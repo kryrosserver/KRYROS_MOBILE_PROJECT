@@ -1,127 +1,129 @@
-# KRYROS Mobile Tech - Enterprise Commerce Platform
+# KRYROS MOBILE - E-Commerce + Fintech Platform
 
-## 🚀 Quick Start
+A comprehensive multi-service commerce + fintech platform for **KRYROS MOBILE TECH LIMITED**.
 
-### Prerequisites
-- Node.js 18+
-- PostgreSQL 14+
-- npm or yarn
+## 🚨 IMPORTANT: Folder Rename Required
 
-### Installation
+The deployment platform does not support folder names with spaces. **You must rename the folder locally before deploying:**
 
-#### 1. Install Frontend Dependencies
+### Manual Fix Required:
+
 ```bash
-cd Frontend/User UI
-npm install
+# Navigate to Frontend folder
+cd Frontend
+
+# Rename "User UI" to "User-UI" (replace space with hyphen)
+# Windows:
+ren "User UI" "User-UI"
+
+# Linux/Mac:
+mv "User UI" "User-UI"
 ```
 
-#### 2. Install Backend Dependencies
-```bash
-cd Backend
-npm install
-```
-
-#### 3. Configure Environment Variables
-```bash
-# Backend
-cp Backend/.env.example Backend/.env
-# Edit .env with your database URL and other settings
-```
-
-#### 4. Setup Database
-```bash
-cd Backend
-npx prisma generate
-npx prisma migrate dev
-```
-
-#### 5. Run Development Servers
-
-**Frontend:**
-```bash
-cd Frontend/User UI
-npm run dev
-# Opens at http://localhost:3000
-```
-
-**Backend:**
-```bash
-cd Backend
-npm run start:dev
-# API at http://localhost:4000
-# Swagger docs at http://localhost:4000/api/docs
-```
+Then update your `package.json` scripts if needed, and push the changes.
 
 ---
 
-## 📁 Project Structure
+## 📦 GitHub Repository
+https://github.com/StarkTol/KRYROS_MOBILE_PROJECT
+
+---
+
+## 🏗️ Project Structure
 
 ```
 KRYROS_MOBILE_PROJECT/
+├── Backend/                 # NestJS API Server
+│   ├── prisma/             # Database schema
+│   └── src/                # API modules
 ├── Frontend/
-│   └── User UI/
-│       └── src/
-│           ├── app/           # Next.js App Router pages
-│           ├── components/    # React components
-│           ├── providers/     # Context providers
-│           ├── lib/          # Utilities
-│           ├── hooks/        # Custom hooks
-│           ├── store/        # Zustand stores
-│           └── types/        # TypeScript types
-├── Backend/
-│   └── src/
-│       ├── auth/             # Authentication module
-│       ├── users/           # User management
-│       ├── products/         # Product catalog
-│       ├── orders/           # Order processing
-│       ├── credit/           # Credit/installments
-│       ├── wallet/           # Wallet service
-│       ├── wholesale/        # Wholesale module
-│       ├── services/        # Service bookings
-│       ├── cms/              # Content management
-│       ├── payments/         # Payment processing
-│       └── prisma/          # Database service
-└── Infrastructure/
-    └── docker/               # Docker configs
+│   ├── User UI/           # Customer-facing app (PORT 3000)
+│   └── Admin Panel/       # Admin dashboard (PORT 3001)
+└── Infrastructure/         # Docker configs
 ```
 
 ---
 
-## 🎨 Tech Stack
+## ✨ Features
 
-### Frontend
-- Next.js 14 (App Router)
-- Tailwind CSS
-- Shadcn UI
-- Framer Motion
-- Zustand (State Management)
-- React Query
-
-### Backend
-- NestJS
-- Prisma ORM
-- PostgreSQL
-- JWT Authentication
-- Swagger/OpenAPI
+- **E-Commerce:** Product catalog, cart, wishlist, orders
+- **Fintech:** Buy Now Pay Later, credit profiles, installments
+- **Wholesale:** Bulk pricing, MOQ, distributor accounts
+- **Admin Panel:** Full CMS, analytics, user management
 
 ---
 
-## 🔑 Features
+## 🚀 Quick Start (Local Development)
 
-- ✅ Multi-service e-commerce (Retail, Wholesale, Software, Services)
-- ✅ Credit/Installment System (Buy Now, Pay Later)
-- ✅ User Dashboard with Order Tracking
-- ✅ Admin Panel with Dynamic CMS
-- ✅ Payment Integration (Paystack, Flutterwave)
-- ✅ Mobile-Responsive Design
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/StarkTol/KRYROS_MOBILE_PROJECT.git
+cd KRYROS_MOBILE_PROJECT
+
+# Install dependencies
+cd Frontend/User UI && npm install
+cd ../../Backend && npm install
+```
+
+### 2. Database Setup
+
+```bash
+# Create PostgreSQL database
+# Copy environment file
+cp Backend/.env.example Backend/.env
+
+# Update .env with your database URL
+# Then run migrations
+cd Backend
+npx prisma migrate dev
+```
+
+### 3. Run Development Servers
+
+```bash
+# Terminal 1 - Backend (Port 3000)
+cd Backend && npm run start:dev
+
+# Terminal 2 - User UI (Port 3000)
+cd Frontend/User UI && npm run dev
+
+# Terminal 3 - Admin Panel (Port 3001)
+cd Frontend/Admin Panel && npm run dev
+```
+
+### 4. Access
+
+- **User UI:** http://localhost:3000
+- **Admin Panel:** http://localhost:3001
 
 ---
 
-## 📞 Support
+## 🔧 Deployment (Render.com)
 
+1. Create a PostgreSQL database on Render
+2. Connect GitHub repository
+3. Set environment variables:
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `JWT_SECRET` - Random string for JWT tokens
+4. Deploy using `render.yaml` or manual setup
+
+---
+
+## 📄 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 14, Tailwind CSS, Framer Motion |
+| Backend | NestJS, Prisma ORM |
+| Database | PostgreSQL |
+| Auth | JWT |
+| Payments | Paystack, Flutterwave |
+
+---
+
+## 📧 Contact
+
+**KRYROS MOBILE TECH LIMITED**
+- Phone: +260966423719
 - Email: kryrosmobile@gmail.com
-- Phone: +260 966 423 719
-
----
-
-© 2024 KRYROS MOBILE TECH LIMITED. All rights reserved.
