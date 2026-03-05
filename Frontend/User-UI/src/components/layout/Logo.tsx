@@ -3,22 +3,13 @@ import Link from 'next/link';
 export function Logo({ size = 48, className = '' }: { size?: number; className?: string }) {
   return (
     <Link href="/" className={`flex items-center gap-2 ${className}`}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 100 100"
-        className="rounded-lg"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect width="100" height="100" rx="20" fill="url(#grad)"/>
-        <defs>
-          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#10B981"/>
-            <stop offset="100%" stopColor="#059669"/>
-          </linearGradient>
-        </defs>
-        <text x="50" y="65" fontFamily="Arial, sans-serif" fontSize="50" fontWeight="bold" fill="white" textAnchor="middle">K</text>
+      <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="32" fill="#14B8A6" />
+        <g fill="none" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 18 L22 46" />
+          <path d="M25 32 L42 18" />
+          <path d="M25 32 C42 32 45 40 38 44 C34 46 29 44 30 40" />
+        </g>
       </svg>
       <span className="text-xl font-bold text-slate-900">KRYROS</span>
     </Link>

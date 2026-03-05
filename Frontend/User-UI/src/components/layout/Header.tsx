@@ -96,9 +96,6 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <Logo size={40} />
-            <span className="text-2xl font-bold tracking-tight text-slate-900 font-heading">
-              KRYROS
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
