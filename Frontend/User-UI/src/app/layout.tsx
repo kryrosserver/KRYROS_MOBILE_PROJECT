@@ -57,8 +57,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'KRYROS MOBILE TECH LIMITED' }],
   creator: 'KRYROS',
   icons: {
-    icon: '/logo.jpeg',
-    apple: '/logo.jpeg',
+    icon: '/logo.svg',
+    apple: '/logo.svg',
   },
 }
 
