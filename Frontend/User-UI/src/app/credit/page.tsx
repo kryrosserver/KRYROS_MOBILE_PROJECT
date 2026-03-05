@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -113,7 +111,6 @@ export default function CreditPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
       
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-800 py-20">
@@ -372,7 +369,7 @@ export default function CreditPage() {
         </div>
       </div>
 
-      <Footer />
+      </div>
     </div>
   );
 }

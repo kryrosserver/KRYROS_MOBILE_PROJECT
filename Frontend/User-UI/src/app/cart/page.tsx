@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -79,7 +77,6 @@ export default function CartPage() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header />
         <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="rounded-xl bg-white py-16 text-center">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
@@ -92,14 +89,12 @@ export default function CartPage() {
             </Button>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
       
       <div className="bg-slate-900 py-12">
         <div className="mx-auto max-w-7xl px-4">

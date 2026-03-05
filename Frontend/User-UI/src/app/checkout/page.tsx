@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -67,7 +65,6 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
       
       {/* Progress Steps */}
       <div className="bg-white border-b border-slate-200">

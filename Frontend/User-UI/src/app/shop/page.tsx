@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/home/ProductCard";
 import { products } from "@/data/mock-data";
 import { 
@@ -64,7 +62,6 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
       
       {/* Page Header */}
       <div className="bg-slate-900 py-12">
@@ -277,7 +274,7 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <Footer />
+      </div>
     </div>
   );
 }

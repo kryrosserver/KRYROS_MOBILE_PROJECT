@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { 
   Store, 
@@ -75,7 +73,6 @@ const values = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
       
       {/* Hero */}
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-800 py-20">
