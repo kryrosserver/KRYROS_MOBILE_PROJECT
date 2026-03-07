@@ -19,7 +19,8 @@ import {
   TrendingUp,
   TrendingDown,
   Banknote,
-  Building
+  Building,
+  Users
 } from "lucide-react";
 
 const walletStats = {
