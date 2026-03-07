@@ -4,6 +4,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 import { execSync } from 'child_process';
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 async function bootstrap() {
   try {
@@ -11,6 +13,38 @@ async function bootstrap() {
     execSync('npx prisma db push', { stdio: 'inherit' });
   } catch (e) {
     console.log('Prisma db push failed or was skipped');
+  }
+
+  // Seed default SUPER_ADMIN if env vars are provided
+  try {
+    const ADMIN_EMAIL = process.env.ADMIN_SEED_EMAIL;
+    const ADMIN_PASSWORD = process.env.ADMIN_SEED_PASSWORD;
+    if (ADMIN_EMAIL && ADMIN_PASSWORD) {
+      const prisma = new PrismaClient();
+      const existing = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
+      if (!existing) {
+        const hashed = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        await prisma.user.create({
+          data: {
+            email: ADMIN_EMAIL,
+            password: hashed,
+            firstName: 'Admin',
+            lastName: 'User',
+            role: 'SUPER_ADMIN',
+            isVerified: true,
+            isActive: true,
+          },
+        });
+        console.log('✅ Seeded SUPER_ADMIN account:', ADMIN_EMAIL);
+      } else {
+        console.log('ℹ️ SUPER_ADMIN already exists:', ADMIN_EMAIL);
+      }
+      await prisma.$disconnect();
+    } else {
+      console.log('ℹ️ Skipping admin seed (ADMIN_SEED_EMAIL/ADMIN_SEED_PASSWORD not set)');
+    }
+  } catch (e) {
+    console.log('Admin seed step failed:', e);
   }
   const app = await NestFactory.create(AppModule);
   
