@@ -16,11 +16,18 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((r) => setTimeout(r, 800));
-      document.cookie = "admin_token=demo; Max-Age=2592000; Path=/";
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || "Login failed");
+      }
       window.location.href = "/admin";
     } catch (err) {
-      setError("Unable to sign in. Please try again.");
+      setError(err instanceof Error ? err.message : "Unable to sign in. Please try again.");
     } finally {
       setIsLoading(false);
     }
