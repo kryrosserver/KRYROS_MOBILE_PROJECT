@@ -12,6 +12,10 @@ services:
         sync: false
       - key: NODE_ENV
         value: production
+      - key: CORS_ORIGINS
+        value: https://kryros.onrender.com,https://kryrosadminpanel.onrender.com
+      - key: FRONTEND_URL
+        value: https://kryros.onrender.com
 
   - type: web
     name: kryros-user-ui

@@ -124,15 +124,20 @@ The `render.yaml` file contains the deployment configuration. Connect your GitHu
 ```
 DATABASE_URL=postgresql://user:password@host:5432/dbname
 JWT_SECRET=your-super-secret-key
-NODE_ENV=development
-PORT=3000
-FRONTEND_URL=http://localhost:3000
+NODE_ENV=production
+PORT=4000
+FRONTEND_URL=https://kryros.onrender.com
+CORS_ORIGINS=https://kryros.onrender.com,https://kryrosadminpanel.onrender.com
 ```
 
 ### Frontend (.env)
 ```
 NEXT_PUBLIC_API_URL=https://kryrosbackend.onrender.com/api
+NEXT_PUBLIC_FRONTEND_URL=https://kryros.onrender.com
+NEXT_PUBLIC_ADMIN_URL=https://kryrosadminpanel.onrender.com
 ```
+
+Tip: copy the provided .env.example files in each app to .env.local or .env.production as needed.
 
 ---
 
