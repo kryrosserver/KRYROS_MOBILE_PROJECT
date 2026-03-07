@@ -40,6 +40,7 @@ model User {
   wishlists         WishlistItem[]
   notifications     Notification[]
   supportTickets    SupportTicket[]
+  roleAssignments   UserRoleAssignment[]
 
   @@map("users")
 }
@@ -58,6 +59,7 @@ model Role {
   permissions Permission[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  userAssignments UserRoleAssignment[]
 
   @@map("roles")
 }
@@ -499,6 +501,7 @@ enum CreditStatus {
 model CreditAccount {
   id              String           @id @default(uuid())
   userId          String
+  creditProfileId String?
   productId       String
   creditPlanId    String
   amount          Decimal          @db.Decimal(10, 2)
@@ -514,6 +517,7 @@ model CreditAccount {
   updatedAt       DateTime         @updatedAt
 
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditProfile   CreditProfile?   @relation(fields: [creditProfileId], references: [id], onDelete: Cascade)
   product         Product          @relation(fields: [productId], references: [id])
   creditPlan      CreditPlan       @relation(fields: [creditPlanId], references: [id])
   payments        CreditPayment[]
