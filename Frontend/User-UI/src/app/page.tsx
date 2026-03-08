@@ -41,28 +41,40 @@ function HeroSlider() {
 
   useEffect(() => {
     let isMounted = true
-    cmsApi.getBanners().then(res => {
-      if (isMounted && res.data && Array.isArray(res.data)) {
-        const mapped = res.data.map((b: any) => ({
-          id: b.id,
-          title: b.title,
-          subtitle: b.subtitle || '',
-          image: b.image,
-          link: b.link || '/shop',
-          linkText: b.linkText || 'Shop Now',
-          isActive: b.isActive,
-          position: b.position || 0,
-        }))
-        setHeroBanners(mapped)
-      }
-    }).catch(() => {
-      setHeroBanners([])
-    })
+    cmsApi.getBanners()
+      .then((res) => {
+        if (isMounted && res.data && Array.isArray(res.data)) {
+          const mapped = res.data
+            .filter((b: any) => b?.isActive)
+            .sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))
+            .map((b: any) => ({
+              id: b.id,
+              title: b.title,
+              subtitle: b.subtitle || '',
+              image: b.image,
+              link: b.link || '/shop',
+              linkText: b.linkText || 'Shop Now',
+              isActive: b.isActive,
+              position: b.position || 0,
+            }))
+          setHeroBanners(mapped)
+        }
+      })
+      .catch(() => {
+        setHeroBanners([])
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!heroBanners.length) return
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (heroBanners.length ? (prev + 1) % heroBanners.length : 0))
+      setCurrentSlide((prev) => (prev + 1) % heroBanners.length)
     }, 5000)
     return () => clearInterval(timer)
-  }, [])
+  }, [heroBanners.length])
 
   if (!heroBanners.length) {
     return <ComingSoon title="Homepage Banners Coming Soon" message="Our latest promotions will appear here." />
