@@ -58,6 +58,9 @@ export default function CMSPage() {
     position: 0,
     isActive: true,
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   const loadBanners = async () => {
     setLoading(true);
@@ -173,25 +176,59 @@ export default function CMSPage() {
           <div className="flex gap-3">
             <button
               onClick={async () => {
-                const res = await fetch("/api/cms/banners", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(form),
-                });
-                if (res.ok) {
+                try {
+                  setSaving(true);
+                  setError(null);
+                  setMessage(null);
+                  const res = await fetch("/api/cms/banners", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(form),
+                  });
+                  const body = await res.json().catch(() => ({}));
+                  if (!res.ok) throw new Error(body?.error || "Failed to create banner");
                   setShowAdd(false);
                   setForm({ title: "", image: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
+                  setMessage("Banner created");
                   await loadBanners();
+                } catch (e: any) {
+                  setError(e?.message || "Failed to create banner");
+                } finally {
+                  setSaving(false);
                 }
               }}
-              className="btn-primary"
+              disabled={saving}
+              className="btn-primary disabled:opacity-50"
             >
-              Create
+              {saving ? "Creating..." : "Create"}
             </button>
             <button onClick={() => setShowAdd(false)} className="btn-secondary">
               Cancel
             </button>
+            <button
+              onClick={async () => {
+                try {
+                  setSaving(true);
+                  setError(null);
+                  const res = await fetch("/api/cms/banners/seed", { method: "POST" });
+                  const body = await res.json().catch(() => ({}));
+                  if (!res.ok) throw new Error(body?.error || "Failed to seed banners");
+                  setMessage("Default banners added");
+                  await loadBanners();
+                } catch (e: any) {
+                  setError(e?.message || "Failed to add default banners");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              disabled={saving}
+              className="btn-secondary"
+            >
+              Quick Add Default Banners
+            </button>
           </div>
+          {error && <div className="text-sm text-red-600">{error}</div>}
+          {message && <div className="text-sm text-green-600">{message}</div>}
         </div>
       )}
 
