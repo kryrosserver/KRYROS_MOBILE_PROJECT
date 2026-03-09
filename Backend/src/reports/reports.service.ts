@@ -39,7 +39,7 @@ export class ReportsService {
       .reduce((s, o) => s + Number(o.total), 0);
     const totalOrders = orders.length;
     const activeUsers = usersCount;
-    const creditDisbursed = creditAccounts.reduce((s: number, c: any) => s + Number(c.amount || 0), 0);
+    const creditDisbursed = creditAccounts.reduce<number>((s, c: any) => s + Number(c.amount || 0), 0);
 
     const byMonth: Record<string, { revenue: number; orders: number }> = {};
     for (const o of orders) {
@@ -96,7 +96,7 @@ export class ReportsService {
 
     const credit = {
       activeAccounts: creditAccounts.filter((c: any) => c.status === 'ACTIVE').length,
-      totalOutstanding: creditAccounts.reduce((s: number, c: any) => s + Number(c.remainingAmount || 0), 0),
+      totalOutstanding: creditAccounts.reduce<number>((s, c: any) => s + Number(c.remainingAmount || 0), 0),
       repaymentRate: 0,
       defaultRate: (creditAccounts.filter((c: any) => c.status === 'DEFAULTED').length / (creditAccounts.length || 1)) * 100,
     };
@@ -111,4 +111,3 @@ export class ReportsService {
     };
   }
 }
-
