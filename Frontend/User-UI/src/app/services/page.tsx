@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Smartphone, 
@@ -16,68 +16,7 @@ import {
   Calendar
 } from "lucide-react";
 
-const services = [
-  {
-    id: 1,
-    name: "Phone Repair",
-    description: "Screen replacement, battery change, charging port repair, and more",
-    icon: Smartphone,
-    price: "From K 300",
-    duration: "1-2 hours",
-    rating: 4.8,
-    reviews: 234
-  },
-  {
-    id: 2,
-    name: "Laptop Repair",
-    description: "Hardware diagnostics, keyboard replacement, screen repair, virus removal",
-    icon: Laptop,
-    price: "From K 500",
-    duration: "2-4 hours",
-    rating: 4.9,
-    reviews: 156
-  },
-  {
-    id: 3,
-    name: "Tablet Repair",
-    description: "Screen replacement, battery issues, software problems",
-    icon: Tablet,
-    price: "From K 350",
-    duration: "1-3 hours",
-    rating: 4.7,
-    reviews: 89
-  },
-  {
-    id: 4,
-    name: "Smartwatch Repair",
-    description: "Screen repair, band replacement, battery issues",
-    icon: Watch,
-    price: "From K 250",
-    duration: "1-2 hours",
-    rating: 4.6,
-    reviews: 45
-  },
-  {
-    id: 5,
-    name: "Data Recovery",
-    description: "Recover lost data from phones, laptops, USB drives, memory cards",
-    icon: Wrench,
-    price: "From K 500",
-    duration: "24-48 hours",
-    rating: 4.9,
-    reviews: 67
-  },
-  {
-    id: 6,
-    name: "Device Unlocking",
-    description: "Network unlock, FRP bypass, bootloader unlock",
-    icon: Shield,
-    price: "From K 200",
-    duration: "1-24 hours",
-    rating: 4.8,
-    reviews: 123
-  }
-];
+type Service = { id: string; name: string; description?: string; duration: string; price: number; category: string; image?: string };
 
 const whyChooseUs = [
   "Certified technicians",
@@ -110,7 +49,20 @@ const testimonials = [
 ];
 
 export default function ServicesPage() {
-  const [selectedService, setSelectedService] = useState<number | null>(null);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [items, setItems] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/services`, { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => { if (active) setItems(Array.isArray(d) ? d : []); })
+      .catch(() => active && setItems([]))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -139,7 +91,8 @@ export default function ServicesPage() {
           </div>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
+            {loading && <div className="text-slate-500">Loading services…</div>}
+            {!loading && items.map((service) => (
               <div 
                 key={service.id}
                 className={`rounded-xl border-2 bg-white p-6 transition-all hover:shadow-lg cursor-pointer ${
@@ -150,25 +103,21 @@ export default function ServicesPage() {
                 onClick={() => setSelectedService(service.id)}
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-green-100">
-                  <service.icon className="h-7 w-7 text-green-600" />
+                  <Wrench className="h-7 w-7 text-green-600" />
                 </div>
                 
                 <h3 className="mt-4 text-lg font-semibold text-slate-900">{service.name}</h3>
-                <p className="mt-2 text-sm text-slate-600">{service.description}</p>
+                <p className="mt-2 text-sm text-slate-600">{service.description || "—"}</p>
                 
                 <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     {service.duration}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    {service.rating} ({service.reviews})
-                  </div>
                 </div>
                 
                 <div className="mt-4 flex items-center justify-between">
-                  <span className="text-lg font-bold text-green-600">{service.price}</span>
+                  <span className="text-lg font-bold text-green-600">K {Number(service.price).toLocaleString()}</span>
                   <Button size="sm" className="bg-green-500 hover:bg-green-600">
                     Book Now
                   </Button>

@@ -148,6 +148,24 @@ export default function ServicesPage() {
       {/* Services Tab */}
       {activeTab === "services" && (
         <>
+          {!loading && !services.length && (
+            <div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="text-sm text-yellow-900">No services found. You can seed some sample services for a quick start.</div>
+              <button
+                onClick={async () => {
+                  const ok = confirm("Seed sample services?");
+                  if (!ok) return;
+                  const res = await fetch("/internal/admin/services/seed", { method: "POST" });
+                  const body = await res.json().catch(() => ({}));
+                  if (!res.ok) alert(body?.error || "Failed to seed");
+                  await load();
+                }}
+                className="btn-primary"
+              >
+                Seed Sample Services
+              </button>
+            </div>
+          )}
           {/* Quick Create */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 border border-slate-200 rounded-lg p-4">
             <input placeholder="Name" className="admin-input" value={form.name || ""} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} />
@@ -262,6 +280,23 @@ export default function ServicesPage() {
                 </div>
 
                 <div className="flex items-center gap-2 mt-4">
+                  <button
+                    onClick={async () => {
+                      const name = prompt("Name", service.name) || service.name;
+                      const price = Number(prompt("Price", String(service.price)) || service.price);
+                      const duration = prompt("Duration", service.duration) || service.duration;
+                      const category = prompt("Category", service.category) || service.category;
+                      const res = await fetch(`/internal/admin/services/${service.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, price, duration, category }),
+                      });
+                      if (res.ok) await load();
+                    }}
+                    className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
                   <button
                     onClick={async () => {
                       if (!confirm("Delete this service?")) return;

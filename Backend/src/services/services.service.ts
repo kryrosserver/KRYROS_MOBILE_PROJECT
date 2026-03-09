@@ -46,4 +46,19 @@ export class ServicesService {
   async remove(id: string) {
     return this.prisma.service.delete({ where: { id } });
   }
+
+  async seedSampleServices() {
+    const count = await this.prisma.service.count();
+    if (count > 0) {
+      return { success: true, message: 'Services already exist', count };
+    }
+    const items = [
+      { name: 'Phone Repair', slug: 'phone-repair', description: 'Screen replacement, battery, charging port', price: 300, category: 'Repairs', duration: '1-2 hours', image: '', features: ['Genuine parts', '90-day warranty'], isActive: true },
+      { name: 'Laptop Repair', slug: 'laptop-repair', description: 'Diagnostics, keyboard, screen, malware removal', price: 500, category: 'Repairs', duration: '2-4 hours', image: '', features: ['Expert technicians'], isActive: true },
+      { name: 'Data Recovery', slug: 'data-recovery', description: 'Recover data from phones, laptops, storage', price: 500, category: 'Support', duration: '24-48 hours', image: '', features: ['Secure handling'], isActive: true },
+      { name: 'Software Installation', slug: 'software-installation', description: 'OS and app installation and updates', price: 200, category: 'Installation', duration: '1-2 hours', image: '', features: ['Licensed software'], isActive: true },
+    ];
+    const created = await this.prisma.$transaction(items.map(item => this.prisma.service.create({ data: item })));
+    return { success: true, count: created.length, services: created };
+  }
 }

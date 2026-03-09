@@ -65,4 +65,12 @@ export class ServicesController {
   remove(@Param('id') id: string) {
     return this.servicesService.remove(id);
   }
+
+  @Post('seed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed sample services for initial setup' })
+  seed() {
+    return this.servicesService.seedSampleServices();
+  }
 }
