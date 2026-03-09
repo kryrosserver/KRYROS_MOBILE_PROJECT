@@ -480,6 +480,7 @@ export default function HomePage() {
   return (
     <div className="pt-0">
       <HeroSlider />
+      <NewsletterSection />
       <ComingSoon title="Storefront Coming Soon" message="Product listings, categories, and more will appear here once posted." />
     </div>
   )
