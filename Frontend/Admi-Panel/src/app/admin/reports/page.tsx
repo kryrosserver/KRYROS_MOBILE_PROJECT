@@ -177,8 +177,8 @@ export default function ReportsPage() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-slate-900">{product.name}</span>
-                    <span className={`text-sm font-medium ${product.growth > 0 ? "text-green-600" : "text-red-600"}`}>
-                      {product.growth && product.growth > 0 ? "+" : ""}{product.growth ?? 0}%
+                    <span className={`text-sm font-medium ${(product.growth ?? 0) > 0 ? "text-green-600" : "text-red-600"}`}>
+                      {(product.growth ?? 0) > 0 ? "+" : ""}{product.growth ?? 0}%
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-slate-500 mt-1">
