@@ -174,7 +174,7 @@ function WholesaleCreditHighlights() {
   return (
     <section className="section-padding bg-white">
       <div className="container-custom">
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl bg-slate-900 text-white p-8 flex flex-col justify-between">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full bg-green-500/20 px-3 py-1 text-sm font-medium text-green-300">
@@ -188,7 +188,7 @@ function WholesaleCreditHighlights() {
             </Link>
           </div>
 
-          <div className="rounded-2xl bg-green-500 text-white p-8 flex flex-col justify-between lg:col-span-1">
+          <div className="rounded-2xl bg-green-500 text-white p-8 flex flex-col justify-between">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white">
                 Credit Plans
