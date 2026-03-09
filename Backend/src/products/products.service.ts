@@ -200,4 +200,25 @@ export class ProductsService {
     }
     return { success: true, count: created.length, products: created };
   }
+
+  async seedFlashSales() {
+    const now = new Date();
+    const ends = new Date(now.getTime() + 1000 * 60 * 60 * 48);
+    const base = await this.prisma.product.findMany({
+      where: { isActive: true },
+      take: 4,
+      orderBy: { createdAt: 'desc' },
+    });
+    const updated: any[] = [];
+    for (const p of base) {
+      const priceNum = Number((p as any).price);
+      const promo = Math.max(1, Math.round(priceNum * 0.9 * 100) / 100);
+      const u = await this.prisma.product.update({
+        where: { id: p.id },
+        data: { isFlashSale: true, flashSaleEnd: ends, flashSalePrice: promo },
+      });
+      updated.push(u);
+    }
+    return { success: true, count: updated.length, products: updated, endsAt: ends.toISOString() };
+  }
 }

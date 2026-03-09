@@ -19,7 +19,6 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { Zap } from "lucide-react";
 import { useState } from "react";
 
 const menuItems = [
@@ -27,7 +26,6 @@ const menuItems = [
   { icon: Users, label: "Users & Roles", href: "/admin/users" },
   { icon: ShoppingBag, label: "Orders", href: "/admin/orders" },
   { icon: Package, label: "Products", href: "/admin/products" },
-  { icon: Zap, label: "Flash Sales", href: "/admin/flash-sales" },
   { icon: CreditCard, label: "Credit System", href: "/admin/credit" },
   { icon: Wallet, label: "Wallet & Payments", href: "/admin/wallet" },
   { icon: Wrench, label: "Services", href: "/admin/services" },

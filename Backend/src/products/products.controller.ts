@@ -55,6 +55,14 @@ export class ProductsController {
     return this.productsService.seedSampleProducts();
   }
 
+  @Post('flash-sales/seed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed flash sale deals for testing' })
+  seedFlash() {
+    return this.productsService.seedFlashSales();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   findOne(@Param('id') id: string) {

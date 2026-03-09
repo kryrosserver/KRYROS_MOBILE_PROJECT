@@ -20,6 +20,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"all" | "featured" | "flash">("all");
 
   const load = async () => {
     setLoading(true);
@@ -68,7 +69,46 @@ export default function ProductsPage() {
               Seed Sample Products
             </button>
           )}
+          {tab === "flash" && (
+            <button
+              onClick={async () => {
+                const ok = confirm("Seed flash sale deals on a few products?");
+                if (!ok) return;
+                const res = await fetch("/internal/admin/products/flash-sales/seed", { method: "POST" });
+                const body = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                  alert(body?.error || "Failed to seed flash sales");
+                } else {
+                  await load();
+                }
+              }}
+              className="btn-primary"
+            >
+              Seed Flash Sales
+            </button>
+          )}
         </div>
+      </div>
+
+      <div className="admin-card p-3 flex gap-2">
+        <button
+          onClick={() => setTab("all")}
+          className={`px-3 py-1.5 rounded ${tab === "all" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setTab("featured")}
+          className={`px-3 py-1.5 rounded ${tab === "featured" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
+        >
+          Featured
+        </button>
+        <button
+          onClick={() => setTab("flash")}
+          className={`px-3 py-1.5 rounded ${tab === "flash" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
+        >
+          Flash Sales
+        </button>
       </div>
 
       <div className="admin-card overflow-hidden">
@@ -82,15 +122,15 @@ export default function ProductsPage() {
                 <th>Brand</th>
                 <th>Price</th>
                 <th>Status</th>
-                <th>Featured</th>
-                <th>Flash Sale</th>
-                <th>Flash Price</th>
-                <th>Flash Ends</th>
+                {tab !== "flash" && <th>Featured</th>}
+                {tab !== "featured" && <th>Flash Sale</th>}
+                {tab === "flash" && <th>Flash Price</th>}
+                {tab === "flash" && <th>Flash Ends</th>}
                 <th className="text-right">Save</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
+              {(tab === "featured" ? products.filter(p => !!p.isFeatured) : tab === "flash" ? products : products).map((p) => (
                 <tr key={p.id}>
                   <td className="font-medium text-slate-900">{p.name}</td>
                   <td className="font-mono text-sm">{p.sku}</td>
@@ -98,6 +138,7 @@ export default function ProductsPage() {
                   <td>{p.brand?.name || "—"}</td>
                   <td>K {Number(p.price).toLocaleString()}</td>
                   <td><span className={`badge ${p.isActive !== false ? "badge-success" : "badge-danger"}`}>{p.isActive !== false ? "Active" : "Inactive"}</span></td>
+                  {tab !== "flash" && (
                   <td>
                     <input
                       type="checkbox"
@@ -107,6 +148,8 @@ export default function ProductsPage() {
                       }}
                     />
                   </td>
+                  )}
+                  {tab !== "featured" && (
                   <td>
                     <input
                       type="checkbox"
@@ -116,6 +159,8 @@ export default function ProductsPage() {
                       }}
                     />
                   </td>
+                  )}
+                  {tab === "flash" && (
                   <td>
                     <input
                       type="number"
@@ -131,6 +176,8 @@ export default function ProductsPage() {
                       className="admin-input w-36"
                     />
                   </td>
+                  )}
+                  {tab === "flash" && (
                   <td>
                     <input
                       type="datetime-local"
@@ -142,6 +189,7 @@ export default function ProductsPage() {
                       className="admin-input"
                     />
                   </td>
+                  )}
                   <td className="text-right">
                     <button
                       disabled={savingId === p.id}
@@ -149,11 +197,11 @@ export default function ProductsPage() {
                         try {
                           setSavingId(p.id);
                           const payload: any = {
-                            isFeatured: !!p.isFeatured,
-                            isFlashSale: !!p.isFlashSale,
-                            flashSaleEnd: p.flashSaleEnd,
+                            ...(tab !== "flash" ? { isFeatured: !!p.isFeatured } : {}),
+                            ...(tab !== "featured" ? { isFlashSale: !!p.isFlashSale } : {}),
+                            ...(tab === "flash" ? { flashSaleEnd: p.flashSaleEnd } : {}),
                           };
-                          if ((p as any).flashSalePrice !== undefined) {
+                          if (tab === "flash" && (p as any).flashSalePrice !== undefined) {
                             payload.flashSalePrice = (p as any).flashSalePrice;
                           }
                           const res = await fetch(`/internal/admin/products/${p.id}/flags`, {
