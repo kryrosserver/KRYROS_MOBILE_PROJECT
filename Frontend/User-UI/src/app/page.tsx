@@ -188,7 +188,23 @@ function FlashSales() {
     return () => { active = false; clearInterval(timer) }
   }, [])
 
-  if (!flash.length) return null
+  if (!flash.length) {
+    return (
+      <section className="section-padding bg-gradient-to-br from-orange-50 to-red-50">
+        <div className="container-custom">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-kryros-orange text-white px-4 py-2 rounded-lg">
+                <Flashlight className="h-5 w-5" />
+                <span className="font-bold">Flash Sales</span>
+              </div>
+              <span className="text-sm text-gray-600">No flash deals right now</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
   const flashProducts = flash
 
   return (
@@ -248,7 +264,7 @@ function ProductCard({ product }: { product: Product }) {
       {/* Image */}
       <div className="relative aspect-square bg-gray-100">
         <Image
-          src={product.images[0].url}
+          src={(product as any)?.images?.[0]?.url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=800&fit=crop'}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
