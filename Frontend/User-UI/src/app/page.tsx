@@ -365,6 +365,16 @@ function FeaturedProducts() {
 
 // Services Section
 function ServicesSection() {
+  const [items, setItems] = useState<any[]>([])
+  useEffect(() => {
+    let active = true
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/services`, { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => { if (active && Array.isArray(d)) setItems(d) })
+      .catch(() => setItems([]))
+    return () => { active = false }
+  }, [])
+  if (!items.length) return null
   return (
     <section className="section-padding bg-gray-50">
       <div className="container-custom">
@@ -376,7 +386,7 @@ function ServicesSection() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => (
+          {items.map((service: any, index: number) => (
             <motion.div
               key={service.id}
               initial={{ opacity: 0, y: 20 }}
@@ -387,7 +397,7 @@ function ServicesSection() {
             >
               <div className="relative h-40 bg-gray-200">
                 <Image
-                  src={service.image || ''}
+                  src={service.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop'}
                   alt={service.name}
                   fill
                   className="object-cover"
@@ -395,10 +405,10 @@ function ServicesSection() {
               </div>
               <div className="p-4">
                 <h3 className="font-semibold mb-2">{service.name}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{service.description}</p>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{service.description || ''}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-kryros-accent font-bold">From {formatPrice(service.price)}</span>
-                  <Link href={`/services/${service.slug}`}>
+                  <span className="text-kryros-accent font-bold">{service.price ? `From ${formatPrice(service.price)}` : 'Contact for price'}</span>
+                  <Link href={`/services`}>
                     <Button variant="ghost" size="sm">Book</Button>
                   </Link>
                 </div>
@@ -498,6 +508,7 @@ export default function HomePage() {
       <HeroSlider />
       <FeaturedProducts />
       <FlashSales />
+      <ServicesSection />
       <NewsletterSection />
       <ComingSoon title="Storefront Coming Soon" message="Product listings, categories, and more will appear here once posted." />
     </div>

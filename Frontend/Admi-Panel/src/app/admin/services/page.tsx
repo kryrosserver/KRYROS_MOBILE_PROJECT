@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   Wrench, 
   Plus, 
@@ -22,103 +22,27 @@ import {
   AlertCircle
 } from "lucide-react";
 
-const servicesData = [
-  { 
-    id: 1, 
-    name: "Phone Repair", 
-    category: "Repairs", 
-    price: 500,
-    duration: "1-2 hours",
-    technicians: 3,
-    rating: 4.8,
-    bookings: 156,
-    status: "active",
-    description: "Screen replacement, battery replacement, charging port repair"
-  },
-  { 
-    id: 2, 
-    name: "Laptop Repair", 
-    category: "Repairs", 
-    price: 1500,
-    duration: "2-4 hours",
-    technicians: 2,
-    rating: 4.7,
-    bookings: 89,
-    status: "active",
-    description: "Hardware diagnostics, keyboard replacement, screen repair"
-  },
-  { 
-    id: 3, 
-    name: "iOS Setup", 
-    category: "Installation", 
-    price: 300,
-    duration: "30 mins",
-    technicians: 4,
-    rating: 4.9,
-    bookings: 234,
-    status: "active",
-    description: "iPhone/iPad initial setup, data transfer, app installation"
-  },
-  { 
-    id: 4, 
-    name: "Home Network Setup", 
-    category: "Installation", 
-    price: 800,
-    duration: "2-3 hours",
-    technicians: 2,
-    rating: 4.6,
-    bookings: 45,
-    status: "active",
-    description: "Router setup, WiFi optimization, security configuration"
-  },
-  { 
-    id: 5, 
-    name: "Data Recovery", 
-    category: "Services", 
-    price: 2500,
-    duration: "24-48 hours",
-    technicians: 1,
-    rating: 4.5,
-    bookings: 23,
-    status: "active",
-    description: "Recover lost data from phones, laptops, storage devices"
-  },
-  { 
-    id: 6, 
-    name: "Device Trade-in", 
-    category: "Trade-in", 
-    price: 0,
-    duration: "30 mins",
-    technicians: 3,
-    rating: 4.4,
-    bookings: 312,
-    status: "active",
-    description: "Evaluate and trade-in old devices for cash or credit"
-  },
-  { 
-    id: 7, 
-    name: "Software Support", 
-    category: "Support", 
-    price: 400,
-    duration: "1 hour",
-    technicians: 5,
-    rating: 4.8,
-    bookings: 178,
-    status: "active",
-    description: "Software troubleshooting, virus removal, OS reinstall"
-  },
-  { 
-    id: 8, 
-    name: "On-site Service", 
-    category: "Support", 
-    price: 600,
-    duration: "1-2 hours",
-    technicians: 2,
-    rating: 4.3,
-    status: "inactive",
-    description: " technicians come to your location for service"
-  },
-];
+type Service = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  category: string;
+  duration: string;
+  image?: string;
+  features?: string[];
+  isActive: boolean;
+};
+
+const emptyForm: Partial<Service> = {
+  name: "",
+  slug: "",
+  price: 0,
+  category: "",
+  duration: "",
+  isActive: true,
+};
 
 const bookingsData = [
   { id: "BK001", service: "Phone Repair", customer: "John Chanda", date: "2024-01-15", time: "10:00 AM", status: "confirmed", technician: "Mike" },
@@ -136,12 +60,30 @@ export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState<Partial<Service>>(emptyForm);
+  const [saving, setSaving] = useState(false);
 
-  const filteredServices = servicesData.filter(service => {
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/internal/admin/services", { cache: "no-store" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body?.error || "Failed to load");
+      setServices(Array.isArray(body) ? body : body?.data || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         service.description.toLowerCase().includes(searchQuery.toLowerCase());
+                         (service.description || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || service.category === selectedCategory;
-    const matchesStatus = selectedStatus === "All" || service.status === selectedStatus;
+    const matchesStatus = selectedStatus === "All" || (service.isActive ? "active" : "inactive") === selectedStatus;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -158,7 +100,9 @@ export default function ServicesPage() {
           <h1 className="text-2xl font-bold text-slate-900">Services Management</h1>
           <p className="mt-1 text-slate-600">Configure service offerings and bookings</p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+        <button
+          onClick={() => setForm(emptyForm)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
           <Plus className="h-4 w-4" />
           Add Service
         </button>
@@ -190,6 +134,41 @@ export default function ServicesPage() {
       {/* Services Tab */}
       {activeTab === "services" && (
         <>
+          {/* Quick Create */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-3 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <input placeholder="Name" className="admin-input" value={form.name || ""} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} />
+            <input placeholder="Slug" className="admin-input" value={form.slug || ""} onChange={(e) => setForm(f => ({ ...f, slug: e.target.value }))} />
+            <input placeholder="Category" className="admin-input" value={form.category || ""} onChange={(e) => setForm(f => ({ ...f, category: e.target.value }))} />
+            <input placeholder="Duration" className="admin-input" value={form.duration || ""} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} />
+            <input placeholder="Price" type="number" className="admin-input" value={form.price ?? 0} onChange={(e) => setForm(f => ({ ...f, price: Number(e.target.value) }))} />
+            <button
+              disabled={saving}
+              onClick={async () => {
+                setSaving(true);
+                try {
+                  const res = await fetch("/internal/admin/services", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      name: form.name, slug: form.slug, category: form.category, duration: form.duration, price: form.price ?? 0, isActive: true
+                    }),
+                  });
+                  const body = await res.json().catch(() => ({}));
+                  if (!res.ok) throw new Error(body?.error || "Failed to create");
+                  await load();
+                  setForm(emptyForm);
+                } catch (e) {
+                  alert(e instanceof Error ? e.message : "Failed to create");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              className="btn-primary"
+            >
+              {saving ? "Saving..." : "Create"}
+            </button>
+          </div>
+
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1 max-w-md">
@@ -230,57 +209,60 @@ export default function ServicesPage() {
                   <div className="h-12 w-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <Wrench className="h-6 w-6 text-green-600" />
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                    service.status === "active" 
-                      ? "bg-green-100 text-green-700" 
-                      : "bg-slate-100 text-slate-600"
-                  }`}>
-                    {service.status}
-                  </span>
+                  <label className="text-xs flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={service.isActive}
+                      onChange={async (e) => {
+                        const isActive = e.target.checked;
+                        await fetch(`/internal/admin/services/${service.id}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ isActive }),
+                        });
+                        setServices(prev => prev.map(s => s.id === service.id ? { ...s, isActive } : s));
+                      }}
+                    />
+                    <span className={service.isActive ? "text-green-600" : "text-slate-600"}>
+                      {service.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </label>
                 </div>
                 
                 <h3 className="font-semibold text-slate-900 mb-1">{service.name}</h3>
-                <p className="text-sm text-slate-500 mb-4">{service.description}</p>
+                <p className="text-sm text-slate-500 mb-4">{service.description || "—"}</p>
                 
                 <div className="flex items-center gap-4 text-sm text-slate-600 mb-4">
                   <span className="flex items-center gap-1">
                     <DollarSign className="h-4 w-4" />
-                    {service.price > 0 ? `K ${service.price}` : "Free"}
+                    {Number(service.price) > 0 ? `K ${Number(service.price).toLocaleString()}` : "Free"}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     {service.duration}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    {service.rating}
-                  </span>
                 </div>
                 
                 <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-slate-400" />
-                    <span className="text-sm text-slate-600">{service.technicians} technicians</span>
-                  </div>
-                  {service.bookings && (
-                    <span className="text-sm text-slate-500">{service.bookings} bookings</span>
-                  )}
+                  <div />
                 </div>
 
                 <div className="flex items-center gap-2 mt-4">
-                  <button className="flex-1 px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                    Edit
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Delete this service?")) return;
+                      const res = await fetch(`/internal/admin/services/${service.id}`, { method: "DELETE" });
+                      if (res.ok) setServices(prev => prev.filter(s => s.id !== service.id));
+                    }}
+                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
             ))}
           </div>
+          {loading && <div className="p-4 text-sm text-slate-500">Loading...</div>}
         </>
       )}
 
@@ -371,7 +353,7 @@ export default function ServicesPage() {
           </div>
           <div>
             <p className="text-sm text-slate-500">Total Services</p>
-            <p className="text-xl font-bold text-slate-900">{servicesData.length}</p>
+            <p className="text-xl font-bold text-slate-900">{services.length}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
