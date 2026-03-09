@@ -1,36 +1,32 @@
-# Node / JS
+# Node/Nest/Next common ignores
 node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+
+# Env and local config
+.env
+.env.*
+.npmrc
+yarn.lock.tmp
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 
-# Next.js
-.next/
-out/
-.vercel/
-
-# Build outputs
-dist/
-build/
-.turbo/
-coverage/
-.cache/
-*.tsbuildinfo
-
-# Env & secrets
-.env
-.env.*
-
-# Editors / OS
+# OS
 .DS_Store
 Thumbs.db
-.idea/
+
+# Trae/IDE
+.trae/
 .vscode/
-.eslintcache
 
 # Misc
-*.log
+*.local
+*.swp
+*.swo

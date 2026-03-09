@@ -64,4 +64,30 @@ export class CMSService {
   async deleteSection(id: string) {
     return this.prisma.cMSSection.delete({ where: { id } });
   }
+
+  async seedSections() {
+    // Ensure a Categories Grid section exists and enabled
+    const section = await this.prisma.cMSSection.findFirst({
+      where: {
+        OR: [{ type: 'categories' }, { title: 'Shop by Category' }],
+      },
+    });
+    if (!section) {
+      await this.prisma.cMSSection.create({
+        data: {
+          type: 'categories',
+          title: 'Shop by Category',
+          subtitle: 'Browse our wide range of tech products',
+          isActive: true,
+          order: 3,
+        } as any,
+      });
+    } else if (!section.isActive) {
+      await this.prisma.cMSSection.update({
+        where: { id: section.id },
+        data: { isActive: true },
+      });
+    }
+    return { success: true };
+  }
 }

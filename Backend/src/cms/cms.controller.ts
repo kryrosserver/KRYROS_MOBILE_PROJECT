@@ -89,6 +89,14 @@ export class CMSController {
     return this.cmsService.deleteSection(id);
   }
 
+  @Post('sections/seed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed default homepage sections (admin)' })
+  seedSections() {
+    return this.cmsService.seedSections();
+  }
+
   @Get('pages/:slug')
   @ApiOperation({ summary: 'Get CMS page by slug' })
   getPage(@Param('slug') slug: string) {

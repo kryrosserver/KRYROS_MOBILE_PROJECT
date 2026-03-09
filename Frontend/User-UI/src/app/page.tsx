@@ -10,7 +10,7 @@ import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/providers/CartProvider'
 import { formatPrice, getTimeRemaining, calculateDiscount } from '@/lib/utils'
-import { cmsApi, productsApi } from '@/lib/api'
+import { cmsApi, productsApi, categoriesApi } from '@/lib/api'
 import type { Product } from '@/types'
 
 // Remove placeholders by using empty arrays until real data exists
@@ -331,6 +331,75 @@ function ProductCard({ product }: { product: Product }) {
   )
 }
 
+// Categories Grid Section
+function CategoriesGridSection() {
+  const [enabled, setEnabled] = useState(true)
+  const [title, setTitle] = useState('Shop by Category')
+  const [subtitle, setSubtitle] = useState('Browse our wide range of tech products')
+  const [categories, setCategories] = useState<any[]>([])
+
+  useEffect(() => {
+    let active = true
+    // Check CMS sections to respect admin toggle (optional; defaults to enabled)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/cms/sections`, { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => {
+        if (!active) return
+        const arr = Array.isArray(d) ? d : d?.data || []
+        const sect = arr.find((s:any) => (s.type === 'categories' || s.slug === 'categories-grid') && s.isActive !== false)
+        if (!sect) setEnabled(false)
+        if (sect?.title) setTitle(sect.title)
+        if (sect?.subtitle) setSubtitle(sect.subtitle)
+      })
+      .catch(() => {
+        // If CMS not available, keep section enabled
+        setEnabled(true)
+      })
+
+    categoriesApi.getAll()
+      .then(res => {
+        if (!active) return
+        const list = Array.isArray(res.data) ? res.data : []
+        setCategories(list.slice(0, 8))
+      })
+      .catch(() => setCategories([]))
+
+    return () => { active = false }
+  }, [])
+
+  if (!enabled || !categories.length) return null
+
+  return (
+    <section className="section-padding bg-white">
+      <div className="container-custom">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900">{title}</h2>
+          <p className="text-slate-600">{subtitle}</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {categories.map((cat:any, index:number) => (
+            <Link
+              key={cat.id ?? index}
+              href="/shop"
+              className="group rounded-xl border bg-white p-6 text-center hover:shadow-md transition-shadow"
+            >
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                {/* simple placeholder icon block; could render cat.icon when available */}
+                <span className="text-green-600 text-lg">⌁</span>
+              </div>
+              <div className="font-medium text-slate-900">{cat.name ?? 'Category'}</div>
+              {typeof cat.productCount === 'number' && (
+                <div className="text-sm text-slate-500">{cat.productCount} products</div>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Featured Products Section
 function FeaturedProducts() {
   const [featuredProducts, setFeatured] = useState<any[]>([])
@@ -526,6 +595,7 @@ export default function HomePage() {
     <div className="pt-0">
       <HeroSlider />
       <FlashSales />
+      <CategoriesGridSection />
       <FeaturedProducts />
       <ServicesSection />
       <TestimonialsSection />
