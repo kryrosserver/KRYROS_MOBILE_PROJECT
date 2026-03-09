@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Flashlight, Star, Heart, ShoppingCart, ArrowRight, Clock, Tag, Zap, Shield, CreditCard, Smartphone, Laptop, Tablet, Headphones, Watch, Code2, Music, Gamepad2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CreditSection } from '@/components/home/CreditSection'
 import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/providers/CartProvider'
@@ -652,6 +653,7 @@ export default function HomePage() {
       <CategoriesGridSection />
       <FeaturedProducts />
       <WholesaleCreditHighlights />
+      <CreditSection />
       <ServicesSection />
       <TestimonialsSection />
       <NewsletterSection />
