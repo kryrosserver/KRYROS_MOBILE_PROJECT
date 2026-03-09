@@ -148,7 +148,6 @@ export default function ProductsPage() {
                       onClick={async () => {
                         try {
                           setSavingId(p.id);
-                          // Build payload omitting undefined fields to satisfy DTO validators
                           const payload: any = {
                             isFeatured: !!p.isFeatured,
                             isFlashSale: !!p.isFlashSale,
