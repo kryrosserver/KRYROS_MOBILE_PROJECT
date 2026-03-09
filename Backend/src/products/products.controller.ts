@@ -47,6 +47,14 @@ export class ProductsController {
     return this.productsService.updateFlags(id, body);
   }
 
+  @Post('seed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed sample products for initial setup' })
+  seed() {
+    return this.productsService.seedSampleProducts();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   findOne(@Param('id') id: string) {

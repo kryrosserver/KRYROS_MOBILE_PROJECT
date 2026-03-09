@@ -48,7 +48,27 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
           <p className="text-slate-500">Manage your product inventory</p>
         </div>
-        <button onClick={load} className="btn-secondary">Refresh</button>
+        <div className="flex items-center gap-2">
+          <button onClick={load} className="btn-secondary">Refresh</button>
+          {!loading && !products.length && (
+            <button
+              onClick={async () => {
+                const ok = confirm("Seed sample products? This will add a few demo products.");
+                if (!ok) return;
+                const res = await fetch("/internal/admin/products/seed", { method: "POST" });
+                const body = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                  alert(body?.error || "Failed to seed products");
+                } else {
+                  await load();
+                }
+              }}
+              className="btn-primary"
+            >
+              Seed Sample Products
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="admin-card overflow-hidden">
@@ -139,7 +159,11 @@ export default function ProductsPage() {
             </tbody>
           </table>
           {loading && <div className="p-4 text-sm text-slate-500">Loading...</div>}
-          {!loading && !products.length && !error && <div className="p-4 text-sm text-slate-500">No products yet</div>}
+          {!loading && !products.length && !error && (
+            <div className="p-4 text-sm text-slate-500">
+              No products yet. Use “Seed Sample Products” to add a few items, then toggle Featured and Save.
+            </div>
+          )}
           {error && <div className="p-4 text-sm text-red-600">{error}</div>}
         </div>
       </div>
