@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Flashlight, Star, Heart, ShoppingCart, ArrowRight, Clock, Tag, Zap, Shield, CreditCard, Smartphone, Laptop, Tablet, Headphones, Watch, Code2, Music, Gamepad2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flashlight, Star, Heart, ShoppingCart, ArrowRight, Clock, Tag, Zap, Shield, CreditCard, Smartphone, Laptop, Tablet, Headphones, Watch, Code2, Music, Gamepad2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
@@ -165,6 +165,72 @@ function HeroSlider() {
         <ChevronRight className="h-6 w-6" />
       </Button>
     </div>
+  )
+}
+
+function WholesaleCreditHighlights() {
+  return (
+    <section className="section-padding bg-white">
+      <div className="container-custom">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="rounded-2xl bg-slate-900 text-white p-8 flex flex-col justify-between">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-green-500/20 px-3 py-1 text-sm font-medium text-green-300">
+                <Package className="h-4 w-4" /> Wholesale
+              </span>
+              <h3 className="mt-4 text-2xl font-bold">Bulk Orders, Better Prices</h3>
+              <p className="mt-2 text-slate-300">Save up to 40% on bulk orders. Perfect for businesses and resellers.</p>
+            </div>
+            <Link href="/wholesale" className="mt-6 inline-flex items-center gap-2 text-green-400 hover:text-green-300">
+              Explore Wholesale <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="rounded-2xl bg-green-500 text-white p-8 flex flex-col justify-between lg:col-span-1">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white">
+                Credit Plans
+              </span>
+              <h3 className="mt-4 text-2xl font-bold">Buy Now, Pay Later</h3>
+              <p className="mt-2 text-white/90">0% interest for the first 3 months. Flexible monthly payments up to 24 months.</p>
+            </div>
+            <Link href="/credit" className="mt-6 inline-flex items-center gap-2 text-white hover:text-white/90">
+              Apply for Credit <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+              <Package className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <div className="font-medium text-slate-900">Free Shipping</div>
+              <div className="text-sm text-slate-500">On orders over $500</div>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+              <Shield className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="font-medium text-slate-900">Secure Payments</div>
+              <div className="text-sm text-slate-500">100% protected checkout</div>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+              <CreditCard className="h-5 w-5 text-orange-600" />
+            </div>
+            <div>
+              <div className="font-medium text-slate-900">Easy Installments</div>
+              <div className="text-sm text-slate-500">Up to 24 months</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -582,6 +648,7 @@ export default function HomePage() {
   return (
     <div className="pt-0">
       <HeroSlider />
+      <WholesaleCreditHighlights />
       <FlashSales />
       <CategoriesGridSection />
       <FeaturedProducts />
