@@ -16,26 +16,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const token = (await cookies()).get("admin_token")?.value || "";
-  const body = await request.text();
-  const res = await fetch(`${API_BASE}/products`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body,
+  const body = await request.json().catch(async () => {
+    const txt = await request.text();
+    try { return JSON.parse(txt); } catch { return {}; }
   });
-  const text = await res.text();
-  if (!res.ok) {
-    return NextResponse.json({ error: text || "Failed to create product" }, { status: res.status });
-  }
-  return NextResponse.json(JSON.parse(text));
-}
-
-export async function POST(request: Request) {
-  const body = await request.json();
-  const t = cookies().get("admin_token")?.value || "";
+  const t = (await cookies()).get("admin_token")?.value || "";
   const res = await fetch(`${API_BASE}/products`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
