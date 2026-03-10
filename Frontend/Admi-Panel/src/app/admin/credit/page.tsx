@@ -66,12 +66,7 @@ export default function CreditPage() {
         </div>
       </div>
 
-      <div className="admin-card">
-        <p className="text-sm text-slate-600">
-          Credit applications and plan management require backend endpoints. When those are ready, I’ll add
-          review queues and actions here, while these summary metrics continue to pull from the live reports API.
-        </p>
-      </div>
+      
     </div>
   );
 }
