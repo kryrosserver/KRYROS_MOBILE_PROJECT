@@ -269,44 +269,7 @@ export function Header() {
               </span>
             </Link>
             <div className="hidden lg:block">
-              <div ref={accountRef} className="relative">
-                <button
-                  onClick={() => setAccountOpen(!accountOpen)}
-                  className="flex items-center gap-2 rounded-md p-2 text-slate-900 transition-colors hover:bg-slate-100"
-                  aria-label="Account"
-                >
-                  <User className="h-5 w-5" />
-                  <span className="text-sm">Account</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
-                <AnimatePresence>
-                  {accountOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 4 }}
-                      className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-slate-200 bg-white p-2 shadow-lg"
-                    >
-                      <Link href="/dashboard" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-900 hover:bg-slate-100">
-                        Dashboard
-                      </Link>
-                      <Link href="/dashboard/orders" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-900 hover:bg-slate-100">
-                        My Orders
-                      </Link>
-                      <Link href="/dashboard/installments" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-900 hover:bg-slate-100">
-                        Installments
-                      </Link>
-                      <Link href="/dashboard/wallet" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-900 hover:bg-slate-100">
-                        Wallet
-                      </Link>
-                      <hr className="my-1 border-slate-200" />
-                      <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-900 hover:bg-slate-100">
-                        Sign In
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <AuthButtons />
             </div>
             <button
               onClick={() => setMobileMenuOpen(true)}
