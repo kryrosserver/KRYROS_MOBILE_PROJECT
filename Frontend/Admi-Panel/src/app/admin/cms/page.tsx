@@ -90,6 +90,24 @@ export default function CMSPage() {
 
   useEffect(() => { loadSections(); }, []);
 
+  async function compressImage(file: File, maxWidth = 800, quality = 0.85): Promise<string> {
+    const blobURL = URL.createObjectURL(file);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = blobURL;
+    });
+    const scale = Math.min(1, maxWidth / img.width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(blobURL);
+    return canvas.toDataURL("image/jpeg", quality);
+  }
+
   const tabs = [
     { id: "banners", label: "Banners", icon: Image, count: banners.length },
     { id: "testimonials", label: "Testimonials", icon: MessageSquare, count: sections.filter((s:any) => s.type === "testimonials" && s.isActive).length },
@@ -405,39 +423,173 @@ export default function CMSPage() {
 
           <div className="space-y-3">
             {sections.filter((s:any) => s.type === "testimonials").map((s:any) => (
-              <div key={s.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">{s.title || "Testimonials"}</p>
-                  <p className="text-sm text-slate-500">Items: {Array.isArray(s.config?.items) ? s.config.items.length : 0}</p>
+              <div key={s.id} className="space-y-4 p-4 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{s.title || "Testimonials"}</p>
+                    <p className="text-sm text-slate-500">Items: {Array.isArray(s.config?.items) ? s.config.items.length : 0}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        defaultChecked={s.isActive}
+                        onChange={async (e) => {
+                          await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                            method: "PUT",
+                            credentials: "same-origin",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ isActive: e.target.checked }),
+                          });
+                          await loadSections();
+                        }}
+                      />
+                      Active
+                    </label>
+                    <button
+                      onClick={async () => {
+                        const ok = confirm("Delete this section?");
+                        if (!ok) return;
+                        const res = await fetch(`/internal/admin/cms/sections/${s.id}`, { method: "DELETE", credentials: "same-origin" });
+                        if (res.ok) await loadSections();
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <label className="text-sm flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked={s.isActive}
-                      onChange={async (e) => {
-                        await fetch(`/internal/admin/cms/sections/${s.id}`, {
+
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                    <input placeholder="Customer name" className="admin-input" id={`t-name-${s.id}`} />
+                    <input placeholder="Location (optional)" className="admin-input" id={`t-location-${s.id}`} />
+                    <input type="number" min="1" max="5" placeholder="Rating 1-5" className="admin-input" id={`t-rating-${s.id}`} />
+                  </div>
+                  <textarea placeholder="Comment" className="admin-input w-full h-24 mb-3" id={`t-comment-${s.id}`} />
+                  <div className="flex items-center gap-3">
+                    <input type="file" accept="image/*" id={`t-avatar-${s.id}`} />
+                    <button
+                      onClick={async () => {
+                        const name = (document.getElementById(`t-name-${s.id}`) as HTMLInputElement).value.trim();
+                        const location = (document.getElementById(`t-location-${s.id}`) as HTMLInputElement).value.trim();
+                        const ratingStr = (document.getElementById(`t-rating-${s.id}`) as HTMLInputElement).value.trim();
+                        const comment = (document.getElementById(`t-comment-${s.id}`) as HTMLTextAreaElement).value.trim();
+                        const fileInput = document.getElementById(`t-avatar-${s.id}`) as HTMLInputElement;
+                        if (!name || !comment) {
+                          alert("Please provide name and comment");
+                          return;
+                        }
+                        const rating = Math.min(5, Math.max(1, Number(ratingStr || "5")));
+                        let avatar = "";
+                        const file = (fileInput.files || [])[0];
+                        if (file) {
+                          avatar = await compressImage(file, 600, 0.9);
+                        }
+                        const items = Array.isArray(s.config?.items) ? [...s.config.items] : [];
+                        items.push({ name, comment, rating, location, avatar });
+                        const res = await fetch(`/internal/admin/cms/sections/${s.id}`, {
                           method: "PUT",
                           credentials: "same-origin",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ isActive: e.target.checked }),
+                          body: JSON.stringify({ config: { items } }),
                         });
-                        await loadSections();
+                        if (res.ok) {
+                          (document.getElementById(`t-name-${s.id}`) as HTMLInputElement).value = "";
+                          (document.getElementById(`t-location-${s.id}`) as HTMLInputElement).value = "";
+                          (document.getElementById(`t-rating-${s.id}`) as HTMLInputElement).value = "";
+                          (document.getElementById(`t-comment-${s.id}`) as HTMLTextAreaElement).value = "";
+                          if (fileInput) fileInput.value = "";
+                          await loadSections();
+                        } else {
+                          const t = await res.text();
+                          alert(t || "Failed to add testimonial");
+                        }
                       }}
-                    />
-                    Active
-                  </label>
-                  <button
-                    onClick={async () => {
-                      const ok = confirm("Delete this section?");
-                      if (!ok) return;
-                      const res = await fetch(`/internal/admin/cms/sections/${s.id}`, { method: "DELETE", credentials: "same-origin" });
-                      if (res.ok) await loadSections();
-                    }}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                      className="btn-primary"
+                    >
+                      Add Testimonial
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-sm text-slate-600">
+                        <th className="p-2">Avatar</th>
+                        <th className="p-2">Name</th>
+                        <th className="p-2">Location</th>
+                        <th className="p-2">Rating</th>
+                        <th className="p-2">Comment</th>
+                        <th className="p-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(Array.isArray(s.config?.items) ? s.config.items : []).map((it:any, idx:number) => (
+                        <tr key={idx} className="border-t">
+                          <td className="p-2">
+                            <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden">
+                              {it.avatar ? <img src={it.avatar} alt={it.name} className="h-10 w-10 object-cover" /> : null}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <input defaultValue={it.name} className="admin-input" id={`it-name-${s.id}-${idx}`} />
+                          </td>
+                          <td className="p-2">
+                            <input defaultValue={it.location || ""} className="admin-input" id={`it-location-${s.id}-${idx}`} />
+                          </td>
+                          <td className="p-2 w-24">
+                            <input type="number" min="1" max="5" defaultValue={it.rating || 5} className="admin-input" id={`it-rating-${s.id}-${idx}`} />
+                          </td>
+                          <td className="p-2">
+                            <textarea defaultValue={it.comment} className="admin-input w-full h-16" id={`it-comment-${s.id}-${idx}`} />
+                          </td>
+                          <td className="p-2 text-right">
+                            <button
+                              onClick={async () => {
+                                const items = Array.isArray(s.config?.items) ? [...s.config.items] : [];
+                                items.splice(idx, 1);
+                                const res = await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                                  method: "PUT",
+                                  credentials: "same-origin",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ config: { items } }),
+                                });
+                                if (res.ok) await loadSections();
+                              }}
+                              className="btn-danger"
+                            >
+                              Delete
+                            </button>
+                            <button
+                              onClick={async () => {
+                                const items = Array.isArray(s.config?.items) ? [...s.config.items] : [];
+                                const updated = {
+                                  ...items[idx],
+                                  name: (document.getElementById(`it-name-${s.id}-${idx}`) as HTMLInputElement).value,
+                                  location: (document.getElementById(`it-location-${s.id}-${idx}`) as HTMLInputElement).value,
+                                  rating: Number((document.getElementById(`it-rating-${s.id}-${idx}`) as HTMLInputElement).value),
+                                  comment: (document.getElementById(`it-comment-${s.id}-${idx}`) as HTMLTextAreaElement).value,
+                                };
+                                items[idx] = updated;
+                                const res = await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                                  method: "PUT",
+                                  credentials: "same-origin",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ config: { items } }),
+                                });
+                                if (res.ok) await loadSections();
+                              }}
+                              className="btn-secondary ml-2"
+                            >
+                              Save
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             ))}
