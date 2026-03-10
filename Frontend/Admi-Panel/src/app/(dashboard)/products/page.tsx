@@ -533,6 +533,7 @@ export default function ProductsPage() {
                           });
                           const body = await res.json().catch(() => ({}));
                           if (!res.ok) throw new Error(body?.error || "Failed to save");
+                          await load();
                         } catch (e) {
                           alert(e instanceof Error ? e.message : "Failed to save");
                         } finally {
