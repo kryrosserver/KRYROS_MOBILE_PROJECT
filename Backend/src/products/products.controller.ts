@@ -6,6 +6,7 @@ import { UpdateProductFlagsDto } from './dto/update-product-flags.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import type { Express } from 'express';
 
 @ApiTags('Products')
 @Controller('products')
