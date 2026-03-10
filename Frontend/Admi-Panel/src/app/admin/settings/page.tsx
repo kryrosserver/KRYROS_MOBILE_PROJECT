@@ -17,6 +17,7 @@ import {
   Upload,
   Check
 } from "lucide-react";
+import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 
 const settings = {
   company: {
@@ -55,6 +56,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { companyName, setCompanyName, logoDataUrl, setLogoDataUrl } = useAdminSettings();
 
   const handleSave = () => {
     setIsSaving(true);
@@ -126,7 +128,8 @@ export default function SettingsPage() {
                   <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
-                    defaultValue={settings.company.name}
+                    defaultValue={companyName || settings.company.name}
+                    onChange={(e)=> setCompanyName(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
@@ -208,14 +211,45 @@ export default function SettingsPage() {
             <div className="pt-6 border-t border-slate-200">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Company Logo</h3>
               <div className="flex items-center gap-6">
-                <div className="h-20 w-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-slate-400">K</span>
+                <div className="h-20 w-20 rounded-xl border-2 border-dashed border-slate-300 overflow-hidden flex items-center justify-center bg-slate-100">
+                  {logoDataUrl ? <img src={logoDataUrl} alt="logo" className="h-20 w-20 object-cover" /> : <span className="text-2xl font-bold text-slate-400">{(companyName || "K")[0]}</span>}
                 </div>
                 <div>
-                  <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer">
                     <Upload className="h-4 w-4" />
-                    Upload Logo
-                  </button>
+                    <span>Upload Logo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+                          const url = URL.createObjectURL(f);
+                          const i = new Image();
+                          i.onload = () => resolve(i);
+                          i.onerror = reject;
+                          i.src = url;
+                        });
+                        const canvas = document.createElement("canvas");
+                        const size = 200;
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext("2d")!;
+                        ctx.fillStyle = "#fff";
+                        ctx.fillRect(0,0,size,size);
+                        const scale = Math.min(size / img.width, size / img.height);
+                        const w = Math.round(img.width * scale);
+                        const h = Math.round(img.height * scale);
+                        const x = Math.round((size - w) / 2);
+                        const y = Math.round((size - h) / 2);
+                        ctx.drawImage(img, x, y, w, h);
+                        const data = canvas.toDataURL("image/png", 0.9);
+                        setLogoDataUrl(data);
+                      }}
+                    />
+                  </label>
                   <p className="mt-2 text-sm text-slate-500">PNG, JPG up to 2MB. Recommended 200x200px</p>
                 </div>
               </div>
