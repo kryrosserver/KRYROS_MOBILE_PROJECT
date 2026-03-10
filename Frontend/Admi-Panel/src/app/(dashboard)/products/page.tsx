@@ -68,6 +68,12 @@ export default function ProductsPage() {
     const type = isPng ? "image/png" : "image/jpeg";
     return canvas.toDataURL(type, quality);
   }
+  
+  function getAdminToken(): string {
+    if (typeof document === "undefined") return "";
+    const match = document.cookie.match(/(?:^|; )admin_token=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }
 
   const load = async () => {
     setLoading(true);
@@ -274,10 +280,18 @@ export default function ProductsPage() {
                         for (const b of blobs) {
                           formData.append("images", b);
                         }
-                        res = await fetch("/internal/admin/products/upload", {
+                        const token = getAdminToken();
+                        res = await fetch(`${API_BASE}/products/upload`, {
                           method: "POST",
+                          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                           body: formData,
                         });
+                        if (res.status === 404) {
+                          res = await fetch("/internal/admin/products/upload", {
+                            method: "POST",
+                            body: formData,
+                          });
+                        }
                         if (res.status === 404) {
                           const fallbackPayload = {
                             name: form.name,
@@ -290,11 +304,18 @@ export default function ProductsPage() {
                             isFeatured: form.isFeatured,
                             imageDataUrls: form.images,
                           };
-                          res = await fetch("/internal/admin/products", {
+                          res = await fetch(`${API_BASE}/products`, {
                             method: "POST",
-                            headers: { "Content-Type": "application/json" },
+                            headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
                             body: JSON.stringify(fallbackPayload),
                           });
+                          if (res.status === 404) {
+                            res = await fetch("/internal/admin/products", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify(fallbackPayload),
+                            });
+                          }
                         }
                       } else {
                         const payload = {
@@ -308,11 +329,19 @@ export default function ProductsPage() {
                           isFeatured: form.isFeatured,
                           imageDataUrls: form.images,
                         };
-                        res = await fetch("/internal/admin/products", {
+                        const token = getAdminToken();
+                        res = await fetch(`${API_BASE}/products`, {
                           method: "POST",
-                          headers: { "Content-Type": "application/json" },
+                          headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
                           body: JSON.stringify(payload),
                         });
+                        if (res.status === 404) {
+                          res = await fetch("/internal/admin/products", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                          });
+                        }
                       }
                       const body = await res.json().catch(() => ({}));
                       if (!res.ok) throw new Error(body?.error || "Failed to create product");
@@ -623,7 +652,15 @@ export default function ProductsPage() {
                           const blob = await resp.blob();
                           formData.append("images", new File([blob], f.name.replace(/\.(png|jpg|jpeg|webp)$/i, ".jpg"), { type: "image/jpeg" }));
                         }
-                        res = await fetch(`/internal/admin/products/${id}/upload`, { method: "POST", body: formData });
+                        const token = getAdminToken();
+                        res = await fetch(`${API_BASE}/products/${id}/upload`, {
+                          method: "POST",
+                          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                          body: formData
+                        });
+                        if (res.status === 404) {
+                          res = await fetch(`/internal/admin/products/${id}/upload`, { method: "POST", body: formData });
+                        }
                         if (res.status === 404) {
                           const fallbackPayload: any = {
                             ...(editForm.name ? { name: editForm.name } : {}),
@@ -635,11 +672,18 @@ export default function ProductsPage() {
                             isFeatured: editForm.isFeatured,
                             ...(editForm.images.length ? { imageDataUrls: editForm.images, replaceImages: true } : {}),
                           };
-                          res = await fetch(`/internal/admin/products/${id}`, {
+                          res = await fetch(`${API_BASE}/products/${id}`, {
                             method: "PUT",
-                            headers: { "Content-Type": "application/json" },
+                            headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
                             body: JSON.stringify(fallbackPayload),
                           });
+                          if (res.status === 404) {
+                            res = await fetch(`/internal/admin/products/${id}`, {
+                              method: "PUT",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify(fallbackPayload),
+                            });
+                          }
                         }
                       } else {
                         const payload: any = {
@@ -652,11 +696,19 @@ export default function ProductsPage() {
                           isFeatured: editForm.isFeatured,
                           ...(editForm.images.length ? { imageDataUrls: editForm.images, replaceImages: true } : {}),
                         };
-                        res = await fetch(`/internal/admin/products/${id}`, {
+                        const token = getAdminToken();
+                        res = await fetch(`${API_BASE}/products/${id}`, {
                           method: "PUT",
-                          headers: { "Content-Type": "application/json" },
+                          headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
                           body: JSON.stringify(payload),
                         });
+                        if (res.status === 404) {
+                          res = await fetch(`/internal/admin/products/${id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                          });
+                        }
                       }
                       const body = await res.json().catch(() => ({}));
                       if (!res.ok) throw new Error(body?.error || "Failed to update product");
