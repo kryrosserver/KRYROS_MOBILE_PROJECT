@@ -86,10 +86,17 @@ export function Header() {
 
   useEffect(() => {
     let active = true
-    wishlistApi.getMine().then(res => {
-      if (!active) return
-      setWishlistCount(Array.isArray(res.data) ? res.data.length : 0)
-    }).catch(() => {}).finally(() => {})
+    const refresh = () => {
+      wishlistApi.getMine()
+        .then(res => {
+          if (!active) return
+          setWishlistCount(Array.isArray(res.data) ? res.data.length : 0)
+        })
+        .catch(() => {})
+    }
+    refresh()
+    const handler = () => refresh()
+    window.addEventListener('wishlist:changed', handler as any)
     return () => { active = false }
   }, [])
 

@@ -5,6 +5,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { Heart, ShoppingCart, Eye, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { wishlistApi } from "@/lib/api";
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
 
 // Accept any product format
 interface ProductCardProps {
@@ -43,6 +46,8 @@ function getProductCategory(p: any): string {
 export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   // Normalize product data for display
   const displayImage = getProductImage(product);
@@ -164,7 +169,24 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             size="icon"
             variant="secondary"
             className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-slate-100"
-            onClick={() => setIsWishlisted(!isWishlisted)}
+            onClick={async () => {
+              const id = product?.id;
+              if (!id) return;
+              if (!isAuthenticated) {
+                router.push("/login");
+                return;
+              }
+              if (isWishlisted) {
+                await wishlistApi.remove(id);
+                setIsWishlisted(false);
+              } else {
+                await wishlistApi.add(id);
+                setIsWishlisted(true);
+              }
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event("wishlist:changed"));
+              }
+            }}
           >
             <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
           </Button>

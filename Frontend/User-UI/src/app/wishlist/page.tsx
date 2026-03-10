@@ -112,6 +112,9 @@ export default function WishlistPage() {
                     onClick={async () => {
                       await wishlistApi.remove(it.productId);
                       setItems(prev => prev.filter(x => x.productId !== it.productId));
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(new Event("wishlist:changed"));
+                      }
                     }}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
