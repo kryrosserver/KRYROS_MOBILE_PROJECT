@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/providers/AuthProvider";
-import { User, LogOut, Package, CreditCard } from "lucide-react";
+import { User, LogOut, Package, CreditCard, Wallet } from "lucide-react";
 
 export function AuthButtons() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -38,15 +38,29 @@ export function AuthButtons() {
               href="/dashboard"
               className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
+              <User className="h-4 w-4" />
+              Dashboard
+            </Link>
+            <Link
+              href="/dashboard/orders"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            >
               <Package className="h-4 w-4" />
               My Orders
             </Link>
             <Link
-              href="/dashboard/credits"
+              href="/dashboard/installments"
               className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
             >
               <CreditCard className="h-4 w-4" />
-              My Credits
+              Installments
+            </Link>
+            <Link
+              href="/dashboard/wallet"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            >
+              <Wallet className="h-4 w-4" />
+              Wallet
             </Link>
             <button
               onClick={logout}
