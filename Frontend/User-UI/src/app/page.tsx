@@ -11,6 +11,8 @@ import { BlogSection } from '@/components/home/BlogSection'
 import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/providers/CartProvider'
+import { useAuth } from '@/providers/AuthProvider'
+import { wishlistApi } from '@/lib/api'
 import { formatPrice, getTimeRemaining, calculateDiscount } from '@/lib/utils'
 import { cmsApi, productsApi, categoriesApi } from '@/lib/api'
 import type { Product } from '@/types'
@@ -356,6 +358,7 @@ function FlashSales() {
 function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart()
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const { isAuthenticated } = useAuth()
 
   const discount = product.salePrice
     ? calculateDiscount(product.price, product.salePrice)
@@ -399,7 +402,24 @@ function ProductCard({ product }: { product: Product }) {
             variant="ghost"
             size="icon"
             className="bg-white shadow-md hover:bg-gray-100"
-            onClick={() => setIsWishlisted(!isWishlisted)}
+            onClick={async () => {
+              const id = (product as any)?.id
+              if (!id) return
+              if (!isAuthenticated) {
+                window.location.href = '/login'
+                return
+              }
+              if (isWishlisted) {
+                await wishlistApi.remove(id)
+                setIsWishlisted(false)
+              } else {
+                await wishlistApi.add(id)
+                setIsWishlisted(true)
+              }
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('wishlist:changed'))
+              }
+            }}
           >
             <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
           </Button>

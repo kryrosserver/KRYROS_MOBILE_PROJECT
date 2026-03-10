@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { wishlistApi } from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/providers/CartProvider";
 
 // Accept any product format
 interface ProductCardProps {
@@ -48,6 +49,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const { addItem } = useCart();
 
   // Normalize product data for display
   const displayImage = getProductImage(product);
@@ -119,7 +121,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               )}
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => addItem(product)}
+              >
                 <ShoppingCart className="mr-1 h-4 w-4" />
                 Add
               </Button>
@@ -148,7 +154,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 <Heart className={`mr-1 h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
                 {isWishlisted ? "Wishlisted" : "Wishlist"}
               </Button>
-              <Button size="sm" className="bg-green-500 hover:bg-green-600">
+              <Button
+                size="sm"
+                className="bg-green-500 hover:bg-green-600"
+                onClick={() => addItem(product)}
+              >
                 Buy Now
               </Button>
             </div>
@@ -226,7 +236,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
         {/* Add to Cart */}
         <div className={`absolute bottom-3 left-3 right-3 transition-transform duration-300 ${isHovered ? 'translate-y-0' : 'translate-y-full'}`}>
-          <Button className="w-full bg-green-500 hover:bg-green-600" size="sm">
+          <Button
+            className="w-full bg-green-500 hover:bg-green-600"
+            size="sm"
+            onClick={() => addItem(product)}
+          >
             <ShoppingCart className="mr-2 h-4 w-4" />
             Add to Cart
           </Button>
