@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Search, Package, MoreVertical, Edit2, Trash2, Database, Layers, MoveRight, History } from "lucide-react";
 import { useInvoiceStore, Product } from "@/providers/InvoiceStore";
+import { formatPrice } from "@/lib/utils";
 
 export default function InventoryPage() {
   const { products, addProduct } = useInvoiceStore();
