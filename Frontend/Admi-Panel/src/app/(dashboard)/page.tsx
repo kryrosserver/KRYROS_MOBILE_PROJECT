@@ -1,40 +1,55 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { DollarSign, ShoppingCart, Users, CreditCard, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { 
+  Plus, RefreshCw, Bell, Settings, FileText, FileEdit, Users, 
+  Package, CreditCard, ShoppingBag, ShoppingCart, Truck, 
+  Database, RotateCcw, DollarSign, BarChart3, RotateCw, UserCheck, ChevronRight 
+} from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 type Summary = {
-  stats: { totalRevenue: number; totalOrders: number; activeUsers: number; creditDisbursed: number };
-  recentTransactions: { id: string; customer: string; amount: number; status: string; date: string }[];
-};
-
-type Order = {
-  id: string;
-  orderNumber: string;
-  total: number;
-  status: string;
-  paymentStatus: string;
-  createdAt: string;
-  user?: { firstName: string; lastName: string; email: string };
+  sales: number;
+  purchases: number;
+  paymentReceived: number;
+  paymentPaid: number;
+  outstandingBalance: number;
+  outstandingPayment: number;
+  expense: number;
+  profit: number;
 };
 
 export default function AdminDashboard() {
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [summary, setSummary] = useState<Summary>({
+    sales: 0,
+    purchases: 0,
+    paymentReceived: 0,
+    paymentPaid: 0,
+    outstandingBalance: 0,
+    outstandingPayment: 0,
+    expense: 0,
+    profit: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [repRes, ordRes] = await Promise.all([
-        fetch("/internal/admin/reports/summary?range=month", { cache: "no-store" }),
-        fetch("/internal/admin/orders", { cache: "no-store" }),
-      ]);
-      const [rep, ord] = await Promise.all([repRes.json().catch(()=>null), ordRes.json().catch(()=>[])]);
-      if (repRes.ok) setSummary(rep);
-      if (ordRes.ok) setOrders(Array.isArray(ord) ? ord : ord?.data || []);
+      const res = await fetch("/internal/admin/reports/summary?range=month", { cache: "no-store" });
+      const data = await res.json().catch(() => null);
+      if (data && data.stats) {
+        setSummary({
+          sales: data.stats.totalRevenue || 0,
+          purchases: 0,
+          paymentReceived: data.stats.totalRevenue || 0,
+          paymentPaid: 0,
+          outstandingBalance: 0,
+          outstandingPayment: 0,
+          expense: 0,
+          profit: data.stats.totalRevenue || 0,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -42,101 +57,125 @@ export default function AdminDashboard() {
 
   useEffect(() => { load(); }, []);
 
-  const cards = useMemo(() => {
-    const s = summary?.stats;
-    return [
-      { title: "Revenue (This Month)", value: formatPrice(Number(s?.totalRevenue || 0)), icon: DollarSign, color: "green" },
-      { title: "Total Orders", value: (Number(s?.totalOrders || 0)).toLocaleString(), icon: ShoppingCart, color: "blue" },
-      { title: "Active Users", value: (Number(s?.activeUsers || 0)).toLocaleString(), icon: Users, color: "purple" },
-      { title: "Credit Disbursed", value: formatPrice(Number(s?.creditDisbursed || 0)), icon: CreditCard, color: "orange" },
-    ];
-  }, [summary]);
+  const quickActions = [
+    { title: "New Invoice", icon: Plus, href: "/admin/invoice/new" },
+    { title: "New Estimate", icon: Plus, href: "/admin/estimate/new" },
+    { title: "New Payment", icon: Plus, href: "/admin/payment/new" },
+  ];
+
+  const modules = [
+    { title: "Invoice", icon: FileText, href: "/admin/invoice" },
+    { title: "Estimate", icon: FileEdit, href: "/admin/estimate" },
+    { title: "Client / Supplier", icon: Users, href: "/admin/contacts" },
+    { title: "Product/Service", icon: Package, href: "/admin/products" },
+    { title: "Payment", icon: CreditCard, href: "/admin/payments" },
+    { title: "Purchase", icon: ShoppingBag, href: "/admin/purchases" },
+    { title: "Sale Order", icon: FileText, href: "/admin/sale-orders" },
+    { title: "Purchase Order", icon: ShoppingCart, href: "/admin/purchase-orders" },
+    { title: "Delivery Note", icon: FileText, href: "/admin/delivery-notes" },
+    { title: "Inventory", icon: Database, href: "/admin/inventory" },
+    { title: "Sale Return", icon: RotateCcw, href: "/admin/sale-returns" },
+    { title: "Expense", icon: DollarSign, href: "/admin/expenses" },
+    { title: "Reports", icon: BarChart3, href: "/admin/reports" },
+    { title: "Purchase Return", icon: RotateCw, href: "/admin/purchase-returns" },
+    { title: "Agent", icon: UserCheck, href: "/admin/agents" },
+  ];
+
+  const summaryCards = [
+    { title: "Sales", subtitle: "Sales this month", value: summary.sales, color: "text-orange-500", href: "/admin/reports/sales" },
+    { title: "Purchases", subtitle: "Purchase this month", value: summary.purchases, color: "text-orange-500", href: "/admin/reports/purchases" },
+    { title: "Payment Received", subtitle: "Received this month", value: summary.paymentReceived, color: "text-green-500", href: "/admin/reports/payments-received" },
+    { title: "Payment Paid", subtitle: "Paid this month", value: summary.paymentPaid, color: "text-red-500", href: "/admin/reports/payments-paid" },
+    { title: "Outstanding Balance", subtitle: "This Month", value: summary.outstandingBalance, color: "text-green-500", href: "/admin/reports/outstanding-balance" },
+    { title: "Outstanding Payment", subtitle: "This Month", value: summary.outstandingPayment, color: "text-red-500", href: "/admin/reports/outstanding-payment" },
+    { title: "Expense", subtitle: "Expense this month", value: summary.expense, color: "text-slate-900", href: "/admin/expenses" },
+    { title: "Profit / Loss", subtitle: "This Month", value: summary.profit, color: "text-green-500", href: "/admin/reports/profit-loss" },
+  ];
+
+  const orderStats = [
+    { label: "Booked", count: 0, color: "bg-slate-300" },
+    { label: "Processing", count: 0, color: "bg-orange-300" },
+    { label: "Completed", count: 0, color: "bg-green-300" },
+    { label: "Delivered", count: 0, color: "bg-cyan-400" },
+    { label: "Cancelled", count: 0, color: "bg-pink-300" },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-500">Live business metrics and recent activity</p>
+    <div className="flex flex-col min-h-screen bg-slate-100 max-w-4xl mx-auto shadow-sm">
+      {/* Header */}
+      <header className="bg-[#1e293b] text-white p-4 flex items-center justify-between sticky top-0 z-10">
+        <h1 className="text-xl font-semibold">Uni Invoice</h1>
+        <div className="flex items-center gap-4">
+          <button onClick={() => { setIsRefreshing(true); load().finally(() => setTimeout(() => setIsRefreshing(false), 300)); }}>
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`} />
+          </button>
+          <button><Bell className="h-5 w-5" /></button>
+          <button><Settings className="h-5 w-5" /></button>
         </div>
-        <button
-          onClick={() => { setIsRefreshing(true); load().finally(()=> setTimeout(()=> setIsRefreshing(false),300)); }}
-          className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-        >
-          <RefreshCw className={`h-4 w-4 text-slate-600 ${isRefreshing ? "animate-spin" : ""}`} />
-        </button>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map(c => (
-          <div key={c.title} className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between">
-              <div className={`h-10 w-10 rounded-lg flex items-center justify-center bg-${c.color}-100`}>
-                <c.icon className={`h-5 w-5 text-${c.color}-600`} />
-              </div>
+      {/* Quick Actions */}
+      <div className="bg-[#1e293b] p-4 pt-0 grid grid-cols-3 gap-3">
+        {quickActions.map((action, i) => (
+          <Link key={i} href={action.href} className="bg-[#334155] rounded-lg p-3 flex flex-col items-start gap-1 hover:bg-[#475569] transition-colors">
+            <div className="h-6 w-6 rounded-full border border-white/30 flex items-center justify-center">
+              <Plus className="h-4 w-4" />
             </div>
-            <div className="mt-4">
-              <p className="text-sm text-slate-500">{c.title}</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{c.value}</p>
-            </div>
-          </div>
+            <span className="text-xs font-medium text-white/90 leading-tight">{action.title}</span>
+          </Link>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Orders</h2>
-          <div className="overflow-x-auto">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Order #</th>
-                  <th>Customer</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(orders.slice(0,6)).map(o => (
-                  <tr key={o.id}>
-                    <td className="font-mono">{o.orderNumber}</td>
-                    <td>{o.user ? `${o.user.firstName || ""} ${o.user.lastName || ""}`.trim() || o.user.email : "—"}</td>
-                    <td>{formatPrice(Number(o.total))}</td>
-                    <td><span className="badge badge-neutral">{o.status}</span></td>
-                    <td><span className={`badge ${o.paymentStatus === "PAID" ? "badge-success" : o.paymentStatus === "PENDING" ? "badge-warning" : "badge-danger"}`}>{o.paymentStatus}</span></td>
-                    <td className="text-slate-500">{new Date(o.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {loading && <div className="p-4 text-sm text-slate-500">Loading...</div>}
-            {!loading && !orders.length && <div className="p-4 text-sm text-slate-500">No recent orders</div>}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Transactions</h2>
-          <div className="space-y-3">
-            {(summary?.recentTransactions || []).slice(0,6).map(txn => (
-              <div key={txn.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
-                <div>
-                  <p className="font-medium text-slate-900">{txn.customer}</p>
-                  <p className="text-xs text-slate-500">{txn.id} • {txn.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-slate-900">{formatPrice(Number(txn.amount))}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    txn.status === "paid" || txn.status === "completed" ? "bg-green-100 text-green-700" : txn.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
-                  }`}>{txn.status}</span>
-                </div>
+      {/* Feature Grid */}
+      <div className="p-0.5 bg-slate-200">
+        <div className="grid grid-cols-4 gap-[1px]">
+          {modules.map((m, i) => (
+            <Link key={i} href={m.href} className="bg-white p-4 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors aspect-square">
+              <div className="text-[#2dd4bf]">
+                <m.icon className="h-6 w-6" strokeWidth={1.5} />
               </div>
-            ))}
-            {!summary?.recentTransactions?.length && <div className="p-4 text-sm text-slate-500 border border-slate-200 rounded-lg">No transactions</div>}
-          </div>
+              <span className="text-[10px] text-center font-medium text-slate-700 leading-tight">{m.title}</span>
+            </Link>
+          ))}
+          {/* Empty slot for layout if needed */}
+          <div className="bg-white aspect-square"></div>
         </div>
       </div>
+
+      {/* Summary Cards */}
+      <div className="mt-4 grid grid-cols-2 gap-[1px] bg-slate-200">
+        {summaryCards.map((card, i) => (
+          <Link key={i} href={card.href} className="bg-white p-4 flex flex-col justify-between group cursor-pointer hover:bg-slate-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">{card.title}</h3>
+                <p className="text-[10px] text-slate-400">{card.subtitle}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-300" />
+            </div>
+            <p className={`mt-2 text-base font-bold ${card.color}`}>ZMW {card.value.toFixed(2)}</p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Order Statistics */}
+      <div className="mt-4 bg-white p-4 border-t border-b border-slate-200">
+        <h3 className="text-sm font-semibold text-slate-900">Order Statistics</h3>
+        <p className="text-[10px] text-slate-400">Order Statistics of current month</p>
+        
+        <div className="mt-4 space-y-2">
+          {orderStats.map((stat, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className={`h-3 w-3 rounded-full ${stat.color}`}></div>
+              <span className="text-xs text-slate-700 font-medium">{stat.label} : {stat.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-20"></div> {/* Bottom spacing */}
     </div>
   );
 }
+
+
