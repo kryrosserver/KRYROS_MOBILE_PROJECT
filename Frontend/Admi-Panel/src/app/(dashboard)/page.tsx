@@ -5,7 +5,7 @@ import Link from "next/link";
 import { 
   Plus, RefreshCw, Bell, Settings, FileText, FileEdit, Users, 
   Package, CreditCard, ShoppingBag, ShoppingCart, Truck, 
-  Database, RotateCcw, DollarSign, BarChart3, RotateCw, UserCheck, ChevronRight 
+  Database, RotateCcw, DollarSign, BarChart3, RotateCw, UserCheck, ChevronRight, ArrowRight 
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
