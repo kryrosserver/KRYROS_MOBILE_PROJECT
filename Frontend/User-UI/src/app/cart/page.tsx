@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -20,6 +21,7 @@ import type { CartItem as CIC } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
 export default function CartPage() {
+  const router = useRouter();
   const { items, updateQuantity, removeItem, getSubtotal } = useCart();
   const [couponCode, setCouponCode] = useState("");
 
@@ -27,6 +29,14 @@ export default function CartPage() {
   const discount = 0;
   const shipping = subtotal > 5000 ? 0 : 150;
   const total = subtotal - discount + shipping;
+
+  const handleCheckout = () => {
+    router.push("/checkout");
+  };
+
+  const handleBuyOnCredit = () => {
+    router.push("/credit");
+  };
 
   if (items.length === 0) {
     return (
@@ -171,10 +181,17 @@ export default function CartPage() {
 
               {/* Checkout Buttons */}
               <div className="mt-6 space-y-3">
-                <Button className="w-full bg-green-500 hover:bg-green-600">
+                <Button 
+                  className="w-full bg-green-500 hover:bg-green-600"
+                  onClick={handleCheckout}
+                >
                   Proceed to Checkout <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleBuyOnCredit}
+                >
                   Buy on Credit
                 </Button>
               </div>

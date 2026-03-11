@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCart } from "@/providers/CartProvider";
 import { 
   CreditCard, 
   Smartphone, 
@@ -14,6 +16,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { CartItem } from "@/types";
 
 const steps = [
   { id: 1, name: "Information", status: "current" },
@@ -43,6 +46,7 @@ const paymentMethods = [
 ];
 
 export default function CheckoutPage() {
+  const { items, getSubtotal } = useCart();
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [formData, setFormData] = useState({
@@ -60,8 +64,8 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const subtotal = 28500;
-  const shipping = 0;
+  const subtotal = useMemo(() => getSubtotal(), [getSubtotal, items]);
+  const shipping = subtotal > 5000 ? 0 : 150;
   const total = subtotal + shipping;
 
   return (
@@ -335,35 +339,31 @@ export default function CheckoutPage() {
               <h3 className="text-lg font-semibold text-slate-900">Order Summary</h3>
               
               <div className="mt-4 space-y-4">
-                <div className="flex gap-4">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                    <img 
-                      src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&h=100&fit=crop" 
-                      alt="iPhone"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">iPhone 15 Pro Max 256GB</p>
-                    <p className="text-sm text-slate-500">Qty: 1</p>
-                  </div>
-                  <p className="font-medium text-slate-900">{formatPrice(25000)}</p>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                    <img 
-                      src="https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=100&h=100&fit=crop" 
-                      alt="AirPods"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">AirPods Pro (2nd Gen)</p>
-                    <p className="text-sm text-slate-500">Qty: 2</p>
-                  </div>
-                  <p className="font-medium text-slate-900">{formatPrice(7000)}</p>
-                </div>
+                {items.map((ci: CartItem) => {
+                  const itemId = ci.product.id + (ci.variant?.id ? `:${ci.variant.id}` : "");
+                  const primary = ci.product.images?.find((i) => i.isPrimary)?.url || ci.product.images?.[0]?.url || "";
+                  const unitPrice = ci.variant?.price || ci.product.salePrice || ci.product.price;
+                  return (
+                    <div key={itemId} className="flex gap-4">
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                        <Image 
+                          src={primary || "/placeholder.png"} 
+                          alt={ci.product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">{ci.product.name}</p>
+                        <p className="text-sm text-slate-500">Qty: {ci.quantity}</p>
+                        {ci.variant && (
+                          <p className="text-xs text-slate-400">Variant: {ci.variant.value}</p>
+                        )}
+                      </div>
+                      <p className="font-medium text-slate-900">{formatPrice(Number(unitPrice * ci.quantity))}</p>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-6 space-y-3 border-t border-slate-200 pt-4">
