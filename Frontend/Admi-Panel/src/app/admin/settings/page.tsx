@@ -92,7 +92,7 @@ export default function SettingsPage() {
     address: " Lusaka, Zambia",
     website: "https://kryrosmobile.com",
     timezone: "Africa/Lusaka",
-    currency: "ZMW",
+    currency: "USD",
     language: "English"
   };
 
@@ -243,8 +243,8 @@ export default function SettingsPage() {
                   defaultValue={companySettings.currency}
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white"
                 >
-                  <option value="ZMW">ZMW - Zambian Kwacha</option>
                   <option value="USD">USD - US Dollar</option>
+                  <option value="ZMW">ZMW - Zambian Kwacha</option>
                   <option value="EUR">EUR - Euro</option>
                   <option value="GBP">GBP - British Pound</option>
                 </select>
@@ -431,7 +431,7 @@ export default function SettingsPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Flat Shipping Fee (ZMW)</label>
+                    <label className="text-sm font-medium text-slate-700">Flat Shipping Fee (USD)</label>
                     <div className="relative">
                       <Truck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       <input
@@ -444,9 +444,9 @@ export default function SettingsPage() {
                     <p className="text-xs text-slate-500">The base cost for all deliveries.</p>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Free Shipping Threshold (ZMW)</label>
+                    <label className="text-sm font-medium text-slate-700">Free Shipping Threshold (USD)</label>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">ZK</div>
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">$</div>
                       <input
                         type="number"
                         value={shippingThreshold}
