@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { API_BASE } from "@/lib/config";
 import { formatPrice } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [tab, setTab] = useState<"all" | "featured" | "flash">("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
@@ -77,11 +78,13 @@ export default function ProductsPage() {
     return match ? decodeURIComponent(match[1]) : "";
   }
 
-  const load = async () => {
+  const load = useCallback(async (search = "") => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/internal/admin/products", { cache: "no-store" });
+      const url = new URL("/api/admin/products", window.location.origin);
+      if (search) url.searchParams.set("search", search);
+      const res = await fetch(url.toString(), { cache: "no-store" });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || "Failed to load products");
       const items = Array.isArray(body?.products) ? body.products : body?.data || [];
@@ -91,11 +94,14 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    const timer = setTimeout(() => {
+      load(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm, load]);
 
   return (
     <>
@@ -106,8 +112,14 @@ export default function ProductsPage() {
           <p className="text-slate-500">Manage your product inventory</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={load} className="btn-secondary">Refresh</button>
-          {/* Removed seed actions */}
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="admin-input h-10 w-64"
+          />
+          <button onClick={() => load(searchTerm)} className="btn-secondary">Refresh</button>
         </div>
       </div>
 
