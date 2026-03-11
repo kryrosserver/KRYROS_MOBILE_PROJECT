@@ -82,7 +82,19 @@ function HeroSlider() {
   }, [heroBanners.length])
 
   if (!heroBanners.length) {
-    return <ComingSoon title="Homepage Banners Coming Soon" message="Our latest promotions will appear here." />
+    return (
+      <div className="relative h-[500px] md:h-[600px] overflow-hidden bg-slate-900 flex items-center justify-center">
+        <div className="container-custom">
+          <div className="max-w-xl space-y-6">
+            <div className="h-8 w-32 bg-white/10 rounded-full animate-pulse" />
+            <div className="h-16 w-full bg-white/10 rounded-xl animate-pulse" />
+            <div className="h-16 w-3/4 bg-white/10 rounded-xl animate-pulse" />
+            <div className="h-24 w-full bg-white/5 rounded-lg animate-pulse" />
+            <div className="h-12 w-48 bg-white/20 rounded-lg animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -242,11 +254,12 @@ function WholesaleCreditHighlights() {
 function CategoriesGridSection() {
   const [categories, setCategories] = useState<any[]>([])
   const [cmsConfig, setCmsConfig] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let active = true
     // Fetch CMS sections to see which categories are selected
-    cmsApi.getSections().then(res => {
+    const p1 = cmsApi.getSections().then(res => {
       if (!active) return
       const arr = Array.isArray(res.data) ? res.data : (res as any)?.data || []
       const sect = arr.find((s:any) => s.type === 'categories' && s.isActive)
@@ -254,13 +267,18 @@ function CategoriesGridSection() {
     })
 
     // Also fetch real counts from categories API
-    categoriesApi.getAll()
+    const p2 = categoriesApi.getAll()
       .then(res => {
         if (!active) return
         const list = Array.isArray(res.data) ? res.data : []
         setCategories(list)
       })
       .catch(() => setCategories([]))
+
+    Promise.all([p1, p2]).finally(() => {
+      if (active) setLoading(false)
+    })
+
     return () => { active = false }
   }, [])
 
@@ -278,8 +296,6 @@ function CategoriesGridSection() {
     return categories.slice(0, 8)
   }, [categories, cmsConfig])
 
-  if (!displayCategories.length) return null
-
   const iconFor = (name: string) => {
     const n = (name || '').toLowerCase()
     if (n.includes('phone')) return Smartphone
@@ -293,6 +309,8 @@ function CategoriesGridSection() {
     return Tag
   }
 
+  if (!loading && !displayCategories.length) return null
+
   return (
     <section className="section-padding bg-slate-50">
       <div className="container-custom">
@@ -301,21 +319,31 @@ function CategoriesGridSection() {
           <p className="text-slate-600">{cmsConfig?.subtitle || "Browse our wide range of tech products"}</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {displayCategories.map((cat:any, idx:number) => {
-            const Icon = iconFor(cat?.name || '')
-            const count = cat?.productCount || 0
-            return (
-              <Link key={cat?.id ?? idx} href={`/shop?category=${cat.slug}`} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-                  <Icon className="h-6 w-6 text-green-600" />
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-slate-900">{cat?.name || 'Category'}</div>
-                  <div className="text-sm text-slate-500">{count} products</div>
-                </div>
-              </Link>
-            )
-          })}
+          {loading ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-slate-200 animate-pulse">
+                <div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-slate-100" />
+                <div className="h-4 bg-slate-100 rounded w-1/2 mx-auto" />
+                <div className="h-3 bg-slate-100 rounded w-1/3 mx-auto mt-2" />
+              </div>
+            ))
+          ) : (
+            displayCategories.map((cat:any, idx:number) => {
+              const Icon = iconFor(cat?.name || '')
+              const count = cat?.productCount || 0
+              return (
+                <Link key={cat?.id ?? idx} href={`/shop?category=${cat.slug}`} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                    <Icon className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-slate-900">{cat?.name || 'Category'}</div>
+                    <div className="text-sm text-slate-500">{count} products</div>
+                  </div>
+                </Link>
+              )
+            })
+          )}
         </div>
       </div>
     </section>
@@ -515,14 +543,20 @@ function ProductCard({ product }: { product: Product }) {
 // Featured Products Section
 function FeaturedProducts() {
   const [featuredProducts, setFeatured] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     let active = true
     productsApi.getFeatured().then(res => {
-      if (active && Array.isArray(res.data)) setFeatured(res.data.slice(0, 8))
+      if (active && Array.isArray(res.data)) {
+        setFeatured(res.data.slice(0, 8))
+      }
+      setLoading(false)
     })
     return () => { active = false }
   }, [])
-  if (!featuredProducts.length) return null
+
+  if (!loading && !featuredProducts.length) return null
 
   return (
     <section className="section-padding bg-gray-50">
@@ -535,9 +569,22 @@ function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl h-[350px] animate-pulse">
+                <div className="aspect-square bg-slate-100 rounded-t-xl" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-slate-100 rounded w-3/4" />
+                  <div className="h-4 bg-slate-100 rounded w-1/2" />
+                  <div className="h-6 bg-slate-100 rounded w-1/3 mt-4" />
+                </div>
+              </div>
+            ))
+          ) : (
+            featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
       </div>
     </section>

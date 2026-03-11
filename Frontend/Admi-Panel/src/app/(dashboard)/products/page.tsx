@@ -19,7 +19,7 @@ type Product = {
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [tab, setTab] = useState<"all" | "featured" | "flash">("all");
@@ -383,7 +383,21 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {(tab === "featured" ? products.filter(p => !!p.isFeatured) : tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : products).map((p) => (
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td><div className="h-4 bg-slate-100 rounded w-3/4"></div></td>
+                    <td><div className="h-4 bg-slate-100 rounded w-1/2"></div></td>
+                    <td><div className="h-4 bg-slate-100 rounded w-1/2"></div></td>
+                    <td><div className="h-4 bg-slate-100 rounded w-1/3"></div></td>
+                    <td><div className="h-4 bg-slate-100 rounded w-1/4"></div></td>
+                    <td><div className="h-6 bg-slate-100 rounded-full w-16"></div></td>
+                    <td><div className="h-4 bg-slate-100 rounded w-4"></div></td>
+                    <td><div className="h-4 bg-slate-100 rounded w-4"></div></td>
+                    <td className="text-right"><div className="h-8 bg-slate-100 rounded-lg w-20 ml-auto"></div></td>
+                  </tr>
+                ))
+              ) : (tab === "featured" ? products.filter(p => !!p.isFeatured) : tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : products).map((p) => (
                 <tr key={p.id}>
                   <td className="font-medium text-slate-900">{p.name}</td>
                   <td className="font-mono text-sm">{p.sku}</td>
