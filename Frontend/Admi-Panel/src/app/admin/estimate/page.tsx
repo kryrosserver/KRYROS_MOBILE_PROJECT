@@ -3,6 +3,7 @@
 import { Plus, Search, FileEdit, Eye, Printer, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useInvoiceStore } from "@/providers/InvoiceStore";
+import { formatPrice } from "@/lib/utils";
 
 export default function EstimatePage() {
   const { estimates } = useInvoiceStore();
