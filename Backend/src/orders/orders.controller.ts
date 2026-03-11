@@ -4,6 +4,7 @@ import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -36,8 +37,8 @@ export class OrdersController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  create(@Body() data: any) {
-    return this.ordersService.create(data);
+  create(@Req() req: Request, @Body() data: CreateOrderDto) {
+    return this.ordersService.create((req as any).user.id, data);
   }
 
   @Put(':id/status')
