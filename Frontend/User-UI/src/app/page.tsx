@@ -241,18 +241,44 @@ function WholesaleCreditHighlights() {
 
 function CategoriesGridSection() {
   const [categories, setCategories] = useState<any[]>([])
+  const [cmsConfig, setCmsConfig] = useState<any>(null)
+
   useEffect(() => {
     let active = true
+    // Fetch CMS sections to see which categories are selected
+    cmsApi.getSections().then(res => {
+      if (!active) return
+      const arr = Array.isArray(res.data) ? res.data : (res as any)?.data || []
+      const sect = arr.find((s:any) => s.type === 'categories' && s.isActive)
+      if (sect) setCmsConfig(sect)
+    })
+
+    // Also fetch real counts from categories API
     categoriesApi.getAll()
       .then(res => {
         if (!active) return
         const list = Array.isArray(res.data) ? res.data : []
-        setCategories(list.slice(0, 8))
+        setCategories(list)
       })
       .catch(() => setCategories([]))
     return () => { active = false }
   }, [])
-  if (!categories.length) return null
+
+  // If we have CMS config, use those categories. Otherwise fallback to top categories
+  const displayCategories = useMemo(() => {
+    if (cmsConfig && Array.isArray(cmsConfig.config?.items) && cmsConfig.config.items.length > 0) {
+      return cmsConfig.config.items.map((item: any) => {
+        const realCat = categories.find(c => c.slug === item.slug || c.name === item.name)
+        return {
+          ...item,
+          productCount: realCat?.productCount ?? realCat?._count?.products ?? 0
+        }
+      })
+    }
+    return categories.slice(0, 8)
+  }, [categories, cmsConfig])
+
+  if (!displayCategories.length) return null
 
   const iconFor = (name: string) => {
     const n = (name || '').toLowerCase()
@@ -271,15 +297,15 @@ function CategoriesGridSection() {
     <section className="section-padding bg-slate-50">
       <div className="container-custom">
         <div className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-display font-bold">Shop by Category</h2>
-          <p className="text-slate-600">Browse our wide range of tech products</p>
+          <h2 className="text-2xl md:text-3xl font-display font-bold">{cmsConfig?.title || "Shop by Category"}</h2>
+          <p className="text-slate-600">{cmsConfig?.subtitle || "Browse our wide range of tech products"}</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {categories.map((cat:any, idx:number) => {
+          {displayCategories.map((cat:any, idx:number) => {
             const Icon = iconFor(cat?.name || '')
-            const count = (cat?.productCount ?? cat?._count?.products ?? 0)
+            const count = cat?.productCount || 0
             return (
-              <Link key={cat?.id ?? idx} href="/shop" className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow">
+              <Link key={cat?.id ?? idx} href={`/shop?category=${cat.slug}`} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
                   <Icon className="h-6 w-6 text-green-600" />
                 </div>

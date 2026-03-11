@@ -110,6 +110,7 @@ export default function CMSPage() {
 
   const tabs = [
     { id: "banners", label: "Banners", icon: ImageIcon, count: banners.length },
+    { id: "categories", label: "Categories Grid", icon: Layout, count: sections.find((s:any) => s.type === "categories")?.config?.items?.length || 0 },
     { id: "testimonials", label: "Testimonials", icon: MessageSquare, count: sections.filter((s:any) => s.type === "testimonials" && s.isActive).length },
     { id: "wholesale", label: "Wholesale Deals", icon: Star, count: sections.filter((s:any) => s.type === "wholesale_deals" && s.isActive).length },
   ];
@@ -124,15 +125,17 @@ export default function CMSPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">CMS Management</h1>
-          <p className="mt-1 text-slate-600">Manage banners for the storefront</p>
+          <p className="mt-1 text-slate-600">Manage storefront content and layout</p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Add New
-        </button>
+        {activeTab === "banners" && (
+          <button
+            onClick={() => setShowAdd(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Add New Banner
+          </button>
+        )}
       </div>
 
       {showAdd && (
@@ -267,106 +270,259 @@ export default function CMSPage() {
         </nav>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-        />
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-
       {/* Banners Tab */}
       {activeTab === "banners" && (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">
-                  <GripVertical className="h-4 w-4 inline mr-2" />
-                  Order
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Banner</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Title</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Link</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Status</th>
-                <th className="text-right px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {filteredBanners.map((banner) => (
-                <tr key={banner.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <span className="flex items-center gap-2 text-sm text-slate-600">
-                      <GripVertical className="h-4 w-4 cursor-move" />
-                      {banner.position}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="h-12 w-24 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-                      <ImageIcon className="h-6 w-6 text-slate-400" />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-slate-900">{banner.title}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <a href={banner.link || "/shop"} className="text-sm text-green-600 hover:underline flex items-center gap-1">
-                      {banner.link || "/shop"} <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="flex items-center gap-1 text-sm">
-                      {banner.isActive ? (
-                        <span className="text-green-600 flex items-center gap-1">
-                          <ToggleRight className="h-5 w-5" /> Active
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 flex items-center gap-1">
-                          <ToggleLeft className="h-5 w-5" /> Inactive
-                        </span>
-                      )}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                        <Eye className="h-4 w-4 text-slate-600" />
-                      </button>
-                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                        <Edit className="h-4 w-4 text-slate-600" />
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const ok = confirm("Delete this banner?");
-                          if (!ok) return;
-                          const res = await fetch(`/internal/cms/banners/${banner.id}`, {
-                            method: "DELETE",
-                            credentials: "same-origin",
-                          });
-                          if (res.ok) {
-                            await loadBanners();
-                          }
-                        }}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </button>
-                    </div>
-                  </td>
+        <div className="space-y-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search banners..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">
+                    <GripVertical className="h-4 w-4 inline mr-2" />
+                    Order
+                  </th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Banner</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Title</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Link</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Status</th>
+                  <th className="text-right px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {loading && <div className="p-4 text-sm text-slate-500">Loading...</div>}
-          {!loading && filteredBanners.length === 0 && (
-            <div className="p-4 text-sm text-slate-500">No banners found</div>
-          )}
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {filteredBanners.map((banner) => (
+                  <tr key={banner.id} className="hover:bg-slate-50">
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-2 text-sm text-slate-600">
+                        <GripVertical className="h-4 w-4 cursor-move" />
+                        {banner.position}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-12 w-24 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
+                        {banner.image ? (
+                          <img src={banner.image} alt={banner.title} className="h-full w-full object-cover" />
+                        ) : (
+                          <ImageIcon className="h-6 w-6 text-slate-400" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-slate-900">{banner.title}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <a href={banner.link || "/shop"} className="text-sm text-green-600 hover:underline flex items-center gap-1">
+                        {banner.link || "/shop"} <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button 
+                        onClick={async () => {
+                          const res = await fetch(`/internal/cms/banners/${banner.id}`, {
+                            method: "PUT",
+                            credentials: "same-origin",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ isActive: !banner.isActive }),
+                          });
+                          if (res.ok) await loadBanners();
+                        }}
+                        className="flex items-center gap-1 text-sm"
+                      >
+                        {banner.isActive ? (
+                          <span className="text-green-600 flex items-center gap-1">
+                            <ToggleRight className="h-5 w-5" /> Active
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 flex items-center gap-1">
+                            <ToggleLeft className="h-5 w-5" /> Inactive
+                          </span>
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                          <Eye className="h-4 w-4 text-slate-600" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setForm({
+                              title: banner.title,
+                              subtitle: banner.subtitle || "",
+                              image: banner.image,
+                              link: banner.link || "",
+                              linkText: banner.linkText || "Shop Now",
+                              position: banner.position,
+                              isActive: banner.isActive
+                            });
+                            setShowAdd(true);
+                          }}
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                          <Edit className="h-4 w-4 text-slate-600" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const ok = confirm("Delete this banner?");
+                            if (!ok) return;
+                            const res = await fetch(`/internal/cms/banners/${banner.id}`, {
+                              method: "DELETE",
+                              credentials: "same-origin",
+                            });
+                            if (res.ok) {
+                              await loadBanners();
+                            }
+                          }}
+                          className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {loading && <div className="p-4 text-sm text-slate-500">Loading...</div>}
+            {!loading && filteredBanners.length === 0 && (
+              <div className="p-4 text-sm text-slate-500">No banners found</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Categories Tab */}
+      {activeTab === "categories" && (
+        <div className="admin-card p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Homepage Categories</h2>
+              <p className="text-sm text-slate-500">Select which categories appear in the "Shop by Category" section on the homepage.</p>
+            </div>
+            <button
+              onClick={async () => {
+                const res = await fetch("/internal/admin/cms/sections", {
+                  method: "POST",
+                  credentials: "same-origin",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ 
+                    type: "categories", 
+                    title: "Shop by Category", 
+                    subtitle: "Browse our wide range of tech products",
+                    isActive: true, 
+                    order: 3, 
+                    config: { items: [] } 
+                  }),
+                });
+                if (res.ok) {
+                  await loadSections();
+                  alert("Categories section initialized");
+                }
+              }}
+              className="btn-secondary"
+            >
+              Initialize Section
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {sections.filter((s:any) => s.type === "categories").map((s:any) => (
+              <div key={s.id} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Section Title</label>
+                    <input 
+                      defaultValue={s.title} 
+                      className="admin-input"
+                      onBlur={async (e) => {
+                        await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                          method: "PUT",
+                          credentials: "same-origin",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ title: e.target.value }),
+                        });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Section Subtitle</label>
+                    <input 
+                      defaultValue={s.subtitle} 
+                      className="admin-input"
+                      onBlur={async (e) => {
+                        await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                          method: "PUT",
+                          credentials: "same-origin",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ subtitle: e.target.value }),
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 py-2 border-b">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Selected Categories</h3>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {(Array.isArray(s.config?.items) ? s.config.items : []).map((it:any, idx:number) => (
+                    <div key={idx} className="relative group bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                      <button 
+                        onClick={async () => {
+                          const items = [...s.config.items];
+                          items.splice(idx, 1);
+                          await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                            method: "PUT",
+                            credentials: "same-origin",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ config: { items } }),
+                          });
+                          await loadSections();
+                        }}
+                        className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      <div className="font-medium text-slate-900">{it.name}</div>
+                      <div className="text-[10px] text-slate-500 uppercase tracking-tighter">Slug: {it.slug}</div>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const name = prompt("Enter Category Name:");
+                      const slug = prompt("Enter Category Slug (e.g. phones):");
+                      if (name && slug) {
+                        const items = Array.isArray(s.config?.items) ? [...s.config.items] : [];
+                        items.push({ name, slug });
+                        fetch(`/internal/admin/cms/sections/${s.id}`, {
+                          method: "PUT",
+                          credentials: "same-origin",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ config: { items } }),
+                        }).then(() => loadSections());
+                      }
+                    }}
+                    className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 hover:border-green-500 hover:text-green-500 transition-all"
+                  >
+                    <Plus className="h-5 w-5 mb-1" />
+                    <span className="text-xs font-bold">Add Category</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
