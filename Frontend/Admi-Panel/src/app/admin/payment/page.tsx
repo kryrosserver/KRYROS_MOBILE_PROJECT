@@ -40,7 +40,7 @@ export default function PaymentPage() {
                     <td className="px-6 py-4 text-slate-600">{p.clientId || "Walk-in Customer"}</td>
                     <td className="px-6 py-4 text-slate-500">{new Date(p.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 text-slate-500 capitalize">{p.method || "Cash"}</td>
-                    <td className="px-6 py-4 text-right font-semibold text-slate-900 text-green-600">ZMW {p.amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right font-semibold text-slate-900 text-green-600">{formatPrice(p.amount)}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-500" title="View"><Eye className="h-4 w-4" /></button>

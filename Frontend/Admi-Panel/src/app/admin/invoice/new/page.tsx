@@ -188,17 +188,17 @@ export default function NewInvoicePage() {
                     </td>
                     <td className="py-4 px-4">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">ZMW</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">$</span>
                         <input 
                           type="number" 
                           value={it.price} 
                           onChange={(e) => updateItem(idx, "price", Number(e.target.value))}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-12 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
                         />
                       </div>
                     </td>
                     <td className="py-4 text-right font-bold text-slate-900">
-                      ZMW {((Number(it.qty) || 0) * (Number(it.price) || 0)).toFixed(2)}
+                      {formatPrice((Number(it.qty) || 0) * (Number(it.price) || 0))}
                     </td>
                     <td className="py-4 pl-4 text-right">
                       <button 
@@ -235,16 +235,16 @@ export default function NewInvoicePage() {
           <div className="w-full md:w-80 space-y-4">
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Subtotal</span>
-              <span className="font-semibold text-slate-900">ZMW {subTotal.toFixed(2)}</span>
+              <span className="font-semibold text-slate-900">{formatPrice(subTotal)}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Tax (16%)</span>
-              <span className="font-semibold text-slate-900">ZMW {tax.toFixed(2)}</span>
+              <span className="font-semibold text-slate-900">{formatPrice(tax)}</span>
             </div>
             <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
               <span className="text-lg font-bold text-slate-900">Total Amount</span>
               <span className="text-2xl font-black text-slate-900 underline decoration-slate-200 underline-offset-4">
-                ZMW {total.toFixed(2)}
+                {formatPrice(total)}
               </span>
             </div>
           </div>

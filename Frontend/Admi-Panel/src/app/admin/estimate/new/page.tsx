@@ -138,8 +138,8 @@ export default function NewEstimatePage() {
 
         <div className="mt-8 pt-8 border-t border-slate-200 flex justify-end">
           <div className="w-80 space-y-2">
-            <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>ZMW {subTotal.toFixed(2)}</span></div>
-            <div className="flex justify-between text-xl font-bold text-slate-900 pt-2 border-t"><span>Total</span><span>ZMW {total.toFixed(2)}</span></div>
+            <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatPrice(subTotal)}</span></div>
+            <div className="flex justify-between text-xl font-bold text-slate-900 pt-2 border-t"><span>Total</span><span>{formatPrice(total)}</span></div>
           </div>
         </div>
       </div>

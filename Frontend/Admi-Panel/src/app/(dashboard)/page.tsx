@@ -154,7 +154,7 @@ export default function AdminDashboard() {
               </div>
               <ChevronRight className="h-4 w-4 text-slate-300" />
             </div>
-            <p className={`mt-2 text-base font-bold ${card.color}`}>ZMW {card.value.toFixed(2)}</p>
+            <p className={`mt-2 text-base font-bold ${card.color}`}>{formatPrice(card.value)}</p>
           </Link>
         ))}
       </div>

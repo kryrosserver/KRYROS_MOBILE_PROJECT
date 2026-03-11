@@ -68,12 +68,12 @@ export default function NewPaymentPage() {
           <div className="space-y-1.5">
             <label className="text-sm font-bold text-slate-700">Amount Received</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">ZMW</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
               <input 
                 type="number" 
                 value={amount} 
                 onChange={(e) => setAmount(Number(e.target.value))} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-16 pr-4 py-3 text-lg font-bold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-lg font-bold"
               />
             </div>
           </div>

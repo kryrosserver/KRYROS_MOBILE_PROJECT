@@ -30,7 +30,7 @@ export default function InvoicePage() {
         ].map((stat, i) => (
           <div key={i} className="bg-white p-5 rounded-xl border border-slate-200">
             <p className="text-sm text-slate-500">{stat.label}</p>
-            <p className={`text-xl font-bold mt-1 ${stat.color}`}>ZMW {stat.value.toFixed(2)}</p>
+            <p className={`text-xl font-bold mt-1 ${stat.color}`}>{formatPrice(stat.value)}</p>
           </div>
         ))}
       </div>
@@ -77,7 +77,7 @@ export default function InvoicePage() {
                     <td className="px-6 py-4 text-slate-600">{inv.clientId || "Walk-in Customer"}</td>
                     <td className="px-6 py-4 text-slate-500">{new Date(inv.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 text-slate-500">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "-"}</td>
-                    <td className="px-6 py-4 text-right font-semibold text-slate-900">ZMW {inv.total.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right font-semibold text-slate-900">{formatPrice(inv.total)}</td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                         Unpaid
