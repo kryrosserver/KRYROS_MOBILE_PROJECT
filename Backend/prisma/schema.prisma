@@ -816,3 +816,17 @@ model Setting {
 
   @@map("settings")
 }
+
+model ShippingMethod {
+  id               String   @id @default(uuid())
+  name             String
+  description      String?
+  fee              Decimal  @db.Decimal(10, 2)
+  minThreshold     Decimal  @default(0) @db.Decimal(10, 2)
+  estimatedDays    String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("shipping_methods")
+}
