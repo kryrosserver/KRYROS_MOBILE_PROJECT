@@ -50,7 +50,9 @@ export default function CheckoutPage() {
   const { items, getSubtotal } = useCart();
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
+  const [shippingMethods, setShippingMethods] = useState<any[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<any>(null);
+  const [loadingMethods, setLoadingMethods] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -64,8 +66,13 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     const fetchShipping = async () => {
-      const { data } = await settingsApi.getShippingConfig();
-      if (data) setShippingConfig(data);
+      setLoadingMethods(true);
+      const { data } = await settingsApi.getShippingMethods();
+      if (data && data.length > 0) {
+        setShippingMethods(data);
+        setSelectedShipping(data[0]);
+      }
+      setLoadingMethods(false);
     };
     fetchShipping();
   }, []);
@@ -75,7 +82,10 @@ export default function CheckoutPage() {
   };
 
   const subtotal = useMemo(() => getSubtotal(), [getSubtotal, items]);
-  const shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
+  const shipping = useMemo(() => {
+    if (!selectedShipping) return 0;
+    return subtotal >= Number(selectedShipping.minThreshold) ? 0 : Number(selectedShipping.fee);
+  }, [selectedShipping, subtotal]);
   const total = subtotal + shipping;
 
   return (
@@ -236,24 +246,54 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-semibold text-slate-900">Shipping Method</h2>
                 
                 <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between rounded-lg border-2 border-green-500 bg-green-50 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-green-500">
-                        <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900">Home Delivery</p>
-                        <p className="text-sm text-slate-500">
-                          {shipping === 0 
-                            ? "Free shipping on orders over " + formatPrice(shippingConfig.threshold)
-                            : "Standard delivery to your doorstep"}
-                        </p>
-                      </div>
+                  {loadingMethods ? (
+                    <div className="py-8 flex flex-col items-center justify-center text-slate-400 gap-2">
+                      <div className="h-6 w-6 border-2 border-green-500/20 border-t-green-500 rounded-full animate-spin"></div>
+                      <p className="text-xs">Loading shipping options...</p>
                     </div>
-                    <span className="font-bold text-slate-900">
-                      {shipping === 0 ? "Free" : formatPrice(Number(shipping))}
-                    </span>
-                  </div>
+                  ) : shippingMethods.length === 0 ? (
+                    <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg text-orange-700 text-sm">
+                      No shipping methods available. Please contact support.
+                    </div>
+                  ) : (
+                    shippingMethods.map((method) => {
+                      const isSelected = selectedShipping?.id === method.id;
+                      const isFree = subtotal >= Number(method.minThreshold);
+                      return (
+                        <label 
+                          key={method.id}
+                          className={`flex cursor-pointer items-center justify-between rounded-xl border-2 p-4 transition-all ${
+                            isSelected ? "border-green-500 bg-green-50" : "border-slate-100 hover:border-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="radio" 
+                              name="shipping" 
+                              checked={isSelected}
+                              onChange={() => setSelectedShipping(method)}
+                              className="text-green-500" 
+                            />
+                            <div>
+                              <p className="font-bold text-slate-900">{method.name}</p>
+                              <p className="text-xs text-slate-500">{method.description}</p>
+                              {method.estimatedDays && (
+                                <p className="text-[10px] text-green-600 font-medium mt-0.5">{method.estimatedDays}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-black text-slate-900">
+                              {isFree ? "Free" : formatPrice(Number(method.fee))}
+                            </span>
+                            {Number(method.minThreshold) > 0 && !isFree && (
+                              <p className="text-[9px] text-slate-400 mt-0.5">Free over {formatPrice(Number(method.minThreshold))}</p>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })
+                  )}
                 </div>
                 
                 <div className="mt-8 flex justify-between">
@@ -262,7 +302,8 @@ export default function CheckoutPage() {
                     Back
                   </Button>
                   <Button 
-                    className="bg-green-500 hover:bg-green-600"
+                    disabled={!selectedShipping}
+                    className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
                     onClick={() => setCurrentStep(3)}
                   >
                     Continue to Payment

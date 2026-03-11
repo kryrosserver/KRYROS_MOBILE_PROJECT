@@ -156,6 +156,7 @@ export const wholesaleApi = {
 // Settings API
 export const settingsApi = {
   getShippingConfig: () => fetchApi<{ fee: number; threshold: number }>('/settings/shipping'),
+  getShippingMethods: () => fetchApi<any[]>('/shipping/active'),
   getAll: () => fetchApi<any[]>('/settings'),
   update: (key: string, value: string) =>
     fetchApi<any>(`/settings/${key}`, {

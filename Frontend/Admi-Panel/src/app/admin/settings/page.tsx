@@ -16,64 +16,135 @@ import {
   Save,
   Upload,
   Check,
-  Truck
+  Truck,
+  Plus,
+  Trash2,
+  Edit2,
+  X
 } from "lucide-react";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
+
+type ShippingMethod = {
+  id: string;
+  name: string;
+  description?: string;
+  fee: number;
+  minThreshold: number;
+  estimatedDays?: string;
+  isActive: boolean;
+};
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [shippingFee, setShippingFee] = useState(50);
-  const [shippingThreshold, setShippingThreshold] = useState(5000);
+  
+  // Shipping Methods State
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMethod, setEditingMethod] = useState<ShippingMethod | null>(null);
+  const [methodForm, setMethodForm] = useState({
+    name: "",
+    description: "",
+    fee: 0,
+    minThreshold: 0,
+    estimatedDays: "",
+    isActive: true
+  });
+
   const { companyName, setCompanyName, logoDataUrl, setLogoDataUrl } = useAdminSettings();
 
   useEffect(() => {
-    async function loadShipping() {
-      setLoading(true);
-      try {
-        const res = await fetch("/internal/admin/settings");
-        if (res.ok) {
-          const data = await res.json();
-          setShippingFee(data.fee);
-          setShippingThreshold(data.threshold);
-        }
-      } catch (e) {
-        console.error("Failed to load shipping settings", e);
-      } finally {
-        setLoading(false);
-      }
+    if (activeTab === "shipping") {
+      loadShippingMethods();
     }
-    loadShipping();
-  }, []);
+  }, [activeTab]);
 
-  const handleSave = async () => {
+  async function loadShippingMethods() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/shipping");
+      if (res.ok) {
+        const data = await res.json();
+        setShippingMethods(data);
+      }
+    } catch (e) {
+      console.error("Failed to load shipping methods", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleOpenModal = (method?: ShippingMethod) => {
+    if (method) {
+      setEditingMethod(method);
+      setMethodForm({
+        name: method.name,
+        description: method.description || "",
+        fee: method.fee,
+        minThreshold: method.minThreshold,
+        estimatedDays: method.estimatedDays || "",
+        isActive: method.isActive
+      });
+    } else {
+      setEditingMethod(null);
+      setMethodForm({
+        name: "",
+        description: "",
+        fee: 0,
+        minThreshold: 0,
+        estimatedDays: "",
+        isActive: true
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSaveMethod = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSaving(true);
     try {
-      if (activeTab === "shipping") {
-        await Promise.all([
-          fetch("/internal/admin/settings", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key: "shipping_fee", value: shippingFee }),
-          }),
-          fetch("/internal/admin/settings", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key: "free_shipping_threshold", value: shippingThreshold }),
-          }),
-        ]);
-      }
+      const url = editingMethod ? `/api/shipping/${editingMethod.id}` : "/api/shipping";
+      const method = editingMethod ? "PUT" : "POST";
       
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(methodForm),
+      });
+
+      if (res.ok) {
+        setIsModalOpen(false);
+        loadShippingMethods();
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
     } catch (e) {
-      console.error("Failed to save settings", e);
-      alert("Failed to save settings");
+      console.error("Failed to save shipping method", e);
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDeleteMethod = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this shipping method?")) return;
+    try {
+      const res = await fetch(`/api/shipping/${id}`, { method: "DELETE" });
+      if (res.ok) loadShippingMethods();
+    } catch (e) {
+      console.error("Failed to delete shipping method", e);
+    }
+  };
+
+  const handleSave = async () => {
+    // This is for other tabs if needed
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }, 1000);
   };
 
   const tabs = [
@@ -424,48 +495,192 @@ export default function SettingsPage() {
 
         {activeTab === "shipping" && (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Shipping Configuration</h3>
-              {loading ? (
-                <div className="p-8 text-center text-slate-500">Loading settings...</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Flat Shipping Fee (USD)</label>
-                    <div className="relative">
-                      <Truck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <input
-                        type="number"
-                        value={shippingFee}
-                        onChange={(e) => setShippingFee(Number(e.target.value))}
-                        className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-500">The base cost for all deliveries.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Free Shipping Threshold (USD)</label>
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">$</div>
-                      <input
-                        type="number"
-                        value={shippingThreshold}
-                        onChange={(e) => setShippingThreshold(Number(e.target.value))}
-                        className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-500">Orders above this amount get free shipping.</p>
-                  </div>
-                </div>
-              )}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Shipping Methods</h3>
+                <p className="text-sm text-slate-500">Configure different shipping options for your customers.</p>
+              </div>
+              <button 
+                onClick={() => handleOpenModal()}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+                Add Method
+              </button>
             </div>
 
-            <div className="pt-6 border-t border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Delivery Zones</h3>
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
-                <p className="text-sm text-slate-600 italic">Advanced zone-based shipping rules are coming soon.</p>
+            {loading ? (
+              <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-3">
+                <div className="h-8 w-8 border-4 border-green-500/20 border-t-green-500 rounded-full animate-spin"></div>
+                <p className="text-sm font-medium">Loading shipping methods...</p>
               </div>
-            </div>
+            ) : shippingMethods.length === 0 ? (
+              <div className="py-12 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400 gap-4">
+                <div className="p-4 bg-slate-50 rounded-full">
+                  <Truck className="h-8 w-8" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-slate-900">No shipping methods found</p>
+                  <p className="text-xs">Click "Add Method" to create your first shipping option.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {shippingMethods.map((method) => (
+                  <div key={method.id} className={`p-6 rounded-2xl border transition-all ${method.isActive ? "border-slate-200 bg-white hover:border-green-500/50 hover:shadow-xl hover:shadow-green-500/5" : "border-slate-100 bg-slate-50 opacity-75"}`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="p-3 bg-slate-100 rounded-xl text-slate-600">
+                        <Truck className="h-5 w-5" />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button 
+                          onClick={() => handleOpenModal(method)}
+                          className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteMethod(method.id)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1 mb-4">
+                      <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                        {method.name}
+                        {!method.isActive && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded">Disabled</span>}
+                      </h4>
+                      <p className="text-xs text-slate-500 line-clamp-2 min-h-[32px]">{method.description || "No description provided."}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 py-4 border-t border-slate-100">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fee</p>
+                        <p className="text-lg font-black text-slate-900">${method.fee}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Free From</p>
+                        <p className="text-lg font-black text-green-600">${method.minThreshold}</p>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-slate-500">
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="h-3 w-3" />
+                        {method.estimatedDays || "Not specified"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add/Edit Modal */}
+            {isModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-slate-900">{editingMethod ? "Edit Shipping Method" : "Add Shipping Method"}</h3>
+                    <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <form onSubmit={handleSaveMethod} className="p-8 space-y-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Method Name</label>
+                        <input
+                          required
+                          type="text"
+                          value={methodForm.name}
+                          onChange={(e) => setMethodForm({...methodForm, name: e.target.value})}
+                          placeholder="e.g. Express Shipping"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Description</label>
+                        <textarea
+                          value={methodForm.description}
+                          onChange={(e) => setMethodForm({...methodForm, description: e.target.value})}
+                          placeholder="Short description for customers..."
+                          rows={2}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all resize-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Fee (USD)</label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                            <input
+                              required
+                              type="number"
+                              step="0.01"
+                              value={methodForm.fee}
+                              onChange={(e) => setMethodForm({...methodForm, fee: Number(e.target.value)})}
+                              className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Free Threshold</label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                            <input
+                              required
+                              type="number"
+                              step="0.01"
+                              value={methodForm.minThreshold}
+                              onChange={(e) => setMethodForm({...methodForm, minThreshold: Number(e.target.value)})}
+                              className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Estimated Delivery</label>
+                        <input
+                          type="text"
+                          value={methodForm.estimatedDays}
+                          onChange={(e) => setMethodForm({...methodForm, estimatedDays: e.target.value})}
+                          placeholder="e.g. 2-3 business days"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                        />
+                      </div>
+                      <label className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={methodForm.isActive}
+                          onChange={(e) => setMethodForm({...methodForm, isActive: e.target.checked})}
+                          className="h-5 w-5 rounded border-slate-300 text-green-500 focus:ring-green-500"
+                        />
+                        <div>
+                          <span className="text-sm font-bold text-slate-900">Active</span>
+                          <p className="text-xs text-slate-500">Enable this method for customers</p>
+                        </div>
+                      </label>
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsModalOpen(false)}
+                        className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="flex-1 py-4 bg-green-500 text-white rounded-2xl font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-500/25 disabled:opacity-50"
+                      >
+                        {isSaving ? "Saving..." : editingMethod ? "Update Method" : "Create Method"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
