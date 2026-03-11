@@ -14,6 +14,7 @@ import { CMSModule } from './cms/cms.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReportsModule } from './reports/reports.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     PaymentsModule,
     ReportsModule,
     WishlistModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

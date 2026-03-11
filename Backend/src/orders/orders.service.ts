@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private settingsService: SettingsService,
+  ) {}
 
   async findAll(userId?: string, params?: { skip?: number; take?: number; status?: string }) {
     const { skip = 0, take = 20, status } = params || {};
@@ -150,9 +154,10 @@ export class OrdersService {
       });
     }
 
-    // Tax and Shipping (simplified)
+    // Tax and Shipping
+    const shippingConfig = await this.settingsService.getShippingConfig();
     const tax = subtotal * 0.16; // 16% VAT
-    const shipping = 50; // Flat shipping rate
+    const shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
     const total = subtotal + tax + shipping;
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

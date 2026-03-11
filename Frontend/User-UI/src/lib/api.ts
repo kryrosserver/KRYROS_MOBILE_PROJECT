@@ -153,4 +153,15 @@ export const wholesaleApi = {
     }),
 };
 
+// Settings API
+export const settingsApi = {
+  getShippingConfig: () => fetchApi<{ fee: number; threshold: number }>('/settings/shipping'),
+  getAll: () => fetchApi<any[]>('/settings'),
+  update: (key: string, value: string) =>
+    fetchApi<any>(`/settings/${key}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    }),
+};
+
 export default fetchApi;

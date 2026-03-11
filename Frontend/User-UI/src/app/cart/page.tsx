@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -19,15 +19,25 @@ import {
 import { useCart } from "@/providers/CartProvider";
 import type { CartItem as CIC } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import { settingsApi } from "@/lib/api";
 
 export default function CartPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem, getSubtotal } = useCart();
   const [couponCode, setCouponCode] = useState("");
+  const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
+
+  useEffect(() => {
+    const fetchShipping = async () => {
+      const { data } = await settingsApi.getShippingConfig();
+      if (data) setShippingConfig(data);
+    };
+    fetchShipping();
+  }, []);
 
   const subtotal = useMemo(() => getSubtotal(), [getSubtotal, items]);
   const discount = 0;
-  const shipping = subtotal > 5000 ? 0 : 150;
+  const shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
   const total = subtotal - discount + shipping;
 
   const handleCheckout = () => {

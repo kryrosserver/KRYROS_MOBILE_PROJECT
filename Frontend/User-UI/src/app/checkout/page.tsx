@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/providers/CartProvider";
+import { settingsApi } from "@/lib/api";
 import { 
   CreditCard, 
   Smartphone, 
@@ -49,6 +50,7 @@ export default function CheckoutPage() {
   const { items, getSubtotal } = useCart();
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -60,12 +62,20 @@ export default function CheckoutPage() {
     zipCode: ""
   });
 
+  useEffect(() => {
+    const fetchShipping = async () => {
+      const { data } = await settingsApi.getShippingConfig();
+      if (data) setShippingConfig(data);
+    };
+    fetchShipping();
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const subtotal = useMemo(() => getSubtotal(), [getSubtotal, items]);
-  const shipping = subtotal > 5000 ? 0 : 150;
+  const shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
   const total = subtotal + shipping;
 
   return (

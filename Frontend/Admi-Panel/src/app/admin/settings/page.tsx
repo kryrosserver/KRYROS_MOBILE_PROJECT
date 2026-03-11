@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Settings, 
   Building, 
@@ -15,12 +15,77 @@ import {
   Palette,
   Save,
   Upload,
-  Check
+  Check,
+  Truck
 } from "lucide-react";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 
-const settings = {
-  company: {
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState("company");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [shippingFee, setShippingFee] = useState(50);
+  const [shippingThreshold, setShippingThreshold] = useState(5000);
+  const { companyName, setCompanyName, logoDataUrl, setLogoDataUrl } = useAdminSettings();
+
+  useEffect(() => {
+    async function loadShipping() {
+      setLoading(true);
+      try {
+        const res = await fetch("/internal/admin/settings");
+        if (res.ok) {
+          const data = await res.json();
+          setShippingFee(data.fee);
+          setShippingThreshold(data.threshold);
+        }
+      } catch (e) {
+        console.error("Failed to load shipping settings", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadShipping();
+  }, []);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      if (activeTab === "shipping") {
+        await Promise.all([
+          fetch("/internal/admin/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: "shipping_fee", value: shippingFee }),
+          }),
+          fetch("/internal/admin/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: "free_shipping_threshold", value: shippingThreshold }),
+          }),
+        ]);
+      }
+      
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      console.error("Failed to save settings", e);
+      alert("Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const tabs = [
+    { id: "company", label: "Company", icon: Building },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "payment", label: "Payment", icon: CreditCard },
+    { id: "shipping", label: "Shipping", icon: Truck },
+    { id: "security", label: "Security", icon: Shield },
+    { id: "appearance", label: "Appearance", icon: Palette },
+  ];
+
+  const companySettings = {
     name: "KRYROS MOBILE TECH LIMITED",
     email: "kryrosmobile@gmail.com",
     phone: "+260966423719",
@@ -29,51 +94,30 @@ const settings = {
     timezone: "Africa/Lusaka",
     currency: "ZMW",
     language: "English"
-  },
-  notifications: {
+  };
+
+  const notificationSettings = {
     emailOrders: true,
     emailPayments: true,
     emailCredit: true,
     pushOrders: true,
     pushPayments: true,
     pushCredit: false
-  },
-  payment: {
+  };
+
+  const paymentSettings = {
     paystackKey: "pk_test_****",
     flutterwaveKey: "flw_test_****",
     bankName: "Stanbic Bank Zambia",
     accountNumber: "********1234",
     accountName: "KRYROS MOBILE TECH LIMITED"
-  },
-  security: {
+  };
+
+  const securitySettings = {
     twoFactor: false,
     sessionTimeout: 30,
     ipWhitelist: false
-  }
-};
-
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("company");
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const { companyName, setCompanyName, logoDataUrl, setLogoDataUrl } = useAdminSettings();
-
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }, 1000);
   };
-
-  const tabs = [
-    { id: "company", label: "Company", icon: Building },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "payment", label: "Payment", icon: CreditCard },
-    { id: "security", label: "Security", icon: Shield },
-    { id: "appearance", label: "Appearance", icon: Palette },
-  ];
 
   return (
     <div className="space-y-6">
@@ -128,7 +172,7 @@ export default function SettingsPage() {
                   <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
-                    defaultValue={companyName || settings.company.name}
+                    defaultValue={companyName || companySettings.name}
                     onChange={(e)=> setCompanyName(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
@@ -140,7 +184,7 @@ export default function SettingsPage() {
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="email"
-                    defaultValue={settings.company.email}
+                    defaultValue={companySettings.email}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
@@ -151,7 +195,7 @@ export default function SettingsPage() {
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="tel"
-                    defaultValue={settings.company.phone}
+                    defaultValue={companySettings.phone}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
@@ -162,7 +206,7 @@ export default function SettingsPage() {
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="url"
-                    defaultValue={settings.company.website}
+                    defaultValue={companySettings.website}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
@@ -172,7 +216,7 @@ export default function SettingsPage() {
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <textarea
-                    defaultValue={settings.company.address}
+                    defaultValue={companySettings.address}
                     rows={2}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
                   />
@@ -183,7 +227,7 @@ export default function SettingsPage() {
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <select
-                    defaultValue={settings.company.timezone}
+                    defaultValue={companySettings.timezone}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white"
                   >
                     <option value="Africa/Lusaka">Africa/Lusaka (GMT+2)</option>
@@ -196,7 +240,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Currency</label>
                 <select
-                  defaultValue={settings.company.currency}
+                  defaultValue={companySettings.currency}
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white"
                 >
                   <option value="ZMW">ZMW - Zambian Kwacha</option>
@@ -267,21 +311,21 @@ export default function SettingsPage() {
                     <span className="font-medium text-slate-900">Order Notifications</span>
                     <p className="text-sm text-slate-500">Receive emails for new orders</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.notifications.emailOrders} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={notificationSettings.emailOrders} className="h-5 w-5 rounded text-green-500" />
                 </label>
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
                     <span className="font-medium text-slate-900">Payment Notifications</span>
                     <p className="text-sm text-slate-500">Receive emails for payments</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.notifications.emailPayments} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={notificationSettings.emailPayments} className="h-5 w-5 rounded text-green-500" />
                 </label>
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
                     <span className="font-medium text-slate-900">Credit System</span>
                     <p className="text-sm text-slate-500">Receive emails for credit updates</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.notifications.emailCredit} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={notificationSettings.emailCredit} className="h-5 w-5 rounded text-green-500" />
                 </label>
               </div>
             </div>
@@ -294,14 +338,14 @@ export default function SettingsPage() {
                     <span className="font-medium text-slate-900">Order Notifications</span>
                     <p className="text-sm text-slate-500">Push notifications for new orders</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.notifications.pushOrders} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={notificationSettings.pushOrders} className="h-5 w-5 rounded text-green-500" />
                 </label>
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
                     <span className="font-medium text-slate-900">Payment Notifications</span>
                     <p className="text-sm text-slate-500">Push notifications for payments</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.notifications.pushPayments} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={notificationSettings.pushPayments} className="h-5 w-5 rounded text-green-500" />
                 </label>
               </div>
             </div>
@@ -326,7 +370,7 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                     <div>
                       <label className="text-sm text-slate-600">Public Key</label>
-                      <input type="password" defaultValue={settings.payment.paystackKey} className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg" />
+                      <input type="password" defaultValue={paymentSettings.paystackKey} className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg" />
                     </div>
                     <div>
                       <label className="text-sm text-slate-600">Secret Key</label>
@@ -347,7 +391,7 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                     <div>
                       <label className="text-sm text-slate-600">Public Key</label>
-                      <input type="password" defaultValue={settings.payment.flutterwaveKey} className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg" />
+                      <input type="password" defaultValue={paymentSettings.flutterwaveKey} className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg" />
                     </div>
                     <div>
                       <label className="text-sm text-slate-600">Secret Key</label>
@@ -363,16 +407,63 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="text-sm font-medium text-slate-700">Bank Name</label>
-                  <input type="text" defaultValue={settings.payment.bankName} className="w-full mt-1 px-4 py-2.5 border border-slate-300 rounded-lg" />
+                  <input type="text" defaultValue={paymentSettings.bankName} className="w-full mt-1 px-4 py-2.5 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-slate-700">Account Number</label>
-                  <input type="text" defaultValue={settings.payment.accountNumber} className="w-full mt-1 px-4 py-2.5 border border-slate-300 rounded-lg" />
+                  <input type="text" defaultValue={paymentSettings.accountNumber} className="w-full mt-1 px-4 py-2.5 border border-slate-300 rounded-lg" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="text-sm font-medium text-slate-700">Account Name</label>
-                  <input type="text" defaultValue={settings.payment.accountName} className="w-full mt-1 px-4 py-2.5 border border-slate-300 rounded-lg" />
+                  <input type="text" defaultValue={paymentSettings.accountName} className="w-full mt-1 px-4 py-2.5 border border-slate-300 rounded-lg" />
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "shipping" && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Shipping Configuration</h3>
+              {loading ? (
+                <div className="p-8 text-center text-slate-500">Loading settings...</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Flat Shipping Fee (ZMW)</label>
+                    <div className="relative">
+                      <Truck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <input
+                        type="number"
+                        value={shippingFee}
+                        onChange={(e) => setShippingFee(Number(e.target.value))}
+                        className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500">The base cost for all deliveries.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Free Shipping Threshold (ZMW)</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">ZK</div>
+                      <input
+                        type="number"
+                        value={shippingThreshold}
+                        onChange={(e) => setShippingThreshold(Number(e.target.value))}
+                        className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500">Orders above this amount get free shipping.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-6 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Delivery Zones</h3>
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                <p className="text-sm text-slate-600 italic">Advanced zone-based shipping rules are coming soon.</p>
               </div>
             </div>
           </div>
@@ -388,7 +479,7 @@ export default function SettingsPage() {
                     <span className="font-medium text-slate-900">Two-Factor Authentication</span>
                     <p className="text-sm text-slate-500">Require 2FA for all admin logins</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.security.twoFactor} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={securitySettings.twoFactor} className="h-5 w-5 rounded text-green-500" />
                 </label>
               </div>
             </div>
@@ -399,7 +490,7 @@ export default function SettingsPage() {
                 <label className="text-sm font-medium text-slate-700">Session Timeout (minutes)</label>
                 <input 
                   type="number" 
-                  defaultValue={settings.security.sessionTimeout}
+                  defaultValue={securitySettings.sessionTimeout}
                   className="w-full max-w-xs px-4 py-2.5 border border-slate-300 rounded-lg"
                 />
                 <p className="text-sm text-slate-500">Admin will be logged out after this period of inactivity</p>
@@ -414,7 +505,7 @@ export default function SettingsPage() {
                     <span className="font-medium text-slate-900">IP Whitelist</span>
                     <p className="text-sm text-slate-500">Restrict admin access to specific IPs</p>
                   </div>
-                  <input type="checkbox" defaultChecked={settings.security.ipWhitelist} className="h-5 w-5 rounded text-green-500" />
+                  <input type="checkbox" defaultChecked={securitySettings.ipWhitelist} className="h-5 w-5 rounded text-green-500" />
                 </label>
               </div>
             </div>
