@@ -57,14 +57,14 @@ export default function BrandsPage() {
   }, []);
 
   const handleCleanup = async () => {
-    if (!confirm("This will clear all brand data and reset product brand assignments to fix database inconsistencies. Continue?")) return;
+    if (!confirm("This will fix database inconsistencies by clearing all brand data and resetting product brand assignments. This is required because the brand system was upgraded from UUIDs to Numbers. Continue?")) return;
     
     try {
       const res = await fetch("/api/admin/brands/cleanup-corrupted-data", {
         method: "POST"
       });
-      if (!res.ok) throw new Error("Cleanup failed");
-      alert("Database cleaned up successfully. You can now re-add your brands.");
+      if (!res.ok) throw new Error("Maintenance failed");
+      alert("Database maintenance complete! Your store should now load correctly. You can now re-add your brands.");
       await loadBrands();
     } catch (e: any) {
       alert(e.message);
@@ -157,7 +157,7 @@ export default function BrandsPage() {
         <div className="flex items-center gap-3">
           <button onClick={handleCleanup} className="btn-danger flex items-center gap-2 text-xs py-1 px-3">
             <Trash2 className="h-3 w-3" />
-            Repair DB
+            Fix Database
           </button>
           <button onClick={loadBrands} className="btn-secondary flex items-center gap-2">
             <RefreshCcw className="h-4 w-4" />

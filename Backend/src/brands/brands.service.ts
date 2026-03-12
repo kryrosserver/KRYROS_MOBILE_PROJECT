@@ -75,25 +75,35 @@ export class BrandsService {
   }
 
   async cleanupCorruptedData() {
-    console.log('Cleaning up corrupted brand data...');
+    console.log('Running database cleanup and maintenance...');
     
-    // 1. Update all products to remove brandId references
+    // 1. Reset all products to have NO brandId (fixes the string vs int mismatch)
     const updatedProducts = await this.prisma.product.updateMany({
       data: {
         brandId: null
       }
     });
 
-    // 2. Delete all brands
+    // 2. Clear out the brands table entirely to fix the ID type issue
     try {
+      // TRUNCATE is safer for resetting autoincrement IDs
       await this.prisma.$executeRawUnsafe('TRUNCATE TABLE "brands" RESTART IDENTITY CASCADE;');
     } catch (e) {
+      console.warn('Truncate failed, trying deleteMany...', e.message);
       await this.prisma.brand.deleteMany({});
     }
 
+    // 3. Ensure Category table has showOnHome column if db push failed
+    try {
+      await this.prisma.$executeRawUnsafe('ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "showOnHome" BOOLEAN DEFAULT false;');
+    } catch (e) {
+      console.warn('Failed to add column showOnHome via SQL:', e.message);
+    }
+
     return { 
-      message: 'Cleanup complete', 
-      productsUpdated: updatedProducts.count 
+      message: 'Database cleanup and maintenance complete', 
+      productsUpdated: updatedProducts.count,
+      brandsCleared: true
     };
   }
 }
