@@ -20,24 +20,28 @@ export class BrandsService {
     const slug = dto.slug || this.slugify(dto.name);
     
     // Check for existing slug
+    const existing = await this.prisma.brand.findUnique({
+      where: { slug }
+    });
+
+    if (existing) {
+      throw new ConflictException(`Brand with slug "${slug}" already exists`);
+    }
+
     try {
-      const existing = await this.prisma.brand.findUnique({
-        where: { slug }
-      });
-
-      if (existing) {
-        throw new ConflictException('Brand with this slug already exists');
-      }
-
       return await this.prisma.brand.create({
         data: {
-          ...dto,
-          slug
+          name: dto.name,
+          slug,
+          logo: dto.logo || null,
+          description: dto.description || null,
+          website: dto.website || null,
+          isActive: dto.isActive !== undefined ? dto.isActive : true,
         },
       });
     } catch (e) {
       console.error('Brand creation error:', e);
-      throw e;
+      throw new Error(`Database error: ${e.message}`);
     }
   }
 
