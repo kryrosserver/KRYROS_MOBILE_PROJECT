@@ -4,8 +4,8 @@ services:
     env: node
     region: oregon
     rootDir: Backend
-    buildCommand: npm install && npm install @nestjs/cli && npx prisma generate && npx nest build && ls -la && ls -la dist/ 2>/dev/null || echo "dist folder not found"
-    startCommand: npm run db:push && npm start
+    buildCommand: npm install && npm install @nestjs/cli && npx prisma generate && npx nest build
+    startCommand: npm run db:push && node dist/main.js
     envVars:
       - key: DATABASE_URL
         sync: false
