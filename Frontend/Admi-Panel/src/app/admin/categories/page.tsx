@@ -244,12 +244,46 @@ export default function CategoriesPage() {
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-white/50 rounded-lg border border-green-100/50 flex items-center justify-between">
-            <div className="text-sm text-slate-600">
-              Currently showing <span className="font-bold text-green-600">{categories.filter(c => c.showOnHome).length}</span> categories on the homepage.
+          <div className="mt-4 p-3 bg-white/50 rounded-lg border border-green-100/50 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-600">
+                Currently showing <span className="font-bold text-green-600">{categories.filter(c => c.showOnHome).length}</span> categories on the homepage.
+              </div>
+              <div className="text-xs text-slate-400 italic">
+                {updatingCms ? "Saving changes..." : "Auto-saved on blur"}
+              </div>
             </div>
-            <div className="text-xs text-slate-400 italic">
-              {updatingCms ? "Saving changes..." : "Auto-saved on blur"}
+
+            {/* Legacy Cleanup Notice */}
+            {cmsSection.config?.items && Array.isArray(cmsSection.config.items) && cmsSection.config.items.length > 0 && (
+              <div className="p-2.5 bg-amber-50 border border-amber-100 rounded text-xs text-amber-700 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span>You have <b>{cmsSection.config.items.length}</b> legacy categories from the old CMS page still active.</span>
+                </div>
+                <button 
+                  onClick={async () => {
+                    if (confirm("Clear legacy homepage categories? This will only show the categories you've marked with a sparkle below.")) {
+                      setUpdatingCms(true);
+                      try {
+                        const res = await fetch(`/api/admin/cms/sections/${cmsSection.id}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ config: { items: [] } }),
+                        });
+                        if (res.ok) setCmsSection({ ...cmsSection, config: { items: [] } });
+                      } catch (e) { console.error(e); } finally { setUpdatingCms(false); }
+                    }
+                  }}
+                  className="px-2 py-1 bg-white border border-amber-200 rounded hover:bg-amber-100 transition-colors font-medium"
+                >
+                  Clear Legacy Items
+                </button>
+              </div>
+            )}
+
+            <div className="text-[11px] text-slate-500 bg-slate-100/50 p-2 rounded border border-slate-200/50">
+              <span className="font-bold text-slate-700">How to add/remove categories:</span> Scroll down to the category table and click the <b>Sparkle (✨)</b> icon in the <b>Homepage</b> column to toggle visibility on the storefront.
             </div>
           </div>
         </div>
@@ -276,7 +310,7 @@ export default function CategoriesPage() {
                 <th className="px-6 py-3">Category Name</th>
                 <th className="px-6 py-3">Slug</th>
                 <th className="px-6 py-3">Parent</th>
-                <th className="px-6 py-3 text-center">Homepage</th>
+                <th className="px-6 py-3 text-center">Show on Home</th>
                 <th className="px-6 py-3 text-center">Status</th>
                 <th className="px-6 py-3 text-right">Actions</th>
               </tr>
