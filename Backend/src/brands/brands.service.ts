@@ -20,20 +20,25 @@ export class BrandsService {
     const slug = dto.slug || this.slugify(dto.name);
     
     // Check for existing slug
-    const existing = await this.prisma.brand.findUnique({
-      where: { slug }
-    });
+    try {
+      const existing = await this.prisma.brand.findUnique({
+        where: { slug }
+      });
 
-    if (existing) {
-      throw new ConflictException('Brand with this slug already exists');
+      if (existing) {
+        throw new ConflictException('Brand with this slug already exists');
+      }
+
+      return await this.prisma.brand.create({
+        data: {
+          ...dto,
+          slug
+        },
+      });
+    } catch (e) {
+      console.error('Brand creation error:', e);
+      throw e;
     }
-
-    return this.prisma.brand.create({
-      data: {
-        ...dto,
-        slug
-      },
-    });
   }
 
   async findAll() {
