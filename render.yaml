@@ -5,7 +5,7 @@ services:
     region: oregon
     rootDir: Backend
     buildCommand: npm install && npm install @nestjs/cli && npx prisma generate && npx nest build
-    startCommand: npx prisma db push --accept-data-loss && node ./dist/main
+    startCommand: npm run db:push && npm start
     envVars:
       - key: DATABASE_URL
         sync: false
