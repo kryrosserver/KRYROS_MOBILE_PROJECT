@@ -1,35 +1,43 @@
 # Database Fix Guide
 
 ## The Problem
-The `brands` table has `id` as TEXT but Prisma expects it to be INT with autoincrement. This is causing the 500 error.
+Several tables are missing or have wrong schema in the database. This is causing 500 errors when trying to create records.
 
 ## Solution: Run this SQL in Neon SQL Editor
 
-### Option 1: Drop and recreate the brands table (RECOMMENDED)
+**Delete ALL tables to let Prisma recreate them correctly:**
+
 ```sql
--- Drop the incorrectly created brands table
+-- Drop all tables that might have wrong schema
+DROP TABLE IF EXISTS "shipping_methods" CASCADE;
 DROP TABLE IF EXISTS "brands" CASCADE;
+DROP TABLE IF EXISTS "products" CASCADE;
+DROP TABLE IF EXISTS "categories" CASCADE;
+DROP TABLE IF EXISTS "users" CASCADE;
+DROP TABLE IF EXISTS "orders" CASCADE;
+DROP TABLE IF EXISTS "order_items" CASCADE;
+DROP TABLE IF EXISTS "wallets" CASCADE;
+DROP TABLE IF EXISTS "transactions" CASCADE;
+DROP TABLE IF EXISTS "credit_profiles" CASCADE;
+DROP TABLE IF EXISTS "credit_accounts" CASCADE;
+DROP TABLE IF EXISTS "cMS_pages" CASCADE;
+DROP TABLE IF EXISTS "cMS_sections" CASCADE;
+DROP TABLE IF EXISTS "cMS_banners" CASCADE;
+DROP TABLE IF EXISTS "addresses" CASCADE;
+DROP TABLE IF EXISTS "wishlist_items" CASCADE;
+DROP TABLE IF EXISTS "reviews" CASCADE;
+DROP TABLE IF EXISTS "service_bookings" CASCADE;
+DROP TABLE IF EXISTS "services" CASCADE;
+DROP TABLE IF EXISTS "wholesale_accounts" CASCADE;
+DROP TABLE IF EXISTS "wholesale_prices" CASCADE;
+DROP TABLE IF EXISTS "notifications" CASCADE;
+DROP TABLE IF EXISTS "support_tickets" CASCADE;
+DROP TABLE IF EXISTS "roles" CASCADE;
+DROP TABLE IF EXISTS "permissions" CASCADE;
+DROP TABLE IF EXISTS "user_roles" CASCADE;
+DROP TABLE IF EXISTS "audit_logs" CASCADE;
 ```
 
-This will allow Prisma to recreate it correctly on the next request.
+After running this SQL, Prisma will automatically recreate all tables with the correct schema when you call any API endpoint.
 
-### Option 2: Fix the column type (if you have data you want to keep)
-```sql
--- First drop the table if it exists and has wrong structure
-DROP TABLE IF EXISTS "brands" CASCADE;
-
--- Let Prisma recreate it correctly
--- The table will be recreated automatically when you call the API
-```
-
-## After Fixing
-Once you've run the SQL above, the brands API should work correctly. The table will be recreated with the correct schema:
-- `id` - INTEGER with autoincrement
-- `name` - TEXT NOT NULL
-- `slug` - TEXT NOT NULL UNIQUE
-- `logo` - TEXT (optional)
-- `description` - TEXT (optional)
-- `website` - TEXT (optional)
-- `isActive` - BOOLEAN DEFAULT true
-- `createdAt` - TIMESTAMP
-- `updatedAt` - TIMESTAMP
+This is the fastest way to fix the database - just drop all tables and let Prisma recreate them.

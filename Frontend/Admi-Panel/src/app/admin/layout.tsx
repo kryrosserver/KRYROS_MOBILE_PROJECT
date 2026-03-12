@@ -117,10 +117,10 @@ function Shell({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setMobileOpen(false)} />
       )}
-      <aside className={`fixed top-0 left-0 h-full bg-slate-900 z-50 transition-all duration-300 ${
+      <aside className={`fixed top-0 left-0 h-full bg-slate-900 z-50 transition-all duration-300 flex flex-col ${
         sidebarOpen ? "w-64" : "w-20"
       } ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 shrink-0">
           <Link href="/admin" className="flex items-center gap-3">
             {logoNode}
             {sidebarOpen && <span className="text-white font-bold">{companyName || "KRYROS"}</span>}
@@ -132,7 +132,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -150,7 +150,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 shrink-0">
           <button
             onClick={async () => {
               await fetch("/api/auth/logout", { method: "POST" });
