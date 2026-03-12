@@ -82,8 +82,8 @@ export default function SettingsPage() {
       setMethodForm({
         name: method.name,
         description: method.description || "",
-        fee: method.fee,
-        minThreshold: method.minThreshold,
+        fee: Number(method.fee),
+        minThreshold: Number(method.minThreshold),
         estimatedDays: method.estimatedDays || "",
         isActive: method.isActive
       });

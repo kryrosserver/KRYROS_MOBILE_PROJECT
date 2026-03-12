@@ -8,7 +8,7 @@ function getAdminToken(req: NextRequest): string {
 
 export async function GET(req: NextRequest) {
   const token = getAdminToken(req);
-  const res = await fetch(`${API_BASE}/shipping/active`, {
+  const res = await fetch(`${API_BASE}/shipping`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     cache: "no-store",
   });

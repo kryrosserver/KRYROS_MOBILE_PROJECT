@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsBoolean } from 'class-validator';
 
 export class CreateShippingMethodDto {
   @ApiProperty()
@@ -27,6 +27,11 @@ export class CreateShippingMethodDto {
   @IsString()
   @IsOptional()
   estimatedDays?: string;
+
+  @ApiProperty({ default: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }
 
 export class UpdateShippingMethodDto {
@@ -58,6 +63,7 @@ export class UpdateShippingMethodDto {
   estimatedDays?: string;
 
   @ApiProperty({ required: false })
+  @IsBoolean()
   @IsOptional()
   isActive?: boolean;
 }
