@@ -64,6 +64,30 @@ function ShoppingCart(props: any) {
   return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>;
 }
 
+const testimonials = [
+  {
+    name: "Chanda Mwansa",
+    role: "Business Owner",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    content: "The credit system helped me get my business laptop without draining my savings. Very convenient!",
+    rating: 5
+  },
+  {
+    name: "Brian Sampa",
+    role: "Teacher",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    content: "Easy monthly payments made it possible for me to afford the latest iPhone. Great service!",
+    rating: 5
+  },
+  {
+    name: "Agness Phiri",
+    role: "Nurse",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+    content: "Transparent process with no hidden fees. Highly recommend KRYROS credit!",
+    rating: 5
+  }
+];
+
 function CreditPageContent() {
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
@@ -384,31 +408,37 @@ function CreditPageContent() {
           </div>
           
           <div className="grid gap-6 md:grid-cols-3">
-            {creditPlans.map((plan) => (
+            {plans.map((plan) => (
               <div
                 key={plan.id}
                 className="relative rounded-2xl border-2 border-slate-200 bg-white p-8 transition-all hover:border-green-500 hover:shadow-lg"
               >
-                <div className="mb-4 text-4xl">{plan.icon}</div>
+                <div className="mb-4 text-4xl">{plan.icon || '🚀'}</div>
                 <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-                <p className="mt-1 text-slate-600">{plan.months} months</p>
+                <p className="mt-1 text-slate-600">{plan.duration} months</p>
                 
                 <div className="my-6 space-y-3">
                   <div className="flex justify-between">
                     <span className="text-slate-600">Interest Rate</span>
-                    <span className="font-medium text-slate-900">{plan.interest}</span>
+                    <span className="font-medium text-slate-900">{plan.interestRate}%</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">Min Amount</span>
-                    <span className="font-medium text-slate-900">{formatPrice(Number(plan.minAmount))}</span>
+                    <span className="font-medium text-slate-900">{formatPrice(Number(plan.minimumAmount))}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">Max Amount</span>
-                    <span className="font-medium text-slate-900">{formatPrice(Number(plan.maxAmount))}</span>
+                    <span className="font-medium text-slate-900">{formatPrice(Number(plan.maximumAmount))}</span>
                   </div>
                 </div>
                 
-                <Button className="w-full bg-green-500 hover:bg-green-600">
+                <Button 
+                  className="w-full bg-green-500 hover:bg-green-600"
+                  onClick={() => {
+                    setSelectedPlanId(plan.id);
+                    document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
                   Select Plan
                 </Button>
               </div>
