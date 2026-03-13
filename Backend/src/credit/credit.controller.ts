@@ -31,6 +31,31 @@ export class CreditController {
     return this.creditService.getAccounts(userId);
   }
 
+  @Get('all')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all credit accounts (Admin)' })
+  getAll(
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+    @Query('status') status?: string,
+  ) {
+    // In a real app, you should also have an AdminGuard here
+    return this.creditService.getAllAccounts({
+      skip: skip ? Number(skip) : undefined,
+      take: take ? Number(take) : undefined,
+      status,
+    });
+  }
+
+  @Put('accounts/:id/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update credit account status (Admin)' })
+  updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
+    return this.creditService.updateAccountStatus(id, body.status);
+  }
+
   @Get('my-credits')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -44,5 +69,14 @@ export class CreditController {
   @ApiOperation({ summary: 'Calculate installment' })
   calculate(@Body() body: { amount: number; planId: string }) {
     return this.creditService.calculateInstallment(body.amount, body.planId);
+  }
+
+  @Post('apply')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Apply for credit' })
+  apply(@Req() req: Request, @Body() body: { productId: string; planId: string; amount: number }) {
+    const userId = (req as any).user.id;
+    return this.creditService.applyForCredit(userId, body);
   }
 }

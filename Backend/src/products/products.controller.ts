@@ -23,6 +23,7 @@ export class ProductsController {
     @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
     @Query('featured') featured?: boolean,
+    @Query('allowCredit') allowCredit?: boolean,
   ) {
     return this.productsService.findAll({
       skip: skip ? Number(skip) : undefined,
@@ -30,6 +31,18 @@ export class ProductsController {
       categoryId,
       search,
       isFeatured: featured,
+      allowCredit: allowCredit === true || (allowCredit as any) === 'true',
+    });
+  }
+
+  @Get('credit')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get products available for credit' })
+  getCreditProducts(@Query('skip') skip?: number, @Query('take') take?: number) {
+    return this.productsService.findAll({
+      skip: skip ? Number(skip) : undefined,
+      take: take ? Number(take) : undefined,
+      allowCredit: true,
     });
   }
 

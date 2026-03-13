@@ -31,16 +31,21 @@ export class UpdateProductDto {
   brandSlug?: string;
 
   @IsOptional()
-  @IsNumber()
-  brandId?: number;
-
-  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
   @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowCredit?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  creditMinimum?: number;
 
   @IsOptional()
   @IsBoolean()

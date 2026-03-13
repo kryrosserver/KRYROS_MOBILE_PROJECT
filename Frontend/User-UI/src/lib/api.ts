@@ -76,6 +76,11 @@ export const productsApi = {
   getFeatured: () => fetchApi<any[]>('/products/featured'),
 
   getFlashSales: () => fetchApi<any[]>('/products/flash-sales'),
+
+  getCredit: (params?: { skip?: number; take?: number }) => {
+    const query = new URLSearchParams(params as any).toString();
+    return fetchApi<any>(`/products/credit?${query}`);
+  },
 };
 
 // Categories API

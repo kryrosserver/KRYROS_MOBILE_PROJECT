@@ -26,10 +26,6 @@ export class CreateProductDto {
   @IsOptional()
   brandSlug?: string;
 
-  @IsNumber()
-  @IsOptional()
-  brandId?: number;
-
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
@@ -37,6 +33,15 @@ export class CreateProductDto {
   @IsBoolean()
   @IsOptional()
   isFeatured?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  allowCredit?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  creditMinimum?: number;
 
   @IsArray()
   @ValidateIf((o) => Array.isArray(o.imageDataUrls))

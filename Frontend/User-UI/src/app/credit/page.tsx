@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { productsApi, creditApi } from "@/lib/api";
+import { ProductCard } from "@/components/home/ProductCard";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   CreditCard, 
   Calculator, 
@@ -13,102 +17,132 @@ import {
   ArrowRight,
   Users,
   Star,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 
-const creditPlans = [
-  { 
-    id: 1, 
-    name: "Starter", 
-    months: 3, 
-    interest: "5%", 
-    minAmount: 1000, 
-    maxAmount: 10000,
-    icon: "🚀"
-  },
-  { 
-    id: 2, 
-    name: "Standard", 
-    months: 6, 
-    interest: "8%", 
-    minAmount: 5000, 
-    maxAmount: 30000,
-    icon: "⭐"
-  },
-  { 
-    id: 3, 
-    name: "Premium", 
-    months: 12, 
-    interest: "12%", 
-    minAmount: 10000, 
-    maxAmount: 100000,
-    icon: "👑"
-  },
-];
-
-const howItWorks = [
-  { 
-    step: 1, 
-    title: "Choose Your Product", 
-    description: "Select any product from our store and click 'Buy on Credit'",
-    icon: ShoppingCart 
-  },
-  { 
-    step: 2, 
-    title: "Select Plan", 
-    description: "Pick a payment plan that fits your budget",
-    icon: Calculator 
-  },
-  { 
-    step: 3, 
-    title: "Quick Approval", 
-    description: "Get approved within minutes with minimal documents",
-    icon: Clock 
-  },
-  { 
-    step: 4, 
-    title: "Start Paying", 
-    description: "Make easy monthly installments and own your product",
-    icon: CreditCard 
-  },
-];
-
-const testimonials = [
-  {
-    name: "Chanda Mwansa",
-    role: "Business Owner",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-    content: "The credit system helped me get my business laptop without draining my savings. Very convenient!",
-    rating: 5
-  },
-  {
-    name: "Brian Sampa",
-    role: "Teacher",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-    content: "Easy monthly payments made it possible for me to afford the latest iPhone. Great service!",
-    rating: 5
-  },
-  {
-    name: "Agness Phiri",
-    role: "Nurse",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-    content: "Transparent process with no hidden fees. Highly recommend KRYROS credit!",
-    rating: 5
-  }
-];
-
-function ShoppingCart(props: any) {
-  return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>;
+// Types from API
+interface CreditPlan {
+  id: string;
+  name: string;
+  duration: number;
+  interestRate: number;
+  minimumAmount: number;
+  maximumAmount: number;
+  description?: string;
+  icon?: string;
 }
 
-export default function CreditPage() {
+function CreditPageContent() {
+  const searchParams = useSearchParams();
+  const productId = searchParams.get("productId");
+  const { toast } = useToast();
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [plans, setPlans] = useState<CreditPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
+  
   const [calculatorAmount, setCalculatorAmount] = useState(10000);
-  const [calculatorMonths, setCalculatorMonths] = useState(6);
-  const selectedPlan = creditPlans.find(p => p.months === calculatorMonths) || creditPlans[1];
-  const interest = parseFloat(selectedPlan.interest);
-  const totalInterest = calculatorAmount * (interest / 100);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
+  const [targetProduct, setTargetProduct] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      try {
+        const [prodRes, planRes] = await Promise.all([
+          productsApi.getCredit({ take: 8 }),
+          creditApi.getPlans()
+        ]);
+        
+        if (prodRes.data) {
+          const prods = (prodRes.data as any).data || [];
+          setProducts(prods);
+          
+          if (productId) {
+            const found = prods.find((p: any) => p.id === productId);
+            if (found) {
+              setTargetProduct(found);
+              setCalculatorAmount(Number(found.price));
+              document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+            } else {
+              // Fetch specific product if not in the initial 8
+              const singleRes = await productsApi.getById(productId);
+              if (singleRes.data) {
+                setTargetProduct(singleRes.data);
+                setCalculatorAmount(Number(singleRes.data.price));
+                document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }
+          }
+        }
+        
+        if (planRes.data) {
+          setPlans(planRes.data);
+          if (planRes.data.length > 0) {
+            setSelectedPlanId(planRes.data[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load credit data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [productId]);
+
+  const handleApply = async () => {
+    if (!targetProduct && !productId) {
+      toast({
+        title: "No product selected",
+        description: "Please select a product from the catalog first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setApplying(true);
+    try {
+      const res = await creditApi.apply({
+        productId: targetProduct?.id || productId,
+        planId: selectedPlanId,
+        amount: calculatorAmount
+      });
+
+      if (res.error) {
+        toast({
+          title: "Application Failed",
+          description: res.error,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Application Submitted!",
+          description: "Your credit application has been received and is being processed.",
+        });
+        // Redirect to installments dashboard
+        window.location.href = "/dashboard/installments";
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive"
+      });
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  const selectedPlan = plans.find(p => p.id === selectedPlanId);
+  const interestRate = selectedPlan ? Number(selectedPlan.interestRate) : 0;
+  const duration = selectedPlan ? selectedPlan.duration : 1;
+  
+  const totalInterest = calculatorAmount * (interestRate / 100);
   const totalAmount = calculatorAmount + totalInterest;
-  const monthlyPayment = totalAmount / calculatorMonths;
+  const monthlyPayment = totalAmount / duration;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -125,19 +159,48 @@ export default function CreditPage() {
               Get the tech you need with flexible installment plans. No stress, just easy payments.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-green-500 hover:bg-green-600">
-                Apply Now <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="bg-green-500 hover:bg-green-600" onClick={() => document.getElementById('credit-catalog')?.scrollIntoView({ behavior: 'smooth' })}>
+                Browse Credit Catalog <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
-                Learn More
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
+                Calculate Payments
               </Button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Credit Catalog - THE SEPARATION */}
+      <div id="credit-catalog" className="py-16 bg-white">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-slate-900">Installment Catalog</h2>
+            <p className="mt-2 text-slate-600">Products available for immediate credit purchase</p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-10 w-10 animate-spin text-green-500" />
+            </div>
+          ) : products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+              <p className="text-slate-500 font-medium">No products listed for installments yet.</p>
+              <Button variant="link" className="text-green-600 mt-2" onClick={() => window.location.href='/shop'}>
+                Browse main shop
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Credit Calculator */}
-      <div className="py-16">
+      <div id="calculator" className="py-16">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-slate-900">Credit Calculator</h2>
@@ -145,6 +208,21 @@ export default function CreditPage() {
           </div>
           
           <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-lg">
+            {targetProduct && (
+              <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-4">
+                <div className="h-16 w-16 bg-white rounded-lg overflow-hidden border">
+                  <img src={targetProduct.images?.[0]?.url || '/placeholder.jpg'} alt={targetProduct.name} className="h-full w-full object-cover" />
+                </div>
+                <div>
+                  <p className="text-xs text-green-600 font-bold uppercase">Applying for:</p>
+                  <h4 className="font-bold text-slate-900">{targetProduct.name}</h4>
+                  <p className="text-sm text-slate-500">{formatPrice(Number(targetProduct.price))}</p>
+                </div>
+                <Button variant="ghost" size="sm" className="ml-auto text-slate-400" onClick={() => setTargetProduct(null)}>
+                  Change
+                </Button>
+              </div>
+            )}
             <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-6">
                 <div>
@@ -156,16 +234,21 @@ export default function CreditPage() {
                     value={calculatorAmount}
                     onChange={(e) => setCalculatorAmount(Number(e.target.value))}
                     className="text-lg"
+                    disabled={!!targetProduct}
                   />
-                  <input
-                    type="range"
-                    min="1000"
-                    max="100000"
-                    step="1000"
-                    value={calculatorAmount}
-                    onChange={(e) => setCalculatorAmount(Number(e.target.value))}
-                    className="mt-3 w-full accent-green-500"
-                  />
+                  {!targetProduct && (
+                    <>
+                      <input
+                        type="range"
+                        min="1000"
+                        max="100000"
+                        step="1000"
+                        value={calculatorAmount}
+                        onChange={(e) => setCalculatorAmount(Number(e.target.value))}
+                        className="mt-3 w-full accent-green-500"
+                      />
+                    </>
+                  )}
                   <div className="mt-1 flex justify-between text-xs text-slate-500">
                     <span>{formatPrice(1000)}</span>
                     <span>{formatPrice(100000)}</span>
@@ -176,21 +259,24 @@ export default function CreditPage() {
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Payment Period
                   </label>
-                  <div className="flex gap-2">
-                    {creditPlans.map((plan) => (
+                  <div className="flex flex-wrap gap-2">
+                    {plans.map((plan) => (
                       <button
                         key={plan.id}
-                        onClick={() => setCalculatorMonths(plan.months)}
-                        className={`flex-1 rounded-lg border-2 p-3 text-center transition-all ${
-                          calculatorMonths === plan.months
+                        onClick={() => setSelectedPlanId(plan.id)}
+                        className={`flex-1 min-w-[100px] rounded-lg border-2 p-3 text-center transition-all ${
+                          selectedPlanId === plan.id
                             ? "border-green-500 bg-green-50"
                             : "border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        <span className="block text-lg font-bold text-slate-900">{plan.months}</span>
+                        <span className="block text-lg font-bold text-slate-900">{plan.duration}</span>
                         <span className="text-xs text-slate-500">months</span>
                       </button>
                     ))}
+                    {plans.length === 0 && (
+                      <div className="text-slate-400 text-sm py-2">No plans configured in database.</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -204,7 +290,7 @@ export default function CreditPage() {
                     <span className="font-medium text-slate-900">{formatPrice(Number(calculatorAmount))}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Interest ({selectedPlan.interest})</span>
+                    <span className="text-slate-600">Interest ({interestRate}%)</span>
                     <span className="font-medium text-slate-900">{formatPrice(Number(totalInterest))}</span>
                   </div>                  <div className="flex justify-between">
                     <span className="text-slate-600">Total Amount</span>
@@ -217,8 +303,17 @@ export default function CreditPage() {
                   </div>
                 </div>
                 
-                <Button className="mt-4 w-full bg-green-500 hover:bg-green-600">
-                  Apply for This Plan
+                <Button 
+                  className="mt-4 w-full bg-green-500 hover:bg-green-600"
+                  disabled={applying || !selectedPlanId}
+                  onClick={handleApply}
+                >
+                  {applying ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : targetProduct ? "Confirm Application" : "Apply for This Plan"}
                 </Button>
               </div>
             </div>
@@ -371,5 +466,13 @@ export default function CreditPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function CreditPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-green-500" /></div>}>
+      <CreditPageContent />
+    </Suspense>
   );
 }

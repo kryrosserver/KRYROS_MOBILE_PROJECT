@@ -4,9 +4,10 @@ import { ShopContent } from "@/components/shop/ShopContent";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend.onrender.com/api";
 
-async function getGroupedProducts(featured: boolean) {
+async function getGroupedProducts(featured: boolean, credit: boolean) {
   const url = new URL(`${API_URL}/products/grouped`);
   if (featured) url.searchParams.set("featured", "true");
+  if (credit) url.searchParams.set("allowCredit", "true");
   
   const res = await fetch(url.toString(), { cache: "no-store" });
   if (!res.ok) return [];
@@ -15,8 +16,12 @@ async function getGroupedProducts(featured: boolean) {
 
 export default async function ShopPage({ searchParams }: { searchParams?: { [key: string]: string } }) {
   const featured = (searchParams?.featured || "").toLowerCase() === "true";
-  const groupedData = await getGroupedProducts(featured);
-  const title = featured ? "Featured Products" : "All Products";
+  const credit = (searchParams?.credit || "").toLowerCase() === "true";
+  const groupedData = await getGroupedProducts(featured, credit);
+  
+  let title = "All Products";
+  if (featured) title = "Featured Products";
+  if (credit) title = "Installment Products";
 
   return (
     <div className="container-custom py-8">
@@ -28,7 +33,7 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
         <div className="flex items-center bg-slate-100/80 p-1.5 rounded-xl border border-slate-200 shadow-sm">
           <Link 
             href="/shop" 
-            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${!featured ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${!featured && !credit ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
           >
             All Shop
           </Link>
@@ -37,6 +42,12 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
             className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${featured ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
           >
             Featured
+          </Link>
+          <Link 
+            href="/shop?credit=true" 
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${credit ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
+          >
+            Installments
           </Link>
         </div>
       </div>

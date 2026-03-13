@@ -14,13 +14,15 @@ export class ProductsService {
     categoryId?: string;
     search?: string;
     isFeatured?: boolean;
+    allowCredit?: boolean;
   }) {
-    const { skip = 0, take = 20, categoryId, search, isFeatured } = params;
+    const { skip = 0, take = 20, categoryId, search, isFeatured, allowCredit } = params;
     
     const where: any = { isActive: true };
     
     if (categoryId) where.categoryId = categoryId;
     if (isFeatured) where.isFeatured = true;
+    if (allowCredit !== undefined) where.allowCredit = allowCredit;
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -237,6 +239,8 @@ export class ProductsService {
         brandId,
         isActive: data.isActive ?? true,
         isFeatured: data.isFeatured ?? false,
+        allowCredit: data.allowCredit ?? false,
+        creditMinimum: data.creditMinimum ?? null,
       },
     });
 
@@ -306,6 +310,8 @@ export class ProductsService {
         brandId,
         isActive: data.isActive ?? true,
         isFeatured: data.isFeatured ?? false,
+        allowCredit: data.allowCredit ?? false,
+        creditMinimum: data.creditMinimum ?? null,
       },
     });
 
@@ -397,6 +403,8 @@ export class ProductsService {
         price: data.price ?? undefined,
         isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
         isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : undefined,
+        allowCredit: typeof data.allowCredit === 'boolean' ? data.allowCredit : undefined,
+        creditMinimum: typeof data.creditMinimum === 'number' ? data.creditMinimum : undefined,
         categoryId: categoryId ?? undefined,
         brandId: brandId,
       },

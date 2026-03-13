@@ -245,14 +245,24 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </Button>
         </div>
 
-        {/* Add to Cart */}
-        <div className={`absolute bottom-3 left-3 right-3 transition-transform duration-300 ${isHovered ? 'translate-y-0' : 'translate-y-full'}`}>
+        {/* Action Buttons Overlay */}
+        <div className={`absolute bottom-3 left-3 right-3 flex flex-col gap-2 transition-transform duration-300 ${isHovered ? 'translate-y-0' : 'translate-y-[120%]'}`}>
+          {product?.allowCredit && (
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-xs py-1 h-8"
+              size="sm"
+              onClick={() => router.push(`/credit?productId=${product.id}`)}
+            >
+              <CreditCard className="mr-2 h-3 w-3" />
+              Get on Installment
+            </Button>
+          )}
           <Button
-            className="w-full bg-green-500 hover:bg-green-600"
+            className="w-full bg-green-500 hover:bg-green-600 text-xs py-1 h-8"
             size="sm"
             onClick={() => addItem(product)}
           >
-            <ShoppingCart className="mr-2 h-4 w-4" />
+            <ShoppingCart className="mr-2 h-3 w-3" />
             Add to Cart
           </Button>
         </div>
@@ -260,7 +270,14 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
       {/* Content */}
       <div className="p-4">
-        <p className="text-xs text-slate-500">{displayBrand}</p>
+        <div className="flex justify-between items-start">
+          <p className="text-xs text-slate-500">{displayBrand}</p>
+          {product?.allowCredit && (
+            <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase">
+              Credit
+            </span>
+          )}
+        </div>
         <Link href={`/product/${product?.slug ?? product?.id}`}>
           <h3 className="mt-1 text-sm font-medium text-slate-900 line-clamp-2 transition-colors group-hover:text-green-500">
             {product?.name}
@@ -287,9 +304,12 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             </span>
           )}
           <Button
-            size="sm"
-            variant="outline"
-            onClick={async () => {
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 rounded-full"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
               const id = product?.id;
               if (!id) return;
               if (!isAuthenticated) {
@@ -297,18 +317,10 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 return;
               }
               if (isWishlisted) {
-                const res = await wishlistApi.remove(id);
-                if (res.error) {
-                  toast({ title: "Failed to remove from wishlist", description: res.error, variant: "destructive" });
-                  return;
-                }
+                await wishlistApi.remove(id);
                 setIsWishlisted(false);
               } else {
-                const res = await wishlistApi.add(id);
-                if (res.error) {
-                  toast({ title: "Failed to add to wishlist", description: res.error, variant: "destructive" });
-                  return;
-                }
+                await wishlistApi.add(id);
                 setIsWishlisted(true);
               }
               if (typeof window !== "undefined") {
@@ -316,16 +328,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               }
             }}
           >
-            <Heart className={`mr-1 h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
-            {isWishlisted ? "Wishlisted" : "Wishlist"}
+            <Heart className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
           </Button>
         </div>
-
-        {product?.allowCredit && (
-          <p className="mt-2 text-xs text-green-600 font-medium">
-            Available on credit
-          </p>
-        )}
       </div>
     </div>
   );

@@ -49,6 +49,8 @@ export default function ProductsPage() {
     brandId: "" as string | number,
     isFeatured: false,
     isActive: true,
+    allowCredit: false,
+    creditMinimum: "",
     images: [] as string[],
   });
   const [files, setFiles] = useState<File[]>([]);
@@ -61,6 +63,8 @@ export default function ProductsPage() {
     brandId: "" as string | number,
     isActive: true,
     isFeatured: false,
+    allowCredit: false,
+    creditMinimum: "",
     images: [] as string[],
   });
   const [editFiles, setEditFiles] = useState<File[]>([]);
@@ -230,6 +234,25 @@ export default function ProductsPage() {
                   />
                   Featured
                 </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.allowCredit}
+                    onChange={(e) => setForm({ ...form, allowCredit: e.target.checked })}
+                  />
+                  Allow Credit
+                </label>
+                {form.allowCredit && (
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Credit Minimum"
+                    value={form.creditMinimum}
+                    onChange={(e) => setForm({ ...form, creditMinimum: e.target.value })}
+                    className="admin-input w-full"
+                  />
+                )}
               </div>
             </div>
             <div>
@@ -281,6 +304,8 @@ export default function ProductsPage() {
                         if (form.brandId) formData.append("brandId", String(form.brandId));
                         formData.append("isActive", String(form.isActive));
                         formData.append("isFeatured", String(form.isFeatured));
+                        formData.append("allowCredit", String(form.allowCredit));
+                        if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
                         // Recompress large files to blobs if needed for better size/quality tradeoff
                         const blobs = await Promise.all(
                           files.map(async (f) => {
@@ -317,6 +342,8 @@ export default function ProductsPage() {
                             brandId: form.brandId ? Number(form.brandId) : undefined,
                             isActive: form.isActive,
                             isFeatured: form.isFeatured,
+                            allowCredit: form.allowCredit,
+                            creditMinimum: form.creditMinimum ? Number(form.creditMinimum) : undefined,
                             imageDataUrls: form.images,
                           };
                           res = await fetch("/internal/admin/products", {
@@ -342,9 +369,11 @@ export default function ProductsPage() {
                         categorySlug: form.categorySlug || "general",
                         brandId: form.brandId ? Number(form.brandId) : undefined,
                         isActive: form.isActive,
-                          isFeatured: form.isFeatured,
-                          imageDataUrls: form.images,
-                        };
+                        isFeatured: form.isFeatured,
+                        allowCredit: form.allowCredit,
+                        creditMinimum: form.creditMinimum ? Number(form.creditMinimum) : undefined,
+                        imageDataUrls: form.images,
+                      };
                         res = await fetch("/internal/admin/products", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
@@ -423,6 +452,7 @@ export default function ProductsPage() {
                 <th>Brand</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Credit</th>
                 {tab !== "flash" && <th>Featured</th>}
                 {tab !== "featured" && <th>Flash Sale</th>}
                 {tab === "flash" && <th>Flash Price</th>}
@@ -453,6 +483,20 @@ export default function ProductsPage() {
                   <td>{p.brand?.name || "—"}</td>
                   <td>{formatPrice(Number(p.price))}</td>
                   <td><span className={`badge ${p.isActive !== false ? "badge-success" : "badge-danger"}`}>{p.isActive !== false ? "Active" : "Inactive"}</span></td>
+                  <td>
+                    <div className="flex flex-col items-center">
+                      <input
+                        type="checkbox"
+                        checked={!!(p as any).allowCredit}
+                        onChange={(e) => {
+                          setProducts(prev => prev.map(x => x.id === p.id ? { ...x, allowCredit: e.target.checked } : x));
+                        }}
+                      />
+                      {(p as any).allowCredit && (p as any).creditMinimum && (
+                        <span className="text-[10px] text-slate-500">Min: {(p as any).creditMinimum}</span>
+                      )}
+                    </div>
+                  </td>
                   {tab !== "flash" && (
                   <td>
                     <input
@@ -517,6 +561,8 @@ export default function ProductsPage() {
                           brandId: p.brand?.id || "",
                           isActive: p.isActive !== false,
                           isFeatured: !!p.isFeatured,
+                          allowCredit: !!(p as any).allowCredit,
+                          creditMinimum: String((p as any).creditMinimum ?? ""),
                           images: [],
                         });
                         setEditFiles([]);
@@ -551,6 +597,7 @@ export default function ProductsPage() {
                             ...(tab !== "flash" ? { isFeatured: !!p.isFeatured } : {}),
                             ...(tab !== "featured" ? { isFlashSale: !!p.isFlashSale } : {}),
                             ...(tab === "flash" ? { flashSaleEnd: p.flashSaleEnd } : {}),
+                            allowCredit: !!(p as any).allowCredit,
                           };
                           if (tab === "flash" && (p as any).flashSalePrice !== undefined) {
                             payload.flashSalePrice = (p as any).flashSalePrice;
@@ -657,6 +704,25 @@ export default function ProductsPage() {
                   />
                   Featured
                 </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={editForm.allowCredit}
+                    onChange={(e) => setEditForm({ ...editForm, allowCredit: e.target.checked })}
+                  />
+                  Allow Credit
+                </label>
+                {editForm.allowCredit && (
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Credit Minimum"
+                    value={editForm.creditMinimum}
+                    onChange={(e) => setEditForm({ ...editForm, creditMinimum: e.target.value })}
+                    className="admin-input w-full"
+                  />
+                )}
               </div>
             </div>
             <div>
@@ -701,6 +767,8 @@ export default function ProductsPage() {
                         if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
                         formData.append("isActive", String(editForm.isActive));
                         formData.append("isFeatured", String(editForm.isFeatured));
+                        formData.append("allowCredit", String(editForm.allowCredit));
+                        if (editForm.creditMinimum) formData.append("creditMinimum", String(Number(editForm.creditMinimum)));
                         formData.append("replaceImages", "true");
                         for (const f of editFiles) {
                           const recompressed = await compressImage(f, 2000, 0.9);
@@ -723,9 +791,11 @@ export default function ProductsPage() {
                             ...(editForm.price ? { price: Number(editForm.price) } : {}),
                             ...(editForm.description ? { description: editForm.description } : {}),
                             ...(editForm.categorySlug ? { categorySlug: editForm.categorySlug } : {}),
-                            ...(editForm.brandId ? { brandId: Number(editForm.brandId) } : {}),
+                            ...(editForm.brandId ? { brandId: Number(editForm.brandId),
                             isActive: editForm.isActive,
                             isFeatured: editForm.isFeatured,
+                            allowCredit: editForm.allowCredit,
+                            creditMinimum: editForm.creditMinimum ? Number(editForm.creditMinimum) : undefined,
                             ...(editForm.images.length ? { imageDataUrls: editForm.images, replaceImages: true } : {}),
                           };
                           res = await fetch(`/internal/admin/products/${id}`, {
@@ -751,6 +821,8 @@ export default function ProductsPage() {
                           ...(editForm.brandId ? { brandId: Number(editForm.brandId) } : {}),
                           isActive: editForm.isActive,
                           isFeatured: editForm.isFeatured,
+                          allowCredit: editForm.allowCredit,
+                          creditMinimum: editForm.creditMinimum ? Number(editForm.creditMinimum) : undefined,
                           ...(editForm.images.length ? { imageDataUrls: editForm.images, replaceImages: true } : {}),
                         };
                         res = await fetch(`/internal/admin/products/${id}`, {
