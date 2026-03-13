@@ -179,6 +179,7 @@ model Product {
   metaDescription   String?
   metaKeywords      String?
   isActive          Boolean   @default(true)
+  specifications    String?   @db.Text
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
