@@ -7,6 +7,11 @@ export class CategoriesService {
 
   async findAll() {
     return this.prisma.category.findMany({
+      include: {
+        _count: {
+          select: { products: true }
+        }
+      },
       orderBy: { sortOrder: 'asc' },
     });
   }
@@ -14,6 +19,11 @@ export class CategoriesService {
   async getHomepageCategories() {
     return this.prisma.category.findMany({
       where: { isActive: true, showOnHome: true },
+      include: {
+        _count: {
+          select: { products: true }
+        }
+      },
       orderBy: { sortOrder: 'asc' },
     });
   }
