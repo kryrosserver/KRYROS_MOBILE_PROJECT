@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Heart, ShoppingCart, Eye, Star, ArrowRight } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Star, ArrowRight, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { wishlistApi } from "@/lib/api";
