@@ -115,6 +115,17 @@ export function Header() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [mobileMenuOpen])
+
   const suggestions = [
     "iPhone 15 Pro Max",
     "Samsung Galaxy S24",
@@ -281,12 +292,12 @@ export function Header() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <>
+          <div className="fixed inset-0 z-[100]">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-slate-900/50"
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
@@ -294,19 +305,16 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-xl"
+              className="absolute inset-y-0 left-0 w-[280px] bg-white shadow-2xl"
             >
               <div className="flex h-full flex-col">
-                <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
+                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
                   <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500">
-                      <span className="text-sm font-bold text-white">K</span>
-                    </div>
-                    <span className="text-lg font-bold text-slate-900">KRYROS</span>
+                    <Logo size={32} />
                   </Link>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-md p-1 text-slate-900 hover:bg-slate-100"
+                    className="rounded-full p-2 text-slate-900 hover:bg-slate-100 transition-colors"
                     aria-label="Close menu"
                   >
                     <X className="h-5 w-5" />
@@ -314,63 +322,66 @@ export function Header() {
                 </div>
 
                 {/* Mobile Search */}
-                <div className="border-b border-slate-200 px-4 py-3">
+                <div className="px-4 py-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Search products..."
-                      className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-green-500 focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <nav className="flex-1 overflow-y-auto px-4 py-4">
+                <nav className="flex-1 overflow-y-auto px-4 pb-8">
                   <div className="flex flex-col gap-1">
                     <Link
                       href="/"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
+                      className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-50"
                     >
                       Home
                     </Link>
 
-                    {/* Dynamic Categories for Mobile */}
-                    <div className="mt-2 px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <div className="mt-4 px-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                       Categories
                     </div>
-                    {categories.map((cat) => (
-                      <Link
-                        key={cat.id}
-                        href={`/shop?category=${cat.slug}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100 capitalize"
-                      >
-                        {cat.name}
-                      </Link>
-                    ))}
-
-                    <div className="mt-2 px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      More
+                    <div className="space-y-1">
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.id}
+                          href={`/shop?category=${cat.slug}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 capitalize"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
                     </div>
-                    {["All Products", "Credit", "Wholesale"].map((item) => (
-                      <Link
-                        key={item}
-                        href={`/${item.toLowerCase().replace(" ", "-")}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
-                      >
-                        {item}
-                      </Link>
-                    ))}
+
+                    <div className="mt-4 px-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      Our Shop
+                    </div>
+                    <div className="space-y-1">
+                      {["All Products", "Credit", "Wholesale"].map((item) => (
+                        <Link
+                          key={item}
+                          href={`/${item.toLowerCase().replace(" ", "-")}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                        >
+                          {item}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </nav>
 
-                <div className="border-t border-slate-200 px-4 py-4">
+                <div className="border-t border-slate-100 p-4 bg-slate-50/50">
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-[0.98]"
                   >
                     <User className="h-4 w-4" />
                     My Account
@@ -378,7 +389,7 @@ export function Header() {
                 </div>
               </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </header>

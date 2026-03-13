@@ -453,6 +453,7 @@ export default function ProductsPage() {
                         allowCredit: false,
                         creditMinimum: "",
                         images: [],
+                        specifications: [],
                       });
                       setFiles([]);
                       await load();
