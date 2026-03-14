@@ -126,6 +126,20 @@ export function Header() {
     }
   }, [mobileMenuOpen])
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = 'unset';
+      document.body.style.touchAction = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.touchAction = 'auto';
+    };
+  }, [mobileMenuOpen]);
+
   const suggestions = [
     "iPhone 15 Pro Max",
     "Samsung Galaxy S24",
@@ -307,7 +321,8 @@ export function Header() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100]">
+          <div className="fixed inset-0 z-[100] h-screen w-screen overflow-hidden">
+            {/* Backdrop with fade-in */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -315,93 +330,84 @@ export function Header() {
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
               onClick={() => setMobileMenuOpen(false)}
             />
+            
+            {/* Sidebar with slide-in from left */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute inset-y-0 left-0 w-[280px] bg-white shadow-2xl"
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="absolute inset-y-0 left-0 flex w-[280px] max-w-[85vw] flex-col bg-white shadow-2xl"
             >
-              <div className="flex h-full flex-col">
-                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
-                  <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                    <Logo size={32} />
-                  </Link>
-                  <button
+              {/* Sidebar Header */}
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-100 px-5">
+                <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                  <Logo size={32} />
+                </Link>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-full p-2 text-slate-900 hover:bg-slate-100 transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Sidebar Content (Scrollable) */}
+              <div className="flex-1 overflow-y-auto overscroll-contain px-2 py-4 scrollbar-none">
+                <nav className="flex flex-col gap-1">
+                  <Link
+                    href="/"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-full p-2 text-slate-900 hover:bg-slate-100 transition-colors"
-                    aria-label="Close menu"
+                    className="flex items-center rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-50"
                   >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+                    Home
+                  </Link>
 
-                {/* Mobile Search */}
-                <div className="px-4 py-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search products..."
-                      className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-green-500 focus:outline-none"
-                    />
+                  <div className="mt-4 px-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Categories
                   </div>
-                </div>
+                  <div className="space-y-1">
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        href={`/shop?category=${cat.slug}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 capitalize"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
 
-                <nav className="flex-1 overflow-y-auto px-4 pb-8">
-                  <div className="flex flex-col gap-1">
-                    <Link
-                      href="/"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-50"
-                    >
-                      Home
-                    </Link>
-
-                    <div className="mt-4 px-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                      Categories
-                    </div>
-                    <div className="space-y-1">
-                      {categories.map((cat) => (
-                        <Link
-                          key={cat.id}
-                          href={`/shop?category=${cat.slug}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 capitalize"
-                        >
-                          {cat.name}
-                        </Link>
-                      ))}
-                    </div>
-
-                    <div className="mt-4 px-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                      Our Shop
-                    </div>
-                    <div className="space-y-1">
-                      {["Shop", "All Products", "Credit", "Wholesale"].map((item) => (
-                        <Link
-                          key={item}
-                          href={`/${item.toLowerCase().replace(" ", "-")}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
-                        >
-                          {item}
-                        </Link>
-                      ))}
-                    </div>
+                  <div className="mt-4 px-4 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Our Shop
+                  </div>
+                  <div className="space-y-1">
+                    {["Shop", "All Products", "Credit", "Wholesale"].map((item) => (
+                      <Link
+                        key={item}
+                        href={`/${item.toLowerCase().replace(" ", "-")}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                      >
+                        {item}
+                      </Link>
+                    ))}
                   </div>
                 </nav>
+              </div>
 
-                <div className="border-t border-slate-100 p-4 bg-slate-50/50">
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-[0.98]"
-                  >
-                    <User className="h-4 w-4" />
-                    My Account
-                  </Link>
-                </div>
+              {/* Sidebar Footer (Sticky at bottom) */}
+              <div className="shrink-0 border-t border-slate-100 bg-slate-50/50 p-4">
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3.5 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-[0.98] shadow-lg shadow-slate-900/10"
+                >
+                  <User className="h-4 w-4" />
+                  My Account
+                </Link>
               </div>
             </motion.div>
           </div>
