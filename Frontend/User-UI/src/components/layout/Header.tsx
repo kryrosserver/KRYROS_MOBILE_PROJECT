@@ -163,6 +163,20 @@ export function Header() {
               Home
             </Link>
             
+            <Link
+              href="/shop"
+              className="rounded-md px-3 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
+            >
+              Shop
+            </Link>
+
+            <Link
+              href="/all-products"
+              className="rounded-md px-3 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
+            >
+              All Products
+            </Link>
+
             {/* Dynamic Categories */}
             {categories.map((cat) => (
               <Link
@@ -175,16 +189,17 @@ export function Header() {
             ))}
 
             <Link
-              href="/shop"
-              className="rounded-md px-3 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
-            >
-              All Products
-            </Link>
-            <Link
               href="/credit"
               className="rounded-md px-3 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
             >
               Credit
+            </Link>
+
+            <Link
+              href="/wholesale"
+              className="rounded-md px-3 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
+            >
+              Wholesale
             </Link>
           </nav>
 
@@ -363,7 +378,7 @@ export function Header() {
                       Our Shop
                     </div>
                     <div className="space-y-1">
-                      {["All Products", "Credit", "Wholesale"].map((item) => (
+                      {["Shop", "All Products", "Credit", "Wholesale"].map((item) => (
                         <Link
                           key={item}
                           href={`/${item.toLowerCase().replace(" ", "-")}`}

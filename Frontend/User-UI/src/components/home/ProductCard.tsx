@@ -174,102 +174,38 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   // Grid view
   return (
     <div
-      className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all hover:shadow-lg"
+      className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-slate-100">
-        <Image
-          src={displayImage}
-          alt={product?.name || 'Product'}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+      {/* Image Section */}
+      <div className="relative aspect-square overflow-hidden bg-slate-50">
+        <Link href={`/product/${product?.slug ?? product?.id}`}>
+          <Image
+            src={displayImage}
+            alt={product?.name || 'Product'}
+            fill
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+          />
+        </Link>
         
         {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1">
+        <div className="absolute left-3 top-3 flex flex-col gap-2">
           {product?.isNew && (
-            <span className="rounded bg-blue-500 px-2 py-0.5 text-xs font-medium text-white">
-              New
+            <span className="rounded-full bg-blue-500 px-2 py-1 text-[10px] font-bold text-white shadow-lg">
+              NEW
             </span>
           )}
           {discount && (
-            <span className="rounded bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
+            <span className="rounded-full bg-orange-500 px-2 py-1 text-[10px] font-bold text-white shadow-lg">
               -{discount}%
             </span>
           )}
         </div>
-
-        {/* Quick Actions */}
-        <div className={`absolute right-3 top-3 flex flex-col gap-2 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-slate-100"
-            onClick={async () => {
-              const id = product?.id;
-              if (!id) return;
-              if (!isAuthenticated) {
-                router.push("/login");
-                return;
-              }
-              if (isWishlisted) {
-                const res = await wishlistApi.remove(id);
-                if (res.error) {
-                  toast({ title: "Failed to remove from wishlist", description: res.error, variant: "destructive" });
-                  return;
-                }
-                setIsWishlisted(false);
-              } else {
-                const res = await wishlistApi.add(id);
-                if (res.error) {
-                  toast({ title: "Failed to add to wishlist", description: res.error, variant: "destructive" });
-                  return;
-                }
-                setIsWishlisted(true);
-              }
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new Event("wishlist:changed"));
-              }
-            }}
-          >
-            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-slate-100"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Action Buttons Overlay - Hidden on small screens, shown on hover for desktop */}
-        <div className={`absolute bottom-3 left-3 right-3 hidden flex-col gap-2 transition-transform duration-300 md:flex ${isHovered ? 'translate-y-0' : 'translate-y-[120%]'}`}>
-          {product?.allowCredit && (
-            <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-xs py-1 h-8 shadow-lg"
-              size="sm"
-              onClick={() => router.push(`/credit?productId=${product.id}`)}
-            >
-              <CreditCard className="mr-2 h-3 w-3" />
-              Installment
-            </Button>
-          )}
-          <Button
-            className="w-full bg-green-500 hover:bg-green-600 text-xs py-1 h-8 shadow-lg"
-            size="sm"
-            onClick={() => addItem(product)}
-          >
-            <ShoppingCart className="mr-2 h-3 w-3" />
-            Add to Cart
-          </Button>
-        </div>
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <div className="flex justify-between items-start">
           <p className="text-xs text-slate-500">{displayBrand}</p>
           {product?.allowCredit && (
@@ -279,7 +215,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
         </div>
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="mt-1 text-sm font-medium text-slate-900 line-clamp-2 transition-colors group-hover:text-green-500">
+          <h3 className="mt-1 text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500">
             {product?.name}
           </h3>
         </Link>
@@ -296,33 +232,20 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           <span className="text-xs text-slate-500">({displayReviews})</span>
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="flex flex-col">
-            <span className="text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
-            {product?.originalPrice && (
-              <span className="text-xs text-slate-400 line-through">
-                {formatPrice(Number(product.originalPrice))}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              size="icon"
-              className="h-9 w-9 rounded-full bg-green-500 text-white md:hidden shadow-sm hover:bg-green-600 transition-colors"
-              onClick={() => {
-                addItem(product);
-                toast({
-                  title: "Added to Cart",
-                  description: `${product.name} has been added.`,
-                });
-              }}
-            >
-              <ShoppingCart className="h-4 w-4" />
-            </Button>
+        <div className="mt-auto pt-4">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
+              {product?.originalPrice && (
+                <span className="text-xs text-slate-400 line-through">
+                  {formatPrice(Number(product.originalPrice))}
+                </span>
+              )}
+            </div>
             <Button
               size="icon"
               variant="ghost"
-              className="h-9 w-9 rounded-full"
+              className="h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100"
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -345,6 +268,39 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               }}
             >
               <Heart className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {product?.allowCredit && (
+              <Button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-[10px] md:text-xs py-2 h-9 shadow-sm font-bold"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(`/credit?productId=${product.id}`);
+                }}
+              >
+                <CreditCard className="mr-2 h-3 w-3" />
+                Get on Installment
+              </Button>
+            )}
+            <Button
+              className="w-full bg-green-500 hover:bg-green-600 text-xs py-2 h-10 shadow-md font-bold text-white uppercase tracking-wider"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addItem(product);
+                toast({
+                  title: "Added to Cart",
+                  description: `${product.name} has been added.`,
+                });
+              }}
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Add to Cart
             </Button>
           </div>
         </div>
