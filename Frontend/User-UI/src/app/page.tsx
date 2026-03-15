@@ -10,6 +10,7 @@ import { CreditSection } from '@/components/home/CreditSection'
 import { BlogSection } from '@/components/home/BlogSection'
 import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
+import { ProductCard } from '@/components/home/ProductCard'
 import { useCart } from '@/providers/CartProvider'
 import { useAuth } from '@/providers/AuthProvider'
 import { wishlistApi } from '@/lib/api'
@@ -368,180 +369,13 @@ function FlashSales({ products, loading = false }: { products: any[], loading?: 
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
           {flashProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
     </section>
-  )
-}
-
-// Product Card Component
-function ProductCard({ product }: { product: Product }) {
-  const { addItem } = useCart()
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  const { isAuthenticated } = useAuth()
-  const { toast } = useToast()
-
-  const discount = product.salePrice
-    ? calculateDiscount(product.price, product.salePrice)
-    : product.flashSalePrice
-    ? calculateDiscount(product.price, product.flashSalePrice)
-    : 0
-
-  const displayPrice = product.flashSalePrice || product.salePrice || product.price
-
-  // Extract key specs (RAM, Storage, etc.)
-  const specs = Array.isArray((product as any)?.specifications) 
-    ? (product as any).specifications 
-    : (typeof (product as any)?.specifications === 'string' ? JSON.parse((product as any).specifications) : []);
-  
-  // Look for RAM, Storage, or any first 2 specs
-  const importantKeys = ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen', 'size', 'capacity'];
-  let displaySpecs = specs.filter((s: any) => 
-    importantKeys.some(k => s.key?.toLowerCase().includes(k))
-  ).map((s: any) => ({
-    ...s,
-    // Shorten very long values (e.g., screen details) to keep the card clean
-    value: s.value.length > 20 ? s.value.split(',')[0].slice(0, 20) + (s.value.length > 20 ? '...' : '') : s.value
-  })).slice(0, 2);
-
-  // If no "important" specs found, just take the first two available
-  if (displaySpecs.length === 0 && specs.length > 0) {
-    displaySpecs = specs.map((s: any) => ({
-      ...s,
-      value: s.value.length > 20 ? s.value.slice(0, 20) + '...' : s.value
-    })).slice(0, 2);
-  }
-
-  return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
-    >
-      {/* Image */}
-      <div className="relative aspect-square bg-gray-100">
-        <Image
-          src={(product as any)?.images?.[0]?.url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=800&fit=crop'}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1">
-          {discount > 0 && (
-            <span className="bg-kryros-orange text-white text-xs font-bold px-2 py-1 rounded">
-              -{discount}%
-            </span>
-          )}
-          {product.isFlashSale && (
-            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-              <Zap className="h-3 w-3" /> Flash
-            </span>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-white shadow-md hover:bg-gray-100"
-            onClick={async () => {
-              const id = (product as any)?.id
-              if (!id) return
-              if (!isAuthenticated) {
-                window.location.href = '/login'
-                return
-              }
-              if (isWishlisted) {
-                const res = await wishlistApi.remove(id)
-                if (res.error) {
-                  toast({ title: 'Failed to remove from wishlist', description: res.error, variant: 'destructive' })
-                  return
-                }
-                setIsWishlisted(false)
-              } else {
-                const res = await wishlistApi.add(id)
-                if (res.error) {
-                  toast({ title: 'Failed to add to wishlist', description: res.error, variant: 'destructive' })
-                  return
-                }
-                setIsWishlisted(true)
-              }
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new Event('wishlist:changed'))
-              }
-            }}
-          >
-            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
-          </Button>
-        </div>
-
-        {/* Quick Add */}
-        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            className="w-full bg-kryros-accent hover:bg-kryros-accent-hover text-white"
-            onClick={() => addItem(product)}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
-          </Button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-4 flex flex-col h-full min-h-[180px]">
-        <Link href={`/product/${product.slug}`}>
-          <h3 className="font-medium text-sm line-clamp-2 hover:text-kryros-accent transition-colors h-10">
-            {product.name}
-          </h3>
-        </Link>
-
-        {/* Quick Specs */}
-        {displaySpecs.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5 min-h-[28px]">
-            {displaySpecs.map((spec: any, idx: number) => (
-              <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-600 border border-slate-100 whitespace-nowrap overflow-hidden">
-                {spec.value}
-              </span>
-            ))}
-          </div>
-        )}
-        
-        <div className="flex items-center gap-1 mt-2">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-            />
-          ))}
-          <span className="text-xs text-slate-500">({product.reviewCount})</span>
-        </div>
-
-        <div className="mt-auto pt-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg text-kryros-primary">
-              {formatPrice(displayPrice)}
-            </span>
-            {product.salePrice && (
-              <span className="text-sm text-slate-500 line-through">
-                {formatPrice(product.price)}
-              </span>
-            )}
-          </div>
-
-          {product.allowCredit && (
-            <div className="mt-1 text-[10px] text-kryros-accent flex items-center gap-1 font-medium">
-              <CreditCard className="h-3 w-3" />
-              Buy from {formatPrice(product.creditMinimum || 500)}/mo
-            </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
   )
 }
 
@@ -560,7 +394,7 @@ function FeaturedProducts({ products, loading = false }: { products: any[], load
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
           {loading ? (
             [...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-xl h-[350px] animate-pulse">

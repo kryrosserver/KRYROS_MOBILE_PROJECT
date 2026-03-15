@@ -246,8 +246,8 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1 min-h-[220px]">
-        <div className="flex justify-between items-start">
+      <div className="p-3 md:p-4 flex flex-col flex-1 min-h-[120px] md:min-h-[220px]">
+        <div className="hidden md:flex justify-between items-start">
           <p className="text-xs text-slate-500">{displayBrand}</p>
           {product?.allowCredit && (
             <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase">
@@ -256,14 +256,14 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
         </div>
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="mt-1 text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500 h-10">
+          <h3 className="mt-1 text-xs md:text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500 h-8 md:h-10">
             {product?.name}
           </h3>
         </Link>
 
-        {/* Quick Specs for Grid View */}
+        {/* Quick Specs - Hidden on Mobile */}
         {displaySpecs.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5 min-h-[28px]">
+          <div className="hidden md:flex mt-2 flex-wrap gap-1.5 min-h-[28px]">
             {displaySpecs.map((spec: any, idx: number) => (
               <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-2 py-1 text-[9px] font-semibold text-slate-600 border border-slate-100 whitespace-nowrap overflow-hidden">
                 {spec.value}
@@ -272,7 +272,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </div>
         )}
         
-        <div className="mt-2 flex items-center gap-1">
+        <div className="hidden md:flex mt-2 items-center gap-1">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
@@ -284,12 +284,12 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           <span className="text-xs text-slate-500">({displayReviews})</span>
         </div>
 
-        <div className="mt-auto pt-4">
-          <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="mt-auto pt-2 md:pt-4">
+          <div className="flex items-center justify-between gap-2 mb-1 md:mb-3">
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
+              <span className="text-sm md:text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
               {product?.originalPrice && (
-                <span className="text-xs text-slate-400 line-through">
+                <span className="text-[10px] md:text-xs text-slate-400 line-through">
                   {formatPrice(Number(product.originalPrice))}
                 </span>
               )}
@@ -297,7 +297,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             <Button
               size="icon"
               variant="ghost"
-              className="h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100"
+              className="hidden md:flex h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100"
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -323,7 +323,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="hidden md:flex flex-col gap-2">
             {product?.allowCredit && (
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-[10px] md:text-xs py-2 h-9 shadow-sm font-bold"
