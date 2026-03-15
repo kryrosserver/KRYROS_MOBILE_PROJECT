@@ -108,7 +108,8 @@ function CreditPageContent() {
       try {
         const [prodRes, planRes] = await Promise.all([
           productsApi.getCredit({ take: 8 }),
-          creditApi.getPlans()
+          // Filter plans by productId if available
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/credit/plans${productId ? `?productId=${productId}` : ''}`).then(r => r.json())
         ]);
         
         if (prodRes.data) {
@@ -133,10 +134,10 @@ function CreditPageContent() {
           }
         }
         
-        if (planRes.data) {
-          setPlans(planRes.data);
-          if (planRes.data.length > 0) {
-            setSelectedPlanId(planRes.data[0].id);
+        if (planRes) {
+          setPlans(planRes);
+          if (planRes.length > 0) {
+            setSelectedPlanId(planRes[0].id);
           }
         }
       } catch (error) {
@@ -203,21 +204,21 @@ function CreditPageContent() {
     <div className="min-h-screen bg-slate-50">
       
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-800 py-20">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fillRule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fillOpacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')]"></div>
+      <div className="relative overflow-hidden bg-slate-50 py-12 md:py-20">
+        <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fillRule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23000000%22%20fillOpacity%3D%221%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')]"></div>
         <div className="relative mx-auto max-w-7xl px-4">
           <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
-              Buy Now, <span className="text-green-400">Pay Later</span>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">
+              Buy Now, <span className="text-green-600">Pay Later</span>
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300">
+            <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg text-slate-600">
               Get the tech you need with flexible installment plans. No stress, just easy payments.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-green-500 hover:bg-green-600" onClick={() => document.getElementById('credit-catalog')?.scrollIntoView({ behavior: 'smooth' })}>
+              <Button size="lg" className="w-full sm:w-auto bg-green-500 hover:bg-green-600" onClick={() => document.getElementById('credit-catalog')?.scrollIntoView({ behavior: 'smooth' })}>
                 Browse Credit Catalog <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto border-slate-200 text-slate-900 hover:bg-slate-100" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
                 Calculate Payments
               </Button>
             </div>

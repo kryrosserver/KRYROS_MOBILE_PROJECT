@@ -15,8 +15,52 @@ export class CreditService {
     return profile;
   }
 
-  async getPlans() {
-    return this.prisma.creditPlan.findMany({ where: { isActive: true } });
+  async getPlans(params?: { productId?: string }) {
+    if (params?.productId) {
+      const product = await this.prisma.product.findUnique({
+        where: { id: params.productId },
+        include: { category: true, brand: true }
+      });
+
+      if (!product) return [];
+
+      return this.prisma.creditPlan.findMany({
+        where: {
+          isActive: true,
+          minimumAmount: { lte: product.price },
+          maximumAmount: { gte: product.price },
+          OR: [
+            // Plan applies to all
+            { targetBrandId: null, targetCategoryId: null },
+            // Plan matches brand
+            { targetBrandId: product.brandId },
+            // Plan matches category
+            { targetCategoryId: product.categoryId }
+          ]
+        },
+        orderBy: { duration: 'asc' }
+      });
+    }
+    return this.prisma.creditPlan.findMany({ 
+      where: { isActive: true },
+      include: { brand: true, category: true },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async createPlan(data: any) {
+    return this.prisma.creditPlan.create({ data });
+  }
+
+  async updatePlan(id: string, data: any) {
+    return this.prisma.creditPlan.update({
+      where: { id },
+      data
+    });
+  }
+
+  async deletePlan(id: string) {
+    return this.prisma.creditPlan.delete({ where: { id } });
   }
 
   async getAccounts(userId: string) {

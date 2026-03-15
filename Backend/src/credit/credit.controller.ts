@@ -19,8 +19,29 @@ export class CreditController {
 
   @Get('plans')
   @ApiOperation({ summary: 'Get available credit plans' })
-  getPlans() {
-    return this.creditService.getPlans();
+  getPlans(@Query('productId') productId?: string) {
+    return this.creditService.getPlans({ productId });
+  }
+
+  @Post('plans')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new credit plan (Admin)' })
+  createPlan(@Body() body: any) {
+    return this.creditService.createPlan(body);
+  }
+
+  @Put('plans/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update a credit plan (Admin)' })
+  updatePlan(@Param('id') id: string, @Body() body: any) {
+    return this.creditService.updatePlan(id, body);
+  }
+
+  @Body()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Delete a credit plan (Admin)' })
+  deletePlan(@Param('id') id: string) {
+    return this.creditService.deletePlan(id);
   }
 
   @Get('accounts')

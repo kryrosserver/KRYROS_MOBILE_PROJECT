@@ -137,6 +137,7 @@ model Category {
   children    Category[] @relation("CategoryHierarchy")
   products    Product[]
   brands      Brand[]
+  creditPlans CreditPlan[]
 
   @@map("categories")
 }
@@ -155,6 +156,7 @@ model Brand {
   updatedAt   DateTime  @updatedAt
 
   products    Product[]
+  creditPlans CreditPlan[]
 
   @@map("brands")
 }
@@ -549,6 +551,14 @@ model CreditPlan {
   maximumAmount Decimal  @db.Decimal(10, 2)
   description   String?
   isActive      Boolean  @default(true)
+  
+  // Rules for eligibility
+  targetBrandId    Int?
+  targetCategoryId String?
+  
+  brand            Brand?    @relation(fields: [targetBrandId], references: [id])
+  category         Category? @relation(fields: [targetCategoryId], references: [id])
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
