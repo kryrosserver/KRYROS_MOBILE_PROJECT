@@ -480,22 +480,32 @@ export class ProductsService {
     }
   }
 
-  async updateFlags(id: string, data: { isFeatured?: boolean; isFlashSale?: boolean; flashSaleEnd?: string | null; flashSalePrice?: number | null; allowCredit?: boolean }) {
+  async updateFlags(
+    id: string,
+    data: {
+      isFeatured?: boolean;
+      isFlashSale?: boolean;
+      flashSaleEnd?: string | null;
+      flashSalePrice?: number | null;
+      allowCredit?: boolean;
+    },
+  ) {
     let flashSaleEndValue: Date | null | undefined = undefined;
     let flashSalePriceValue: number | undefined = undefined;
 
     if (data.isFlashSale === true) {
       const now = new Date();
-      const desiredEnd = data.flashSaleEnd ? new Date(data.flashSaleEnd) : new Date(now.getTime() + 1000 * 60 * 60 * 48);
-      flashSaleEndValue = desiredEnd > now ? desiredEnd : new Date(now.getTime() + 1000 * 60 * 60 * 48);
+      const end = data.flashSaleEnd;
+      const desiredEnd = end ? new Date(end) : new Date(now.getTime() + 48 * 60 * 60 * 1000);
+      flashSaleEndValue = desiredEnd > now ? desiredEnd : new Date(now.getTime() + 48 * 60 * 60 * 1000);
       flashSalePriceValue = data.flashSalePrice ?? undefined;
     } else if (data.isFlashSale === false) {
       flashSaleEndValue = null;
       flashSalePriceValue = undefined;
     }
 
-    const product = await this.prisma.product.update({
-      where: { id },
+    const result = await this.prisma.product.update({
+      where: { id: id },
       data: {
         isFeatured: data.isFeatured ?? undefined,
         isFlashSale: data.isFlashSale ?? undefined,
@@ -504,7 +514,7 @@ export class ProductsService {
         flashSalePrice: flashSalePriceValue,
       },
     });
-    return product;
+    return result;
   }
 
   async seedSampleProducts() {
