@@ -59,6 +59,18 @@ export class UpdateProductDto {
   creditMinimum?: number;
 
   @IsOptional()
+  @IsString()
+  creditMessage?: string;
+
+  @IsOptional()
+  @IsString()
+  deliveryInfo?: string;
+
+  @IsOptional()
+  @IsString()
+  warrantyInfo?: string;
+
+  @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   replaceImages?: boolean;
