@@ -68,6 +68,7 @@ export function Header() {
   const [categories, setCategories] = useState<any[]>([])
   const [wishlistCount, setWishlistCount] = useState<number>(0)
   const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
@@ -439,35 +440,77 @@ export function Header() {
                       Categories
                     </p>
                     <div className="space-y-1 pb-4">
-                      {categories.map((cat) => (
-                        <div key={cat.id} className="space-y-1">
-                          <Link
-                            href={`/shop?category=${cat.slug}`}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-foreground transition-colors hover:bg-secondary capitalize"
-                          >
-                            <span>{cat.name}</span>
-                            <span className="text-[10px] bg-secondary-foreground/10 px-1.5 py-0.5 rounded-full">
-                              {cat._count?.products || 0}
-                            </span>
-                          </Link>
-                          {/* Brands under this category in mobile */}
-                          {cat.brands?.length > 0 && (
-                            <div className="ml-4 border-l border-border pl-2 space-y-1">
-                              {cat.brands.slice(0, 5).map((brand: any) => (
-                                <Link
-                                  key={brand.id}
-                                  href={`/shop?category=${cat.slug}&brand=${brand.slug}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="block rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary capitalize"
+                      {categories.map((cat) => {
+                        const isExpanded = expandedCategories.includes(cat.id);
+                        const hasBrands = cat.brands?.length > 0;
+                        
+                        const toggleExpand = (e: React.MouseEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setExpandedCategories(prev => 
+                            isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
+                          );
+                        };
+
+                        return (
+                          <div key={cat.id} className="space-y-1">
+                            <div className="flex items-center gap-1">
+                              <Link
+                                href={`/shop?category=${cat.slug}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex-1 flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-foreground transition-colors hover:bg-secondary capitalize"
+                              >
+                                <span>{cat.name}</span>
+                                <span className="text-[10px] bg-secondary-foreground/10 px-1.5 py-0.5 rounded-full">
+                                  {cat._count?.products || 0}
+                                </span>
+                              </Link>
+                              {hasBrands && (
+                                <button
+                                  onClick={toggleExpand}
+                                  className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-colors"
+                                  aria-label={isExpanded ? "Collapse" : "Expand"}
                                 >
-                                  {brand.name}
-                                </Link>
-                              ))}
+                                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                                </button>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      ))}
+                            
+                            {/* Brands under this category in mobile */}
+                            <AnimatePresence>
+                              {hasBrands && isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="ml-4 border-l border-border pl-2 space-y-1 py-1">
+                                    {cat.brands.slice(0, 10).map((brand: any) => (
+                                      <Link
+                                        key={brand.id}
+                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary capitalize"
+                                      >
+                                        {brand.name}
+                                      </Link>
+                                    ))}
+                                    <Link
+                                      href={`/shop?category=${cat.slug}`}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="block rounded-md px-3 py-1.5 text-xs font-bold text-kryros-green transition-colors hover:bg-secondary capitalize"
+                                    >
+                                      View All {cat.name}
+                                    </Link>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </nav>
