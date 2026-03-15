@@ -20,6 +20,7 @@ type Product = {
   category?: { id: string; name: string; slug: string };
   brand?: { id: number; name: string; slug: string };
   specifications?: string | any[];
+  images?: any[];
 };
 
 type Category = {
