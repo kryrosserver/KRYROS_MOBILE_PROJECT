@@ -15,7 +15,7 @@ export function formatPrice(price: number, currency = 'USD'): string {
 }
 
 export function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat('en-ZM', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -23,7 +23,7 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatDateTime(date: Date | string): string {
-  return new Intl.DateTimeFormat('en-ZM', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
