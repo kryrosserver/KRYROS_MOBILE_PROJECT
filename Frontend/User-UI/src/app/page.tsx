@@ -393,6 +393,22 @@ function ProductCard({ product }: { product: Product }) {
 
   const displayPrice = product.flashSalePrice || product.salePrice || product.price
 
+  // Extract key specs (RAM, Storage, etc.)
+  const specs = Array.isArray((product as any)?.specifications) 
+    ? (product as any).specifications 
+    : (typeof (product as any)?.specifications === 'string' ? JSON.parse((product as any).specifications) : []);
+  
+  // Look for RAM, Storage, or any first 2 specs
+  const importantKeys = ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen', 'size', 'capacity'];
+  let displaySpecs = specs.filter((s: any) => 
+    importantKeys.some(k => s.key?.toLowerCase().includes(k))
+  ).slice(0, 2);
+
+  // If no "important" specs found, just take the first two available
+  if (displaySpecs.length === 0 && specs.length > 0) {
+    displaySpecs = specs.slice(0, 2);
+  }
+
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -461,7 +477,7 @@ function ProductCard({ product }: { product: Product }) {
         {/* Quick Add */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
-            className="w-full bg-kryros-accent hover:bg-kryros-accent-hover"
+            className="w-full bg-kryros-accent hover:bg-kryros-accent-hover text-white"
             onClick={() => addItem(product)}
           >
             <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
@@ -470,40 +486,53 @@ function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col h-full min-h-[160px]">
         <Link href={`/product/${product.slug}`}>
-          <h3 className="font-medium text-sm line-clamp-2 hover:text-kryros-accent transition-colors">
+          <h3 className="font-medium text-sm line-clamp-2 hover:text-kryros-accent transition-colors h-10">
             {product.name}
           </h3>
         </Link>
+
+        {/* Quick Specs */}
+        {displaySpecs.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5 h-6 overflow-hidden">
+            {displaySpecs.map((spec: any, idx: number) => (
+              <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-100">
+                {spec.value}
+              </span>
+            ))}
+          </div>
+        )}
         
-        <div className="flex items-center gap-1 mt-1">
+        <div className="flex items-center gap-1 mt-2">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
               className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
             />
           ))}
-          <span className="text-sm text-slate-600">({product.reviewCount})</span>
+          <span className="text-xs text-slate-500">({product.reviewCount})</span>
         </div>
 
-        <div className="mt-2 flex items-center gap-2">
-          <span className="font-bold text-lg text-kryros-primary">
-            {formatPrice(displayPrice)}
-          </span>
-          {product.salePrice && (
-            <span className="text-base text-slate-500 line-through">
-              {formatPrice(product.price)}
+        <div className="mt-auto pt-3">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-lg text-kryros-primary">
+              {formatPrice(displayPrice)}
             </span>
+            {product.salePrice && (
+              <span className="text-sm text-slate-500 line-through">
+                {formatPrice(product.price)}
+              </span>
+            )}
+          </div>
+
+          {product.allowCredit && (
+            <div className="mt-1 text-[10px] text-kryros-accent flex items-center gap-1 font-medium">
+              <CreditCard className="h-3 w-3" />
+              Buy from {formatPrice(product.creditMinimum || 500)}/mo
+            </div>
           )}
         </div>
-
-        {product.allowCredit && (
-          <div className="mt-2 text-xs text-kryros-accent flex items-center gap-1">
-            <CreditCard className="h-3 w-3" />
-            Buy from {formatPrice(product.creditMinimum || 500)}/mo
-          </div>
-        )}
       </div>
     </motion.div>
   )

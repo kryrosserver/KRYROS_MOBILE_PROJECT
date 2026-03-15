@@ -69,9 +69,16 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     ? product.specifications 
     : (typeof product?.specifications === 'string' ? JSON.parse(product.specifications) : []);
   
-  const keySpecs = specs.filter((s: any) => 
-    ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen'].includes(s.key?.toLowerCase())
+  // Look for RAM, Storage, or any first 2 specs
+  const importantKeys = ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen', 'size', 'capacity'];
+  let displaySpecs = specs.filter((s: any) => 
+    importantKeys.some(k => s.key?.toLowerCase().includes(k))
   ).slice(0, 2);
+
+  // If no "important" specs found, just take the first two available
+  if (displaySpecs.length === 0 && specs.length > 0) {
+    displaySpecs = specs.slice(0, 2);
+  }
   
   const discount = product?.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -114,9 +121,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             </Link>
             
             {/* Quick Specs for List View */}
-            {keySpecs.length > 0 && (
+            {displaySpecs.length > 0 && (
               <div className="mt-1.5 flex flex-wrap gap-2">
-                {keySpecs.map((spec: any, idx: number) => (
+                {displaySpecs.map((spec: any, idx: number) => (
                   <span key={idx} className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
                     {spec.value}
                   </span>
@@ -248,9 +255,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </Link>
 
         {/* Quick Specs for Grid View */}
-        {keySpecs.length > 0 && (
+        {displaySpecs.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {keySpecs.map((spec: any, idx: number) => (
+            {displaySpecs.map((spec: any, idx: number) => (
               <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500 border border-slate-100">
                 {spec.value}
               </span>

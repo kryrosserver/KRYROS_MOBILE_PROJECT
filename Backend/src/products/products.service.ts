@@ -119,6 +119,7 @@ export class ProductsService {
       take,
       include: {
         category: true,
+        brand: true,
         images: { orderBy: { sortOrder: 'asc' }, take: 1 },
         inventory: true,
       },
@@ -136,6 +137,7 @@ export class ProductsService {
       },
       include: {
         category: true,
+        brand: true,
         images: { orderBy: { sortOrder: 'asc' }, take: 1 },
         inventory: true,
       },
