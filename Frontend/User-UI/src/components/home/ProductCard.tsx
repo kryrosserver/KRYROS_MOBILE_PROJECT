@@ -246,7 +246,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-3 md:p-4 flex flex-col flex-1 min-h-[120px] md:min-h-[220px]">
+      <div className="p-2 md:p-4 flex flex-col flex-1 min-h-[110px] md:min-h-[220px]">
         <div className="hidden md:flex justify-between items-start">
           <p className="text-xs text-slate-500">{displayBrand}</p>
           {product?.allowCredit && (
@@ -256,7 +256,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
         </div>
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="mt-1 text-xs md:text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500 h-8 md:h-10">
+          <h3 className="mt-1 text-[11px] md:text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500 h-8 md:h-10">
             {product?.name}
           </h3>
         </Link>
@@ -284,12 +284,12 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           <span className="text-xs text-slate-500">({displayReviews})</span>
         </div>
 
-        <div className="mt-auto pt-2 md:pt-4">
+        <div className="mt-auto pt-1 md:pt-4">
           <div className="flex items-center justify-between gap-2 mb-1 md:mb-3">
             <div className="flex flex-col">
-              <span className="text-sm md:text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
+              <span className="text-xs md:text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
               {product?.originalPrice && (
-                <span className="text-[10px] md:text-xs text-slate-400 line-through">
+                <span className="text-[9px] md:text-xs text-slate-400 line-through">
                   {formatPrice(Number(product.originalPrice))}
                 </span>
               )}

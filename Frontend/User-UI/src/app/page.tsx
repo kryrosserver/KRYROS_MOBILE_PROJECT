@@ -344,27 +344,27 @@ function FlashSales({ products, loading = false }: { products: any[], loading?: 
   const flashProducts = products
 
   return (
-    <section className="section-padding bg-gradient-to-br from-orange-50 to-red-50">
+    <section className="py-8 md:py-16 bg-gradient-to-br from-orange-50 to-red-50 overflow-hidden">
       <div className="container-custom">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-kryros-orange text-white px-4 py-2 rounded-lg">
-              <Flashlight className="h-5 w-5" />
-              <span className="font-bold">Flash Sales</span>
+            <div className="flex items-center gap-2 bg-kryros-orange text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg">
+              <Flashlight className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="font-bold text-sm md:text-base">Flash Sales</span>
             </div>
-            <div className="flex items-center gap-1 text-sm text-gray-600">
-              <Clock className="h-4 w-4" />
+            <div className="flex items-center gap-1 text-[11px] md:text-sm text-gray-600">
+              <Clock className="h-3.5 w-3.5" />
               Ends in:
             </div>
             <div className="flex gap-1">
               {['days', 'hours', 'minutes', 'seconds'].map((unit) => (
-                <div key={unit} className="bg-kryros-primary text-white px-2 py-1 rounded text-sm font-bold min-w-[40px] text-center">
+                <div key={unit} className="bg-kryros-primary text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-sm font-bold min-w-[30px] md:min-w-[40px] text-center">
                   {isMounted ? String(timeLeft[unit as keyof typeof timeLeft]).padStart(2, '0') : '--'}
                 </div>
               ))}
             </div>
           </div>
-          <Link href="/flash-sales" className="text-kryros-orange font-medium hover:underline flex items-center gap-1">
+          <Link href="/flash-sales" className="text-kryros-orange text-sm font-medium hover:underline flex items-center gap-1">
             View All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -385,11 +385,11 @@ function FeaturedProducts({ products, loading = false }: { products: any[], load
   const featuredProducts = products
 
   return (
-    <section className="section-padding bg-gray-50">
+    <section className="py-8 md:py-16 bg-gray-50">
       <div className="container-custom">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl md:text-3xl font-heading font-bold">Featured Products</h2>
-          <Link href="/shop?featured=true" className="text-kryros-accent font-medium hover:underline flex items-center gap-1">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-3xl font-heading font-bold">Featured Products</h2>
+          <Link href="/shop?featured=true" className="text-kryros-accent text-sm font-medium hover:underline flex items-center gap-1">
             View All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
