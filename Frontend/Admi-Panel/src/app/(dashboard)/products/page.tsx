@@ -345,20 +345,20 @@ export default function ProductsPage() {
                       }
                       setCreating(true);
                       let res;
+                      const formData = new FormData();
+                      formData.append("name", form.name);
+                      formData.append("sku", form.sku);
+                      formData.append("price", String(Number(form.price)));
+                      formData.append("description", form.description);
+                      formData.append("categorySlug", form.categorySlug || "general");
+                      if (form.brandId) formData.append("brandId", String(form.brandId));
+                      formData.append("isActive", String(form.isActive));
+                      formData.append("isFeatured", String(form.isFeatured));
+                      formData.append("allowCredit", String(form.allowCredit));
+                      if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
+                      if (form.specifications.length > 0) formData.append("specifications", JSON.stringify(form.specifications));
+
                       if (files.length > 0) {
-                        const formData = new FormData();
-                        formData.append("name", form.name);
-                        formData.append("sku", form.sku);
-                        formData.append("price", String(Number(form.price)));
-                        formData.append("description", form.description);
-                        formData.append("categorySlug", form.categorySlug || "general");
-                        if (form.brandId) formData.append("brandId", String(form.brandId));
-                        formData.append("isActive", String(form.isActive));
-                        formData.append("isFeatured", String(form.isFeatured));
-                        formData.append("allowCredit", String(form.allowCredit));
-                        if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
-                        if (form.specifications.length > 0) formData.append("specifications", JSON.stringify(form.specifications));
-                        // Recompress large files to blobs if needed for better size/quality tradeoff
                         const blobs = await Promise.all(
                           files.map(async (f) => {
                             const tooLarge = f.size > 3 * 1024 * 1024;
@@ -372,7 +372,9 @@ export default function ProductsPage() {
                         for (const b of blobs) {
                           formData.append("images", b);
                         }
-                        res = await fetch("/internal/admin/products/upload", {
+                      }
+
+                      res = await fetch("/internal/admin/products/upload", {
                         method: "POST",
                         body: formData,
                       });
@@ -803,18 +805,19 @@ export default function ProductsPage() {
                     try {
                       const id = editItem.id;
                       let res;
+                      const formData = new FormData();
+                      if (editForm.name) formData.append("name", editForm.name);
+                      if (editForm.price) formData.append("price", String(Number(editForm.price)));
+                      if (editForm.description) formData.append("description", editForm.description);
+                      if (editForm.categorySlug) formData.append("categorySlug", editForm.categorySlug);
+                      if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
+                      formData.append("isActive", String(editForm.isActive));
+                      formData.append("isFeatured", String(editForm.isFeatured));
+                      formData.append("allowCredit", String(editForm.allowCredit));
+                      if (editForm.creditMinimum) formData.append("creditMinimum", String(Number(editForm.creditMinimum)));
+                      if (editForm.specifications.length > 0) formData.append("specifications", JSON.stringify(editForm.specifications));
+
                       if (editFiles.length > 0) {
-                        const formData = new FormData();
-                        if (editForm.name) formData.append("name", editForm.name);
-                        if (editForm.price) formData.append("price", String(Number(editForm.price)));
-                        if (editForm.description) formData.append("description", editForm.description);
-                        if (editForm.categorySlug) formData.append("categorySlug", editForm.categorySlug);
-                        if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
-                        formData.append("isActive", String(editForm.isActive));
-                        formData.append("isFeatured", String(editForm.isFeatured));
-                        formData.append("allowCredit", String(editForm.allowCredit));
-                        if (editForm.creditMinimum) formData.append("creditMinimum", String(Number(editForm.creditMinimum)));
-                        if (editForm.specifications.length > 0) formData.append("specifications", JSON.stringify(editForm.specifications));
                         formData.append("replaceImages", "true");
                         for (const f of editFiles) {
                           const recompressed = await compressImage(f, 2000, 0.9);
@@ -822,7 +825,9 @@ export default function ProductsPage() {
                           const blob = await resp.blob();
                           formData.append("images", new File([blob], f.name.replace(/\.(png|jpg|jpeg|webp)$/i, ".jpg"), { type: "image/jpeg" }));
                         }
-                        res = await fetch(`/internal/admin/products/${id}/upload`, { method: "POST", body: formData });
+                      }
+
+                      res = await fetch(`/internal/admin/products/${id}/upload`, { method: "POST", body: formData });
                       
                       const body = await res.json().catch(() => ({}));
                       if (!res.ok) throw new Error(body?.error || body?.message || "Failed to update product");
