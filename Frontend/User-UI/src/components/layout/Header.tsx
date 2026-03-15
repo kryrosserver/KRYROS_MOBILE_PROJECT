@@ -473,9 +473,9 @@ export function Header() {
                               <Link
                                 href={`/shop?category=${cat.slug}`}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="flex-1 flex items-center justify-between rounded-md px-3 py-2 text-sm font-bold text-foreground transition-colors hover:bg-secondary capitalize"
+                                className="flex-1 flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                               >
-                                <span>{cat.name}</span>
+                                <span className="capitalize">{cat.name.toLowerCase()}</span>
                                 <span className="text-[10px] bg-secondary-foreground/10 px-1.5 py-0.5 rounded-full">
                                   {cat._count?.products || 0}
                                 </span>
