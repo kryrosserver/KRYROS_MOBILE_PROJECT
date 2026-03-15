@@ -122,6 +122,7 @@ export default function ProductsPage() {
     try {
       const url = new URL("/api/admin/products", window.location.origin);
       if (search) url.searchParams.set("search", search);
+      url.searchParams.set("showInactive", "true");
       const res = await fetch(url.toString(), { cache: "no-store" });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || "Failed to load products");
@@ -618,13 +619,13 @@ export default function ProductsPage() {
                         setEditForm({
                           name: p.name,
                           price: String(p.price ?? ""),
-                          description: "", // If you want to keep description, you'll need it in the Product type
+                          description: (p as any).description || "",
                           categorySlug: p.category?.slug || "",
                           brandId: p.brand?.id || "",
                           isActive: p.isActive !== false,
                           isFeatured: !!p.isFeatured,
-                          allowCredit: !!(p as any).allowCredit,
-                          creditMinimum: String((p as any).creditMinimum ?? ""),
+                          allowCredit: !!p.allowCredit,
+                          creditMinimum: String(p.creditMinimum ?? ""),
                           specifications: typeof (p as any).specifications === 'string' 
                             ? JSON.parse((p as any).specifications) 
                             : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),

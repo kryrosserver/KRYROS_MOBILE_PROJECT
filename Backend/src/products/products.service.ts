@@ -15,10 +15,14 @@ export class ProductsService {
     search?: string;
     isFeatured?: boolean;
     allowCredit?: boolean;
+    showInactive?: boolean;
   }) {
-    const { skip = 0, take = 20, categoryId, search, isFeatured, allowCredit } = params;
+    const { skip = 0, take = 20, categoryId, search, isFeatured, allowCredit, showInactive } = params;
     
-    const where: any = { isActive: true };
+    const where: any = {};
+    if (!showInactive) {
+      where.isActive = true;
+    }
     
     if (categoryId) where.categoryId = categoryId;
     if (isFeatured) where.isFeatured = true;
@@ -398,7 +402,7 @@ export class ProductsService {
     const updated = await this.prisma.product.update({
       where: { id },
       data: {
-        name: data.name ?? undefined,
+        name: data.name?.trim() || undefined,
         slug: slug ?? undefined,
         description: data.description ?? undefined,
         shortDescription: data.shortDescription ?? undefined,

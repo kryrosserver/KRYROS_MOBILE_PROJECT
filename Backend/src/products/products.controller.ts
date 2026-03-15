@@ -24,6 +24,7 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('featured') featured?: boolean,
     @Query('allowCredit') allowCredit?: boolean,
+    @Query('showInactive') showInactive?: boolean,
   ) {
     return this.productsService.findAll({
       skip: skip ? Number(skip) : undefined,
@@ -32,6 +33,7 @@ export class ProductsController {
       search,
       isFeatured: featured,
       allowCredit: allowCredit === true || (allowCredit as any) === 'true',
+      showInactive: showInactive === true || (showInactive as any) === 'true',
     });
   }
 
