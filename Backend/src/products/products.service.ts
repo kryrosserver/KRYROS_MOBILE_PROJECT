@@ -483,27 +483,23 @@ export class ProductsService {
   async updateFlags(id: string, data: { isFeatured?: boolean; isFlashSale?: boolean; flashSaleEnd?: string | null; flashSalePrice?: number | null; allowCredit?: boolean }) {
     let flashSaleEndValue: Date | null | undefined = undefined;
     let flashSalePriceValue: number | undefined = undefined;
-    if (typeof data.isFlashSale === 'boolean') {
-      if (data.isFlashSale) {
-        // Default to 48 hours if no end provided; also guard against past-dates
-        const now = new Date();
-        const desiredEnd = data.flashSaleEnd ? new Date(data.flashSaleEnd) : new Date(now.getTime() + 1000 * 60 * 60 * 48);
-        flashSaleEndValue = desiredEnd > now ? desiredEnd : new Date(now.getTime() + 1000 * 60 * 60 * 48);
-        flashSalePriceValue = data.flashSalePrice !== undefined ? data.flashSalePrice : undefined;
-      } else {
-        flashSaleEndValue = data.flashSaleEnd !== undefined ? (data.flashSaleEnd ? new Date(data.flashSaleEnd) : null) : null;
-        flashSalePriceValue = data.flashSalePrice !== undefined ? data.flashSalePrice : undefined;
-      }
-    } else {
-      flashSaleEndValue = data.flashSaleEnd !== undefined ? (data.flashSaleEnd ? new Date(data.flashSaleEnd) : null) : undefined;
-      flashSalePriceValue = data.flashSalePrice !== undefined ? data.flashSalePrice : undefined;
+
+    if (data.isFlashSale === true) {
+      const now = new Date();
+      const desiredEnd = data.flashSaleEnd ? new Date(data.flashSaleEnd) : new Date(now.getTime() + 1000 * 60 * 60 * 48);
+      flashSaleEndValue = desiredEnd > now ? desiredEnd : new Date(now.getTime() + 1000 * 60 * 60 * 48);
+      flashSalePriceValue = data.flashSalePrice ?? undefined;
+    } else if (data.isFlashSale === false) {
+      flashSaleEndValue = null;
+      flashSalePriceValue = undefined;
     }
+
     const product = await this.prisma.product.update({
       where: { id },
       data: {
-        isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : undefined,
-        isFlashSale: typeof data.isFlashSale === 'boolean' ? data.isFlashSale : undefined,
-        allowCredit: typeof data.allowCredit === 'boolean' ? data.allowCredit : undefined,
+        isFeatured: data.isFeatured ?? undefined,
+        isFlashSale: data.isFlashSale ?? undefined,
+        allowCredit: data.allowCredit ?? undefined,
         flashSaleEnd: flashSaleEndValue,
         flashSalePrice: flashSalePriceValue,
       },
