@@ -153,42 +153,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   Wishlist
                 </Button>
               </div>
-
-              {p.allowCredit && (
-                <div className="mt-6 rounded-xl bg-blue-50 p-4 border border-blue-100">
-                  <div className="flex items-center gap-2 text-blue-700 font-bold">
-                    <CreditCard className="h-5 w-5" />
-                    Available on Installments
-                  </div>
-                  <p className="mt-1 text-sm text-blue-600">
-                    Get this product from as low as {formatPrice(Number(p.creditMinimum || 500))}/month
-                  </p>
-                  <Button variant="link" className="mt-2 h-auto p-0 text-blue-700 underline underline-offset-4">
-                    Apply for Credit Now
-                  </Button>
-                </div>
-              )}
-
-              <div className="mt-8 grid grid-cols-2 gap-4 border-t pt-8">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <Truck className="h-5 w-5" />
-                  </div>
-                  <div className="text-xs">
-                    <p className="font-bold text-slate-900">Fast Delivery</p>
-                    <p className="text-slate-500">Lusaka & Copperbelt</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <Shield className="h-5 w-5" />
-                  </div>
-                  <div className="text-xs">
-                    <p className="font-bold text-slate-900">1 Year Warranty</p>
-                    <p className="text-slate-500">Genuine products</p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Specifications & Description */}
