@@ -261,27 +261,27 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </h3>
         </Link>
 
-        {/* Quick Specs - Hidden on Mobile */}
+        {/* Quick Specs - Optimized for Mobile & Desktop */}
         {displaySpecs.length > 0 && (
-          <div className="hidden md:flex mt-2 flex-wrap gap-1.5 min-h-[28px]">
+          <div className="flex mt-1.5 md:mt-2 flex-wrap gap-1 md:gap-1.5 min-h-[18px] md:min-h-[28px] overflow-hidden">
             {displaySpecs.map((spec: any, idx: number) => (
-              <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-2 py-1 text-[9px] font-semibold text-slate-600 border border-slate-100 whitespace-nowrap overflow-hidden">
+              <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-1 md:px-2 py-0.5 md:py-1 text-[8px] md:text-[9px] font-bold text-slate-600 border border-slate-100 whitespace-nowrap">
                 {spec.value}
               </span>
             ))}
           </div>
         )}
         
-        <div className="hidden md:flex mt-2 items-center gap-1">
+        <div className="flex mt-1.5 md:mt-2 items-center gap-0.5 md:gap-1">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className={`h-3 w-3 ${
+              className={`h-2.5 w-2.5 md:h-3 w-3 ${
                 i < Math.floor(product?.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-slate-300"
               }`}
             />
           ))}
-          <span className="text-xs text-slate-500">({displayReviews})</span>
+          <span className="text-[9px] md:text-xs text-slate-500">({displayReviews})</span>
         </div>
 
         <div className="mt-auto pt-1 md:pt-4">
