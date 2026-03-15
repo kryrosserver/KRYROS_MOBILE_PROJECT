@@ -103,7 +103,6 @@ export class ProductsService {
         inventory: true,
         relatedProducts: {
           include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
-        },
       },
     });
 
