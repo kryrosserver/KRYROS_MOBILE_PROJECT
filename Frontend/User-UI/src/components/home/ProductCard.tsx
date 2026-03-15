@@ -63,6 +63,15 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const displayBrand = getProductBrand(product);
   const displayReviews = getProductReviews(product);
   const displayCategory = getProductCategory(product);
+
+  // Extract key specs (RAM, Storage, etc.)
+  const specs = Array.isArray(product?.specifications) 
+    ? product.specifications 
+    : (typeof product?.specifications === 'string' ? JSON.parse(product.specifications) : []);
+  
+  const keySpecs = specs.filter((s: any) => 
+    ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen'].includes(s.key?.toLowerCase())
+  ).slice(0, 2);
   
   const discount = product?.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -103,6 +112,18 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 {product?.name}
               </h3>
             </Link>
+            
+            {/* Quick Specs for List View */}
+            {keySpecs.length > 0 && (
+              <div className="mt-1.5 flex flex-wrap gap-2">
+                {keySpecs.map((spec: any, idx: number) => (
+                  <span key={idx} className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                    {spec.value}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="mt-2 flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -221,10 +242,21 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
         </div>
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="mt-1 text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500">
+          <h3 className="mt-1 text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500 h-10">
             {product?.name}
           </h3>
         </Link>
+
+        {/* Quick Specs for Grid View */}
+        {keySpecs.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {keySpecs.map((spec: any, idx: number) => (
+              <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500 border border-slate-100">
+                {spec.value}
+              </span>
+            ))}
+          </div>
+        )}
         
         <div className="mt-2 flex items-center gap-1">
           {[...Array(5)].map((_, i) => (
