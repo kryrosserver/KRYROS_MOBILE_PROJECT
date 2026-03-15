@@ -211,7 +211,7 @@ export function Header() {
                             {cat.brands?.slice(0, 6).map((brand: any) => (
                               <li key={brand.id}>
                                 <Link
-                                  href={`/shop?category=${cat.slug}&brand=${brand.slug}`}
+                                  href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
                                   onClick={() => setMegaMenuOpen(false)}
                                   className="text-sm text-foreground transition-colors hover:text-kryros-green capitalize"
                                 >
@@ -505,7 +505,7 @@ export function Header() {
                                     {cat.brands.slice(0, 10).map((brand: any) => (
                                       <Link
                                         key={brand.id}
-                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}`}
+                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="block rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary capitalize"
                                       >

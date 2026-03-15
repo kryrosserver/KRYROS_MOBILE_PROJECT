@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ProductCard } from "@/components/home/ProductCard";
 import { BrandNav } from "./BrandNav";
 
@@ -20,6 +21,20 @@ type CategoryGroup = {
 };
 
 export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
+  useEffect(() => {
+    // Smooth scroll to brand if hash exists in URL
+    const hash = window.location.hash;
+    if (hash) {
+      const id = hash.replace('#', '');
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500); // Small delay to ensure content is rendered
+    }
+  }, [groupedData]);
+
   if (!groupedData || groupedData.length === 0) {
     return (
       <div className="rounded-xl border bg-white p-10 text-center text-slate-600">
@@ -48,8 +63,8 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
             {category.brands.map((brand) => (
               <div 
                 key={brand.id} 
-                id={`${category.slug}-${brand.slug}`}
-                className="scroll-mt-32"
+                id={`brand-${brand.slug}`}
+                className="scroll-mt-24"
               >
                 {/* Brand Header */}
                 <div className="flex items-center justify-between mb-4">
