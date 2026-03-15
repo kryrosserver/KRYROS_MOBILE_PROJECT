@@ -425,6 +425,21 @@ export function Header() {
 
                 <nav className="flex-1 overflow-y-auto px-4 py-4 overscroll-contain custom-scrollbar">
                   <div className="flex flex-col gap-1">
+                    {/* User Account Quick Link */}
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex w-full items-center gap-3 rounded-xl bg-kryros-green/10 px-4 py-4 mb-4 text-sm font-bold text-kryros-green transition-colors hover:bg-kryros-green/20"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-kryros-green text-white">
+                        <User className="h-5 w-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-base">My Account</span>
+                        <span className="text-[10px] text-kryros-green/70 font-medium uppercase tracking-wider">Manage your profile & orders</span>
+                      </div>
+                    </Link>
+
                     {["Home", "Shop", "Credit Plans", "Wholesale"].map((item) => (
                       <Link
                         key={item}
@@ -514,17 +529,6 @@ export function Header() {
                     </div>
                   </div>
                 </nav>
-
-                <div className="border-t border-border px-4 py-6 shrink-0 bg-card mt-auto shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)]">
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-kryros-green py-3.5 text-sm font-bold text-accent-foreground transition-colors hover:bg-kryros-green/90 shadow-lg shadow-kryros-green/20"
-                  >
-                    <User className="h-4 w-4" />
-                    My Account
-                  </Link>
-                </div>
               </div>
             </motion.div>
           </div>
