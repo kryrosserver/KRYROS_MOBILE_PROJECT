@@ -143,11 +143,12 @@ export class ProductsService {
     });
   }
 
-  async getGroupedProducts(isFeatured?: boolean) {
+  async getGroupedProducts(isFeatured?: boolean, allowCredit?: boolean) {
     const products = await this.prisma.product.findMany({
       where: { 
         isActive: true,
-        ...(isFeatured !== undefined ? { isFeatured } : {})
+        ...(isFeatured !== undefined ? { isFeatured } : {}),
+        ...(allowCredit !== undefined ? { allowCredit } : {})
       },
       include: { 
         images: true, 

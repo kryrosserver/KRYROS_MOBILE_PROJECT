@@ -8,6 +8,8 @@ export async function GET(req: NextRequest) {
   const skip = searchParams.get("skip") || "0";
   const categoryId = searchParams.get("categoryId") || "";
   const featured = searchParams.get("featured") || "";
+  const allowCredit = searchParams.get("allowCredit") || "";
+  const showInactive = searchParams.get("showInactive") || "";
 
   const url = new URL(`${API_BASE}/products`);
   if (search) url.searchParams.set("search", search);
@@ -15,6 +17,8 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("skip", skip);
   if (categoryId) url.searchParams.set("categoryId", categoryId);
   if (featured) url.searchParams.set("featured", featured);
+  if (allowCredit) url.searchParams.set("allowCredit", allowCredit);
+  if (showInactive) url.searchParams.set("showInactive", showInactive);
 
   const res = await fetch(url.toString(), { cache: "no-store" });
   const text = await res.text();

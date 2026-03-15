@@ -22,18 +22,18 @@ export class ProductsController {
     @Query('take') take?: number,
     @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
-    @Query('featured') featured?: boolean,
-    @Query('allowCredit') allowCredit?: boolean,
-    @Query('showInactive') showInactive?: boolean,
+    @Query('featured') featured?: string,
+    @Query('allowCredit') allowCredit?: string,
+    @Query('showInactive') showInactive?: string,
   ) {
     return this.productsService.findAll({
       skip: skip ? Number(skip) : undefined,
       take: take ? Number(take) : undefined,
       categoryId,
       search,
-      isFeatured: featured,
-      allowCredit: allowCredit === true || (allowCredit as any) === 'true',
-      showInactive: showInactive === true || (showInactive as any) === 'true',
+      isFeatured: featured === 'true' ? true : (featured === 'false' ? false : undefined),
+      allowCredit: allowCredit === 'true' ? true : (allowCredit === 'false' ? false : undefined),
+      showInactive: showInactive === 'true' ? true : (showInactive === 'false' ? false : undefined),
     });
   }
 
@@ -65,9 +65,13 @@ export class ProductsController {
   @Get('grouped')
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get products grouped by category and brand' })
-  getGrouped(@Query('featured') featured?: string) {
+  getGrouped(
+    @Query('featured') featured?: string,
+    @Query('allowCredit') allowCredit?: string,
+  ) {
     const isFeatured = featured === 'true' ? true : (featured === 'false' ? false : undefined);
-    return this.productsService.getGroupedProducts(isFeatured);
+    const isCredit = allowCredit === 'true' ? true : (allowCredit === 'false' ? false : undefined);
+    return this.productsService.getGroupedProducts(isFeatured, isCredit);
   }
 
   @Put(':id/flags')
