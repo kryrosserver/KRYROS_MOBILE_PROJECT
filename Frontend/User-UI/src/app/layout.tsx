@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Poppins, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { Header, TopBar } from '@/components/layout/Header'
+import { MobileBottomNav } from '@/components/layout/MobileNav/MobileBottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { CartProvider } from '@/providers/CartProvider'
 import { QueryProvider } from '@/providers/QueryProvider'
@@ -73,7 +74,8 @@ export default function RootLayout({
               <div className="min-h-screen flex flex-col">
                 <TopBar />
                 <Header />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 pb-16 md:pb-0">{children}</main>
+                <MobileBottomNav />
                 <Footer />
               </div>
               <WhatsAppWidget />

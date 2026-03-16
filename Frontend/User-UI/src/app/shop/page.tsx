@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/home/ProductCard";
 import { ShopContent } from "@/components/shop/ShopContent";
+import { CategoryGrid } from "@/components/shop/CategoryGrid";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend.onrender.com/api";
+
+async function getCategories() {
+  const res = await fetch(`${API_URL}/categories`, { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.data || [];
+}
 
 async function getGroupedProducts(featured: boolean, credit: boolean) {
   const url = new URL(`${API_URL}/products/grouped`);
@@ -17,7 +25,11 @@ async function getGroupedProducts(featured: boolean, credit: boolean) {
 export default async function ShopPage({ searchParams }: { searchParams?: { [key: string]: string } }) {
   const featured = (searchParams?.featured || "").toLowerCase() === "true";
   const credit = (searchParams?.credit || "").toLowerCase() === "true";
-  const groupedData = await getGroupedProducts(featured, credit);
+  
+  const [groupedData, categories] = await Promise.all([
+    getGroupedProducts(featured, credit),
+    getCategories()
+  ]);
   
   let title = "All Products";
   if (featured) title = "Featured Products";
@@ -51,6 +63,8 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
           </Link>
         </div>
       </div>
+
+      <CategoryGrid categories={categories} />
 
       <ShopContent groupedData={groupedData} />
     </div>

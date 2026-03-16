@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'
 
@@ -121,101 +121,155 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             )}
           </div>
 
-          {/* Right: Info */}
-          <div className="flex flex-col">
-            <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8">
-              <div className="flex items-center justify-between">
-                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-green-700">
-                  {p.category?.name || 'General'}
+          {/* Right: Electron Purchase Block */}
+          <div className="flex flex-col space-y-6">
+            <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
+              {/* Pricing */}
+              <div className="flex items-baseline gap-4">
+                <span className="text-3xl md:text-4xl font-extrabold text-red-600 tracking-tight">
+                  {formatPrice(Number(p.price))}
                 </span>
-                {p.brand?.name && (
-                  <span className="text-sm font-medium text-slate-500">{p.brand.name}</span>
-                )}
-              </div>
-              
-              <h1 className="mt-4 text-2xl font-bold text-slate-900 md:text-3xl">{p.name}</h1>
-              <p className="mt-2 text-sm text-slate-500 font-mono">SKU: {p.sku}</p>
-
-              <div className="mt-6 flex items-baseline gap-4">
-                <span className="text-3xl font-bold text-slate-900">{formatPrice(Number(p.price))}</span>
                 {p.originalPrice && (
-                  <span className="text-lg text-slate-400 line-through">{formatPrice(Number(p.originalPrice))}</span>
+                  <span className="text-lg text-slate-400 line-through font-medium">
+                    {formatPrice(Number(p.originalPrice))}
+                  </span>
                 )}
               </div>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" className="flex-1 bg-green-500 hover:bg-green-600">
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  Add to Cart
-                </Button>
-                <Button size="lg" variant="outline" className="flex-1 border-slate-200">
-                  <Heart className="mr-2 h-5 w-5" />
-                  Wishlist
-                </Button>
+              {/* Scarcity Indicator */}
+              <div className="mt-6 space-y-2">
+                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                  <span className="text-red-500">Ordered: {p.orderedCount || 8}</span>
+                  <span className="text-green-600">Items Available: {p.stock || 28}</span>
+                </div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                  <div 
+                    className="h-full bg-red-500 rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
+                    style={{ width: `${Math.min(((p.orderedCount || 8) / ((p.orderedCount || 8) + (p.stock || 28))) * 100, 100)}%` }} 
+                  />
+                </div>
               </div>
 
-              {p.allowCredit && (
-                <div className="mt-6 rounded-xl bg-blue-50 p-4 border border-blue-100">
-                  <div className="flex items-center gap-2 text-blue-700 font-bold">
-                    <CreditCard className="h-5 w-5" />
-                    Available on Installments
+              {/* Add to Cart & Controls */}
+              <div className="mt-8 border border-slate-100 rounded-md p-4 bg-slate-50/30">
+                <div className="flex flex-wrap gap-3">
+                  {/* Quantity Selector */}
+                  <div className="flex items-center border border-slate-200 bg-white rounded-md h-12 overflow-hidden shadow-sm">
+                    <button className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full"><Minus className="h-4 w-4" /></button>
+                    <input type="number" defaultValue={1} className="w-12 text-center font-bold text-slate-800 focus:outline-none h-full border-x border-slate-100" />
+                    <button className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full"><Plus className="h-4 w-4" /></button>
                   </div>
-                  <p className="mt-1 text-sm text-blue-600 font-medium">
-                    {p.creditMessage || `Get this product from as low as ${formatPrice(Number(p.creditMinimum || 500))}/month`}
-                  </p>
-                  <Button variant="link" className="mt-2 h-auto p-0 text-blue-700 underline underline-offset-4">
-                    Apply for Credit Now
+                  
+                  {/* Add to Cart Button */}
+                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg shadow-blue-600/20 transition-all active:scale-95">
+                    Add to cart
                   </Button>
                 </div>
-              )}
 
-              {(p.deliveryInfo || p.warrantyInfo) && (
-                <div className="mt-8 grid grid-cols-2 gap-4 border-t pt-8">
-                  {p.deliveryInfo && (
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                        <Truck className="h-5 w-5" />
-                      </div>
-                      <div className="text-xs">
-                        <p className="font-bold text-slate-900">Delivery Info</p>
-                        <p className="text-slate-500">{p.deliveryInfo}</p>
-                      </div>
-                    </div>
-                  )}
-                  {p.warrantyInfo && (
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                        <Shield className="h-5 w-5" />
-                      </div>
-                      <div className="text-xs">
-                        <p className="font-bold text-slate-900">Warranty</p>
-                        <p className="text-slate-500">{p.warrantyInfo}</p>
-                      </div>
-                    </div>
-                  )}
+                <div className="mt-4 flex gap-3">
+                  {/* Side Icons */}
+                  <div className="flex gap-2">
+                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"><Heart className="h-5 w-5" /></button>
+                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"><RefreshCw className="h-5 w-5" /></button>
+                  </div>
+                  
+                  {/* Buy Now Button */}
+                  <Button className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg transition-all active:scale-95">
+                    Buy Now
+                  </Button>
                 </div>
-              )}
+              </div>
+
+              {/* Bundle Offer */}
+              <div className="mt-8 border-t border-dashed border-slate-200 pt-6">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest mb-4">
+                  YOU WILL GET 8% OFF ON EACH PRODUCT
+                </h4>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 group">
+                    <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
+                      <Image src={mainImage} alt={p.name} fill className="object-contain p-1" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                        <span className="text-xs font-bold text-slate-700 truncate">This Item: {p.name}</span>
+                      </div>
+                      <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{p.stock || 28} IN STOCK (CAN BE BACKORDERED)</p>
+                    </div>
+                    <span className="text-sm font-extrabold text-red-600">{formatPrice(Number(p.price))}</span>
+                  </div>
+
+                  {/* Dummy Accessory for Bundle */}
+                  <div className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity">
+                    <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
+                      <Image src="https://images.unsplash.com/photo-1546868871-70ca4844567c?w=100&h=100&fit=crop" alt="Accessory" fill className="object-contain p-1" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                        <span className="text-xs font-bold text-slate-700 truncate">1 x Premium Case + Screen Protector</span>
+                      </div>
+                      <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">IN STOCK</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-slate-400 line-through font-medium">{formatPrice(25)}</p>
+                      <p className="text-sm font-extrabold text-red-600">{formatPrice(15)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Request Info Button */}
+              <div className="mt-8">
+                <Button className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold h-14 uppercase tracking-widest text-sm shadow-xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
+                  <MessageCircle className="h-6 w-6" />
+                  REQUEST INFORMATION
+                </Button>
+              </div>
+            </div>
+
+            {/* Warranty & Delivery Badges */}
+            <div className="grid grid-cols-1 gap-3">
+              <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
+                <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
+                <div className="text-xs font-bold text-slate-700">✓ 5 YEARS GUARANTEE</div>
+              </div>
+              <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
+                <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Truck className="h-5 w-5" /></div>
+                <div className="text-xs font-bold text-slate-700">✓ FREE RETURNS</div>
+              </div>
+              <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
+                <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><CreditCard className="h-5 w-5" /></div>
+                <div className="text-xs font-bold text-slate-700">✓ INSTALLMENT OPTIONS</div>
+              </div>
             </div>
 
             {/* Specifications & Description */}
-            <div className="mt-8 space-y-8">
+            <div className="space-y-6 pt-4">
               {specifications.length > 0 && (
-                <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900">Specifications</h3>
-                  <div className="mt-4 grid gap-y-3">
+                <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
+                  <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider mb-6 flex items-center gap-2">
+                    <span className="w-8 h-1 bg-blue-600 rounded-full"></span>
+                    Specifications
+                  </h3>
+                  <div className="grid gap-y-3">
                     {specifications.map((spec: any, idx: number) => (
-                      <div key={idx} className="flex border-b border-slate-100 pb-2 last:border-0">
-                        <span className="w-1/3 text-sm font-medium text-slate-500">{spec.key}</span>
-                        <span className="w-2/3 text-sm font-bold text-slate-900">{spec.value}</span>
+                      <div key={idx} className="flex border-b border-slate-50 pb-3 last:border-0">
+                        <span className="w-1/3 text-xs font-bold text-slate-400 uppercase tracking-tight">{spec.key}</span>
+                        <span className="w-2/3 text-sm font-bold text-slate-800">{spec.value}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <h3 className="text-lg font-bold text-slate-900">Description</h3>
-                <div className="mt-4 text-sm leading-relaxed text-slate-600 whitespace-pre-line">
+              <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
+                <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-8 h-1 bg-blue-600 rounded-full"></span>
+                  Description
+                </h3>
+                <div className="text-sm leading-relaxed text-slate-600 font-medium whitespace-pre-line">
                   {p.description}
                 </div>
               </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Heart, ShoppingCart, Eye, Star, ArrowRight, CreditCard } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Star, ArrowRight, CreditCard, RefreshCw, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { wishlistApi } from "@/lib/api";
@@ -214,12 +214,12 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   // Grid view
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group relative flex flex-col overflow-hidden rounded-lg bg-white shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Section */}
-      <div className="relative aspect-square overflow-hidden bg-slate-50">
+      <div className="relative aspect-square overflow-hidden bg-slate-50/50">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
           <Image
             src={displayImage}
@@ -231,130 +231,105 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </Link>
         
         {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-col gap-2">
+        <div className="absolute left-2 top-2 flex flex-col gap-1.5 z-10">
           {product?.isNew && (
-            <span className="rounded-full bg-blue-500 px-2 py-1 text-[10px] font-bold text-white shadow-lg">
+            <span className="rounded-sm bg-green-500 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
               NEW
             </span>
           )}
           {discount && (
-            <span className="rounded-full bg-orange-500 px-2 py-1 text-[10px] font-bold text-white shadow-lg">
-              -{discount}%
+            <span className="rounded-sm bg-pink-500 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+              {discount}%
             </span>
           )}
+        </div>
+
+        {/* Floating Icons */}
+        <div className="absolute right-2 top-2 flex flex-col gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-300 z-10">
+          <button 
+            onClick={async (e) => {
+              e.preventDefault(); e.stopPropagation();
+              const id = product?.id; if (!id) return;
+              if (!isAuthenticated) { router.push("/login"); return; }
+              if (isWishlisted) { await wishlistApi.remove(id); setIsWishlisted(false); }
+              else { await wishlistApi.add(id); setIsWishlisted(true); }
+              window.dispatchEvent(new Event("wishlist:changed"));
+            }}
+            className={`p-2 rounded-full shadow-md bg-white hover:bg-slate-50 transition-colors ${isWishlisted ? 'text-pink-500' : 'text-slate-400'}`}
+          >
+            <Heart className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`} />
+          </button>
+          <button className="p-2 rounded-full shadow-md bg-white hover:bg-slate-50 text-slate-400 transition-colors">
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          <button className="p-2 rounded-full shadow-md bg-white hover:bg-slate-50 text-slate-400 transition-colors">
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Rating Badge */}
+        <div className="absolute left-2 bottom-2 bg-yellow-100/90 backdrop-blur-sm px-1.5 py-0.5 rounded border border-yellow-200 flex items-center gap-1">
+          <span className="text-[10px] font-bold text-yellow-700">{Number(product?.rating || 5).toFixed(1)}</span>
+          <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
+          <span className="text-[10px] text-yellow-600 font-medium">1</span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-2 md:p-4 flex flex-col flex-1 min-h-[110px] md:min-h-[220px]">
-        <div className="hidden md:flex justify-between items-start">
-          <p className="text-xs text-slate-500">{displayBrand}</p>
-          {product?.allowCredit && (
-            <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase">
-              Credit
-            </span>
-          )}
-        </div>
+      <div className="p-3 md:p-4 flex flex-col flex-1 border-t border-slate-50">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="mt-1 text-[11px] md:text-sm font-medium text-slate-900 line-clamp-2 transition-colors hover:text-green-500 h-8 md:h-10">
+          <h3 className="text-sm font-bold text-slate-900 line-clamp-2 transition-colors hover:text-blue-600 h-10">
             {product?.name}
           </h3>
         </Link>
 
-        {/* Quick Specs - Optimized for Mobile & Desktop */}
-        {displaySpecs.length > 0 && (
-          <div className="flex mt-1.5 md:mt-2 flex-wrap gap-1 md:gap-1.5 min-h-[18px] md:min-h-[28px] overflow-hidden">
-            {displaySpecs.map((spec: any, idx: number) => (
-              <span key={idx} className="inline-flex items-center rounded bg-slate-50 px-1 md:px-2 py-0.5 md:py-1 text-[8px] md:text-[9px] font-bold text-slate-600 border border-slate-100 whitespace-nowrap">
-                {spec.value}
-              </span>
-            ))}
-          </div>
-        )}
-        
-        <div className="flex mt-1.5 md:mt-2 items-center gap-0.5 md:gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`h-2.5 w-2.5 md:h-3 w-3 ${
-                i < Math.floor(product?.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-slate-300"
-              }`}
-            />
-          ))}
-          <span className="text-[9px] md:text-xs text-slate-500">({displayReviews})</span>
+        <div className="mt-2 flex items-baseline gap-2">
+          <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
+            {formatPrice(Number(product?.price ?? 0))}
+          </span>
+          {product?.originalPrice && (
+            <span className="text-xs text-slate-400 line-through">
+              {formatPrice(Number(product.originalPrice))}
+            </span>
+          )}
         </div>
 
-        <div className="mt-auto pt-1 md:pt-4">
-          <div className="flex items-center justify-between gap-2 mb-1 md:mb-3">
-            <div className="flex flex-col">
-              <span className="text-xs md:text-lg font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
-              {product?.originalPrice && (
-                <span className="text-[9px] md:text-xs text-slate-400 line-through">
-                  {formatPrice(Number(product.originalPrice))}
-                </span>
-              )}
-            </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="hidden md:flex h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100"
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const id = product?.id;
-                if (!id) return;
-                if (!isAuthenticated) {
-                  router.push("/login");
-                  return;
-                }
-                if (isWishlisted) {
-                  await wishlistApi.remove(id);
-                  setIsWishlisted(false);
-                } else {
-                  await wishlistApi.add(id);
-                  setIsWishlisted(true);
-                }
-                if (typeof window !== "undefined") {
-                  window.dispatchEvent(new Event("wishlist:changed"));
-                }
-              }}
-            >
-              <Heart className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
-            </Button>
+        <div className="mt-2 flex items-center gap-1">
+          <span className="text-[10px] font-bold text-green-600 uppercase">In Stock: {product?.stock || 28}</span>
+          <div className="flex gap-0.5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className={`h-2.5 w-2.5 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-slate-200"}`} />
+            ))}
           </div>
+        </div>
 
-          <div className="hidden md:flex flex-col gap-2">
-            {product?.allowCredit && (
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-[10px] md:text-xs py-2 h-9 shadow-sm font-bold"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  router.push(`/credit?productId=${product.id}`);
-                }}
-              >
-                <CreditCard className="mr-2 h-3 w-3" />
-                Get on Installment
-              </Button>
-            )}
-            <Button
-              className="w-full bg-green-500 hover:bg-green-600 text-xs py-2 h-10 shadow-md font-bold text-white uppercase tracking-wider"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                addItem(product);
-                toast({
-                  title: "Added to Cart",
-                  description: `${product.name} has been added.`,
-                });
-              }}
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Cart
-            </Button>
+        {/* Feature Checklist */}
+        <div className="mt-3 space-y-1">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+            <Check className="h-3 w-3 text-green-500" />
+            <span>5 YEARS GUARANTEE</span>
           </div>
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+            <Check className="h-3 w-3 text-green-500" />
+            <span>FREE RETURNS</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+            <Check className="h-3 w-3 text-green-500" />
+            <span>INSTALLMENT OPTIONS</span>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-slate-100">
+          <Button
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 uppercase tracking-wider text-xs shadow-md shadow-blue-600/20"
+            onClick={(e) => {
+              e.preventDefault(); e.stopPropagation();
+              addItem(product);
+              toast({ title: "Added to Cart", description: `${product.name} has been added.` });
+            }}
+          >
+            Add to cart
+          </Button>
         </div>
       </div>
     </div>

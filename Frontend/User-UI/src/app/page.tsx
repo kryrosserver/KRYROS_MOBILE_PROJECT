@@ -369,7 +369,7 @@ function FlashSales({ products, loading = false }: { products: any[], loading?: 
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {flashProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -394,7 +394,7 @@ function FeaturedProducts({ products, loading = false }: { products: any[], load
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {loading ? (
             [...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-xl h-[350px] animate-pulse">
@@ -627,7 +627,6 @@ export default function HomePage() {
     <div className="pt-0">
       <HeroSlider banners={data?.banners || []} />
       <FlashSales products={data?.flashSales || []} />
-      <CategoriesGridSection categories={data?.categories || []} sections={data?.sections || []} />
       <FeaturedProducts products={data?.featured || []} />
       <WholesaleCreditHighlights />
       <CreditSection />
