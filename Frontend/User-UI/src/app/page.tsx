@@ -11,6 +11,7 @@ import { BlogSection } from '@/components/home/BlogSection'
 import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
 import { ProductCard } from '@/components/home/ProductCard'
+import { CategoryGrid } from '@/components/shop/CategoryGrid'
 import { useCart } from '@/providers/CartProvider'
 import { useAuth } from '@/providers/AuthProvider'
 import { wishlistApi } from '@/lib/api'
@@ -626,6 +627,11 @@ export default function HomePage() {
   return (
     <div className="pt-0">
       <HeroSlider banners={data?.banners || []} />
+      
+      <div className="container-custom py-8">
+        <CategoryGrid categories={data?.categories || []} />
+      </div>
+
       <FlashSales products={data?.flashSales || []} />
       <FeaturedProducts products={data?.featured || []} />
       <WholesaleCreditHighlights />

@@ -9,7 +9,8 @@ async function getCategories() {
   const res = await fetch(`${API_URL}/categories`, { cache: "no-store" });
   if (!res.ok) return [];
   const data = await res.json();
-  return data.data || [];
+  // Handle both direct array and wrapped { data: [] } formats
+  return Array.isArray(data) ? data : (data.data || []);
 }
 
 async function getGroupedProducts(featured: boolean, credit: boolean) {
