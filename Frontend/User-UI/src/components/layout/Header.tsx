@@ -145,17 +145,17 @@ export function Header() {
 
   const suggestions = [
     "iPhone 16 Pro Max",
-    "Samsung Galaxy S25",
-    "MacBook Pro",
-    "iPad Pro",
-    "AirPods Pro",
-  ].filter((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+    "Samsung Galaxy S24 Ultra",
+    "MacBook Pro M3",
+    "iPad Pro M4",
+    "AirPods Pro 2",
+  ].filter((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-background/95 shadow-lg backdrop-blur-md"
+          ? "bg-background/80 shadow-lg backdrop-blur-lg border-b border-border/40"
           : "bg-background border-b border-slate-100"
       }`}
     >
@@ -397,155 +397,154 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col bg-card shadow-xl"
+              className="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col bg-card shadow-xl overflow-hidden"
             >
-                <div className="flex items-center justify-between border-b border-border px-4 py-4 h-16 shrink-0">
-                  <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                    <Logo size={32} />
-                  </Link>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-md p-1 text-foreground hover:bg-secondary"
-                    aria-label="Close menu"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-
-                {/* Tabs for Menu and Categories */}
-                <div className="flex border-b border-border shrink-0">
-                  <button
-                    onClick={() => setMobileActiveTab("menu")}
-                    className={`flex-1 py-4 text-sm font-bold transition-all ${
-                      mobileActiveTab === "menu"
-                        ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    MENU
-                  </button>
-                  <button
-                    onClick={() => setMobileActiveTab("categories")}
-                    className={`flex-1 py-4 text-sm font-bold transition-all ${
-                      mobileActiveTab === "categories"
-                        ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    CATEGORIES
-                  </button>
-                </div>
-
-                <nav className="flex-1 overflow-y-auto px-4 py-6 overscroll-contain custom-scrollbar">
-                  <AnimatePresence mode="wait">
-                    {mobileActiveTab === "menu" ? (
-                      <motion.div
-                        key="menu-tab"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        className="flex flex-col gap-2"
-                      >
-                        {[
-                          { name: "Home", href: "/" },
-                          { name: "Shop", href: "/shop" },
-                          { name: "Credit Plans", href: "/credit" },
-                          { name: "Wholesale", href: "/wholesale" },
-                        ].map((item) => (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="rounded-xl px-4 py-4 text-base font-bold text-slate-800 transition-colors bg-slate-50 hover:bg-slate-100 flex items-center justify-between border border-slate-100"
-                          >
-                            {item.name}
-                            <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
-                          </Link>
-                        ))}
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="categories-tab"
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        className="space-y-2"
-                      >
-                        {categories.map((cat) => {
-                          const isExpanded = expandedCategories.includes(cat.id);
-                          const hasBrands = cat.brands?.length > 0;
-                          
-                          const toggleExpand = (e: React.MouseEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setExpandedCategories(prev => 
-                              isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
-                            );
-                          };
-
-                          return (
-                            <div key={cat.id} className="space-y-1">
-                              <div className="flex items-center gap-1">
-                                <Link
-                                  href={`/shop?category=${cat.slug}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="flex-1 flex items-center justify-between rounded-xl px-4 py-4 text-base font-bold text-slate-800 transition-colors bg-slate-50 hover:bg-slate-100 border border-slate-100"
-                                >
-                                  <span className="capitalize">{cat.name.toLowerCase()}</span>
-                                  <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
-                                    {cat._count?.products || 0}
-                                  </span>
-                                </Link>
-                                {hasBrands && (
-                                  <button
-                                    onClick={toggleExpand}
-                                    className="p-3 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors border border-transparent"
-                                    aria-label={isExpanded ? "Collapse" : "Expand"}
-                                  >
-                                    <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
-                                  </button>
-                                )}
-                              </div>
-                              
-                              <AnimatePresence>
-                                {hasBrands && isExpanded && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="overflow-hidden"
-                                  >
-                                    <div className="ml-4 border-l-2 border-blue-100 pl-4 space-y-2 py-2">
-                                      {cat.brands.slice(0, 10).map((brand: any) => (
-                                        <Link
-                                          key={brand.id}
-                                          href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
-                                          onClick={() => setMobileMenuOpen(false)}
-                                          className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-blue-600 capitalize"
-                                        >
-                                          {brand.name}
-                                        </Link>
-                                      ))}
-                                      <Link
-                                        href={`/shop?category=${cat.slug}`}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block rounded-lg px-4 py-2.5 text-sm font-bold text-blue-600 transition-colors hover:bg-blue-50 capitalize"
-                                      >
-                                        View All {cat.name}
-                                      </Link>
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </nav>
+              <div className="flex items-center justify-between border-b border-border px-4 py-4 h-16 shrink-0">
+                <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                  <Logo size={32} />
+                </Link>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-md p-1 text-foreground hover:bg-secondary"
+                  aria-label="Close menu"
+                >
+                  <X className="h-6 w-6" />
+                </button>
               </div>
+
+              {/* Tabs for Menu and Categories */}
+              <div className="flex border-b border-border shrink-0">
+                <button
+                  onClick={() => setMobileActiveTab("menu")}
+                  className={`flex-1 py-4 text-sm font-bold transition-all ${
+                    mobileActiveTab === "menu"
+                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  MENU
+                </button>
+                <button
+                  onClick={() => setMobileActiveTab("categories")}
+                  className={`flex-1 py-4 text-sm font-bold transition-all ${
+                    mobileActiveTab === "categories"
+                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  CATEGORIES
+                </button>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto px-4 py-6 overscroll-contain custom-scrollbar">
+                <AnimatePresence mode="wait">
+                  {mobileActiveTab === "menu" ? (
+                    <motion.div
+                      key="menu-tab"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="flex flex-col gap-2"
+                    >
+                      {[
+                        { name: "Home", href: "/" },
+                        { name: "Shop", href: "/shop" },
+                        { name: "Credit Plans", href: "/credit" },
+                        { name: "Wholesale", href: "/wholesale" },
+                      ].map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="rounded-xl px-4 py-4 text-base font-bold text-slate-800 transition-colors bg-slate-50 hover:bg-slate-100 flex items-center justify-between border border-slate-100"
+                        >
+                          {item.name}
+                          <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
+                        </Link>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="categories-tab"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="space-y-2"
+                    >
+                      {categories.map((cat) => {
+                        const isExpanded = expandedCategories.includes(cat.id);
+                        const hasBrands = cat.brands?.length > 0;
+                        
+                        const toggleExpand = (e: React.MouseEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setExpandedCategories(prev => 
+                            isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
+                          );
+                        };
+
+                        return (
+                          <div key={cat.id} className="space-y-1">
+                            <div className="flex items-center gap-1">
+                              <Link
+                                href={`/shop?category=${cat.slug}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex-1 flex items-center justify-between rounded-xl px-4 py-4 text-base font-bold text-slate-800 transition-colors bg-slate-50 hover:bg-slate-100 border border-slate-100"
+                              >
+                                <span className="capitalize">{cat.name.toLowerCase()}</span>
+                                <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
+                                  {cat._count?.products || 0}
+                                </span>
+                              </Link>
+                              {hasBrands && (
+                                <button
+                                  onClick={toggleExpand}
+                                  className="p-3 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors border border-transparent"
+                                  aria-label={isExpanded ? "Collapse" : "Expand"}
+                                >
+                                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                                </button>
+                              )}
+                            </div>
+                            
+                            <AnimatePresence>
+                              {hasBrands && isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="ml-4 border-l-2 border-blue-100 pl-4 space-y-2 py-2">
+                                    {cat.brands.slice(0, 10).map((brand: any) => (
+                                      <Link
+                                        key={brand.id}
+                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-blue-600 capitalize"
+                                      >
+                                        {brand.name}
+                                      </Link>
+                                    ))}
+                                    <Link
+                                      href={`/shop?category=${cat.slug}`}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="block rounded-lg px-4 py-2.5 text-sm font-bold text-blue-600 transition-colors hover:bg-blue-50 capitalize"
+                                    >
+                                      View All {cat.name}
+                                    </Link>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </nav>
             </motion.div>
           </div>
         )}
