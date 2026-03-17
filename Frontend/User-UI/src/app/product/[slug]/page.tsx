@@ -48,40 +48,47 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     notFound()
   }
 
-  const p = product
-  const specifications = typeof p.specifications === 'string' 
-    ? JSON.parse(p.specifications) 
-    : (Array.isArray(p.specifications) ? p.specifications : [])
+  const p = product;
+  
+  // Safe parsing for specifications
+  let specifications = [];
+  try {
+    specifications = typeof p.specifications === 'string' 
+      ? JSON.parse(p.specifications) 
+      : (Array.isArray(p.specifications) ? p.specifications : []);
+  } catch (e) {
+    console.error("Failed to parse specifications:", e);
+  }
 
   const [quantity, setQuantity] = useState(1);
-
   const { addItem } = useCart();
-
-  const handleAddToCart = () => {
-    addItem(p, undefined, quantity);
-  };
 
   const [includeAccessory, setIncludeAccessory] = useState(false);
 
+  // Safe access for relations and numbers
   const accessory = p.productRelations?.[0]?.related;
-
-  const basePrice = Number(p.price);
-  const accessoryPrice = accessory ? Number(accessory.price) : 0;
+  const basePrice = Number(p.price || 0);
+  const accessoryPrice = accessory ? Number(accessory.price || 0) : 0;
+  const stockTotal = Number(p.stockTotal || 1); // Default to 1 to avoid division by zero
+  const stockCurrent = Number(p.stockCurrent || 0);
 
   const totalPrice = includeAccessory
     ? (basePrice + accessoryPrice) * 0.92 // 8% discount
     : basePrice;
+
+  const handleAddToCart = () => {
+    addItem(p, undefined, quantity);
+  };
 
   const handleBuyNow = () => {
     addItem(p, undefined, quantity);
     if (includeAccessory && accessory) {
       addItem(accessory, undefined, 1);
     }
-    // Redirect to checkout
   };
 
   const handleWishlist = () => {
-    // Add to wishlist
+    // Add to wishlist logic
   };
 
   const images = p.images?.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
@@ -89,6 +96,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % images.length);
   const prevImage = () => setActiveImageIdx((prev) => (prev - 1 + images.length) % images.length);
+
+  // Calculate scarcity percentage safely
+  const scarcityPercentage = Math.max(0, Math.min(100, ((stockTotal - stockCurrent) / stockTotal) * 100));
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 md:py-12">
@@ -171,13 +181,13 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {/* Scarcity Indicator */}
               <div className="mt-6 space-y-2">
                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                  <span className="text-red-500">Ordered: {p.stockTotal - p.stockCurrent}</span>
-                  <span className="text-green-600">Items Available: {p.stockCurrent}</span>
+                  <span className="text-red-500">Ordered: {stockTotal - stockCurrent}</span>
+                  <span className="text-green-600">Items Available: {stockCurrent}</span>
                 </div>
                 <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-50">
                   <div 
                     className="h-full bg-red-500 rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
-                    style={{ width: `${Math.min(((p.stockTotal - p.stockCurrent) / p.stockTotal) * 100, 100)}%` }} 
+                    style={{ width: `${scarcityPercentage}%` }} 
                   />
                 </div>
               </div>
@@ -197,13 +207,13 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     <input 
                       type="number" 
                       value={quantity} 
-                      onChange={(e) => setQuantity(Math.max(1, Math.min(p.stockCurrent, Number(e.target.value))))}
+                      onChange={(e) => setQuantity(Math.max(1, Math.min(stockCurrent || 1, Number(e.target.value))))}
                       className="w-12 text-center font-bold text-slate-800 focus:outline-none h-full border-x border-slate-100" 
                     />
                     <button 
                       className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full disabled:opacity-50"
-                      onClick={() => setQuantity(q => Math.min(p.stockCurrent, q + 1))}
-                      disabled={quantity >= p.stockCurrent}
+                      onClick={() => setQuantity(q => Math.min(stockCurrent || 1, q + 1))}
+                      disabled={quantity >= (stockCurrent || 1)}
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -213,7 +223,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <Button 
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg shadow-blue-600/20 transition-all active:scale-95"
                     onClick={handleAddToCart}
-                    disabled={p.stockCurrent <= 0}
+                    disabled={stockCurrent <= 0}
                   >
                     Add to cart
                   </Button>
@@ -237,7 +247,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <Button 
                     className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg transition-all active:scale-95"
                     onClick={handleBuyNow}
-                    disabled={p.stockCurrent <= 0}
+                    disabled={stockCurrent <= 0}
                   >
                     Buy Now
                   </Button>
@@ -260,7 +270,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                           <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
                           <span className="text-xs font-bold text-slate-700 truncate">This Item: {p.name}</span>
                         </div>
-                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{p.stockCurrent || 0} IN STOCK (CAN BE BACKORDERED)</p>
+                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{stockCurrent} IN STOCK (CAN BE BACKORDERED)</p>
                       </div>
                       <span className="text-sm font-extrabold text-red-600">{formatPrice(Number(p.price))}</span>
                     </div>
@@ -280,7 +290,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                           />
                           <span className="text-xs font-bold text-slate-700 truncate">{accessory.name}</span>
                         </div>
-                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{accessory.inventory?.stock || 0} IN STOCK</p>
+                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{accessory.stockCurrent || 0} IN STOCK</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-extrabold text-red-600">{formatPrice(accessory.price)}</p>
@@ -297,7 +307,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold h-14 uppercase tracking-widest text-sm shadow-xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
                 >
                   <a 
-                    href={`https://wa.me/?text=Hello, I would like to know more about the product: ${p.name}. You can find it here: ${window.location.href}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(`Hello, I would like to know more about the product: ${p.name}. (SKU: ${p.sku})`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
