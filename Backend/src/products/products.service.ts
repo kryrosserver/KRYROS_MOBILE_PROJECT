@@ -82,6 +82,8 @@ export class ProductsService {
         variants: true,
         inventory: true,
         reviews: { take: 10, orderBy: { createdAt: 'desc' } },
+        productRelations: {
+          include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
       },
     });
 
@@ -101,7 +103,7 @@ export class ProductsService {
         images: { orderBy: { sortOrder: 'asc' } },
         variants: true,
         inventory: true,
-        relatedProducts: {
+        productRelations: {
           include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
       },
     });

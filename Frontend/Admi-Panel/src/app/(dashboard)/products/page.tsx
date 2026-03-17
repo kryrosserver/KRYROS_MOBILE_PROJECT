@@ -87,6 +87,7 @@ export default function ProductsPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [editItem, setEditItem] = useState<Product | null>(null);
   const [editForm, setEditForm] = useState({
+    id: "",
     name: "",
     price: "",
     description: "",
@@ -754,6 +755,7 @@ export default function ProductsPage() {
                       onClick={() => {
                         setEditItem(p);
                         setEditForm({
+                          id: p.id,
                           name: p.name,
                           price: String(p.price ?? ""),
                           description: (p as any).description || "",
