@@ -285,11 +285,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
         <div className="mt-2 flex items-baseline gap-2">
           <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
-            {formatPrice(Number(product?.price ?? 0))}
+            {formatPrice(Number(product?.price || 0))}
           </span>
           {product?.originalPrice && (
             <span className="text-xs text-slate-400 line-through">
-              {formatPrice(Number(product.originalPrice))}
+              {formatPrice(Number(product.originalPrice || 0))}
             </span>
           )}
         </div>
