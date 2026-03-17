@@ -570,6 +570,7 @@ export default function ProductsPage() {
                         sku: "",
                         price: "",
                         description: "",
+                        shortDescription: "",
                         categorySlug: "general",
                         brandId: "",
                         isFeatured: false,
