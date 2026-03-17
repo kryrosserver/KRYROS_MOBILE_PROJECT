@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { notFound } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
+import { useCart } from '@/providers/CartProvider'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check } from 'lucide-react'

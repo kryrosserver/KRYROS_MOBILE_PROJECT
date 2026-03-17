@@ -227,11 +227,8 @@ model Product {
   wishlists         WishlistItem[]
   
   // Bundle / Upsell logic
-  upsellProducts    ProductRelation[] @relation("ProductUpsell")
-  upsellOf          ProductRelation[] @relation("UpsellOf")
-  
-  relatedProducts   ProductRelation[] @relation("ProductRelation")
-  relatedTo         ProductRelation[] @relation("RelatedTo")
+  productRelations ProductRelation[] @relation("ProductRelation")
+  relatedTo        ProductRelation[] @relation("RelatedTo")
 
   @@map("products")
 }
@@ -293,10 +290,6 @@ model ProductRelation {
 
   product       Product @relation("ProductRelation", fields: [productId], references: [id], onDelete: Cascade)
   related       Product @relation("RelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
-  
-  // Upsell relations
-  upsellProduct Product @relation("ProductUpsell", fields: [productId], references: [id], onDelete: Cascade)
-  upsellOf      Product @relation("UpsellOf", fields: [relatedId], references: [id], onDelete: Cascade)
 
   @@unique([productId, relatedId, relationType])
   @@map("product_relations")
