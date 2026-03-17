@@ -45,7 +45,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   }
 
   if (!product) {
-    notFound()
+    return null;
   }
 
   const p = product;
@@ -68,24 +68,26 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const [includeAccessory, setIncludeAccessory] = useState(false);
 
   // Safe access for relations and numbers
-  const accessory = p?.productRelations?.[0]?.related;
+  const productRelations = p?.productRelations || [];
+  const accessory = productRelations.length > 0 ? productRelations[0]?.related : null;
+  
   const basePrice = Number(p?.price || 0);
   const accessoryPrice = accessory ? Number(accessory.price || 0) : 0;
   const stockTotal = Number(p?.stockTotal || 1); // Default to 1 to avoid division by zero
   const stockCurrent = Number(p?.stockCurrent || 0);
 
-  const totalPrice = includeAccessory
+  const totalPrice = includeAccessory && accessory
     ? (basePrice + accessoryPrice) * 0.92 // 8% discount
     : basePrice;
 
   const handleAddToCart = () => {
-    if (cart?.addItem) {
+    if (cart && typeof cart.addItem === 'function') {
       cart.addItem(p, undefined, quantity);
     }
   };
 
   const handleBuyNow = () => {
-    if (cart?.addItem) {
+    if (cart && typeof cart.addItem === 'function') {
       cart.addItem(p, undefined, quantity);
       if (includeAccessory && accessory) {
         cart.addItem(accessory, undefined, 1);
@@ -97,7 +99,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     // Add to wishlist logic
   };
 
-  const images = p?.images?.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
+  const images = Array.isArray(p?.images) && p.images.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
   const mainImage = images[activeImageIdx]?.url || '/placeholder.jpg';
 
   const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % images.length);
@@ -276,17 +278,17 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                          <span className="text-xs font-bold text-slate-700 truncate">This Item: {p.name}</span>
+                          <span className="text-xs font-bold text-slate-700 truncate">This Item: {p?.name}</span>
                         </div>
                         <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{stockCurrent} IN STOCK (CAN BE BACKORDERED)</p>
                       </div>
-                      <span className="text-sm font-extrabold text-red-600">{formatPrice(Number(p.price))}</span>
+                      <span className="text-sm font-extrabold text-red-600">{formatPrice(Number(p?.price || 0))}</span>
                     </div>
 
                     {/* Accessory for Bundle */}
                     <div className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity">
                       <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
-                        <Image src={accessory.images?.[0]?.url || '/placeholder.jpg'} alt={accessory.name} fill className="object-contain p-1" />
+                        <Image src={accessory?.images?.[0]?.url || '/placeholder.jpg'} alt={accessory?.name || 'Accessory'} fill className="object-contain p-1" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -296,12 +298,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                             checked={includeAccessory}
                             onChange={(e) => setIncludeAccessory(e.target.checked)}
                           />
-                          <span className="text-xs font-bold text-slate-700 truncate">{accessory.name}</span>
+                          <span className="text-xs font-bold text-slate-700 truncate">{accessory?.name}</span>
                         </div>
-                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{accessory.stockCurrent || 0} IN STOCK</p>
+                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{accessory?.stockCurrent || 0} IN STOCK</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-extrabold text-red-600">{formatPrice(accessory.price)}</p>
+                        <p className="text-sm font-extrabold text-red-600">{formatPrice(Number(accessory?.price || 0))}</p>
                       </div>
                     </div>
                   </div>
@@ -315,7 +317,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold h-14 uppercase tracking-widest text-sm shadow-xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
                 >
                   <a 
-                    href={`https://wa.me/?text=${encodeURIComponent(`Hello, I would like to know more about the product: ${p.name}. (SKU: ${p.sku})`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(`Hello, I would like to know more about the product: ${p?.name}. (SKU: ${p?.sku})`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -367,7 +369,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   Description
                 </h3>
                 <div className="text-sm leading-relaxed text-slate-600 font-medium whitespace-pre-line">
-                  {p.description}
+                  {p?.description}
                 </div>
               </div>
             </div>
