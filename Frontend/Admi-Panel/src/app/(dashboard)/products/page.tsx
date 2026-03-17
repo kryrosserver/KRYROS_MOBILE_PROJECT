@@ -63,6 +63,7 @@ export default function ProductsPage() {
     sku: "",
     price: "",
     description: "",
+    shortDescription: "",
     categorySlug: "",
     brandId: "" as string | number,
     isFeatured: false,
@@ -91,6 +92,7 @@ export default function ProductsPage() {
     name: "",
     price: "",
     description: "",
+    shortDescription: "",
     categorySlug: "",
     brandId: "" as string | number,
     isActive: true,
@@ -240,6 +242,12 @@ export default function ProductsPage() {
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="admin-input w-full h-24"
+              />
+              <textarea
+                placeholder="Short Description (Optional - shows below product title)"
+                value={form.shortDescription}
+                onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
+                className="admin-input w-full h-16"
               />
               <div className="grid grid-cols-2 gap-2">
                 <select
@@ -511,6 +519,7 @@ export default function ProductsPage() {
                       formData.append("sku", form.sku);
                       formData.append("price", String(Number(form.price)));
                       formData.append("description", form.description);
+                      if (form.shortDescription) formData.append("shortDescription", form.shortDescription);
                       formData.append("categorySlug", form.categorySlug || "general");
                       formData.append("brandId", String(form.brandId));
                       formData.append("isActive", String(form.isActive));
@@ -759,6 +768,7 @@ export default function ProductsPage() {
                           name: p.name,
                           price: String(p.price ?? ""),
                           description: (p as any).description || "",
+                          shortDescription: (p as any).shortDescription || "",
                           categorySlug: p.category?.slug || "",
                           brandId: p.brand?.id || "",
                           isActive: p.isActive !== false,
@@ -925,6 +935,16 @@ export default function ProductsPage() {
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     className="admin-input w-full h-32"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Short Description</label>
+                  <textarea
+                    placeholder="Short Description"
+                    value={editForm.shortDescription}
+                    onChange={(e) => setEditForm({ ...editForm, shortDescription: e.target.value })}
+                    className="admin-input w-full h-20"
                   />
                 </div>
 
@@ -1209,6 +1229,7 @@ export default function ProductsPage() {
                   if (editForm.name) formData.append("name", editForm.name);
                   if (editForm.price) formData.append("price", String(Number(editForm.price)));
                   if (editForm.description) formData.append("description", editForm.description);
+                  if (editForm.shortDescription) formData.append("shortDescription", editForm.shortDescription);
                   if (editForm.categorySlug) formData.append("categorySlug", editForm.categorySlug);
                   if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
                   formData.append("isActive", String(editForm.isActive));

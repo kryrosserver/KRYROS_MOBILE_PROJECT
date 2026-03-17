@@ -108,7 +108,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   const p = product;
   const price = Number(p.price || 0);
-  const originalPrice = p.originalPrice ? Number(p.originalPrice) : null;
+  const originalPrice = p.originalPrice ? Number(p.originalPrice) : (p.discountPercentage ? price / (1 - p.discountPercentage / 100) : null);
   const stockTotal = Math.max(1, Number(p.stockTotal || 0));
   const stockCurrent = Math.max(0, Number(p.stockCurrent || 0));
   
@@ -142,10 +142,37 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   return (
     <div className="min-h-screen bg-slate-50 py-8 md:py-12">
       <div className="container-custom">
+        {/* Breadcrumbs / Category & Brand */}
+        <div className="flex flex-wrap items-center gap-2 mb-6 text-xs font-bold uppercase tracking-wider text-slate-400">
+          <a href="/shop" className="hover:text-blue-600 transition-colors">Shop</a>
+          <span className="h-1 w-1 rounded-full bg-slate-300"></span>
+          <a href={`/shop?category=${p.category?.slug}`} className="hover:text-blue-600 transition-colors">{p.category?.name || 'Uncategorized'}</a>
+          {p.brand && (
+            <>
+              <span className="h-1 w-1 rounded-full bg-slate-300"></span>
+              <span className="text-slate-600">{p.brand.name}</span>
+            </>
+          )}
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
           {/* Left: Images */}
           <div className="space-y-4">
             <div className="group relative aspect-square overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+              {/* Badges */}
+              <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                {p.isNew && (
+                  <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-widest">
+                    New Arrival
+                  </span>
+                )}
+                {p.discountPercentage && (
+                  <span className="bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-widest">
+                    -{p.discountPercentage}% OFF
+                  </span>
+                )}
+              </div>
+
               <Image
                 src={mainImage}
                 alt={p.name || "Product"}
@@ -196,6 +223,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
           {/* Right: Purchase Block */}
           <div className="flex flex-col space-y-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{p.name}</h1>
+              <p className="mt-2 text-sm text-slate-500 font-medium">{p.sku}</p>
+              {p.shortDescription && (
+                <p className="mt-4 text-slate-600 font-medium leading-relaxed">{p.shortDescription}</p>
+              )}
+            </div>
+
             <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
               <div className="flex items-baseline gap-4">
                 <span className="text-3xl md:text-4xl font-extrabold text-red-600 tracking-tight">
@@ -207,6 +242,18 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   </span>
                 )}
               </div>
+
+              {p.allowCredit && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md flex items-center gap-3">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-xs font-bold text-blue-900 uppercase tracking-wide">Credit Available</p>
+                    <p className="text-[11px] font-medium text-blue-700">
+                      {p.creditMessage || `Starting from ${formatPrice(Number(p.creditMinimum || 0))} per month`}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6 space-y-2">
                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
@@ -345,16 +392,34 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {p.hasFiveYearGuarantee && (
+              {p.deliveryInfo && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
-                  <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">✓ 5 YEARS GUARANTEE</div>
+                  <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Truck className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Delivery Info</div>
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.deliveryInfo}</div>
+                  </div>
                 </div>
               )}
-              {p.hasFreeReturns && (
+              {p.warrantyInfo && (
+                <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
+                  <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Shield className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Warranty</div>
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.warrantyInfo}</div>
+                  </div>
+                </div>
+              )}
+              {!p.deliveryInfo && p.hasFreeReturns && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
                   <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Truck className="h-5 w-5" /></div>
                   <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">✓ FREE RETURNS</div>
+                </div>
+              )}
+              {!p.warrantyInfo && p.hasFiveYearGuarantee && (
+                <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
+                  <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
+                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">✓ 5 YEARS GUARANTEE</div>
                 </div>
               )}
               {p.hasInstallmentOptions && (
@@ -364,6 +429,18 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 </div>
               )}
             </div>
+
+            {p.wholesalePrice && (
+              <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center text-green-400">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Wholesale Available</span>
+                </div>
+                <span className="text-sm font-black text-green-400">{formatPrice(Number(p.wholesalePrice))}</span>
+              </div>
+            )}
 
             <div className="space-y-6 pt-4">
               {specs.length > 0 && (
