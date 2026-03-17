@@ -768,7 +768,7 @@ export default function ProductsPage() {
                           hasFreeReturns: !!p.hasFreeReturns,
                           hasInstallmentOptions: !!p.hasInstallmentOptions,
                           wholesalePrice: String(p.wholesalePrice ?? ""),
-                          upsellProductId: String(p.relatedProducts?.[0]?.relatedProductId ?? ""),
+                          upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
                           allowCredit: !!p.allowCredit,
                           creditMinimum: String(p.creditMinimum ?? ""),
                           creditMessage: p.creditMessage || "",

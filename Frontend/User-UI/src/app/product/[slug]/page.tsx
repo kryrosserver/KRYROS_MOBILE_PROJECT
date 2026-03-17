@@ -58,12 +58,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const { addItem } = useCart();
 
   const handleAddToCart = () => {
-    addItem(p, quantity);
+    addItem(p, undefined, quantity);
   };
 
   const [includeAccessory, setIncludeAccessory] = useState(false);
 
-  const accessory = p.relatedProducts?.[0]?.related;
+  const accessory = p.productRelations?.[0]?.related;
 
   const basePrice = Number(p.price);
   const accessoryPrice = accessory ? Number(accessory.price) : 0;
@@ -73,9 +73,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     : basePrice;
 
   const handleBuyNow = () => {
-    addItem(p, quantity);
+    addItem(p, undefined, quantity);
     if (includeAccessory && accessory) {
-      addItem(accessory, 1);
+      addItem(accessory, undefined, 1);
     }
     // Redirect to checkout
   };
