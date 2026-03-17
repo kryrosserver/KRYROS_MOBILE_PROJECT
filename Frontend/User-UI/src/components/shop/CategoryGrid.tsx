@@ -19,11 +19,6 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
 
   return (
     <div className="mb-12 relative">
-      <h2 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-widest flex items-center gap-2">
-        <span className="w-6 h-0.5 bg-blue-600 rounded-full"></span>
-        Quick Categories
-      </h2>
-      
       {/* Horizontal Scroll Container */}
       <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0">
         {categories.map((category) => (

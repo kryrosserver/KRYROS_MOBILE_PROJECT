@@ -23,14 +23,24 @@ async function getGroupedProducts(featured: boolean, credit: boolean) {
   return res.json();
 }
 
+async function getCmsSections() {
+  const res = await fetch(`${API_URL}/cms/sections`, { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : (data.data || []);
+}
+
 export default async function ShopPage({ searchParams }: { searchParams?: { [key: string]: string } }) {
   const featured = (searchParams?.featured || "").toLowerCase() === "true";
   const credit = (searchParams?.credit || "").toLowerCase() === "true";
   
-  const [groupedData, categories] = await Promise.all([
+  const [groupedData, categories, sections] = await Promise.all([
     getGroupedProducts(featured, credit),
-    getCategories()
+    getCategories(),
+    getCmsSections()
   ]);
+
+  const catSection = sections.find((s: any) => s.type === "categories" && s.isActive);
   
   let title = "All Products";
   if (featured) title = "Featured Products";
@@ -40,8 +50,8 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
     <div className="container-custom py-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4 border-b pb-6 border-slate-100">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{title}</h1>
-          <p className="text-slate-500 mt-2 font-medium">Browse our premium collection by category and brand</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{catSection?.title || title}</h1>
+          <p className="text-slate-500 mt-2 font-medium">{catSection?.subtitle || "Browse our premium collection by category and brand"}</p>
         </div>
         <div className="flex items-center bg-slate-100/80 p-1.5 rounded-xl border border-slate-200 shadow-sm">
           <Link 

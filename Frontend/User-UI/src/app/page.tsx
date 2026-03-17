@@ -628,10 +628,6 @@ export default function HomePage() {
     <div className="pt-0">
       <HeroSlider banners={data?.banners || []} />
       
-      <div className="container-custom py-8">
-        <CategoryGrid categories={data?.categories || []} />
-      </div>
-
       <FlashSales products={data?.flashSales || []} />
       <FeaturedProducts products={data?.featured || []} />
       <WholesaleCreditHighlights />

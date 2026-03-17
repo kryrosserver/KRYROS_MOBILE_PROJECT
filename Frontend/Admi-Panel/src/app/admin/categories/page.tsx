@@ -42,10 +42,30 @@ export default function CategoriesPage() {
     name: "",
     slug: "",
     description: "",
+    image: "",
     parentId: "",
     isActive: true,
     showOnHome: false,
   });
+  const [file, setFile] = useState<File | null>(null);
+
+  async function compressImage(file: File, maxWidth = 800, quality = 0.8): Promise<string> {
+    const blobURL = URL.createObjectURL(file);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = blobURL;
+    });
+    const scale = Math.min(1, maxWidth / img.width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(blobURL);
+    return canvas.toDataURL("image/jpeg", quality);
+  }
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -100,12 +120,14 @@ export default function CategoriesPage() {
   };
 
   const handleOpenModal = (category?: Category) => {
+    setFile(null);
     if (category) {
       setEditingCategory(category);
       setForm({
         name: category.name,
         slug: category.slug,
         description: category.description || "",
+        image: category.image || "",
         parentId: category.parentId || "",
         isActive: category.isActive,
         showOnHome: category.showOnHome || false,
@@ -116,6 +138,7 @@ export default function CategoriesPage() {
         name: "",
         slug: "",
         description: "",
+        image: "",
         parentId: "",
         isActive: true,
         showOnHome: false,
@@ -295,8 +318,12 @@ export default function CategoriesPage() {
                   <tr key={category.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded bg-slate-100 flex items-center justify-center text-slate-400">
-                          <LayoutGrid className="h-4 w-4" />
+                        <div className="h-10 w-10 rounded bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden border border-slate-200">
+                          {category.image ? (
+                            <img src={category.image} alt={category.name} className="h-full w-full object-contain p-1" />
+                          ) : (
+                            <LayoutGrid className="h-4 w-4" />
+                          )}
                         </div>
                         <div>
                           <p className="font-medium text-slate-900">{category.name}</p>
@@ -373,6 +400,31 @@ export default function CategoriesPage() {
               </button>
             </div>
             <div className="p-6 space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="h-16 w-16 rounded bg-white border flex items-center justify-center overflow-hidden shrink-0">
+                  {form.image ? (
+                    <img src={form.image} alt="Preview" className="h-full w-full object-contain p-1" />
+                  ) : (
+                    <LayoutGrid className="h-8 w-8 text-slate-300" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Category Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        const compressed = await compressImage(f);
+                        setForm({ ...form, image: compressed });
+                        setFile(f);
+                      }
+                    }}
+                    className="text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Category Name</label>
                 <input
