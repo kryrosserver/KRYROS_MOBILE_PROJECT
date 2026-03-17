@@ -250,9 +250,39 @@ export class ProductsService {
         creditMessage: data.creditMessage ?? null,
         deliveryInfo: data.deliveryInfo ?? null,
         warrantyInfo: data.warrantyInfo ?? null,
+        isNew: data.isNew ?? true,
+        discountPercentage: data.discountPercentage ?? null,
+        stockTotal: data.stockTotal ?? 0,
+        stockCurrent: data.stockCurrent ?? 0,
+        hasFiveYearGuarantee: data.hasFiveYearGuarantee ?? false,
+        hasFreeReturns: data.hasFreeReturns ?? false,
+        hasInstallmentOptions: data.hasInstallmentOptions ?? false,
+        rating: data.rating ?? 0,
+        reviewCount: data.reviewCount ?? 0,
+        wholesalePrice: data.wholesalePrice ?? null,
+        isNew: data.isNew ?? true,
+        discountPercentage: data.discountPercentage ?? null,
+        stockTotal: data.stockTotal ?? 0,
+        stockCurrent: data.stockCurrent ?? 0,
+        hasFiveYearGuarantee: data.hasFiveYearGuarantee ?? false,
+        hasFreeReturns: data.hasFreeReturns ?? false,
+        hasInstallmentOptions: data.hasInstallmentOptions ?? false,
+        rating: data.rating ?? 0,
+        reviewCount: data.reviewCount ?? 0,
+        wholesalePrice: data.wholesalePrice ?? null,
         specifications: data.specifications ? JSON.stringify(data.specifications) : null,
       },
     });
+
+    if (data.upsellProductId) {
+      await this.prisma.productRelation.create({
+        data: {
+          productId: product.id,
+          relatedProductId: Number(data.upsellProductId),
+          relationType: 'upsell',
+        },
+      });
+    }
 
     const imgs = Array.isArray(data.imageDataUrls) ? data.imageDataUrls : [];
     for (let idx = 0; idx < imgs.length; idx++) {
@@ -422,11 +452,35 @@ export class ProductsService {
         creditMessage: data.creditMessage !== undefined ? data.creditMessage : undefined,
         deliveryInfo: data.deliveryInfo !== undefined ? data.deliveryInfo : undefined,
         warrantyInfo: data.warrantyInfo !== undefined ? data.warrantyInfo : undefined,
+        isNew: typeof data.isNew === 'boolean' ? data.isNew : undefined,
+        discountPercentage: typeof data.discountPercentage === 'number' ? data.discountPercentage : undefined,
+        stockTotal: typeof data.stockTotal === 'number' ? data.stockTotal : undefined,
+        stockCurrent: typeof data.stockCurrent === 'number' ? data.stockCurrent : undefined,
+        hasFiveYearGuarantee: typeof data.hasFiveYearGuarantee === 'boolean' ? data.hasFiveYearGuarantee : undefined,
+        hasFreeReturns: typeof data.hasFreeReturns === 'boolean' ? data.hasFreeReturns : undefined,
+        hasInstallmentOptions: typeof data.hasInstallmentOptions === 'boolean' ? data.hasInstallmentOptions : undefined,
+        rating: typeof data.rating === 'number' ? data.rating : undefined,
+        reviewCount: typeof data.reviewCount === 'number' ? data.reviewCount : undefined,
+        wholesalePrice: typeof data.wholesalePrice === 'number' ? data.wholesalePrice : undefined,
         categoryId: categoryId ?? undefined,
         brandId: brandId,
         specifications: data.specifications ? JSON.stringify(data.specifications) : undefined,
       },
     });
+
+    if (data.upsellProductId) {
+      // Clear existing upsells and add new one (simple implementation for now)
+      await this.prisma.productRelation.deleteMany({
+        where: { productId: id, relationType: 'upsell' },
+      });
+      await this.prisma.productRelation.create({
+        data: {
+          productId: id,
+          relatedProductId: Number(data.upsellProductId),
+          relationType: 'upsell',
+        },
+      });
+    }
 
     if (Array.isArray(data.imageDataUrls)) {
       if (data.replaceImages !== false) {

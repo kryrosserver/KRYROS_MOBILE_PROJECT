@@ -171,11 +171,30 @@ model Product {
   shortDescription  String?
   price             Decimal   @db.Decimal(10, 2)
   salePrice         Decimal?  @db.Decimal(10, 2)
+  wholesalePrice    Decimal?  @db.Decimal(10, 2)
   sku               String    @unique
   barcode           String?
   weight            Decimal?  @db.Decimal(10, 3)
+  
+  // Badges & Flags
   isFeatured        Boolean   @default(false)
   isFlashSale       Boolean   @default(false)
+  isNew             Boolean   @default(true)
+  discountPercentage Int?      // Manual discount override if needed
+  
+  // Stock Scarcity Logic
+  stockTotal        Int       @default(50)  // Capacity
+  stockCurrent      Int       @default(42)  // Available
+  
+  // Guarantees
+  hasFiveYearGuarantee Boolean @default(true)
+  hasFreeReturns      Boolean @default(true)
+  hasInstallmentOptions      Boolean @default(true)
+
+  // Ratings
+  rating            Float?    @default(0)
+  reviewCount       Int?      @default(0)
+
   flashSalePrice    Decimal?  @db.Decimal(10, 2)
   flashSaleEnd      DateTime?
   allowCredit       Boolean   @default(false)
@@ -206,6 +225,11 @@ model Product {
   wholesalePrices   WholesalePrice[]
   creditAccounts    CreditAccount[]
   wishlists         WishlistItem[]
+  
+  // Bundle / Upsell logic
+  upsellProducts    ProductRelation[] @relation("ProductUpsell")
+  upsellOf          ProductRelation[] @relation("UpsellOf")
+  
   relatedProducts   ProductRelation[] @relation("ProductRelation")
   relatedTo         ProductRelation[] @relation("RelatedTo")
 
@@ -265,12 +289,16 @@ model ProductRelation {
   id            String  @id @default(uuid())
   productId     String
   relatedId     String
-  relationType  String  @default("related")
+  relationType  String  @default("related") // "related", "upsell"
 
   product       Product @relation("ProductRelation", fields: [productId], references: [id], onDelete: Cascade)
   related       Product @relation("RelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
+  
+  // Upsell relations
+  upsellProduct Product @relation("ProductUpsell", fields: [productId], references: [id], onDelete: Cascade)
+  upsellOf      Product @relation("UpsellOf", fields: [relatedId], references: [id], onDelete: Cascade)
 
-  @@unique([productId, relatedId])
+  @@unique([productId, relatedId, relationType])
   @@map("product_relations")
 }
 

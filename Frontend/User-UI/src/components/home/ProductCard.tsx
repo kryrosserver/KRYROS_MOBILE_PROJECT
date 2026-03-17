@@ -237,7 +237,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               NEW
             </span>
           )}
-          {discount && (
+          {discount > 0 && (
             <span className="rounded-sm bg-pink-500 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
               {discount}%
             </span>
@@ -269,9 +269,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
         {/* Rating Badge */}
         <div className="absolute left-2 bottom-2 bg-yellow-100/90 backdrop-blur-sm px-1.5 py-0.5 rounded border border-yellow-200 flex items-center gap-1">
-          <span className="text-[10px] font-bold text-yellow-700">{Number(product?.rating || 5).toFixed(1)}</span>
+          <span className="text-[10px] font-bold text-yellow-700">{Number(product?.rating || 0).toFixed(1)}</span>
           <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
-          <span className="text-[10px] text-yellow-600 font-medium">1</span>
+          <span className="text-[10px] text-yellow-600 font-medium">({product?.reviewCount || 0})</span>
         </div>
       </div>
 
@@ -295,28 +295,34 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </div>
 
         <div className="mt-2 flex items-center gap-1">
-          <span className="text-[10px] font-bold text-green-600 uppercase">In Stock: {product?.stock || 28}</span>
+          <span className="text-[10px] font-bold text-green-600 uppercase">In Stock: {product?.inventory?.stock || 0}</span>
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-2.5 w-2.5 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-slate-200"}`} />
+              <Star key={i} className={`h-2.5 w-2.5 ${i < Math.floor(product?.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-slate-200"}`} />
             ))}
           </div>
         </div>
 
         {/* Feature Checklist */}
         <div className="mt-3 space-y-1">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-            <Check className="h-3 w-3 text-green-500" />
-            <span>5 YEARS GUARANTEE</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-            <Check className="h-3 w-3 text-green-500" />
-            <span>FREE RETURNS</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-            <Check className="h-3 w-3 text-green-500" />
-            <span>INSTALLMENT OPTIONS</span>
-          </div>
+          {product?.hasFiveYearGuarantee &&
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+                <Check className="h-3 w-3 text-green-500" />
+                <span>5 YEARS GUARANTEE</span>
+            </div>
+          }
+          {product?.hasFreeReturns &&
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+                <Check className="h-3 w-3 text-green-500" />
+                <span>FREE RETURNS</span>
+            </div>
+          }
+          {product?.hasInstallmentOptions &&
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+                <Check className="h-3 w-3 text-green-500" />
+                <span>INSTALLMENT OPTIONS</span>
+            </div>
+          }
         </div>
 
         <div className="mt-4 pt-3 border-t border-slate-100">

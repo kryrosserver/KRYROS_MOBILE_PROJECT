@@ -52,11 +52,42 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     ? JSON.parse(p.specifications) 
     : (Array.isArray(p.specifications) ? p.specifications : [])
 
-  const images = p.images?.length > 0 ? p.images : [{ url: '/placeholder.jpg' }]
-  const mainImage = images[activeImageIdx]?.url || '/placeholder.jpg'
+  const [quantity, setQuantity] = useState(1);
 
-  const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % images.length)
-  const prevImage = () => setActiveImageIdx((prev) => (prev - 1 + images.length) % images.length)
+  const { addItem } = useCart();
+
+  const handleAddToCart = () => {
+    addItem(p, quantity);
+  };
+
+  const [includeAccessory, setIncludeAccessory] = useState(false);
+
+  const accessory = p.relatedProducts?.[0]?.related;
+
+  const basePrice = Number(p.price);
+  const accessoryPrice = accessory ? Number(accessory.price) : 0;
+
+  const totalPrice = includeAccessory
+    ? (basePrice + accessoryPrice) * 0.92 // 8% discount
+    : basePrice;
+
+  const handleBuyNow = () => {
+    addItem(p, quantity);
+    if (includeAccessory && accessory) {
+      addItem(accessory, 1);
+    }
+    // Redirect to checkout
+  };
+
+  const handleWishlist = () => {
+    // Add to wishlist
+  };
+
+  const images = p.images?.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
+  const mainImage = images[activeImageIdx]?.url || '/placeholder.jpg';
+
+  const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % images.length);
+  const prevImage = () => setActiveImageIdx((prev) => (prev - 1 + images.length) % images.length);
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 md:py-12">
@@ -127,11 +158,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {/* Pricing */}
               <div className="flex items-baseline gap-4">
                 <span className="text-3xl md:text-4xl font-extrabold text-red-600 tracking-tight">
-                  {formatPrice(Number(p.price))}
+                  {formatPrice(totalPrice)}
                 </span>
-                {p.originalPrice && (
+                {p.salePrice && (
                   <span className="text-lg text-slate-400 line-through font-medium">
-                    {formatPrice(Number(p.originalPrice))}
+                    {formatPrice(Number(p.price))}
                   </span>
                 )}
               </div>
@@ -139,13 +170,13 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {/* Scarcity Indicator */}
               <div className="mt-6 space-y-2">
                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                  <span className="text-red-500">Ordered: {p.orderedCount || 8}</span>
-                  <span className="text-green-600">Items Available: {p.stock || 28}</span>
+                  <span className="text-red-500">Ordered: {p.stockTotal - p.stockCurrent}</span>
+                  <span className="text-green-600">Items Available: {p.stockCurrent}</span>
                 </div>
                 <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-50">
                   <div 
                     className="h-full bg-red-500 rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
-                    style={{ width: `${Math.min(((p.orderedCount || 8) / ((p.orderedCount || 8) + (p.stock || 28))) * 100, 100)}%` }} 
+                    style={{ width: `${Math.min(((p.stockTotal - p.stockCurrent) / p.stockTotal) * 100, 100)}%` }} 
                   />
                 </div>
               </div>
@@ -155,13 +186,34 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 <div className="flex flex-wrap gap-3">
                   {/* Quantity Selector */}
                   <div className="flex items-center border border-slate-200 bg-white rounded-md h-12 overflow-hidden shadow-sm">
-                    <button className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full"><Minus className="h-4 w-4" /></button>
-                    <input type="number" defaultValue={1} className="w-12 text-center font-bold text-slate-800 focus:outline-none h-full border-x border-slate-100" />
-                    <button className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full"><Plus className="h-4 w-4" /></button>
+                    <button 
+                      className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full disabled:opacity-50"
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <input 
+                      type="number" 
+                      value={quantity} 
+                      onChange={(e) => setQuantity(Math.max(1, Math.min(p.stockCurrent, Number(e.target.value))))}
+                      className="w-12 text-center font-bold text-slate-800 focus:outline-none h-full border-x border-slate-100" 
+                    />
+                    <button 
+                      className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full disabled:opacity-50"
+                      onClick={() => setQuantity(q => Math.min(p.stockCurrent, q + 1))}
+                      disabled={quantity >= p.stockCurrent}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
                   </div>
                   
                   {/* Add to Cart Button */}
-                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg shadow-blue-600/20 transition-all active:scale-95">
+                  <Button 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg shadow-blue-600/20 transition-all active:scale-95"
+                    onClick={handleAddToCart}
+                    disabled={p.stockCurrent <= 0}
+                  >
                     Add to cart
                   </Button>
                 </div>
@@ -169,62 +221,88 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 <div className="mt-4 flex gap-3">
                   {/* Side Icons */}
                   <div className="flex gap-2">
-                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"><Heart className="h-5 w-5" /></button>
-                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"><RefreshCw className="h-5 w-5" /></button>
+                    <button 
+                      className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
+                      onClick={handleWishlist}
+                    >
+                      <Heart className="h-5 w-5" />
+                    </button>
+                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors shadow-sm">
+                      <RefreshCw className="h-5 w-5" />
+                    </button>
                   </div>
                   
                   {/* Buy Now Button */}
-                  <Button className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg transition-all active:scale-95">
+                  <Button 
+                    className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg transition-all active:scale-95"
+                    onClick={handleBuyNow}
+                    disabled={p.stockCurrent <= 0}
+                  >
                     Buy Now
                   </Button>
                 </div>
               </div>
 
               {/* Bundle Offer */}
-              <div className="mt-8 border-t border-dashed border-slate-200 pt-6">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest mb-4">
-                  YOU WILL GET 8% OFF ON EACH PRODUCT
-                </h4>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 group">
-                    <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
-                      <Image src={mainImage} alt={p.name} fill className="object-contain p-1" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <span className="text-xs font-bold text-slate-700 truncate">This Item: {p.name}</span>
+              {accessory && (
+                <div className="mt-8 border-t border-dashed border-slate-200 pt-6">
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest mb-4">
+                    YOU WILL GET 8% OFF ON EACH PRODUCT
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 group">
+                      <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
+                        <Image src={mainImage} alt={p.name} fill className="object-contain p-1" />
                       </div>
-                      <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{p.stock || 28} IN STOCK (CAN BE BACKORDERED)</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                          <span className="text-xs font-bold text-slate-700 truncate">This Item: {p.name}</span>
+                        </div>
+                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{p.stockCurrent || 0} IN STOCK (CAN BE BACKORDERED)</p>
+                      </div>
+                      <span className="text-sm font-extrabold text-red-600">{formatPrice(Number(p.price))}</span>
                     </div>
-                    <span className="text-sm font-extrabold text-red-600">{formatPrice(Number(p.price))}</span>
-                  </div>
 
-                  {/* Dummy Accessory for Bundle */}
-                  <div className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity">
-                    <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
-                      <Image src="https://images.unsplash.com/photo-1546868871-70ca4844567c?w=100&h=100&fit=crop" alt="Accessory" fill className="object-contain p-1" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <span className="text-xs font-bold text-slate-700 truncate">1 x Premium Case + Screen Protector</span>
+                    {/* Accessory for Bundle */}
+                    <div className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity">
+                      <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
+                        <Image src={accessory.images?.[0]?.url || '/placeholder.jpg'} alt={accessory.name} fill className="object-contain p-1" />
                       </div>
-                      <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">IN STOCK</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-slate-400 line-through font-medium">{formatPrice(25)}</p>
-                      <p className="text-sm font-extrabold text-red-600">{formatPrice(15)}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <input 
+                            type="checkbox" 
+                            className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                            checked={includeAccessory}
+                            onChange={(e) => setIncludeAccessory(e.target.checked)}
+                          />
+                          <span className="text-xs font-bold text-slate-700 truncate">{accessory.name}</span>
+                        </div>
+                        <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{accessory.inventory?.stock || 0} IN STOCK</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-extrabold text-red-600">{formatPrice(accessory.price)}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Request Info Button */}
               <div className="mt-8">
-                <Button className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold h-14 uppercase tracking-widest text-sm shadow-xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
-                  <MessageCircle className="h-6 w-6" />
-                  REQUEST INFORMATION
+                <Button 
+                  asChild
+                  className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold h-14 uppercase tracking-widest text-sm shadow-xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                >
+                  <a 
+                    href={`https://wa.me/?text=Hello, I would like to know more about the product: ${p.name}. You can find it here: ${window.location.href}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="h-6 w-6" />
+                    REQUEST INFORMATION
+                  </a>
                 </Button>
               </div>
             </div>

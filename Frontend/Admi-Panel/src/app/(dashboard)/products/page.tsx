@@ -13,6 +13,14 @@ type Product = {
   isActive?: boolean;
   isFeatured?: boolean;
   isFlashSale?: boolean;
+  isNew?: boolean;
+  discountPercentage?: number | null;
+  stockTotal?: number;
+  stockCurrent?: number;
+  hasFiveYearGuarantee?: boolean;
+  hasFreeReturns?: boolean;
+  hasInstallmentOptions?: boolean;
+  wholesalePrice?: number | null;
   allowCredit?: boolean;
   creditMinimum?: number | string | null;
   creditMessage?: string | null;
@@ -57,6 +65,15 @@ export default function ProductsPage() {
     categorySlug: "",
     brandId: "" as string | number,
     isFeatured: false,
+    isNew: true,
+    discountPercentage: "",
+    stockTotal: "50",
+    stockCurrent: "42",
+    hasFiveYearGuarantee: true,
+    hasFreeReturns: true,
+    hasInstallmentOptions: true,
+    wholesalePrice: "",
+    upsellProductId: "",
     isActive: true,
     allowCredit: false,
     creditMinimum: "",
@@ -76,6 +93,15 @@ export default function ProductsPage() {
     brandId: "" as string | number,
     isActive: true,
     isFeatured: false,
+    isNew: true,
+    discountPercentage: "",
+    stockTotal: "",
+    stockCurrent: "",
+    hasFiveYearGuarantee: true,
+    hasFreeReturns: true,
+    hasInstallmentOptions: true,
+    wholesalePrice: "",
+    upsellProductId: "",
     allowCredit: false,
     creditMinimum: "",
     creditMessage: "",
@@ -255,6 +281,104 @@ export default function ProductsPage() {
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
+                    checked={form.isNew}
+                    onChange={(e) => setForm({ ...form, isNew: e.target.checked })}
+                  />
+                  New Badge
+                </label>
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="number"
+                    placeholder="Discount %"
+                    value={form.discountPercentage}
+                    onChange={(e) => setForm({ ...form, discountPercentage: e.target.value })}
+                    className="admin-input w-24"
+                  />
+                </div>
+              </div>
+
+              {/* Stock Scarcity Section */}
+              <div className="border-t pt-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700">Stock Scarcity Logic</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    placeholder="Total Stock Capacity"
+                    value={form.stockTotal}
+                    onChange={(e) => setForm({ ...form, stockTotal: e.target.value })}
+                    className="admin-input w-full"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Current Stock"
+                    value={form.stockCurrent}
+                    onChange={(e) => setForm({ ...form, stockCurrent: e.target.value })}
+                    className="admin-input w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Wholesale Pricing Section */}
+              <div className="border-t pt-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700">Upsell & Bundle Logic</p>
+                <div className="space-y-2">
+                  <select
+                    className="admin-input w-full"
+                    value={form.upsellProductId}
+                    onChange={(e) => setForm({ ...form, upsellProductId: e.target.value })}
+                  >
+                    <option value="">Select Linked Accessory (Upsell)</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-slate-500 italic">This product will be offered as a bundle with 8% discount on the product details page.</p>
+                </div>
+                
+                <input
+                  type="number"
+                  placeholder="Wholesale Price (Optional)"
+                  value={form.wholesalePrice}
+                  onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
+                  className="admin-input w-full"
+                />
+              </div>
+
+              {/* Guarantees Section */}
+              <div className="border-t pt-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700">Guarantees & Options</p>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.hasFiveYearGuarantee}
+                      onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
+                    />
+                    5 Year Guarantee
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.hasFreeReturns}
+                      onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
+                    />
+                    Free Returns
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.hasInstallmentOptions}
+                      onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
+                    />
+                    Installment Options
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
                     checked={form.allowCredit}
                     onChange={(e) => setForm({ ...form, allowCredit: e.target.checked })}
                   />
@@ -386,9 +510,18 @@ export default function ProductsPage() {
                       formData.append("price", String(Number(form.price)));
                       formData.append("description", form.description);
                       formData.append("categorySlug", form.categorySlug || "general");
-                      if (form.brandId) formData.append("brandId", String(form.brandId));
+                      formData.append("brandId", String(form.brandId));
                       formData.append("isActive", String(form.isActive));
                       formData.append("isFeatured", String(form.isFeatured));
+                      formData.append("isNew", String(form.isNew));
+                      if (form.discountPercentage) formData.append("discountPercentage", String(Number(form.discountPercentage)));
+                      formData.append("stockTotal", String(Number(form.stockTotal || 0)));
+                      formData.append("stockCurrent", String(Number(form.stockCurrent || 0)));
+                      formData.append("hasFiveYearGuarantee", String(form.hasFiveYearGuarantee));
+                      formData.append("hasFreeReturns", String(form.hasFreeReturns));
+                      formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
+                      if (form.wholesalePrice) formData.append("wholesalePrice", String(Number(form.wholesalePrice)));
+                      if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
                       formData.append("allowCredit", String(form.allowCredit));
                       if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
                       if (form.creditMessage) formData.append("creditMessage", form.creditMessage);
@@ -618,6 +751,15 @@ export default function ProductsPage() {
                           brandId: p.brand?.id || "",
                           isActive: p.isActive !== false,
                           isFeatured: !!p.isFeatured,
+                          isNew: !!p.isNew,
+                          discountPercentage: String(p.discountPercentage ?? ""),
+                          stockTotal: String(p.stockTotal ?? ""),
+                          stockCurrent: String(p.stockCurrent ?? ""),
+                          hasFiveYearGuarantee: !!p.hasFiveYearGuarantee,
+                          hasFreeReturns: !!p.hasFreeReturns,
+                          hasInstallmentOptions: !!p.hasInstallmentOptions,
+                          wholesalePrice: String(p.wholesalePrice ?? ""),
+                          upsellProductId: String(p.relatedProducts?.[0]?.relatedProductId ?? ""),
                           allowCredit: !!p.allowCredit,
                           creditMinimum: String(p.creditMinimum ?? ""),
                           creditMessage: p.creditMessage || "",
@@ -795,6 +937,107 @@ export default function ProductsPage() {
                       />
                       Featured Product
                     </label>
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editForm.isNew}
+                        onChange={(e) => setEditForm({ ...editForm, isNew: e.target.checked })}
+                        className="w-4 h-4 text-green-500 rounded"
+                      />
+                      New Badge
+                    </label>
+                    <div className="flex flex-col gap-1 col-span-2">
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Discount Percentage (%)</label>
+                      <input
+                        type="number"
+                        placeholder="Discount %"
+                        value={editForm.discountPercentage}
+                        onChange={(e) => setEditForm({ ...editForm, discountPercentage: e.target.value })}
+                        className="admin-input w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2 grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Total Stock Capacity</label>
+                      <input
+                        type="number"
+                        placeholder="Total Capacity"
+                        value={editForm.stockTotal}
+                        onChange={(e) => setEditForm({ ...editForm, stockTotal: e.target.value })}
+                        className="admin-input w-full"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Current Stock</label>
+                      <input
+                        type="number"
+                        placeholder="Current Stock"
+                        value={editForm.stockCurrent}
+                        onChange={(e) => setEditForm({ ...editForm, stockCurrent: e.target.value })}
+                        className="admin-input w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Linked Accessory (Upsell Bundle)</label>
+                    <select
+                      className="admin-input w-full"
+                      value={editForm.upsellProductId}
+                      onChange={(e) => setEditForm({ ...editForm, upsellProductId: e.target.value })}
+                    >
+                      <option value="">No Accessory Linked</option>
+                      {products.filter(p => p.id !== editForm.id).map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-slate-500 mt-1 italic">Selecting a product here will enable the 8% bundle discount offer.</p>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Wholesale Price (USD)</label>
+                    <input
+                      type="number"
+                      placeholder="Wholesale Price"
+                      value={editForm.wholesalePrice}
+                      onChange={(e) => setEditForm({ ...editForm, wholesalePrice: e.target.value })}
+                      className="admin-input w-full"
+                    />
+                  </div>
+
+                  <div className="pt-2 space-y-3">
+                    <p className="text-sm font-bold text-slate-800 border-b pb-2">Guarantees</p>
+                    <div className="flex flex-wrap gap-4">
+                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.hasFiveYearGuarantee}
+                          onChange={(e) => setEditForm({ ...editForm, hasFiveYearGuarantee: e.target.checked })}
+                          className="w-4 h-4 text-green-500 rounded"
+                        />
+                        5 Year Guarantee
+                      </label>
+                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.hasFreeReturns}
+                          onChange={(e) => setEditForm({ ...editForm, hasFreeReturns: e.target.checked })}
+                          className="w-4 h-4 text-green-500 rounded"
+                        />
+                        Free Returns
+                      </label>
+                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.hasInstallmentOptions}
+                          onChange={(e) => setEditForm({ ...editForm, hasInstallmentOptions: e.target.checked })}
+                          className="w-4 h-4 text-green-500 rounded"
+                        />
+                        Installment Options
+                      </label>
+                    </div>
                   </div>
                   
                   <div className="pt-2">
@@ -958,6 +1201,15 @@ export default function ProductsPage() {
                   if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
                   formData.append("isActive", String(editForm.isActive));
                   formData.append("isFeatured", String(editForm.isFeatured));
+                  formData.append("isNew", String(editForm.isNew));
+                  if (editForm.discountPercentage) formData.append("discountPercentage", String(Number(editForm.discountPercentage)));
+                  if (editForm.stockTotal) formData.append("stockTotal", String(Number(editForm.stockTotal)));
+                  if (editForm.stockCurrent) formData.append("stockCurrent", String(Number(editForm.stockCurrent)));
+                  formData.append("hasFiveYearGuarantee", String(editForm.hasFiveYearGuarantee));
+                  formData.append("hasFreeReturns", String(editForm.hasFreeReturns));
+                  formData.append("hasInstallmentOptions", String(editForm.hasInstallmentOptions));
+                  if (editForm.wholesalePrice) formData.append("wholesalePrice", String(Number(editForm.wholesalePrice)));
+                  if (editForm.upsellProductId) formData.append("upsellProductId", String(editForm.upsellProductId));
                   formData.append("allowCredit", String(editForm.allowCredit));
                   if (editForm.creditMinimum) formData.append("creditMinimum", String(Number(editForm.creditMinimum)));
                   if (editForm.creditMessage) formData.append("creditMessage", editForm.creditMessage);
