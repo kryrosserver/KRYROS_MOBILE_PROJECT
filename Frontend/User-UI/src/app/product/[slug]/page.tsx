@@ -27,14 +27,48 @@ async function getProduct(slug: string) {
 export default function ProductPage({ params }: { params: { slug: string } }) {
   const [product, setProduct] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeImageIdx, setActiveImageIdx] = useState(0)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    getProduct(params.slug).then(data => {
-      setProduct(data)
-      setLoading(false)
-    })
+    setMounted(true)
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        // Try slug first
+        let res = await fetch(`${API_URL}/products/slug/${params.slug}`, { cache: 'no-store' })
+        let data = null
+        
+        if (res.ok) {
+          data = await res.json()
+        } else {
+          // Fallback: treat slug as id
+          res = await fetch(`${API_URL}/products/${params.slug}`, { cache: 'no-store' })
+          if (res.ok) {
+            data = await res.json()
+          }
+        }
+
+        if (!data) {
+          setError("Product not found")
+        } else {
+          setProduct(data)
+        }
+      } catch (err) {
+        console.error("Fetch error:", err)
+        setError("Failed to load product")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (params.slug) {
+      fetchProduct()
+    }
   }, [params.slug])
+
+  if (!mounted) return null
 
   if (loading) {
     return (
@@ -44,8 +78,15 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     )
   }
 
-  if (!product) {
-    return null;
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4">
+        <h1 className="text-2xl font-bold text-slate-800 mb-4">{error || "Product not found"}</h1>
+        <Button onClick={() => window.location.reload()} className="bg-green-600">
+          Try Again
+        </Button>
+      </div>
+    )
   }
 
   const p = product;
@@ -53,13 +94,13 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   // Safe parsing for specifications
   let specifications = [];
   try {
-    if (p && p.specifications) {
+    if (p.specifications) {
       specifications = typeof p.specifications === 'string' 
         ? JSON.parse(p.specifications) 
         : (Array.isArray(p.specifications) ? p.specifications : []);
     }
   } catch (e) {
-    console.error("Failed to parse specifications:", e);
+    specifications = [];
   }
 
   const [quantity, setQuantity] = useState(1);
@@ -68,13 +109,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const [includeAccessory, setIncludeAccessory] = useState(false);
 
   // Safe access for relations and numbers
-  const productRelations = p?.productRelations || [];
+  const productRelations = Array.isArray(p.productRelations) ? p.productRelations : [];
   const accessory = productRelations.length > 0 ? productRelations[0]?.related : null;
   
-  const basePrice = Number(p?.price || 0);
-  const accessoryPrice = accessory ? Number(accessory.price || 0) : 0;
-  const stockTotal = Number(p?.stockTotal || 1); // Default to 1 to avoid division by zero
-  const stockCurrent = Number(p?.stockCurrent || 0);
+  const basePrice = isNaN(Number(p.price)) ? 0 : Number(p.price);
+  const accessoryPrice = accessory && !isNaN(Number(accessory.price)) ? Number(accessory.price) : 0;
+  
+  const stockTotal = Math.max(1, Number(p.stockTotal || 0));
+  const stockCurrent = Math.max(0, Number(p.stockCurrent || 0));
 
   const totalPrice = includeAccessory && accessory
     ? (basePrice + accessoryPrice) * 0.92 // 8% discount
@@ -95,20 +137,13 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     }
   };
 
-  const handleWishlist = () => {
-    // Add to wishlist logic
-  };
-
-  const images = Array.isArray(p?.images) && p.images.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
+  const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
   const mainImage = images[activeImageIdx]?.url || '/placeholder.jpg';
 
   const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % images.length);
   const prevImage = () => setActiveImageIdx((prev) => (prev - 1 + images.length) % images.length);
 
-  // Calculate scarcity percentage safely
   const scarcityPercentage = Math.max(0, Math.min(100, ((stockTotal - stockCurrent) / stockTotal) * 100));
-
-  if (!p) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 md:py-12">
