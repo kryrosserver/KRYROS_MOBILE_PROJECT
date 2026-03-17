@@ -295,7 +295,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </div>
 
         <div className="mt-2 flex items-center gap-1">
-          <span className="text-[10px] font-bold text-green-600 uppercase">In Stock: {product?.inventory?.stock || 0}</span>
+          <span className="text-[10px] font-bold text-green-600 uppercase">In Stock: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}</span>
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
               <Star key={i} className={`h-2.5 w-2.5 ${i < Math.floor(product?.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-slate-200"}`} />

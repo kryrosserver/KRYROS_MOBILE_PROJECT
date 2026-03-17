@@ -45,6 +45,8 @@ export class ProductsService {
             brand: true,
             images: { orderBy: { sortOrder: 'asc' }, take: 1 },
             inventory: true,
+            productRelations: {
+              include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
           },
           orderBy: { createdAt: 'desc' },
         }),
@@ -63,6 +65,8 @@ export class ProductsService {
             category: true,
             images: { orderBy: { sortOrder: 'asc' }, take: 1 },
             inventory: true,
+            productRelations: {
+              include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
           },
           orderBy: { createdAt: 'desc' },
         }),
@@ -124,6 +128,8 @@ export class ProductsService {
         brand: true,
         images: { orderBy: { sortOrder: 'asc' }, take: 1 },
         inventory: true,
+        productRelations: {
+          include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -142,6 +148,8 @@ export class ProductsService {
         brand: true,
         images: { orderBy: { sortOrder: 'asc' }, take: 1 },
         inventory: true,
+        productRelations: {
+          include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
       },
     });
   }
@@ -156,7 +164,10 @@ export class ProductsService {
       include: { 
         images: true, 
         category: true, 
-        brand: true 
+        brand: true,
+        inventory: true,
+        productRelations: {
+          include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
       },
       orderBy: [
         { category: { name: 'asc' } },
@@ -263,6 +274,9 @@ export class ProductsService {
         reviewCount: data.reviewCount ?? 0,
         wholesalePrice: data.wholesalePrice ?? null,
         specifications: data.specifications ? JSON.stringify(data.specifications) : null,
+        isFlashSale: (data as any).isFlashSale ?? false,
+        flashSalePrice: (data as any).flashSalePrice ?? null,
+        flashSaleEnd: (data as any).flashSaleEnd ? new Date((data as any).flashSaleEnd) : null,
       },
     });
 

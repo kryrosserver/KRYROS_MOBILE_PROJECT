@@ -330,18 +330,24 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
             {/* Warranty & Delivery Badges */}
             <div className="grid grid-cols-1 gap-3">
-              <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
-                <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
-                <div className="text-xs font-bold text-slate-700">✓ 5 YEARS GUARANTEE</div>
-              </div>
-              <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
-                <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Truck className="h-5 w-5" /></div>
-                <div className="text-xs font-bold text-slate-700">✓ FREE RETURNS</div>
-              </div>
-              <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
-                <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><CreditCard className="h-5 w-5" /></div>
-                <div className="text-xs font-bold text-slate-700">✓ INSTALLMENT OPTIONS</div>
-              </div>
+              {p?.hasFiveYearGuarantee && (
+                <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
+                  <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
+                  <div className="text-xs font-bold text-slate-700">✓ 5 YEARS GUARANTEE</div>
+                </div>
+              )}
+              {p?.hasFreeReturns && (
+                <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
+                  <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Truck className="h-5 w-5" /></div>
+                  <div className="text-xs font-bold text-slate-700">✓ FREE RETURNS</div>
+                </div>
+              )}
+              {p?.hasInstallmentOptions && (
+                <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4">
+                  <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><CreditCard className="h-5 w-5" /></div>
+                  <div className="text-xs font-bold text-slate-700">✓ INSTALLMENT OPTIONS</div>
+                </div>
+              )}
             </div>
 
             {/* Specifications & Description */}
