@@ -53,37 +53,43 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   // Safe parsing for specifications
   let specifications = [];
   try {
-    specifications = typeof p.specifications === 'string' 
-      ? JSON.parse(p.specifications) 
-      : (Array.isArray(p.specifications) ? p.specifications : []);
+    if (p && p.specifications) {
+      specifications = typeof p.specifications === 'string' 
+        ? JSON.parse(p.specifications) 
+        : (Array.isArray(p.specifications) ? p.specifications : []);
+    }
   } catch (e) {
     console.error("Failed to parse specifications:", e);
   }
 
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
+  const cart = useCart();
 
   const [includeAccessory, setIncludeAccessory] = useState(false);
 
   // Safe access for relations and numbers
-  const accessory = p.productRelations?.[0]?.related;
-  const basePrice = Number(p.price || 0);
+  const accessory = p?.productRelations?.[0]?.related;
+  const basePrice = Number(p?.price || 0);
   const accessoryPrice = accessory ? Number(accessory.price || 0) : 0;
-  const stockTotal = Number(p.stockTotal || 1); // Default to 1 to avoid division by zero
-  const stockCurrent = Number(p.stockCurrent || 0);
+  const stockTotal = Number(p?.stockTotal || 1); // Default to 1 to avoid division by zero
+  const stockCurrent = Number(p?.stockCurrent || 0);
 
   const totalPrice = includeAccessory
     ? (basePrice + accessoryPrice) * 0.92 // 8% discount
     : basePrice;
 
   const handleAddToCart = () => {
-    addItem(p, undefined, quantity);
+    if (cart?.addItem) {
+      cart.addItem(p, undefined, quantity);
+    }
   };
 
   const handleBuyNow = () => {
-    addItem(p, undefined, quantity);
-    if (includeAccessory && accessory) {
-      addItem(accessory, undefined, 1);
+    if (cart?.addItem) {
+      cart.addItem(p, undefined, quantity);
+      if (includeAccessory && accessory) {
+        cart.addItem(accessory, undefined, 1);
+      }
     }
   };
 
@@ -91,7 +97,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     // Add to wishlist logic
   };
 
-  const images = p.images?.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
+  const images = p?.images?.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
   const mainImage = images[activeImageIdx]?.url || '/placeholder.jpg';
 
   const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % images.length);
@@ -99,6 +105,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   // Calculate scarcity percentage safely
   const scarcityPercentage = Math.max(0, Math.min(100, ((stockTotal - stockCurrent) / stockTotal) * 100));
+
+  if (!p) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 md:py-12">
