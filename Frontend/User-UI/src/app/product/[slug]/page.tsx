@@ -137,6 +137,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     }
   };
 
+  const handleWishlist = () => {
+    // Add to wishlist logic
+  };
+
   const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [{ url: '/placeholder.jpg' }];
   const mainImage = images[activeImageIdx]?.url || '/placeholder.jpg';
 
