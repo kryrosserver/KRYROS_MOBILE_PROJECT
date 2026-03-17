@@ -260,16 +260,6 @@ export class ProductsService {
         rating: data.rating ?? 0,
         reviewCount: data.reviewCount ?? 0,
         wholesalePrice: data.wholesalePrice ?? null,
-        isNew: data.isNew ?? true,
-        discountPercentage: data.discountPercentage ?? null,
-        stockTotal: data.stockTotal ?? 0,
-        stockCurrent: data.stockCurrent ?? 0,
-        hasFiveYearGuarantee: data.hasFiveYearGuarantee ?? false,
-        hasFreeReturns: data.hasFreeReturns ?? false,
-        hasInstallmentOptions: data.hasInstallmentOptions ?? false,
-        rating: data.rating ?? 0,
-        reviewCount: data.reviewCount ?? 0,
-        wholesalePrice: data.wholesalePrice ?? null,
         specifications: data.specifications ? JSON.stringify(data.specifications) : null,
       },
     });
@@ -278,7 +268,7 @@ export class ProductsService {
       await this.prisma.productRelation.create({
         data: {
           productId: product.id,
-          relatedProductId: Number(data.upsellProductId),
+          relatedId: String(data.upsellProductId),
           relationType: 'upsell',
         },
       });
@@ -355,9 +345,29 @@ export class ProductsService {
         creditMessage: data.creditMessage ?? null,
         deliveryInfo: data.deliveryInfo ?? null,
         warrantyInfo: data.warrantyInfo ?? null,
+        isNew: data.isNew ?? true,
+        discountPercentage: data.discountPercentage ?? null,
+        stockTotal: data.stockTotal ?? 0,
+        stockCurrent: data.stockCurrent ?? 0,
+        hasFiveYearGuarantee: data.hasFiveYearGuarantee ?? false,
+        hasFreeReturns: data.hasFreeReturns ?? false,
+        hasInstallmentOptions: data.hasInstallmentOptions ?? false,
+        rating: data.rating ?? 0,
+        reviewCount: data.reviewCount ?? 0,
+        wholesalePrice: data.wholesalePrice ?? null,
         specifications: data.specifications ? JSON.stringify(data.specifications) : null,
       },
     });
+
+    if (data.upsellProductId) {
+      await this.prisma.productRelation.create({
+        data: {
+          productId: product.id,
+          relatedId: String(data.upsellProductId),
+          relationType: 'upsell',
+        },
+      });
+    }
 
     for (let idx = 0; idx < files.length; idx++) {
       const f = files[idx];
@@ -476,7 +486,7 @@ export class ProductsService {
       await this.prisma.productRelation.create({
         data: {
           productId: id,
-          relatedProductId: Number(data.upsellProductId),
+          relatedId: String(data.upsellProductId),
           relationType: 'upsell',
         },
       });

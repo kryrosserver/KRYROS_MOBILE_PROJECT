@@ -32,6 +32,7 @@ type Product = {
   brand?: { id: number; name: string; slug: string };
   specifications?: string | any[];
   images?: any[];
+  productRelations?: any[];
 };
 
 type Category = {
