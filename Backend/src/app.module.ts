@@ -19,6 +19,9 @@ import { SettingsModule } from './settings/settings.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { BrandsModule } from './brands/brands.module';
 import { CountriesModule } from './countries/countries.module';
+import { StatesModule } from './states/states.module';
+import { CitiesModule } from './cities/cities.module';
+import { ShippingZonesModule } from './shipping-zones/shipping-zones.module';
 
 @Module({
   imports: [
@@ -49,6 +52,9 @@ import { CountriesModule } from './countries/countries.module';
     ShippingModule,
     BrandsModule,
     CountriesModule,
+    StatesModule,
+    CitiesModule,
+    ShippingZonesModule,
   ],
 })
 export class AppModule {}

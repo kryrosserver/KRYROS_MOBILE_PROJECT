@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/providers/CartProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
-import { settingsApi } from "@/lib/api";
+import { settingsApi, locationsApi } from "@/lib/api";
 import { 
   CreditCard, 
   Smartphone, 
@@ -15,7 +15,14 @@ import {
   Lock, 
   CheckCircle,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Loader2,
+  MapPin,
+  Truck,
+  ChevronRight,
+  CheckCircle2,
+  ShieldCheck,
+  Package
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { CartItem } from "@/types";
@@ -55,20 +62,39 @@ export default function CheckoutPage() {
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<any>(null);
   const [loadingMethods, setLoadingMethods] = useState(false);
+
+  // New Location States
+  const [isNewShippingEnabled, setIsNewShippingEnabled] = useState(false);
+  const [countries, setCountries] = useState<any[]>([]);
+  const [states, setStates] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
     lastName: "",
     phone: "",
     address: "",
-    city: "",
-    province: "",
+    cityId: "",
+    stateId: "",
+    countryId: "",
     zipCode: ""
   });
 
   useEffect(() => {
-    const fetchShipping = async () => {
+    const init = async () => {
       setLoadingMethods(true);
+      
+      // Check if new shipping is enabled
+      const statusRes = await locationsApi.getShippingStatus();
+      if (statusRes.data !== undefined) setIsNewShippingEnabled(statusRes.data);
+
+      // Load initial countries
+      const countriesRes = await locationsApi.getCountries();
+      if (countriesRes.data) setCountries(countriesRes.data);
+
+      // Load old shipping methods as fallback
       const { data } = await settingsApi.getShippingMethods();
       if (data && data.length > 0) {
         setShippingMethods(data);
@@ -76,8 +102,43 @@ export default function CheckoutPage() {
       }
       setLoadingMethods(false);
     };
-    fetchShipping();
+    init();
   }, []);
+
+  // Update states when country changes
+  useEffect(() => {
+    if (formData.countryId) {
+      setLoadingLocations(true);
+      locationsApi.getStates(formData.countryId).then(res => {
+        if (res.data) setStates(res.data);
+        setCities([]);
+        setLoadingLocations(false);
+      });
+    }
+  }, [formData.countryId]);
+
+  // Update cities when state changes
+  useEffect(() => {
+    if (formData.stateId) {
+      setLoadingLocations(true);
+      locationsApi.getCities(formData.stateId).then(res => {
+        if (res.data) setCities(res.data);
+        setLoadingLocations(false);
+      });
+    }
+  }, [formData.stateId]);
+
+  // Fetch matching shipping methods
+  useEffect(() => {
+    if (isNewShippingEnabled && formData.countryId && formData.stateId && formData.cityId) {
+      locationsApi.getMatchingShipping(formData.countryId, formData.stateId, formData.cityId).then(res => {
+        if (res.data && res.data.length > 0) {
+          setShippingMethods(res.data);
+          setSelectedShipping(res.data[0]);
+        }
+      });
+    }
+  }, [isNewShippingEnabled, formData.countryId, formData.stateId, formData.cityId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -192,25 +253,54 @@ export default function CheckoutPage() {
                   </div>
                   
                   <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <label className="mb-1 block text-sm font-medium text-slate-700">Country</label>
+                      <select
+                        name="countryId"
+                        value={formData.countryId}
+                        onChange={(e) => setFormData({ ...formData, countryId: e.target.value, stateId: "", cityId: "" })}
+                        className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none"
+                        required
+                      >
+                        <option value="">Select Country</option>
+                        {countries.map((c) => (
+                          <option key={c.id} value={c.id}>{c.flag} {c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-700">Province / State</label>
+                      <select
+                        name="stateId"
+                        value={formData.stateId}
+                        onChange={(e) => setFormData({ ...formData, stateId: e.target.value, cityId: "" })}
+                        className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
+                        disabled={!formData.countryId || loadingLocations}
+                        required
+                      >
+                        <option value="">Select State</option>
+                        {states.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div>
                       <label className="mb-1 block text-sm font-medium text-slate-700">City</label>
-                      <Input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        placeholder="Lusaka"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">Province</label>
-                      <Input
-                        type="text"
-                        name="province"
-                        value={formData.province}
-                        onChange={handleInputChange}
-                        placeholder="Lusaka Province"
-                      />
+                      <select
+                        name="cityId"
+                        value={formData.cityId}
+                        onChange={(e) => setFormData({ ...formData, cityId: e.target.value })}
+                        className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
+                        disabled={!formData.stateId || loadingLocations}
+                        required
+                      >
+                        <option value="">Select City</option>
+                        {cities.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   
@@ -260,7 +350,7 @@ export default function CheckoutPage() {
                   ) : (
                     shippingMethods.map((method) => {
                       const isSelected = selectedShipping?.id === method.id;
-                      const isFree = subtotal >= Number(method.minThreshold);
+                      const isFree = subtotal >= Number(method.freeShippingThreshold || method.minThreshold);
                       return (
                         <label 
                           key={method.id}
@@ -268,7 +358,7 @@ export default function CheckoutPage() {
                             isSelected ? "border-green-500 bg-green-50" : "border-slate-100 hover:border-slate-200"
                           }`}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex flex-1 items-center gap-3">
                             <input 
                               type="radio" 
                               name="shipping" 
@@ -276,20 +366,20 @@ export default function CheckoutPage() {
                               onChange={() => setSelectedShipping(method)}
                               className="text-green-500" 
                             />
+                            <Truck className="h-5 w-5 text-slate-600" />
                             <div>
-                              <p className="font-bold text-slate-900">{method.name}</p>
-                              <p className="text-xs text-slate-500">{method.description}</p>
-                              {method.estimatedDays && (
-                                <p className="text-[10px] text-green-600 font-medium mt-0.5">{method.estimatedDays}</p>
-                              )}
+                              <p className="font-medium text-slate-900">{method.name}</p>
+                              <p className="text-sm text-slate-500">
+                                {method.estimatedDays || "3-5 business days"}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="font-black text-slate-900">
-                              {isFree ? "Free" : formatPrice(Number(method.fee))}
-                            </span>
-                            {Number(method.minThreshold) > 0 && !isFree && (
-                              <p className="text-[9px] text-slate-400 mt-0.5">Free over {formatPrice(Number(method.minThreshold))}</p>
+                            <p className="font-bold text-slate-900">
+                              {isFree ? "FREE" : formatPrice(Number(method.price || method.fee))}
+                            </p>
+                            {Number(method.freeShippingThreshold || method.minThreshold) > 0 && (
+                              <p className="text-[10px] text-slate-400 font-medium">Free over {formatPrice(Number(method.freeShippingThreshold || method.minThreshold))}</p>
                             )}
                           </div>
                         </label>

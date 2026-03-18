@@ -861,8 +861,77 @@ model Country {
   updatedAt         DateTime         @updatedAt
 
   paymentMethods    CountryPaymentMethod[]
+  states            State[]
+  shippingZones     ShippingZone[]
 
   @@map("countries")
+}
+
+model State {
+  id        String   @id @default(uuid())
+  countryId String
+  name      String
+  code      String?  // e.g. LUS for Lusaka
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  country       Country        @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  cities        City[]
+  shippingZones ShippingZone[]
+
+  @@unique([countryId, name])
+  @@map("states")
+}
+
+model City {
+  id        String   @id @default(uuid())
+  stateId   String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  state         State          @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  shippingZones ShippingZone[]
+
+  @@unique([stateId, name])
+  @@map("cities")
+}
+
+model ShippingZone {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  countryId String?
+  stateId   String?
+  cityId    String?
+  priority  Int      @default(0) // Higher number = higher priority
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  country         Country?                 @relation(fields: [countryId], references: [id])
+  state           State?                   @relation(fields: [stateId], references: [id])
+  city            City?                    @relation(fields: [cityId], references: [id])
+  shippingMethods LocationShippingMethod[]
+
+  @@map("shipping_zones")
+}
+
+model LocationShippingMethod {
+  id                    String   @id @default(uuid())
+  zoneId                String
+  name                  String
+  price                 Decimal  @db.Decimal(10, 2)
+  freeShippingThreshold Decimal? @db.Decimal(10, 2)
+  estimatedDays         String?
+  status                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  zone ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@map("location_shipping_methods")
 }
 
 enum SymbolPosition {

@@ -158,6 +158,22 @@ export const wholesaleApi = {
     }),
 };
 
+// Locations & Shipping API
+export const locationsApi = {
+  getCountries: () => fetchApi<any[]>('/countries'),
+  getStates: (countryId: string) => fetchApi<any[]>(`/states?countryId=${countryId}`),
+  getCities: (stateId: string) => fetchApi<any[]>(`/cities?stateId=${stateId}`),
+  
+  getShippingStatus: () => fetchApi<boolean>('/shipping-zones/status'),
+  getMatchingShipping: (countryId?: string, stateId?: string, cityId?: string) => {
+    const params = new URLSearchParams();
+    if (countryId) params.append('countryId', countryId);
+    if (stateId) params.append('stateId', stateId);
+    if (cityId) params.append('cityId', cityId);
+    return fetchApi<any[]>(`/shipping-zones/matching?${params.toString()}`);
+  },
+};
+
 // Settings API
 export const settingsApi = {
   getShippingConfig: () => fetchApi<{ fee: number; threshold: number }>('/settings/shipping'),
