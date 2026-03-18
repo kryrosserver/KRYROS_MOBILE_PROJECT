@@ -9,9 +9,13 @@ export class ShippingZonesService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async onModuleInit() {
-    await this.ensureGlobalDefaultZone();
-    await this.migrateOldShippingMethods();
-    await this.ensureFeatureFlag();
+    try {
+      await this.ensureGlobalDefaultZone();
+      await this.migrateOldShippingMethods();
+      await this.ensureFeatureFlag();
+    } catch (error) {
+      console.error('Failed to initialize ShippingZonesService. Database tables might be missing.', error.message);
+    }
   }
 
   private async ensureGlobalDefaultZone() {

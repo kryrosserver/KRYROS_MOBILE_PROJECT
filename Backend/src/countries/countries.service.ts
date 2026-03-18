@@ -13,10 +13,14 @@ export class CountriesService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async onModuleInit() {
-    // Seed default USD and ZMW if not exists
-    await this.seedDefaults();
-    // Initial rate update
-    await this.updateExchangeRates();
+    try {
+      // Seed default USD and ZMW if not exists
+      await this.seedDefaults();
+      // Initial rate update
+      await this.updateExchangeRates();
+    } catch (error) {
+      this.logger.error('Failed to initialize CountriesService. Database tables might be missing.', error.message);
+    }
   }
 
   private async seedDefaults() {
