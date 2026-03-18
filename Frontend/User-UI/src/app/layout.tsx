@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer'
 import { CartProvider } from '@/providers/CartProvider'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
+import { CurrencyProvider } from '@/providers/CurrencyProvider'
 import { Toaster } from '@/components/ui/toaster'
 import WhatsAppWidget from '@/components/whatsapp/WhatsAppWidget'
 
@@ -70,17 +71,19 @@ export default function RootLayout({
       <body className={`${inter.variable} ${poppins.variable} ${playfair.variable} font-sans antialiased`}>
         <QueryProvider>
           <AuthProvider>
-            <CartProvider>
-              <div className="min-h-screen flex flex-col">
-                <TopBar />
-                <Header />
-                <main className="flex-1 pb-16 md:pb-0">{children}</main>
-                <MobileBottomNav />
-                <Footer />
-              </div>
-              <WhatsAppWidget />
-              <Toaster />
-            </CartProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <div className="min-h-screen flex flex-col">
+                  <TopBar />
+                  <Header />
+                  <main className="flex-1 pb-16 md:pb-0">{children}</main>
+                  <MobileBottomNav />
+                  <Footer />
+                </div>
+                <WhatsAppWidget />
+                <Toaster />
+              </CartProvider>
+            </CurrencyProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

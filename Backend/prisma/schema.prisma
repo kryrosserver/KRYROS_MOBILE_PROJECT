@@ -842,6 +842,49 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+// ==================== COUNTRIES & CURRENCIES ====================
+
+model Country {
+  id                String           @id @default(uuid())
+  name              String           @unique
+  code              String           @unique // ISO 3166-1 alpha-2 (e.g. ZM)
+  currencyCode      String           // e.g. ZMW
+  currencySymbol    String           // e.g. ZK or ZMW
+  symbolPosition    SymbolPosition   @default(BEFORE)
+  exchangeRate      Decimal          @default(1.0) @db.Decimal(18, 6)
+  autoRate          Boolean          @default(true)
+  lastRateUpdate    DateTime?
+  flag              String?          // Emoji or URL
+  status            Boolean          @default(true)
+  isDefault         Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  paymentMethods    CountryPaymentMethod[]
+
+  @@map("countries")
+}
+
+enum SymbolPosition {
+  BEFORE
+  AFTER
+}
+
+model CountryPaymentMethod {
+  id          String   @id @default(uuid())
+  countryId   String
+  name        String   // e.g. MTN Mobile Money
+  description String?
+  logo        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+
+  @@map("country_payment_methods")
+}
+
 // ==================== SETTINGS ====================
 
 model Setting {

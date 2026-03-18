@@ -1,0 +1,29 @@
+[33mcommit a40adeec95f394ea374173b52ee11c463b728a63[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: KRYROS Admin <admin@kryrosmobile.local>
+Date:   Tue Mar 17 17:53:18 2026 +0100
+
+    refactor: redevelop product page with exhaustive null-safety and robust fetch fallbacks
+
+[33mcommit 2c2963dca3deec42bba74d4a902f66bcd06c79a7[m
+Author: KRYROS Admin <admin@kryrosmobile.local>
+Date:   Tue Mar 17 17:38:48 2026 +0100
+
+    refactor: redevelop product page with exhaustive null-safety and robust fetch fallbacks
+
+[33mcommit 042297787f596adbb87e982a62318f0496634d1c[m
+Author: KRYROS Admin <admin@kryrosmobile.local>
+Date:   Tue Mar 17 17:25:02 2026 +0100
+
+    fix: restore missing handleWishlist function
+
+[33mcommit f4edeb1bf46117a42c51633a2ae2280a111acad9[m
+Author: KRYROS Admin <admin@kryrosmobile.local>
+Date:   Tue Mar 17 17:17:09 2026 +0100
+
+    fix: final exhaustive hydration and null-safety fixes for product page stability
+
+[33mcommit 9816e23c13f53c57dee551da883860bdc15d5bc4[m
+Author: KRYROS Admin <admin@kryrosmobile.local>
+Date:   Tue Mar 17 16:40:54 2026 +0100
+
+    fix: ensure full data sync across backend and frontend for all product features

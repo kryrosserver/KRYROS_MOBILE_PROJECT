@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/providers/CartProvider";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import { settingsApi } from "@/lib/api";
 import { 
   CreditCard, 
@@ -48,8 +49,9 @@ const paymentMethods = [
 
 export default function CheckoutPage() {
   const { items, getSubtotal } = useCart();
+  const { selectedCountry, convertPrice, formatLocal } = useCurrency();
   const [currentStep, setCurrentStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<any>(null);
   const [loadingMethods, setLoadingMethods] = useState(false);
@@ -317,64 +319,71 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-semibold text-slate-900">Payment Method</h2>
                 
                 <div className="mt-6 space-y-3">
-                  {paymentMethods.map((method) => (
-                    <label
-                      key={method.id}
-                      className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
-                        paymentMethod === method.id
-                          ? "border-green-500 bg-green-50"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value={method.id}
-                          checked={paymentMethod === method.id}
-                          onChange={() => setPaymentMethod(method.id)}
-                          className="text-green-500"
-                        />
-                        <method.icon className="h-5 w-5 text-slate-600" />
-                        <div>
-                          <p className="font-medium text-slate-900">{method.name}</p>
-                          <p className="text-sm text-slate-500">{method.description}</p>
+                  {selectedCountry?.paymentMethods?.length ? (
+                    selectedCountry.paymentMethods.map((method: any) => (
+                      <label
+                        key={method.id}
+                        className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
+                          paymentMethod === method.id
+                            ? "border-green-500 bg-green-50"
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="payment"
+                            value={method.id}
+                            checked={paymentMethod === method.id}
+                            onChange={() => setPaymentMethod(method.id)}
+                            className="text-green-500"
+                          />
+                          <CreditCard className="h-5 w-5 text-slate-600" />
+                          <div>
+                            <p className="font-medium text-slate-900">{method.name}</p>
+                            <p className="text-sm text-slate-500">{method.description || "Safe and secure payment"}</p>
+                          </div>
                         </div>
-                      </div>
-                    </label>
-                  ))}
+                      </label>
+                    ))
+                  ) : (
+                    // Default methods if none assigned to country
+                    paymentMethods.map((method) => (
+                      <label
+                        key={method.id}
+                        className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
+                          paymentMethod === method.id
+                            ? "border-green-500 bg-green-50"
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="payment"
+                            value={method.id}
+                            checked={paymentMethod === method.id}
+                            onChange={() => setPaymentMethod(method.id)}
+                            className="text-green-500"
+                          />
+                          <method.icon className="h-5 w-5 text-slate-600" />
+                          <div>
+                            <p className="font-medium text-slate-900">{method.name}</p>
+                            <p className="text-sm text-slate-500">{method.description}</p>
+                          </div>
+                        </div>
+                      </label>
+                    ))
+                  )}
                 </div>
-
-                {paymentMethod === "card" && (
-                  <div className="mt-6 space-y-4 rounded-lg border border-slate-200 p-4">
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">Card Number</label>
-                      <Input placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Expiry Date</label>
-                        <Input placeholder="MM/YY" />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">CVV</label>
-                        <Input placeholder="123" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">Cardholder Name</label>
-                      <Input placeholder="JOHN DOE" />
-                    </div>
-                  </div>
-                )}
 
                 <div className="mt-8 flex justify-between">
                   <Button variant="ghost" onClick={() => setCurrentStep(2)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
-                  <Button className="bg-green-500 hover:bg-green-600">
-                    Pay {formatPrice(Number(total))}
+                  <Button className="bg-green-500 hover:bg-green-600 disabled:opacity-50" disabled={!paymentMethod}>
+                    Pay {selectedCountry?.code === "US" || !selectedCountry ? formatPrice(Number(total)) : formatLocal(convertPrice(total).amount)}
                   </Button>
                 </div>
               </div>

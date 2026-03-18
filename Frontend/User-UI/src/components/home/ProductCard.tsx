@@ -10,6 +10,7 @@ import { wishlistApi } from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartProvider";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import { useToast } from "@/components/ui/use-toast";
 
 // Accept any product format
@@ -56,6 +57,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const { addItem } = useCart();
+  const { convertPrice, selectedCountry } = useCurrency();
   const { toast } = useToast();
 
   // Normalize product data for display
@@ -63,6 +65,10 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const displayBrand = getProductBrand(product);
   const displayReviews = getProductReviews(product);
   const displayCategory = getProductCategory(product);
+
+  const priceInfo = convertPrice(Number(product?.price ?? 0));
+  const originalPriceInfo = product?.originalPrice ? convertPrice(Number(product.originalPrice)) : null;
+  const isUSD = !selectedCountry || selectedCountry.code === "US";
 
   // Extract key specs (RAM, Storage, etc.)
   const specs = Array.isArray(product?.specifications) 
@@ -155,11 +161,20 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </div>
           
           <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-slate-900">{formatPrice(Number(product?.price ?? 0))}</span>
-              {product?.originalPrice && (
-                <span className="text-sm text-slate-500 line-through">
-                  {formatPrice(Number(product.originalPrice))}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-slate-900">
+                  {isUSD ? formatPrice(Number(product?.price ?? 0)) : priceInfo.formatted}
+                </span>
+                {product?.originalPrice && (
+                  <span className="text-sm text-slate-500 line-through">
+                    {isUSD ? formatPrice(Number(product.originalPrice)) : originalPriceInfo?.formatted}
+                  </span>
+                )}
+              </div>
+              {!isUSD && (
+                <span className="text-[10px] text-slate-400 font-medium italic">
+                  ≈ {formatPrice(Number(product?.price || 0))} USD
                 </span>
               )}
             </div>
@@ -283,13 +298,20 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </h3>
         </Link>
 
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
-            {formatPrice(Number(product?.price || 0))}
-          </span>
-          {product?.originalPrice && (
-            <span className="text-xs text-slate-400 line-through">
-              {formatPrice(Number(product.originalPrice || 0))}
+        <div className="mt-2 flex flex-col">
+          <div className="flex items-baseline gap-2">
+            <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
+              {isUSD ? formatPrice(Number(product?.price || 0)) : priceInfo.formatted}
+            </span>
+            {product?.originalPrice && (
+              <span className="text-xs text-slate-400 line-through">
+                {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
+              </span>
+            )}
+          </div>
+          {!isUSD && (
+            <span className="text-[10px] text-slate-400 font-medium">
+              ≈ {formatPrice(Number(product?.price || 0))} USD
             </span>
           )}
         </div>

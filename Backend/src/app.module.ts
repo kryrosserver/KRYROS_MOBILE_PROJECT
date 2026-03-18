@@ -18,6 +18,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { SettingsModule } from './settings/settings.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { BrandsModule } from './brands/brands.module';
+import { CountriesModule } from './countries/countries.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { BrandsModule } from './brands/brands.module';
     SettingsModule,
     ShippingModule,
     BrandsModule,
+    CountriesModule,
   ],
 })
 export class AppModule {}

@@ -21,12 +21,14 @@ import {
 import { Logo } from "./Logo"
 import { AuthButtons } from "./AuthButtons"
 import { useCart } from "@/providers/CartProvider"
+import { useCurrency } from "@/providers/CurrencyProvider"
 import { wishlistApi, settingsApi, categoriesApi } from "@/lib/api"
 import { formatPrice } from "@/lib/utils"
 import { megaMenuCategories as staticMegaMenuCategories } from "@/lib/store-data"
 
 export function TopBar() {
   const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
+  const { countries, selectedCountry, setCountry, isLoading } = useCurrency();
 
   useEffect(() => {
     settingsApi.getShippingConfig().then(res => {
@@ -47,11 +49,43 @@ export function TopBar() {
             kryrosmobile@gmail.com
           </span>
         </div>
-        <div className="flex w-full items-center justify-center gap-4 md:w-auto md:justify-end">
-          <span className="flex items-center gap-1 text-kryros-green font-bold">
-            <Truck className="h-3 w-3" />
-            Free Shipping Over {formatPrice(shippingConfig.threshold)}
-          </span>
+        
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1 text-kryros-green font-bold">
+              <Truck className="h-3 w-3" />
+              Free Shipping Over {formatPrice(shippingConfig.threshold)}
+            </span>
+          </div>
+
+          {/* Country Selector */}
+          <div className="relative group">
+            <button className="flex items-center gap-2 hover:text-kryros-green transition-colors font-medium border-l border-white/10 pl-6 py-1">
+              <span>{selectedCountry?.flag || "🏳️"}</span>
+              <span className="uppercase">{selectedCountry?.currencyCode || "USD"}</span>
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white text-slate-900 rounded-lg shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div className="p-2 space-y-1">
+                <p className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Country</p>
+                {countries.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setCountry(c.code)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors ${
+                      selectedCountry?.code === c.code ? "bg-green-50 text-green-600" : "hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{c.flag || "🏳️"}</span>
+                      <span className="font-semibold">{c.name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400">{c.currencyCode}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
