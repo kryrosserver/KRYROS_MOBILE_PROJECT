@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'
 import { ProductCard } from '@/components/home/ProductCard'
 
 async function getFlashSales() {

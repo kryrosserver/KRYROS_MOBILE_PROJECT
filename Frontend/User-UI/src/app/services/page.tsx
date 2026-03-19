@@ -57,7 +57,7 @@ export default function ServicesPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/services`, { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/services`, { cache: 'no-store' })
       .then(r => r.json())
       .then(d => { if (active) setItems(Array.isArray(d) ? d : []); })
       .catch(() => active && setItems([]))

@@ -28,7 +28,7 @@ export default function CreditPage() {
   const loadAccounts = async () => {
     setAccountsLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/credit/all`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/credit/all`, {
         headers: {
           'Authorization': `Bearer ${getAdminToken()}`
         }
@@ -53,7 +53,7 @@ export default function CreditPage() {
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/credit/accounts/${id}/status`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/credit/accounts/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

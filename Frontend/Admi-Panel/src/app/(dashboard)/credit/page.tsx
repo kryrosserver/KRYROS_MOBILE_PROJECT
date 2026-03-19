@@ -50,9 +50,9 @@ export default function CreditPage() {
   const loadData = async () => {
     try {
       const [plansRes, catsRes, brandsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/credit/plans`).then(r => r.json()),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/categories`).then(r => r.json()),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/brands`).then(r => r.json())
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/credit/plans`).then(r => r.json()),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/categories`).then(r => r.json()),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/brands`).then(r => r.json())
       ]);
       setPlans(plansRes || []);
       setCategories(catsRes.data || []);

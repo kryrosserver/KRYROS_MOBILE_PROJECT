@@ -109,7 +109,7 @@ function CreditPageContent() {
         const [prodRes, planRes] = await Promise.all([
           productsApi.getCredit({ take: 8 }),
           // Filter plans by productId if available
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/credit/plans${productId ? `?productId=${productId}` : ''}`).then(r => r.json())
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/credit/plans${productId ? `?productId=${productId}` : ''}`).then(r => r.json())
         ]);
         
         if (prodRes.data) {

@@ -423,7 +423,7 @@ function ServicesSection() {
   const [items, setItems] = useState<any[]>([])
   useEffect(() => {
     let active = true
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend.onrender.com/api'}/services`, { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'}/services`, { cache: 'no-store' })
       .then(r => r.json())
       .then(d => { if (active && Array.isArray(d)) setItems(d) })
       .catch(() => setItems([]))
