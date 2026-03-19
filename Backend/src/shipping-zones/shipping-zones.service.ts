@@ -162,28 +162,50 @@ export class ShippingZonesService implements OnModuleInit {
   }
 
   // MATCHING LOGIC (VERY IMPORTANT)
-  async findMatchingMethods(countryId?: string, stateId?: string, cityId?: string) {
-    // 1. Try matching by city_id
-    if (cityId) {
-      const zone = await this.prisma.shippingZone.findFirst({
-        where: { cityId, isActive: true },
-        include: { shippingMethods: { where: { status: true } } },
-        orderBy: { priority: 'desc' },
-      });
-      if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+  async findMatchingMethods(countryId?: string, stateId?: string, cityId?: string, manual?: boolean, stateName?: string, cityName?: string) {
+    // If NOT manual, try structured matching
+    if (!manual) {
+      // 1. Try matching by city_id
+      if (cityId) {
+        const zone = await this.prisma.shippingZone.findFirst({
+          where: { cityId, isActive: true },
+          include: { shippingMethods: { where: { status: true } } },
+          orderBy: { priority: 'desc' },
+        });
+        if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+      }
+
+      // 2. Try matching by state_id
+      if (stateId) {
+        const zone = await this.prisma.shippingZone.findFirst({
+          where: { stateId, isActive: true },
+          include: { shippingMethods: { where: { status: true } } },
+          orderBy: { priority: 'desc' },
+        });
+        if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+      }
+    } else {
+      // If MANUAL, try matching by state name (if it exists as a structured state in the DB)
+      if (stateName && countryId) {
+        const state = await this.prisma.state.findFirst({
+          where: { 
+            name: { equals: stateName, mode: 'insensitive' },
+            countryId 
+          }
+        });
+        
+        if (state) {
+          const zone = await this.prisma.shippingZone.findFirst({
+            where: { stateId: state.id, isActive: true },
+            include: { shippingMethods: { where: { status: true } } },
+            orderBy: { priority: 'desc' },
+          });
+          if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+        }
+      }
     }
 
-    // 2. Try matching by state_id
-    if (stateId) {
-      const zone = await this.prisma.shippingZone.findFirst({
-        where: { stateId, isActive: true },
-        include: { shippingMethods: { where: { status: true } } },
-        orderBy: { priority: 'desc' },
-      });
-      if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
-    }
-
-    // 3. Try matching by country_id
+    // 3. Try matching by country_id (Common for both manual and non-manual)
     if (countryId) {
       const zone = await this.prisma.shippingZone.findFirst({
         where: { countryId, isActive: true },

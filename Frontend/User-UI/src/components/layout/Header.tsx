@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 import {
   Search,
   ShoppingCart,
@@ -498,86 +499,108 @@ export function Header() {
                       ))}
                     </motion.div>
                   ) : (
-                    <motion.div
-                      key="categories-tab"
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      className="space-y-2"
-                    >
-                      {categories.map((cat) => {
-                        const isExpanded = expandedCategories.includes(cat.id);
-                        const hasBrands = cat.brands?.length > 0;
-                        
-                        const toggleExpand = (e: React.MouseEvent) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setExpandedCategories(prev => 
-                            isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
-                          );
-                        };
+                      <motion.div
+                        key="categories-tab"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                      >
+                        <div className="grid grid-cols-2 gap-3">
+                        {categories.map((cat) => {
+                          const isExpanded = expandedCategories.includes(cat.id);
+                          const hasBrands = cat.brands?.length > 0;
+                          
+                          const toggleExpand = (e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setExpandedCategories(prev => 
+                              isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
+                            );
+                          };
 
-                        return (
-                          <div key={cat.id} className="space-y-1">
-                            <div className="flex items-center gap-1">
-                              <Link
-                                href={`/shop?category=${cat.slug}`}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="flex-1 flex items-center justify-between rounded-xl px-4 py-4 text-base font-bold text-slate-800 transition-colors bg-slate-50 hover:bg-slate-100 border border-slate-100"
-                              >
-                                <span className="capitalize">{cat.name.toLowerCase()}</span>
-                                <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
-                                  {cat._count?.products || 0}
-                                </span>
-                              </Link>
-                              {hasBrands && (
-                                <button
-                                  onClick={toggleExpand}
-                                  className="p-3 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors border border-transparent"
-                                  aria-label={isExpanded ? "Collapse" : "Expand"}
+                          return (
+                            <div key={cat.id} className="col-span-1">
+                              <div className="flex flex-col gap-1">
+                                <Link
+                                  href={`/shop?category=${cat.slug}`}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                  className="relative group flex flex-col items-center justify-center rounded-xl overflow-hidden aspect-square border border-slate-100 bg-slate-50 transition-all hover:bg-slate-100"
                                 >
-                                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
-                                </button>
-                              )}
-                            </div>
-                            
-                            <AnimatePresence>
-                              {hasBrands && isExpanded && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div className="ml-4 border-l-2 border-blue-100 pl-4 space-y-2 py-2">
-                                    {cat.brands.slice(0, 10).map((brand: any) => (
-                                      <Link
-                                        key={brand.id}
-                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-blue-600 capitalize"
-                                      >
-                                        {brand.name}
-                                      </Link>
-                                    ))}
-                                    <Link
-                                      href={`/shop?category=${cat.slug}`}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="block rounded-lg px-4 py-2.5 text-sm font-bold text-blue-600 transition-colors hover:bg-blue-50 capitalize"
-                                    >
-                                      View All {cat.name}
-                                    </Link>
+                                  {/* Category Image */}
+                                  <div className="relative w-full h-full">
+                                    {cat.image ? (
+                                      <Image 
+                                        src={cat.image} 
+                                        alt={cat.name}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center bg-blue-50">
+                                        <span className="text-3xl">📦</span>
+                                      </div>
+                                    )}
+                                    {/* Overlay for text legibility */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
                                   </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                                  
+                                  {/* Category Name & Count */}
+                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
+                                    <span className="block text-[13px] font-bold text-white capitalize truncate drop-shadow-md">
+                                      {cat.name.toLowerCase()}
+                                    </span>
+                                    <span className="inline-block text-[9px] bg-blue-600/90 text-white px-1.5 py-0.5 rounded-full font-bold mt-0.5">
+                                      {cat._count?.products || 0}
+                                    </span>
+                                  </div>
+                                </Link>
+
+                                {hasBrands && (
+                                  <button
+                                    onClick={toggleExpand}
+                                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors border ${
+                                      isExpanded 
+                                        ? "bg-blue-600 text-white border-blue-600" 
+                                        : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+                                    }`}
+                                  >
+                                    {isExpanded ? "Close Brands" : "Show Brands"}
+                                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                                  </button>
+                                )}
+                              </div>
+                              
+                              <AnimatePresence>
+                                {hasBrands && isExpanded && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="overflow-hidden col-span-2"
+                                  >
+                                    <div className="mt-2 grid grid-cols-1 gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                      {cat.brands.slice(0, 10).map((brand: any) => (
+                                        <Link
+                                          key={brand.id}
+                                          href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
+                                          onClick={() => setMobileMenuOpen(false)}
+                                          className="block rounded-lg px-3 py-2 text-xs font-bold text-slate-600 transition-colors bg-white hover:text-blue-600 capitalize shadow-sm"
+                                        >
+                                          {brand.name}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                         })}
+                       </div>
+                     </motion.div>
+                   )}
+                 </AnimatePresence>
               </nav>
             </motion.div>
           </div>

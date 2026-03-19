@@ -33,8 +33,18 @@ export class ShippingZonesController {
     @Query('countryId') countryId?: string,
     @Query('stateId') stateId?: string,
     @Query('cityId') cityId?: string,
+    @Query('manual') manual?: string,
+    @Query('stateName') stateName?: string,
+    @Query('cityName') cityName?: string,
   ) {
-    return this.shippingZonesService.findMatchingMethods(countryId, stateId, cityId);
+    return this.shippingZonesService.findMatchingMethods(
+      countryId, 
+      stateId, 
+      cityId, 
+      manual === 'true', 
+      stateName, 
+      cityName
+    );
   }
 
   @Get(':id')
