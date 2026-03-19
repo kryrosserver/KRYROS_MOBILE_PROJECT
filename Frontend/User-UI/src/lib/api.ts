@@ -165,11 +165,14 @@ export const locationsApi = {
   getCities: (stateId: string) => fetchApi<any[]>(`/cities?stateId=${stateId}`),
   
   getShippingStatus: () => fetchApi<boolean>('/shipping-zones/status'),
-  getMatchingShipping: (countryId?: string, stateId?: string, cityId?: string) => {
+  getMatchingShipping: (countryId?: string, stateId?: string, cityId?: string, manual?: boolean, stateName?: string, cityName?: string) => {
     const params = new URLSearchParams();
     if (countryId) params.append('countryId', countryId);
     if (stateId) params.append('stateId', stateId);
     if (cityId) params.append('cityId', cityId);
+    if (manual) params.append('manual', 'true');
+    if (stateName) params.append('stateName', stateName);
+    if (cityName) params.append('cityName', cityName);
     return fetchApi<any[]>(`/shipping-zones/matching?${params.toString()}`);
   },
 };

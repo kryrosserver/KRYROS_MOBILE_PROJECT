@@ -32,6 +32,10 @@ export class CreateOrderDto {
   @IsOptional()
   billingAddressId?: string;
 
+  @IsUUID()
+  @IsOptional()
+  shippingMethodId?: string;
+
   @IsEnum(PaymentMethod)
   @IsNotEmpty()
   paymentMethod!: PaymentMethod;

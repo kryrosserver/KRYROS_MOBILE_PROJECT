@@ -2,12 +2,14 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { SettingsService } from '../settings/settings.service';
+import { ShippingZonesService } from '../shipping-zones/shipping-zones.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private settingsService: SettingsService,
+    private shippingZonesService: ShippingZonesService,
   ) {}
 
   async findAll(userId?: string, params?: { skip?: number; take?: number; status?: string }) {
@@ -155,9 +157,22 @@ export class OrdersService {
     }
 
     // Tax and Shipping
-    const shippingConfig = await this.settingsService.getShippingConfig();
+    let shipping = 0;
+    const isNewShippingEnabled = await this.shippingZonesService.isEnabled();
+
+    if (isNewShippingEnabled && data.shippingMethodId) {
+      const method = await this.prisma.locationShippingMethod.findUnique({
+        where: { id: data.shippingMethodId }
+      });
+      if (method) {
+        shipping = subtotal >= Number(method.freeShippingThreshold || 0) ? 0 : Number(method.price);
+      }
+    } else {
+      const shippingConfig = await this.settingsService.getShippingConfig();
+      shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
+    }
+
     const tax = subtotal * 0.16; // 16% VAT
-    const shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
     const total = subtotal + tax + shipping;
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

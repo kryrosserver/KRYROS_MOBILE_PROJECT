@@ -79,7 +79,10 @@ export default function CheckoutPage() {
     cityId: "",
     stateId: "",
     countryId: "",
-    zipCode: ""
+    zipCode: "",
+    manual: false,
+    stateName: "",
+    cityName: ""
   });
 
   useEffect(() => {
@@ -130,15 +133,27 @@ export default function CheckoutPage() {
 
   // Fetch matching shipping methods
   useEffect(() => {
-    if (isNewShippingEnabled && formData.countryId && formData.stateId && formData.cityId) {
-      locationsApi.getMatchingShipping(formData.countryId, formData.stateId, formData.cityId).then(res => {
+    const canFetch = isNewShippingEnabled && formData.countryId && (
+      (!formData.manual && formData.stateId && formData.cityId) ||
+      (formData.manual && formData.stateName && formData.cityName)
+    );
+
+    if (canFetch) {
+      locationsApi.getMatchingShipping(
+        formData.countryId, 
+        formData.stateId, 
+        formData.cityId, 
+        formData.manual, 
+        formData.stateName, 
+        formData.cityName
+      ).then(res => {
         if (res.data && res.data.length > 0) {
           setShippingMethods(res.data);
           setSelectedShipping(res.data[0]);
         }
       });
     }
-  }, [isNewShippingEnabled, formData.countryId, formData.stateId, formData.cityId]);
+  }, [isNewShippingEnabled, formData.countryId, formData.stateId, formData.cityId, formData.manual, formData.stateName, formData.cityName]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -269,38 +284,87 @@ export default function CheckoutPage() {
                       </select>
                     </div>
 
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">Province / State</label>
-                      <select
-                        name="stateId"
-                        value={formData.stateId}
-                        onChange={(e) => setFormData({ ...formData, stateId: e.target.value, cityId: "" })}
-                        className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
-                        disabled={!formData.countryId || loadingLocations}
-                        required
-                      >
-                        <option value="">Select State</option>
-                        {states.map((s) => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                    {!formData.manual ? (
+                      <>
+                        <div>
+                          <label className="mb-1 block text-sm font-medium text-slate-700">Province / State</label>
+                          <select
+                            name="stateId"
+                            value={formData.stateId}
+                            onChange={(e) => setFormData({ ...formData, stateId: e.target.value, cityId: "" })}
+                            className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
+                            disabled={!formData.countryId || loadingLocations}
+                            required
+                          >
+                            <option value="">Select State</option>
+                            {states.map((s) => (
+                              <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                          </select>
+                        </div>
 
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">City</label>
-                      <select
-                        name="cityId"
-                        value={formData.cityId}
-                        onChange={(e) => setFormData({ ...formData, cityId: e.target.value })}
-                        className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
-                        disabled={!formData.stateId || loadingLocations}
-                        required
-                      >
-                        <option value="">Select City</option>
-                        {cities.map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </select>
+                        <div>
+                          <label className="mb-1 block text-sm font-medium text-slate-700">City</label>
+                          <select
+                            name="cityId"
+                            value={formData.cityId}
+                            onChange={(e) => setFormData({ ...formData, cityId: e.target.value })}
+                            className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
+                            disabled={!formData.stateId || loadingLocations}
+                            required
+                          >
+                            <option value="">Select City</option>
+                            {cities.map((c) => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="mb-1 block text-sm font-medium text-slate-700">Province / State (Manual)</label>
+                          <Input
+                            type="text"
+                            name="stateName"
+                            value={formData.stateName}
+                            onChange={(e) => setFormData({ ...formData, stateName: e.target.value })}
+                            placeholder="Enter your state"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-sm font-medium text-slate-700">City (Manual)</label>
+                          <Input
+                            type="text"
+                            name="cityName"
+                            value={formData.cityName}
+                            onChange={(e) => setFormData({ ...formData, cityName: e.target.value })}
+                            placeholder="Enter your city"
+                            required
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div className="sm:col-span-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.manual}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            manual: e.target.checked,
+                            stateId: "",
+                            cityId: "",
+                            stateName: "",
+                            cityName: ""
+                          })}
+                          className="h-4 w-4 rounded border-slate-300 text-green-500 focus:ring-green-500"
+                        />
+                        <span className="text-xs text-slate-500 font-medium">Not listed? Enter manually</span>
+                      </label>
                     </div>
                   </div>
                   

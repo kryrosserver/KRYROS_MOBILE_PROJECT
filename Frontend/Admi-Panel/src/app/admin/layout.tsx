@@ -20,7 +20,8 @@ import {
   LogOut,
   Menu,
   X,
-  Globe
+  Globe,
+  Map as MapIcon
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AdminSettingsProvider, useAdminSettings } from "@/providers/AdminSettingsProvider";
@@ -35,7 +36,8 @@ const menuItems = [
   { icon: Package, label: "Products", href: "/admin/products" },
   { icon: CreditCard, label: "Credit System", href: "/admin/credit" },
   { icon: Wallet, label: "Wallet & Payments", href: "/admin/wallet" },
-  { icon: Globe, label: "Locations & Shipping", href: "/admin/locations-shipping" },
+  { icon: Globe, label: "Countries / Currencies", href: "/admin/countries" },
+  { icon: MapIcon, label: "Locations & Shipping", href: "/admin/locations-shipping" },
   { icon: Wrench, label: "Services", href: "/admin/services" },
   { icon: FileText, label: "Invoicing", href: "/admin/invoice" },
   { icon: FileText, label: "CMS & Pages", href: "/admin/cms" },
