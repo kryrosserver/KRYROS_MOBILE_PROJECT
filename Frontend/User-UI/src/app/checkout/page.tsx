@@ -227,8 +227,8 @@ export default function CheckoutPage() {
             shipping: convertedShipping.amount,
             total: convertedTotal.amount,
             currency: {
-              code: convertedTotal.currency,
-              symbol: convertedTotal.symbol
+              code: selectedCountry?.currencyCode || "USD",
+              symbol: selectedCountry?.currencySymbol || "$"
             }
           });
 
