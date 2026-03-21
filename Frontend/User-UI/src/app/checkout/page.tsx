@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/providers/CartProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
-import { settingsApi, locationsApi } from "@/lib/api";
 import { 
   CreditCard, 
   Smartphone, 

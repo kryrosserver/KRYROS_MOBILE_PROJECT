@@ -48,6 +48,7 @@ export default function CountriesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   
   const [form, setForm] = useState({
     name: "",
@@ -154,6 +155,20 @@ export default function CountriesPage() {
     }
   };
 
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      const res = await fetch("/api/admin/countries/seed", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to seed countries");
+      await loadCountries();
+      alert("Default countries seeded successfully!");
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const filteredCountries = countries.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.currencyCode.toLowerCase().includes(searchTerm.toLowerCase())
@@ -166,13 +181,23 @@ export default function CountriesPage() {
           <h1 className="text-2xl font-bold text-slate-900">Countries & Currencies</h1>
           <p className="text-slate-500">Manage multi-country support and exchange rates</p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-sm"
-        >
-          <Plus className="h-5 w-5" />
-          Add Country
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleSeed}
+            disabled={seeding}
+            className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg font-semibold border border-slate-200 transition-colors shadow-sm disabled:opacity-50"
+          >
+            <RefreshCcw className={`h-4 w-4 ${seeding ? "animate-spin" : ""}`} />
+            {seeding ? "Seeding..." : "Seed Defaults"}
+          </button>
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-sm"
+          >
+            <Plus className="h-5 w-5" />
+            Add Country
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
