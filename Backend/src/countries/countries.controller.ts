@@ -21,6 +21,12 @@ export class CountriesController {
     return this.countriesService.findAll();
   }
 
+  @Post('seed')
+  // @UseGuards(JwtAuthGuard, AdminGuard)
+  seed() {
+    return this.countriesService.seedDefaults();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.countriesService.findOne(id);

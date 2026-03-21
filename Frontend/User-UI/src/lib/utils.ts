@@ -78,3 +78,40 @@ export function getTimeRemaining(endTime: Date | string): {
 
   return { days, hours, minutes, seconds, total }
 }
+
+export function generateWhatsAppMessage(data: {
+  orderNumber: string
+  customer: { firstName: string; lastName: string; phone: string }
+  address: {
+    street: string
+    city: string
+    state: string
+    country: string
+    manual?: boolean
+  }
+  items: Array<{ name: string; quantity: number; price: number; variant?: string }>
+  subtotal: number
+  shipping: number
+  total: number
+  currency: { code: string; symbol: string }
+}) {
+  const format = (val: number) => `${data.currency.symbol} ${val.toLocaleString()}`
+
+  let message = `*Hello KRYROS, here is my order:*%0A%0A`
+  message += `*🆔 Order:* #${data.orderNumber}%0A`
+  message += `*👤 Customer:* ${data.customer.firstName} ${data.customer.lastName} (${data.customer.phone})%0A`
+  message += `*📍 Delivery:* ${data.address.street}, ${data.address.city}, ${data.address.state}, ${data.address.country}${data.address.manual ? ' (Manual Input)' : ''}%0A%0A`
+
+  message += `*📦 Products:*%0A`
+  data.items.forEach((item) => {
+    message += `- ${item.quantity}x ${item.name}${item.variant ? ` (${item.variant})` : ''} - ${format(item.price * item.quantity)}%0A`
+  })
+
+  message += `%0A*🚚 Shipping:* ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A%0A`
+  message += `*💰 Totals:*%0A`
+  message += `- Subtotal: ${format(data.subtotal)}%0A`
+  message += `- Shipping: ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A`
+  message += `*🔥 TOTAL TO PAY: ${format(data.total)}*`
+
+  return message
+}

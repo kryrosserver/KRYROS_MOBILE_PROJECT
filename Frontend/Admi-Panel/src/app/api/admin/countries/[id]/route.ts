@@ -11,7 +11,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: res.status });
   } catch (error) {
     return NextResponse.json({ error: "Failed to update country" }, { status: 500 });
   }
@@ -23,7 +23,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       method: "DELETE",
     });
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: res.status });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete country" }, { status: 500 });
   }

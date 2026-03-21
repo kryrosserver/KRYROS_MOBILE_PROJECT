@@ -8,7 +8,7 @@ export async function GET() {
       cache: "no-store",
     });
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: res.status });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch countries" }, { status: 500 });
   }
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: res.status });
   } catch (error) {
     return NextResponse.json({ error: "Failed to create country" }, { status: 500 });
   }

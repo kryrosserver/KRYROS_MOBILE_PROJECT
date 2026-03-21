@@ -129,7 +129,10 @@ export default function CountriesPage() {
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) throw new Error("Failed to save country");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to save country");
+      }
       
       setShowModal(false);
       loadCountries();

@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCountryDto, SymbolPosition } from './dto/create-country.dto';
 import { UpdateCountryDto } from './dto/update-country.dto';
@@ -23,7 +23,7 @@ export class CountriesService implements OnModuleInit {
     }
   }
 
-  private async seedDefaults() {
+  async seedDefaults() {
     const usd = await this.prisma.country.findUnique({ where: { code: 'US' } });
     if (!usd) {
       await this.prisma.country.create({
@@ -65,6 +65,8 @@ export class CountriesService implements OnModuleInit {
         ],
       });
     }
+
+    return { message: 'Seed completed' };
   }
 
   @Cron(CronExpression.EVERY_12_HOURS)
@@ -98,17 +100,37 @@ export class CountriesService implements OnModuleInit {
 
   async create(createCountryDto: CreateCountryDto) {
     const { paymentMethods, ...countryData } = createCountryDto;
-    return this.prisma.country.create({
-      data: {
-        ...countryData,
-        paymentMethods: {
-          create: paymentMethods || [],
+
+    try {
+      // Check if country already exists by name or code
+      const existing = await this.prisma.country.findFirst({
+        where: {
+          OR: [
+            { name: countryData.name },
+            { code: countryData.code },
+          ],
         },
-      },
-      include: {
-        paymentMethods: true,
-      },
-    });
+      });
+
+      if (existing) {
+        throw new BadRequestException(`Country with name "${countryData.name}" or code "${countryData.code}" already exists`);
+      }
+
+      return await this.prisma.country.create({
+        data: {
+          ...countryData,
+          paymentMethods: {
+            create: paymentMethods || [],
+          },
+        },
+        include: {
+          paymentMethods: true,
+        },
+      });
+    } catch (error) {
+      this.logger.error('Error creating country:', error.message);
+      throw error;
+    }
   }
 
   async findAll() {

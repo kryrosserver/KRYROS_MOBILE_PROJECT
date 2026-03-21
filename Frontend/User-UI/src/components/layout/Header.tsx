@@ -109,6 +109,7 @@ export function Header() {
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
   const { getItemCount } = useCart()
+  const { countries, selectedCountry, setCountry } = useCurrency()
 
   useEffect(() => {
     // Fetch categories with their brands for the dynamic Mega Menu
@@ -432,54 +433,80 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col bg-card shadow-xl overflow-hidden"
+              className="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col bg-white shadow-xl overflow-hidden"
             >
-              <div className="flex items-center justify-between border-b border-border px-4 py-4 h-16 shrink-0">
-                <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                  <Logo size={32} />
-                </Link>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-md p-1 text-foreground hover:bg-secondary"
-                  aria-label="Close menu"
-                >
-                  <X className="h-6 w-6" />
-                </button>
+              {/* Custom Header with Search and Close */}
+              <div className="flex items-center justify-between bg-white shrink-0">
+                <div className="flex-1 flex bg-slate-100">
+                  <button
+                    onClick={() => setMobileActiveTab("menu")}
+                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-all ${
+                      mobileActiveTab === "menu"
+                        ? "text-slate-900 bg-white"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    MENU
+                  </button>
+                  <button
+                    onClick={() => setMobileActiveTab("categories")}
+                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-all ${
+                      mobileActiveTab === "categories"
+                        ? "text-slate-900 bg-white"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    CATEGORIES
+                  </button>
+                </div>
+                <div className="flex items-center">
+                  <button className="p-4 text-slate-400">
+                    <Search className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="bg-[#00155a] p-4 text-white"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
               </div>
 
-              {/* Tabs for Menu and Categories */}
-              <div className="flex border-b border-border shrink-0">
-                <button
-                  onClick={() => setMobileActiveTab("menu")}
-                  className={`flex-1 py-4 text-sm font-bold transition-all ${
-                    mobileActiveTab === "menu"
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  MENU
-                </button>
-                <button
-                  onClick={() => setMobileActiveTab("categories")}
-                  className={`flex-1 py-4 text-sm font-bold transition-all ${
-                    mobileActiveTab === "categories"
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  CATEGORIES
-                </button>
+              {/* Mobile Currency Selector */}
+              <div className="bg-slate-50 border-b border-slate-100 px-4 py-3 shrink-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Select Currency</p>
+                <div className="flex flex-wrap gap-2">
+                  {countries.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        setCountry(c.code);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedCountry?.code === c.code 
+                          ? "bg-kryros-green text-white" 
+                          : "bg-white border border-slate-200 text-slate-700 hover:border-kryros-green"
+                      }`}
+                    >
+                      <span>{c.flag}</span>
+                      <span>{c.currencyCode}</span>
+                      <span className="text-xs opacity-70">{c.currencySymbol}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <nav className="flex-1 overflow-y-auto px-4 py-6 overscroll-contain custom-scrollbar">
+              <nav className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar">
                 <AnimatePresence mode="wait">
                   {mobileActiveTab === "menu" ? (
                     <motion.div
                       key="menu-tab"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="flex flex-col gap-2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col divide-y divide-slate-100"
                     >
                       {[
                         { name: "Home", href: "/" },
@@ -491,7 +518,7 @@ export function Header() {
                           key={item.name}
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="rounded-xl px-4 py-4 text-base font-bold text-slate-800 transition-colors bg-slate-50 hover:bg-slate-100 flex items-center justify-between border border-slate-100"
+                          className="px-6 py-4 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
                         >
                           {item.name}
                           <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
@@ -499,108 +526,88 @@ export function Header() {
                       ))}
                     </motion.div>
                   ) : (
-                      <motion.div
-                        key="categories-tab"
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                      >
-                        <div className="grid grid-cols-2 gap-3">
-                        {categories.map((cat) => {
-                          const isExpanded = expandedCategories.includes(cat.id);
-                          const hasBrands = cat.brands?.length > 0;
-                          
-                          const toggleExpand = (e: React.MouseEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setExpandedCategories(prev => 
-                              isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
-                            );
-                          };
-
-                          return (
-                            <div key={cat.id} className="col-span-1">
-                              <div className="flex flex-col gap-1">
-                                <Link
-                                  href={`/shop?category=${cat.slug}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="relative group flex flex-col items-center justify-center rounded-xl overflow-hidden aspect-square border border-slate-100 bg-slate-50 transition-all hover:bg-slate-100"
-                                >
-                                  {/* Category Image */}
-                                  <div className="relative w-full h-full">
-                                    {cat.image ? (
-                                      <Image 
-                                        src={cat.image} 
-                                        alt={cat.name}
-                                        fill
-                                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                      />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center bg-blue-50">
-                                        <span className="text-3xl">📦</span>
-                                      </div>
-                                    )}
-                                    {/* Overlay for text legibility */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
-                                  </div>
-                                  
-                                  {/* Category Name & Count */}
-                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
-                                    <span className="block text-[13px] font-bold text-white capitalize truncate drop-shadow-md">
-                                      {cat.name.toLowerCase()}
-                                    </span>
-                                    <span className="inline-block text-[9px] bg-blue-600/90 text-white px-1.5 py-0.5 rounded-full font-bold mt-0.5">
-                                      {cat._count?.products || 0}
-                                    </span>
-                                  </div>
-                                </Link>
-
-                                {hasBrands && (
-                                  <button
-                                    onClick={toggleExpand}
-                                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors border ${
-                                      isExpanded 
-                                        ? "bg-blue-600 text-white border-blue-600" 
-                                        : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                                    }`}
-                                  >
-                                    {isExpanded ? "Close Brands" : "Show Brands"}
-                                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
-                                  </button>
-                                )}
-                              </div>
-                              
-                              <AnimatePresence>
-                                {hasBrands && isExpanded && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="overflow-hidden col-span-2"
-                                  >
-                                    <div className="mt-2 grid grid-cols-1 gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-100">
-                                      {cat.brands.slice(0, 10).map((brand: any) => (
-                                        <Link
-                                          key={brand.id}
-                                          href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
-                                          onClick={() => setMobileMenuOpen(false)}
-                                          className="block rounded-lg px-3 py-2 text-xs font-bold text-slate-600 transition-colors bg-white hover:text-blue-600 capitalize shadow-sm"
-                                        >
-                                          {brand.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
+                    <motion.div
+                      key="categories-tab"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col divide-y divide-slate-100"
+                    >
+                      {categories.map((cat) => {
+                        const isExpanded = expandedCategories.includes(cat.id);
+                        const hasBrands = cat.brands?.length > 0;
+                        
+                        const toggleExpand = (e: React.MouseEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setExpandedCategories(prev => 
+                            isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
                           );
-                         })}
-                       </div>
-                     </motion.div>
-                   )}
-                 </AnimatePresence>
+                        };
+
+                        return (
+                          <div key={cat.id} className="flex flex-col">
+                            <div className="flex items-center justify-between group border-b border-slate-50">
+                              <Link
+                                href={`/shop?category=${cat.slug}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex-1 flex items-center gap-5 px-6 py-4 transition-all hover:bg-slate-50"
+                              >
+                                <div className="relative h-10 w-10 shrink-0 flex items-center justify-center">
+                                  {cat.image ? (
+                                    <Image 
+                                      src={cat.image} 
+                                      alt={cat.name}
+                                      fill
+                                      className="object-contain"
+                                    />
+                                  ) : (
+                                    <span className="text-xl">📦</span>
+                                  )}
+                                </div>
+                                <span className="text-[15px] font-semibold text-slate-900">
+                                  {cat.name}
+                                </span>
+                              </Link>
+                              
+                              <button
+                                onClick={hasBrands ? toggleExpand : undefined}
+                                className={`px-6 py-5 text-slate-400 ${!hasBrands ? 'cursor-default opacity-40' : 'hover:text-slate-600'}`}
+                                disabled={!hasBrands}
+                              >
+                                <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                              </button>
+                            </div>
+
+                            <AnimatePresence>
+                              {hasBrands && isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden bg-slate-50/50"
+                                >
+                                  <div className="flex flex-col divide-y divide-slate-100/50 pl-14">
+                                    {cat.brands.map((brand: any) => (
+                                      <Link
+                                        key={brand.id}
+                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="py-3 pr-6 text-xs font-bold text-slate-500 hover:text-blue-600 capitalize transition-colors"
+                                      >
+                                        {brand.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </nav>
             </motion.div>
           </div>

@@ -468,6 +468,7 @@ enum PaymentMethod {
   MOBILE_MONEY
   WALLET
   CREDIT
+  WHATSAPP
 }
 
 // ==================== WHOLESALE ====================
