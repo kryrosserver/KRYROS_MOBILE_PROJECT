@@ -98,11 +98,13 @@ export class CountriesService implements OnModuleInit {
         rates = response.data.rates;
       } catch (fallbackError) {
         this.logger.error('All exchange rate providers failed.', fallbackError.message);
-        return; // Stop if all providers fail
+        throw new BadRequestException('Failed to fetch live rates from all providers');
       }
     }
 
-    if (!rates) return;
+    if (!rates) {
+      throw new BadRequestException('Received empty rates from providers');
+    }
 
     try {
       const autoRateCountries = await this.prisma.country.findMany({
@@ -123,8 +125,10 @@ export class CountriesService implements OnModuleInit {
         }
       }
       this.logger.log('Exchange rates updated successfully');
+      return { message: 'Rates updated successfully', updated: autoRateCountries.length };
     } catch (dbError) {
       this.logger.error('Failed to save updated rates to database', dbError.message);
+      throw new BadRequestException(`Failed to save rates: ${dbError.message}`);
     }
   }
 
