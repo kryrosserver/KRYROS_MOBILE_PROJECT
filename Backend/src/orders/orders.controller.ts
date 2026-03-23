@@ -54,7 +54,7 @@ export class OrdersController {
   @Put(':id/status')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  updateStatus(@Param('id') id: string, @Body('status') status: string) {
-    return this.ordersService.updateStatus(id, status);
+  updateStatus(@Param('id') id: string, @Body('status') status: string, @Body('paymentStatus') paymentStatus?: string) {
+    return this.ordersService.updateStatus(id, status, paymentStatus);
   }
 }

@@ -8,7 +8,7 @@ import {
   AlertCircle
 } from "lucide-react";
 
-type Tab = "countries" | "states" | "cities" | "zones";
+type Tab = "countries" | "states" | "cities" | "zones" | "global";
 
 export default function LocationsShippingPage() {
   const [activeTab, setActiveTab] = useState<Tab>("countries");
@@ -31,6 +31,7 @@ export default function LocationsShippingPage() {
   const [cityForm, setCityForm] = useState({ stateId: "", name: "", isActive: true });
   const [zoneForm, setZoneForm] = useState({ name: "", countryId: "", stateId: "", cityId: "", priority: 0, isActive: true });
   const [methodForm, setMethodForm] = useState({ zoneId: "", name: "", price: 0, freeShippingThreshold: 0, estimatedDays: "", status: true });
+  const [globalMethodForm, setGlobalMethodForm] = useState({ name: "", description: "", fee: 0, minThreshold: 0, estimatedDays: "", isActive: true });
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -40,6 +41,8 @@ export default function LocationsShippingPage() {
 
       let url = `/api/admin/${activeTab}`;
       if (activeTab === "zones") url = `/api/admin/shipping-zones`;
+      if (activeTab === "global") url = `/api/admin/shipping`;
+      
       const res = await fetch(url);
       const json = await res.json();
       setData(Array.isArray(json) ? json : []);
@@ -87,6 +90,8 @@ export default function LocationsShippingPage() {
       setCityForm(item ? { ...item } : { stateId: "", name: "", isActive: true });
     } else if (activeTab === "zones") {
       setZoneForm(item ? { ...item } : { name: "", countryId: "", stateId: "", cityId: "", priority: 0, isActive: true });
+    } else if (activeTab === "global") {
+      setGlobalMethodForm(item ? { ...item, fee: Number(item.fee), minThreshold: Number(item.minThreshold) } : { name: "", description: "", fee: 0, minThreshold: 0, estimatedDays: "", isActive: true });
     }
     setShowModal(true);
   };
@@ -95,15 +100,16 @@ export default function LocationsShippingPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : activeTab}`;
+      let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : (activeTab === "global" ? "shipping" : activeTab)}`;
       if (editingItem) url += `/${editingItem.id}`;
       
       const body = activeTab === "countries" ? countryForm : 
                    activeTab === "states" ? stateForm : 
-                   activeTab === "cities" ? cityForm : zoneForm;
+                   activeTab === "cities" ? cityForm : 
+                   activeTab === "zones" ? zoneForm : globalMethodForm;
 
       const res = await fetch(url, {
-        method: editingItem ? "PATCH" : "POST",
+        method: editingItem ? (activeTab === "global" ? "PUT" : "PATCH") : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
@@ -122,7 +128,7 @@ export default function LocationsShippingPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this item?")) return;
     try {
-      let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : activeTab}/${id}`;
+      let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : (activeTab === "global" ? "shipping" : activeTab)}/${id}`;
       const res = await fetch(url, { method: "DELETE" });
       if (res.ok) loadData();
     } catch (e) {
@@ -221,6 +227,7 @@ export default function LocationsShippingPage() {
           { id: "states", label: "States / Provinces", icon: MapIcon },
           { id: "cities", label: "Cities", icon: Building2 },
           { id: "zones", label: "Shipping Zones", icon: Truck },
+          { id: "global", label: "Global Methods", icon: Settings2 },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -262,15 +269,22 @@ export default function LocationsShippingPage() {
                 {activeTab === "states" && <th className="px-6 py-4">Country</th>}
                 {activeTab === "cities" && <th className="px-6 py-4">State</th>}
                 {activeTab === "zones" && <th className="px-6 py-4">Target Location</th>}
+                {activeTab === "global" && (
+                  <>
+                    <th className="px-6 py-4">Price</th>
+                    <th className="px-6 py-4">Free Over</th>
+                    <th className="px-6 py-4">Delivery</th>
+                  </>
+                )}
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">Loading...</td></tr>
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">Loading...</td></tr>
               ) : data.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">No items found</td></tr>
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">No items found</td></tr>
               ) : data.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/50">
                   <td className="px-6 py-4">
@@ -278,7 +292,9 @@ export default function LocationsShippingPage() {
                       {activeTab === "countries" && <span className="text-xl">{item.flag || "🏳️"}</span>}
                       <div>
                         <p className="font-semibold text-slate-900">{item.name}</p>
-                        {item.code && <p className="text-xs text-slate-500">{item.code}</p>}
+                        {(item.code || item.description) && (
+                          <p className="text-xs text-slate-500">{item.code || item.description}</p>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -317,6 +333,13 @@ export default function LocationsShippingPage() {
                         </div>
                       </div>
                     </td>
+                  )}
+                  {activeTab === "global" && (
+                    <>
+                      <td className="px-6 py-4 text-sm font-bold text-slate-900">${Number(item.fee).toFixed(2)}</td>
+                      <td className="px-6 py-4 text-sm text-green-600 font-medium">{Number(item.minThreshold) > 0 ? `$${Number(item.minThreshold).toFixed(2)}` : "Always Free"}</td>
+                      <td className="px-6 py-4 text-sm text-slate-500">{item.estimatedDays || "—"}</td>
+                    </>
                   )}
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${item.status || item.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-400"}`}>
@@ -409,6 +432,33 @@ export default function LocationsShippingPage() {
                         {states.find(s => s.id === zoneForm.stateId)?.cities?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "global" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-bold">Method Name</label>
+                    <input required placeholder="e.g. Standard Shipping" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.name} onChange={e => setGlobalMethodForm({...globalMethodForm, name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold">Description</label>
+                    <input placeholder="e.g. Delivery within 3-5 days" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.description} onChange={e => setGlobalMethodForm({...globalMethodForm, description: e.target.value})} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-bold">Shipping Fee ($)</label>
+                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.fee} onChange={e => setGlobalMethodForm({...globalMethodForm, fee: parseFloat(e.target.value)})} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-bold">Free Over ($)</label>
+                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.minThreshold} onChange={e => setGlobalMethodForm({...globalMethodForm, minThreshold: parseFloat(e.target.value)})} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold">Estimated Days</label>
+                    <input placeholder="e.g. 3-5 days" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.estimatedDays} onChange={e => setGlobalMethodForm({...globalMethodForm, estimatedDays: e.target.value})} />
                   </div>
                 </div>
               )}

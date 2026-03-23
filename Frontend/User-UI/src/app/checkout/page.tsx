@@ -134,7 +134,7 @@ export default function CheckoutPage() {
       const countriesRes = await locationsApi.getCountries();
       if (countriesRes.data) setCountries(countriesRes.data);
 
-      // Load old shipping methods as fallback
+      // Load global shipping methods
       const { data } = await settingsApi.getShippingMethods();
       if (data && data.length > 0) {
         setShippingMethods(data);
@@ -168,14 +168,17 @@ export default function CheckoutPage() {
     }
   }, [formData.stateId]);
 
-  // Fetch matching shipping methods
+  // Fetch matching shipping methods (Only if Location Shipping is enabled)
   useEffect(() => {
-    const canFetch = isNewShippingEnabled && formData.countryId && (
+    if (!isNewShippingEnabled) return;
+
+    const canFetch = formData.countryId && (
       (!formData.manual && formData.stateId && formData.cityId) ||
       (formData.manual && formData.stateName && formData.cityName)
     );
 
     if (canFetch) {
+      setLoadingMethods(true);
       locationsApi.getMatchingShipping(
         formData.countryId, 
         formData.stateId, 
@@ -188,6 +191,7 @@ export default function CheckoutPage() {
           setShippingMethods(res.data);
           setSelectedShipping(res.data[0]);
         }
+        setLoadingMethods(false);
       });
     }
   }, [isNewShippingEnabled, formData.countryId, formData.stateId, formData.cityId, formData.manual, formData.stateName, formData.cityName]);

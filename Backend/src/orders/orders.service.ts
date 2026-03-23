@@ -48,20 +48,8 @@ export class OrdersService {
             variant: true,
           },
         },
-        shippingAddress: {
-          include: {
-            city: true,
-            state: true,
-            country: true,
-          }
-        },
-        billingAddress: {
-          include: {
-            city: true,
-            state: true,
-            country: true,
-          }
-        },
+        shippingAddress: true,
+        billingAddress: true,
         user: {
           select: {
             firstName: true,
@@ -82,15 +70,19 @@ export class OrdersService {
     // We search by orderNumber or ID just in case
     const order = await this.prisma.order.findFirst({
       where: {
-        OR: [
-          { orderNumber: orderNumber },
-          { id: orderNumber }
-        ],
-        // The email is stored in the shippingAddress or associated with the user
-        // Let's check both for accuracy
-        OR: [
-          { user: { email: { equals: email, mode: 'insensitive' } } },
-          { shippingAddress: { email: { equals: email, mode: 'insensitive' } } }
+        AND: [
+          {
+            OR: [
+              { orderNumber: orderNumber },
+              { id: orderNumber }
+            ]
+          },
+          {
+            OR: [
+              { user: { email: { equals: email, mode: 'insensitive' } } },
+              { shippingAddress: { email: { equals: email, mode: 'insensitive' } } }
+            ]
+          }
         ]
       },
       include: {
@@ -352,19 +344,24 @@ export class OrdersService {
     });
   }
 
-  async updateStatus(id: string, status: string) {
+  async updateStatus(id: string, status: string, paymentStatus?: string) {
     await this.findById(id);
     return this.prisma.$transaction(async (tx) => {
+      const data: any = { status: status as any };
+      if (paymentStatus) {
+        data.paymentStatus = paymentStatus as any;
+      }
+
       const order = await tx.order.update({
         where: { id },
-        data: { status: status as any },
+        data,
       });
 
       await tx.orderLog.create({
         data: {
           orderId: id,
           status: status as any,
-          notes: `Order status updated to ${status}`,
+          notes: `Order status updated to ${status}${paymentStatus ? ` (Payment: ${paymentStatus})` : ''}`,
         },
       });
 
