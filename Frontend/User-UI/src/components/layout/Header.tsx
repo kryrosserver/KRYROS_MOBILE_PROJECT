@@ -63,27 +63,39 @@ export function TopBar() {
           <div className="relative group">
             <button className="flex items-center gap-2 hover:text-kryros-green transition-colors font-medium border-l border-white/10 pl-6 py-1">
               <span>{selectedCountry?.flag || "🏳️"}</span>
-              <span className="uppercase">{selectedCountry?.currencyCode || "USD"}</span>
-              <ChevronDown className="h-3 w-3" />
+              <span className="uppercase text-white group-hover:text-kryros-green">{selectedCountry?.currencyCode || "USD"}</span>
+              <ChevronDown className="h-3 w-3 text-white group-hover:text-kryros-green" />
             </button>
-            <div className="absolute right-0 top-full mt-1 w-48 bg-white text-slate-900 rounded-lg shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-              <div className="p-2 space-y-1">
-                <p className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Country</p>
-                {countries.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setCountry(c.code)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors ${
-                      selectedCountry?.code === c.code ? "bg-green-50 text-green-600" : "hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{c.flag || "🏳️"}</span>
-                      <span className="font-semibold">{c.name}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400">{c.currencyCode}</span>
-                  </button>
-                ))}
+            <div className="absolute right-0 top-full mt-1 w-56 bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-200 z-[100]">
+              <div className="p-3 space-y-1">
+                <p className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">Select Currency</p>
+                <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                  {countries.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setCountry(c.code)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
+                        selectedCountry?.code === c.code 
+                          ? "bg-kryros-green/10 text-kryros-green shadow-sm" 
+                          : "hover:bg-slate-50 text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl filter drop-shadow-sm">{c.flag || "🏳️"}</span>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] font-bold leading-tight">{c.name}</span>
+                          <span className="text-[10px] font-medium opacity-60 uppercase">{c.currencyCode}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{c.currencySymbol}</span>
+                        {selectedCountry?.code === c.code && (
+                          <div className="h-1.5 w-1.5 rounded-full bg-kryros-green animate-pulse" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -474,9 +486,9 @@ export function Header() {
               </div>
 
               {/* Mobile Currency Selector */}
-              <div className="bg-slate-50 border-b border-slate-100 px-4 py-3 shrink-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Select Currency</p>
-                <div className="flex flex-wrap gap-2">
+              <div className="bg-slate-50 border-b border-slate-100 px-4 py-4 shrink-0">
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-1">Select Currency</p>
+                <div className="grid grid-cols-2 gap-3">
                   {countries.map((c) => (
                     <button
                       key={c.id}
@@ -484,15 +496,17 @@ export function Header() {
                         setCountry(c.code);
                         setMobileMenuOpen(false);
                       }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl text-center transition-all ${
                         selectedCountry?.code === c.code 
-                          ? "bg-kryros-green text-white" 
-                          : "bg-white border border-slate-200 text-slate-700 hover:border-kryros-green"
+                          ? "bg-kryros-green text-white shadow-lg shadow-kryros-green/20 ring-2 ring-kryros-green/50" 
+                          : "bg-white border border-slate-200 text-slate-700 hover:border-kryros-green shadow-sm"
                       }`}
                     >
-                      <span>{c.flag}</span>
-                      <span>{c.currencyCode}</span>
-                      <span className="text-xs opacity-70">{c.currencySymbol}</span>
+                      <span className="text-2xl mb-1">{c.flag || "🏳️"}</span>
+                      <span className="text-xs font-bold uppercase">{c.currencyCode}</span>
+                      <span className={`text-[10px] font-medium ${selectedCountry?.code === c.code ? "text-white/70" : "text-slate-400"}`}>
+                        {c.currencySymbol}
+                      </span>
                     </button>
                   ))}
                 </div>
