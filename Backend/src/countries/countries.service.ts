@@ -24,49 +24,56 @@ export class CountriesService implements OnModuleInit {
   }
 
   async seedDefaults() {
-    const usd = await this.prisma.country.findUnique({ where: { code: 'US' } });
-    if (!usd) {
-      await this.prisma.country.create({
-        data: {
-          name: 'United States',
-          code: 'US',
-          currencyCode: 'USD',
-          currencySymbol: '$',
-          symbolPosition: SymbolPosition.BEFORE,
-          exchangeRate: 1.0,
-          autoRate: false,
-          isDefault: true,
-          flag: '🇺🇸',
-        },
-      });
+    try {
+      const usd = await this.prisma.country.findUnique({ where: { code: 'US' } });
+      if (!usd) {
+        await this.prisma.country.create({
+          data: {
+            name: 'United States',
+            code: 'US',
+            currencyCode: 'USD',
+            currencySymbol: '$',
+            symbolPosition: SymbolPosition.BEFORE,
+            exchangeRate: 1.0,
+            autoRate: false,
+            isDefault: true,
+            flag: '🇺🇸',
+          },
+        });
+        this.logger.log('Seeded default country: US');
+      }
+
+      const zmw = await this.prisma.country.findUnique({ where: { code: 'ZM' } });
+      if (!zmw) {
+        const country = await this.prisma.country.create({
+          data: {
+            name: 'Zambia',
+            code: 'ZM',
+            currencyCode: 'ZMW',
+            currencySymbol: 'ZK',
+            symbolPosition: SymbolPosition.BEFORE,
+            exchangeRate: 27.2,
+            autoRate: true,
+            flag: '🇿🇲',
+          },
+        });
+
+        // Add default payment methods for Zambia
+        await this.prisma.countryPaymentMethod.createMany({
+          data: [
+            { countryId: country.id, name: 'MTN Mobile Money' },
+            { countryId: country.id, name: 'Airtel Money' },
+            { countryId: country.id, name: 'Zambian Bank Transfer' },
+          ],
+        });
+        this.logger.log('Seeded default country: ZM with payment methods');
+      }
+
+      return { message: 'Seed completed' };
+    } catch (error) {
+      this.logger.error('Seed operation failed:', error.message);
+      throw new BadRequestException(`Seed failed: ${error.message}`);
     }
-
-    const zmw = await this.prisma.country.findUnique({ where: { code: 'ZM' } });
-    if (!zmw) {
-      const country = await this.prisma.country.create({
-        data: {
-          name: 'Zambia',
-          code: 'ZM',
-          currencyCode: 'ZMW',
-          currencySymbol: 'ZK',
-          symbolPosition: SymbolPosition.BEFORE,
-          exchangeRate: 27.2,
-          autoRate: true,
-          flag: '🇿🇲',
-        },
-      });
-
-      // Add default payment methods for Zambia
-      await this.prisma.countryPaymentMethod.createMany({
-        data: [
-          { countryId: country.id, name: 'MTN Mobile Money' },
-          { countryId: country.id, name: 'Airtel Money' },
-          { countryId: country.id, name: 'Zambian Bank Transfer' },
-        ],
-      });
-    }
-
-    return { message: 'Seed completed' };
   }
 
   @Cron(CronExpression.EVERY_12_HOURS)
