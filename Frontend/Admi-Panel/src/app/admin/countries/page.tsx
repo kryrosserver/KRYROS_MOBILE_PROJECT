@@ -49,6 +49,7 @@ export default function CountriesPage() {
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   const [form, setForm] = useState({
     name: "",
@@ -169,6 +170,20 @@ export default function CountriesPage() {
     }
   };
 
+  const handleRefreshRates = async () => {
+    setRefreshing(true);
+    try {
+      const res = await fetch("/api/admin/countries/refresh-rates", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to refresh rates");
+      await loadCountries();
+      alert("Exchange rates updated from live API!");
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const filteredCountries = countries.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.currencyCode.toLowerCase().includes(searchTerm.toLowerCase())
@@ -182,6 +197,15 @@ export default function CountriesPage() {
           <p className="text-slate-500">Manage multi-country support and exchange rates</p>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={handleRefreshRates}
+            disabled={refreshing}
+            className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-semibold border border-purple-200 transition-colors shadow-sm disabled:opacity-50"
+            title="Fetch live rates now"
+          >
+            <RefreshCcw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Updating..." : "Update Live Rates"}
+          </button>
           <button 
             onClick={handleSeed}
             disabled={seeding}

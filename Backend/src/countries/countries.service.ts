@@ -8,7 +8,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class CountriesService implements OnModuleInit {
   private readonly logger = new Logger(CountriesService.name);
-  private readonly EXCHANGE_API_URL = 'https://api.exchangerate-api.com/v4/latest/USD';
+  private readonly PRIMARY_EXCHANGE_API = 'https://api.exchangerate-api.com/v4/latest/USD';
+  private readonly FALLBACK_EXCHANGE_API = 'https://open.er-api.com/v6/latest/USD';
 
   constructor(private prisma: PrismaService) {}
 
@@ -76,13 +77,34 @@ export class CountriesService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_12_HOURS)
+  @Cron(CronExpression.EVERY_1_HOUR)
   async updateExchangeRates() {
-    this.logger.log('Updating exchange rates...');
+    this.logger.log('Updating exchange rates (Hourly Cron)...');
+    
+    let rates = null;
+    
+    // 1. Try Primary Provider
     try {
-      const response = await axios.get(this.EXCHANGE_API_URL);
-      const rates = response.data.rates;
+      this.logger.log(`Attempting to fetch rates from Primary Provider: ${this.PRIMARY_EXCHANGE_API}`);
+      const response = await axios.get(this.PRIMARY_EXCHANGE_API);
+      rates = response.data.rates;
+    } catch (primaryError) {
+      this.logger.error('Primary Provider failed, attempting fallback...', primaryError.message);
+      
+      // 2. Try Fallback Provider
+      try {
+        this.logger.log(`Attempting to fetch rates from Fallback Provider: ${this.FALLBACK_EXCHANGE_API}`);
+        const response = await axios.get(this.FALLBACK_EXCHANGE_API);
+        rates = response.data.rates;
+      } catch (fallbackError) {
+        this.logger.error('All exchange rate providers failed.', fallbackError.message);
+        return; // Stop if all providers fail
+      }
+    }
 
+    if (!rates) return;
+
+    try {
       const autoRateCountries = await this.prisma.country.findMany({
         where: { autoRate: true, status: true },
       });
@@ -93,15 +115,16 @@ export class CountriesService implements OnModuleInit {
           await this.prisma.country.update({
             where: { id: country.id },
             data: {
-              exchangeRate: newRate,
+              exchangeRate: parseFloat(newRate.toFixed(4)),
               lastRateUpdate: new Date(),
             },
           });
+          this.logger.log(`Updated rate for ${country.currencyCode}: ${newRate}`);
         }
       }
       this.logger.log('Exchange rates updated successfully');
-    } catch (error) {
-      this.logger.error('Failed to update exchange rates', error.message);
+    } catch (dbError) {
+      this.logger.error('Failed to save updated rates to database', dbError.message);
     }
   }
 

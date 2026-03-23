@@ -27,6 +27,11 @@ export class CountriesController {
     return this.countriesService.seedDefaults();
   }
 
+  @Post('refresh-rates')
+  refreshRates() {
+    return this.countriesService.updateExchangeRates();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.countriesService.findOne(id);
