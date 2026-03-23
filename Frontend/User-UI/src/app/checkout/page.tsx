@@ -628,12 +628,43 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-semibold text-slate-900">Payment Method</h2>
                 
                 <div className="mt-6 space-y-3">
-                  {selectedCountry?.paymentMethods?.length ? (
-                    selectedCountry.paymentMethods.map((method: any) => (
+                  {/* 1. Show Country-Specific Payment Methods */}
+                  {selectedCountry?.paymentMethods?.map((method: any) => (
+                    <label
+                      key={method.id}
+                      className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
+                        paymentMethod === method.id
+                          ? "border-green-500 bg-green-50"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="payment"
+                          value={method.id}
+                          checked={paymentMethod === method.id}
+                          onChange={() => setPaymentMethod(method.id)}
+                          className="text-green-500"
+                        />
+                        <CreditCard className="h-5 w-5 text-slate-600" />
+                        <div>
+                          <p className="font-medium text-slate-900">{method.name}</p>
+                          <p className="text-sm text-slate-500">{method.description || "Safe and secure payment"}</p>
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+
+                  {/* 2. Always Show WhatsApp (Global Method) */}
+                  {(() => {
+                    const whatsapp = paymentMethods.find(m => m.id === "whatsapp");
+                    if (!whatsapp) return null;
+                    return (
                       <label
-                        key={method.id}
+                        key={whatsapp.id}
                         className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
-                          paymentMethod === method.id
+                          paymentMethod === whatsapp.id
                             ? "border-green-500 bg-green-50"
                             : "border-slate-200 hover:border-slate-300"
                         }`}
@@ -642,48 +673,48 @@ export default function CheckoutPage() {
                           <input
                             type="radio"
                             name="payment"
-                            value={method.id}
-                            checked={paymentMethod === method.id}
-                            onChange={() => setPaymentMethod(method.id)}
+                            value={whatsapp.id}
+                            checked={paymentMethod === whatsapp.id}
+                            onChange={() => setPaymentMethod(whatsapp.id)}
                             className="text-green-500"
                           />
-                          <CreditCard className="h-5 w-5 text-slate-600" />
+                          <whatsapp.icon className="h-5 w-5 text-slate-600" />
                           <div>
-                            <p className="font-medium text-slate-900">{method.name}</p>
-                            <p className="text-sm text-slate-500">{method.description || "Safe and secure payment"}</p>
+                            <p className="font-medium text-slate-900">{whatsapp.name}</p>
+                            <p className="text-sm text-slate-500">{whatsapp.description}</p>
                           </div>
                         </div>
                       </label>
-                    ))
-                  ) : (
-                    // Default methods if none assigned to country
-                    paymentMethods.map((method) => (
-                      <label
-                        key={method.id}
-                        className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
-                          paymentMethod === method.id
-                            ? "border-green-500 bg-green-50"
-                            : "border-slate-200 hover:border-slate-300"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="payment"
-                            value={method.id}
-                            checked={paymentMethod === method.id}
-                            onChange={() => setPaymentMethod(method.id)}
-                            className="text-green-500"
-                          />
-                          <method.icon className="h-5 w-5 text-slate-600" />
-                          <div>
-                            <p className="font-medium text-slate-900">{method.name}</p>
-                            <p className="text-sm text-slate-500">{method.description}</p>
-                          </div>
+                    );
+                  })()}
+
+                  {/* 3. Show Other Default Methods ONLY if no country methods exist */}
+                  {!selectedCountry?.paymentMethods?.length && paymentMethods.filter(m => m.id !== "whatsapp").map((method) => (
+                    <label
+                      key={method.id}
+                      className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
+                        paymentMethod === method.id
+                          ? "border-green-500 bg-green-50"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="payment"
+                          value={method.id}
+                          checked={paymentMethod === method.id}
+                          onChange={() => setPaymentMethod(method.id)}
+                          className="text-green-500"
+                        />
+                        <method.icon className="h-5 w-5 text-slate-600" />
+                        <div>
+                          <p className="font-medium text-slate-900">{method.name}</p>
+                          <p className="text-sm text-slate-500">{method.description}</p>
                         </div>
-                      </label>
-                    ))
-                  )}
+                      </div>
+                    </label>
+                  ))}
                 </div>
 
                 <div className="mt-8 flex justify-between">
