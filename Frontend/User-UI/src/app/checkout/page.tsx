@@ -93,6 +93,35 @@ export default function CheckoutPage() {
     cityName: ""
   });
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const validateStep1 = () => {
+    const errors: Record<string, string> = {};
+    if (!formData.email) errors.email = "Email is required";
+    if (!formData.firstName) errors.firstName = "First name is required";
+    if (!formData.lastName) errors.lastName = "Last name is required";
+    if (!formData.phone) errors.phone = "Phone is required";
+    if (!formData.address) errors.address = "Address is required";
+    if (!formData.countryId) errors.countryId = "Country is required";
+    
+    if (!formData.manual) {
+      if (!formData.stateId) errors.stateId = "State is required";
+      if (!formData.cityId) errors.cityId = "City is required";
+    } else {
+      if (!formData.stateName) errors.stateName = "State name is required";
+      if (!formData.cityName) errors.cityName = "City name is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const currentSteps = useMemo(() => [
+    { id: 1, name: "Information", status: currentStep === 1 ? "current" : currentStep > 1 ? "completed" : "pending" },
+    { id: 2, name: "Shipping", status: currentStep === 2 ? "current" : currentStep > 2 ? "completed" : "pending" },
+    { id: 3, name: "Payment", status: currentStep === 3 ? "current" : "pending" }
+  ], [currentStep]);
+
   useEffect(() => {
     const init = async () => {
       setLoadingMethods(true);
@@ -170,13 +199,28 @@ export default function CheckoutPage() {
   const subtotal = useMemo(() => getSubtotal(), [getSubtotal, items]);
   const shipping = useMemo(() => {
     if (!selectedShipping) return 0;
-    return subtotal >= Number(selectedShipping.minThreshold) ? 0 : Number(selectedShipping.fee);
+    // Check for free shipping threshold
+    const threshold = Number(selectedShipping.minThreshold || selectedShipping.freeShippingThreshold || 0);
+    if (threshold > 0 && subtotal >= threshold) return 0;
+    return Number(selectedShipping.price || selectedShipping.fee || 0);
   }, [selectedShipping, subtotal]);
   const total = subtotal + shipping;
 
+  // Helper to format price in current currency
+  const displayPrice = (amount: number) => {
+    if (selectedCountry?.code === "US" || !selectedCountry) {
+      return formatPrice(amount);
+    }
+    return formatLocal(convertPrice(amount).amount);
+  };
+
   const handlePlaceOrder = async () => {
+    if (!paymentMethod) return;
     setPlacingOrder(true);
     try {
+      // 1. Create the address first
+      // Note: We need an addressesApi or similar. Let's check lib/api.ts
+      
       const orderData = {
         items: items.map(item => ({
           productId: item.product.id,
@@ -184,17 +228,18 @@ export default function CheckoutPage() {
           quantity: item.quantity
         })),
         paymentMethod: paymentMethod === 'whatsapp' ? 'WHATSAPP' : paymentMethod.toUpperCase(),
-        notes: "Order via WhatsApp",
+        notes: "Order via Website Checkout",
         shippingMethodId: selectedShipping?.id,
-        // The backend handles address creation if we pass the data, 
-        // but for now let's assume we might need to handle address logic.
-        // Looking at orders.service.ts, it expects shippingAddressId.
-        // We might need to create the address first.
+        // For now, we'll pass the address details directly if the backend supports it,
+        // or we might need to update the backend to handle this.
+        addressDetails: {
+          ...formData,
+          countryName: countries.find(c => c.id === formData.countryId)?.name || "",
+          stateName: formData.manual ? formData.stateName : (states.find(s => s.id === formData.stateId)?.name || ""),
+          cityName: formData.manual ? formData.cityName : (cities.find(c => c.id === formData.cityId)?.name || ""),
+        }
       };
 
-      // For simplicity in this demo/setup, we'll focus on the WhatsApp redirection logic.
-      // In a real app, we'd create the address and then the order.
-      
       const res = await ordersApi.create(orderData);
       
       if (res.data) {
@@ -212,9 +257,9 @@ export default function CheckoutPage() {
             },
             address: {
               street: formData.address,
-              city: formData.manual ? formData.cityName : (cities.find(c => c.id === formData.cityId)?.name || ""),
-              state: formData.manual ? formData.stateName : (states.find(s => s.id === formData.stateId)?.name || ""),
-              country: countries.find(c => c.id === formData.countryId)?.name || "",
+              city: orderData.addressDetails.cityName,
+              state: orderData.addressDetails.stateName,
+              country: orderData.addressDetails.countryName,
               manual: formData.manual
             },
             items: items.map(item => ({
@@ -239,8 +284,9 @@ export default function CheckoutPage() {
         clearCart();
         window.location.href = `/dashboard/orders/${res.data.id}`;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Order creation failed", error);
+      alert(error.response?.data?.message || "Failed to place order. Please try again.");
     } finally {
       setPlacingOrder(false);
     }
@@ -253,23 +299,23 @@ export default function CheckoutPage() {
       <div className="bg-white border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex items-center justify-center gap-4">
-            {steps.map((step, idx) => (
+            {currentSteps.map((step, idx) => (
               <div key={step.id} className="flex items-center">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                   step.status === "current" 
                     ? "bg-green-500 text-white" 
                     : step.status === "completed"
                     ? "bg-green-100 text-green-600"
                     : "bg-slate-100 text-slate-500"
                 }`}>
-                  {step.status === "completed" ? <CheckCircle className="h-5 w-5" /> : step.id}
+                  {step.status === "completed" ? <CheckCircle2 className="h-5 w-5" /> : step.id}
                 </div>
-                <span className={`ml-2 text-sm ${
-                  step.status === "current" ? "font-medium text-slate-900" : "text-slate-500"
+                <span className={`ml-2 text-sm transition-colors ${
+                  step.status === "current" ? "font-bold text-slate-900" : "text-slate-500"
                 }`}>
                   {step.name}
                 </span>
-                {idx < steps.length - 1 && (
+                {idx < currentSteps.length - 1 && (
                   <div className="mx-4 h-0.5 w-8 bg-slate-200"></div>
                 )}
               </div>
@@ -288,14 +334,16 @@ export default function CheckoutPage() {
                 
                 <div className="mt-6 space-y-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">Email Address</label>
                     <Input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="your@email.com"
+                      className={formErrors.email ? "border-red-500" : ""}
                     />
+                    {formErrors.email && <p className="mt-1 text-xs text-red-500">{formErrors.email}</p>}
                   </div>
                   
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -307,7 +355,9 @@ export default function CheckoutPage() {
                         value={formData.firstName}
                         onChange={handleInputChange}
                         placeholder="John"
+                        className={formErrors.firstName ? "border-red-500" : ""}
                       />
+                      {formErrors.firstName && <p className="mt-1 text-xs text-red-500">{formErrors.firstName}</p>}
                     </div>
                     <div>
                       <label className="mb-1 block text-sm font-medium text-slate-700">Last Name</label>
@@ -317,7 +367,9 @@ export default function CheckoutPage() {
                         value={formData.lastName}
                         onChange={handleInputChange}
                         placeholder="Doe"
+                        className={formErrors.lastName ? "border-red-500" : ""}
                       />
+                      {formErrors.lastName && <p className="mt-1 text-xs text-red-500">{formErrors.lastName}</p>}
                     </div>
                   </div>
                   
@@ -329,7 +381,9 @@ export default function CheckoutPage() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="+260 966 123 456"
+                      className={formErrors.phone ? "border-red-500" : ""}
                     />
+                    {formErrors.phone && <p className="mt-1 text-xs text-red-500">{formErrors.phone}</p>}
                   </div>
                 </div>
 
@@ -337,14 +391,16 @@ export default function CheckoutPage() {
                 
                 <div className="mt-4 space-y-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Address</label>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">Street Address</label>
                     <Input
                       type="text"
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      placeholder="Street address"
+                      placeholder="e.g. Plot 123, Great East Road"
+                      className={formErrors.address ? "border-red-500" : ""}
                     />
+                    {formErrors.address && <p className="mt-1 text-xs text-red-500">{formErrors.address}</p>}
                   </div>
                   
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -354,7 +410,7 @@ export default function CheckoutPage() {
                         name="countryId"
                         value={formData.countryId}
                         onChange={(e) => setFormData({ ...formData, countryId: e.target.value, stateId: "", cityId: "" })}
-                        className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none"
+                        className={`w-full rounded-md border p-2 text-sm focus:border-green-500 focus:outline-none ${formErrors.countryId ? "border-red-500" : "border-slate-300"}`}
                         required
                       >
                         <option value="">Select Country</option>
@@ -362,6 +418,7 @@ export default function CheckoutPage() {
                           <option key={c.id} value={c.id}>{c.flag} {c.name}</option>
                         ))}
                       </select>
+                      {formErrors.countryId && <p className="mt-1 text-xs text-red-500">{formErrors.countryId}</p>}
                     </div>
 
                     {!formData.manual ? (
@@ -372,7 +429,7 @@ export default function CheckoutPage() {
                             name="stateId"
                             value={formData.stateId}
                             onChange={(e) => setFormData({ ...formData, stateId: e.target.value, cityId: "" })}
-                            className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
+                            className={`w-full rounded-md border p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50 ${formErrors.stateId ? "border-red-500" : "border-slate-300"}`}
                             disabled={!formData.countryId || loadingLocations}
                             required
                           >
@@ -381,6 +438,7 @@ export default function CheckoutPage() {
                               <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
                           </select>
+                          {formErrors.stateId && <p className="mt-1 text-xs text-red-500">{formErrors.stateId}</p>}
                         </div>
 
                         <div>
@@ -389,7 +447,7 @@ export default function CheckoutPage() {
                             name="cityId"
                             value={formData.cityId}
                             onChange={(e) => setFormData({ ...formData, cityId: e.target.value })}
-                            className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50"
+                            className={`w-full rounded-md border p-2 text-sm focus:border-green-500 focus:outline-none disabled:opacity-50 ${formErrors.cityId ? "border-red-500" : "border-slate-300"}`}
                             disabled={!formData.stateId || loadingLocations}
                             required
                           >
@@ -398,6 +456,7 @@ export default function CheckoutPage() {
                               <option key={c.id} value={c.id}>{c.name}</option>
                             ))}
                           </select>
+                          {formErrors.cityId && <p className="mt-1 text-xs text-red-500">{formErrors.cityId}</p>}
                         </div>
                       </>
                     ) : (
@@ -410,8 +469,10 @@ export default function CheckoutPage() {
                             value={formData.stateName}
                             onChange={(e) => setFormData({ ...formData, stateName: e.target.value })}
                             placeholder="Enter your state"
+                            className={formErrors.stateName ? "border-red-500" : ""}
                             required
                           />
+                          {formErrors.stateName && <p className="mt-1 text-xs text-red-500">{formErrors.stateName}</p>}
                         </div>
 
                         <div>
@@ -422,8 +483,10 @@ export default function CheckoutPage() {
                             value={formData.cityName}
                             onChange={(e) => setFormData({ ...formData, cityName: e.target.value })}
                             placeholder="Enter your city"
+                            className={formErrors.cityName ? "border-red-500" : ""}
                             required
                           />
+                          {formErrors.cityName && <p className="mt-1 text-xs text-red-500">{formErrors.cityName}</p>}
                         </div>
                       </>
                     )}
@@ -449,7 +512,7 @@ export default function CheckoutPage() {
                   </div>
                   
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Zip Code</label>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">Zip Code (Optional)</label>
                     <Input
                       type="text"
                       name="zipCode"
@@ -461,7 +524,7 @@ export default function CheckoutPage() {
                 </div>
                 
                 <div className="mt-8 flex justify-between">
-                  <Button variant="ghost">
+                  <Button variant="ghost" asChild>
                     <Link href="/cart" className="flex items-center">
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Back to Cart
@@ -469,7 +532,12 @@ export default function CheckoutPage() {
                   </Button>
                   <Button 
                     className="bg-green-500 hover:bg-green-600"
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => {
+                      if (validateStep1()) {
+                        setCurrentStep(2);
+                        window.scrollTo(0, 0);
+                      }
+                    }}
                   >
                     Continue to Shipping
                   </Button>
@@ -489,12 +557,13 @@ export default function CheckoutPage() {
                     </div>
                   ) : shippingMethods.length === 0 ? (
                     <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg text-orange-700 text-sm">
-                      No shipping methods available. Please contact support.
+                      No shipping methods available for your location. Please contact support.
                     </div>
                   ) : (
                     shippingMethods.map((method) => {
                       const isSelected = selectedShipping?.id === method.id;
-                      const isFree = subtotal >= Number(method.freeShippingThreshold || method.minThreshold);
+                      const isFree = subtotal >= Number(method.freeShippingThreshold || method.minThreshold || 0);
+                      const methodPrice = Number(method.price || method.fee || 0);
                       return (
                         <label 
                           key={method.id}
@@ -520,10 +589,10 @@ export default function CheckoutPage() {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-slate-900">
-                              {isFree ? "FREE" : formatPrice(Number(method.price || method.fee))}
+                              {isFree ? "FREE" : displayPrice(methodPrice)}
                             </p>
-                            {Number(method.freeShippingThreshold || method.minThreshold) > 0 && (
-                              <p className="text-[10px] text-slate-400 font-medium">Free over {formatPrice(Number(method.freeShippingThreshold || method.minThreshold))}</p>
+                            {Number(method.freeShippingThreshold || method.minThreshold || 0) > 0 && (
+                              <p className="text-[10px] text-slate-400 font-medium">Free over {displayPrice(Number(method.freeShippingThreshold || method.minThreshold))}</p>
                             )}
                           </div>
                         </label>
@@ -533,14 +602,20 @@ export default function CheckoutPage() {
                 </div>
                 
                 <div className="mt-8 flex justify-between">
-                  <Button variant="ghost" onClick={() => setCurrentStep(1)}>
+                  <Button variant="ghost" onClick={() => {
+                    setCurrentStep(1);
+                    window.scrollTo(0, 0);
+                  }}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
                   <Button 
                     disabled={!selectedShipping}
                     className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
-                    onClick={() => setCurrentStep(3)}
+                    onClick={() => {
+                      setCurrentStep(3);
+                      window.scrollTo(0, 0);
+                    }}
                   >
                     Continue to Payment
                   </Button>
@@ -612,7 +687,10 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="mt-8 flex justify-between">
-                  <Button variant="ghost" onClick={() => setCurrentStep(2)}>
+                  <Button variant="ghost" onClick={() => {
+                    setCurrentStep(2);
+                    window.scrollTo(0, 0);
+                  }}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
@@ -624,7 +702,7 @@ export default function CheckoutPage() {
                     {placingOrder ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    {paymentMethod === 'whatsapp' ? 'Place Order & Send to WhatsApp' : `Pay ${selectedCountry?.code === "US" || !selectedCountry ? formatPrice(Number(total)) : formatLocal(convertPrice(total).amount)}`}
+                    {paymentMethod === 'whatsapp' ? 'Place Order & Send to WhatsApp' : `Complete Order - ${displayPrice(total)}`}
                   </Button>
                 </div>
               </div>
@@ -636,14 +714,14 @@ export default function CheckoutPage() {
             <div className="rounded-xl bg-white p-6 shadow-sm sticky top-24">
               <h3 className="text-lg font-semibold text-slate-900">Order Summary</h3>
               
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {items.map((ci: CartItem) => {
                   const itemId = ci.product.id + (ci.variant?.id ? `:${ci.variant.id}` : "");
                   const primary = ci.product.images?.find((i) => i.isPrimary)?.url || ci.product.images?.[0]?.url || "";
-                  const unitPrice = ci.variant?.price || ci.product.salePrice || ci.product.price;
+                  const unitPrice = Number(ci.variant?.price || ci.product.salePrice || ci.product.price);
                   return (
                     <div key={itemId} className="flex gap-4">
-                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-100">
                         <Image 
                           src={primary || "/placeholder.png"} 
                           alt={ci.product.name}
@@ -651,14 +729,14 @@ export default function CheckoutPage() {
                           className="object-cover"
                         />
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{ci.product.name}</p>
-                        <p className="text-sm text-slate-500">Qty: {ci.quantity}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-900 truncate">{ci.product.name}</p>
+                        <p className="text-xs text-slate-500">Qty: {ci.quantity}</p>
                         {ci.variant && (
-                          <p className="text-xs text-slate-400">Variant: {ci.variant.value}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">Variant: {ci.variant.value}</p>
                         )}
                       </div>
-                      <p className="font-medium text-slate-900">{formatPrice(Number(unitPrice * ci.quantity))}</p>
+                      <p className="text-sm font-bold text-slate-900 whitespace-nowrap">{displayPrice(unitPrice * ci.quantity)}</p>
                     </div>
                   );
                 })}
@@ -666,27 +744,29 @@ export default function CheckoutPage() {
 
               <div className="mt-6 space-y-3 border-t border-slate-200 pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Subtotal</span>
-                  <span className="font-medium text-slate-900">{formatPrice(Number(subtotal))}</span>
+                  <span className="text-slate-600 font-medium">Subtotal</span>
+                  <span className="font-bold text-slate-900">{displayPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Shipping</span>
-                  <span className="font-medium text-green-600">{shipping === 0 ? "Free" : formatPrice(Number(shipping))}</span>
+                  <span className="text-slate-600 font-medium">Shipping</span>
+                  <span className={`font-bold ${shipping === 0 ? "text-green-600" : "text-slate-900"}`}>
+                    {shipping === 0 ? "FREE" : displayPrice(shipping)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Tax</span>
-                  <span className="font-medium text-slate-900">{formatPrice(0)}</span>
+                  <span className="text-slate-600 font-medium">Tax (16%)</span>
+                  <span className="font-bold text-slate-900">{displayPrice(subtotal * 0.16)}</span>
                 </div>
                 <hr className="my-3 border-slate-200" />
-                <div className="flex justify-between">
-                  <span className="font-semibold text-slate-900">Total</span>
-                  <span className="text-xl font-bold text-slate-900">{formatPrice(Number(total))}</span>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-900">Total</span>
+                  <span className="text-2xl font-black text-slate-900">{displayPrice(total + (subtotal * 0.16))}</span>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 rounded-lg bg-green-50 p-3">
-                <Lock className="h-5 w-5 text-green-600" />
-                <p className="text-sm text-green-700">Your payment is secure and encrypted</p>
+              <div className="mt-6 flex items-center gap-2 rounded-lg bg-green-50 p-3 border border-green-100">
+                <ShieldCheck className="h-5 w-5 text-green-600" />
+                <p className="text-xs text-green-700 font-medium leading-tight">Your order is secure. You can track your purchase in your dashboard.</p>
               </div>
             </div>
           </div>
