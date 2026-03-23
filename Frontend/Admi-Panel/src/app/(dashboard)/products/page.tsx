@@ -230,15 +230,18 @@ export default function ProductsPage() {
                 onChange={(e) => setForm({ ...form, sku: e.target.value })}
                 className="admin-input w-full"
               />
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Price"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                className="admin-input w-full"
-              />
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Retail Price (USD)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Retail Price"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  className="admin-input w-full"
+                />
+              </div>
               <textarea
                 placeholder="Description"
                 value={form.description}
@@ -644,6 +647,7 @@ export default function ProductsPage() {
                         warrantyInfo: "",
                         images: [],
                         specifications: [],
+                        wholesaleTiers: [],
                       });
                       setFiles([]);
                       await load();
@@ -950,12 +954,12 @@ export default function ProductsPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Price (USD)</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Standard Retail Price (USD)</label>
                     <input
                       type="number"
                       min="0"
                       step="0.01"
-                      placeholder="Price"
+                      placeholder="Retail Price"
                       value={editForm.price}
                       onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
                       className="admin-input w-full"

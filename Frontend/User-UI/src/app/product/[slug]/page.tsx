@@ -4,14 +4,18 @@ import { useEffect, useState } from 'react'
 import { formatPrice } from '@/lib/utils'
 import { useCart } from '@/providers/CartProvider'
 import { useCurrency } from '@/providers/CurrencyProvider'
+import { useAuth } from '@/providers/AuthProvider'
+import { wholesaleApi } from '@/lib/api'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-d68q.onrender.com/api'
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
   const [product, setProduct] = useState<any>(null)
+  const [wholesaleAccount, setWholesaleAccount] = useState<any>(null)
+  const [wholesaleTiers, setWholesaleTiers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeImageIdx, setActiveImageIdx] = useState(0)
@@ -20,6 +24,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const [mounted, setMounted] = useState(false)
   const cart = useCart()
   const { selectedCountry, convertPrice, formatLocal } = useCurrency()
+  const { user, isAuthenticated } = useAuth()
 
   // Helper to format price in current currency
   const displayPrice = (amount: number) => {
@@ -54,6 +59,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
           setError("Product not found")
         } else {
           setProduct(data)
+          // Fetch wholesale tiers if product found
+          const tiersRes = await fetch(`${API_URL}/wholesale/prices/${data.id}`)
+          if (tiersRes.ok) {
+            setWholesaleTiers(await tiersRes.json())
+          }
         }
       } catch (err) {
         console.error("Fetch error:", err)
@@ -67,6 +77,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       fetchProduct()
     }
   }, [params.slug])
+
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      wholesaleApi.getAccount(user.id).then(res => {
+        setWholesaleAccount(res.data || null)
+      }).catch(() => setWholesaleAccount(null))
+    }
+  }, [isAuthenticated, user?.id])
 
   const handleAddToCart = () => {
     if (cart && typeof cart.addItem === 'function' && product) {
@@ -441,14 +459,48 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
 
             {p.wholesalePrice && (
-              <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center text-green-400">
-                    <Check className="h-4 w-4" />
+              <div className="space-y-3">
+                {wholesaleAccount?.status === "APPROVED" ? (
+                  <div className="bg-slate-900 p-6 rounded-xl shadow-lg border border-slate-800">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-green-400" />
+                        <span className="text-sm font-black text-white uppercase tracking-widest">Wholesale Tiers</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-2 py-1 rounded">Approved Partner</span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {/* Base Tier (Quantity 1) */}
+                      <div className="flex justify-between items-center py-2 border-b border-slate-800">
+                        <span className="text-xs text-slate-400 font-medium">1+ units</span>
+                        <span className="text-sm font-bold text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
+                      </div>
+                      
+                      {/* Custom Tiers */}
+                      {wholesaleTiers.map((tier, idx) => (
+                        <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-800 last:border-0">
+                          <span className="text-xs text-slate-400 font-medium">{tier.minQuantity}+ units</span>
+                          <span className="text-sm font-bold text-green-400">{displayPrice(Number(tier.price))}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <p className="mt-4 text-[10px] text-slate-500 italic leading-relaxed">
+                      Wholesale prices are applied automatically in your cart based on the total quantity.
+                    </p>
                   </div>
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Wholesale Available</span>
-                </div>
-                <span className="text-sm font-black text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
+                ) : (
+                  <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center text-green-400">
+                        <Check className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Wholesale Available</span>
+                    </div>
+                    <span className="text-sm font-black text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
+                  </div>
+                )}
               </div>
             )}
 

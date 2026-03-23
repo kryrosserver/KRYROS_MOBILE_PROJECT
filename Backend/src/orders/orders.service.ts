@@ -176,15 +176,29 @@ export class OrdersService {
       const originalPrice = Number(product.price);
       let price = originalPrice;
 
-      // Check wholesale pricing first if applicable
-      if (user?.wholesaleAccount && product.wholesalePrices?.length) {
-        // Find the best wholesale price for this quantity
-        const applicablePrice = product.wholesalePrices
-          .filter((wp) => item.quantity >= wp.minQuantity)
-          .sort((a, b) => b.minQuantity - a.minQuantity)[0];
-        
-        if (applicablePrice) {
-          price = Number(applicablePrice.price);
+      // Check wholesale pricing logic
+      if (user?.wholesaleAccount) {
+        let bestWholesalePrice: number | null = null;
+
+        // 1. Check Tiered Pricing first
+        if (product.wholesalePrices?.length) {
+          const applicableTier = product.wholesalePrices
+            .filter((wp) => item.quantity >= wp.minQuantity)
+            .sort((a, b) => b.minQuantity - a.minQuantity)[0];
+          
+          if (applicableTier) {
+            bestWholesalePrice = Number(applicableTier.price);
+          }
+        }
+
+        // 2. Fallback to base wholesalePrice if no tier matched or tiers don't exist
+        if (bestWholesalePrice === null && product.wholesalePrice) {
+          bestWholesalePrice = Number(product.wholesalePrice);
+        }
+
+        // Apply if found
+        if (bestWholesalePrice !== null) {
+          price = bestWholesalePrice;
         }
       } else if (
         product.isFlashSale &&
