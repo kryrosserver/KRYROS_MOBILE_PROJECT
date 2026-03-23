@@ -485,30 +485,28 @@ export function Header() {
                 </div>
               </div>
 
-              {/* Mobile Currency Selector */}
-              <div className="bg-slate-50 border-b border-slate-100 px-4 py-4 shrink-0">
-                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-1">Select Currency</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {countries.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => {
-                        setCountry(c.code);
-                        setMobileMenuOpen(false);
+              {/* Mobile Currency Selector - Redesigned to be compact */}
+              <div className="bg-slate-50 border-b border-slate-100 px-6 py-3 shrink-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Currency</span>
+                  <div className="relative">
+                    <select
+                      value={selectedCountry?.code || ""}
+                      onChange={(e) => {
+                        setCountry(e.target.value);
+                        // Optional: don't close menu automatically so they can see the change
+                        // setMobileMenuOpen(false);
                       }}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl text-center transition-all ${
-                        selectedCountry?.code === c.code 
-                          ? "bg-kryros-green text-white shadow-lg shadow-kryros-green/20 ring-2 ring-kryros-green/50" 
-                          : "bg-white border border-slate-200 text-slate-700 hover:border-kryros-green shadow-sm"
-                      }`}
+                      className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-kryros-green/20 focus:border-kryros-green shadow-sm"
                     >
-                      <span className="text-2xl mb-1">{c.flag || "🏳️"}</span>
-                      <span className="text-xs font-bold uppercase">{c.currencyCode}</span>
-                      <span className={`text-[10px] font-medium ${selectedCountry?.code === c.code ? "text-white/70" : "text-slate-400"}`}>
-                        {c.currencySymbol}
-                      </span>
-                    </button>
-                  ))}
+                      {countries.map((c) => (
+                        <option key={c.id} value={c.code}>
+                          {c.flag} {c.currencyCode} ({c.currencySymbol})
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
