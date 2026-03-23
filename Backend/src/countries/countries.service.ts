@@ -146,9 +146,26 @@ export class CountriesService implements OnModuleInit {
         throw new BadRequestException(`Country with name "${countryData.name}" or code "${countryData.code}" already exists`);
       }
 
+      // If autoRate is enabled, fetch the initial rate from the API immediately
+      let initialRate = countryData.exchangeRate || 1.0;
+      if (countryData.autoRate) {
+        try {
+          const response = await axios.get(this.PRIMARY_EXCHANGE_API);
+          const rate = response.data.rates[countryData.currencyCode];
+          if (rate) {
+            initialRate = parseFloat(rate.toFixed(4));
+            this.logger.log(`Fetched initial auto-rate for ${countryData.currencyCode}: ${initialRate}`);
+          }
+        } catch (apiError) {
+          this.logger.warn(`Failed to fetch initial rate for ${countryData.currencyCode}, using provided/default rate.`, apiError.message);
+        }
+      }
+
       return await this.prisma.country.create({
         data: {
           ...countryData,
+          exchangeRate: initialRate,
+          lastRateUpdate: countryData.autoRate ? new Date() : null,
           paymentMethods: {
             create: paymentMethods || [],
           },
