@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Package
 } from "lucide-react";
 import Link from "next/link";
 
