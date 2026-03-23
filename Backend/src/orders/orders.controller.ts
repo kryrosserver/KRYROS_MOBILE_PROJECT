@@ -41,6 +41,12 @@ export class OrdersController {
     return this.ordersService.create((req as any).user.id, data);
   }
 
+  @Get('track')
+  @ApiOperation({ summary: 'Track order by ID and email (Public)' })
+  async trackOrder(@Query('orderNumber') orderNumber: string, @Query('email') email: string) {
+    return this.ordersService.trackOrder(orderNumber, email);
+  }
+
   @Put(':id/status')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

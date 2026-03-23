@@ -31,7 +31,7 @@ const footerLinks = {
       { label: 'FAQs', href: '/faq' },
       { label: 'Shipping Info', href: '/shipping' },
       { label: 'Returns', href: '/returns' },
-      { label: 'Track Order', href: '/track' },
+      { label: 'Track Order', href: '/track-order' },
     ],
   },
   company: {

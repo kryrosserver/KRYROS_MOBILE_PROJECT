@@ -100,6 +100,9 @@ export const ordersApi = {
   getMyOrders: () => fetchApi<any[]>('/orders/my-orders'),
 
   getById: (id: string) => fetchApi<any>(`/orders/${id}`),
+
+  trackOrder: (orderNumber: string, email: string) =>
+    fetchApi<any>(`/orders/track?orderNumber=${orderNumber}&email=${email}`),
 };
 
 // Credit API

@@ -81,7 +81,7 @@ export function getTimeRemaining(endTime: Date | string): {
 
 export function generateWhatsAppMessage(data: {
   orderNumber: string
-  customer: { firstName: string; lastName: string; phone: string }
+  customer: { firstName: string; lastName: string; phone: string; email: string }
   address: {
     street: string
     city: string
@@ -112,6 +112,7 @@ export function generateWhatsAppMessage(data: {
   message += `- Subtotal: ${format(data.subtotal)}%0A`
   message += `- Shipping: ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A`
   message += `*🔥 TOTAL TO PAY: ${format(data.total)} (${data.currency.code})*%0A%0A`
+  message += `*🚚 Track Your Order:* https://kryrosweb.onrender.com/track-order?id=${data.orderNumber}%26email=${encodeURIComponent(data.customer.email)}%0A%0A`
   message += `_I would like to receive payment details to complete my purchase in ${data.currency.code}._`
 
   return message

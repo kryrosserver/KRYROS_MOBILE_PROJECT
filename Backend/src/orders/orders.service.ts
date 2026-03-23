@@ -38,15 +38,96 @@ export class OrdersService {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
-        user: true,
-        items: { include: { product: { include: { images: true } }, variant: true } },
-        shippingAddress: true,
-        billingAddress: true,
+        items: {
+          include: {
+            product: {
+              include: {
+                images: true,
+              }
+            },
+            variant: true,
+          },
+        },
+        shippingAddress: {
+          include: {
+            city: true,
+            state: true,
+            country: true,
+          }
+        },
+        billingAddress: {
+          include: {
+            city: true,
+            state: true,
+            country: true,
+          }
+        },
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
         logs: { orderBy: { createdAt: 'desc' } },
       },
     });
+
     if (!order) throw new NotFoundException('Order not found');
     return order;
+  }
+
+  async trackOrder(orderNumber: string, email: string) {
+    // 1. Find the order by orderNumber (which is the friendly ID like ORD-123)
+    // We search by orderNumber or ID just in case
+    const order = await this.prisma.order.findFirst({
+      where: {
+        OR: [
+          { orderNumber: orderNumber },
+          { id: orderNumber }
+        ],
+        // The email is stored in the shippingAddress or associated with the user
+        // Let's check both for accuracy
+        OR: [
+          { user: { email: { equals: email, mode: 'insensitive' } } },
+          { shippingAddress: { email: { equals: email, mode: 'insensitive' } } }
+        ]
+      },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                images: true,
+              }
+            },
+            variant: true,
+          },
+        },
+        shippingAddress: true,
+      }
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found with the provided details');
+    }
+
+    // Return only necessary tracking info for guest safety
+    return {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      createdAt: order.createdAt,
+      items: order.items.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.product.images?.find(i => i.isPrimary)?.url || item.product.images?.[0]?.url
+      })),
+      total: order.total,
+      shippingStatus: order.status // Assuming status covers shipping for now
+    };
   }
 
   async create(userId: string, data: CreateOrderDto) {

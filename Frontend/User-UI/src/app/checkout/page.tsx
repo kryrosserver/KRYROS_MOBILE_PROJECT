@@ -253,7 +253,8 @@ export default function CheckoutPage() {
             customer: {
               firstName: formData.firstName,
               lastName: formData.lastName,
-              phone: formData.phone
+              phone: formData.phone,
+              email: formData.email
             },
             address: {
               street: formData.address,
