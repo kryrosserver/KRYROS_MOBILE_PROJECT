@@ -77,7 +77,7 @@ export class CountriesService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_1_HOUR)
+  @Cron(CronExpression.EVERY_HOUR)
   async updateExchangeRates() {
     this.logger.log('Updating exchange rates (Hourly Cron)...');
     
