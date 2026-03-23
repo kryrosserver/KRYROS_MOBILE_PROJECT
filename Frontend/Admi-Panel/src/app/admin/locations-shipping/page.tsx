@@ -199,14 +199,14 @@ export default function LocationsShippingPage() {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Enable Location Shipping</span>
             <button 
               onClick={() => toggleFeature(!isNewShippingEnabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${isNewShippingEnabled ? "bg-kryros-green" : "bg-slate-300"}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${isNewShippingEnabled ? "bg-green-500" : "bg-slate-300"}`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isNewShippingEnabled ? "translate-x-6" : "translate-x-1"}`} />
             </button>
           </div>
           <button 
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-kryros-green hover:bg-kryros-green/90 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-500/20"
+            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-500/20"
           >
             <Plus className="h-5 w-5" />
             Add {activeTab.slice(0, -1)}
@@ -227,7 +227,7 @@ export default function LocationsShippingPage() {
             onClick={() => setActiveTab(tab.id as Tab)}
             className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium transition-all ${
               activeTab === tab.id 
-                ? "border-kryros-green text-kryros-green" 
+                ? "border-green-500 text-green-600" 
                 : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -247,10 +247,10 @@ export default function LocationsShippingPage() {
               placeholder={`Search ${activeTab}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-kryros-green/20"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20"
             />
           </div>
-          <button onClick={loadData} className="p-2 text-slate-500 hover:text-kryros-green"><RefreshCcw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} /></button>
+          <button onClick={loadData} className="p-2 text-slate-500 hover:text-green-600"><RefreshCcw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} /></button>
         </div>
 
         <div className="overflow-x-auto">
@@ -309,7 +309,7 @@ export default function LocationsShippingPage() {
                           ))}
                           <button 
                             onClick={() => handleOpenMethodModal(item)}
-                            className="flex items-center gap-1.5 text-[10px] font-bold text-kryros-green hover:text-kryros-green/80 uppercase tracking-widest mt-1"
+                            className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 hover:text-green-700 uppercase tracking-widest mt-1"
                           >
                             <PlusCircle className="h-3 w-3" />
                             Add Method
@@ -413,7 +413,7 @@ export default function LocationsShippingPage() {
                 </div>
               )}
 
-              <button disabled={saving} className="w-full py-3 bg-kryros-green text-white rounded-lg font-bold shadow-lg shadow-green-500/20 disabled:opacity-50">
+              <button disabled={saving} className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-lg shadow-green-500/20 disabled:opacity-50 transition-all">
                 {saving ? "Saving..." : "Confirm & Save"}
               </button>
             </form>
@@ -460,7 +460,7 @@ export default function LocationsShippingPage() {
                 <span className="text-sm font-medium">Method Active</span>
               </div>
 
-              <button disabled={saving} className="w-full py-3 bg-kryros-green text-white rounded-lg font-bold shadow-lg shadow-green-500/20 disabled:opacity-50">
+              <button disabled={saving} className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-lg shadow-green-500/20 disabled:opacity-50 transition-all">
                 {saving ? "Saving..." : "Confirm Method"}
               </button>
             </form>
