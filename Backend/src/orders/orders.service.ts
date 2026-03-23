@@ -153,7 +153,12 @@ export class OrdersService {
         inventory: true, 
         variants: true,
         wholesalePrices: user?.wholesaleAccount ? {
-          where: { accountId: user.wholesaleAccount.id }
+          where: { 
+            OR: [
+              { accountId: user.wholesaleAccount.id },
+              { accountId: null }
+            ]
+          }
         } : false
       },
     });

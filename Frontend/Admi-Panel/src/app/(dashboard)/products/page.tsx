@@ -84,6 +84,7 @@ export default function ProductsPage() {
     warrantyInfo: "",
     images: [] as string[],
     specifications: [] as { key: string; value: string }[],
+    wholesaleTiers: [] as { minQuantity: number; price: number }[],
   });
   const [files, setFiles] = useState<File[]>([]);
   const [editItem, setEditItem] = useState<Product | null>(null);
@@ -113,6 +114,7 @@ export default function ProductsPage() {
     warrantyInfo: "",
     images: [] as string[],
     specifications: [] as { key: string; value: string }[],
+    wholesaleTiers: [] as { minQuantity: number; price: number }[],
   });
   const [editFiles, setEditFiles] = useState<File[]>([]);
 
@@ -347,11 +349,53 @@ export default function ProductsPage() {
                 
                 <input
                   type="number"
-                  placeholder="Wholesale Price (Optional)"
+                  placeholder="Base Wholesale Price (Optional)"
                   value={form.wholesalePrice}
                   onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
                   className="admin-input w-full"
                 />
+
+                <div className="space-y-2 mt-2">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Wholesale Tiers (Quantity Based)</p>
+                  {form.wholesaleTiers.map((tier, idx) => (
+                    <div key={idx} className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        placeholder="Min Qty (e.g. 10)"
+                        value={tier.minQuantity}
+                        onChange={(e) => {
+                          const newTiers = [...form.wholesaleTiers];
+                          newTiers[idx].minQuantity = Number(e.target.value);
+                          setForm({ ...form, wholesaleTiers: newTiers });
+                        }}
+                        className="admin-input flex-1"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price (e.g. 150)"
+                        value={tier.price}
+                        onChange={(e) => {
+                          const newTiers = [...form.wholesaleTiers];
+                          newTiers[idx].price = Number(e.target.value);
+                          setForm({ ...form, wholesaleTiers: newTiers });
+                        }}
+                        className="admin-input flex-1"
+                      />
+                      <button
+                        onClick={() => setForm({ ...form, wholesaleTiers: form.wholesaleTiers.filter((_, i) => i !== idx) })}
+                        className="text-red-500 p-1 hover:bg-red-50 rounded"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setForm({ ...form, wholesaleTiers: [...form.wholesaleTiers, { minQuantity: 0, price: 0 }] })}
+                    className="text-xs text-blue-600 font-bold hover:underline"
+                  >
+                    + Add Price Tier
+                  </button>
+                </div>
               </div>
 
               {/* Guarantees Section */}
@@ -564,6 +608,15 @@ export default function ProductsPage() {
                       const body = await res.json().catch(() => ({}));
                       if (!res.ok) throw new Error(body?.error || body?.message || "Failed to create product");
                       
+                      // Save wholesale tiers if any
+                      if (form.wholesaleTiers.length > 0) {
+                        await fetch(`/api/admin/wholesale/prices/${body.id}`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(form.wholesaleTiers),
+                        });
+                      }
+
                       setShowCreate(false);
                       setForm({
                         name: "",
@@ -762,7 +815,14 @@ export default function ProductsPage() {
                   )}
                   <td className="text-right space-x-2">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        // Fetch wholesale prices first
+                        let tiers = [];
+                        try {
+                          const res = await fetch(`/api/admin/wholesale/prices/${p.id}`);
+                          if (res.ok) tiers = await res.json();
+                        } catch (e) {}
+
                         setEditItem(p);
                         setEditForm({
                           id: p.id,
@@ -792,6 +852,7 @@ export default function ProductsPage() {
                             ? JSON.parse((p as any).specifications) 
                             : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
                           images: Array.isArray(p.images) ? p.images.map((img: any) => img.url) : [],
+                          wholesaleTiers: Array.isArray(tiers) ? tiers.map(t => ({ minQuantity: t.minQuantity, price: Number(t.price) })) : [],
                         });
                         setEditFiles([]);
                       }}
@@ -1030,14 +1091,62 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="pt-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Wholesale Price (USD)</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Base Wholesale Price (USD)</label>
                     <input
                       type="number"
-                      placeholder="Wholesale Price"
+                      placeholder="Base Wholesale Price"
                       value={editForm.wholesalePrice}
                       onChange={(e) => setEditForm({ ...editForm, wholesalePrice: e.target.value })}
                       className="admin-input w-full"
                     />
+                  </div>
+
+                  <div className="pt-4 space-y-3 border-t border-slate-100">
+                    <p className="text-sm font-bold text-slate-800">Tiered Wholesale Pricing (Quantity Based)</p>
+                    {editForm.wholesaleTiers.map((tier, idx) => (
+                      <div key={idx} className="flex gap-2 items-center bg-white p-2 rounded border border-slate-100 shadow-sm">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Min Qty</label>
+                          <input
+                            type="number"
+                            placeholder="e.g. 10"
+                            value={tier.minQuantity}
+                            onChange={(e) => {
+                              const newTiers = [...editForm.wholesaleTiers];
+                              newTiers[idx].minQuantity = Number(e.target.value);
+                              setEditForm({ ...editForm, wholesaleTiers: newTiers });
+                            }}
+                            className="admin-input w-full text-xs"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Price</label>
+                          <input
+                            type="number"
+                            placeholder="e.g. 150"
+                            value={tier.price}
+                            onChange={(e) => {
+                              const newTiers = [...editForm.wholesaleTiers];
+                              newTiers[idx].price = Number(e.target.value);
+                              setEditForm({ ...editForm, wholesaleTiers: newTiers });
+                            }}
+                            className="admin-input w-full text-xs"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setEditForm({ ...editForm, wholesaleTiers: editForm.wholesaleTiers.filter((_, i) => i !== idx) })}
+                          className="text-red-500 p-1 hover:bg-red-50 rounded mt-4"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setEditForm({ ...editForm, wholesaleTiers: [...editForm.wholesaleTiers, { minQuantity: 0, price: 0 }] })}
+                      className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1"
+                    >
+                      <PlusCircle className="h-3 w-3" /> Add Price Tier
+                    </button>
                   </div>
 
                   <div className="pt-2 space-y-3">
@@ -1266,6 +1375,13 @@ export default function ProductsPage() {
                   const body = await res.json().catch(() => ({}));
                   if (!res.ok) throw new Error(body?.error || body?.message || "Failed to update product");
                   
+                  // Update wholesale tiers if any
+                  await fetch(`/api/admin/wholesale/prices/${id}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(editForm.wholesaleTiers),
+                  });
+
                   setEditItem(null);
                   setEditFiles([]);
                   await load();
