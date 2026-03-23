@@ -53,7 +53,7 @@ export class WholesaleService {
         productId,
         minQuantity: p.minQuantity,
         price: p.price,
-        accountId: p.accountId || "" // Global if empty (but the schema requires accountId)
+        accountId: p.accountId || null
       }))
     });
   }
