@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/lib/utils'
 import { useCart } from '@/providers/CartProvider'
+import { useCurrency } from '@/providers/CurrencyProvider'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check } from 'lucide-react'
@@ -18,6 +19,15 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const [includeAccessory, setIncludeAccessory] = useState(false)
   const [mounted, setMounted] = useState(false)
   const cart = useCart()
+  const { selectedCountry, convertPrice, formatLocal } = useCurrency()
+
+  // Helper to format price in current currency
+  const displayPrice = (amount: number) => {
+    if (selectedCountry?.code === "US" || !selectedCountry) {
+      return formatPrice(amount);
+    }
+    return formatLocal(convertPrice(amount).amount);
+  };
 
   useEffect(() => {
     setMounted(true)
@@ -234,11 +244,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
               <div className="flex items-baseline gap-4">
                 <span className="text-3xl md:text-4xl font-extrabold text-red-600 tracking-tight">
-                  {formatPrice(totalPrice)}
+                  {displayPrice(totalPrice)}
                 </span>
                 {originalPrice && (
                   <span className="text-lg text-slate-400 line-through font-medium">
-                    {formatPrice(originalPrice)}
+                    {displayPrice(originalPrice)}
                   </span>
                 )}
               </div>
@@ -249,7 +259,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <div>
                     <p className="text-xs font-bold text-blue-900 uppercase tracking-wide">Credit Available</p>
                     <p className="text-[11px] font-medium text-blue-700">
-                      {p.creditMessage || `Starting from ${formatPrice(Number(p.creditMinimum || 0))} per month`}
+                      {p.creditMessage || `Starting from ${displayPrice(Number(p.creditMinimum || 0))} per month`}
                     </p>
                   </div>
                 </div>
@@ -342,7 +352,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                         </div>
                         <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">{stockCurrent} IN STOCK</p>
                       </div>
-                      <span className="text-sm font-extrabold text-red-600">{formatPrice(price)}</span>
+                      <span className="text-sm font-extrabold text-red-600">{displayPrice(price)}</span>
                     </div>
 
                     <div className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity">
@@ -367,7 +377,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                         <p className="text-[10px] font-bold text-green-600 mt-0.5 uppercase">IN STOCK</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-extrabold text-red-600">{formatPrice(accessoryPrice)}</p>
+                        <p className="text-sm font-extrabold text-red-600">{displayPrice(accessoryPrice)}</p>
                       </div>
                     </div>
                   </div>
@@ -438,7 +448,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   </div>
                   <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Wholesale Available</span>
                 </div>
-                <span className="text-sm font-black text-green-400">{formatPrice(Number(p.wholesalePrice))}</span>
+                <span className="text-sm font-black text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
               </div>
             )}
 

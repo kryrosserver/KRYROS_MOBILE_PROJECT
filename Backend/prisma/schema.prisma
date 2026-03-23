@@ -90,10 +90,11 @@ model UserRoleAssignment {
 
 model Address {
   id          String   @id @default(uuid())
-  userId      String
+  userId      String?
   type        AddressType @default(SHIPPING)
   firstName   String
   lastName    String
+  email       String?
   company     String?
   street      String
   city        String?
@@ -114,7 +115,7 @@ model Address {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   shippingOrders Order[] @relation("OrderShippingAddress")
   billingOrders  Order[] @relation("OrderBillingAddress")
 
@@ -386,7 +387,7 @@ model WishlistItem {
 model Order {
   id                String        @id @default(uuid())
   orderNumber       String        @unique
-  userId            String
+  userId            String?
   status            OrderStatus   @default(PENDING)
   paymentStatus     PaymentStatus @default(PENDING)
   paymentMethod     PaymentMethod?
@@ -403,7 +404,7 @@ model Order {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  user              User          @relation(fields: [userId], references: [id])
+  user              User?          @relation(fields: [userId], references: [id])
   shippingAddressId String?
   shippingAddress   Address?      @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
   billingAddressId String?

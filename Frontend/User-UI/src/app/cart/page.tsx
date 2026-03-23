@@ -17,6 +17,7 @@ import {
   CreditCard
 } from "lucide-react";
 import { useCart } from "@/providers/CartProvider";
+import { useCurrency } from "@/providers/CurrencyProvider";
 import type { CartItem as CIC } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { settingsApi } from "@/lib/api";
@@ -24,6 +25,7 @@ import { settingsApi } from "@/lib/api";
 export default function CartPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem, getSubtotal } = useCart();
+  const { selectedCountry, convertPrice, formatLocal } = useCurrency();
   const [couponCode, setCouponCode] = useState("");
   const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
 
@@ -39,6 +41,14 @@ export default function CartPage() {
   const discount = 0;
   const shipping = subtotal >= shippingConfig.threshold ? 0 : shippingConfig.fee;
   const total = subtotal - discount + shipping;
+
+  // Helper to format price in current currency
+  const displayPrice = (amount: number) => {
+    if (selectedCountry?.code === "US" || !selectedCountry) {
+      return formatPrice(amount);
+    }
+    return formatLocal(convertPrice(amount).amount);
+  };
 
   const handleCheckout = () => {
     router.push("/checkout");
@@ -125,7 +135,7 @@ export default function CartPage() {
                       </div>
                       
                       <div className="text-right">
-                        <p className="font-bold text-slate-900">{formatPrice(Number(unitPrice * ci.quantity))}</p>
+                        <p className="font-bold text-slate-900">{displayPrice(Number(unitPrice * ci.quantity))}</p>
                       </div>
                     </div>
                   </div>
@@ -149,27 +159,27 @@ export default function CartPage() {
               <div className="mt-6 space-y-3">
                 <div className="flex justify-between">
                   <span className="text-slate-600">Subtotal</span>
-                  <span className="font-medium text-slate-900">{formatPrice(Number(subtotal))}</span>
+                  <span className="font-medium text-slate-900">{displayPrice(Number(subtotal))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">Discount</span>
-                  <span className="font-medium text-green-600">{discount ? `-${formatPrice(Number(discount))}` : formatPrice(0)}</span>
+                  <span className="font-medium text-green-600">{discount ? `-${displayPrice(Number(discount))}` : displayPrice(0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">Shipping</span>
                   <span className="font-medium text-slate-900">
-                    {shipping === 0 ? "Free" : formatPrice(Number(shipping))}
+                    {shipping === 0 ? "Free" : displayPrice(Number(shipping))}
                   </span>
                 </div>
                 {shipping > 0 && (
                   <p className="text-xs text-green-600">
-                    Add {formatPrice(Number(shippingConfig.threshold - subtotal))} more for free shipping!
+                    Add {displayPrice(Number(shippingConfig.threshold - subtotal))} more for free shipping!
                   </p>
                 )}
                 <hr className="my-3 border-slate-200" />
                 <div className="flex justify-between">
                   <span className="text-lg font-semibold text-slate-900">Total</span>
-                  <span className="text-lg font-bold text-slate-900">{formatPrice(Number(total))}</span>
+                  <span className="text-lg font-bold text-slate-900">{displayPrice(Number(total))}</span>
                 </div>
               </div>
 
@@ -214,7 +224,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
                   <Truck className="h-5 w-5 text-green-500" />
-                  <span>Free shipping on orders over {formatPrice(shippingConfig.threshold)}</span>
+                  <span>Free shipping on orders over {displayPrice(shippingConfig.threshold)}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
                   <CreditCard className="h-5 w-5 text-green-500" />

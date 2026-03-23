@@ -130,27 +130,25 @@ export class OrdersService {
     };
   }
 
-  async create(userId: string, data: CreateOrderDto) {
-    const { items, shippingAddressId, billingAddressId, paymentMethod, notes } = data;
+  async create(userId: string | undefined, data: CreateOrderDto) {
+    const { items, shippingAddressId: providedShippingAddressId, billingAddressId: providedBillingAddressId, paymentMethod, notes, addressDetails } = data;
 
     // 1. Fetch user to check role and wholesale account
-    const user = await this.prisma.user.findUnique({
+    const user = userId ? await this.prisma.user.findUnique({
       where: { id: userId },
       include: { wholesaleAccount: true },
-    });
+    }) : null;
 
-    if (!user) throw new NotFoundException('User not found');
-
-    // Verify addresses
-    if (shippingAddressId) {
+    // Verify addresses if IDs provided
+    if (providedShippingAddressId && userId) {
       const address = await this.prisma.address.findFirst({
-        where: { id: shippingAddressId, userId },
+        where: { id: providedShippingAddressId, userId },
       });
       if (!address) throw new BadRequestException('Invalid shipping address');
     }
-    if (billingAddressId) {
+    if (providedBillingAddressId && userId) {
       const address = await this.prisma.address.findFirst({
-        where: { id: billingAddressId, userId },
+        where: { id: providedBillingAddressId, userId },
       });
       if (!address) throw new BadRequestException('Invalid billing address');
     }
@@ -162,7 +160,7 @@ export class OrdersService {
       include: { 
         inventory: true, 
         variants: true,
-        wholesalePrices: user.wholesaleAccount ? {
+        wholesalePrices: user?.wholesaleAccount ? {
           where: { accountId: user.wholesaleAccount.id }
         } : false
       },
@@ -182,7 +180,7 @@ export class OrdersService {
       let price = originalPrice;
 
       // Check wholesale pricing first if applicable
-      if (user.wholesaleAccount && product.wholesalePrices?.length) {
+      if (user?.wholesaleAccount && product.wholesalePrices?.length) {
         // Find the best wholesale price for this quantity
         const applicablePrice = product.wholesalePrices
           .filter((wp) => item.quantity >= wp.minQuantity)
@@ -206,7 +204,7 @@ export class OrdersService {
         // If it's a wholesaler, we might still use the wholesale price calculated above, 
         // or the variant price if it's more specific. For now, let's assume wholesale price applies to the base product.
         // But if not a wholesaler, we definitely use the variant price.
-        if (!user.wholesaleAccount || !product.wholesalePrices?.length) {
+        if (!user?.wholesaleAccount || !product.wholesalePrices?.length) {
           price = Number(variant.price);
         }
         if (variant.stock < item.quantity) {
@@ -260,11 +258,43 @@ export class OrdersService {
 
     // 4. Prisma Transaction
     return this.prisma.$transaction(async (tx) => {
+      let finalShippingAddressId = providedShippingAddressId;
+      let finalBillingAddressId = providedBillingAddressId;
+
+      // Create address if details provided (for guest or new address)
+      if (addressDetails) {
+        const newAddress = await tx.address.create({
+          data: {
+            userId: userId || null,
+            firstName: addressDetails.firstName,
+            lastName: addressDetails.lastName,
+            email: addressDetails.email,
+            phone: addressDetails.phone,
+            street: addressDetails.address,
+            countryId: addressDetails.countryId,
+            stateId: addressDetails.stateId,
+            cityId: addressDetails.cityId,
+            stateName: addressDetails.stateName,
+            cityName: addressDetails.cityName,
+            manual: addressDetails.manual || false,
+            country: addressDetails.countryName || "Zambia",
+            type: 'SHIPPING'
+          }
+        });
+        finalShippingAddressId = newAddress.id;
+        // For guest, use same address for billing if not provided
+        if (!finalBillingAddressId) finalBillingAddressId = newAddress.id;
+      }
+
+      if (!finalShippingAddressId) {
+        throw new BadRequestException('Shipping address is required');
+      }
+
       // Create Order
       const order = await tx.order.create({
         data: {
           orderNumber,
-          userId,
+          userId: userId || null,
           status: 'PENDING',
           paymentStatus: 'PENDING',
           paymentMethod,
@@ -274,8 +304,8 @@ export class OrdersService {
           discount: totalDiscount,
           total,
           notes,
-          shippingAddressId,
-          billingAddressId,
+          shippingAddressId: finalShippingAddressId,
+          billingAddressId: finalBillingAddressId,
           items: {
             create: orderItemsData,
           },

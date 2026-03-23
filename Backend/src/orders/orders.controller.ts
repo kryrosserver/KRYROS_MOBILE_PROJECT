@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nest
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -35,10 +36,13 @@ export class OrdersController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create order (Public/Guest support)' })
   create(@Req() req: Request, @Body() data: CreateOrderDto) {
-    return this.ordersService.create((req as any).user.id, data);
+    // req.user will be populated if a valid token is provided, otherwise it's a guest order
+    const userId = (req as any).user?.id;
+    return this.ordersService.create(userId, data);
   }
 
   @Get('track')

@@ -17,6 +17,56 @@ export class OrderItemDto {
   quantity!: number;
 }
 
+export class AddressDetailsDto {
+  @IsString()
+  @IsNotEmpty()
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  firstName!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  address!: string;
+
+  @IsUUID()
+  @IsOptional()
+  countryId?: string;
+
+  @IsUUID()
+  @IsOptional()
+  stateId?: string;
+
+  @IsUUID()
+  @IsOptional()
+  cityId?: string;
+
+  @IsString()
+  @IsOptional()
+  stateName?: string;
+
+  @IsString()
+  @IsOptional()
+  cityName?: string;
+
+  @IsString()
+  @IsOptional()
+  countryName?: string;
+
+  @IsInt()
+  @IsOptional()
+  manual?: boolean;
+}
+
 export class CreateOrderDto {
   @IsArray()
   @IsNotEmpty()
@@ -43,4 +93,9 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AddressDetailsDto)
+  addressDetails?: AddressDetailsDto;
 }
