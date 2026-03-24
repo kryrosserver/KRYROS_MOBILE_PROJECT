@@ -1,13 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { API_BASE } from "@/lib/config";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+function getAdminToken(req: NextRequest): string {
+  const token = req.cookies.get("admin_token")?.value;
+  return token || "";
+}
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const token = getAdminToken(req);
     const body = await req.json();
-    const res = await fetch(`${BACKEND_URL}/shipping-zones/methods/${params.id}`, {
+    const res = await fetch(`${API_BASE}/shipping-zones/methods/${params.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(body),
     });
     const data = await res.json();
@@ -17,10 +25,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const res = await fetch(`${BACKEND_URL}/shipping-zones/methods/${params.id}`, {
+    const token = getAdminToken(req);
+    const res = await fetch(`${API_BASE}/shipping-zones/methods/${params.id}`, {
       method: "DELETE",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     const data = await res.json();
     return NextResponse.json(data);

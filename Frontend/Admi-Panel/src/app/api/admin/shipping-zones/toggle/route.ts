@@ -6,24 +6,11 @@ function getAdminToken(req: NextRequest): string {
   return token || "";
 }
 
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const countryId = searchParams.get("countryId");
-    const url = countryId ? `${API_BASE}/states?countryId=${countryId}` : `${API_BASE}/states`;
-    const res = await fetch(url, { cache: "no-store" });
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch states" }, { status: 500 });
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
     const token = getAdminToken(req);
     const body = await req.json();
-    const res = await fetch(`${API_BASE}/states`, {
+    const res = await fetch(`${API_BASE}/shipping-zones/toggle`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -34,6 +21,6 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create state" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to toggle shipping feature" }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { SettingsService } from '../settings/settings.service';
 import { ShippingZonesService } from '../shipping-zones/shipping-zones.service';
+import { Prisma, PaymentMethod } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -11,6 +12,28 @@ export class OrdersService {
     private settingsService: SettingsService,
     private shippingZonesService: ShippingZonesService,
   ) {}
+
+  private convertToPaymentMethod(method: string): PaymentMethod {
+    const methodMap: Record<string, PaymentMethod> = {
+      'CARD': PaymentMethod.CARD,
+      'card': PaymentMethod.CARD,
+      'BANK_TRANSFER': PaymentMethod.BANK_TRANSFER,
+      'bank_transfer': PaymentMethod.BANK_TRANSFER,
+      'bank': PaymentMethod.BANK_TRANSFER,
+      'MOBILE_MONEY': PaymentMethod.MOBILE_MONEY,
+      'mobile_money': PaymentMethod.MOBILE_MONEY,
+      'mobile': PaymentMethod.MOBILE_MONEY,
+      'WALLET': PaymentMethod.WALLET,
+      'wallet': PaymentMethod.WALLET,
+      'CREDIT': PaymentMethod.CREDIT,
+      'credit': PaymentMethod.CREDIT,
+      'WHATSAPP': PaymentMethod.WHATSAPP,
+      'whatsapp': PaymentMethod.WHATSAPP,
+    };
+    
+    const normalized = method?.toUpperCase();
+    return methodMap[normalized] || PaymentMethod.CARD;
+  }
 
   async findAll(userId?: string, params?: { skip?: number; take?: number; status?: string }) {
     const { skip = 0, take = 20, status } = params || {};
@@ -124,6 +147,9 @@ export class OrdersService {
 
   async create(userId: string | undefined, data: CreateOrderDto) {
     const { items, shippingAddressId: providedShippingAddressId, billingAddressId: providedBillingAddressId, paymentMethod, notes, addressDetails } = data;
+    
+    // Convert string payment method to enum
+    const paymentMethodEnum = this.convertToPaymentMethod(paymentMethod);
 
     // 1. Fetch user to check role and wholesale account
     const user = userId ? await this.prisma.user.findUnique({
@@ -309,7 +335,7 @@ export class OrdersService {
           userId: userId || null,
           status: 'PENDING',
           paymentStatus: 'PENDING',
-          paymentMethod,
+          paymentMethod: paymentMethodEnum,
           subtotal,
           tax,
           shipping,

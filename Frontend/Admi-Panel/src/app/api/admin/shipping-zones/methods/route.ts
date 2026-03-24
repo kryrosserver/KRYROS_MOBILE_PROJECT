@@ -1,13 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { API_BASE } from "@/lib/config";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+function getAdminToken(req: NextRequest): string {
+  const token = req.cookies.get("admin_token")?.value;
+  return token || "";
+}
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const token = getAdminToken(req);
     const body = await req.json();
-    const res = await fetch(`${BACKEND_URL}/shipping-zones/methods`, {
+    const res = await fetch(`${API_BASE}/shipping-zones/methods`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(body),
     });
     const data = await res.json();

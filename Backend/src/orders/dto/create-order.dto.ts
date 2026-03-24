@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '@prisma/client';
 
@@ -90,9 +90,9 @@ export class CreateOrderDto {
   @IsOptional()
   shippingMethodId?: string;
 
-  @IsEnum(PaymentMethod)
+  @IsString()
   @IsNotEmpty()
-  paymentMethod!: PaymentMethod;
+  paymentMethod!: string;
 
   @IsString()
   @IsOptional()

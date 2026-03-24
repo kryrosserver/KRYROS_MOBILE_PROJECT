@@ -1,10 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { API_BASE } from "@/lib/config";
 
-const BACKEND_URL = "https://kryrosbackend-d68q.onrender.com/api";
+function getAdminToken(req: NextRequest): string {
+  const token = req.cookies.get("admin_token")?.value;
+  return token || "";
+}
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const res = await fetch(`${BACKEND_URL}/countries`, {
+    const res = await fetch(`${API_BASE}/countries`, {
       cache: "no-store",
     });
     const data = await res.json();
@@ -14,12 +18,16 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const token = getAdminToken(req);
     const body = await req.json();
-    const res = await fetch(`${BACKEND_URL}/countries`, {
+    const res = await fetch(`${API_BASE}/countries`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(body),
     });
     const data = await res.json();

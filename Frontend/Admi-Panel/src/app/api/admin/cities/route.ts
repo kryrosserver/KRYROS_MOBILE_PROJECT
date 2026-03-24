@@ -1,12 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { API_BASE } from "@/lib/config";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+function getAdminToken(req: NextRequest): string {
+  const token = req.cookies.get("admin_token")?.value;
+  return token || "";
+}
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const stateId = searchParams.get("stateId");
-    const url = stateId ? `${BACKEND_URL}/cities?stateId=${stateId}` : `${BACKEND_URL}/cities`;
+    const url = stateId ? `${API_BASE}/cities?stateId=${stateId}` : `${API_BASE}/cities`;
     const res = await fetch(url, { cache: "no-store" });
     const data = await res.json();
     return NextResponse.json(data);
@@ -15,12 +19,16 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const token = getAdminToken(req);
     const body = await req.json();
-    const res = await fetch(`${BACKEND_URL}/cities`, {
+    const res = await fetch(`${API_BASE}/cities`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(body),
     });
     const data = await res.json();
