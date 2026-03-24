@@ -199,6 +199,17 @@ export class OrdersService {
     const orderItemsData: any[] = [];
     const inventoryUpdates: any[] = [];
 
+    // Aggregate quantities to check against total stock
+    const quantityMap: Record<string, number> = {};
+    const variantQuantityMap: Record<string, number> = {};
+
+    for (const item of items) {
+      quantityMap[item.productId] = (quantityMap[item.productId] || 0) + item.quantity;
+      if (item.variantId) {
+        variantQuantityMap[item.variantId] = (variantQuantityMap[item.variantId] || 0) + item.quantity;
+      }
+    }
+
     for (const item of items) {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new NotFoundException(`Product ${item.productId} not found`);
@@ -206,30 +217,20 @@ export class OrdersService {
       const originalPrice = Number(product.price);
       let price = originalPrice;
 
-      // Check wholesale pricing logic
+      // ... price logic ...
       if (user?.wholesaleAccount) {
+        // ... (wholesale price logic remains the same)
         let bestWholesalePrice: number | null = null;
-
-        // 1. Check Tiered Pricing first
         if (product.wholesalePrices?.length) {
           const applicableTier = product.wholesalePrices
             .filter((wp) => item.quantity >= wp.minQuantity)
             .sort((a, b) => b.minQuantity - a.minQuantity)[0];
-          
-          if (applicableTier) {
-            bestWholesalePrice = Number(applicableTier.price);
-          }
+          if (applicableTier) bestWholesalePrice = Number(applicableTier.price);
         }
-
-        // 2. Fallback to base wholesalePrice if no tier matched or tiers don't exist
         if (bestWholesalePrice === null && product.wholesalePrice) {
           bestWholesalePrice = Number(product.wholesalePrice);
         }
-
-        // Apply if found
-        if (bestWholesalePrice !== null) {
-          price = bestWholesalePrice;
-        }
+        if (bestWholesalePrice !== null) price = bestWholesalePrice;
       } else if (
         product.isFlashSale &&
         product.flashSalePrice &&
@@ -239,24 +240,25 @@ export class OrdersService {
         price = Number(product.flashSalePrice);
       }
 
+      const canBackorder = product.inventory?.allowBackorder || false;
+
       if (item.variantId) {
         const variant = product.variants.find((v) => v.id === item.variantId);
         if (!variant) throw new NotFoundException(`Variant ${item.variantId} not found for product ${product.id}`);
         
-        // If not a wholesaler, we definitely use the variant price.
         if (!user?.wholesaleAccount || !product.wholesalePrices?.length) {
           price = Number(variant.price);
         }
 
-        // Stock Check with Backorder support
-        const canBackorder = product.inventory?.allowBackorder || false;
-        if (variant.stock < item.quantity && !canBackorder) {
-          throw new BadRequestException(`Insufficient stock for variant ${variant.name} of product ${product.name}. Current stock: ${variant.stock}`);
+        const requestedQty = variantQuantityMap[item.variantId];
+        if (variant.stock < requestedQty && !canBackorder) {
+          throw new BadRequestException(`Insufficient stock for ${product.name} (${variant.name}: ${variant.value}). Available: ${variant.stock}, Requested: ${requestedQty}`);
         }
       } else {
-        const canBackorder = product.inventory?.allowBackorder || false;
-        if ((!product.inventory || product.inventory.stock < item.quantity) && !canBackorder) {
-          throw new BadRequestException(`Insufficient stock for product ${product.name}. Current stock: ${product.inventory?.stock || 0}`);
+        const requestedQty = quantityMap[item.productId];
+        const availableStock = product.inventory?.stock || 0;
+        if (availableStock < requestedQty && !canBackorder) {
+          throw new BadRequestException(`Insufficient stock for ${product.name}. Available: ${availableStock}, Requested: ${requestedQty}`);
         }
       }
 
