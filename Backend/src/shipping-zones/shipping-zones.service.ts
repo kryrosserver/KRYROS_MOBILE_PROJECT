@@ -105,6 +105,7 @@ export class ShippingZonesService implements OnModuleInit {
         country: true,
         state: true,
         city: true,
+        shippingMethods: true,
         _count: {
           select: { shippingMethods: true },
         },

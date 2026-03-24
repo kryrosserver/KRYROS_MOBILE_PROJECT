@@ -27,33 +27,9 @@ export class ShippingService {
 
   async findAll() {
     try {
-      const methods = await this.prisma.shippingMethod.findMany({
+      return await this.prisma.shippingMethod.findMany({
         orderBy: { createdAt: 'desc' },
       });
-
-      // If no methods exist, try to migrate from old settings
-      if (methods.length === 0) {
-        const [feeSetting, thresholdSetting] = await Promise.all([
-          this.prisma.setting.findUnique({ where: { key: 'shipping_fee' } }),
-          this.prisma.setting.findUnique({ where: { key: 'free_shipping_threshold' } }),
-        ]);
-
-        if (feeSetting || thresholdSetting) {
-          const defaultMethod = await this.prisma.shippingMethod.create({
-            data: {
-              name: 'Standard Shipping',
-              description: 'Our standard delivery service',
-              fee: new Prisma.Decimal(feeSetting?.value || '50'),
-              minThreshold: new Prisma.Decimal(thresholdSetting?.value || '5000'),
-              estimatedDays: '3-5 Business Days',
-              isActive: true,
-            }
-          });
-          return [defaultMethod];
-        }
-      }
-
-      return methods;
     } catch (error) {
       console.error('Prisma Error fetching shipping methods:', error);
       throw error;
