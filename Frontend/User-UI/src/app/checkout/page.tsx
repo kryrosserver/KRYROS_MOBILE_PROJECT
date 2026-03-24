@@ -228,21 +228,27 @@ export default function CheckoutPage() {
       const orderData = {
         items: items.map(item => ({
           productId: item.product.id,
-          variantId: item.variant?.id,
+          variantId: item.variant?.id || undefined,
           quantity: item.quantity
         })),
         paymentMethod: paymentMethod === 'whatsapp' ? 'WHATSAPP' : paymentMethod.toUpperCase(),
         notes: "Order via Website Checkout",
-        shippingMethodId: selectedShipping?.id,
+        shippingMethodId: selectedShipping?.id || undefined,
         // Clean up empty strings to undefined to satisfy backend validation
         addressDetails: {
-          ...formData,
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          address: formData.address,
+          zipCode: formData.zipCode || undefined,
+          manual: formData.manual || false,
           countryId: formData.countryId || undefined,
           stateId: formData.stateId || undefined,
           cityId: formData.cityId || undefined,
-          countryName: countries.find(c => c.id === formData.countryId)?.name || "",
-          stateName: formData.manual ? formData.stateName : (states.find(s => s.id === formData.stateId)?.name || ""),
-          cityName: formData.manual ? formData.cityName : (cities.find(c => c.id === formData.cityId)?.name || ""),
+          countryName: countries.find(c => c.id === formData.countryId)?.name || undefined,
+          stateName: formData.manual ? (formData.stateName || undefined) : (states.find(s => s.id === formData.stateId)?.name || undefined),
+          cityName: formData.manual ? (formData.cityName || undefined) : (cities.find(c => c.id === formData.cityId)?.name || undefined),
         }
       };
 
