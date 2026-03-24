@@ -242,18 +242,21 @@ export class OrdersService {
       if (item.variantId) {
         const variant = product.variants.find((v) => v.id === item.variantId);
         if (!variant) throw new NotFoundException(`Variant ${item.variantId} not found for product ${product.id}`);
-        // If it's a wholesaler, we might still use the wholesale price calculated above, 
-        // or the variant price if it's more specific. For now, let's assume wholesale price applies to the base product.
-        // But if not a wholesaler, we definitely use the variant price.
+        
+        // If not a wholesaler, we definitely use the variant price.
         if (!user?.wholesaleAccount || !product.wholesalePrices?.length) {
           price = Number(variant.price);
         }
-        if (variant.stock < item.quantity) {
-          throw new BadRequestException(`Insufficient stock for variant ${variant.name} of product ${product.name}`);
+
+        // Stock Check with Backorder support
+        const canBackorder = product.inventory?.allowBackorder || false;
+        if (variant.stock < item.quantity && !canBackorder) {
+          throw new BadRequestException(`Insufficient stock for variant ${variant.name} of product ${product.name}. Current stock: ${variant.stock}`);
         }
       } else {
-        if (!product.inventory || product.inventory.stock < item.quantity) {
-          throw new BadRequestException(`Insufficient stock for product ${product.name}`);
+        const canBackorder = product.inventory?.allowBackorder || false;
+        if ((!product.inventory || product.inventory.stock < item.quantity) && !canBackorder) {
+          throw new BadRequestException(`Insufficient stock for product ${product.name}. Current stock: ${product.inventory?.stock || 0}`);
         }
       }
 
@@ -374,23 +377,24 @@ export class OrdersService {
             where: { id: update.variantId },
             data: { stock: { decrement: update.quantity } },
           });
-        } else {
+        }
+
+        // Always update base inventory for tracking (if exists)
+        const inventory = await tx.inventory.findUnique({ where: { productId: update.productId } });
+        if (inventory) {
           await tx.inventory.update({
             where: { productId: update.productId },
             data: { stock: { decrement: update.quantity } },
           });
-        }
 
-        // Record stock movement
-        const inventory = await tx.inventory.findUnique({ where: { productId: update.productId } });
-        if (inventory) {
+          // Record stock movement
           await tx.stockMovement.create({
             data: {
               inventoryId: inventory.id,
               type: 'STOCK_OUT',
               quantity: update.quantity,
               reference: order.orderNumber,
-              notes: `Order placement ${order.orderNumber}`,
+              notes: `Order placement ${order.orderNumber}${inventory.stock - update.quantity < 0 ? ' (Backorder)' : ''}`,
             },
           });
         }
