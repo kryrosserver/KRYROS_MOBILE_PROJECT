@@ -42,13 +42,13 @@ const paymentMethods = [
     description: "Pay with Visa, Mastercard, or Verve"
   },
   { 
-    id: "mobile", 
+    id: "mobile_money", 
     name: "Mobile Money", 
     icon: Smartphone,
     description: "Airtel Money, MTN Mobile Money"
   },
   { 
-    id: "bank", 
+    id: "bank_transfer", 
     name: "Bank Transfer", 
     icon: Building,
     description: "Direct bank transfer"
@@ -234,10 +234,12 @@ export default function CheckoutPage() {
         paymentMethod: paymentMethod === 'whatsapp' ? 'WHATSAPP' : paymentMethod.toUpperCase(),
         notes: "Order via Website Checkout",
         shippingMethodId: selectedShipping?.id,
-        // For now, we'll pass the address details directly if the backend supports it,
-        // or we might need to update the backend to handle this.
+        // Clean up empty strings to undefined to satisfy backend validation
         addressDetails: {
           ...formData,
+          countryId: formData.countryId || undefined,
+          stateId: formData.stateId || undefined,
+          cityId: formData.cityId || undefined,
           countryName: countries.find(c => c.id === formData.countryId)?.name || "",
           stateName: formData.manual ? formData.stateName : (states.find(s => s.id === formData.stateId)?.name || ""),
           cityName: formData.manual ? formData.cityName : (cities.find(c => c.id === formData.cityId)?.name || ""),

@@ -282,6 +282,7 @@ export class OrdersService {
             email: addressDetails.email,
             phone: addressDetails.phone,
             street: addressDetails.address,
+            zipCode: addressDetails.zipCode,
             countryId: addressDetails.countryId,
             stateId: addressDetails.stateId,
             cityId: addressDetails.cityId,

@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '@prisma/client';
 
@@ -38,6 +38,10 @@ export class AddressDetailsDto {
   @IsNotEmpty()
   address!: string;
 
+  @IsString()
+  @IsOptional()
+  zipCode?: string;
+
   @IsUUID()
   @IsOptional()
   countryId?: string;
@@ -62,7 +66,7 @@ export class AddressDetailsDto {
   @IsOptional()
   countryName?: string;
 
-  @IsInt()
+  @IsBoolean()
   @IsOptional()
   manual?: boolean;
 }
