@@ -103,38 +103,38 @@ npm run dev
    - Create new Web Service
    - Build Command: `cd Frontend/User-UI && npm install && npm run build`
    - Start Command: `cd Frontend/User-UI && npm run start`
-   - Add Environment Variable:
-     - `NEXT_PUBLIC_API_URL`: Your backend API base (e.g., https://kryrosbackend-d68q.onrender.com/api)
+   - Add Environment Variables:
+     - `NEXT_PUBLIC_API_URL`: Your backend API base (e.g., https://kryrosbackend-hxfp.onrender.com/api)
+     - `NEXT_PUBLIC_FRONTEND_URL`: https://kryrosweb-dr6p.onrender.com
+     - `NEXT_PUBLIC_ADMIN_URL`: https://kryrosadmin.onrender.com
 
 3. **Deploy Admin Panel:**
    - Create new Web Service  
    - Build Command: `cd Frontend/Admi-Panel && npm install && npm run build`
    - Start Command: `cd Frontend/Admi-Panel && npm run start`
-   - Add Environment Variable:
-     - `NEXT_PUBLIC_API_URL`: Your backend API base (e.g., https://kryrosbackend-d68q.onrender.com/api)
+   - Add Environment Variables:
+     - `NEXT_PUBLIC_API_URL`: Your backend API base (e.g., https://kryrosbackend-hxfp.onrender.com/api)
 
 ### Or Use render.yaml
 The `render.yaml` file contains the deployment configuration. Connect your GitHub repo to Render and it will auto-detect the configuration.
 
 ---
 
-## 📄 Environment Variables
+## 🛠️ Recommended Environment Variables (Production)
 
-### Backend (.env)
-```
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-JWT_SECRET=your-super-secret-key
-NODE_ENV=production
-PORT=4000
-FRONTEND_URL=https://kryrosweb.onrender.com
-CORS_ORIGINS=https://kryrosweb.onrender.com,https://kryrosadminpanel-03la.onrender.com
+### Backend
+```env
+FRONTEND_URL=https://kryrosweb-dr6p.onrender.com
+CORS_ORIGINS=https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
+DATABASE_URL=...
+JWT_SECRET=...
 ```
 
-### Frontend (.env)
-```
-NEXT_PUBLIC_API_URL=https://kryrosbackend-d68q.onrender.com/api
-NEXT_PUBLIC_FRONTEND_URL=https://kryrosweb.onrender.com
-NEXT_PUBLIC_ADMIN_URL=https://kryrosadminpanel-03la.onrender.com
+### Frontend (User UI & Admin)
+```env
+NEXT_PUBLIC_API_URL=https://kryrosbackend-hxfp.onrender.com/api
+NEXT_PUBLIC_FRONTEND_URL=https://kryrosweb-dr6p.onrender.com
+NEXT_PUBLIC_ADMIN_URL=https://kryrosadmin.onrender.com
 ```
 
 Tip: copy the provided .env.example files in each app to .env.local or .env.production as needed.

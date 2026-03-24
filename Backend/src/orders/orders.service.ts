@@ -148,6 +148,10 @@ export class OrdersService {
   async create(userId: string | undefined, data: CreateOrderDto) {
     const { items, shippingAddressId: providedShippingAddressId, billingAddressId: providedBillingAddressId, paymentMethod, notes, addressDetails } = data;
     
+    if (!items || items.length === 0) {
+      throw new BadRequestException('Order items are required');
+    }
+
     // Convert string payment method to enum
     const paymentMethodEnum = this.convertToPaymentMethod(paymentMethod);
 
@@ -314,6 +318,8 @@ export class OrdersService {
             cityId: addressDetails.cityId,
             stateName: addressDetails.stateName,
             cityName: addressDetails.cityName,
+            city: addressDetails.cityName, // Legacy field sync
+            state: addressDetails.stateName, // Legacy field sync
             manual: addressDetails.manual || false,
             country: addressDetails.countryName || "Zambia",
             type: 'SHIPPING'
@@ -336,16 +342,20 @@ export class OrdersService {
           status: 'PENDING',
           paymentStatus: 'PENDING',
           paymentMethod: paymentMethodEnum,
-          subtotal,
-          tax,
-          shipping,
-          discount: totalDiscount,
-          total,
+          subtotal: new Prisma.Decimal(subtotal),
+          tax: new Prisma.Decimal(tax),
+          shipping: new Prisma.Decimal(shipping),
+          discount: new Prisma.Decimal(totalDiscount),
+          total: new Prisma.Decimal(total),
           notes,
           shippingAddressId: finalShippingAddressId,
           billingAddressId: finalBillingAddressId,
           items: {
-            create: orderItemsData,
+            create: orderItemsData.map(item => ({
+              ...item,
+              price: new Prisma.Decimal(item.price),
+              total: new Prisma.Decimal(item.total),
+            })),
           },
           logs: {
             create: {

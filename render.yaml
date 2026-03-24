@@ -20,9 +20,9 @@ services:
       - key: NODE_OPTIONS
         value: --max-old-space-size=384
       - key: CORS_ORIGINS
-        value: https://kryrosweb.onrender.com,https://kryrosadminpanel-03la.onrender.com
+        value: https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
       - key: FRONTEND_URL
-        value: https://kryrosweb.onrender.com
+        value: https://kryrosweb-dr6p.onrender.com
 
   - type: web
     name: kryros-user-ui
@@ -33,7 +33,7 @@ services:
     startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://kryrosbackend-d68q.onrender.com/api
+        value: https://kryrosbackend-hxfp.onrender.com/api
       - key: NODE_OPTIONS
         value: --max-old-space-size=384
       - key: NEXT_TELEMETRY_DISABLED
@@ -48,7 +48,7 @@ services:
     startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://kryrosbackend-d68q.onrender.com/api
+        value: https://kryrosbackend-hxfp.onrender.com/api
       - key: NODE_OPTIONS
         value: --max-old-space-size=384
       - key: NEXT_TELEMETRY_DISABLED

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = "https://kryrosbackend-d68q.onrender.com/api";
+const BACKEND_URL = "https://kryrosbackend-hxfp.onrender.com/api";
 
 export async function POST() {
   try {

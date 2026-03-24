@@ -3,7 +3,7 @@ import { ProductCard } from "@/components/home/ProductCard";
 import { ShopContent } from "@/components/shop/ShopContent";
 import { CategoryGrid } from "@/components/shop/CategoryGrid";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-d68q.onrender.com/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-hxfp.onrender.com/api";
 
 async function getCategories() {
   const res = await fetch(`${API_URL}/categories`, { cache: "no-store" });

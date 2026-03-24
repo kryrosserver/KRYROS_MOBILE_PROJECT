@@ -229,7 +229,8 @@ export default function CheckoutPage() {
         items: items.map(item => ({
           productId: item.product.id,
           variantId: item.variant?.id || undefined,
-          quantity: item.quantity
+          quantity: item.quantity,
+          price: Number(item.variant?.price || item.product.salePrice || item.product.price)
         })),
         paymentMethod: paymentMethod === 'whatsapp' ? 'WHATSAPP' : paymentMethod.toUpperCase(),
         notes: "Order via Website Checkout",
@@ -243,10 +244,10 @@ export default function CheckoutPage() {
           address: formData.address,
           zipCode: formData.zipCode || undefined,
           manual: formData.manual || false,
-          countryId: formData.countryId || undefined,
-          stateId: formData.stateId || undefined,
-          cityId: formData.cityId || undefined,
-          countryName: countries.find(c => c.id === formData.countryId)?.name || undefined,
+          countryId: (formData.countryId && formData.countryId.length > 5) ? formData.countryId : undefined,
+          stateId: (formData.stateId && formData.stateId.length > 5) ? formData.stateId : undefined,
+          cityId: (formData.cityId && formData.cityId.length > 5) ? formData.cityId : undefined,
+          countryName: countries.find(c => c.id === formData.countryId)?.name || "Zambia",
           stateName: formData.manual ? (formData.stateName || undefined) : (states.find(s => s.id === formData.stateId)?.name || undefined),
           cityName: formData.manual ? (formData.cityName || undefined) : (cities.find(c => c.id === formData.cityId)?.name || undefined),
         }
@@ -254,6 +255,10 @@ export default function CheckoutPage() {
 
       const res = await ordersApi.create(orderData);
       
+      if (res.error) {
+        throw new Error(res.error);
+      }
+
       if (res.data) {
         if (paymentMethod === 'whatsapp') {
           const convertedTotal = convertPrice(total);

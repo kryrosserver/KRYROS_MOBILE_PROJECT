@@ -59,7 +59,7 @@ async function bootstrap() {
   // Enable CORS for multiple origins
   const corsList = (process.env.CORS_ORIGINS ||
     process.env.FRONTEND_URL ||
-    'http://localhost:3000')
+    'https://kryrosweb-dr6p.onrender.com, https://kryrosadmin.onrender.com, http://localhost:3000, http://localhost:3001')
     .split(',')
     .map((s) => s.trim());
   app.enableCors({
