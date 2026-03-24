@@ -11,10 +11,10 @@ export class ShippingZonesService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.ensureGlobalDefaultZone();
-      await this.migrateOldShippingMethods();
+      await this.syncGlobalMethods();
       await this.ensureFeatureFlag();
     } catch (error) {
-      console.error('Failed to initialize ShippingZonesService. Database tables might be missing.', error.message);
+      console.error('Failed to initialize ShippingZonesService:', error.message);
     }
   }
 
@@ -33,7 +33,7 @@ export class ShippingZonesService implements OnModuleInit {
     }
   }
 
-  private async migrateOldShippingMethods() {
+  private async syncGlobalMethods() {
     const globalZone = await this.prisma.shippingZone.findUnique({
       where: { name: 'Global Default' },
       include: { shippingMethods: true },
@@ -41,21 +41,19 @@ export class ShippingZonesService implements OnModuleInit {
 
     if (!globalZone) return;
 
-    // Only migrate if global zone has no methods yet
-    if (globalZone.shippingMethods.length === 0) {
-      const oldMethods = await this.prisma.shippingMethod.findMany({
-        where: { isActive: true },
-      });
+    const globalMethods = await this.prisma.shippingMethod.findMany();
 
-      for (const old of oldMethods) {
+    for (const gm of globalMethods) {
+      const exists = globalZone.shippingMethods.find(m => m.name === gm.name);
+      if (!exists) {
         await this.prisma.locationShippingMethod.create({
           data: {
             zoneId: globalZone.id,
-            name: old.name,
-            price: old.fee,
-            freeShippingThreshold: old.minThreshold,
-            estimatedDays: old.estimatedDays,
-            status: old.isActive,
+            name: gm.name,
+            price: gm.fee,
+            freeShippingThreshold: gm.minThreshold,
+            estimatedDays: gm.estimatedDays,
+            status: gm.isActive,
           },
         });
       }

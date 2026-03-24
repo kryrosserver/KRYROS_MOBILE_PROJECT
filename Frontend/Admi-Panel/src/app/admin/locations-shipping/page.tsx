@@ -30,14 +30,15 @@ export default function LocationsShippingPage() {
   const [stateForm, setStateForm] = useState({ countryId: "", name: "", code: "", isActive: true });
   const [cityForm, setCityForm] = useState({ stateId: "", name: "", isActive: true });
   const [zoneForm, setZoneForm] = useState({ name: "", countryId: "", stateId: "", cityId: "", priority: 0, isActive: true });
-  const [methodForm, setMethodForm] = useState({ zoneId: "", name: "", price: 0, freeShippingThreshold: 0, estimatedDays: "", status: true });
-  const [globalMethodForm, setGlobalMethodForm] = useState({ name: "", description: "", fee: 0, minThreshold: 0, estimatedDays: "", isActive: true });
+  const [methodForm, setMethodForm] = useState({ zoneId: "", name: "", price: "0", freeShippingThreshold: "0", estimatedDays: "", status: true });
+  const [globalMethodForm, setGlobalMethodForm] = useState({ name: "", description: "", fee: "0", minThreshold: "0", estimatedDays: "", isActive: true });
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const statusRes = await fetch("/api/admin/shipping-zones/status");
-      setIsNewShippingEnabled(await statusRes.json());
+      const isEnabled = await statusRes.json();
+      setIsNewShippingEnabled(!!isEnabled);
 
       let url = `/api/admin/${activeTab}`;
       if (activeTab === "zones") url = `/api/admin/shipping-zones`;
@@ -45,19 +46,33 @@ export default function LocationsShippingPage() {
       
       const res = await fetch(url);
       const json = await res.json();
-      setData(Array.isArray(json) ? json : []);
+      
+      // Handle both array and wrapped object responses
+      let items = [];
+      if (Array.isArray(json)) {
+        items = json;
+      } else if (json && Array.isArray(json.data)) {
+        items = json.data;
+      } else if (json && Array.isArray(json.methods)) {
+        items = json.methods;
+      }
+      
+      setData(items);
 
       // Load dependencies
       if (activeTab === "states" || activeTab === "zones") {
         const cRes = await fetch("/api/admin/countries");
-        setCountries(await cRes.json());
+        const cJson = await cRes.json();
+        setCountries(Array.isArray(cJson) ? cJson : []);
       }
       if (activeTab === "cities" || activeTab === "zones") {
         const sRes = await fetch("/api/admin/states");
-        setStates(await sRes.json());
+        const sJson = await sRes.json();
+        setStates(Array.isArray(sJson) ? sJson : []);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Error loading shipping data:", e);
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -91,7 +106,11 @@ export default function LocationsShippingPage() {
     } else if (activeTab === "zones") {
       setZoneForm(item ? { ...item } : { name: "", countryId: "", stateId: "", cityId: "", priority: 0, isActive: true });
     } else if (activeTab === "global") {
-      setGlobalMethodForm(item ? { ...item, fee: Number(item.fee), minThreshold: Number(item.minThreshold) } : { name: "", description: "", fee: 0, minThreshold: 0, estimatedDays: "", isActive: true });
+      setGlobalMethodForm(item ? { 
+        ...item, 
+        fee: String(item.fee), 
+        minThreshold: String(item.minThreshold) 
+      } : { name: "", description: "", fee: "0", minThreshold: "0", estimatedDays: "", isActive: true });
     }
     setShowModal(true);
   };
@@ -103,10 +122,19 @@ export default function LocationsShippingPage() {
       let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : (activeTab === "global" ? "shipping" : activeTab)}`;
       if (editingItem) url += `/${editingItem.id}`;
       
-      const body = activeTab === "countries" ? countryForm : 
-                   activeTab === "states" ? stateForm : 
-                   activeTab === "cities" ? cityForm : 
-                   activeTab === "zones" ? zoneForm : globalMethodForm;
+      let body: any;
+      if (activeTab === "countries") body = countryForm;
+      else if (activeTab === "states") body = stateForm;
+      else if (activeTab === "cities") body = cityForm;
+      else if (activeTab === "zones") body = zoneForm;
+      else {
+        // Global Method - ensure numbers are sent correctly
+        body = {
+          ...globalMethodForm,
+          fee: parseFloat(globalMethodForm.fee) || 0,
+          minThreshold: parseFloat(globalMethodForm.minThreshold) || 0
+        };
+      }
 
       const res = await fetch(url, {
         method: editingItem ? (activeTab === "global" ? "PUT" : "PATCH") : "POST",
@@ -117,6 +145,9 @@ export default function LocationsShippingPage() {
       if (res.ok) {
         setShowModal(false);
         loadData();
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || err.message || "Failed to save"}`);
       }
     } catch (e) {
       alert("Error saving");
@@ -142,8 +173,8 @@ export default function LocationsShippingPage() {
     setMethodForm({
       zoneId: zone.id,
       name: method?.name || "",
-      price: Number(method?.price || 0),
-      freeShippingThreshold: Number(method?.freeShippingThreshold || 0),
+      price: String(method?.price || 0),
+      freeShippingThreshold: String(method?.freeShippingThreshold || 0),
       estimatedDays: method?.estimatedDays || "",
       status: method ? method.status : true,
     });
@@ -158,15 +189,24 @@ export default function LocationsShippingPage() {
         ? `/api/admin/shipping-zones/methods/${editingMethod.id}` 
         : `/api/admin/shipping-zones/methods`;
       
+      const body = {
+        ...methodForm,
+        price: parseFloat(methodForm.price) || 0,
+        freeShippingThreshold: parseFloat(methodForm.freeShippingThreshold) || 0
+      };
+
       const res = await fetch(url, {
         method: editingMethod ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(methodForm),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
         setShowMethodModal(false);
         loadData();
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || err.message || "Failed to save method"}`);
       }
     } catch (e) {
       alert("Error saving method");
@@ -449,11 +489,11 @@ export default function LocationsShippingPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-bold">Shipping Fee ($)</label>
-                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.fee} onChange={e => setGlobalMethodForm({...globalMethodForm, fee: parseFloat(e.target.value)})} />
+                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.fee} onChange={e => setGlobalMethodForm({...globalMethodForm, fee: e.target.value})} />
                     </div>
                     <div>
                       <label className="text-sm font-bold">Free Over ($)</label>
-                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.minThreshold} onChange={e => setGlobalMethodForm({...globalMethodForm, minThreshold: parseFloat(e.target.value)})} />
+                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.minThreshold} onChange={e => setGlobalMethodForm({...globalMethodForm, minThreshold: e.target.value})} />
                     </div>
                   </div>
                   <div>
@@ -492,11 +532,11 @@ export default function LocationsShippingPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-bold">Price ($)</label>
-                  <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.price} onChange={e => setMethodForm({...methodForm, price: parseFloat(e.target.value)})} />
+                  <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.price} onChange={e => setMethodForm({...methodForm, price: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-bold">Free Threshold ($)</label>
-                  <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.freeShippingThreshold} onChange={e => setMethodForm({...methodForm, freeShippingThreshold: parseFloat(e.target.value)})} />
+                  <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.freeShippingThreshold} onChange={e => setMethodForm({...methodForm, freeShippingThreshold: e.target.value})} />
                 </div>
               </div>
 

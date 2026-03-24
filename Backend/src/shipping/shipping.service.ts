@@ -9,7 +9,7 @@ export class ShippingService {
 
   async create(dto: CreateShippingMethodDto) {
     try {
-      return await this.prisma.shippingMethod.create({
+      const method = await this.prisma.shippingMethod.create({
         data: {
           name: dto.name,
           description: dto.description,
@@ -19,6 +19,30 @@ export class ShippingService {
           isActive: dto.isActive ?? true,
         },
       });
+
+      // Sync with Location-based shipping system
+      try {
+        const globalZone = await this.prisma.shippingZone.findFirst({
+          where: { countryId: null, stateId: null, cityId: null, name: 'Global Default' }
+        });
+        
+        if (globalZone) {
+          await this.prisma.locationShippingMethod.create({
+            data: {
+              zoneId: globalZone.id,
+              name: method.name,
+              price: method.fee,
+              freeShippingThreshold: method.minThreshold,
+              estimatedDays: method.estimatedDays,
+              status: method.isActive
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Failed to sync new global method with location zones', e);
+      }
+
+      return method;
     } catch (error) {
       console.error('Prisma Error creating shipping method:', error);
       throw error;
@@ -52,17 +76,41 @@ export class ShippingService {
   }
 
   async update(id: string, dto: UpdateShippingMethodDto) {
-    await this.findOne(id);
+    const oldMethod = await this.findOne(id);
     
     const updateData: any = { ...dto };
     if (dto.fee !== undefined) updateData.fee = new Prisma.Decimal(dto.fee);
     if (dto.minThreshold !== undefined) updateData.minThreshold = new Prisma.Decimal(dto.minThreshold);
 
     try {
-      return await this.prisma.shippingMethod.update({
+      const updated = await this.prisma.shippingMethod.update({
         where: { id },
         data: updateData,
       });
+
+      // Update sync in location-based system
+      try {
+        const locationMethod = await this.prisma.locationShippingMethod.findFirst({
+          where: { name: oldMethod.name }
+        });
+        
+        if (locationMethod) {
+          await this.prisma.locationShippingMethod.update({
+            where: { id: locationMethod.id },
+            data: {
+              name: updated.name,
+              price: updated.fee,
+              freeShippingThreshold: updated.minThreshold,
+              estimatedDays: updated.estimatedDays,
+              status: updated.isActive
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Failed to sync updated global method with location zones', e);
+      }
+
+      return updated;
     } catch (error) {
       console.error('Prisma Error updating shipping method:', error);
       throw error;
@@ -70,7 +118,17 @@ export class ShippingService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
+    const method = await this.findOne(id);
+    
+    // Remove sync in location-based system
+    try {
+      await this.prisma.locationShippingMethod.deleteMany({
+        where: { name: method.name }
+      });
+    } catch (e) {
+      console.error('Failed to remove synced location method', e);
+    }
+
     return this.prisma.shippingMethod.delete({
       where: { id },
     });
