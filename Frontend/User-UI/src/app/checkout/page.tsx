@@ -297,7 +297,7 @@ export default function CheckoutPage() {
             notes: "Order via Website Checkout"
           });
 
-          const whatsappUrl = `https://wa.me/260966423719?text=${message}`;
+          const whatsappUrl = `https://wa.me/260966423719?text=${encodeURIComponent(message)}`;
           window.open(whatsappUrl, '_blank');
         }
         

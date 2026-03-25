@@ -99,43 +99,43 @@ export function generateWhatsAppMessage(data: {
 }) {
   const format = (val: number) => `${data.currency.symbol}${val.toLocaleString()}`
 
-  let message = `*Hello KRYROS, I just placed an order!*%0A%0A`
+  let message = `*Hello KRYROS, I just placed an order!*\n\n`
   
-  message += `*🆔 ORDER DETAILS*%0A`
-  message += `Order Number: #${data.orderNumber}%0A`
-  message += `Total Amount: ${format(data.total)} (${data.currency.code})%0A%0A`
+  message += `*🆔 ORDER DETAILS*\n`
+  message += `Order Number: #${data.orderNumber}\n`
+  message += `Total Amount: ${format(data.total)} (${data.currency.code})\n\n`
 
-  message += `*👤 CUSTOMER INFO*%0A`
-  message += `Name: ${data.customer.firstName} ${data.customer.lastName}%0A`
-  message += `Phone: ${data.customer.phone}%0A`
-  message += `Email: ${data.customer.email}%0A%0A`
+  message += `*👤 CUSTOMER INFO*\n`
+  message += `Name: ${data.customer.firstName} ${data.customer.lastName}\n`
+  message += `Phone: ${data.customer.phone}\n`
+  message += `Email: ${data.customer.email}\n\n`
 
-  message += `*📍 DELIVERY ADDRESS*%0A`
-  message += `Street: ${data.address.street}%0A`
-  message += `City: ${data.address.city}%0A`
-  message += `Province/State: ${data.address.state}%0A`
-  message += `Country: ${data.address.country}%0A`
-  if (data.address.zipCode) message += `Zip Code: ${data.address.zipCode}%0A`
-  if (data.address.manual) message += `_(Manual Entry)_%0A`
-  message += `%0A`
+  message += `*📍 DELIVERY ADDRESS*\n`
+  message += `Street: ${data.address.street}\n`
+  message += `City: ${data.address.city}\n`
+  message += `Province/State: ${data.address.state}\n`
+  message += `Country: ${data.address.country}\n`
+  if (data.address.zipCode) message += `Zip Code: ${data.address.zipCode}\n`
+  if (data.address.manual) message += `_(Manual Entry)_\n`
+  message += `\n`
 
-  message += `*📦 PRODUCTS ORDERED*%0A`
+  message += `*📦 PRODUCTS ORDERED*\n`
   data.items.forEach((item) => {
-    message += `- ${item.quantity}x ${item.name}${item.variant ? ` (${item.variant})` : ''} @ ${format(item.price)} each%0A`
+    message += `- ${item.quantity}x ${item.name}${item.variant ? ` (${item.variant})` : ''} @ ${format(item.price)} each\n`
   })
-  message += `%0A`
+  message += `\n`
 
-  message += `*💰 BILLING SUMMARY*%0A`
-  message += `Subtotal: ${format(data.subtotal)}%0A`
-  message += `Shipping: ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A`
-  message += `*Total to Pay: ${format(data.total)}*%0A%0A`
+  message += `*💰 BILLING SUMMARY*\n`
+  message += `Subtotal: ${format(data.subtotal)}\n`
+  message += `Shipping: ${data.shipping === 0 ? 'FREE' : format(data.shipping)}\n`
+  message += `*Total to Pay: ${format(data.total)}*\n\n`
 
   if (data.notes) {
-    message += `*📝 Notes:* ${data.notes}%0A%0A`
+    message += `*📝 Notes:* ${data.notes}\n\n`
   }
 
-  message += `*🚚 TRACKING LINK*%0A`
-  message += `https://kryrosweb-dr6p.onrender.com/track-order?id=${data.orderNumber}%26email=${encodeURIComponent(data.customer.email)}%0A%0A`
+  message += `*🚚 TRACKING LINK*\n`
+  message += `https://kryrosweb-dr6p.onrender.com/track-order?id=${data.orderNumber}&email=${encodeURIComponent(data.customer.email)}\n\n`
   
   message += `_Please send me the payment instructions to complete this order. Thank you!_`
 
