@@ -81,6 +81,9 @@ export default function ProductsPage() {
     hasInstallmentOptions: true,
     installmentOptionsText: "Installment Options",
     wholesalePrice: "",
+    isWholesaleOnly: false,
+    unitsPerPack: "1",
+    wholesaleMoq: "1",
     upsellProductId: "",
     isActive: true,
     allowCredit: false,
@@ -115,6 +118,9 @@ export default function ProductsPage() {
     hasInstallmentOptions: true,
     installmentOptionsText: "",
     wholesalePrice: "",
+    isWholesaleOnly: false,
+    unitsPerPack: "1",
+    wholesaleMoq: "1",
     upsellProductId: "",
     allowCredit: false,
     creditMinimum: "",
@@ -359,13 +365,51 @@ export default function ProductsPage() {
                   <p className="text-[10px] text-slate-500 italic">This product will be offered as a bundle with 8% discount on the product details page.</p>
                 </div>
                 
-                <input
-                  type="number"
-                  placeholder="Base Wholesale Price (Optional)"
-                  value={form.wholesalePrice}
-                  onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
-                  className="admin-input w-full"
-                />
+                <div className="flex flex-col gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <label className="flex items-center gap-2 text-sm font-bold text-blue-700">
+                    <input
+                      type="checkbox"
+                      checked={form.isWholesaleOnly}
+                      onChange={(e) => setForm({ ...form, isWholesaleOnly: e.target.checked })}
+                    />
+                    WHolesale Only Product
+                  </label>
+                  <p className="text-[10px] text-blue-600 italic px-6">If checked, this product will be hidden from regular retail customers.</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Units per Pack</label>
+                    <input
+                      type="number"
+                      placeholder="Units per Pack (e.g. 20)"
+                      value={form.unitsPerPack}
+                      onChange={(e) => setForm({ ...form, unitsPerPack: e.target.value })}
+                      className="admin-input w-full"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Min Order Qty (Packs)</label>
+                    <input
+                      type="number"
+                      placeholder="Min Packs (e.g. 5)"
+                      value={form.wholesaleMoq}
+                      onChange={(e) => setForm({ ...form, wholesaleMoq: e.target.value })}
+                      className="admin-input w-full"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-1 mt-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Base Wholesale Price (Per Pack)</label>
+                  <input
+                    type="number"
+                    placeholder="Base Wholesale Price"
+                    value={form.wholesalePrice}
+                    onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
+                    className="admin-input w-full"
+                  />
+                </div>
 
                 <div className="space-y-2 mt-2">
                   <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Wholesale Tiers (Quantity Based)</p>
@@ -623,6 +667,9 @@ export default function ProductsPage() {
                       formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
                       if (form.installmentOptionsText) formData.append("installmentOptionsText", form.installmentOptionsText);
                       if (form.wholesalePrice) formData.append("wholesalePrice", String(Number(form.wholesalePrice)));
+                      formData.append("isWholesaleOnly", String(form.isWholesaleOnly));
+                      formData.append("unitsPerPack", String(Number(form.unitsPerPack || 1)));
+                      formData.append("wholesaleMoq", String(Number(form.wholesaleMoq || 1)));
                       if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
                       formData.append("allowCredit", String(form.allowCredit));
                       if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
@@ -896,6 +943,9 @@ export default function ProductsPage() {
                           hasInstallmentOptions: !!p.hasInstallmentOptions,
                           installmentOptionsText: p.installmentOptionsText || "Installment Options",
                           wholesalePrice: String(p.wholesalePrice ?? ""),
+                          isWholesaleOnly: !!(p as any).isWholesaleOnly,
+                          unitsPerPack: (p as any).unitsPerPack || 1,
+                          wholesaleMoq: (p as any).wholesaleMoq || 1,
                           upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
                           allowCredit: !!p.allowCredit,
                           creditMinimum: String(p.creditMinimum ?? ""),
@@ -1153,6 +1203,45 @@ export default function ProductsPage() {
                       onChange={(e) => setEditForm({ ...editForm, wholesalePrice: e.target.value })}
                       className="admin-input w-full"
                     />
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-4">
+                    <p className="text-sm font-bold text-blue-800 border-b border-blue-200 pb-2">Wholesale & Bulk Pack</p>
+                    <div className="flex flex-col gap-2">
+                      <label className="flex items-center gap-2 text-sm font-bold text-blue-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.isWholesaleOnly}
+                          onChange={(e) => setEditForm({ ...editForm, isWholesaleOnly: e.target.checked })}
+                          className="w-4 h-4 text-blue-500 rounded"
+                        />
+                        Wholesale Only Product
+                      </label>
+                      <p className="text-[10px] text-blue-600 italic px-6">Hidden from regular retail customers.</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Units per Pack</label>
+                        <input
+                          type="number"
+                          placeholder="Units per Pack (e.g. 20)"
+                          value={editForm.unitsPerPack}
+                          onChange={(e) => setEditForm({ ...editForm, unitsPerPack: Number(e.target.value) })}
+                          className="admin-input w-full bg-white"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Min Order Qty (Packs)</label>
+                        <input
+                          type="number"
+                          placeholder="Min Packs (e.g. 5)"
+                          value={editForm.wholesaleMoq}
+                          onChange={(e) => setEditForm({ ...editForm, wholesaleMoq: Number(e.target.value) })}
+                          className="admin-input w-full bg-white"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="pt-4 space-y-3 border-t border-slate-100">
@@ -1434,6 +1523,9 @@ export default function ProductsPage() {
                   if (editForm.discountPercentage) formData.append("discountPercentage", String(Number(editForm.discountPercentage)));
                   if (editForm.stockTotal) formData.append("stockTotal", String(Number(editForm.stockTotal)));
                   if (editForm.stockCurrent) formData.append("stockCurrent", String(Number(editForm.stockCurrent)));
+                  formData.append("isWholesaleOnly", String(editForm.isWholesaleOnly));
+                  formData.append("unitsPerPack", String(Number(editForm.unitsPerPack || 1)));
+                  formData.append("wholesaleMoq", String(Number(editForm.wholesaleMoq || 1)));
                   formData.append("hasFiveYearGuarantee", String(editForm.hasFiveYearGuarantee));
                   if (editForm.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", editForm.fiveYearGuaranteeText);
                   formData.append("hasFreeReturns", String(editForm.hasFreeReturns));

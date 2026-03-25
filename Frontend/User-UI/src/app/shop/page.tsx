@@ -24,6 +24,8 @@ async function getGroupedProducts(featured: boolean, credit: boolean) {
     const url = new URL(`${API_URL}/products/grouped`);
     if (featured) url.searchParams.set("featured", "true");
     if (credit) url.searchParams.set("allowCredit", "true");
+    // Explicitly hide wholesale products from main shop
+    url.searchParams.set("isWholesaleOnly", "false");
     
     const res = await fetch(url.toString(), { 
       next: { revalidate: 600 } // Cache for 10 minutes

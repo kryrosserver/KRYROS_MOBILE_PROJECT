@@ -133,6 +133,21 @@ export class UpdateProductDto {
   reviewCount?: number;
 
   @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  isWholesaleOnly?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  unitsPerPack?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  wholesaleMoq?: number;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)

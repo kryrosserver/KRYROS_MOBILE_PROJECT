@@ -97,6 +97,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : product?.discount;
 
+  const isWholesale = product?.isWholesaleOnly;
+  const unitsPerPack = product?.unitsPerPack || 1;
+  const unitPrice = product?.price / unitsPerPack;
+  const unitPriceInfo = convertPrice(unitPrice);
+
   if (viewMode === "list") {
     return (
       <div 
@@ -115,6 +120,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           {product?.isNew && (
             <span className="absolute left-2 top-2 rounded bg-blue-500 px-2 py-0.5 text-xs font-medium text-white">
               New
+            </span>
+          )}
+          {isWholesale && (
+            <span className="absolute left-2 top-2 rounded bg-indigo-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+              Wholesale
             </span>
           )}
           {discount && (
@@ -166,12 +176,22 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 <span className="text-xl font-bold text-slate-900">
                   {isUSD ? formatPrice(Number(product?.price ?? 0)) : priceInfo.formatted}
                 </span>
+                {isWholesale && unitsPerPack > 1 && (
+                  <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                    Pack of {unitsPerPack}
+                  </span>
+                )}
                 {product?.originalPrice && (
                   <span className="text-sm text-slate-500 line-through">
                     {isUSD ? formatPrice(Number(product.originalPrice)) : originalPriceInfo?.formatted}
                   </span>
                 )}
               </div>
+              {isWholesale && unitsPerPack > 1 && (
+                <span className="text-[10px] text-slate-500 font-medium">
+                  {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} per unit
+                </span>
+              )}
               {!isUSD && (
                 <span className="text-[10px] text-slate-400 font-medium italic">
                   ≈ {formatPrice(Number(product?.price || 0))} USD
@@ -252,6 +272,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               NEW
             </span>
           )}
+          {isWholesale && (
+            <span className="rounded-sm bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+              WHOLESALE
+            </span>
+          )}
           {discount > 0 && (
             <span className="rounded-sm bg-pink-500 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
               {discount}%
@@ -299,16 +324,26 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </Link>
 
         <div className="mt-2 flex flex-col">
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
               {isUSD ? formatPrice(Number(product?.price || 0)) : priceInfo.formatted}
             </span>
+            {isWholesale && unitsPerPack > 1 && (
+              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded">
+                Pack of {unitsPerPack}
+              </span>
+            )}
             {product?.originalPrice && (
               <span className="text-xs text-slate-400 line-through">
                 {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
               </span>
             )}
           </div>
+          {isWholesale && unitsPerPack > 1 && (
+            <span className="text-[10px] text-slate-500 font-medium">
+              {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} / unit
+            </span>
+          )}
           {!isUSD && (
             <span className="text-[10px] text-slate-400 font-medium">
               ≈ {formatPrice(Number(product?.price || 0))} USD

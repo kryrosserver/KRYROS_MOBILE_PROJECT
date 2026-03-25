@@ -227,6 +227,17 @@ export class OrdersService {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new NotFoundException(`Product ${item.productId} not found`);
 
+      // 1. Check if product is wholesale-only
+      if (product.isWholesaleOnly && (!user?.wholesaleAccount || user.wholesaleAccount.status !== 'APPROVED')) {
+        throw new BadRequestException(`Product ${product.name} is for wholesale partners only. Please apply for a wholesale account.`);
+      }
+
+      // 2. Check MOQ (Minimum Order Quantity)
+      const moq = product.wholesaleMoq || 1;
+      if (item.quantity < moq) {
+        throw new BadRequestException(`Minimum order quantity for ${product.name} is ${moq} units/packs.`);
+      }
+
       const originalPrice = Number(product.price);
       let price = originalPrice;
 
@@ -280,7 +291,7 @@ export class OrdersService {
       inventoryUpdates.push({
         productId: item.productId,
         variantId: item.variantId,
-        quantity: item.quantity,
+        quantity: item.quantity * (product.unitsPerPack || 1),
       });
     }
 

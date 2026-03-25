@@ -22,6 +22,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const [quantity, setQuantity] = useState(1)
   const [includeAccessory, setIncludeAccessory] = useState(false)
   const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    if (product) {
+      setQuantity(product.wholesaleMoq || 1)
+    }
+  }, [product])
   const cart = useCart()
   const { selectedCountry, convertPrice, formatLocal } = useCurrency()
   const { user, isAuthenticated } = useAuth()
@@ -154,6 +160,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   const scarcityPercentage = Math.max(0, Math.min(100, ((stockTotal - stockCurrent) / stockTotal) * 100));
 
+  const isWholesale = p.isWholesaleOnly;
+  const unitsPerPack = p.unitsPerPack || 1;
+  const unitPrice = totalPrice / unitsPerPack;
+  const moq = p.wholesaleMoq || 1;
+
   const rawImages = Array.isArray(p.images) ? p.images : [];
   const images = rawImages.length > 0 
     ? rawImages.map((img: any) => ({ url: typeof img === 'string' ? img : (img.url || '/placeholder.jpg') }))
@@ -264,14 +275,31 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
 
             <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
-              <div className="flex items-baseline gap-4">
-                <span className="text-3xl md:text-4xl font-extrabold text-red-600 tracking-tight">
-                  {displayPrice(totalPrice)}
-                </span>
-                {originalPrice && (
-                  <span className="text-lg text-slate-400 line-through font-medium">
-                    {displayPrice(originalPrice)}
+              {isWholesale && (
+                <div className="mb-4 inline-block bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded uppercase tracking-widest shadow-sm">
+                  Wholesale Pack
+                </div>
+              )}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-4">
+                  <span className="text-3xl md:text-4xl font-extrabold text-red-600 tracking-tight">
+                    {displayPrice(totalPrice)}
                   </span>
+                  {originalPrice && (
+                    <span className="text-lg text-slate-400 line-through font-medium">
+                      {displayPrice(originalPrice)}
+                    </span>
+                  )}
+                </div>
+                {isWholesale && unitsPerPack > 1 && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                      Pack of {unitsPerPack}
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium">
+                      ({displayPrice(unitPrice)} per unit)
+                    </span>
+                  </div>
                 )}
               </div>
 
@@ -305,8 +333,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <div className="flex items-center border border-slate-200 bg-white rounded-md h-12 overflow-hidden shadow-sm">
                     <button 
                       className="px-3 hover:bg-slate-50 text-slate-400 h-full disabled:opacity-50"
-                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                      disabled={quantity <= 1}
+                      onClick={() => setQuantity(q => Math.max(moq, q - 1))}
+                      disabled={quantity <= moq}
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -318,19 +346,19 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     />
                     <button 
                       className="px-3 hover:bg-slate-50 text-slate-400 h-full disabled:opacity-50"
-                      onClick={() => setQuantity(q => Math.min(stockCurrent || 1, q + 1))}
-                      disabled={quantity >= (stockCurrent || 1)}
+                      onClick={() => setQuantity(q => Math.min(stockCurrent || 1000, q + 1))}
+                      disabled={quantity >= (stockCurrent || 1000)}
                     >
                       <Plus className="h-4 w-4" />
                     </button>
                   </div>
                   
                   <Button 
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95 disabled:bg-slate-300"
                     onClick={handleAddToCart}
-                    disabled={stockCurrent <= 0}
+                    disabled={isWholesale && wholesaleAccount?.status !== "APPROVED"}
                   >
-                    Add to cart
+                    {isWholesale && wholesaleAccount?.status !== "APPROVED" ? "Wholesale Only" : "Add to cart"}
                   </Button>
                 </div>
 
@@ -348,13 +376,22 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   </div>
                   
                   <Button 
-                    className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95"
+                    className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95 disabled:bg-slate-300"
                     onClick={handleBuyNow}
-                    disabled={stockCurrent <= 0}
+                    disabled={isWholesale && wholesaleAccount?.status !== "APPROVED"}
                   >
-                    Buy Now
+                    {isWholesale && wholesaleAccount?.status !== "APPROVED" ? "Account Required" : "Buy Now"}
                   </Button>
                 </div>
+                
+                {isWholesale && (!isAuthenticated || wholesaleAccount?.status !== "APPROVED") && (
+                  <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg flex gap-3 items-start">
+                    <Info className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-indigo-800 font-medium">
+                      This is a wholesale-only product. You must be an <Link href="/wholesale" className="underline font-bold">Approved Partner</Link> to purchase bulk packs.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {accessory && (

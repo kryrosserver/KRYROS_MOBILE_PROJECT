@@ -181,6 +181,10 @@ model Product {
   shortDescription  String?
   price             Decimal   @db.Decimal(10, 2)
   salePrice         Decimal?  @db.Decimal(10, 2)
+  // Wholesale Logic
+  isWholesaleOnly   Boolean   @default(false)
+  unitsPerPack      Int       @default(1)
+  wholesaleMoq      Int       @default(1)
   wholesalePrice    Decimal?  @db.Decimal(10, 2)
   sku               String    @unique
   barcode           String?

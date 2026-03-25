@@ -128,6 +128,21 @@ export class CreateProductDto {
   @Type(() => Number)
   reviewCount?: number;
 
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  isWholesaleOnly?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  unitsPerPack?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  wholesaleMoq?: number;
+
   @IsNumber()
   @IsOptional()
   @Min(0)
