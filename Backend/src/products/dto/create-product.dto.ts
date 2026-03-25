@@ -116,11 +116,6 @@ export class CreateProductDto {
   @IsOptional()
   installmentOptionsText?: string;
 
-  @IsBoolean()
-  @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
-  hasInstallmentOptions?: boolean;
-
   @IsNumber()
   @IsOptional()
   @Min(0)
