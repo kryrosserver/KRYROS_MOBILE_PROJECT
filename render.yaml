@@ -20,9 +20,9 @@ services:
       - key: NODE_OPTIONS
         value: --max-old-space-size=384
       - key: CORS_ORIGINS
-        value: https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
+        value: https://kryros.com,https://www.kryros.com,https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
       - key: FRONTEND_URL
-        value: https://kryrosweb-dr6p.onrender.com
+        value: https://kryros.com
 
   - type: web
     name: kryros-user-ui

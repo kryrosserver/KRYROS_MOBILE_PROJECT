@@ -105,7 +105,7 @@ npm run dev
    - Start Command: `cd Frontend/User-UI && npm run start`
    - Add Environment Variables:
      - `NEXT_PUBLIC_API_URL`: Your backend API base (e.g., https://kryrosbackend-hxfp.onrender.com/api)
-     - `NEXT_PUBLIC_FRONTEND_URL`: https://kryrosweb-dr6p.onrender.com
+     - `NEXT_PUBLIC_FRONTEND_URL`: https://kryros.com
      - `NEXT_PUBLIC_ADMIN_URL`: https://kryrosadmin.onrender.com
 
 3. **Deploy Admin Panel:**
@@ -124,8 +124,8 @@ The `render.yaml` file contains the deployment configuration. Connect your GitHu
 
 ### Backend
 ```env
-FRONTEND_URL=https://kryrosweb-dr6p.onrender.com
-CORS_ORIGINS=https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
+FRONTEND_URL=https://kryros.com
+CORS_ORIGINS=https://kryros.com,https://www.kryros.com,https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
 DATABASE_URL=...
 JWT_SECRET=...
 ```
@@ -133,7 +133,7 @@ JWT_SECRET=...
 ### Frontend (User UI & Admin)
 ```env
 NEXT_PUBLIC_API_URL=https://kryrosbackend-hxfp.onrender.com/api
-NEXT_PUBLIC_FRONTEND_URL=https://kryrosweb-dr6p.onrender.com
+NEXT_PUBLIC_FRONTEND_URL=https://kryros.com
 NEXT_PUBLIC_ADMIN_URL=https://kryrosadmin.onrender.com
 ```
 
