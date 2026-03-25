@@ -771,6 +771,54 @@ model CMSSection {
   @@map("cms_sections")
 }
 
+// ==================== FOOTER MANAGEMENT ====================
+
+model FooterSection {
+  id        String       @id @default(uuid())
+  title     String       // e.g., "Shop", "Services", "Support", "Company"
+  order     Int          @default(0)
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  
+  links     FooterLink[]
+
+  @@map("footer_sections")
+}
+
+model FooterLink {
+  id          String       @id @default(uuid())
+  sectionId   String
+  label       String
+  href        String
+  order       Int          @default(0)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  section     FooterSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@map("footer_links")
+}
+
+model FooterConfig {
+  id                String   @id @default(uuid())
+  logo              String?
+  description       String?  @db.Text
+  contactPhone      String?
+  contactEmail      String?
+  contactAddress    String?
+  newsletterTitle   String? @default("Subscribe to our Newsletter")
+  newsletterSubtitle String? @db.Text
+  copyrightText     String?
+  socialLinks       Json?    // Array of { platform: string, url: string }
+  paymentMethods    Json?    // Array of { name: string }
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("footer_config")
+}
+
 // ==================== NOTIFICATIONS ====================
 
 model Notification {

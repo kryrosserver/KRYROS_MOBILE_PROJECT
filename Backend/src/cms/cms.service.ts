@@ -4,6 +4,11 @@ import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
+import { CreateFooterSectionDto } from './dto/create-footer-section.dto';
+import { UpdateFooterSectionDto } from './dto/update-footer-section.dto';
+import { CreateFooterLinkDto } from './dto/create-footer-link.dto';
+import { UpdateFooterLinkDto } from './dto/update-footer-link.dto';
+import { UpdateFooterConfigDto } from './dto/update-footer-config.dto';
 
 @Injectable()
 export class CMSService {
@@ -112,5 +117,245 @@ export class CMSService {
     }
 
     return { success: true };
+  }
+
+  // ==================== FOOTER MANAGEMENT ====================
+
+  async getFooter() {
+    const sections = await this.prisma.footerSection.findMany({
+      where: { isActive: true },
+      include: {
+        links: {
+          where: { isActive: true },
+          orderBy: { order: 'asc' },
+        },
+      },
+      orderBy: { order: 'asc' },
+    });
+
+    const config = await this.prisma.footerConfig.findFirst();
+
+    return {
+      sections,
+      config,
+    };
+  }
+
+  // Footer Sections
+  async listFooterSections() {
+    return this.prisma.footerSection.findMany({
+      include: {
+        links: {
+          orderBy: { order: 'asc' },
+        },
+      },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async createFooterSection(data: CreateFooterSectionDto) {
+    return this.prisma.footerSection.create({
+      data,
+      include: {
+        links: true,
+      },
+    });
+  }
+
+  async updateFooterSection(id: string, data: UpdateFooterSectionDto) {
+    return this.prisma.footerSection.update({
+      where: { id },
+      data,
+      include: {
+        links: true,
+      },
+    });
+  }
+
+  async deleteFooterSection(id: string) {
+    return this.prisma.footerSection.delete({
+      where: { id },
+    });
+  }
+
+  // Footer Links
+  async createFooterLink(data: CreateFooterLinkDto) {
+    return this.prisma.footerLink.create({ data });
+  }
+
+  async updateFooterLink(id: string, data: UpdateFooterLinkDto) {
+    return this.prisma.footerLink.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deleteFooterLink(id: string) {
+    return this.prisma.footerLink.delete({
+      where: { id },
+    });
+  }
+
+  // Footer Config
+  async getFooterConfig() {
+    return this.prisma.footerConfig.findFirst();
+  }
+
+  async updateFooterConfig(data: UpdateFooterConfigDto) {
+    const existing = await this.prisma.footerConfig.findFirst();
+
+    if (existing) {
+      return this.prisma.footerConfig.update({
+        where: { id: existing.id },
+        data,
+      });
+    } else {
+      return this.prisma.footerConfig.create({ data: data as any });
+    }
+  }
+
+  async seedFooter() {
+    // Check if footer already exists
+    const existingSection = await this.prisma.footerSection.findFirst();
+    if (existingSection) {
+      return { success: true, message: 'Footer already seeded' };
+    }
+
+    // Create default footer sections with links
+    const shopSection = await this.prisma.footerSection.create({
+      data: {
+        title: 'Shop',
+        order: 1,
+        isActive: true,
+      },
+    });
+
+    const shopLinks = [
+      { label: 'Smartphones', href: '/shop?category=smartphones' },
+      { label: 'Laptops', href: '/shop?category=laptops' },
+      { label: 'Accessories', href: '/shop?category=accessories' },
+      { label: 'Wearables', href: '/shop?category=wearables' },
+      { label: 'Software', href: '/software' },
+    ];
+
+    for (let i = 0; i < shopLinks.length; i++) {
+      await this.prisma.footerLink.create({
+        data: {
+          sectionId: shopSection.id,
+          label: shopLinks[i].label,
+          href: shopLinks[i].href,
+          order: i,
+          isActive: true,
+        },
+      });
+    }
+
+    const servicesSection = await this.prisma.footerSection.create({
+      data: {
+        title: 'Services',
+        order: 2,
+        isActive: true,
+      },
+    });
+
+    const serviceLinks = [
+      { label: 'Phone Repairs', href: '/services?type=repairs' },
+      { label: 'Laptop Repairs', href: '/services?type=repairs' },
+      { label: 'Installation', href: '/services?type=installation' },
+      { label: 'Tech Support', href: '/services?type=support' },
+      { label: 'Consulting', href: '/services?type=consulting' },
+    ];
+
+    for (let i = 0; i < serviceLinks.length; i++) {
+      await this.prisma.footerLink.create({
+        data: {
+          sectionId: servicesSection.id,
+          label: serviceLinks[i].label,
+          href: serviceLinks[i].href,
+          order: i,
+          isActive: true,
+        },
+      });
+    }
+
+    const supportSection = await this.prisma.footerSection.create({
+      data: {
+        title: 'Support',
+        order: 3,
+        isActive: true,
+      },
+    });
+
+    const supportLinks = [
+      { label: 'Contact Us', href: '/contact' },
+      { label: 'FAQs', href: '/faq' },
+      { label: 'Shipping Info', href: '/shipping' },
+      { label: 'Returns', href: '/returns' },
+      { label: 'Track Order', href: '/track-order' },
+    ];
+
+    for (let i = 0; i < supportLinks.length; i++) {
+      await this.prisma.footerLink.create({
+        data: {
+          sectionId: supportSection.id,
+          label: supportLinks[i].label,
+          href: supportLinks[i].href,
+          order: i,
+          isActive: true,
+        },
+      });
+    }
+
+    const companySection = await this.prisma.footerSection.create({
+      data: {
+        title: 'Company',
+        order: 4,
+        isActive: true,
+      },
+    });
+
+    const companyLinks = [
+      { label: 'About Us', href: '/about' },
+      { label: 'Careers', href: '/careers' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms', href: '/terms' },
+    ];
+
+    for (let i = 0; i < companyLinks.length; i++) {
+      await this.prisma.footerLink.create({
+        data: {
+          sectionId: companySection.id,
+          label: companyLinks[i].label,
+          href: companyLinks[i].href,
+          order: i,
+          isActive: true,
+        },
+      });
+    }
+
+    // Create footer config
+    await this.prisma.footerConfig.create({
+      data: {
+        description:
+          'Your trusted source for phones, electronics, accessories, software, and technology services in Zambia and beyond.',
+        contactPhone: '+260 966 423 719',
+        contactEmail: 'kryrosmobile@gmail.com',
+        contactAddress: 'Lusaka, Zambia',
+        newsletterTitle: 'Subscribe to our Newsletter',
+        newsletterSubtitle: 'Get the latest deals and updates directly to your inbox',
+        copyrightText: '© {year} KRYROS MOBILE TECH LIMITED. All rights reserved.',
+        socialLinks: [
+          { platform: 'facebook', url: '#' },
+          { platform: 'twitter', url: '#' },
+          { platform: 'instagram', url: '#' },
+          { platform: 'linkedin', url: '#' },
+          { platform: 'youtube', url: '#' },
+        ],
+        paymentMethods: [{ name: 'Visa' }, { name: 'Mastercard' }, { name: 'M-Pesa' }],
+      } as any,
+    });
+
+    return { success: true, message: 'Footer seeded successfully' };
   }
 }

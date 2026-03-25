@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingBag, ShoppingCart, User, Search } from "lucide-react";
+import { Home, ShoppingBag, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/providers/CartProvider";
 
 export function MobileBottomNav() {
@@ -15,7 +15,6 @@ export function MobileBottomNav() {
     { label: "Store", icon: ShoppingBag, href: "/shop" },
     { label: "Cart", icon: ShoppingCart, href: "/cart", badge: cartCount },
     { label: "Account", icon: User, href: "/profile" },
-    { label: "Search", icon: Search, href: "/search" },
   ];
 
   return (

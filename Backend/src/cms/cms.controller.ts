@@ -7,6 +7,11 @@ import { UpdateBannerDto } from './dto/update-banner.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
+import { CreateFooterSectionDto } from './dto/create-footer-section.dto';
+import { UpdateFooterSectionDto } from './dto/update-footer-section.dto';
+import { CreateFooterLinkDto } from './dto/create-footer-link.dto';
+import { UpdateFooterLinkDto } from './dto/update-footer-link.dto';
+import { UpdateFooterConfigDto } from './dto/update-footer-config.dto';
 
 @ApiTags('CMS')
 @Controller('cms')
@@ -104,5 +109,95 @@ export class CMSController {
   @ApiOperation({ summary: 'Get CMS page by slug' })
   getPage(@Param('slug') slug: string) {
     return this.cmsService.getPage(slug);
+  }
+
+  // ==================== FOOTER MANAGEMENT ====================
+
+  @Get('footer')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get footer data' })
+  getFooter() {
+    return this.cmsService.getFooter();
+  }
+
+  // Footer Sections
+  @Get('footer/sections/manage')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all footer sections' })
+  listFooterSections() {
+    return this.cmsService.listFooterSections();
+  }
+
+  @Post('footer/sections')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create footer section' })
+  createFooterSection(@Body() data: CreateFooterSectionDto) {
+    return this.cmsService.createFooterSection(data);
+  }
+
+  @Put('footer/sections/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update footer section' })
+  updateFooterSection(@Param('id') id: string, @Body() data: UpdateFooterSectionDto) {
+    return this.cmsService.updateFooterSection(id, data);
+  }
+
+  @Delete('footer/sections/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete footer section' })
+  deleteFooterSection(@Param('id') id: string) {
+    return this.cmsService.deleteFooterSection(id);
+  }
+
+  // Footer Links
+  @Post('footer/links')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create footer link' })
+  createFooterLink(@Body() data: CreateFooterLinkDto) {
+    return this.cmsService.createFooterLink(data);
+  }
+
+  @Put('footer/links/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update footer link' })
+  updateFooterLink(@Param('id') id: string, @Body() data: UpdateFooterLinkDto) {
+    return this.cmsService.updateFooterLink(id, data);
+  }
+
+  @Delete('footer/links/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete footer link' })
+  deleteFooterLink(@Param('id') id: string) {
+    return this.cmsService.deleteFooterLink(id);
+  }
+
+  // Footer Config
+  @Get('footer/config')
+  @ApiOperation({ summary: 'Get footer config' })
+  getFooterConfig() {
+    return this.cmsService.getFooterConfig();
+  }
+
+  @Put('footer/config')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update footer config' })
+  updateFooterConfig(@Body() data: UpdateFooterConfigDto) {
+    return this.cmsService.updateFooterConfig(data);
+  }
+
+  @Post('footer/seed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed default footer data (admin)' })
+  seedFooter() {
+    return this.cmsService.seedFooter();
   }
 }

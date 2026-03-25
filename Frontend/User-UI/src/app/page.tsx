@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Flashlight, Star, Heart, ShoppingCart, ArrowRight, Clock, Tag, Zap, Shield, CreditCard, Smartphone, Laptop, Tablet, Headphones, Watch, Code2, Music, Gamepad2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CreditSection } from '@/components/home/CreditSection'
-import { BlogSection } from '@/components/home/BlogSection'
 import ComingSoon from '@/components/common/ComingSoon'
 import { Input } from '@/components/ui/input'
 import { ProductCard } from '@/components/home/ProductCard'
@@ -634,7 +633,6 @@ export default function HomePage() {
       <CreditSection />
       <ServicesSection />
       <TestimonialsSection sections={data?.sections || []} />
-      <BlogSection />
       <NewsletterSection />
     </div>
   )
