@@ -37,7 +37,7 @@ export default function OrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/internal/admin/orders", { cache: "no-store" });
+      const res = await fetch("/api/admin/orders", { cache: "no-store" });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || "Failed to load orders");
       const items = Array.isArray(body) ? body : body?.data || [];
@@ -170,7 +170,7 @@ export default function OrdersPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link 
-                      href={`/orders/${o.id}`}
+                      href={`/admin/orders/${o.id}`}
                       className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm group-hover:shadow-md"
                     >
                       <ChevronRight className="h-4 w-4" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/utils";
 import { 
   ArrowLeft, 
@@ -12,7 +12,9 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  FileText,
+  History
 } from "lucide-react";
 import Link from "next/link";
 
@@ -25,6 +27,13 @@ type OrderItem = {
     name: string;
     images?: { url: string }[];
   };
+};
+
+type OrderLog = {
+  id: string;
+  status: string;
+  notes: string;
+  createdAt: string;
 };
 
 type Order = {
@@ -52,10 +61,11 @@ type Order = {
     manual: boolean;
   };
   items: OrderItem[];
+  logs?: OrderLog[];
 };
 
-export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -185,15 +195,49 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 <span className="font-medium">{formatPrice(order.shipping)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Tax (16%)</span>
+                <span className="text-slate-500">Tax</span>
                 <span className="font-medium">{formatPrice(order.tax)}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold text-slate-900 pt-2">
+              <div className="flex justify-between text-lg font-bold text-slate-900 pt-2 border-t border-slate-200 mt-2">
                 <span>Total</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>
+
+          {/* Order Notes */}
+          <div className="admin-card p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-slate-400" /> Order Notes
+            </h2>
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm text-slate-600 italic">
+              {order.notes || "No notes provided for this order."}
+            </div>
+          </div>
+
+          {/* Log History */}
+          {order.logs && order.logs.length > 0 && (
+            <div className="admin-card p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <History className="h-5 w-5 text-slate-400" /> Status History
+              </h2>
+              <div className="space-y-4">
+                {order.logs.map((log) => (
+                  <div key={log.id} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="h-2 w-2 rounded-full bg-blue-500 mt-2"></div>
+                      <div className="flex-1 w-px bg-slate-200 my-1"></div>
+                    </div>
+                    <div className="flex-1 pb-4">
+                      <p className="text-sm font-bold text-slate-900">{log.status}</p>
+                      <p className="text-xs text-slate-500 mb-1">{new Date(log.createdAt).toLocaleString()}</p>
+                      {log.notes && <p className="text-sm text-slate-600">{log.notes}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
