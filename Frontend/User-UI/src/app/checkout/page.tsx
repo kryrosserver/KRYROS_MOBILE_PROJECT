@@ -275,9 +275,10 @@ export default function CheckoutPage() {
             },
             address: {
               street: formData.address,
-              city: orderData.addressDetails.cityName,
-              state: orderData.addressDetails.stateName,
-              country: orderData.addressDetails.countryName,
+              city: orderData.addressDetails.cityName || "",
+              state: orderData.addressDetails.stateName || "",
+              country: orderData.addressDetails.countryName || "",
+              zipCode: formData.zipCode,
               manual: formData.manual
             },
             items: items.map(item => ({
@@ -288,11 +289,12 @@ export default function CheckoutPage() {
             })),
             subtotal: convertedSubtotal.amount,
             shipping: convertedShipping.amount,
-            total: convertedTotal.amount,
+            total: convertedTotal.amount + (convertedSubtotal.amount * 0.16),
             currency: {
               code: selectedCountry?.currencyCode || "USD",
               symbol: selectedCountry?.currencySymbol || "$"
-            }
+            },
+            notes: "Order via Website Checkout"
           });
 
           const whatsappUrl = `https://wa.me/260966423719?text=${message}`;

@@ -87,6 +87,7 @@ export function generateWhatsAppMessage(data: {
     city: string
     state: string
     country: string
+    zipCode?: string
     manual?: boolean
   }
   items: Array<{ name: string; quantity: number; price: number; variant?: string }>
@@ -94,26 +95,49 @@ export function generateWhatsAppMessage(data: {
   shipping: number
   total: number
   currency: { code: string; symbol: string }
+  notes?: string
 }) {
-  const format = (val: number) => `${data.currency.symbol} ${val.toLocaleString()}`
+  const format = (val: number) => `${data.currency.symbol}${val.toLocaleString()}`
 
-  let message = `*Hello KRYROS, here is my order:*%0A%0A`
-  message += `*🆔 Order:* #${data.orderNumber}%0A`
-  message += `*👤 Customer:* ${data.customer.firstName} ${data.customer.lastName} (${data.customer.phone})%0A`
-  message += `*📍 Delivery:* ${data.address.street}, ${data.address.city}, ${data.address.state}, ${data.address.country}${data.address.manual ? ' (Manual Input)' : ''}%0A%0A`
+  let message = `*Hello KRYROS, I just placed an order!*%0A%0A`
+  
+  message += `*🆔 ORDER DETAILS*%0A`
+  message += `Order Number: #${data.orderNumber}%0A`
+  message += `Total Amount: ${format(data.total)} (${data.currency.code})%0A%0A`
 
-  message += `*📦 Products:*%0A`
+  message += `*👤 CUSTOMER INFO*%0A`
+  message += `Name: ${data.customer.firstName} ${data.customer.lastName}%0A`
+  message += `Phone: ${data.customer.phone}%0A`
+  message += `Email: ${data.customer.email}%0A%0A`
+
+  message += `*📍 DELIVERY ADDRESS*%0A`
+  message += `Street: ${data.address.street}%0A`
+  message += `City: ${data.address.city}%0A`
+  message += `Province/State: ${data.address.state}%0A`
+  message += `Country: ${data.address.country}%0A`
+  if (data.address.zipCode) message += `Zip Code: ${data.address.zipCode}%0A`
+  if (data.address.manual) message += `_(Manual Entry)_%0A`
+  message += `%0A`
+
+  message += `*📦 PRODUCTS ORDERED*%0A`
   data.items.forEach((item) => {
-    message += `- ${item.quantity}x ${item.name}${item.variant ? ` (${item.variant})` : ''} - ${format(item.price * item.quantity)}%0A`
+    message += `- ${item.quantity}x ${item.name}${item.variant ? ` (${item.variant})` : ''} @ ${format(item.price)} each%0A`
   })
+  message += `%0A`
 
-  message += `%0A*🚚 Shipping:* ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A%0A`
-  message += `*💰 Totals:*%0A`
-  message += `- Subtotal: ${format(data.subtotal)}%0A`
-  message += `- Shipping: ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A`
-  message += `*🔥 TOTAL TO PAY: ${format(data.total)} (${data.currency.code})*%0A%0A`
-  message += `*🚚 Track Your Order:* https://kryrosweb-dr6p.onrender.com/track-order?id=${data.orderNumber}%26email=${encodeURIComponent(data.customer.email)}%0A%0A`
-  message += `_I would like to receive payment details to complete my purchase in ${data.currency.code}._`
+  message += `*💰 BILLING SUMMARY*%0A`
+  message += `Subtotal: ${format(data.subtotal)}%0A`
+  message += `Shipping: ${data.shipping === 0 ? 'FREE' : format(data.shipping)}%0A`
+  message += `*Total to Pay: ${format(data.total)}*%0A%0A`
+
+  if (data.notes) {
+    message += `*📝 Notes:* ${data.notes}%0A%0A`
+  }
+
+  message += `*🚚 TRACKING LINK*%0A`
+  message += `https://kryrosweb-dr6p.onrender.com/track-order?id=${data.orderNumber}%26email=${encodeURIComponent(data.customer.email)}%0A%0A`
+  
+  message += `_Please send me the payment instructions to complete this order. Thank you!_`
 
   return message
 }
