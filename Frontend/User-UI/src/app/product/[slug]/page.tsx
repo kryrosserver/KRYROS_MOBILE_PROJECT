@@ -42,14 +42,18 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         setError(null)
         
         // Try slug first
-        let res = await fetch(`${API_URL}/products/slug/${params.slug}`, { cache: 'no-store' })
+        let res = await fetch(`${API_URL}/products/slug/${params.slug}`, { 
+          next: { revalidate: 600 } // Cache for 10 minutes
+        })
         let data = null
         
         if (res.ok) {
           data = await res.json()
         } else {
           // Fallback: treat slug as id
-          res = await fetch(`${API_URL}/products/${params.slug}`, { cache: 'no-store' })
+          res = await fetch(`${API_URL}/products/${params.slug}`, { 
+            next: { revalidate: 600 } // Cache for 10 minutes
+          })
           if (res.ok) {
             data = await res.json()
           }

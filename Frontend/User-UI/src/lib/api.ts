@@ -18,9 +18,19 @@ async function fetchApi<T>(
   };
 
   try {
+    // Determine revalidation time based on endpoint
+    let revalidate: number | false = 60; // Default 1 minute
+    
+    if (endpoint.includes('/categories') || endpoint.includes('/cms/sections') || endpoint.includes('/settings')) {
+      revalidate = 3600; // 1 hour for relatively static data
+    } else if (endpoint.includes('/products')) {
+      revalidate = 600; // 10 minutes for products
+    }
+
     const response = await fetch(`${API_URL}${endpoint}`, {
       cache: options.cache ?? 'no-store',
       ...options,
+      next: (options as any).next || (options.method === 'GET' || !options.method ? { revalidate } : undefined),
       headers,
     });
 

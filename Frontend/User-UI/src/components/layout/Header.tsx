@@ -226,6 +226,7 @@ export function Header() {
           <nav className="hidden items-center gap-1 lg:flex">
             <Link
               href="/"
+              prefetch={true}
               className="rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
             >
               Home
@@ -264,6 +265,7 @@ export function Header() {
                               <li key={brand.id}>
                                 <Link
                                   href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
+                                  prefetch={true}
                                   onClick={() => setMegaMenuOpen(false)}
                                   className="text-sm text-foreground transition-colors hover:text-kryros-green capitalize"
                                 >
@@ -276,6 +278,7 @@ export function Header() {
                               <li>
                                 <Link
                                   href={`/shop?category=${cat.slug}`}
+                                  prefetch={true}
                                   onClick={() => setMegaMenuOpen(false)}
                                   className="text-sm text-muted-foreground italic hover:text-kryros-green"
                                 >
@@ -311,12 +314,14 @@ export function Header() {
             </Link>
             <Link
               href="/credit"
+              prefetch={true}
               className="rounded-md px-3 py-2 text-sm font-medium text-kryros-green transition-colors hover:bg-kryros-green/10"
             >
               Credit Plans
             </Link>
             <Link
               href="/wholesale"
+              prefetch={true}
               className="rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
             >
               Wholesale

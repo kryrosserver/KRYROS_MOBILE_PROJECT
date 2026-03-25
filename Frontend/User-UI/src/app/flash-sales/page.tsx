@@ -2,7 +2,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.o
 import { ProductCard } from '@/components/home/ProductCard'
 
 async function getFlashSales() {
-  const res = await fetch(`${API_URL}/products/flash-sales`, { cache: 'no-store' })
+  const res = await fetch(`${API_URL}/products/flash-sales`, { 
+    next: { revalidate: 60 } // Revalidate every minute
+  })
   if (!res.ok) return []
   return res.json()
 }

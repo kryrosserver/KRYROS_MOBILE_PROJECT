@@ -57,7 +57,9 @@ export default function ServicesPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'}/services`, { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'}/services`, { 
+      next: { revalidate: 3600 } // Revalidate every hour
+    })
       .then(r => r.json())
       .then(d => { if (active) setItems(Array.isArray(d) ? d : []); })
       .catch(() => active && setItems([]))
