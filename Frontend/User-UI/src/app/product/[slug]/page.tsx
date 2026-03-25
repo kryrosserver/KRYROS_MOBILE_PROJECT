@@ -7,6 +7,7 @@ import { useCurrency } from '@/providers/CurrencyProvider'
 import { useAuth } from '@/providers/AuthProvider'
 import { wholesaleApi } from '@/lib/api'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info } from 'lucide-react'
 

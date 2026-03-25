@@ -732,6 +732,9 @@ export default function ProductsPage() {
                         hasInstallmentOptions: true,
                         installmentOptionsText: "Installment Options",
                         wholesalePrice: "",
+                        isWholesaleOnly: false,
+                        unitsPerPack: "1",
+                        wholesaleMoq: "1",
                         upsellProductId: "",
                         isActive: true,
                         allowCredit: false,
@@ -741,7 +744,7 @@ export default function ProductsPage() {
                         warrantyInfo: "",
                         images: [],
                         specifications: [],
-                        wholesaleTiers: [],
+                        wholesaleTiers: [] as { minQuantity: number; price: number }[],
                       });
                       setFiles([]);
                       await load();
