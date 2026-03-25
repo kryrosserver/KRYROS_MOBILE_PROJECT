@@ -6,28 +6,48 @@ import { CategoryGrid } from "@/components/shop/CategoryGrid";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-hxfp.onrender.com/api";
 
 async function getCategories() {
-  const res = await fetch(`${API_URL}/categories`, { cache: "no-store" });
-  if (!res.ok) return [];
-  const data = await res.json();
-  // Handle both direct array and wrapped { data: [] } formats
-  return Array.isArray(data) ? data : (data.data || []);
+  try {
+    const res = await fetch(`${API_URL}/categories`, { 
+      next: { revalidate: 3600 } // Cache for 1 hour
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.data || []);
+  } catch (e) {
+    console.error("Fetch error:", e);
+    return [];
+  }
 }
 
 async function getGroupedProducts(featured: boolean, credit: boolean) {
-  const url = new URL(`${API_URL}/products/grouped`);
-  if (featured) url.searchParams.set("featured", "true");
-  if (credit) url.searchParams.set("allowCredit", "true");
-  
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  if (!res.ok) return [];
-  return res.json();
+  try {
+    const url = new URL(`${API_URL}/products/grouped`);
+    if (featured) url.searchParams.set("featured", "true");
+    if (credit) url.searchParams.set("allowCredit", "true");
+    
+    const res = await fetch(url.toString(), { 
+      next: { revalidate: 600 } // Cache for 10 minutes
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch (e) {
+    console.error("Fetch error:", e);
+    return [];
+  }
 }
 
 async function getCmsSections() {
-  const res = await fetch(`${API_URL}/cms/sections`, { cache: "no-store" });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.data || []);
+  try {
+    const res = await fetch(`${API_URL}/cms/sections`, { 
+      next: { revalidate: 3600 } // Cache for 1 hour
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.data || []);
+  } catch (e) {
+    console.error("Fetch error:", e);
+    return [];
+  }
 }
 
 export default async function ShopPage({ searchParams }: { searchParams?: { [key: string]: string } }) {
