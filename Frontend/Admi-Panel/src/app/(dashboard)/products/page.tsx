@@ -947,8 +947,8 @@ export default function ProductsPage() {
                           installmentOptionsText: p.installmentOptionsText || "Installment Options",
                           wholesalePrice: String(p.wholesalePrice ?? ""),
                           isWholesaleOnly: !!(p as any).isWholesaleOnly,
-                          unitsPerPack: (p as any).unitsPerPack || 1,
-                          wholesaleMoq: (p as any).wholesaleMoq || 1,
+                          unitsPerPack: String((p as any).unitsPerPack || 1),
+                          wholesaleMoq: String((p as any).wholesaleMoq || 1),
                           upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
                           allowCredit: !!p.allowCredit,
                           creditMinimum: String(p.creditMinimum ?? ""),
@@ -1230,7 +1230,7 @@ export default function ProductsPage() {
                           type="number"
                           placeholder="Units per Pack (e.g. 20)"
                           value={editForm.unitsPerPack}
-                          onChange={(e) => setEditForm({ ...editForm, unitsPerPack: Number(e.target.value) })}
+                          onChange={(e) => setEditForm({ ...editForm, unitsPerPack: e.target.value })}
                           className="admin-input w-full bg-white"
                         />
                       </div>
@@ -1240,7 +1240,7 @@ export default function ProductsPage() {
                           type="number"
                           placeholder="Min Packs (e.g. 5)"
                           value={editForm.wholesaleMoq}
-                          onChange={(e) => setEditForm({ ...editForm, wholesaleMoq: Number(e.target.value) })}
+                          onChange={(e) => setEditForm({ ...editForm, wholesaleMoq: e.target.value })}
                           className="admin-input w-full bg-white"
                         />
                       </div>
