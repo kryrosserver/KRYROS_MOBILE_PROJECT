@@ -173,6 +173,7 @@ function TrackOrderContent() {
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Order Status</p>
                     <h2 className="text-2xl font-black text-slate-900 uppercase">{order.status}</h2>
+                    <p className="text-xs font-medium text-slate-500 mt-1">Payment: <span className="font-bold">{order.paymentStatus}</span></p>
                   </div>
                 </div>
                 <div className="flex flex-col md:items-end">
@@ -185,22 +186,27 @@ function TrackOrderContent() {
               </div>
 
               {/* Progress Bar */}
-              <div className="mt-10 relative">
+              <div className="mt-10 relative px-4">
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-100 -translate-y-1/2"></div>
                 <div 
                   className="absolute top-1/2 left-0 h-1 bg-green-500 -translate-y-1/2 transition-all duration-1000"
-                  style={{ width: order.status === 'DELIVERED' ? '100%' : order.status === 'SHIPPED' ? '66%' : '33%' }}
+                  style={{ width: order.status === 'DELIVERED' ? '100%' : order.status === 'SHIPPED' ? '66%' : order.status === 'CONFIRMED' || order.status === 'PROCESSING' ? '33%' : '0%' }}
                 ></div>
                 <div className="relative flex justify-between">
-                  {['Processing', 'Shipped', 'Delivered'].map((step, idx) => {
-                    const isActive = 
-                      (idx === 0) || 
-                      (idx === 1 && (order.status === 'SHIPPED' || order.status === 'DELIVERED')) ||
-                      (idx === 2 && order.status === 'DELIVERED');
+                  {[
+                    { label: 'Confirmed', value: 'CONFIRMED' },
+                    { label: 'Shipped', value: 'SHIPPED' },
+                    { label: 'Delivered', value: 'DELIVERED' }
+                  ].map((step, idx) => {
+                    const statusOrder = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
+                    const currentIdx = statusOrder.indexOf(order.status.toUpperCase());
+                    const stepIdx = statusOrder.indexOf(step.value);
+                    const isActive = currentIdx >= stepIdx && currentIdx !== 0;
+                    
                     return (
-                      <div key={step} className="flex flex-col items-center">
+                      <div key={step.label} className="flex flex-col items-center">
                         <div className={`h-4 w-4 rounded-full border-4 border-white shadow-sm transition-colors duration-500 ${isActive ? 'bg-green-500' : 'bg-slate-300'}`}></div>
-                        <span className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-green-600' : 'text-slate-400'}`}>{step}</span>
+                        <span className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-green-600' : 'text-slate-400'}`}>{step.label}</span>
                       </div>
                     );
                   })}
@@ -226,15 +232,30 @@ function TrackOrderContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-900 truncate">{item.name}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{item.variant}</p>
                         <p className="text-xs text-slate-500 font-medium">Qty: {item.quantity}</p>
                       </div>
                       <p className="text-sm font-black text-slate-900">{displayPrice(item.price * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-50 flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-400">Total Paid</span>
-                  <span className="text-xl font-black text-green-600">{displayPrice(order.total)}</span>
+                <div className="mt-6 pt-4 border-t border-slate-50 space-y-2">
+                  <div className="flex justify-between items-center text-xs text-slate-500">
+                    <span>Subtotal</span>
+                    <span>{displayPrice(order.subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-slate-500">
+                    <span>Shipping</span>
+                    <span>{order.shipping === 0 ? "FREE" : displayPrice(order.shipping)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-slate-500">
+                    <span>Tax (16%)</span>
+                    <span>{displayPrice(order.tax)}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-50">
+                    <span className="text-sm font-bold text-slate-400">Total</span>
+                    <span className="text-xl font-black text-green-600">{displayPrice(order.total)}</span>
+                  </div>
                 </div>
               </div>
 
@@ -249,6 +270,22 @@ function TrackOrderContent() {
                       <p className="text-sm font-bold text-slate-900">{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</p>
                       <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                         {order.shippingAddress?.address}, {order.shippingAddress?.city}, {order.shippingAddress?.state}, {order.shippingAddress?.country}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Info */}
+                <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest border-b border-slate-50 pb-4 mb-4">Payment Method</h3>
+                  <div className="flex gap-3 items-center">
+                    <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 uppercase">{order.paymentMethod.replace(/_/g, ' ')}</p>
+                      <p className={`text-[10px] font-bold uppercase ${order.paymentStatus === 'PAID' ? 'text-green-500' : 'text-orange-500'}`}>
+                        {order.paymentStatus}
                       </p>
                     </div>
                   </div>

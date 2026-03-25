@@ -302,7 +302,9 @@ export default function CheckoutPage() {
         }
         
         clearCart();
-        window.location.href = `/dashboard/orders/${res.data.id}`;
+        // Redirect to tracking page with ID and email
+        const trackingUrl = `/track-order?id=${res.data.orderNumber}&email=${encodeURIComponent(orderData.addressDetails.email)}`;
+        window.location.href = trackingUrl;
       }
     } catch (error: any) {
       console.error("Order creation failed", error);

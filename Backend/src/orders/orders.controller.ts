@@ -28,6 +28,12 @@ export class OrdersController {
     return result.data;
   }
 
+  @Get('track')
+  @ApiOperation({ summary: 'Track order by ID and email (Public)' })
+  async trackOrder(@Query('orderNumber') orderNumber: string, @Query('email') email: string) {
+    return this.ordersService.trackOrder(orderNumber, email);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -43,12 +49,6 @@ export class OrdersController {
     // req.user will be populated if a valid token is provided, otherwise it's a guest order
     const userId = (req as any).user?.id;
     return this.ordersService.create(userId, data);
-  }
-
-  @Get('track')
-  @ApiOperation({ summary: 'Track order by ID and email (Public)' })
-  async trackOrder(@Query('orderNumber') orderNumber: string, @Query('email') email: string) {
-    return this.ordersService.trackOrder(orderNumber, email);
   }
 
   @Put(':id/status')

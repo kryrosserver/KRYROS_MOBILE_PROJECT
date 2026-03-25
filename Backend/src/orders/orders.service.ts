@@ -127,21 +127,34 @@ export class OrdersService {
       throw new NotFoundException('Order not found with the provided details');
     }
 
-    // Return only necessary tracking info for guest safety
+    // Return more detailed tracking info
     return {
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status,
       paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
       createdAt: order.createdAt,
       items: order.items.map(item => ({
         name: item.product.name,
         quantity: item.quantity,
-        price: item.price,
-        image: item.product.images?.find(i => i.isPrimary)?.url || item.product.images?.[0]?.url
+        price: Number(item.price),
+        image: item.product.images?.find(i => i.isPrimary)?.url || item.product.images?.[0]?.url,
+        variant: item.variant?.value
       })),
-      total: order.total,
-      shippingStatus: order.status // Assuming status covers shipping for now
+      subtotal: Number(order.subtotal),
+      shipping: Number(order.shipping),
+      tax: Number(order.tax),
+      total: Number(order.total),
+      shippingAddress: order.shippingAddress ? {
+        firstName: order.shippingAddress.firstName,
+        lastName: order.shippingAddress.lastName,
+        address: order.shippingAddress.street,
+        city: order.shippingAddress.cityName || order.shippingAddress.city,
+        state: order.shippingAddress.stateName || order.shippingAddress.state,
+        country: order.shippingAddress.country
+      } : null,
+      shippingStatus: order.status
     };
   }
 
