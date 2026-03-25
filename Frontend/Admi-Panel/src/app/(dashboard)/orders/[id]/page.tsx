@@ -64,7 +64,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/internal/admin/orders/${id}`);
+      const res = await fetch(`/api/admin/orders/${id}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch order");
       setOrder(data);
@@ -82,7 +82,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   const updateOrder = async (status: string, paymentStatus?: string) => {
     setUpdating(true);
     try {
-      const res = await fetch(`/internal/admin/orders/${id}`, {
+      const res = await fetch(`/api/admin/orders/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, paymentStatus }),
@@ -106,7 +106,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   return (
     <div className="space-y-6 pb-12">
       <div className="flex items-center gap-4">
-        <Link href="/orders" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+        <Link href="/admin/orders" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
           <ArrowLeft className="h-5 w-5 text-slate-600" />
         </Link>
         <div>
@@ -128,7 +128,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 <select 
                   className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   value={order.status}
-                  onChange={(e) => updateOrder(e.target.value)}
+                  onChange={(e) => updateOrder(e.target.value, order.paymentStatus)}
                   disabled={updating}
                 >
                   <option value="PENDING">Pending</option>

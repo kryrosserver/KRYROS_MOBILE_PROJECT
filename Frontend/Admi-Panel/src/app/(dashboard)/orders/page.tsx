@@ -37,7 +37,7 @@ export default function OrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/internal/admin/orders", { cache: "no-store" });
+      const res = await fetch("/api/admin/orders", { cache: "no-store" });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || "Failed to load orders");
       const items = Array.isArray(body) ? body : body?.data || [];
@@ -67,6 +67,8 @@ export default function OrdersPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "CONFIRMED": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "PROCESSING": return "bg-orange-100 text-orange-700 border-orange-200";
+      case "SHIPPED": return "bg-purple-100 text-purple-700 border-purple-200";
       case "DELIVERED": return "bg-green-100 text-green-700 border-green-200";
       case "CANCELLED": return "bg-red-100 text-red-700 border-red-200";
       case "PENDING": return "bg-yellow-100 text-yellow-700 border-yellow-200";
@@ -170,7 +172,7 @@ export default function OrdersPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link 
-                      href={`/orders/${o.id}`}
+                      href={`/admin/orders/${o.id}`}
                       className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm group-hover:shadow-md"
                     >
                       <ChevronRight className="h-4 w-4" />
