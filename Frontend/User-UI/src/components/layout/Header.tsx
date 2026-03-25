@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { Logo } from "./Logo"
 import { AuthButtons } from "./AuthButtons"
+import { MobileSearchModal } from "./MobileSearchModal"
 import { useCart } from "@/providers/CartProvider"
 import { useCurrency } from "@/providers/CurrencyProvider"
 import { wishlistApi, settingsApi, categoriesApi } from "@/lib/api"
@@ -109,6 +110,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [accountOpen, setAccountOpen] = useState(false)
@@ -374,7 +376,7 @@ export function Header() {
           {/* Actions */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={() => setMobileSearchOpen(true)}
               className="rounded-md p-2 text-foreground transition-colors hover:bg-secondary lg:hidden"
               aria-label="Search"
             >
@@ -631,6 +633,12 @@ export function Header() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Search Modal */}
+      <MobileSearchModal
+        isOpen={mobileSearchOpen}
+        onClose={() => setMobileSearchOpen(false)}
+      />
     </header>
   )
 }
