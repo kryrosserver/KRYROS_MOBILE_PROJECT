@@ -744,7 +744,9 @@ model CMSBanner {
   id          String   @id @default(uuid())
   title       String
   subtitle    String?
-  image       String
+  mediaType   String   @default("image") // "image" or "video"
+  image       String?  // For image URL or uploaded image
+  videoUrl    String?  // For video URL
   link        String?
   linkText    String?
   isActive    Boolean  @default(true)

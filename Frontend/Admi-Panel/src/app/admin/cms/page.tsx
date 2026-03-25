@@ -52,9 +52,22 @@ export default function CMSPage() {
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState<{ title: string; subtitle?: string; image: string; link?: string; linkText?: string; position?: number; isActive?: boolean }>({
+  const [form, setForm] = useState<{ 
+    title: string; 
+    subtitle?: string; 
+    mediaType: string;
+    image: string; 
+    videoUrl: string;
+    link?: string; 
+    linkText?: string; 
+    position?: number; 
+    isActive?: boolean 
+  }>({
     title: "",
+    subtitle: "",
+    mediaType: "image",
     image: "",
+    videoUrl: "",
     link: "",
     linkText: "Shop Now",
     position: 0,
@@ -169,14 +182,110 @@ export default function CMSPage() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-              <input
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
+              <label className="block text-sm font-medium text-slate-700 mb-1">Media Type</label>
+              <select
+                value={form.mediaType}
+                onChange={(e) => setForm({ ...form, mediaType: e.target.value })}
                 className="admin-input"
-                placeholder="https://..."
-              />
+              >
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+              </select>
             </div>
+            {form.mediaType === 'image' ? (
+              <>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+                  <input
+                    value={form.image}
+                    onChange={(e) => setForm({ ...form, image: e.target.value })}
+                    className="admin-input"
+                    placeholder="https://... or upload below"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Or Upload Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        try {
+                          const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData,
+                          });
+                          const data = await res.json();
+                          if (data.url) {
+                            setForm({ ...form, image: data.url });
+                          }
+                        } catch (err) {
+                          console.error('Upload failed', err);
+                        }
+                      }
+                    }}
+                    className="admin-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
+                  {form.image && (
+                    <div className="mt-2 relative h-20 w-32">
+                      <img src={form.image} alt="Preview" className="h-full w-full object-cover rounded" />
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, image: '' })}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Video URL</label>
+                  <input
+                    value={form.videoUrl || ''}
+                    onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                    className="admin-input"
+                    placeholder="https://www.youtube.com/embed/... or https://..."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Or Upload Video</label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        try {
+                          const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData,
+                          });
+                          const data = await res.json();
+                          if (data.url) {
+                            setForm({ ...form, videoUrl: data.url });
+                          }
+                        } catch (err) {
+                          console.error('Upload failed', err);
+                        }
+                      }
+                    }}
+                    className="admin-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
+                  {form.videoUrl && (
+                    <div className="mt-2 text-sm text-green-600">Video added ✓</div>
+                  )}
+                </div>
+              </>
+            )}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Link</label>
               <input
@@ -223,7 +332,7 @@ export default function CMSPage() {
                   const body = await res.json().catch(() => ({}));
                   if (!res.ok) throw new Error(body?.error || "Failed to create banner");
                   setShowAdd(false);
-                  setForm({ title: "", image: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
+                  setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
                   setMessage("Banner created");
                   await loadBanners();
                 } catch (e: any) {
@@ -311,9 +420,18 @@ export default function CMSPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="h-12 w-24 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-                        {banner.image ? (
+                        {banner.mediaType === 'video' ? (
+                          banner.videoUrl ? (
+                            <video src={banner.videoUrl} className="h-full w-full object-cover" />
+                          ) : (
+                            <span className="text-xs text-slate-400">Video</span>
+                          )
+                        ) : banner.image ? (
                           <img src={banner.image} alt={banner.title} className="h-full w-full object-cover" />
                         ) : (
+                          <ImageIcon className="h-6 w-6 text-slate-300" />
+                        )}
+                      </div>
                           <ImageIcon className="h-6 w-6 text-slate-400" />
                         )}
                       </div>
@@ -360,7 +478,9 @@ export default function CMSPage() {
                             setForm({
                               title: banner.title,
                               subtitle: banner.subtitle || "",
-                              image: banner.image,
+                              mediaType: banner.mediaType || "image",
+                              image: banner.image || "",
+                              videoUrl: banner.videoUrl || "",
                               link: banner.link || "",
                               linkText: banner.linkText || "Shop Now",
                               position: banner.position,

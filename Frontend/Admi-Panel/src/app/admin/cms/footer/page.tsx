@@ -5,14 +5,9 @@ import {
   Plus,
   Edit,
   Trash2,
-  ToggleLeft,
-  ToggleRight,
-  Save,
   X,
   Settings,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface FooterSection {
   id: string;
@@ -361,10 +356,13 @@ export default function FooterManagementPage() {
           <div>
             <div className="mb-6 flex justify-between items-center">
               <h2 className="text-xl font-semibold">Footer Sections</h2>
-              <Button onClick={() => openSectionModal()}>
-                <Plus className="h-4 w-4 mr-2" />
+              <button 
+                onClick={() => openSectionModal()}
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
                 Add Section
-              </Button>
+              </button>
             </div>
 
             {loading ? (
@@ -381,20 +379,18 @@ export default function FooterManagementPage() {
                         <p className="text-sm text-gray-500">Order: {section.order}</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <button
                           onClick={() => openSectionModal(section)}
+                          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
                         >
                           <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        </button>
+                        <button
                           onClick={() => handleDeleteSection(section.id)}
+                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                         >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
 
@@ -402,13 +398,13 @@ export default function FooterManagementPage() {
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="font-medium text-sm">Links ({section.links?.length || 0})</h4>
-                        <Button
-                          size="sm"
+                        <button
                           onClick={() => openLinkModal(section.id)}
+                          className="btn-secondary text-sm inline-flex items-center gap-1 bg-slate-200 text-slate-900 px-3 py-1 rounded hover:bg-slate-300 transition-colors"
                         >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Link
-                        </Button>
+                          <Plus className="h-3 w-3" />
+                          Add
+                        </button>
                       </div>
 
                       {section.links && section.links.length > 0 ? (
@@ -420,20 +416,18 @@ export default function FooterManagementPage() {
                                 <p className="text-xs text-gray-500">{link.href}</p>
                               </div>
                               <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
+                                <button
                                   onClick={() => openLinkModal(section.id, link)}
+                                  className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
                                 >
                                   <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
+                                </button>
+                                <button
                                   onClick={() => handleDeleteLink(link.id)}
+                                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                                 >
-                                  <Trash2 className="h-4 w-4 text-red-600" />
-                                </Button>
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </div>
                             </div>
                           ))}
@@ -454,10 +448,13 @@ export default function FooterManagementPage() {
           <div>
             <div className="mb-6 flex justify-between items-center">
               <h2 className="text-xl font-semibold">Footer Configuration</h2>
-              <Button onClick={() => setShowConfigModal(true)}>
-                <Settings className="h-4 w-4 mr-2" />
+              <button 
+                onClick={() => setShowConfigModal(true)}
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Settings className="h-4 w-4" />
                 Edit Configuration
-              </Button>
+              </button>
             </div>
 
             {footerConfig ? (
@@ -495,7 +492,7 @@ export default function FooterManagementPage() {
                 <h3 className="text-lg font-semibold">
                   {selectedSection ? "Edit Section" : "Add Section"}
                 </h3>
-                <button onClick={() => setShowSectionModal(false)}>
+                <button onClick={() => setShowSectionModal(false)} className="text-gray-600 hover:text-gray-900">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -503,19 +500,22 @@ export default function FooterManagementPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Section Title</label>
-                  <Input
+                  <input
+                    type="text"
                     value={sectionForm.title}
                     onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })}
                     placeholder="e.g., Shop, Services, Support"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                  <Input
+                  <input
                     type="number"
                     value={sectionForm.order}
                     onChange={(e) => setSectionForm({ ...sectionForm, order: parseInt(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -524,26 +524,26 @@ export default function FooterManagementPage() {
                     type="checkbox"
                     checked={sectionForm.isActive}
                     onChange={(e) => setSectionForm({ ...sectionForm, isActive: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300"
                   />
                   <label className="text-sm font-medium">Active</label>
                 </div>
               </div>
 
               <div className="flex gap-3 mt-6">
-                <Button
+                <button
                   onClick={() => setShowSectionModal(false)}
-                  variant="outline"
-                  className="flex-1"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={selectedSection ? handleUpdateSection : handleCreateSection}
                   disabled={saving}
-                  className="flex-1"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "Saving..." : "Save"}
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -557,7 +557,7 @@ export default function FooterManagementPage() {
                 <h3 className="text-lg font-semibold">
                   {selectedLink ? "Edit Link" : "Add Link"}
                 </h3>
-                <button onClick={() => setShowLinkModal(false)}>
+                <button onClick={() => setShowLinkModal(false)} className="text-gray-600 hover:text-gray-900">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -565,28 +565,33 @@ export default function FooterManagementPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Label</label>
-                  <Input
+                  <input
+                    type="text"
                     value={linkForm.label}
                     onChange={(e) => setLinkForm({ ...linkForm, label: e.target.value })}
                     placeholder="e.g., Smartphones"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
-                  <Input
+                  <input
+                    type="text"
                     value={linkForm.href}
                     onChange={(e) => setLinkForm({ ...linkForm, href: e.target.value })}
                     placeholder="e.g., /shop?category=smartphones"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                  <Input
+                  <input
                     type="number"
                     value={linkForm.order}
                     onChange={(e) => setLinkForm({ ...linkForm, order: parseInt(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -595,26 +600,26 @@ export default function FooterManagementPage() {
                     type="checkbox"
                     checked={linkForm.isActive}
                     onChange={(e) => setLinkForm({ ...linkForm, isActive: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300"
                   />
                   <label className="text-sm font-medium">Active</label>
                 </div>
               </div>
 
               <div className="flex gap-3 mt-6">
-                <Button
+                <button
                   onClick={() => setShowLinkModal(false)}
-                  variant="outline"
-                  className="flex-1"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={selectedLink ? handleUpdateLink : handleCreateLink}
                   disabled={saving}
-                  className="flex-1"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "Saving..." : "Save"}
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -626,7 +631,7 @@ export default function FooterManagementPage() {
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 my-8">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Edit Footer Configuration</h3>
-                <button onClick={() => setShowConfigModal(false)}>
+                <button onClick={() => setShowConfigModal(false)} className="text-gray-600 hover:text-gray-900">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -644,33 +649,41 @@ export default function FooterManagementPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                  <Input
+                  <input
+                    type="text"
                     value={configForm.contactPhone || ""}
                     onChange={(e) => setConfigForm({ ...configForm, contactPhone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                  <Input
+                  <input
+                    type="text"
                     value={configForm.contactEmail || ""}
                     onChange={(e) => setConfigForm({ ...configForm, contactEmail: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Contact Address</label>
-                  <Input
+                  <input
+                    type="text"
                     value={configForm.contactAddress || ""}
                     onChange={(e) => setConfigForm({ ...configForm, contactAddress: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Newsletter Title</label>
-                  <Input
+                  <input
+                    type="text"
                     value={configForm.newsletterTitle || ""}
                     onChange={(e) => setConfigForm({ ...configForm, newsletterTitle: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -686,29 +699,30 @@ export default function FooterManagementPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Copyright Text</label>
-                  <Input
+                  <input
+                    type="text"
                     value={configForm.copyrightText || ""}
                     onChange={(e) => setConfigForm({ ...configForm, copyrightText: e.target.value })}
                     placeholder="Use {year} for current year"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="flex gap-3 mt-6">
-                <Button
+                <button
                   onClick={() => setShowConfigModal(false)}
-                  variant="outline"
-                  className="flex-1"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={handleUpdateConfig}
                   disabled={saving}
-                  className="flex-1"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "Saving..." : "Save"}
-                </Button>
+                </button>
               </div>
             </div>
           </div>
