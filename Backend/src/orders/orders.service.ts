@@ -240,8 +240,8 @@ export class OrdersService {
         price = Number(product.flashSalePrice);
       }
 
-      const canBackorder = product.inventory?.allowBackorder || false;
-
+      // Note: We no longer block orders due to insufficient stock. 
+      // Stock will still be updated (allowing negative values) for admin tracking.
       if (item.variantId) {
         const variant = product.variants.find((v) => v.id === item.variantId);
         if (!variant) throw new NotFoundException(`Variant ${item.variantId} not found for product ${product.id}`);
@@ -249,18 +249,8 @@ export class OrdersService {
         if (!user?.wholesaleAccount || !product.wholesalePrices?.length) {
           price = Number(variant.price);
         }
-
-        const requestedQty = variantQuantityMap[item.variantId];
-        if (variant.stock < requestedQty && !canBackorder) {
-          throw new BadRequestException(`Insufficient stock for ${product.name} (${variant.name}: ${variant.value}). Available: ${variant.stock}, Requested: ${requestedQty}`);
-        }
-      } else {
-        const requestedQty = quantityMap[item.productId];
-        const availableStock = product.inventory?.stock || 0;
-        if (availableStock < requestedQty && !canBackorder) {
-          throw new BadRequestException(`Insufficient stock for ${product.name}. Available: ${availableStock}, Requested: ${requestedQty}`);
-        }
-      }
+      } 
+      // End of non-blocking stock check logic
 
       const itemTotal = price * item.quantity;
       subtotal += itemTotal;
