@@ -18,8 +18,11 @@ type Product = {
   stockTotal?: number;
   stockCurrent?: number;
   hasFiveYearGuarantee?: boolean;
+  fiveYearGuaranteeText?: string | null;
   hasFreeReturns?: boolean;
+  freeReturnsText?: string | null;
   hasInstallmentOptions?: boolean;
+  installmentOptionsText?: string | null;
   wholesalePrice?: number | null;
   allowCredit?: boolean;
   creditMinimum?: number | string | null;
@@ -72,8 +75,11 @@ export default function ProductsPage() {
     stockTotal: "50",
     stockCurrent: "42",
     hasFiveYearGuarantee: true,
+    fiveYearGuaranteeText: "5 Year Guarantee",
     hasFreeReturns: true,
+    freeReturnsText: "Free Returns",
     hasInstallmentOptions: true,
+    installmentOptionsText: "Installment Options",
     wholesalePrice: "",
     upsellProductId: "",
     isActive: true,
@@ -103,8 +109,11 @@ export default function ProductsPage() {
     stockTotal: "",
     stockCurrent: "",
     hasFiveYearGuarantee: true,
+    fiveYearGuaranteeText: "",
     hasFreeReturns: true,
+    freeReturnsText: "",
     hasInstallmentOptions: true,
+    installmentOptionsText: "",
     wholesalePrice: "",
     upsellProductId: "",
     allowCredit: false,
@@ -404,31 +413,63 @@ export default function ProductsPage() {
               {/* Guarantees Section */}
               <div className="border-t pt-4 space-y-3">
                 <p className="text-sm font-medium text-slate-700">Guarantees & Options</p>
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={form.hasFiveYearGuarantee}
-                      onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
-                    />
-                    5 Year Guarantee
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={form.hasFreeReturns}
-                      onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
-                    />
-                    Free Returns
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={form.hasInstallmentOptions}
-                      onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
-                    />
-                    Installment Options
-                  </label>
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.hasFiveYearGuarantee}
+                        onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
+                      />
+                      5 Year Guarantee
+                    </label>
+                    {form.hasFiveYearGuarantee && (
+                      <input
+                        placeholder="Guarantee Text (e.g. 5 Year Guarantee)"
+                        value={form.fiveYearGuaranteeText}
+                        onChange={(e) => setForm({ ...form, fiveYearGuaranteeText: e.target.value })}
+                        className="admin-input w-full text-xs"
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.hasFreeReturns}
+                        onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
+                      />
+                      Free Returns
+                    </label>
+                    {form.hasFreeReturns && (
+                      <input
+                        placeholder="Returns Text (e.g. Free Returns)"
+                        value={form.freeReturnsText}
+                        onChange={(e) => setForm({ ...form, freeReturnsText: e.target.value })}
+                        className="admin-input w-full text-xs"
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.hasInstallmentOptions}
+                        onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
+                      />
+                      Installment Options
+                    </label>
+                    {form.hasInstallmentOptions && (
+                      <input
+                        placeholder="Installment Text (e.g. Installment Options)"
+                        value={form.installmentOptionsText}
+                        onChange={(e) => setForm({ ...form, installmentOptionsText: e.target.value })}
+                        className="admin-input w-full text-xs"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -576,8 +617,11 @@ export default function ProductsPage() {
                       formData.append("stockTotal", String(Number(form.stockTotal || 0)));
                       formData.append("stockCurrent", String(Number(form.stockCurrent || 0)));
                       formData.append("hasFiveYearGuarantee", String(form.hasFiveYearGuarantee));
+                      if (form.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", form.fiveYearGuaranteeText);
                       formData.append("hasFreeReturns", String(form.hasFreeReturns));
+                      if (form.freeReturnsText) formData.append("freeReturnsText", form.freeReturnsText);
                       formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
+                      if (form.installmentOptionsText) formData.append("installmentOptionsText", form.installmentOptionsText);
                       if (form.wholesalePrice) formData.append("wholesalePrice", String(Number(form.wholesalePrice)));
                       if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
                       formData.append("allowCredit", String(form.allowCredit));
@@ -635,8 +679,11 @@ export default function ProductsPage() {
                         stockTotal: "50",
                         stockCurrent: "42",
                         hasFiveYearGuarantee: true,
+                        fiveYearGuaranteeText: "5 Year Guarantee",
                         hasFreeReturns: true,
+                        freeReturnsText: "Free Returns",
                         hasInstallmentOptions: true,
+                        installmentOptionsText: "Installment Options",
                         wholesalePrice: "",
                         upsellProductId: "",
                         isActive: true,
@@ -843,8 +890,11 @@ export default function ProductsPage() {
                           stockTotal: String(p.stockTotal ?? ""),
                           stockCurrent: String(p.stockCurrent ?? ""),
                           hasFiveYearGuarantee: !!p.hasFiveYearGuarantee,
+                          fiveYearGuaranteeText: p.fiveYearGuaranteeText || "5 Year Guarantee",
                           hasFreeReturns: !!p.hasFreeReturns,
+                          freeReturnsText: p.freeReturnsText || "Free Returns",
                           hasInstallmentOptions: !!p.hasInstallmentOptions,
+                          installmentOptionsText: p.installmentOptionsText || "Installment Options",
                           wholesalePrice: String(p.wholesalePrice ?? ""),
                           upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
                           allowCredit: !!p.allowCredit,
@@ -1155,34 +1205,66 @@ export default function ProductsPage() {
 
                   <div className="pt-2 space-y-3">
                     <p className="text-sm font-bold text-slate-800 border-b pb-2">Guarantees</p>
-                    <div className="flex flex-wrap gap-4">
-                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editForm.hasFiveYearGuarantee}
-                          onChange={(e) => setEditForm({ ...editForm, hasFiveYearGuarantee: e.target.checked })}
-                          className="w-4 h-4 text-green-500 rounded"
-                        />
-                        5 Year Guarantee
-                      </label>
-                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editForm.hasFreeReturns}
-                          onChange={(e) => setEditForm({ ...editForm, hasFreeReturns: e.target.checked })}
-                          className="w-4 h-4 text-green-500 rounded"
-                        />
-                        Free Returns
-                      </label>
-                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editForm.hasInstallmentOptions}
-                          onChange={(e) => setEditForm({ ...editForm, hasInstallmentOptions: e.target.checked })}
-                          className="w-4 h-4 text-green-500 rounded"
-                        />
-                        Installment Options
-                      </label>
+                    <div className="space-y-3">
+                      <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.hasFiveYearGuarantee}
+                            onChange={(e) => setEditForm({ ...editForm, hasFiveYearGuarantee: e.target.checked })}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          5 Year Guarantee
+                        </label>
+                        {editForm.hasFiveYearGuarantee && (
+                          <input
+                            placeholder="Guarantee Text (e.g. 5 Year Guarantee)"
+                            value={editForm.fiveYearGuaranteeText}
+                            onChange={(e) => setEditForm({ ...editForm, fiveYearGuaranteeText: e.target.value })}
+                            className="admin-input w-full text-xs"
+                          />
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.hasFreeReturns}
+                            onChange={(e) => setEditForm({ ...editForm, hasFreeReturns: e.target.checked })}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Free Returns
+                        </label>
+                        {editForm.hasFreeReturns && (
+                          <input
+                            placeholder="Returns Text (e.g. Free Returns)"
+                            value={editForm.freeReturnsText}
+                            onChange={(e) => setEditForm({ ...editForm, freeReturnsText: e.target.value })}
+                            className="admin-input w-full text-xs"
+                          />
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.hasInstallmentOptions}
+                            onChange={(e) => setEditForm({ ...editForm, hasInstallmentOptions: e.target.checked })}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Installment Options
+                        </label>
+                        {editForm.hasInstallmentOptions && (
+                          <input
+                            placeholder="Installment Text (e.g. Installment Options)"
+                            value={editForm.installmentOptionsText}
+                            onChange={(e) => setEditForm({ ...editForm, installmentOptionsText: e.target.value })}
+                            className="admin-input w-full text-xs"
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -1353,8 +1435,11 @@ export default function ProductsPage() {
                   if (editForm.stockTotal) formData.append("stockTotal", String(Number(editForm.stockTotal)));
                   if (editForm.stockCurrent) formData.append("stockCurrent", String(Number(editForm.stockCurrent)));
                   formData.append("hasFiveYearGuarantee", String(editForm.hasFiveYearGuarantee));
+                  if (editForm.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", editForm.fiveYearGuaranteeText);
                   formData.append("hasFreeReturns", String(editForm.hasFreeReturns));
+                  if (editForm.freeReturnsText) formData.append("freeReturnsText", editForm.freeReturnsText);
                   formData.append("hasInstallmentOptions", String(editForm.hasInstallmentOptions));
+                  if (editForm.installmentOptionsText) formData.append("installmentOptionsText", editForm.installmentOptionsText);
                   if (editForm.wholesalePrice) formData.append("wholesalePrice", String(Number(editForm.wholesalePrice)));
                   if (editForm.upsellProductId) formData.append("upsellProductId", String(editForm.upsellProductId));
                   formData.append("allowCredit", String(editForm.allowCredit));

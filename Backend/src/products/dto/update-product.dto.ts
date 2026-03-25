@@ -99,14 +99,26 @@ export class UpdateProductDto {
   hasFiveYearGuarantee?: boolean;
 
   @IsOptional()
+  @IsString()
+  fiveYearGuaranteeText?: string;
+
+  @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   hasFreeReturns?: boolean;
 
   @IsOptional()
+  @IsString()
+  freeReturnsText?: string;
+
+  @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   hasInstallmentOptions?: boolean;
+
+  @IsOptional()
+  @IsString()
+  installmentOptionsText?: string;
 
   @IsOptional()
   @IsNumber()

@@ -94,10 +94,27 @@ export class CreateProductDto {
   @Transform(({ value }) => value === 'true' || value === true)
   hasFiveYearGuarantee?: boolean;
 
+  @IsString()
+  @IsOptional()
+  fiveYearGuaranteeText?: string;
+
   @IsBoolean()
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   hasFreeReturns?: boolean;
+
+  @IsString()
+  @IsOptional()
+  freeReturnsText?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  hasInstallmentOptions?: boolean;
+
+  @IsString()
+  @IsOptional()
+  installmentOptionsText?: string;
 
   @IsBoolean()
   @IsOptional()

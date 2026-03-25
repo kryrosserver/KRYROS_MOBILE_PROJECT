@@ -200,6 +200,9 @@ model Product {
   hasFiveYearGuarantee Boolean @default(true)
   hasFreeReturns      Boolean @default(true)
   hasInstallmentOptions      Boolean @default(true)
+  fiveYearGuaranteeText String? @db.Text
+  freeReturnsText      String? @db.Text
+  installmentOptionsText String? @db.Text
 
   // Ratings
   rating            Float?    @default(0)

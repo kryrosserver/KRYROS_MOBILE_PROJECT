@@ -441,19 +441,25 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {!p.deliveryInfo && p.hasFreeReturns && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
                   <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Truck className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">✓ FREE RETURNS</div>
+                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                    ✓ {p.freeReturnsText || "FREE RETURNS"}
+                  </div>
                 </div>
               )}
               {!p.warrantyInfo && p.hasFiveYearGuarantee && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
                   <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">✓ 5 YEARS GUARANTEE</div>
+                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                    ✓ {p.fiveYearGuaranteeText || "5 YEARS GUARANTEE"}
+                  </div>
                 </div>
               )}
               {p.hasInstallmentOptions && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
                   <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><CreditCard className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">✓ INSTALLMENT OPTIONS</div>
+                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                    ✓ {p.installmentOptionsText || "INSTALLMENT OPTIONS"}
+                  </div>
                 </div>
               )}
             </div>
