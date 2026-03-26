@@ -15,7 +15,7 @@ import { useCart } from '@/providers/CartProvider'
 import { useAuth } from '@/providers/AuthProvider'
 import { wishlistApi } from '@/lib/api'
 import { useToast } from '@/components/ui/use-toast'
-import { formatPrice, getTimeRemaining, calculateDiscount } from '@/lib/utils'
+import { formatPrice, getTimeRemaining, calculateDiscount, resolveImageUrl } from '@/lib/utils'
 import { cmsApi, productsApi, categoriesApi } from '@/lib/api'
 import type { Product } from '@/types'
 
@@ -104,7 +104,7 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
           {heroBanners[currentSlide]?.mediaType === 'video' ? (
             <div className="relative w-full h-full">
               <video
-                src={heroBanners[currentSlide]?.videoUrl}
+                src={resolveImageUrl(heroBanners[currentSlide]?.videoUrl)}
                 autoPlay
                 loop
                 muted
@@ -115,7 +115,7 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
             </div>
           ) : (
             <Image
-              src={heroBanners[currentSlide]?.image}
+              src={resolveImageUrl(heroBanners[currentSlide]?.image)}
               alt={heroBanners[currentSlide]?.title}
               fill
               className="object-cover"

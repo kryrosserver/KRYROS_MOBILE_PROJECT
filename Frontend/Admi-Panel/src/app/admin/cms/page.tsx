@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { resolveImageUrl } from "@/lib/utils";
 import { 
   Image as ImageIcon, 
   Layout, 
@@ -19,7 +20,8 @@ import {
   Star,
   MessageSquare,
   X,
-  Settings
+  Settings,
+  RefreshCw
 } from "lucide-react";
 
 const cmsData = {
@@ -84,14 +86,43 @@ export default function CMSPage() {
 
   const loadBanners = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/internal/cms/banners/manage", { cache: "no-store", credentials: "same-origin" });
       if (res.ok) {
         const data = await res.json();
-        setBanners(Array.isArray(data) ? data : data?.data || []);
+        const arr = Array.isArray(data) ? data : data?.data || [];
+        setBanners(arr);
+      } else {
+        const txt = await res.text();
+        setError(`Failed to load banners: ${txt || res.statusText}`);
       }
+    } catch (err: any) {
+      setError(`Error loading banners: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSeedBanners = async () => {
+    if (!confirm("This will restore the default promotional banners. Continue?")) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/cms/banners/seed", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      if (res.ok) {
+        setMessage("Default banners restored successfully");
+        await loadBanners();
+      } else {
+        const txt = await res.text();
+        setError(`Failed to restore banners: ${txt}`);
+      }
+    } catch (err: any) {
+      setError(`Error seeding banners: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -147,17 +178,26 @@ export default function CMSPage() {
           <p className="mt-1 text-slate-600">Manage storefront content and layout</p>
         </div>
         {activeTab === "banners" && (
-          <button
-            onClick={() => {
-              setEditingBanner(null);
-              setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
-              setShowAdd(true);
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Add New Banner
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleSeedBanners()}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium border border-slate-200"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Restore Defaults
+            </button>
+            <button
+              onClick={() => {
+                setEditingBanner(null);
+                setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
+                setShowAdd(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold shadow-sm"
+            >
+              <Plus className="h-4 w-4" />
+              Add New Banner
+            </button>
+          </div>
         )}
       </div>
 
@@ -285,7 +325,7 @@ export default function CMSPage() {
                   </div>
                   {form.image && (
                     <div className="h-20 w-32 relative flex-shrink-0 bg-slate-100 rounded border border-slate-200 overflow-hidden group">
-                      <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
+                      <img src={resolveImageUrl(form.image)} alt="Preview" className="h-full w-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, image: '' })}
@@ -359,7 +399,7 @@ export default function CMSPage() {
                   </div>
                   {form.videoUrl && (
                     <div className="h-20 w-32 relative flex-shrink-0 bg-slate-100 rounded border border-slate-200 overflow-hidden flex items-center justify-center">
-                      <video src={form.videoUrl} className="h-full w-full object-cover" />
+                      <video src={resolveImageUrl(form.videoUrl)} className="h-full w-full object-cover" />
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                         <Megaphone className="h-6 w-6 text-white" />
                       </div>
@@ -523,12 +563,12 @@ export default function CMSPage() {
                       <div className="h-12 w-24 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
                         {banner.mediaType === 'video' ? (
                           banner.videoUrl ? (
-                            <video src={banner.videoUrl} className="h-full w-full object-cover" />
+                            <video src={resolveImageUrl(banner.videoUrl)} className="h-full w-full object-cover" />
                           ) : (
                             <span className="text-xs text-slate-400">Video</span>
                           )
                         ) : banner.image ? (
-                          <img src={banner.image} alt={banner.title} className="h-full w-full object-cover" />
+                          <img src={resolveImageUrl(banner.image)} alt={banner.title} className="h-full w-full object-cover" />
                         ) : (
                           <ImageIcon className="h-6 w-6 text-slate-300" />
                         )}
@@ -624,9 +664,18 @@ export default function CMSPage() {
                 ))}
               </tbody>
             </table>
-            {loading && <div className="p-4 text-sm text-slate-500">Loading...</div>}
-            {!loading && filteredBanners.length === 0 && (
-              <div className="p-4 text-sm text-slate-500">No banners found</div>
+            {loading && <div className="p-4 text-sm text-slate-500">Loading banners...</div>}
+            {!loading && banners.length === 0 && (
+              <div className="p-8 text-center">
+                <ImageIcon className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-500 font-medium">No banners found</p>
+                <p className="text-sm text-slate-400 mt-1">Try clicking "Restore Defaults" to get started</p>
+              </div>
+            )}
+            {!loading && banners.length > 0 && filteredBanners.length === 0 && (
+              <div className="p-8 text-center text-sm text-slate-500">
+                No banners match your search "{searchQuery}"
+              </div>
             )}
           </div>
         </div>
@@ -772,7 +821,7 @@ export default function CMSPage() {
                         <tr key={idx} className="border-t">
                           <td className="p-2">
                             <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden">
-                              {it.avatar ? <img src={it.avatar} alt={it.name} className="h-10 w-10 object-cover" /> : null}
+                              {it.avatar ? <img src={resolveImageUrl(it.avatar)} alt={it.name} className="h-10 w-10 object-cover" /> : null}
                             </div>
                           </td>
                           <td className="p-2">
@@ -990,7 +1039,7 @@ export default function CMSPage() {
                         <tr key={idx} className="border-t">
                           <td className="p-2">
                             <div className="h-12 w-20 rounded bg-slate-200 overflow-hidden">
-                              {it.image ? <img src={it.image} alt={it.title} className="h-12 w-20 object-cover" /> : null}
+                              {it.image ? <img src={resolveImageUrl(it.image)} alt={it.title} className="h-12 w-20 object-cover" /> : null}
                             </div>
                           </td>
                           <td className="p-2">
