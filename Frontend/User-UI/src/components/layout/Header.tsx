@@ -480,9 +480,6 @@ export function Header() {
                   </button>
                 </div>
                 <div className="flex items-center">
-                  <button className="p-4 text-slate-400">
-                    <Search className="h-5 w-5" />
-                  </button>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
                     className="bg-[#00155a] p-4 text-white"
