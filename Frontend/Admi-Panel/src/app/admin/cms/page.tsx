@@ -134,9 +134,9 @@ export default function CMSPage() {
     { id: "footer", label: "Footer", icon: Layout, count: 0 },
   ];
 
-  const filteredBanners = banners.filter((b) =>
-    String(b.title || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBanners = banners.filter((b: any) => {
+    return (b.title || "").toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className="space-y-6">
@@ -531,9 +531,6 @@ export default function CMSPage() {
                           <img src={banner.image} alt={banner.title} className="h-full w-full object-cover" />
                         ) : (
                           <ImageIcon className="h-6 w-6 text-slate-300" />
-                        )}
-                      </div>
-                          <ImageIcon className="h-6 w-6 text-slate-400" />
                         )}
                       </div>
                     </td>

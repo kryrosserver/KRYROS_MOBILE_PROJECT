@@ -54,7 +54,9 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
           id: b.id,
           title: b.title,
           subtitle: b.subtitle || '',
+          mediaType: b.mediaType || 'image',
           image: b.image,
+          videoUrl: b.videoUrl,
           link: b.link || '/shop',
           linkText: b.linkText || 'Shop Now',
           isActive: b.isActive,
@@ -99,13 +101,27 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
           transition={{ duration: 0.7 }}
           className="absolute inset-0"
         >
-          <Image
-            src={heroBanners[currentSlide]?.image}
-            alt={heroBanners[currentSlide]?.title}
-            fill
-            className="object-cover"
-            priority
-          />
+          {heroBanners[currentSlide]?.mediaType === 'video' ? (
+            <div className="relative w-full h-full">
+              <video
+                src={heroBanners[currentSlide]?.videoUrl}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40" />
+            </div>
+          ) : (
+            <Image
+              src={heroBanners[currentSlide]?.image}
+              alt={heroBanners[currentSlide]?.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         </motion.div>
       </AnimatePresence>
