@@ -9,11 +9,17 @@ export function formatPrice(price: number, currency = 'USD'): string {
 
 export function resolveImageUrl(url?: string): string {
   if (!url) return "";
-  if (url.startsWith("http") || url.startsWith("data:")) return url;
   
-  // Get the base backend URL (without /api)
+  // If it's already a full URL or a Data URL (Base64), return it as is
+  if (url.startsWith("http") || url.startsWith("data:") || url.startsWith("blob:")) {
+    return url;
+  }
+  
+  // If it's a relative path (e.g., /uploads/...), prefix it with the backend URL
   const rawApi = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-hxfp.onrender.com";
   const baseUrl = rawApi.endsWith("/api") ? rawApi.replace("/api", "") : rawApi;
   
-  return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+  // Clean up double slashes
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${baseUrl}${path}`;
 }

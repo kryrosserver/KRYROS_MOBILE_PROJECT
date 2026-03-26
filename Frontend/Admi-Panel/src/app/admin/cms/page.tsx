@@ -303,20 +303,16 @@ export default function CMSPage() {
                             if (file) {
                               setSaving(true);
                               try {
-                                const formData = new FormData();
-                                formData.append('file', file);
-                                const res = await fetch('/api/upload', {
-                                  method: 'POST',
-                                  body: formData,
-                                });
-                                const data = await res.json();
-                                if (data.url) {
-                                  setForm({ ...form, image: data.url });
-                                } else {
-                                  throw new Error(data.error || "Upload failed");
-                                }
+                                // Create immediate local preview
+                                const localUrl = URL.createObjectURL(file);
+                                setForm({ ...form, image: localUrl });
+                                
+                                // Compress and get Base64 for permanent storage
+                                const base64 = await compressImage(file, 1200, 0.85);
+                                setForm({ ...form, image: base64 });
+                                URL.revokeObjectURL(localUrl);
                               } catch (err: any) {
-                                setError(`Image upload failed: ${err.message}`);
+                                setError(`Image processing failed: ${err.message}`);
                               } finally {
                                 setSaving(false);
                               }
@@ -386,6 +382,10 @@ export default function CMSPage() {
                             if (file) {
                               setSaving(true);
                               try {
+                                // Create immediate local preview
+                                const localUrl = URL.createObjectURL(file);
+                                setForm({ ...form, videoUrl: localUrl });
+
                                 const formData = new FormData();
                                 formData.append('file', file);
                                 const res = await fetch('/api/upload', {
@@ -398,6 +398,7 @@ export default function CMSPage() {
                                 } else {
                                   throw new Error(data.error || "Upload failed");
                                 }
+                                URL.revokeObjectURL(localUrl);
                               } catch (err: any) {
                                 setError(`Video upload failed: ${err.message}`);
                               } finally {
