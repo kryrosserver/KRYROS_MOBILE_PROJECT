@@ -66,7 +66,8 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const displayReviews = getProductReviews(product);
   const displayCategory = getProductCategory(product);
 
-  const priceInfo = convertPrice(Number(product?.price ?? 0));
+  const basePrice = product?.wholesalePrice ? Number(product.wholesalePrice) : Number(product?.price ?? 0);
+  const priceInfo = convertPrice(basePrice);
   const originalPriceInfo = product?.originalPrice ? convertPrice(Number(product.originalPrice)) : null;
   const isUSD = !selectedCountry || selectedCountry.code === "US";
 

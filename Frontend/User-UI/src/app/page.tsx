@@ -114,12 +114,10 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
               <div className="absolute inset-0 bg-black/40" />
             </div>
           ) : (
-            <Image
+            <img
               src={resolveImageUrl(heroBanners[currentSlide]?.image)}
               alt={heroBanners[currentSlide]?.title}
-              fill
-              className="object-cover"
-              priority
+              className="absolute inset-0 w-full h-full object-cover"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />

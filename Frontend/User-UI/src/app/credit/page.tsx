@@ -3,11 +3,12 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, resolveImageUrl } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { productsApi, creditApi } from "@/lib/api";
+import { productsApi, creditApi, cmsApi } from "@/lib/api";
 import { ProductCard } from "@/components/home/ProductCard";
 import { useToast } from "@/components/ui/use-toast";
+import Link from "next/link";
 import { 
   CreditCard, 
   Calculator, 
@@ -95,6 +96,7 @@ function CreditPageContent() {
 
   const [products, setProducts] = useState<any[]>([]);
   const [plans, setPlans] = useState<CreditPlan[]>([]);
+  const [creditOffers, setCreditOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   
@@ -106,10 +108,11 @@ function CreditPageContent() {
     async function loadData() {
       setLoading(true);
       try {
-        const [prodRes, planRes] = await Promise.all([
+        const [prodRes, planRes, cmsRes] = await Promise.all([
           productsApi.getCredit({ take: 8 }),
           // Filter plans by productId if available
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'}/credit/plans${productId ? `?productId=${productId}` : ''}`).then(r => r.json())
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'}/credit/plans${productId ? `?productId=${productId}` : ''}`).then(r => r.json()),
+          cmsApi.getSections()
         ]);
         
         if (prodRes.data) {
@@ -138,6 +141,14 @@ function CreditPageContent() {
           setPlans(planRes);
           if (planRes.length > 0) {
             setSelectedPlanId(planRes[0].id);
+          }
+        }
+
+        if (cmsRes.data) {
+          const sections = Array.isArray(cmsRes.data) ? cmsRes.data : [];
+          const creditSection = sections.find((s: any) => s.type === "credit_offers" && s.isActive);
+          if (creditSection && Array.isArray(creditSection.config?.items)) {
+            setCreditOffers(creditSection.config.items);
           }
         }
       } catch (error) {
@@ -225,6 +236,57 @@ function CreditPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Featured Credit Offers */}
+      {creditOffers.length > 0 && (
+        <div className="py-16 bg-slate-50 border-y border-slate-100">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Special Credit Offers</h2>
+              <p className="mt-2 text-slate-600">Hand-picked tech with our best installment rates</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {creditOffers.map((offer, idx) => (
+                <div key={idx} className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl hover:shadow-2xl transition-all group">
+                  <div className="h-64 relative bg-slate-100 overflow-hidden">
+                    {offer.image ? (
+                      <img src={resolveImageUrl(offer.image)} alt={offer.title} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-slate-300">
+                        <CreditCard className="h-16 w-16" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 right-4 bg-green-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                      Low Deposit
+                    </div>
+                  </div>
+                  <div className="p-8">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{offer.title}</h3>
+                    <p className="text-sm text-slate-500 mb-6">{offer.subtitle}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Down Payment</p>
+                        <p className="text-lg font-black text-green-600">{formatPrice(offer.downPayment)}</p>
+                      </div>
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Monthly</p>
+                        <p className="text-lg font-black text-blue-600">{formatPrice(offer.monthlyAmount)}</p>
+                      </div>
+                    </div>
+
+                    <Link href={offer.slug ? `/product/${offer.slug}` : "/credit"} className="block">
+                      <Button className="w-full bg-slate-900 hover:bg-green-600 text-white font-bold py-6 rounded-2xl transition-all flex items-center justify-center gap-2 group">
+                        Get Started <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Credit Catalog - THE SEPARATION */}
       <div id="credit-catalog" className="py-16 bg-white">

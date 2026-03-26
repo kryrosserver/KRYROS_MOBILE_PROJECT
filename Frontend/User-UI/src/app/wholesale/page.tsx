@@ -4,9 +4,10 @@
  import { useAuth } from "@/providers/AuthProvider"
  import { cmsApi, wholesaleApi } from "@/lib/api"
  import { Button } from "@/components/ui/button"
- import { formatPrice } from "@/lib/utils"
- import { ProductCard } from "@/components/home/ProductCard"
- import { Loader2, Package, ShieldCheck, Zap } from "lucide-react"
+ import { formatPrice, resolveImageUrl } from "@/lib/utils"
+import { ProductCard } from "@/components/home/ProductCard"
+import { Loader2, Package, ShieldCheck, Zap, ShoppingCart, ArrowRight } from "lucide-react"
+import Link from "next/link"
 
  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'
  
@@ -98,6 +99,49 @@
                <p className="text-xs text-slate-500 mt-1">Fast delivery for our business partners</p>
              </div>
            </div>
+
+           {deals.length > 0 && (
+             <div>
+               <h2 className="mb-6 text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
+                 <span className="h-8 w-1 bg-blue-600 rounded-full"></span>
+                 Exclusive Bulk Deals
+               </h2>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 {deals.map((deal, idx) => (
+                   <div key={idx} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col md:flex-row">
+                     <div className="h-48 md:h-auto md:w-48 bg-slate-100 flex-shrink-0 relative">
+                       {deal.image ? (
+                         <img src={resolveImageUrl(deal.image)} alt={deal.title} className="h-full w-full object-cover" />
+                       ) : (
+                         <div className="h-full w-full flex items-center justify-center text-slate-300">
+                           <Package className="h-12 w-12" />
+                         </div>
+                       )}
+                       <div className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
+                         Save Big
+                       </div>
+                     </div>
+                     <div className="p-6 flex-1 flex flex-col justify-between">
+                       <div>
+                         <h3 className="font-bold text-slate-900 text-lg leading-tight">{deal.title}</h3>
+                         <p className="text-sm text-slate-500 mt-1">{deal.subtitle}</p>
+                         <div className="mt-4 flex items-baseline gap-2">
+                           <span className="text-2xl font-black text-blue-600">{formatPrice(deal.price)}</span>
+                           <span className="text-xs text-slate-400 font-medium">per unit</span>
+                         </div>
+                         <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">Min Order: {deal.minQty} units</p>
+                       </div>
+                       <Link href={deal.slug ? `/product/${deal.slug}` : "/shop"} className="mt-6">
+                         <Button className="w-full bg-slate-900 hover:bg-slate-800 text-xs font-bold uppercase tracking-widest h-10 group">
+                           View Deal <ArrowRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                         </Button>
+                       </Link>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </div>
+           )}
 
            <div>
              <h2 className="mb-6 text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
