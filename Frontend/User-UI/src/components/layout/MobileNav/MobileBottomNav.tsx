@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingBag, ShoppingCart, User } from "lucide-react";
+import { Home, LayoutGrid, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/providers/CartProvider";
 
 export function MobileBottomNav() {
@@ -12,7 +12,7 @@ export function MobileBottomNav() {
 
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
-    { label: "Store", icon: ShoppingBag, href: "/shop" },
+    { label: "Categories", icon: LayoutGrid, href: "/shop?categories=all" },
     { label: "Cart", icon: ShoppingCart, href: "/cart", badge: cartCount },
     { label: "Account", icon: User, href: "/profile" },
   ];

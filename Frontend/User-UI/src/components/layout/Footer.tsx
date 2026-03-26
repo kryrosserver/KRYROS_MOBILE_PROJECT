@@ -76,8 +76,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Column */}
           <div className="lg:col-span-2">
+
             <Link href="/" className="flex items-center gap-2 mb-6">
-              <Logo size={48} />
+              {config?.logo ? (
+                <img src={config.logo} alt="Logo" className="h-12 w-auto object-contain" />
+              ) : (
+                <Logo size={48} />
+              )}
             </Link>
             <p className="text-gray-300 mb-6 max-w-sm">
               {config?.description || 'Your trusted source for quality products and services.'}

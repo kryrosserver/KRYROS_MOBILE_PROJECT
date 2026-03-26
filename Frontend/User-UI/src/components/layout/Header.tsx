@@ -21,7 +21,6 @@ import {
 } from "lucide-react"
 import { Logo } from "./Logo"
 import { AuthButtons } from "./AuthButtons"
-import { MobileSearchModal } from "./MobileSearchModal"
 import { useCart } from "@/providers/CartProvider"
 import { useCurrency } from "@/providers/CurrencyProvider"
 import { wishlistApi, settingsApi, categoriesApi } from "@/lib/api"
@@ -110,9 +109,10 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [mobileSearchVisible, setMobileSearchVisible] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("")
   const [accountOpen, setAccountOpen] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
   const [wishlistCount, setWishlistCount] = useState<number>(0)
@@ -192,6 +192,17 @@ export function Header() {
       document.body.style.touchAction = 'auto';
     };
   }, [mobileMenuOpen]);
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      const params = new URLSearchParams();
+      params.set("q", query);
+      if (selectedCategory) {
+        params.set("category", selectedCategory);
+      }
+      window.location.href = `/shop?${params.toString()}`;
+    }
+  };
 
   const suggestions = [
     "iPhone 16 Pro Max",
@@ -375,13 +386,6 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setMobileSearchOpen(true)}
-              className="rounded-md p-2 text-foreground transition-colors hover:bg-secondary lg:hidden"
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
             <Link
               href="/wishlist"
               className="relative rounded-md p-2 text-foreground transition-colors hover:bg-secondary"
@@ -416,7 +420,42 @@ export function Header() {
             </button>
           </div>
         </div>
+
+        {/* Mobile Search Bar - Always Visible on Mobile */}
+        <div className="pb-4 lg:hidden">
+          <div className="flex items-stretch overflow-hidden rounded-lg border border-slate-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all bg-white shadow-sm">
+            <input
+              type="text"
+              placeholder="Search for products"
+              className="w-full bg-white px-4 py-2.5 text-sm focus:outline-none min-w-0"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
+            />
+            <div className="flex items-center border-l border-slate-100 px-3 bg-slate-50/50 relative">
+              <select 
+                className="bg-transparent text-[10px] font-black text-slate-600 focus:outline-none uppercase appearance-none pr-5 relative z-10 cursor-pointer"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">ALL</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="h-3 w-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <button 
+              className="bg-blue-600 px-5 text-white flex items-center justify-center transition-colors hover:bg-blue-700 active:scale-95"
+              onClick={() => handleSearch(searchQuery)}
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Mobile Search Bar - Toggled by Search Icon (Removed as it is now always visible) */}
 
       {/* Services bar */}
       <div className="hidden border-t border-border lg:block">
@@ -630,12 +669,6 @@ export function Header() {
           </div>
         )}
       </AnimatePresence>
-
-      {/* Mobile Search Modal */}
-      <MobileSearchModal
-        isOpen={mobileSearchOpen}
-        onClose={() => setMobileSearchOpen(false)}
-      />
     </header>
   )
 }

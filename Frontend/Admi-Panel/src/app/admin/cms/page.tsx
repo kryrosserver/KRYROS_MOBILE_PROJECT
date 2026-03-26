@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { 
   Image as ImageIcon, 
@@ -17,7 +18,8 @@ import {
   Sparkles,
   Star,
   MessageSquare,
-  X
+  X,
+  Settings
 } from "lucide-react";
 
 const cmsData = {
@@ -126,6 +128,7 @@ export default function CMSPage() {
     { id: "banners", label: "Banners", icon: ImageIcon, count: banners.length },
     { id: "testimonials", label: "Testimonials", icon: MessageSquare, count: sections.filter((s:any) => s.type === "testimonials" && s.isActive).length },
     { id: "wholesale", label: "Wholesale Deals", icon: Star, count: sections.filter((s:any) => s.type === "wholesale_deals" && s.isActive).length },
+    { id: "footer", label: "Footer", icon: Layout, count: 0 },
   ];
 
   const filteredBanners = banners.filter((b) =>
@@ -951,6 +954,26 @@ export default function CMSPage() {
               <div className="text-sm text-slate-500">No wholesale deals section yet. Use “Quick Add Sample”.</div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Footer Management */}
+      {activeTab === "footer" && (
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+          <div className="mx-auto w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+            <Layout className="h-10 w-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Footer Management</h2>
+          <p className="text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
+            Take full control of your store's footer. Manage navigation sections, individual links, 
+            contact details, social media profiles, and accepted payment methods.
+          </p>
+          <Link href="/admin/cms/footer">
+            <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 mx-auto">
+              <Settings className="h-5 w-5" />
+              Open Footer Manager
+            </button>
+          </Link>
         </div>
       )}
 

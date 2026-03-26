@@ -64,7 +64,13 @@ export default function FooterManagementPage() {
     order: 0,
     isActive: true,
   });
-  const [configForm, setConfigForm] = useState<FooterConfig>({});
+  const [configForm, setConfigForm] = useState<FooterConfig>({
+    socialLinks: [],
+    paymentMethods: [],
+  });
+
+  const [newSocial, setNewSocial] = useState({ platform: "facebook", url: "" });
+  const [newPayment, setNewPayment] = useState("");
 
   // Load data
   useEffect(() => {
@@ -75,7 +81,7 @@ export default function FooterManagementPage() {
   const loadFooterSections = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/internal/admin/cms/footer/sections", {
+      const res = await fetch("/api/admin/cms/footer/sections", {
         cache: "no-store",
         credentials: "same-origin",
       });
@@ -90,14 +96,14 @@ export default function FooterManagementPage() {
 
   const loadFooterConfig = async () => {
     try {
-      const res = await fetch("/internal/admin/cms/footer/config", {
+      const res = await fetch("/api/admin/cms/footer/config", {
         cache: "no-store",
         credentials: "same-origin",
       });
       if (res.ok) {
         const data = await res.json();
         setFooterConfig(data);
-        setConfigForm(data || {});
+        setConfigForm(data || { socialLinks: [], paymentMethods: [] });
       }
     } catch (err) {
       console.error("Failed to load footer config:", err);
@@ -113,7 +119,7 @@ export default function FooterManagementPage() {
 
     setSaving(true);
     try {
-      const res = await fetch("/internal/admin/cms/footer/sections", {
+      const res = await fetch("/api/admin/cms/footer/sections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
@@ -138,7 +144,7 @@ export default function FooterManagementPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`/internal/admin/cms/footer/sections/${selectedSection.id}`, {
+      const res = await fetch(`/api/admin/cms/footer/sections/${selectedSection.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
@@ -161,7 +167,7 @@ export default function FooterManagementPage() {
     if (!confirm("Are you sure you want to delete this section?")) return;
 
     try {
-      const res = await fetch(`/internal/admin/cms/footer/sections/${id}`, {
+      const res = await fetch(`/api/admin/cms/footer/sections/${id}`, {
         method: "DELETE",
         credentials: "same-origin",
       });
@@ -186,7 +192,7 @@ export default function FooterManagementPage() {
 
     setSaving(true);
     try {
-      const res = await fetch("/internal/admin/cms/footer/links", {
+      const res = await fetch("/api/admin/cms/footer/links", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
@@ -211,7 +217,7 @@ export default function FooterManagementPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`/internal/admin/cms/footer/links/${selectedLink.id}`, {
+      const res = await fetch(`/api/admin/cms/footer/links/${selectedLink.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
@@ -239,7 +245,7 @@ export default function FooterManagementPage() {
     if (!confirm("Are you sure you want to delete this link?")) return;
 
     try {
-      const res = await fetch(`/internal/admin/cms/footer/links/${id}`, {
+      const res = await fetch(`/api/admin/cms/footer/links/${id}`, {
         method: "DELETE",
         credentials: "same-origin",
       });
@@ -256,10 +262,95 @@ export default function FooterManagementPage() {
   };
 
   // Config operations
+  const handleSeedDefaults = async () => {
+    if (!confirm("This will add default footer sections and links. Continue?")) return;
+    setSaving(true);
+    try {
+      const defaultSections = [
+        { title: "Shop", order: 1, links: [
+          { label: "Smartphones", href: "/shop?category=smartphones", order: 1 },
+          { label: "Laptops", href: "/shop?category=laptops", order: 2 },
+          { label: "Tablets", href: "/shop?category=tablets", order: 3 },
+          { label: "Accessories", href: "/shop?category=accessories", order: 4 },
+        ]},
+        { title: "Company", order: 2, links: [
+          { label: "About Us", href: "/about", order: 1 },
+          { label: "Contact Us", href: "/contact", order: 2 },
+          { label: "Wholesale", href: "/wholesale", order: 3 },
+          { label: "Credit Plans", href: "/credit", order: 4 },
+        ]},
+        { title: "Support", order: 3, links: [
+          { label: "Track Order", href: "/track-order", order: 1 },
+          { label: "Shipping Policy", href: "/shipping", order: 2 },
+          { label: "Terms & Conditions", href: "/terms", order: 3 },
+          { label: "Privacy Policy", href: "/privacy", order: 4 },
+        ]},
+      ];
+
+      for (const sect of defaultSections) {
+        const sRes = await fetch("/api/admin/cms/footer/sections", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ title: sect.title, order: sect.order, isActive: true }),
+        });
+        if (sRes.ok) {
+          const sData = await sRes.json();
+          const sectionId = sData.id || sData.data?.id;
+          if (sectionId) {
+            for (const link of sect.links) {
+              await fetch("/api/admin/cms/footer/links", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify({ ...link, sectionId, isActive: true }),
+              });
+            }
+          }
+        }
+      }
+
+      // Default Config
+      await fetch("/api/admin/cms/footer/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          description: "Your trusted source for quality mobile technology and accessories in Zambia. We provide flexible payment plans and wholesale opportunities.",
+          contactPhone: "+260 971 234 567",
+          contactEmail: "info@kryros.com",
+          contactAddress: "Lusaka, Zambia",
+          newsletterTitle: "Stay Updated",
+          newsletterSubtitle: "Subscribe to get the latest tech deals and news.",
+          copyrightText: "© {year} KRYROS MOBILE TECH LIMITED. All rights reserved.",
+          socialLinks: [
+            { platform: "facebook", url: "https://facebook.com/kryros" },
+            { platform: "instagram", url: "https://instagram.com/kryros" },
+            { platform: "twitter", url: "https://twitter.com/kryros" },
+          ],
+          paymentMethods: [
+            { name: "Visa" },
+            { name: "Mastercard" },
+            { name: "Airtel Money" },
+            { name: "MTN Money" },
+          ]
+        }),
+      });
+
+      setMessage("Default footer content restored successfully");
+      loadFooterSections();
+      loadFooterConfig();
+    } catch (err) {
+      setError("Failed to restore default content");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleUpdateConfig = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/internal/admin/cms/footer/config", {
+      const res = await fetch("/api/admin/cms/footer/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
@@ -300,13 +391,36 @@ export default function FooterManagementPage() {
     setShowLinkModal(true);
   };
 
+  const openConfigModal = () => {
+    setConfigForm(footerConfig || { socialLinks: [], paymentMethods: [] });
+    setShowConfigModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Footer Management</h1>
-          <p className="text-gray-600 mt-2">Manage your website footer content and configuration</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Footer Management</h1>
+            <p className="text-gray-600 mt-2">Manage your website footer content and configuration</p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => handleSeedDefaults()}
+              className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors font-medium border border-slate-200"
+            >
+              <Plus className="h-4 w-4" />
+              Restore Defaults
+            </button>
+            <button 
+              onClick={() => openConfigModal()}
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+            >
+              <Settings className="h-4 w-4" />
+              Edit Configuration
+            </button>
+          </div>
         </div>
 
         {/* Alerts */}
@@ -327,162 +441,94 @@ export default function FooterManagementPage() {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="mb-8 flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("sections")}
-            className={`px-6 py-3 font-medium ${
-              activeTab === "sections"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Footer Sections
-          </button>
-          <button
-            onClick={() => setActiveTab("config")}
-            className={`px-6 py-3 font-medium ${
-              activeTab === "config"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Configuration
-          </button>
-        </div>
+        {/* Sections */}
+        <div>
+          <div className="mb-6 flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Footer Sections</h2>
+            <button 
+              onClick={() => openSectionModal()}
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Section
+            </button>
+          </div>
 
-        {/* Sections Tab */}
-        {activeTab === "sections" && (
-          <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Footer Sections</h2>
-              <button 
-                onClick={() => openSectionModal()}
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Section
-              </button>
-            </div>
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : footerSections.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No footer sections create yet</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {footerSections.map((section) => (
+                <div key={section.id} className="bg-white rounded-lg shadow p-6 border border-gray-100">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{section.title}</h3>
+                      <p className="text-sm text-gray-500">Order: {section.order}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openSectionModal(section)}
+                        className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSection(section.id)}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
 
-            {loading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : footerSections.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No footer sections create yet</div>
-            ) : (
-              <div className="space-y-4">
-                {footerSections.map((section) => (
-                  <div key={section.id} className="bg-white rounded-lg shadow p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold">{section.title}</h3>
-                        <p className="text-sm text-gray-500">Order: {section.order}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openSectionModal(section)}
-                          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSection(section.id)}
-                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                  {/* Links */}
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-sm text-gray-700">Links ({section.links?.length || 0})</h4>
+                      <button
+                        onClick={() => openLinkModal(section.id)}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        + Add Link
+                      </button>
                     </div>
 
-                    {/* Links */}
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-medium text-sm">Links ({section.links?.length || 0})</h4>
-                        <button
-                          onClick={() => openLinkModal(section.id)}
-                          className="btn-secondary text-sm inline-flex items-center gap-1 bg-slate-200 text-slate-900 px-3 py-1 rounded hover:bg-slate-300 transition-colors"
-                        >
-                          <Plus className="h-3 w-3" />
-                          Add
-                        </button>
-                      </div>
-
-                      {section.links && section.links.length > 0 ? (
-                        <div className="space-y-2">
-                          {section.links.map((link) => (
-                            <div key={link.id} className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                              <div>
-                                <p className="font-medium text-sm">{link.label}</p>
-                                <p className="text-xs text-gray-500">{link.href}</p>
-                              </div>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => openLinkModal(section.id, link)}
-                                  className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteLink(link.id)}
-                                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
+                    {section.links && section.links.length > 0 ? (
+                      <div className="space-y-2">
+                        {section.links.map((link) => (
+                          <div key={link.id} className="flex items-center justify-between bg-gray-50 p-3 rounded group">
+                            <div className="overflow-hidden">
+                              <p className="font-medium text-sm truncate">{link.label}</p>
+                              <p className="text-xs text-gray-500 truncate">{link.href}</p>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">No links yet</p>
-                      )}
-                    </div>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => openLinkModal(section.id, link)}
+                                className="p-1 text-slate-400 hover:text-slate-900"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteLink(link.id)}
+                                className="p-1 text-slate-400 hover:text-red-600"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">No links yet</p>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Config Tab */}
-        {activeTab === "config" && (
-          <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Footer Configuration</h2>
-              <button 
-                onClick={() => setShowConfigModal(true)}
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Settings className="h-4 w-4" />
-                Edit Configuration
-              </button>
+                </div>
+              ))}
             </div>
-
-            {footerConfig ? (
-              <div className="bg-white rounded-lg shadow p-6 space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm text-gray-600 mb-2">Description</h3>
-                  <p className="text-gray-900">{footerConfig.description || "Not set"}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-semibold text-sm text-gray-600 mb-2">Contact Phone</h3>
-                    <p className="text-gray-900">{footerConfig.contactPhone || "Not set"}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm text-gray-600 mb-2">Contact Email</h3>
-                    <p className="text-gray-900">{footerConfig.contactEmail || "Not set"}</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm text-gray-600 mb-2">Contact Address</h3>
-                  <p className="text-gray-900">{footerConfig.contactAddress || "Not set"}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">No configuration set</div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Section Modal */}
         {showSectionModal && (
@@ -636,68 +682,181 @@ export default function FooterManagementPage() {
                 </button>
               </div>
 
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    value={configForm.description || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
+              <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+                    <input
+                      type="text"
+                      value={configForm.logo || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, logo: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={configForm.description || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
+                    <input
+                      type="text"
+                      value={configForm.contactPhone || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, contactPhone: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                    <input
+                      type="text"
+                      value={configForm.contactEmail || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, contactEmail: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Address</label>
+                    <input
+                      type="text"
+                      value={configForm.contactAddress || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, contactAddress: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                  <input
-                    type="text"
-                    value={configForm.contactPhone || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, contactPhone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold text-gray-800 mb-3">Newsletter</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={configForm.newsletterTitle || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, newsletterTitle: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                      <input
+                        type="text"
+                        value={configForm.newsletterSubtitle || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, newsletterSubtitle: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                  <input
-                    type="text"
-                    value={configForm.contactEmail || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, contactEmail: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-semibold text-gray-800">Social Links</h4>
+                  </div>
+                  <div className="space-y-2 mb-3">
+                    {configForm.socialLinks?.map((social, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                        <span className="text-sm font-medium w-24 capitalize">{social.platform}</span>
+                        <span className="text-sm text-gray-500 flex-1 truncate">{social.url}</span>
+                        <button
+                          onClick={() => {
+                            const updated = configForm.socialLinks?.filter((_, i) => i !== idx);
+                            setConfigForm({ ...configForm, socialLinks: updated });
+                          }}
+                          className="text-red-500 p-1 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={newSocial.platform}
+                      onChange={(e) => setNewSocial({ ...newSocial, platform: e.target.value })}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option value="facebook">Facebook</option>
+                      <option value="twitter">Twitter</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="youtube">YouTube</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={newSocial.url}
+                      onChange={(e) => setNewSocial({ ...newSocial, url: e.target.value })}
+                      placeholder="https://..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        if (!newSocial.url) return;
+                        const updated = [...(configForm.socialLinks || []), newSocial];
+                        setConfigForm({ ...configForm, socialLinks: updated });
+                        setNewSocial({ platform: "facebook", url: "" });
+                      }}
+                      className="bg-slate-100 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-200"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Address</label>
-                  <input
-                    type="text"
-                    value={configForm.contactAddress || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, contactAddress: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-semibold text-gray-800">Payment Methods</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {configForm.paymentMethods?.map((pm, idx) => (
+                      <div key={idx} className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-sm">
+                        {pm.name}
+                        <button
+                          onClick={() => {
+                            const updated = configForm.paymentMethods?.filter((_, i) => i !== idx);
+                            setConfigForm({ ...configForm, paymentMethods: updated });
+                          }}
+                          className="hover:text-blue-900"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newPayment}
+                      onChange={(e) => setNewPayment(e.target.value)}
+                      placeholder="e.g., Visa, Airtel Money"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        if (!newPayment) return;
+                        const updated = [...(configForm.paymentMethods || []), { name: newPayment }];
+                        setConfigForm({ ...configForm, paymentMethods: updated });
+                        setNewPayment("");
+                      }}
+                      className="bg-slate-100 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-200"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Newsletter Title</label>
-                  <input
-                    type="text"
-                    value={configForm.newsletterTitle || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, newsletterTitle: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Newsletter Subtitle</label>
-                  <textarea
-                    value={configForm.newsletterSubtitle || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, newsletterSubtitle: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={2}
-                  />
-                </div>
-
-                <div>
+                <div className="border-t pt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Copyright Text</label>
                   <input
                     type="text"
@@ -709,7 +868,7 @@ export default function FooterManagementPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-8">
                 <button
                   onClick={() => setShowConfigModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
