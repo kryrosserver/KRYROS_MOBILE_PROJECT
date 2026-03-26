@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Heart, ShoppingCart, Eye, Star, ArrowRight, CreditCard, RefreshCw, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatPrice, resolveImageUrl } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 import { wishlistApi } from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -22,14 +22,13 @@ interface ProductCardProps {
 // Helper to get string values from either format
 function getProductImage(p: any): string {
   if (!p) return '/placeholder.jpg';
-  let url = '/placeholder.jpg';
-  if (typeof p.image === 'string') url = p.image;
-  else if (Array.isArray(p.images) && p.images.length > 0) {
+  if (typeof p.image === 'string') return p.image;
+  if (Array.isArray(p.images) && p.images.length > 0) {
     const first = p.images[0];
-    if (typeof first === 'string') url = first;
-    else if (first && typeof first.url === 'string') url = first.url;
+    if (typeof first === 'string') return first;
+    if (first && typeof first.url === 'string') return first.url;
   }
-  return resolveImageUrl(url);
+  return '/placeholder.jpg';
 }
 
 function getProductBrand(p: any): string {

@@ -821,7 +821,7 @@ export default function CMSPage() {
                         <tr key={idx} className="border-t">
                           <td className="p-2">
                             <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden">
-                              {it.avatar ? <img src={resolveImageUrl(it.avatar)} alt={it.name} className="h-10 w-10 object-cover" /> : null}
+                              {it.avatar ? <img src={it.avatar} alt={it.name} className="h-10 w-10 object-cover" /> : null}
                             </div>
                           </td>
                           <td className="p-2">
@@ -1039,7 +1039,7 @@ export default function CMSPage() {
                         <tr key={idx} className="border-t">
                           <td className="p-2">
                             <div className="h-12 w-20 rounded bg-slate-200 overflow-hidden">
-                              {it.image ? <img src={resolveImageUrl(it.image)} alt={it.title} className="h-12 w-20 object-cover" /> : null}
+                              {it.image ? <img src={it.image} alt={it.title} className="h-12 w-20 object-cover" /> : null}
                             </div>
                           </td>
                           <td className="p-2">
