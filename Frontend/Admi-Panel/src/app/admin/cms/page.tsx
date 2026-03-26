@@ -305,12 +305,14 @@ export default function CMSPage() {
                               try {
                                 // Create immediate local preview
                                 const localUrl = URL.createObjectURL(file);
-                                setForm({ ...form, image: localUrl });
+                                setForm(prev => ({ ...prev, image: localUrl }));
                                 
                                 // Compress and get Base64 for permanent storage
                                 const base64 = await compressImage(file, 1200, 0.85);
-                                setForm({ ...form, image: base64 });
-                                URL.revokeObjectURL(localUrl);
+                                setForm(prev => ({ ...prev, image: base64 }));
+                                
+                                // We don't revoke localUrl immediately because React might still be using it for the preview
+                                // It will be cleaned up when the component unmounts or the file changes
                               } catch (err: any) {
                                 setError(`Image processing failed: ${err.message}`);
                               } finally {
@@ -581,9 +583,19 @@ export default function CMSPage() {
                             <span className="text-xs text-slate-400">Video</span>
                           )
                         ) : banner.image ? (
-                          <img src={resolveImageUrl(banner.image)} alt={banner.title} className="h-full w-full object-cover" />
+                          <img 
+                            src={resolveImageUrl(banner.image)} 
+                            alt={banner.title} 
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Broken+Link';
+                            }}
+                          />
                         ) : (
-                          <ImageIcon className="h-6 w-6 text-slate-300" />
+                          <div className="flex flex-col items-center justify-center">
+                            <ImageIcon className="h-6 w-6 text-slate-300" />
+                            <span className="text-[8px] text-slate-400 uppercase font-bold mt-1">No Image</span>
+                          </div>
                         )}
                       </div>
                     </td>

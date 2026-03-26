@@ -113,12 +113,19 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
               />
               <div className="absolute inset-0 bg-black/40" />
             </div>
-          ) : (
+          ) : heroBanners[currentSlide]?.image ? (
             <img
               src={resolveImageUrl(heroBanners[currentSlide]?.image)}
               alt={heroBanners[currentSlide]?.title}
               className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://placehold.co/1200x600?text=KRYROS+MOBILE+TECH';
+              }}
             />
+          ) : (
+            <div className="absolute inset-0 bg-kryros-primary flex items-center justify-center">
+              <span className="text-white/20 text-4xl font-black uppercase tracking-widest">KRYROS</span>
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         </motion.div>

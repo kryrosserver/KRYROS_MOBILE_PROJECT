@@ -15,20 +15,28 @@ export function formatPrice(price: number, currency = 'USD'): string {
 }
 
 export function resolveImageUrl(url?: string): string {
-  if (!url) return "";
+  if (!url || typeof url !== 'string') return "";
   
-  // If it's already a full URL or a Data URL (Base64), return it as is
-  if (url.startsWith("http") || url.startsWith("data:") || url.startsWith("blob:")) {
+  // If it's already a full URL (http/https), a Data URL (Base64), or a blob URL, return it as is
+  if (
+    url.startsWith("http") || 
+    url.startsWith("https") || 
+    url.startsWith("data:") || 
+    url.startsWith("blob:") ||
+    url.startsWith("//")
+  ) {
     return url;
   }
   
   // If it's a relative path (e.g., /uploads/...), prefix it with the backend URL
   const rawApi = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-hxfp.onrender.com";
-  const baseUrl = rawApi.endsWith("/api") ? rawApi.replace("/api", "") : rawApi;
+  // Remove trailing /api if present to get the base server URL
+  const baseUrl = rawApi.replace(/\/api$/, "");
   
-  // Clean up double slashes
-  const path = url.startsWith("/") ? url : `/${url}`;
-  return `${baseUrl}${path}`;
+  // Ensure the path starts with a single slash
+  const cleanPath = url.startsWith("/") ? url : `/${url}`;
+  
+  return `${baseUrl}${cleanPath}`;
 }
 
 export function formatDate(date: Date | string): string {
