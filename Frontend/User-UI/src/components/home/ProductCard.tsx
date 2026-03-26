@@ -103,6 +103,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const unitPrice = product?.price / unitsPerPack;
   const unitPriceInfo = convertPrice(unitPrice);
 
+  const isCreditPage = typeof window !== 'undefined' && window.location.pathname.includes('/credit');
+  const isWholesalePage = typeof window !== 'undefined' && window.location.pathname.includes('/wholesale');
+
   if (viewMode === "list") {
     return (
       <div 
@@ -173,30 +176,45 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           
           <div className="mt-4 flex items-center justify-between">
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-slate-900">
-                  {isUSD ? formatPrice(Number(product?.price ?? 0)) : priceInfo.formatted}
-                </span>
-                {isWholesale && unitsPerPack > 1 && (
-                  <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
-                    Pack of {unitsPerPack}
-                  </span>
-                )}
-                {product?.originalPrice && (
-                  <span className="text-sm text-slate-500 line-through">
-                    {isUSD ? formatPrice(Number(product.originalPrice)) : originalPriceInfo?.formatted}
-                  </span>
-                )}
-              </div>
-              {isWholesale && unitsPerPack > 1 && (
-                <span className="text-[10px] text-slate-500 font-medium">
-                  {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} per unit
-                </span>
-              )}
-              {!isUSD && (
-                <span className="text-[10px] text-slate-400 font-medium italic">
-                  ≈ {formatPrice(Number(product?.price || 0))} USD
-                </span>
+              {isCreditPage && product.allowCredit ? (
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Deposit:</span>
+                    <span className="text-lg font-bold text-green-600">{convertPrice(Number(product.creditMinimum)).formatted}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Monthly:</span>
+                    <span className="text-sm font-bold text-blue-600">{product.creditMessage || 'Contact Us'}</span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-bold text-slate-900">
+                      {isUSD ? formatPrice(Number(product?.price ?? 0)) : priceInfo.formatted}
+                    </span>
+                    {isWholesale && unitsPerPack > 1 && (
+                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                        Pack of {unitsPerPack}
+                      </span>
+                    )}
+                    {product?.originalPrice && (
+                      <span className="text-sm text-slate-500 line-through">
+                        {isUSD ? formatPrice(Number(product.originalPrice)) : originalPriceInfo?.formatted}
+                      </span>
+                    )}
+                  </div>
+                  {isWholesale && unitsPerPack > 1 && (
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} per unit
+                    </span>
+                  )}
+                  {!isUSD && (
+                    <span className="text-[10px] text-slate-400 font-medium italic">
+                      ≈ {formatPrice(Number(product?.price || 0))} USD
+                    </span>
+                  )}
+                </>
               )}
             </div>
             <div className="flex gap-2">
@@ -325,30 +343,45 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </Link>
 
         <div className="mt-2 flex flex-col">
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
-              {isUSD ? formatPrice(Number(product?.price || 0)) : priceInfo.formatted}
-            </span>
-            {isWholesale && unitsPerPack > 1 && (
-              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded">
-                Pack of {unitsPerPack}
-              </span>
-            )}
-            {product?.originalPrice && (
-              <span className="text-xs text-slate-400 line-through">
-                {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
-              </span>
-            )}
-          </div>
-          {isWholesale && unitsPerPack > 1 && (
-            <span className="text-[10px] text-slate-500 font-medium">
-              {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} / unit
-            </span>
-          )}
-          {!isUSD && (
-            <span className="text-[10px] text-slate-400 font-medium">
-              ≈ {formatPrice(Number(product?.price || 0))} USD
-            </span>
+          {isCreditPage && product.allowCredit ? (
+            <div className="space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
+              <div className="flex items-baseline justify-between">
+                <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">Deposit:</span>
+                <span className="text-sm font-black text-green-600">{convertPrice(Number(product.creditMinimum)).formatted}</span>
+              </div>
+              <div className="flex items-baseline justify-between border-t border-slate-100 pt-1">
+                <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">Monthly:</span>
+                <span className="text-[11px] font-black text-blue-600">{product.creditMessage || 'Contact Us'}</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
+                  {isUSD ? formatPrice(Number(product?.price || 0)) : priceInfo.formatted}
+                </span>
+                {isWholesale && unitsPerPack > 1 && (
+                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded">
+                    Pack of {unitsPerPack}
+                  </span>
+                )}
+                {product?.originalPrice && (
+                  <span className="text-xs text-slate-400 line-through">
+                    {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
+                  </span>
+                )}
+              </div>
+              {isWholesale && unitsPerPack > 1 && (
+                <span className="text-[10px] text-slate-500 font-medium">
+                  {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} / unit
+                </span>
+              )}
+              {!isUSD && (
+                <span className="text-[10px] text-slate-400 font-medium">
+                  ≈ {formatPrice(Number(product?.price || 0))} USD
+                </span>
+              )}
+            </>
           )}
         </div>
 

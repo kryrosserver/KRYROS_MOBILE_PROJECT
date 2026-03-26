@@ -527,23 +527,29 @@ export default function ProductsPage() {
                   Allow Credit
                 </label>
                 {form.allowCredit && (
-                  <>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Credit Minimum Amount"
-                      value={form.creditMinimum}
-                      onChange={(e) => setForm({ ...form, creditMinimum: e.target.value })}
-                      className="admin-input w-full"
-                    />
-                    <input
-                      placeholder="Custom Credit Message (e.g. $500/month)"
-                      value={form.creditMessage}
-                      onChange={(e) => setForm({ ...form, creditMessage: e.target.value })}
-                      className="admin-input w-full"
-                    />
-                  </>
+                  <div className="grid grid-cols-2 gap-3 pl-6 border-l-2 border-green-200 w-full mt-2">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Down Payment (Min)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="e.g. 1500"
+                        value={form.creditMinimum}
+                        onChange={(e) => setForm({ ...form, creditMinimum: e.target.value })}
+                        className="admin-input w-full"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Monthly Installment</label>
+                      <input
+                        placeholder="e.g. 250/month"
+                        value={form.creditMessage}
+                        onChange={(e) => setForm({ ...form, creditMessage: e.target.value })}
+                        className="admin-input w-full"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -1371,22 +1377,28 @@ export default function ProductsPage() {
                       Enable Installments / Credit
                     </label>
                     {editForm.allowCredit && (
-                      <div className="grid grid-cols-1 gap-3 pl-6 border-l-2 border-green-200">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="Min Monthly Payment"
-                          value={editForm.creditMinimum}
-                          onChange={(e) => setEditForm({ ...editForm, creditMinimum: e.target.value })}
-                          className="admin-input w-full"
-                        />
-                        <input
-                          placeholder="Custom Message (e.g. $500/month)"
-                          value={editForm.creditMessage}
-                          onChange={(e) => setEditForm({ ...editForm, creditMessage: e.target.value })}
-                          className="admin-input w-full"
-                        />
+                      <div className="grid grid-cols-2 gap-3 pl-6 border-l-2 border-green-200">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Down Payment (Min)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="e.g. 1500"
+                            value={editForm.creditMinimum}
+                            onChange={(e) => setEditForm({ ...editForm, creditMinimum: e.target.value })}
+                            className="admin-input w-full"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Monthly Installment</label>
+                          <input
+                            placeholder="e.g. 250/month"
+                            value={editForm.creditMessage}
+                            onChange={(e) => setEditForm({ ...editForm, creditMessage: e.target.value })}
+                            className="admin-input w-full"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
