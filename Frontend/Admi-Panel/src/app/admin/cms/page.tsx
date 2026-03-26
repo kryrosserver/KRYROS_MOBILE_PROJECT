@@ -54,6 +54,9 @@ export default function CMSPage() {
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingBanner, setEditingBanner] = useState<any>(null);
+  const [imageSource, setImageSource] = useState<"url" | "upload">("url");
+  const [videoSource, setVideoSource] = useState<"url" | "upload">("url");
   const [form, setForm] = useState<{ 
     title: string; 
     subtitle?: string; 
@@ -145,8 +148,12 @@ export default function CMSPage() {
         </div>
         {activeTab === "banners" && (
           <button
-            onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            onClick={() => {
+              setEditingBanner(null);
+              setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
+              setShowAdd(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold shadow-sm"
           >
             <Plus className="h-4 w-4" />
             Add New Banner
@@ -156,6 +163,13 @@ export default function CMSPage() {
 
       {showAdd && (
         <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900">{editingBanner ? "Edit Banner" : "Add New Banner"}</h2>
+            <button onClick={() => setShowAdd(false)} className="text-slate-400 hover:text-slate-600">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
@@ -184,122 +198,194 @@ export default function CMSPage() {
                 placeholder="Shop Now"
               />
             </div>
-            <div className="md:col-span-2">
+            
+            <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Media Type</label>
-              <select
-                value={form.mediaType}
-                onChange={(e) => setForm({ ...form, mediaType: e.target.value })}
-                className="admin-input"
-              >
-                <option value="image">Image</option>
-                <option value="video">Video</option>
-              </select>
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-lg">
+                <button
+                  onClick={() => setForm({ ...form, mediaType: "image" })}
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
+                    form.mediaType === "image" ? "bg-white text-green-600 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Image
+                </button>
+                <button
+                  onClick={() => setForm({ ...form, mediaType: "video" })}
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
+                    form.mediaType === "video" ? "bg-white text-green-600 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Video
+                </button>
+              </div>
             </div>
+
             {form.mediaType === 'image' ? (
-              <>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-                  <input
-                    value={form.image}
-                    onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    className="admin-input"
-                    placeholder="https://... or upload below"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Or Upload Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        try {
-                          const res = await fetch('/api/upload', {
-                            method: 'POST',
-                            body: formData,
-                          });
-                          const data = await res.json();
-                          if (data.url) {
-                            setForm({ ...form, image: data.url });
-                          }
-                        } catch (err) {
-                          console.error('Upload failed', err);
-                        }
-                      }
-                    }}
-                    className="admin-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                  />
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Image Source</label>
+                <div className="flex gap-4 items-start">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+                      <button
+                        onClick={() => setImageSource("url")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                          imageSource === "url" ? "bg-white text-green-600 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        URL Link
+                      </button>
+                      <button
+                        onClick={() => setImageSource("upload")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                          imageSource === "upload" ? "bg-white text-green-600 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Upload File
+                      </button>
+                    </div>
+                    {imageSource === "url" ? (
+                      <input
+                        value={form.image}
+                        onChange={(e) => setForm({ ...form, image: e.target.value })}
+                        className="admin-input"
+                        placeholder="https://... (e.g., from Cloudinary, S3, etc.)"
+                      />
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setSaving(true);
+                              try {
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                const res = await fetch('/api/upload', {
+                                  method: 'POST',
+                                  body: formData,
+                                });
+                                const data = await res.json();
+                                if (data.url) {
+                                  setForm({ ...form, image: data.url });
+                                }
+                              } catch (err) {
+                                setError("Image upload failed");
+                              } finally {
+                                setSaving(false);
+                              }
+                            }
+                          }}
+                          className="admin-input file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                        />
+                      </div>
+                    )}
+                  </div>
                   {form.image && (
-                    <div className="mt-2 relative h-20 w-32">
-                      <img src={form.image} alt="Preview" className="h-full w-full object-cover rounded" />
+                    <div className="h-20 w-32 relative flex-shrink-0 bg-slate-100 rounded border border-slate-200 overflow-hidden group">
+                      <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, image: '' })}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        className="absolute top-1 right-1 bg-red-500/80 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        ×
+                        <X className="h-3 w-3" />
                       </button>
                     </div>
                   )}
                 </div>
-              </>
+              </div>
             ) : (
-              <>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Video URL</label>
-                  <input
-                    value={form.videoUrl || ''}
-                    onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
-                    className="admin-input"
-                    placeholder="https://www.youtube.com/embed/... or https://..."
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Or Upload Video</label>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        try {
-                          const res = await fetch('/api/upload', {
-                            method: 'POST',
-                            body: formData,
-                          });
-                          const data = await res.json();
-                          if (data.url) {
-                            setForm({ ...form, videoUrl: data.url });
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Video Source</label>
+                <div className="flex gap-4 items-start">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+                      <button
+                        onClick={() => setVideoSource("url")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                          videoSource === "url" ? "bg-white text-green-600 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        URL Link
+                      </button>
+                      <button
+                        onClick={() => setVideoSource("upload")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                          videoSource === "upload" ? "bg-white text-green-600 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Upload File
+                      </button>
+                    </div>
+                    {videoSource === "url" ? (
+                      <input
+                        value={form.videoUrl || ''}
+                        onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                        className="admin-input"
+                        placeholder="e.g., https://www.youtube.com/embed/..."
+                      />
+                    ) : (
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setSaving(true);
+                            try {
+                              const formData = new FormData();
+                              formData.append('file', file);
+                              const res = await fetch('/api/upload', {
+                                method: 'POST',
+                                body: formData,
+                              });
+                              const data = await res.json();
+                              if (data.url) {
+                                setForm({ ...form, videoUrl: data.url });
+                              }
+                            } catch (err) {
+                              setError("Video upload failed");
+                            } finally {
+                              setSaving(false);
+                            }
                           }
-                        } catch (err) {
-                          console.error('Upload failed', err);
-                        }
-                      }
-                    }}
-                    className="admin-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                  />
+                        }}
+                        className="admin-input file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                      />
+                    )}
+                  </div>
                   {form.videoUrl && (
-                    <div className="mt-2 text-sm text-green-600">Video added ✓</div>
+                    <div className="h-20 w-32 relative flex-shrink-0 bg-slate-100 rounded border border-slate-200 overflow-hidden flex items-center justify-center">
+                      <video src={form.videoUrl} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                        <Megaphone className="h-6 w-6 text-white" />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, videoUrl: '' })}
+                        className="absolute top-1 right-1 bg-red-500/80 text-white rounded-full p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
                   )}
                 </div>
-              </>
+              </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Link</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Target URL</label>
               <input
                 value={form.link || ""}
                 onChange={(e) => setForm({ ...form, link: e.target.value })}
                 className="admin-input"
-                placeholder="/shop"
+                placeholder="/shop or full URL"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Position</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Display Order</label>
               <input
                 type="number"
                 value={form.position || 0}
@@ -308,54 +394,66 @@ export default function CMSPage() {
                 placeholder="0"
               />
             </div>
-            <div className="flex items-end">
-              <label className="inline-flex items-center gap-2">
+            <div className="flex items-center pt-6">
+              <label className="inline-flex items-center gap-2 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={!!form.isActive}
                   onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                  className="w-4 h-4 text-green-600 border-slate-300 rounded focus:ring-green-500"
                 />
-                Active
+                <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Visible on Site</span>
               </label>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
             <button
               onClick={async () => {
                 try {
                   setSaving(true);
                   setError(null);
                   setMessage(null);
-                  const res = await fetch("/internal/cms/banners", {
-                    method: "POST",
+                  const method = editingBanner ? "PUT" : "POST";
+                  const url = editingBanner 
+                    ? `/internal/cms/banners/${editingBanner.id}` 
+                    : "/internal/cms/banners";
+                    
+                  const res = await fetch(url, {
+                    method,
                     credentials: "same-origin",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(form),
                   });
                   const body = await res.json().catch(() => ({}));
-                  if (!res.ok) throw new Error(body?.error || "Failed to create banner");
+                  if (!res.ok) throw new Error(body?.error || `Failed to ${editingBanner ? 'update' : 'create'} banner`);
                   setShowAdd(false);
+                  setEditingBanner(null);
                   setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
-                  setMessage("Banner created");
+                  setMessage(`Banner ${editingBanner ? 'updated' : 'created'} successfully`);
                   await loadBanners();
                 } catch (e: any) {
-                  setError(e?.message || "Failed to create banner");
+                  setError(e?.message || "Operation failed");
                 } finally {
                   setSaving(false);
                 }
               }}
               disabled={saving}
-              className="btn-primary disabled:opacity-50"
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold disabled:opacity-50 shadow-sm"
             >
-              {saving ? "Creating..." : "Create"}
+              {saving ? (editingBanner ? "Updating..." : "Creating...") : (editingBanner ? "Update Banner" : "Create Banner")}
             </button>
-            <button onClick={() => setShowAdd(false)} className="btn-secondary">
+            <button 
+              onClick={() => {
+                setShowAdd(false);
+                setEditingBanner(null);
+              }} 
+              className="px-6 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-all font-semibold"
+            >
               Cancel
             </button>
-           
           </div>
-          {error && <div className="text-sm text-red-600">{error}</div>}
-          {message && <div className="text-sm text-green-600">{message}</div>}
+          {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-100">{error}</div>}
+          {message && <div className="p-3 text-sm text-green-600 bg-green-50 rounded-lg border border-green-100">{message}</div>}
         </div>
       )}
 
@@ -478,6 +576,7 @@ export default function CMSPage() {
                         </button>
                         <button 
                           onClick={() => {
+                            setEditingBanner(banner);
                             setForm({
                               title: banner.title,
                               subtitle: banner.subtitle || "",
@@ -489,6 +588,17 @@ export default function CMSPage() {
                               position: banner.position,
                               isActive: banner.isActive
                             });
+                            // If it's a relative path (e.g. /uploads/...) or data:..., it's likely an upload
+                            if (banner.image && (banner.image.startsWith("/") || banner.image.startsWith("data:"))) {
+                              setImageSource("upload");
+                            } else {
+                              setImageSource("url");
+                            }
+                            if (banner.videoUrl && (banner.videoUrl.startsWith("/") || banner.videoUrl.startsWith("data:"))) {
+                              setVideoSource("upload");
+                            } else {
+                              setVideoSource("url");
+                            }
                             setShowAdd(true);
                           }}
                           className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
