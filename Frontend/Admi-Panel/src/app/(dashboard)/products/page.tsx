@@ -24,6 +24,7 @@ type Product = {
   hasInstallmentOptions?: boolean;
   installmentOptionsText?: string | null;
   wholesalePrice?: number | null;
+  isWholesaleOnly?: boolean;
   allowCredit?: boolean;
   creditMinimum?: number | string | null;
   creditMessage?: string | null;
@@ -57,7 +58,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [tab, setTab] = useState<"all" | "featured" | "flash" | "credit">("all");
+  const [tab, setTab] = useState<"all" | "featured" | "flash" | "credit" | "wholesale">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -226,8 +227,19 @@ export default function ProductsPage() {
             <h2 className="text-lg font-semibold text-slate-900">Add New Product</h2>
             <p className="text-sm text-slate-500">Upload product details and images</p>
           </div>
-          <button onClick={() => setShowCreate(v => !v)} className="btn-secondary">
-            {showCreate ? "Close" : "Add Product"}
+          <button onClick={() => {
+            if (!showCreate) {
+              // Set defaults based on active tab when opening
+              setForm(prev => ({
+                ...prev,
+                isWholesaleOnly: tab === "wholesale",
+                allowCredit: tab === "credit",
+                isFeatured: tab === "featured"
+              }));
+            }
+            setShowCreate(v => !v);
+          }} className="btn-secondary">
+            {showCreate ? "Close" : tab === "wholesale" ? "Add Wholesale Product" : tab === "credit" ? "Add Credit Product" : "Add Product"}
           </button>
         </div>
         {showCreate && (
@@ -778,22 +790,28 @@ export default function ProductsPage() {
           All
         </button>
         <button
+          onClick={() => setTab("wholesale")}
+          className={`px-3 py-1.5 rounded ${tab === "wholesale" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700"}`}
+        >
+          Wholesale
+        </button>
+        <button
+          onClick={() => setTab("credit")}
+          className={`px-3 py-1.5 rounded ${tab === "credit" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}
+        >
+          Credit
+        </button>
+        <button
           onClick={() => setTab("featured")}
-          className={`px-3 py-1.5 rounded ${tab === "featured" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
+          className={`px-3 py-1.5 rounded ${tab === "featured" ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-700"}`}
         >
           Featured
         </button>
         <button
           onClick={() => setTab("flash")}
-          className={`px-3 py-1.5 rounded ${tab === "flash" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
+          className={`px-3 py-1.5 rounded ${tab === "flash" ? "bg-red-500 text-white" : "bg-slate-100 text-slate-700"}`}
         >
           Flash Sales
-        </button>
-        <button
-          onClick={() => setTab("credit")}
-          className={`px-3 py-1.5 rounded ${tab === "credit" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
-        >
-          Credit
         </button>
       </div>
 
@@ -833,7 +851,13 @@ export default function ProductsPage() {
                     <td className="text-right"><div className="h-8 bg-slate-100 rounded-lg w-20 ml-auto"></div></td>
                   </tr>
                 ))
-              ) : (tab === "featured" ? products.filter(p => !!p.isFeatured) : tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : tab === "credit" ? products.filter(p => !!p.allowCredit) : products).map((p) => (
+              ) : (
+                tab === "featured" ? products.filter(p => !!p.isFeatured) : 
+                tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
+                tab === "credit" ? products.filter(p => !!p.allowCredit) : 
+                tab === "wholesale" ? products.filter(p => !!p.isWholesaleOnly) :
+                products
+              ).map((p) => (
                 <tr key={p.id}>
                   <td>
                     <div className="h-12 w-12 rounded-lg overflow-hidden border bg-slate-50">

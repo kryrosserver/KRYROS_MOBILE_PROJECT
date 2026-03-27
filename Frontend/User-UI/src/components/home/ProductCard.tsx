@@ -66,7 +66,15 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const displayReviews = getProductReviews(product);
   const displayCategory = getProductCategory(product);
 
-  const basePrice = product?.wholesalePrice ? Number(product.wholesalePrice) : Number(product?.price ?? 0);
+  const isCreditPage = typeof window !== 'undefined' && window.location.pathname.includes('/credit');
+  const isWholesalePage = typeof window !== 'undefined' && window.location.pathname.includes('/wholesale');
+
+  // Logic: If we are on wholesale page, use wholesalePrice if available. 
+  // Otherwise, use regular price.
+  const basePrice = (isWholesalePage && product?.wholesalePrice) 
+    ? Number(product.wholesalePrice) 
+    : Number(product?.price ?? 0);
+
   const priceInfo = convertPrice(basePrice);
   const originalPriceInfo = product?.originalPrice ? convertPrice(Number(product.originalPrice)) : null;
   const isUSD = !selectedCountry || selectedCountry.code === "US";
@@ -100,11 +108,8 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
   const isWholesale = product?.isWholesaleOnly;
   const unitsPerPack = product?.unitsPerPack || 1;
-  const unitPrice = product?.price / unitsPerPack;
+  const unitPrice = basePrice / unitsPerPack;
   const unitPriceInfo = convertPrice(unitPrice);
-
-  const isCreditPage = typeof window !== 'undefined' && window.location.pathname.includes('/credit');
-  const isWholesalePage = typeof window !== 'undefined' && window.location.pathname.includes('/wholesale');
 
   if (viewMode === "list") {
     return (
@@ -191,12 +196,19 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 <>
                   <div className="flex items-center gap-2">
                     <span className="text-xl font-bold text-slate-900">
-                      {isUSD ? formatPrice(Number(product?.price ?? 0)) : priceInfo.formatted}
+                      {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
                     </span>
                     {isWholesale && unitsPerPack > 1 && (
-                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
-                        Pack of {unitsPerPack}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                          Pack of {unitsPerPack}
+                        </span>
+                        {product?.wholesaleMoq > 1 && (
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            MOQ: {product.wholesaleMoq} Packs
+                          </span>
+                        )}
+                      </div>
                     )}
                     {product?.originalPrice && (
                       <span className="text-sm text-slate-500 line-through">
@@ -211,7 +223,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                   )}
                   {!isUSD && (
                     <span className="text-[10px] text-slate-400 font-medium italic">
-                      ≈ {formatPrice(Number(product?.price || 0))} USD
+                      ≈ {formatPrice(basePrice)} USD
                     </span>
                   )}
                 </>
@@ -358,12 +370,19 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             <>
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
-                  {isUSD ? formatPrice(Number(product?.price || 0)) : priceInfo.formatted}
+                  {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
                 </span>
                 {isWholesale && unitsPerPack > 1 && (
-                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded">
-                    Pack of {unitsPerPack}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded whitespace-nowrap">
+                      Pack of {unitsPerPack}
+                    </span>
+                    {product?.wholesaleMoq > 1 && (
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
+                        Min: {product.wholesaleMoq} Packs
+                      </span>
+                    )}
+                  </div>
                 )}
                 {product?.originalPrice && (
                   <span className="text-xs text-slate-400 line-through">
@@ -378,7 +397,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               )}
               {!isUSD && (
                 <span className="text-[10px] text-slate-400 font-medium">
-                  ≈ {formatPrice(Number(product?.price || 0))} USD
+                  ≈ {formatPrice(basePrice)} USD
                 </span>
               )}
             </>
