@@ -69,32 +69,11 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
   if (credit) title = "Installment Products";
 
   return (
-    <div className="container-custom py-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4 border-b pb-6 border-slate-100">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{catSection?.title || title}</h1>
-          <p className="text-slate-500 mt-2 font-medium">{catSection?.subtitle || "Browse our premium collection by category and brand"}</p>
-        </div>
-        <div className="flex items-center bg-slate-100/80 p-1.5 rounded-xl border border-slate-200 shadow-sm">
-          <Link 
-            href="/shop" 
-            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${!featured && !credit ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
-          >
-            All Shop
-          </Link>
-          <Link 
-            href="/shop?featured=true" 
-            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${featured ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
-          >
-            Featured
-          </Link>
-          <Link 
-            href="/shop?credit=true" 
-            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${credit ? "bg-white text-green-600 shadow-md" : "text-slate-600 hover:text-slate-900"}`}
-          >
-            Installments
-          </Link>
-        </div>
+    <div className="container-custom py-12">
+      <div className="flex flex-col items-center justify-center mb-12">
+        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight uppercase text-center">
+          {catSection?.title || title}
+        </h1>
       </div>
 
       <CategoryGrid categories={categories} />
