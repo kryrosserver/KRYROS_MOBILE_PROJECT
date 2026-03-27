@@ -10,6 +10,7 @@ import { AuthProvider } from '@/providers/AuthProvider'
 import { CurrencyProvider } from '@/providers/CurrencyProvider'
 import { Toaster } from '@/components/ui/toaster'
 import WhatsAppWidget from '@/components/whatsapp/WhatsAppWidget'
+import { NewsletterPopup } from '@/components/common/NewsletterPopup'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -80,6 +81,7 @@ export default function RootLayout({
                   <MobileBottomNav />
                   <Footer />
                 </div>
+                <NewsletterPopup />
                 <Toaster />
               </CartProvider>
             </CurrencyProvider>
