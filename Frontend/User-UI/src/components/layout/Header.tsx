@@ -113,6 +113,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
   const [wishlistCount, setWishlistCount] = useState<number>(0)
@@ -122,6 +123,7 @@ export function Header() {
   
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
+  const categoryPickerRef = useRef<HTMLDivElement>(null)
   const { getItemCount } = useCart()
   const { countries, selectedCountry, setCountry } = useCurrency()
 
@@ -154,6 +156,9 @@ export function Header() {
       }
       if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
         setAccountOpen(false)
+      }
+      if (categoryPickerRef.current && !categoryPickerRef.current.contains(event.target as Node)) {
+        setCategoryDropdownOpen(false)
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
@@ -423,30 +428,72 @@ export function Header() {
 
         {/* Mobile Search Bar - Always Visible on Mobile */}
         <div className="pb-4 lg:hidden">
-          <div className="flex items-stretch overflow-hidden rounded-lg border border-slate-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all bg-white shadow-sm">
+          <div className="flex items-stretch overflow-visible rounded-lg border border-slate-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all bg-white shadow-sm h-11">
             <input
               type="text"
               placeholder="Search for products"
-              className="w-full bg-white px-4 py-2.5 text-sm focus:outline-none min-w-0"
+              className="flex-1 bg-white px-4 py-0 text-sm focus:outline-none min-w-0 h-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
             />
-            <div className="flex items-center border-l border-slate-100 px-3 bg-slate-50/50 relative">
-              <select 
-                className="bg-transparent text-[10px] font-black text-slate-600 focus:outline-none uppercase appearance-none pr-5 relative z-10 cursor-pointer"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+            
+            <div className="flex items-center border-l border-slate-100 h-full relative" ref={categoryPickerRef}>
+              <button 
+                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                className="flex items-center gap-2 px-4 h-full bg-slate-50/50 hover:bg-slate-100 transition-colors"
               >
-                <option value="">ALL</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.slug}>{cat.name}</option>
-                ))}
-              </select>
-              <ChevronDown className="h-3 w-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                  {selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name || "ALL" : "ALL"}
+                </span>
+                <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {categoryDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-56 bg-white rounded-xl shadow-2xl border border-slate-100 z-[100] overflow-hidden"
+                  >
+                    <div className="p-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("");
+                          setCategoryDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between ${
+                          selectedCategory === "" ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        ALL
+                        {selectedCategory === "" && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
+                      </button>
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            setSelectedCategory(cat.slug);
+                            setCategoryDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between ${
+                            selectedCategory === cat.slug ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"
+                          }`}
+                        >
+                          {cat.name}
+                          {selectedCategory === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
             <button 
-              className="bg-blue-600 px-5 text-white flex items-center justify-center transition-colors hover:bg-blue-700 active:scale-95"
+              className="bg-blue-600 px-5 text-white flex items-center justify-center transition-colors hover:bg-blue-700 active:scale-95 h-full"
               onClick={() => handleSearch(searchQuery)}
             >
               <Search className="h-4 w-4" />

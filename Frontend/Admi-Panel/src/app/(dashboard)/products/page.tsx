@@ -92,6 +92,8 @@ export default function ProductsPage() {
     creditMessage: "",
     deliveryInfo: "",
     warrantyInfo: "",
+    flashSalePrice: "",
+    flashSaleEnd: "",
     images: [] as string[],
     specifications: [] as { key: string; value: string }[],
     wholesaleTiers: [] as { minQuantity: number; price: number }[],
@@ -128,6 +130,8 @@ export default function ProductsPage() {
     creditMessage: "",
     deliveryInfo: "",
     warrantyInfo: "",
+    flashSalePrice: "",
+    flashSaleEnd: "",
     images: [] as string[],
     specifications: [] as { key: string; value: string }[],
     wholesaleTiers: [] as { minQuantity: number; price: number }[],
@@ -586,6 +590,8 @@ export default function ProductsPage() {
                         if (form.creditMessage) formData.append("creditMessage", form.creditMessage);
                         if (form.deliveryInfo) formData.append("deliveryInfo", form.deliveryInfo);
                         if (form.warrantyInfo) formData.append("warrantyInfo", form.warrantyInfo);
+                        if (form.flashSalePrice) formData.append("flashSalePrice", String(Number(form.flashSalePrice)));
+                        if (form.flashSaleEnd) formData.append("flashSaleEnd", form.flashSaleEnd);
                         if (form.specifications.length > 0) formData.append("specifications", JSON.stringify(form.specifications));
 
                         if (files.length > 0) {
@@ -652,6 +658,8 @@ export default function ProductsPage() {
                           creditMessage: "",
                           deliveryInfo: "",
                           warrantyInfo: "",
+                          flashSalePrice: "",
+                          flashSaleEnd: "",
                           images: [],
                           specifications: [],
                           wholesaleTiers: [] as { minQuantity: number; price: number }[],
@@ -878,6 +886,8 @@ export default function ProductsPage() {
                           creditMessage: p.creditMessage || "",
                           deliveryInfo: p.deliveryInfo || "",
                           warrantyInfo: p.warrantyInfo || "",
+                          flashSalePrice: String((p as any).flashSalePrice ?? ""),
+                          flashSaleEnd: p.flashSaleEnd ? new Date(p.flashSaleEnd).toISOString().slice(0,16) : "",
                           specifications: typeof (p as any).specifications === 'string' 
                             ? JSON.parse((p as any).specifications) 
                             : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
