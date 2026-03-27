@@ -221,566 +221,459 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <div className="admin-card p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">Add New Product</h2>
-            <p className="text-sm text-slate-500">Upload product details and images</p>
+      {tab !== "all" && (
+        <div className="admin-card p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {tab === "wholesale" ? "Add Wholesale Product" : 
+                 tab === "credit" ? "Add Credit Product" : 
+                 tab === "flash" ? "Add Flash Sale Product" : 
+                 tab === "featured" ? "Add Featured Product" : "Add New Product"}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {tab === "wholesale" ? "Upload products specifically for wholesale deals" : 
+                 tab === "credit" ? "Upload products with installment payment options" : 
+                 "Upload product details and images"}
+              </p>
+            </div>
+            <button onClick={() => {
+              if (!showCreate) {
+                // Set defaults based on active tab when opening
+                setForm(prev => ({
+                  ...prev,
+                  isWholesaleOnly: tab === "wholesale",
+                  allowCredit: tab === "credit",
+                  isFeatured: tab === "featured",
+                  isFlashSale: tab === "flash"
+                }));
+              }
+              setShowCreate(v => !v);
+            }} className="btn-secondary">
+              {showCreate ? "Close" : tab === "wholesale" ? "Add Wholesale Product" : tab === "credit" ? "Add Credit Product" : "Add Product"}
+            </button>
           </div>
-          <button onClick={() => {
-            if (!showCreate) {
-              // Set defaults based on active tab when opening
-              setForm(prev => ({
-                ...prev,
-                isWholesaleOnly: tab === "wholesale",
-                allowCredit: tab === "credit",
-                isFeatured: tab === "featured"
-              }));
-            }
-            setShowCreate(v => !v);
-          }} className="btn-secondary">
-            {showCreate ? "Close" : tab === "wholesale" ? "Add Wholesale Product" : tab === "credit" ? "Add Credit Product" : "Add Product"}
-          </button>
-        </div>
-        {showCreate && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <input
-                placeholder="Product name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="admin-input w-full"
-              />
-              <input
-                placeholder="SKU"
-                value={form.sku}
-                onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                className="admin-input w-full"
-              />
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Retail Price (USD)</label>
+          {showCreate && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="Retail Price"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="Product name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="admin-input w-full"
                 />
-              </div>
-              <textarea
-                placeholder="Description"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="admin-input w-full h-24"
-              />
-              <textarea
-                placeholder="Short Description (Optional - shows below product title)"
-                value={form.shortDescription}
-                onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-                className="admin-input w-full h-16"
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={form.categorySlug}
-                  onChange={(e) => setForm({ ...form, categorySlug: e.target.value })}
+                <input
+                  placeholder="SKU"
+                  value={form.sku}
+                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
                   className="admin-input w-full"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(c => (
-                    <option key={c.id} value={c.slug}>{c.name}</option>
-                  ))}
-                </select>
-                <select
-                  value={form.brandId}
-                  onChange={(e) => setForm({ ...form, brandId: e.target.value })}
-                  className="admin-input w-full"
-                >
-                  <option value="">Select Brand (Optional)</option>
-                  {brands.map(b => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.isActive}
-                    onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                  />
-                  Active
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.isFeatured}
-                    onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
-                  />
-                  Featured
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.isNew}
-                    onChange={(e) => setForm({ ...form, isNew: e.target.checked })}
-                  />
-                  New Badge
-                </label>
+                />
+                
+                {/* Retail Price - Hidden for Wholesale Only to avoid confusion, or keep if base is needed */}
                 <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Retail Price (USD)</label>
                   <input
                     type="number"
-                    placeholder="Discount %"
-                    value={form.discountPercentage}
-                    onChange={(e) => setForm({ ...form, discountPercentage: e.target.value })}
-                    className="admin-input w-24"
-                  />
-                </div>
-              </div>
-
-              {/* Stock Scarcity Section */}
-              <div className="border-t pt-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">Stock Scarcity Logic</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="number"
-                    placeholder="Total Stock Capacity"
-                    value={form.stockTotal}
-                    onChange={(e) => setForm({ ...form, stockTotal: e.target.value })}
-                    className="admin-input w-full"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Current Stock"
-                    value={form.stockCurrent}
-                    onChange={(e) => setForm({ ...form, stockCurrent: e.target.value })}
+                    min="0"
+                    step="0.01"
+                    placeholder="Retail Price"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
                     className="admin-input w-full"
                   />
                 </div>
-              </div>
 
-              {/* Wholesale Pricing Section */}
-              <div className="border-t pt-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">Upsell & Bundle Logic</p>
-                <div className="space-y-2">
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Discount %</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 10"
+                      value={form.discountPercentage}
+                      onChange={(e) => setForm({ ...form, discountPercentage: e.target.value })}
+                      className="admin-input w-24"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Stock (Total/Current)</label>
+                    <div className="flex gap-1">
+                      <input
+                        type="number"
+                        placeholder="Total"
+                        value={form.stockTotal}
+                        onChange={(e) => setForm({ ...form, stockTotal: e.target.value })}
+                        className="admin-input w-20"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Current"
+                        value={form.stockCurrent}
+                        onChange={(e) => setForm({ ...form, stockCurrent: e.target.value })}
+                        className="admin-input w-20"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <textarea
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="admin-input w-full h-24"
+                />
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Linked Accessory (Upsell 8% Discount)</label>
                   <select
                     className="admin-input w-full"
                     value={form.upsellProductId}
                     onChange={(e) => setForm({ ...form, upsellProductId: e.target.value })}
                   >
-                    <option value="">Select Linked Accessory (Upsell)</option>
+                    <option value="">Select Linked Accessory</option>
                     {products.map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
-                  <p className="text-[10px] text-slate-500 italic">This product will be offered as a bundle with 8% discount on the product details page.</p>
                 </div>
                 
-                <div className="flex flex-col gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                  <label className="flex items-center gap-2 text-sm font-bold text-blue-700">
-                    <input
-                      type="checkbox"
-                      checked={form.isWholesaleOnly}
-                      onChange={(e) => setForm({ ...form, isWholesaleOnly: e.target.checked })}
-                    />
-                    WHolesale Only Product
-                  </label>
-                  <p className="text-[10px] text-blue-600 italic px-6">If checked, this product will be hidden from regular retail customers.</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mt-2">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Units per Pack</label>
-                    <input
-                      type="number"
-                      placeholder="Units per Pack (e.g. 20)"
-                      value={form.unitsPerPack}
-                      onChange={(e) => setForm({ ...form, unitsPerPack: e.target.value })}
-                      className="admin-input w-full"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Min Order Qty (Packs)</label>
-                    <input
-                      type="number"
-                      placeholder="Min Packs (e.g. 5)"
-                      value={form.wholesaleMoq}
-                      onChange={(e) => setForm({ ...form, wholesaleMoq: e.target.value })}
-                      className="admin-input w-full"
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex flex-col gap-1 mt-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Base Wholesale Price (Per Pack)</label>
-                  <input
-                    type="number"
-                    placeholder="Base Wholesale Price"
-                    value={form.wholesalePrice}
-                    onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
+                {/* Category & Brand - Common to all */}
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={form.categorySlug}
+                    onChange={(e) => setForm({ ...form, categorySlug: e.target.value })}
                     className="admin-input w-full"
-                  />
-                </div>
-
-                <div className="space-y-2 mt-2">
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Wholesale Tiers (Quantity Based)</p>
-                  {form.wholesaleTiers.map((tier, idx) => (
-                    <div key={idx} className="flex gap-2 items-center">
-                      <input
-                        type="number"
-                        placeholder="Min Qty (e.g. 10)"
-                        value={tier.minQuantity}
-                        onChange={(e) => {
-                          const newTiers = [...form.wholesaleTiers];
-                          newTiers[idx].minQuantity = Number(e.target.value);
-                          setForm({ ...form, wholesaleTiers: newTiers });
-                        }}
-                        className="admin-input flex-1"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Price (e.g. 150)"
-                        value={tier.price}
-                        onChange={(e) => {
-                          const newTiers = [...form.wholesaleTiers];
-                          newTiers[idx].price = Number(e.target.value);
-                          setForm({ ...form, wholesaleTiers: newTiers });
-                        }}
-                        className="admin-input flex-1"
-                      />
-                      <button
-                        onClick={() => setForm({ ...form, wholesaleTiers: form.wholesaleTiers.filter((_, i) => i !== idx) })}
-                        className="text-red-500 p-1 hover:bg-red-50 rounded"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => setForm({ ...form, wholesaleTiers: [...form.wholesaleTiers, { minQuantity: 0, price: 0 }] })}
-                    className="text-xs text-blue-600 font-bold hover:underline"
                   >
-                    + Add Price Tier
-                  </button>
-                </div>
-              </div>
-
-              {/* Guarantees Section */}
-              <div className="border-t pt-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">Guarantees & Options</p>
-                <div className="space-y-3">
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={form.hasFiveYearGuarantee}
-                        onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
-                      />
-                      5 Year Guarantee
-                    </label>
-                    {form.hasFiveYearGuarantee && (
-                      <input
-                        placeholder="Guarantee Text (e.g. 5 Year Guarantee)"
-                        value={form.fiveYearGuaranteeText}
-                        onChange={(e) => setForm({ ...form, fiveYearGuaranteeText: e.target.value })}
-                        className="admin-input w-full text-xs"
-                      />
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={form.hasFreeReturns}
-                        onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
-                      />
-                      Free Returns
-                    </label>
-                    {form.hasFreeReturns && (
-                      <input
-                        placeholder="Returns Text (e.g. Free Returns)"
-                        value={form.freeReturnsText}
-                        onChange={(e) => setForm({ ...form, freeReturnsText: e.target.value })}
-                        className="admin-input w-full text-xs"
-                      />
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={form.hasInstallmentOptions}
-                        onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
-                      />
-                      Installment Options
-                    </label>
-                    {form.hasInstallmentOptions && (
-                      <input
-                        placeholder="Installment Text (e.g. Installment Options)"
-                        value={form.installmentOptionsText}
-                        onChange={(e) => setForm({ ...form, installmentOptionsText: e.target.value })}
-                        className="admin-input w-full text-xs"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.allowCredit}
-                    onChange={(e) => setForm({ ...form, allowCredit: e.target.checked })}
-                  />
-                  Allow Credit
-                </label>
-                {form.allowCredit && (
-                  <div className="grid grid-cols-2 gap-3 pl-6 border-l-2 border-green-200 w-full mt-2">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Down Payment (Min)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="e.g. 1500"
-                        value={form.creditMinimum}
-                        onChange={(e) => setForm({ ...form, creditMinimum: e.target.value })}
-                        className="admin-input w-full"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Monthly Installment</label>
-                      <input
-                        placeholder="e.g. 250/month"
-                        value={form.creditMessage}
-                        onChange={(e) => setForm({ ...form, creditMessage: e.target.value })}
-                        className="admin-input w-full"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Shipping & Warranty Section */}
-              <div className="border-t pt-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">Display Information</p>
-                <input
-                  placeholder="Delivery Info (e.g. Fast Delivery - Lusaka)"
-                  value={form.deliveryInfo}
-                  onChange={(e) => setForm({ ...form, deliveryInfo: e.target.value })}
-                  className="admin-input w-full"
-                />
-                <input
-                  placeholder="Warranty Info (e.g. 1 Year Warranty)"
-                  value={form.warrantyInfo}
-                  onChange={(e) => setForm({ ...form, warrantyInfo: e.target.value })}
-                  className="admin-input w-full"
-                />
-              </div>
-
-              {/* Specifications Section */}
-              <div className="border-t pt-4">
-                <p className="text-sm font-medium text-slate-700 mb-2">Specifications (e.g., RAM: 8GB)</p>
-                <div className="space-y-2">
-                  {form.specifications.map((spec, idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <input
-                        placeholder="Key (e.g. RAM)"
-                        value={spec.key}
-                        onChange={(e) => {
-                          const newSpecs = [...form.specifications];
-                          newSpecs[idx].key = e.target.value;
-                          setForm({ ...form, specifications: newSpecs });
-                        }}
-                        className="admin-input flex-1"
-                      />
-                      <input
-                        placeholder="Value (e.g. 8GB)"
-                        value={spec.value}
-                        onChange={(e) => {
-                          const newSpecs = [...form.specifications];
-                          newSpecs[idx].value = e.target.value;
-                          setForm({ ...form, specifications: newSpecs });
-                        }}
-                        className="admin-input flex-1"
-                      />
-                      <button
-                        onClick={() => setForm({ ...form, specifications: form.specifications.filter((_, i) => i !== idx) })}
-                        className="text-red-500 p-2"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => setForm({ ...form, specifications: [...form.specifications, { key: "", value: "" }] })}
-                    className="text-sm text-green-600 font-medium hover:underline"
-                  >
-                    + Add Specification
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="border rounded-lg p-4 bg-slate-50">
-                <p className="text-sm font-medium text-slate-700">Images</p>
-                <p className="text-xs text-slate-500 mb-2">Upload one or more images. First image becomes primary.</p>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-                    const previews = await Promise.all(
-                      files.map((file) => compressImage(file, 1800, 0.9))
-                    );
-                    setForm((prev) => ({ ...prev, images: previews }));
-                    setFiles(files);
-                  }}
-                />
-                {form.images.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {form.images.map((src, i) => (
-                      <div key={i} className="aspect-square rounded-md overflow-hidden border bg-white">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                      </div>
+                    <option value="">Select Category</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.slug}>{c.name}</option>
                     ))}
+                  </select>
+                  <select
+                    value={form.brandId}
+                    onChange={(e) => setForm({ ...form, brandId: e.target.value })}
+                    className="admin-input w-full"
+                  >
+                    <option value="">Select Brand (Optional)</option>
+                    {brands.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* --- WHOLESALE SPECIFIC FIELDS --- */}
+                {tab === "wholesale" && (
+                  <div className="border-t pt-4 space-y-3 bg-indigo-50/30 p-3 rounded-lg border-indigo-100">
+                    <p className="text-[11px] font-black text-indigo-700 uppercase tracking-widest">Wholesale Details</p>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Units per Pack</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 20"
+                          value={form.unitsPerPack}
+                          onChange={(e) => setForm({ ...form, unitsPerPack: e.target.value })}
+                          className="admin-input w-full"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Min Order Qty (Packs)</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 5"
+                          value={form.wholesaleMoq}
+                          onChange={(e) => setForm({ ...form, wholesaleMoq: e.target.value })}
+                          className="admin-input w-full"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Base Wholesale Price (Per Pack)</label>
+                      <input
+                        type="number"
+                        placeholder="Base Wholesale Price"
+                        value={form.wholesalePrice}
+                        onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
+                        className="admin-input w-full"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Quantity-Based Price Tiers</p>
+                      {form.wholesaleTiers.map((tier, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <input
+                            type="number"
+                            placeholder="Min Qty"
+                            value={tier.minQuantity}
+                            onChange={(e) => {
+                              const newTiers = [...form.wholesaleTiers];
+                              newTiers[idx].minQuantity = Number(e.target.value);
+                              setForm({ ...form, wholesaleTiers: newTiers });
+                            }}
+                            className="admin-input flex-1 h-8 text-xs"
+                          />
+                          <input
+                            type="number"
+                            placeholder="Price"
+                            value={tier.price}
+                            onChange={(e) => {
+                              const newTiers = [...form.wholesaleTiers];
+                              newTiers[idx].price = Number(e.target.value);
+                              setForm({ ...form, wholesaleTiers: newTiers });
+                            }}
+                            className="admin-input flex-1 h-8 text-xs"
+                          />
+                          <button
+                            onClick={() => setForm({ ...form, wholesaleTiers: form.wholesaleTiers.filter((_, i) => i !== idx) })}
+                            className="text-red-500 p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => setForm({ ...form, wholesaleTiers: [...form.wholesaleTiers, { minQuantity: 0, price: 0 }] })}
+                        className="text-[10px] text-indigo-600 font-bold hover:underline"
+                      >
+                        + Add Quantity Tier
+                      </button>
+                    </div>
                   </div>
                 )}
+
+                {/* --- CREDIT SPECIFIC FIELDS --- */}
+                {tab === "credit" && (
+                  <div className="border-t pt-4 space-y-3 bg-blue-50/30 p-3 rounded-lg border-blue-100">
+                    <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest">Installment Details</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Down Payment (Min)</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 1500"
+                          value={form.creditMinimum}
+                          onChange={(e) => setForm({ ...form, creditMinimum: e.target.value })}
+                          className="admin-input w-full"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Monthly Installment</label>
+                        <input
+                          placeholder="e.g. 250/month"
+                          value={form.creditMessage}
+                          onChange={(e) => setForm({ ...form, creditMessage: e.target.value })}
+                          className="admin-input w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* --- FLASH SALE SPECIFIC FIELDS --- */}
+                {tab === "flash" && (
+                  <div className="border-t pt-4 space-y-3 bg-red-50/30 p-3 rounded-lg border-red-100">
+                    <p className="text-[11px] font-black text-red-700 uppercase tracking-widest">Flash Sale Details</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Flash Price</label>
+                        <input
+                          type="number"
+                          placeholder="Flash Price"
+                          value={form.flashSalePrice}
+                          onChange={(e) => setForm({ ...form, flashSalePrice: e.target.value })}
+                          className="admin-input w-full"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Sale Ends At</label>
+                        <input
+                          type="datetime-local"
+                          value={form.flashSaleEnd}
+                          onChange={(e) => setForm({ ...form, flashSaleEnd: e.target.value })}
+                          className="admin-input w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* --- COMMON TRUST FIELDS (Guarantee, etc.) --- */}
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                      <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
+                      ACTIVE
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                      <input type="checkbox" checked={form.hasFiveYearGuarantee} onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })} />
+                      5 YEAR GUARANTEE
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                      <input type="checkbox" checked={form.hasFreeReturns} onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })} />
+                      FREE RETURNS
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div className="mt-4 flex justify-end">
-                <button
-                  disabled={creating}
-                  onClick={async () => {
-                    try {
-                      if (!form.name || !form.sku || !form.price || !form.description) {
-                        alert("Please fill in name, SKU, price and description.");
-                        return;
-                      }
-                      setCreating(true);
-                      let res;
-                      const formData = new FormData();
-                      formData.append("name", form.name);
-                      formData.append("sku", form.sku);
-                      formData.append("price", String(Number(form.price)));
-                      formData.append("description", form.description);
-                      if (form.shortDescription) formData.append("shortDescription", form.shortDescription);
-                      formData.append("categorySlug", form.categorySlug || "general");
-                      formData.append("brandId", String(form.brandId));
-                      formData.append("isActive", String(form.isActive));
-                      formData.append("isFeatured", String(form.isFeatured));
-                      formData.append("isNew", String(form.isNew));
-                      if (form.discountPercentage) formData.append("discountPercentage", String(Number(form.discountPercentage)));
-                      formData.append("stockTotal", String(Number(form.stockTotal || 0)));
-                      formData.append("stockCurrent", String(Number(form.stockCurrent || 0)));
-                      formData.append("hasFiveYearGuarantee", String(form.hasFiveYearGuarantee));
-                      if (form.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", form.fiveYearGuaranteeText);
-                      formData.append("hasFreeReturns", String(form.hasFreeReturns));
-                      if (form.freeReturnsText) formData.append("freeReturnsText", form.freeReturnsText);
-                      formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
-                      if (form.installmentOptionsText) formData.append("installmentOptionsText", form.installmentOptionsText);
-                      if (form.wholesalePrice) formData.append("wholesalePrice", String(Number(form.wholesalePrice)));
-                      formData.append("isWholesaleOnly", String(form.isWholesaleOnly));
-                      formData.append("unitsPerPack", String(Number(form.unitsPerPack || 1)));
-                      formData.append("wholesaleMoq", String(Number(form.wholesaleMoq || 1)));
-                      if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
-                      formData.append("allowCredit", String(form.allowCredit));
-                      if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
-                      if (form.creditMessage) formData.append("creditMessage", form.creditMessage);
-                      if (form.deliveryInfo) formData.append("deliveryInfo", form.deliveryInfo);
-                      if (form.warrantyInfo) formData.append("warrantyInfo", form.warrantyInfo);
-                      if (form.specifications.length > 0) formData.append("specifications", JSON.stringify(form.specifications));
-
-                      if (files.length > 0) {
-                        const blobs = await Promise.all(
-                          files.map(async (f) => {
-                            const tooLarge = f.size > 3 * 1024 * 1024;
-                            if (!tooLarge) return f;
-                            const blobUrl = await compressImage(f, 2000, 0.9);
-                            const resp = await fetch(blobUrl);
-                            const blob = await resp.blob();
-                            return new File([blob], f.name.replace(/\.(png|jpg|jpeg|webp)$/i, ".jpg"), { type: "image/jpeg" });
-                          })
-                        );
-                        for (const b of blobs) {
-                          formData.append("images", b);
+              <div>
+                <div className="border rounded-lg p-4 bg-slate-50">
+                  <p className="text-sm font-medium text-slate-700">Images</p>
+                  <p className="text-xs text-slate-500 mb-2">Upload one or more images. First image becomes primary.</p>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || []);
+                      const previews = await Promise.all(
+                        files.map((file) => compressImage(file, 1800, 0.9))
+                      );
+                      setForm((prev) => ({ ...prev, images: previews }));
+                      setFiles(files);
+                    }}
+                  />
+                  {form.images.length > 0 && (
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      {form.images.map((src, i) => (
+                        <div key={i} className="aspect-square rounded-md overflow-hidden border bg-white">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    disabled={creating}
+                    onClick={async () => {
+                      try {
+                        if (!form.name || !form.sku || !form.price || !form.description) {
+                          alert("Please fill in name, SKU, price and description.");
+                          return;
                         }
-                      }
+                        setCreating(true);
+                        let res;
+                        const formData = new FormData();
+                        formData.append("name", form.name);
+                        formData.append("sku", form.sku);
+                        formData.append("price", String(Number(form.price)));
+                        formData.append("description", form.description);
+                        if (form.shortDescription) formData.append("shortDescription", form.shortDescription);
+                        formData.append("categorySlug", form.categorySlug || "general");
+                        formData.append("brandId", String(form.brandId));
+                        formData.append("isActive", String(form.isActive));
+                        formData.append("isFeatured", String(form.isFeatured));
+                        formData.append("isNew", String(form.isNew));
+                        if (form.discountPercentage) formData.append("discountPercentage", String(Number(form.discountPercentage)));
+                        formData.append("stockTotal", String(Number(form.stockTotal || 0)));
+                        formData.append("stockCurrent", String(Number(form.stockCurrent || 0)));
+                        formData.append("hasFiveYearGuarantee", String(form.hasFiveYearGuarantee));
+                        if (form.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", form.fiveYearGuaranteeText);
+                        formData.append("hasFreeReturns", String(form.hasFreeReturns));
+                        if (form.freeReturnsText) formData.append("freeReturnsText", form.freeReturnsText);
+                        formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
+                        if (form.installmentOptionsText) formData.append("installmentOptionsText", form.installmentOptionsText);
+                        if (form.wholesalePrice) formData.append("wholesalePrice", String(Number(form.wholesalePrice)));
+                        formData.append("isWholesaleOnly", String(form.isWholesaleOnly));
+                        formData.append("unitsPerPack", String(Number(form.unitsPerPack || 1)));
+                        formData.append("wholesaleMoq", String(Number(form.wholesaleMoq || 1)));
+                        if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
+                        formData.append("allowCredit", String(form.allowCredit));
+                        if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
+                        if (form.creditMessage) formData.append("creditMessage", form.creditMessage);
+                        if (form.deliveryInfo) formData.append("deliveryInfo", form.deliveryInfo);
+                        if (form.warrantyInfo) formData.append("warrantyInfo", form.warrantyInfo);
+                        if (form.specifications.length > 0) formData.append("specifications", JSON.stringify(form.specifications));
 
-                      res = await fetch("/internal/admin/products/upload", {
-                        method: "POST",
-                        body: formData,
-                      });
-                      
-                      const body = await res.json().catch(() => ({}));
-                      if (!res.ok) throw new Error(body?.error || body?.message || "Failed to create product");
-                      
-                      // Save wholesale tiers if any
-                      if (form.wholesaleTiers.length > 0) {
-                        await fetch(`/api/admin/wholesale/prices/${body.id}`, {
+                        if (files.length > 0) {
+                          const blobs = await Promise.all(
+                            files.map(async (f) => {
+                              const tooLarge = f.size > 3 * 1024 * 1024;
+                              if (!tooLarge) return f;
+                              const blobUrl = await compressImage(f, 2000, 0.9);
+                              const resp = await fetch(blobUrl);
+                              const blob = await resp.blob();
+                              return new File([blob], f.name.replace(/\.(png|jpg|jpeg|webp)$/i, ".jpg"), { type: "image/jpeg" });
+                            })
+                          );
+                          for (const b of blobs) {
+                            formData.append("images", b);
+                          }
+                        }
+
+                        res = await fetch("/internal/admin/products/upload", {
                           method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(form.wholesaleTiers),
+                          body: formData,
                         });
-                      }
+                        
+                        const body = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error(body?.error || body?.message || "Failed to create product");
+                        
+                        // Save wholesale tiers if any
+                        if (form.wholesaleTiers.length > 0) {
+                          await fetch(`/api/admin/wholesale/prices/${body.id}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(form.wholesaleTiers),
+                          });
+                        }
 
-                      setShowCreate(false);
-                      setForm({
-                        name: "",
-                        sku: "",
-                        price: "",
-                        description: "",
-                        shortDescription: "",
-                        categorySlug: "general",
-                        brandId: "",
-                        isFeatured: false,
-                        isNew: true,
-                        discountPercentage: "",
-                        stockTotal: "50",
-                        stockCurrent: "42",
-                        hasFiveYearGuarantee: true,
-                        fiveYearGuaranteeText: "5 Year Guarantee",
-                        hasFreeReturns: true,
-                        freeReturnsText: "Free Returns",
-                        hasInstallmentOptions: true,
-                        installmentOptionsText: "Installment Options",
-                        wholesalePrice: "",
-                        isWholesaleOnly: false,
-                        unitsPerPack: "1",
-                        wholesaleMoq: "1",
-                        upsellProductId: "",
-                        isActive: true,
-                        allowCredit: false,
-                        creditMinimum: "",
-                        creditMessage: "",
-                        deliveryInfo: "",
-                        warrantyInfo: "",
-                        images: [],
-                        specifications: [],
-                        wholesaleTiers: [] as { minQuantity: number; price: number }[],
-                      });
-                      setFiles([]);
-                      await load();
-                    } catch (e: any) {
-                      alert(e.message || "Failed to create product");
-                    } finally {
-                      setCreating(false);
-                    }
-                  }}
-                  className="btn-primary"
-                >
-                  {creating ? "Creating..." : "Save Product"}
-                </button>
+                        setShowCreate(false);
+                        setForm({
+                          name: "",
+                          sku: "",
+                          price: "",
+                          description: "",
+                          shortDescription: "",
+                          categorySlug: "general",
+                          brandId: "",
+                          isFeatured: false,
+                          isNew: true,
+                          discountPercentage: "",
+                          stockTotal: "50",
+                          stockCurrent: "42",
+                          hasFiveYearGuarantee: true,
+                          fiveYearGuaranteeText: "5 Year Guarantee",
+                          hasFreeReturns: true,
+                          freeReturnsText: "Free Returns",
+                          hasInstallmentOptions: true,
+                          installmentOptionsText: "Installment Options",
+                          wholesalePrice: "",
+                          isWholesaleOnly: false,
+                          unitsPerPack: "1",
+                          wholesaleMoq: "1",
+                          upsellProductId: "",
+                          isActive: true,
+                          allowCredit: false,
+                          creditMinimum: "",
+                          creditMessage: "",
+                          deliveryInfo: "",
+                          warrantyInfo: "",
+                          images: [],
+                          specifications: [],
+                          wholesaleTiers: [] as { minQuantity: number; price: number }[],
+                        });
+                        setFiles([]);
+                        await load();
+                      } catch (e: any) {
+                        alert(e.message || "Failed to create product");
+                      } finally {
+                        setCreating(false);
+                      }
+                    }}
+                    className="btn-primary"
+                  >
+                    {creating ? "Creating..." : tab === "wholesale" ? "Create Wholesale Product" : tab === "credit" ? "Create Credit Product" : "Save Product"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <div className="admin-card p-3 flex gap-2">
         <button

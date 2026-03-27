@@ -38,6 +38,11 @@ export class CreateBannerDto {
   position?: number;
 
   @IsOptional()
+  @IsInt()
+  @Min(1)
+  duration?: number; // Duration in seconds for video banners
+
+  @IsOptional()
   @IsISO8601()
   startDate?: string;
 

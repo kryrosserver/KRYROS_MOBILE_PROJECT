@@ -69,6 +69,7 @@ export default function CMSPage() {
     link?: string; 
     linkText?: string; 
     position?: number; 
+    duration?: number; // Duration in seconds for video
     isActive?: boolean 
   }>({
     title: "",
@@ -190,7 +191,7 @@ export default function CMSPage() {
             <button
               onClick={() => {
                 setEditingBanner(null);
-                setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
+                setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, isActive: true });
                 setShowAdd(true);
               }}
               className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold shadow-sm"
@@ -448,6 +449,20 @@ export default function CMSPage() {
                 placeholder="0"
               />
             </div>
+            {form.mediaType === 'video' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Video Duration (seconds)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={form.duration || ''}
+                  onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })}
+                  className="admin-input"
+                  placeholder="Leave empty for default timing"
+                />
+                <p className="text-xs text-slate-500 mt-1">How long this slide stays before moving to the next</p>
+              </div>
+            )}
             <div className="flex items-center pt-6">
               <label className="inline-flex items-center gap-2 cursor-pointer group">
                 <input
@@ -482,7 +497,7 @@ export default function CMSPage() {
                   if (!res.ok) throw new Error(body?.error || `Failed to ${editingBanner ? 'update' : 'create'} banner`);
                   setShowAdd(false);
                   setEditingBanner(null);
-                  setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
+                  setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, isActive: true });
                   setMessage(`Banner ${editingBanner ? 'updated' : 'created'} successfully`);
                   await loadBanners();
                 } catch (e: any) {
@@ -647,6 +662,7 @@ export default function CMSPage() {
                               link: banner.link || "",
                               linkText: banner.linkText || "Shop Now",
                               position: banner.position,
+                              duration: banner.duration || undefined,
                               isActive: banner.isActive
                             });
                             // If it's a relative path (e.g. /uploads/...) or data:..., it's likely an upload

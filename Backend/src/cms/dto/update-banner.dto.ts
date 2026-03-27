@@ -11,7 +11,15 @@ export class UpdateBannerDto {
 
   @IsOptional()
   @IsString()
+  mediaType?: string; // "image" or "video"
+
+  @IsOptional()
+  @IsString()
   image?: string;
+
+  @IsOptional()
+  @IsString()
+  videoUrl?: string;
 
   @IsOptional()
   @IsString()
@@ -29,6 +37,11 @@ export class UpdateBannerDto {
   @IsInt()
   @Min(0)
   position?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  duration?: number; // Duration in seconds for video banners
 
   @IsOptional()
   @IsISO8601()
