@@ -527,8 +527,8 @@ export function Header() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100] h-screen w-screen overflow-hidden">
-            {/* Backdrop with fade-in */}
+          <div className="fixed inset-0 z-[150] h-[100dvh] w-screen overflow-hidden flex">
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -537,22 +537,22 @@ export function Header() {
               onClick={() => setMobileMenuOpen(false)}
             />
             
-            {/* Sidebar with slide-in from left */}
+            {/* Sidebar */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col bg-white shadow-xl overflow-hidden"
+              className="relative h-full w-80 max-w-[85vw] flex flex-col bg-white shadow-xl overflow-hidden"
             >
-              {/* Custom Header with Search and Close */}
-              <div className="flex items-center justify-between bg-white shrink-0">
-                <div className="flex-1 flex bg-slate-100">
+              {/* Custom Header with Tabs and Close */}
+              <div className="flex items-center justify-between bg-white shrink-0 border-b border-slate-100">
+                <div className="flex-1 flex bg-slate-50">
                   <button
                     onClick={() => setMobileActiveTab("menu")}
-                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-all ${
+                    className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
                       mobileActiveTab === "menu"
-                        ? "text-slate-900 bg-white"
+                        ? "text-blue-600 bg-white"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
@@ -560,27 +560,25 @@ export function Header() {
                   </button>
                   <button
                     onClick={() => setMobileActiveTab("categories")}
-                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-all ${
+                    className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
                       mobileActiveTab === "categories"
-                        ? "text-slate-900 bg-white"
+                        ? "text-blue-600 bg-white"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
                     CATEGORIES
                   </button>
                 </div>
-                <div className="flex items-center">
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="bg-[#00155a] p-4 text-white"
-                    aria-label="Close menu"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="bg-[#00155a] p-4 text-white shrink-0"
+                  aria-label="Close menu"
+                >
+                  <X className="h-6 w-6" />
+                </button>
               </div>
 
-              {/* Mobile Currency Selector - Redesigned to be compact and custom */}
+              {/* Mobile Currency Selector */}
               <div className="bg-slate-50 border-b border-slate-100 px-6 py-3 shrink-0">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Currency</span>
@@ -600,7 +598,7 @@ export function Header() {
                           initial={{ opacity: 0, y: 10, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                          className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 z-[110] overflow-hidden"
+                          className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 z-[160] overflow-hidden"
                         >
                           <div className="p-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                             {countries.map((c) => (
@@ -633,7 +631,8 @@ export function Header() {
                 </div>
               </div>
 
-              <nav className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar">
+              {/* Scrollable Content */}
+              <nav className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar bg-white">
                 <AnimatePresence mode="wait">
                   {mobileActiveTab === "menu" ? (
                     <motion.div
@@ -653,7 +652,7 @@ export function Header() {
                           key={item.name}
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="px-6 py-4 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                          className="px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
                         >
                           {item.name}
                           <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
@@ -745,8 +744,8 @@ export function Header() {
                 </AnimatePresence>
               </nav>
 
-              {/* Mobile Menu Footer - WhatsApp and Support */}
-              <div className="p-6 pb-12 bg-slate-50 border-t border-slate-100 mt-auto">
+              {/* Fixed Sidebar Footer */}
+              <div className="p-6 pb-10 bg-slate-50 border-t border-slate-100 shrink-0">
                 <a
                   href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
                   target="_blank"
