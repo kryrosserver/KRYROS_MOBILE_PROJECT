@@ -751,7 +751,8 @@ model CMSBanner {
   linkText    String?
   isActive    Boolean  @default(true)
   position    Int      @default(0)
-  duration    Int?      // Duration in seconds for video banners (null = use default carousel timing)
+  duration    Int?      // Duration in seconds for video banners (carousel timing)
+  displayDays Int?      // How many days to display this banner (auto-hides after this many days)
   startDate   DateTime?
   endDate     DateTime?
   createdAt   DateTime @default(now())

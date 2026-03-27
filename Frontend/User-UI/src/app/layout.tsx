@@ -80,7 +80,6 @@ export default function RootLayout({
                   <MobileBottomNav />
                   <Footer />
                 </div>
-                <WhatsAppWidget />
                 <Toaster />
               </CartProvider>
             </CurrencyProvider>

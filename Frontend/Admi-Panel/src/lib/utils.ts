@@ -10,15 +10,22 @@ export function formatPrice(price: number, currency = 'USD'): string {
 export function resolveImageUrl(url?: string): string {
   if (!url || typeof url !== 'string') return "";
   
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl) return "";
+
   // If it's already a full URL (http/https), a Data URL (Base64), or a blob URL, return it as is
   if (
-    url.startsWith("http") || 
-    url.startsWith("https") || 
-    url.startsWith("data:") || 
-    url.startsWith("blob:") ||
-    url.startsWith("//")
+    trimmedUrl.startsWith("http") || 
+    trimmedUrl.startsWith("https") || 
+    trimmedUrl.startsWith("data:") || 
+    trimmedUrl.startsWith("blob:") ||
+    trimmedUrl.startsWith("//") ||
+    trimmedUrl.startsWith("www.")
   ) {
-    return url;
+    // If it starts with www., prepend https:// for safety if needed, 
+    // though browsers often handle // and www. differently.
+    // For simplicity, let's just return it if it looks absolute.
+    return trimmedUrl.startsWith("www.") ? `https://${trimmedUrl}` : trimmedUrl;
   }
   
   // If it's a relative path (e.g., /uploads/...), prefix it with the backend URL
@@ -27,7 +34,7 @@ export function resolveImageUrl(url?: string): string {
   const baseUrl = rawApi.replace(/\/api$/, "");
   
   // Ensure the path starts with a single slash
-  const cleanPath = url.startsWith("/") ? url : `/${url}`;
+  const cleanPath = trimmedUrl.startsWith("/") ? trimmedUrl : `/${trimmedUrl}`;
   
   return `${baseUrl}${cleanPath}`;
 }

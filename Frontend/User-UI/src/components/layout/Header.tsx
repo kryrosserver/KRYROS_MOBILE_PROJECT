@@ -18,6 +18,7 @@ import {
   Truck,
   CreditCard,
   Headset,
+  MessageCircle,
 } from "lucide-react"
 import { Logo } from "./Logo"
 import { AuthButtons } from "./AuthButtons"
@@ -120,6 +121,7 @@ export function Header() {
   const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [mobileActiveTab, setMobileActiveTab] = useState<"menu" | "categories">("menu");
+  const [mobileCurrencyOpen, setMobileCurrencyOpen] = useState(false);
   
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
@@ -576,27 +578,55 @@ export function Header() {
                 </div>
               </div>
 
-              {/* Mobile Currency Selector - Redesigned to be compact */}
+              {/* Mobile Currency Selector - Redesigned to be compact and custom */}
               <div className="bg-slate-50 border-b border-slate-100 px-6 py-3 shrink-0">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Currency</span>
                   <div className="relative">
-                    <select
-                      value={selectedCountry?.code || ""}
-                      onChange={(e) => {
-                        setCountry(e.target.value);
-                        // Optional: don't close menu automatically so they can see the change
-                        // setMobileMenuOpen(false);
-                      }}
-                      className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-kryros-green/20 focus:border-kryros-green shadow-sm"
+                    <button
+                      onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
+                      className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none shadow-sm hover:bg-slate-50 transition-colors"
                     >
-                      {countries.map((c) => (
-                        <option key={c.id} value={c.code}>
-                          {c.flag} {c.currencyCode} ({c.currencySymbol})
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                      <span>{selectedCountry?.flag}</span>
+                      <span>{selectedCountry?.currencyCode}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {mobileCurrencyOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 z-[110] overflow-hidden"
+                        >
+                          <div className="p-1 max-h-[250px] overflow-y-auto custom-scrollbar">
+                            {countries.map((c) => (
+                              <button
+                                key={c.id}
+                                onClick={() => {
+                                  setCountry(c.code);
+                                  setMobileCurrencyOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
+                                  selectedCountry?.code === c.code 
+                                    ? "bg-blue-50 text-blue-600" 
+                                    : "hover:bg-slate-50 text-slate-600"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm">{c.flag}</span>
+                                  <span className="text-xs font-bold uppercase">{c.currencyCode}</span>
+                                </div>
+                                {selectedCountry?.code === c.code && (
+                                  <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
@@ -712,6 +742,22 @@ export function Header() {
                   )}
                 </AnimatePresence>
               </nav>
+
+              {/* Mobile Menu Footer - WhatsApp and Support */}
+              <div className="p-6 bg-slate-50 border-t border-slate-100">
+                <a
+                  href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-all shadow-md active:scale-95"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Chat on WhatsApp
+                </a>
+                <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-bold">
+                  24/7 Customer Support
+                </p>
+              </div>
             </motion.div>
           </div>
         )}

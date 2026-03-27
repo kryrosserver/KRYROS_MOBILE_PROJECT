@@ -70,6 +70,7 @@ export default function CMSPage() {
     linkText?: string; 
     position?: number; 
     duration?: number; // Duration in seconds for video
+    displayDays?: number; // How many days to display
     isActive?: boolean 
   }>({
     title: "",
@@ -191,7 +192,7 @@ export default function CMSPage() {
             <button
               onClick={() => {
                 setEditingBanner(null);
-                setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, isActive: true });
+                setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, displayDays: undefined, isActive: true });
                 setShowAdd(true);
               }}
               className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold shadow-sm"
@@ -287,12 +288,15 @@ export default function CMSPage() {
                       </button>
                     </div>
                     {imageSource === "url" ? (
-                      <input
-                        value={form.image}
-                        onChange={(e) => setForm({ ...form, image: e.target.value })}
-                        className="admin-input"
-                        placeholder="https://... (e.g., from Cloudinary, S3, etc.)"
-                      />
+                      <div className="space-y-1">
+                        <input
+                          value={form.image}
+                          onChange={(e) => setForm({ ...form, image: e.target.value.trim() })}
+                          className="admin-input"
+                          placeholder="https://... (Direct link to image file)"
+                        />
+                        <p className="text-[10px] text-slate-500 italic">Must be a direct link to an image file (ending in .jpg, .png, etc.)</p>
+                      </div>
                     ) : (
                       <div className="relative">
                         <input
@@ -369,12 +373,15 @@ export default function CMSPage() {
                         </button>
                       </div>
                       {videoSource === "url" ? (
-                        <input
-                          value={form.videoUrl || ''}
-                          onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
-                          className="admin-input"
-                          placeholder="e.g., https://www.youtube.com/embed/..."
-                        />
+                        <div className="space-y-1">
+                          <input
+                            value={form.videoUrl || ''}
+                            onChange={(e) => setForm({ ...form, videoUrl: e.target.value.trim() })}
+                            className="admin-input"
+                            placeholder="Direct video URL or Embed link"
+                          />
+                          <p className="text-[10px] text-slate-500 italic">Example: https://.../video.mp4</p>
+                        </div>
                       ) : (
                         <input
                           type="file"
@@ -463,6 +470,18 @@ export default function CMSPage() {
                 <p className="text-xs text-slate-500 mt-1">How long this slide stays before moving to the next</p>
               </div>
             )}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Display Duration (days)</label>
+              <input
+                type="number"
+                min="1"
+                value={form.displayDays || ''}
+                onChange={(e) => setForm({ ...form, displayDays: Number(e.target.value) })}
+                className="admin-input"
+                placeholder="Leave empty for always display"
+              />
+              <p className="text-xs text-slate-500 mt-1">Banner will auto-hide after this many days</p>
+            </div>
             <div className="flex items-center pt-6">
               <label className="inline-flex items-center gap-2 cursor-pointer group">
                 <input
@@ -497,7 +516,7 @@ export default function CMSPage() {
                   if (!res.ok) throw new Error(body?.error || `Failed to ${editingBanner ? 'update' : 'create'} banner`);
                   setShowAdd(false);
                   setEditingBanner(null);
-                  setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, isActive: true });
+                  setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, displayDays: undefined, isActive: true });
                   setMessage(`Banner ${editingBanner ? 'updated' : 'created'} successfully`);
                   await loadBanners();
                 } catch (e: any) {
@@ -663,6 +682,7 @@ export default function CMSPage() {
                               linkText: banner.linkText || "Shop Now",
                               position: banner.position,
                               duration: banner.duration || undefined,
+                              displayDays: banner.displayDays || undefined,
                               isActive: banner.isActive
                             });
                             // If it's a relative path (e.g. /uploads/...) or data:..., it's likely an upload

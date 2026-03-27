@@ -44,6 +44,11 @@ export class UpdateBannerDto {
   duration?: number; // Duration in seconds for video banners
 
   @IsOptional()
+  @IsInt()
+  @Min(1)
+  displayDays?: number; // How many days to display this banner
+
+  @IsOptional()
   @IsISO8601()
   startDate?: string | null;
 
