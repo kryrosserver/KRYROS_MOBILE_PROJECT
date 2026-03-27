@@ -221,7 +221,9 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 transition-all duration-300 ${
+        mobileMenuOpen ? "z-[100]" : "z-50"
+      } ${
         isScrolled
           ? "bg-background/80 shadow-lg backdrop-blur-lg border-b border-border/40"
           : "bg-background border-b border-slate-100"
@@ -744,7 +746,7 @@ export function Header() {
               </nav>
 
               {/* Mobile Menu Footer - WhatsApp and Support */}
-              <div className="p-6 bg-slate-50 border-t border-slate-100">
+              <div className="p-6 pb-12 bg-slate-50 border-t border-slate-100 mt-auto">
                 <a
                   href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
                   target="_blank"

@@ -15,7 +15,6 @@ export function MobileBottomNav() {
     { label: "Shop", icon: Store, href: "/shop" },
     { label: "Cart", icon: ShoppingBag, href: "/cart", badge: cartCount },
     { label: "Account", icon: User, href: "/profile" },
-    { label: "Search", icon: Search, href: "/shop?search=true" },
   ];
 
   return (
