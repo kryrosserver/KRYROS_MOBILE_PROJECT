@@ -543,10 +543,10 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="relative h-full w-80 max-w-[85vw] flex flex-col bg-white shadow-xl overflow-hidden"
+              className="relative h-[100dvh] w-80 max-w-[85vw] grid grid-rows-[auto_auto_1fr_auto] bg-white shadow-xl overflow-hidden"
             >
-              {/* Custom Header with Tabs and Close */}
-              <div className="flex items-center justify-between bg-white shrink-0 border-b border-slate-100">
+              {/* Custom Header with Tabs and Close - Fixed at Top */}
+              <div className="bg-white border-b border-slate-100 flex items-center justify-between z-10">
                 <div className="flex-1 flex bg-slate-50">
                   <button
                     onClick={() => setMobileActiveTab("menu")}
@@ -578,8 +578,8 @@ export function Header() {
                 </button>
               </div>
 
-              {/* Mobile Currency Selector */}
-              <div className="bg-slate-50 border-b border-slate-100 px-6 py-3 shrink-0">
+              {/* Mobile Currency Selector - Fixed below header */}
+              <div className="bg-slate-50 border-b border-slate-100 px-6 py-3 z-10">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Currency</span>
                   <div className="relative">
@@ -631,8 +631,8 @@ export function Header() {
                 </div>
               </div>
 
-              {/* Scrollable Content */}
-              <nav className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar bg-white">
+              {/* Scrollable Content Area - Only this part scrolls */}
+              <nav className="overflow-y-auto overscroll-contain custom-scrollbar bg-white py-2">
                 <AnimatePresence mode="wait">
                   {mobileActiveTab === "menu" ? (
                     <motion.div
@@ -744,8 +744,8 @@ export function Header() {
                 </AnimatePresence>
               </nav>
 
-              {/* Fixed Sidebar Footer */}
-              <div className="p-6 pb-10 bg-slate-50 border-t border-slate-100 shrink-0">
+              {/* Sidebar Footer - Fixed at Bottom */}
+              <div className="p-6 pb-12 bg-slate-50 border-t border-slate-100">
                 <a
                   href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
                   target="_blank"
