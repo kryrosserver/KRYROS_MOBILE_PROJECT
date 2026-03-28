@@ -26,8 +26,6 @@ type Product = {
   wholesalePrice?: number | null;
   isWholesaleOnly?: boolean;
   allowCredit?: boolean;
-  creditMinimum?: number | string | null;
-  creditMessage?: string | null;
   deliveryInfo?: string | null;
   warrantyInfo?: string | null;
   flashSalePrice?: number | null;
@@ -628,7 +626,7 @@ export default function ProductsPage() {
               ) : (
                 tab === "featured" ? products.filter(p => !!p.isFeatured) : 
                 tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
-                products.filter(p => !p.isWholesaleOnly)
+                products.filter(p => !p.isWholesaleOnly && !p.allowCredit)
               ).map((p) => (
                 <tr key={p.id}>
                   <td>

@@ -418,29 +418,74 @@ export function Header() {
               />
             </div>
             <AnimatePresence>
-              {searchOpen && searchQuery.length > 0 && (
+              {searchOpen && searchQuery.length >= 2 && (
                 <motion.div
-                  initial={{ opacity: 0, y: 4 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  className="absolute left-0 right-0 top-full mt-2 rounded-lg border border-border bg-card p-2 shadow-lg"
+                  exit={{ opacity: 0, y: 8 }}
+                  className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 z-[110] overflow-hidden max-h-[70vh] flex flex-col w-[500px]"
                 >
-                  {suggestions.length > 0 ? (
-                    suggestions.map((s) => (
-                      <Link
-                        key={s}
-                        href={`/shop?q=${encodeURIComponent(s)}`}
-                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-secondary"
-                      >
-                        <Search className="h-3.5 w-3.5 text-muted-foreground" />
-                        {s}
-                      </Link>
-                    ))
-                  ) : (
-                    <p className="px-3 py-2 text-sm text-muted-foreground">
-                      No results found
-                    </p>
-                  )}
+                  <div className="overflow-y-auto custom-scrollbar p-2">
+                    {isSearching ? (
+                      <div className="p-8 text-center">
+                        <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                        <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Searching...</p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
+                        {searchResults.map((product) => (
+                          <Link
+                            key={product.id}
+                            href={`/product/${product.slug || product.id}`}
+                            onClick={() => {
+                              setSearchOpen(false);
+                              setSearchQuery("");
+                            }}
+                            className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
+                          >
+                            <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
+                              <Image
+                                src={product.images?.[0]?.url || product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                                alt={product.name}
+                                fill
+                                className="object-contain p-1"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-sm font-black text-blue-600">{formatPrice(product.price)}</span>
+                                {product.discountPercentage && product.discountPercentage > 0 && (
+                                  <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                    -{product.discountPercentage}%
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2.5 mt-1 text-[9px] font-black uppercase tracking-widest">
+                                <span className={`px-1.5 py-0.5 rounded-sm ${product.stockCurrent > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
+                                  {product.stockCurrent > 0 ? "IN STOCK" : "OUT OF STOCK"}
+                                </span>
+                                <span className="text-slate-400 border-l border-slate-200 pl-2.5">SKU: {product.sku || "N/A"}</span>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                        <Link 
+                          href={`/shop?q=${searchQuery}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="p-3 text-center text-xs font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors border-t border-slate-50 mt-1"
+                        >
+                          View all results
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="p-12 text-center">
+                        <Search className="h-8 w-8 text-slate-200 mx-auto mb-3" />
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No products found</p>
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
