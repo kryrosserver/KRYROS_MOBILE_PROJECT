@@ -89,51 +89,52 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
         </div>
       </div>
 
-      <div className="container-custom">
-        {/* Filter Section - Matches Provided Design */}
-        <div className="mb-10 space-y-6">
-          {/* Action Bar: Filter, Sorting, Search */}
-          <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-slate-100">
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 bg-[#f0f7ff] text-[#2563eb] border border-[#dbeafe] px-5 py-2 rounded-lg font-bold text-sm hover:bg-[#dbeafe] transition-all">
-                Filter
-                <SlidersHorizontal className="h-4 w-4" />
-              </button>
-              {activeCategory && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-100 rounded-lg">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active:</span>
-                  <span className="text-xs font-bold text-slate-700 uppercase">{activeCategory.name}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 cursor-pointer group">
-                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Default sorting</span>
-                <ChevronDown className="h-4 w-4 text-slate-400" />
-              </div>
-              <SearchIcon className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-900 transition-colors" />
-            </div>
-          </div>
-
-          {/* Fast Filters */}
+      <div className="container-custom px-4 md:px-6">
+        {/* Filter Section - Matches Reference Exactly */}
+        <div className="mb-10 space-y-8">
+          {/* 1. Fast Filters */}
           {filterSection && (
-            <div className="space-y-3">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div className="space-y-4">
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
                 Fast Filters:
               </p>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
                 {(filterSection.config?.items || [])
                   .filter((f: any) => f.isActive && !['SELECT COLOR', 'SELECT STORAGE'].includes(f.label.toUpperCase()))
                   .map((f: any) => (
-                  <button key={f.label} className="px-4 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-600 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm flex items-center gap-1.5 uppercase">
-                    {f.icon && <span>{f.icon}</span>}
+                  <button key={f.label} className="whitespace-nowrap px-5 py-2.5 bg-white border border-slate-200 rounded-full text-[11px] font-bold text-slate-700 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm flex items-center gap-2 uppercase">
+                    {f.icon && <span className="text-base">{f.icon}</span>}
                     {f.label}
                   </button>
                 ))}
               </div>
             </div>
           )}
+
+          {/* 2. Action Bar: Filter, Sorting, Search */}
+          <div className="flex items-center justify-between gap-4 py-4 border-t border-slate-100">
+            <div className="flex items-center gap-4">
+              <button className="flex items-center gap-2 bg-[#f0f7ff] text-[#2563eb] border border-[#dbeafe] px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-[#dbeafe] transition-all shadow-sm">
+                Filter
+                <SlidersHorizontal className="h-4 w-4" />
+              </button>
+              {activeCategory && (
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active:</span>
+                  <span className="text-xs font-bold text-slate-700 uppercase">{activeCategory.name}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 md:gap-8">
+              <div className="flex items-center gap-1.5 cursor-pointer group">
+                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors whitespace-nowrap">Default sorting</span>
+                <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+              </div>
+              <div className="h-5 w-px bg-slate-200 hidden sm:block"></div>
+              <SearchIcon className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-900 transition-colors" />
+            </div>
+          </div>
         </div>
 
         <ShopContent groupedData={groupedData} />
