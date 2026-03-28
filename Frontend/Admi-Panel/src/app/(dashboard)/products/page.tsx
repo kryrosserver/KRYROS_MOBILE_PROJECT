@@ -58,7 +58,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [tab, setTab] = useState<"all" | "featured" | "flash" | "credit">("all");
+  const [tab, setTab] = useState<"all" | "featured" | "flash">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -83,9 +83,6 @@ export default function ProductsPage() {
     installmentOptionsText: "Installment Options",
     upsellProductId: "",
     isActive: true,
-    allowCredit: false,
-    creditMinimum: "",
-    creditMessage: "",
     deliveryInfo: "",
     warrantyInfo: "",
     flashSalePrice: "",
@@ -116,9 +113,6 @@ export default function ProductsPage() {
     hasInstallmentOptions: true,
     installmentOptionsText: "",
     upsellProductId: "",
-    allowCredit: false,
-    creditMinimum: "",
-    creditMessage: "",
     deliveryInfo: "",
     warrantyInfo: "",
     flashSalePrice: "",
@@ -220,13 +214,11 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
-                {tab === "credit" ? "Add Credit Product" : 
-                 tab === "flash" ? "Add Flash Sale Product" : 
+                {tab === "flash" ? "Add Flash Sale Product" : 
                  tab === "featured" ? "Add Featured Product" : "Add New Product"}
               </h2>
               <p className="text-sm text-slate-500">
-                {tab === "credit" ? "Upload products with installment payment options" : 
-                 "Upload product details and images"}
+                Upload product details and images
               </p>
             </div>
             <button onClick={() => {
@@ -234,14 +226,13 @@ export default function ProductsPage() {
                 // Set defaults based on active tab when opening
                 setForm(prev => ({
                   ...prev,
-                  allowCredit: tab === "credit",
                   isFeatured: tab === "featured",
                   isFlashSale: tab === "flash"
                 }));
               }
               setShowCreate(v => !v);
             }} className="btn-secondary">
-              {showCreate ? "Close" : tab === "credit" ? "Add Credit Product" : "Add Product"}
+              {showCreate ? "Close" : "Add Product"}
             </button>
           </div>
           {showCreate && (
@@ -528,9 +519,7 @@ export default function ProductsPage() {
                         formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
                         if (form.installmentOptionsText) formData.append("installmentOptionsText", form.installmentOptionsText);
                         if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
-                        formData.append("allowCredit", String(form.allowCredit));
-                        if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
-                        if (form.creditMessage) formData.append("creditMessage", form.creditMessage);
+                        
                         if (form.deliveryInfo) formData.append("deliveryInfo", form.deliveryInfo);
                         if (form.warrantyInfo) formData.append("warrantyInfo", form.warrantyInfo);
                         if (form.flashSalePrice) formData.append("flashSalePrice", String(Number(form.flashSalePrice)));
@@ -583,9 +572,6 @@ export default function ProductsPage() {
                           installmentOptionsText: "Installment Options",
                           upsellProductId: "",
                           isActive: true,
-                          allowCredit: false,
-                          creditMinimum: "",
-                          creditMessage: "",
                           deliveryInfo: "",
                           warrantyInfo: "",
                           flashSalePrice: "",
@@ -620,12 +606,6 @@ export default function ProductsPage() {
           All
         </button>
         <button
-          onClick={() => setTab("credit")}
-          className={`px-3 py-1.5 rounded ${tab === "credit" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}
-        >
-          Credit
-        </button>
-        <button
           onClick={() => setTab("featured")}
           className={`px-3 py-1.5 rounded ${tab === "featured" ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-700"}`}
         >
@@ -651,7 +631,6 @@ export default function ProductsPage() {
                 <th>Brand</th>
                 <th>Price</th>
                 <th>Status</th>
-                <th>Credit</th>
                 {tab !== "flash" && <th>Featured</th>}
                 {tab !== "featured" && <th>Flash Sale</th>}
                 {tab === "flash" && <th>Flash Price</th>}
@@ -671,14 +650,12 @@ export default function ProductsPage() {
                     <td><div className="h-4 bg-slate-100 rounded w-1/4"></div></td>
                     <td><div className="h-6 bg-slate-100 rounded-full w-16"></div></td>
                     <td><div className="h-4 bg-slate-100 rounded w-4"></div></td>
-                    <td><div className="h-4 bg-slate-100 rounded w-4"></div></td>
                     <td className="text-right"><div className="h-8 bg-slate-100 rounded-lg w-20 ml-auto"></div></td>
                   </tr>
                 ))
               ) : (
                 tab === "featured" ? products.filter(p => !!p.isFeatured) : 
                 tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
-                tab === "credit" ? products.filter(p => !!p.allowCredit) : 
                 products.filter(p => !p.isWholesaleOnly)
               ).map((p) => (
                 <tr key={p.id}>
@@ -701,20 +678,6 @@ export default function ProductsPage() {
                   <td>{p.brand?.name || "—"}</td>
                   <td>{formatPrice(Number(p.price))}</td>
                   <td><span className={`badge ${p.isActive !== false ? "badge-success" : "badge-danger"}`}>{p.isActive !== false ? "Active" : "Inactive"}</span></td>
-                  <td>
-                    <div className="flex flex-col items-center">
-                      <input
-                        type="checkbox"
-                        checked={!!p.allowCredit}
-                        onChange={(e) => {
-                          setProducts(prev => prev.map(x => x.id === p.id ? { ...x, allowCredit: e.target.checked } : x));
-                        }}
-                      />
-                      {p.allowCredit && p.creditMinimum && (
-                        <span className="text-[10px] text-slate-500">Min: {p.creditMinimum}</span>
-                      )}
-                    </div>
-                  </td>
                   {tab !== "flash" && (
                   <td>
                     <input
@@ -792,9 +755,6 @@ export default function ProductsPage() {
                           hasInstallmentOptions: !!p.hasInstallmentOptions,
                           installmentOptionsText: p.installmentOptionsText || "Installment Options",
                           upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
-                          allowCredit: !!p.allowCredit,
-                          creditMinimum: String(p.creditMinimum ?? ""),
-                          creditMessage: p.creditMessage || "",
                           deliveryInfo: p.deliveryInfo || "",
                           warrantyInfo: p.warrantyInfo || "",
                           flashSalePrice: String((p as any).flashSalePrice ?? ""),
@@ -836,7 +796,6 @@ export default function ProductsPage() {
                             ...(tab !== "flash" ? { isFeatured: !!p.isFeatured } : {}),
                             ...(tab !== "featured" ? { isFlashSale: !!p.isFlashSale } : {}),
                             ...(tab === "flash" ? { flashSaleEnd: p.flashSaleEnd } : {}),
-                            allowCredit: !!p.allowCredit,
                           };
                           if (tab === "flash" && (p as any).flashSalePrice !== undefined) {
                             payload.flashSalePrice = (p as any).flashSalePrice;
@@ -1104,43 +1063,6 @@ export default function ProductsPage() {
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="pt-2">
-                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer mb-3">
-                      <input
-                        type="checkbox"
-                        checked={editForm.allowCredit}
-                        onChange={(e) => setEditForm({ ...editForm, allowCredit: e.target.checked })}
-                        className="w-4 h-4 text-green-500 rounded"
-                      />
-                      Enable Installments / Credit
-                    </label>
-                    {editForm.allowCredit && (
-                      <div className="grid grid-cols-2 gap-3 pl-6 border-l-2 border-green-200">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Down Payment (Min)</label>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="e.g. 1500"
-                            value={editForm.creditMinimum}
-                            onChange={(e) => setEditForm({ ...editForm, creditMinimum: e.target.value })}
-                            className="admin-input w-full"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Monthly Installment</label>
-                          <input
-                            placeholder="e.g. 250/month"
-                            value={editForm.creditMessage}
-                            onChange={(e) => setEditForm({ ...editForm, creditMessage: e.target.value })}
-                            className="admin-input w-full"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-3">
@@ -1290,20 +1212,13 @@ export default function ProductsPage() {
                   if (editForm.discountPercentage) formData.append("discountPercentage", String(Number(editForm.discountPercentage)));
                   if (editForm.stockTotal) formData.append("stockTotal", String(Number(editForm.stockTotal)));
                   if (editForm.stockCurrent) formData.append("stockCurrent", String(Number(editForm.stockCurrent)));
-                  formData.append("isWholesaleOnly", String(editForm.isWholesaleOnly));
-                  formData.append("unitsPerPack", String(Number(editForm.unitsPerPack || 1)));
-                  formData.append("wholesaleMoq", String(Number(editForm.wholesaleMoq || 1)));
                   formData.append("hasFiveYearGuarantee", String(editForm.hasFiveYearGuarantee));
                   if (editForm.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", editForm.fiveYearGuaranteeText);
                   formData.append("hasFreeReturns", String(editForm.hasFreeReturns));
                   if (editForm.freeReturnsText) formData.append("freeReturnsText", editForm.freeReturnsText);
                   formData.append("hasInstallmentOptions", String(editForm.hasInstallmentOptions));
                   if (editForm.installmentOptionsText) formData.append("installmentOptionsText", editForm.installmentOptionsText);
-                  if (editForm.wholesalePrice) formData.append("wholesalePrice", String(Number(editForm.wholesalePrice)));
                   if (editForm.upsellProductId) formData.append("upsellProductId", String(editForm.upsellProductId));
-                  formData.append("allowCredit", String(editForm.allowCredit));
-                  if (editForm.creditMinimum) formData.append("creditMinimum", String(Number(editForm.creditMinimum)));
-                  if (editForm.creditMessage) formData.append("creditMessage", editForm.creditMessage);
                   if (editForm.deliveryInfo) formData.append("deliveryInfo", editForm.deliveryInfo);
                   if (editForm.warrantyInfo) formData.append("warrantyInfo", editForm.warrantyInfo);
                   if (editForm.specifications.length > 0) formData.append("specifications", JSON.stringify(editForm.specifications));
@@ -1323,13 +1238,6 @@ export default function ProductsPage() {
                   const body = await res.json().catch(() => ({}));
                   if (!res.ok) throw new Error(body?.error || body?.message || "Failed to update product");
                   
-                  // Update wholesale tiers if any
-                  await fetch(`/api/admin/wholesale/prices/${id}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(editForm.wholesaleTiers),
-                  });
-
                   setEditItem(null);
                   setEditFiles([]);
                   await load();
