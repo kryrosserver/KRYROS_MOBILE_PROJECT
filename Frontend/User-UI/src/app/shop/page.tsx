@@ -73,46 +73,71 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
 
   return (
     <div className="container-custom py-12">
+      <div className="flex flex-col items-center justify-center mb-12">
+        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight uppercase text-center">
+          {catSection?.title || title}
+        </h1>
+      </div>
+
       <CategoryGrid categories={categories} />
 
-      {/* Fast Filters Section - Dynamic from Admin Panel - Now back at Top below Categories */}
-      {filterSection && (
-        <div className="mb-12">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center mb-6">
-            {filterSection.title || "Refine Your Search"}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {(filterSection.config?.items || []).filter((f: any) => f.isActive).map((f: any) => (
-              <button key={f.label} className="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm flex items-center gap-2 uppercase">
-                {f.icon && <span>{f.icon}</span>}
-                {f.label}
-              </button>
-            ))}
+      {/* Filter Section - Matches Provided Design */}
+      <div className="mb-12 space-y-8">
+        {/* Fast Filters */}
+        {filterSection && (
+          <div className="space-y-4">
+            <p className="text-sm font-bold text-slate-700">
+              Fast Filters:
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              {(filterSection.config?.items || []).filter((f: any) => f.isActive).map((f: any) => (
+                <button key={f.label} className="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm flex items-center gap-2 uppercase">
+                  {f.icon && <span>{f.icon}</span>}
+                  {f.label}
+                </button>
+              ))}
+              {/* Fallback hardcoded filters if dynamic ones aren't set */}
+              {(!filterSection.config?.items || filterSection.config.items.length === 0) && (
+                <>
+                  <button className="px-5 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 flex items-center gap-2 uppercase shadow-sm">
+                    🟡 FEATURED
+                  </button>
+                  <button className="px-5 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 flex items-center gap-2 uppercase shadow-sm">
+                    🔥 BEST SELLERS
+                  </button>
+                  <button className="px-5 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 flex items-center gap-2 uppercase shadow-sm">
+                    ⭐ TOP RATED
+                  </button>
+                  <button className="px-5 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 uppercase shadow-sm">
+                    SELECT COLOR
+                  </button>
+                  <button className="px-5 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 uppercase shadow-sm">
+                    SELECT STORAGE
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <ShopContent groupedData={groupedData} />
-
-      {/* Advanced Filters & Sorting - Stay at Bottom for Clean Look */}
-      <div className="mt-20 border-t border-slate-100 pt-16">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-black text-xs shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all w-full md:w-auto justify-center uppercase tracking-widest">
-            <Filter className="h-4 w-4" />
-            ADVANCED FILTERS
-            <SlidersHorizontal className="ml-2 h-3.5 w-3.5 opacity-50" />
+        {/* Action Bar: Filter, Sorting, Search */}
+        <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-slate-50">
+          <button className="flex items-center gap-2 bg-[#f0f7ff] text-[#2563eb] border border-[#dbeafe] px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-[#dbeafe] transition-all">
+            Filter
+            <SlidersHorizontal className="h-4 w-4" />
           </button>
 
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 cursor-pointer group">
-              <span className="text-[11px] font-black text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-widest">Default sorting</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Default sorting</span>
+              <ChevronDown className="h-4 w-4 text-slate-400" />
             </div>
-            <div className="h-4 w-px bg-slate-200 hidden md:block"></div>
-            <SearchIcon className="h-4 w-4 text-slate-400 cursor-pointer hover:text-slate-900 transition-colors" />
+            <SearchIcon className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-900 transition-colors" />
           </div>
         </div>
       </div>
+
+      <ShopContent groupedData={groupedData} />
     </div>
   );
 }
