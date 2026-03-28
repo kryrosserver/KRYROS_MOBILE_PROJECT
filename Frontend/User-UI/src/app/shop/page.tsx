@@ -68,7 +68,7 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
   const filterSection = sections.find((s: any) => s.type === "fast_filters" && s.isActive);
   
   const categoryParam = searchParams?.category;
-  const activeCategory = categories.find(c => c.slug === categoryParam);
+  const activeCategory = (categories as any[]).find((c: any) => c.slug === categoryParam);
 
   let title = "All Products";
   if (featured) title = "Featured Products";
