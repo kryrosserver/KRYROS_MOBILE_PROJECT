@@ -47,32 +47,31 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
     <div className="space-y-12">
       {groupedData.map((category) => (
         <section key={category.id} className="relative">
-          {/* Category Header */}
-          <div className="flex items-center gap-4 mb-4 sticky top-0 z-30 bg-white/90 backdrop-blur-md py-4">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 uppercase tracking-tight">
+          {/* Category Header - Perfectly Centered */}
+          <div className="flex flex-col items-center justify-center mb-8 sticky top-0 z-30 bg-white/95 backdrop-blur-md py-6 border-b border-slate-50">
+            <h2 className="text-2xl md:text-4xl font-black text-slate-900 uppercase tracking-tighter text-center">
               {category.name}
             </h2>
-            <div className="h-0.5 flex-1 bg-gradient-to-r from-green-500 to-transparent opacity-20"></div>
           </div>
 
           {/* Dynamic Brand Navigation Bar for this category */}
           <BrandNav brands={category.brands} categorySlug={category.slug} />
 
           {/* Brand Sections */}
-          <div className="space-y-10 mt-6">
+          <div className="space-y-12 mt-8">
             {category.brands.map((brand) => (
               <div 
                 key={brand.id} 
                 id={`brand-${brand.slug}`}
-                className="scroll-mt-24"
+                className="scroll-mt-32"
               >
-                {/* Brand Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <span className="w-1.5 h-6 bg-green-500 rounded-full"></span>
+                {/* Brand Header - Centered with clean line */}
+                <div className="flex flex-col items-center justify-center mb-8">
+                  <div className="h-1 w-12 bg-blue-600 rounded-full mb-3"></div>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-800 flex flex-col items-center gap-1 uppercase tracking-tight">
                     {brand.name}
-                    <span className="text-sm font-normal text-slate-400 ml-2">
-                      ({brand.products.length} products)
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      {brand.products.length} AVAILABLE ITEMS
                     </span>
                   </h3>
                 </div>

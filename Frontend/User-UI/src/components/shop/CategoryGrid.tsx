@@ -18,14 +18,14 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <div className="mb-16">
-      {/* Centered Horizontal Scroll Container */}
-      <div className="flex overflow-x-auto pb-6 gap-6 scrollbar-hide snap-x snap-mandatory justify-start md:justify-center -mx-4 px-4 md:mx-0 md:px-0">
+    <div className="mb-20">
+      {/* Perfectly Centered Horizontal Scroll Container */}
+      <div className="flex overflow-x-auto pb-8 gap-6 scrollbar-hide snap-x snap-mandatory min-[400px]:justify-center px-4">
         {categories.map((category) => (
           <Link
             key={category.id}
             href={`/shop?category=${category.slug}`}
-            className="group relative flex-shrink-0 w-32 md:w-40 flex flex-col items-center gap-3 snap-start"
+            className="group relative flex-shrink-0 w-32 min-[400px]:w-36 md:w-44 flex flex-col items-center gap-4 snap-center text-center"
           >
             {/* Professional Card Design */}
             <div className="relative w-full aspect-square bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:border-blue-400 group-hover:-translate-y-1">

@@ -52,10 +52,10 @@ export function BrandNav({ brands, categorySlug }: { brands: Brand[], categorySl
   if (brands.length <= 1) return null;
 
   return (
-    <div className="sticky top-[64px] z-20 bg-white/80 backdrop-blur-md border-b -mx-4 px-4 md:mx-0 md:px-0">
+    <div className="sticky top-[72px] md:top-[80px] z-20 bg-white/90 backdrop-blur-md border-b border-slate-100 -mx-4 px-4 md:mx-0 md:px-0">
       <div 
         ref={scrollRef}
-        className="flex items-center gap-2 py-3 overflow-x-auto no-scrollbar scroll-smooth"
+        className="flex items-center gap-3 py-4 overflow-x-auto no-scrollbar scroll-smooth justify-start md:justify-center"
       >
         {brands.map((brand) => (
           <a
