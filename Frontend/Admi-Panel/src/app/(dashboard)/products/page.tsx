@@ -58,7 +58,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [tab, setTab] = useState<"all" | "featured" | "flash" | "credit" | "wholesale">("all");
+  const [tab, setTab] = useState<"all" | "featured" | "flash" | "credit">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -81,10 +81,6 @@ export default function ProductsPage() {
     freeReturnsText: "Free Returns",
     hasInstallmentOptions: true,
     installmentOptionsText: "Installment Options",
-    wholesalePrice: "",
-    isWholesaleOnly: false,
-    unitsPerPack: "1",
-    wholesaleMoq: "1",
     upsellProductId: "",
     isActive: true,
     allowCredit: false,
@@ -96,7 +92,6 @@ export default function ProductsPage() {
     flashSaleEnd: "",
     images: [] as string[],
     specifications: [] as { key: string; value: string }[],
-    wholesaleTiers: [] as { minQuantity: number; price: number }[],
   });
   const [files, setFiles] = useState<File[]>([]);
   const [editItem, setEditItem] = useState<Product | null>(null);
@@ -120,10 +115,6 @@ export default function ProductsPage() {
     freeReturnsText: "",
     hasInstallmentOptions: true,
     installmentOptionsText: "",
-    wholesalePrice: "",
-    isWholesaleOnly: false,
-    unitsPerPack: "1",
-    wholesaleMoq: "1",
     upsellProductId: "",
     allowCredit: false,
     creditMinimum: "",
@@ -134,7 +125,6 @@ export default function ProductsPage() {
     flashSaleEnd: "",
     images: [] as string[],
     specifications: [] as { key: string; value: string }[],
-    wholesaleTiers: [] as { minQuantity: number; price: number }[],
   });
   const [editFiles, setEditFiles] = useState<File[]>([]);
 
@@ -230,14 +220,12 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
-                {tab === "wholesale" ? "Add Wholesale Product" : 
-                 tab === "credit" ? "Add Credit Product" : 
+                {tab === "credit" ? "Add Credit Product" : 
                  tab === "flash" ? "Add Flash Sale Product" : 
                  tab === "featured" ? "Add Featured Product" : "Add New Product"}
               </h2>
               <p className="text-sm text-slate-500">
-                {tab === "wholesale" ? "Upload products specifically for wholesale deals" : 
-                 tab === "credit" ? "Upload products with installment payment options" : 
+                {tab === "credit" ? "Upload products with installment payment options" : 
                  "Upload product details and images"}
               </p>
             </div>
@@ -246,7 +234,6 @@ export default function ProductsPage() {
                 // Set defaults based on active tab when opening
                 setForm(prev => ({
                   ...prev,
-                  isWholesaleOnly: tab === "wholesale",
                   allowCredit: tab === "credit",
                   isFeatured: tab === "featured",
                   isFlashSale: tab === "flash"
@@ -254,7 +241,7 @@ export default function ProductsPage() {
               }
               setShowCreate(v => !v);
             }} className="btn-secondary">
-              {showCreate ? "Close" : tab === "wholesale" ? "Add Wholesale Product" : tab === "credit" ? "Add Credit Product" : "Add Product"}
+              {showCreate ? "Close" : tab === "credit" ? "Add Credit Product" : "Add Product"}
             </button>
           </div>
           {showCreate && (
@@ -363,89 +350,6 @@ export default function ProductsPage() {
                     ))}
                   </select>
                 </div>
-
-                {/* --- WHOLESALE SPECIFIC FIELDS --- */}
-                {tab === "wholesale" && (
-                  <div className="border-t pt-4 space-y-3 bg-indigo-50/30 p-3 rounded-lg border-indigo-100">
-                    <p className="text-[11px] font-black text-indigo-700 uppercase tracking-widest">Wholesale Details</p>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Units per Pack</label>
-                        <input
-                          type="number"
-                          placeholder="e.g. 20"
-                          value={form.unitsPerPack}
-                          onChange={(e) => setForm({ ...form, unitsPerPack: e.target.value })}
-                          className="admin-input w-full"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Min Order Qty (Packs)</label>
-                        <input
-                          type="number"
-                          placeholder="e.g. 5"
-                          value={form.wholesaleMoq}
-                          onChange={(e) => setForm({ ...form, wholesaleMoq: e.target.value })}
-                          className="admin-input w-full"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Base Wholesale Price (Per Pack)</label>
-                      <input
-                        type="number"
-                        placeholder="Base Wholesale Price"
-                        value={form.wholesalePrice}
-                        onChange={(e) => setForm({ ...form, wholesalePrice: e.target.value })}
-                        className="admin-input w-full"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Quantity-Based Price Tiers</p>
-                      {form.wholesaleTiers.map((tier, idx) => (
-                        <div key={idx} className="flex gap-2 items-center">
-                          <input
-                            type="number"
-                            placeholder="Min Qty"
-                            value={tier.minQuantity}
-                            onChange={(e) => {
-                              const newTiers = [...form.wholesaleTiers];
-                              newTiers[idx].minQuantity = Number(e.target.value);
-                              setForm({ ...form, wholesaleTiers: newTiers });
-                            }}
-                            className="admin-input flex-1 h-8 text-xs"
-                          />
-                          <input
-                            type="number"
-                            placeholder="Price"
-                            value={tier.price}
-                            onChange={(e) => {
-                              const newTiers = [...form.wholesaleTiers];
-                              newTiers[idx].price = Number(e.target.value);
-                              setForm({ ...form, wholesaleTiers: newTiers });
-                            }}
-                            className="admin-input flex-1 h-8 text-xs"
-                          />
-                          <button
-                            onClick={() => setForm({ ...form, wholesaleTiers: form.wholesaleTiers.filter((_, i) => i !== idx) })}
-                            className="text-red-500 p-1"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() => setForm({ ...form, wholesaleTiers: [...form.wholesaleTiers, { minQuantity: 0, price: 0 }] })}
-                        className="text-[10px] text-indigo-600 font-bold hover:underline"
-                      >
-                        + Add Quantity Tier
-                      </button>
-                    </div>
-                  </div>
-                )}
 
                 {/* --- CREDIT SPECIFIC FIELDS --- */}
                 {tab === "credit" && (
@@ -623,10 +527,6 @@ export default function ProductsPage() {
                         if (form.freeReturnsText) formData.append("freeReturnsText", form.freeReturnsText);
                         formData.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
                         if (form.installmentOptionsText) formData.append("installmentOptionsText", form.installmentOptionsText);
-                        if (form.wholesalePrice) formData.append("wholesalePrice", String(Number(form.wholesalePrice)));
-                        formData.append("isWholesaleOnly", String(form.isWholesaleOnly));
-                        formData.append("unitsPerPack", String(Number(form.unitsPerPack || 1)));
-                        formData.append("wholesaleMoq", String(Number(form.wholesaleMoq || 1)));
                         if (form.upsellProductId) formData.append("upsellProductId", String(form.upsellProductId));
                         formData.append("allowCredit", String(form.allowCredit));
                         if (form.creditMinimum) formData.append("creditMinimum", String(Number(form.creditMinimum)));
@@ -661,15 +561,6 @@ export default function ProductsPage() {
                         const body = await res.json().catch(() => ({}));
                         if (!res.ok) throw new Error(body?.error || body?.message || "Failed to create product");
                         
-                        // Save wholesale tiers if any
-                        if (form.wholesaleTiers.length > 0) {
-                          await fetch(`/api/admin/wholesale/prices/${body.id}`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(form.wholesaleTiers),
-                          });
-                        }
-
                         setShowCreate(false);
                         setForm({
                           name: "",
@@ -690,10 +581,6 @@ export default function ProductsPage() {
                           freeReturnsText: "Free Returns",
                           hasInstallmentOptions: true,
                           installmentOptionsText: "Installment Options",
-                          wholesalePrice: "",
-                          isWholesaleOnly: false,
-                          unitsPerPack: "1",
-                          wholesaleMoq: "1",
                           upsellProductId: "",
                           isActive: true,
                           allowCredit: false,
@@ -705,7 +592,6 @@ export default function ProductsPage() {
                           flashSaleEnd: "",
                           images: [],
                           specifications: [],
-                          wholesaleTiers: [] as { minQuantity: number; price: number }[],
                         });
                         setFiles([]);
                         await load();
@@ -717,7 +603,7 @@ export default function ProductsPage() {
                     }}
                     className="btn-primary"
                   >
-                    {creating ? "Creating..." : tab === "wholesale" ? "Create Wholesale Product" : tab === "credit" ? "Create Credit Product" : "Save Product"}
+                    {creating ? "Creating..." : tab === "credit" ? "Create Credit Product" : "Save Product"}
                   </button>
                 </div>
               </div>
@@ -732,12 +618,6 @@ export default function ProductsPage() {
           className={`px-3 py-1.5 rounded ${tab === "all" ? "bg-green-500 text-white" : "bg-slate-100 text-slate-700"}`}
         >
           All
-        </button>
-        <button
-          onClick={() => setTab("wholesale")}
-          className={`px-3 py-1.5 rounded ${tab === "wholesale" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700"}`}
-        >
-          Wholesale
         </button>
         <button
           onClick={() => setTab("credit")}
@@ -799,8 +679,7 @@ export default function ProductsPage() {
                 tab === "featured" ? products.filter(p => !!p.isFeatured) : 
                 tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
                 tab === "credit" ? products.filter(p => !!p.allowCredit) : 
-                tab === "wholesale" ? products.filter(p => !!p.isWholesaleOnly) :
-                products
+                products.filter(p => !p.isWholesaleOnly)
               ).map((p) => (
                 <tr key={p.id}>
                   <td>
@@ -891,13 +770,6 @@ export default function ProductsPage() {
                   <td className="text-right space-x-2">
                     <button
                       onClick={async () => {
-                        // Fetch wholesale prices first
-                        let tiers = [];
-                        try {
-                          const res = await fetch(`/api/admin/wholesale/prices/${p.id}`);
-                          if (res.ok) tiers = await res.json();
-                        } catch (e) {}
-
                         setEditItem(p);
                         setEditForm({
                           id: p.id,
@@ -919,10 +791,6 @@ export default function ProductsPage() {
                           freeReturnsText: p.freeReturnsText || "Free Returns",
                           hasInstallmentOptions: !!p.hasInstallmentOptions,
                           installmentOptionsText: p.installmentOptionsText || "Installment Options",
-                          wholesalePrice: String(p.wholesalePrice ?? ""),
-                          isWholesaleOnly: !!(p as any).isWholesaleOnly,
-                          unitsPerPack: String((p as any).unitsPerPack || 1),
-                          wholesaleMoq: String((p as any).wholesaleMoq || 1),
                           upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
                           allowCredit: !!p.allowCredit,
                           creditMinimum: String(p.creditMinimum ?? ""),
@@ -935,7 +803,6 @@ export default function ProductsPage() {
                             ? JSON.parse((p as any).specifications) 
                             : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
                           images: Array.isArray(p.images) ? p.images.map((img: any) => img.url) : [],
-                          wholesaleTiers: Array.isArray(tiers) ? tiers.map(t => ({ minQuantity: t.minQuantity, price: Number(t.price) })) : [],
                         });
                         setEditFiles([]);
                       }}
@@ -1171,104 +1038,6 @@ export default function ProductsPage() {
                       ))}
                     </select>
                     <p className="text-[10px] text-slate-500 mt-1 italic">Selecting a product here will enable the 8% bundle discount offer.</p>
-                  </div>
-
-                  <div className="pt-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Base Wholesale Price (USD)</label>
-                    <input
-                      type="number"
-                      placeholder="Base Wholesale Price"
-                      value={editForm.wholesalePrice}
-                      onChange={(e) => setEditForm({ ...editForm, wholesalePrice: e.target.value })}
-                      className="admin-input w-full"
-                    />
-                  </div>
-
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-4">
-                    <p className="text-sm font-bold text-blue-800 border-b border-blue-200 pb-2">Wholesale & Bulk Pack</p>
-                    <div className="flex flex-col gap-2">
-                      <label className="flex items-center gap-2 text-sm font-bold text-blue-700 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editForm.isWholesaleOnly}
-                          onChange={(e) => setEditForm({ ...editForm, isWholesaleOnly: e.target.checked })}
-                          className="w-4 h-4 text-blue-500 rounded"
-                        />
-                        Wholesale Only Product
-                      </label>
-                      <p className="text-[10px] text-blue-600 italic px-6">Hidden from regular retail customers.</p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mt-2">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Units per Pack</label>
-                        <input
-                          type="number"
-                          placeholder="Units per Pack (e.g. 20)"
-                          value={editForm.unitsPerPack}
-                          onChange={(e) => setEditForm({ ...editForm, unitsPerPack: e.target.value })}
-                          className="admin-input w-full bg-white"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Min Order Qty (Packs)</label>
-                        <input
-                          type="number"
-                          placeholder="Min Packs (e.g. 5)"
-                          value={editForm.wholesaleMoq}
-                          onChange={(e) => setEditForm({ ...editForm, wholesaleMoq: e.target.value })}
-                          className="admin-input w-full bg-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 space-y-3 border-t border-slate-100">
-                    <p className="text-sm font-bold text-slate-800">Tiered Wholesale Pricing (Quantity Based)</p>
-                    {editForm.wholesaleTiers.map((tier, idx) => (
-                      <div key={idx} className="flex gap-2 items-center bg-white p-2 rounded border border-slate-100 shadow-sm">
-                        <div className="flex-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Min Qty</label>
-                          <input
-                            type="number"
-                            placeholder="e.g. 10"
-                            value={tier.minQuantity}
-                            onChange={(e) => {
-                              const newTiers = [...editForm.wholesaleTiers];
-                              newTiers[idx].minQuantity = Number(e.target.value);
-                              setEditForm({ ...editForm, wholesaleTiers: newTiers });
-                            }}
-                            className="admin-input w-full text-xs"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Price</label>
-                          <input
-                            type="number"
-                            placeholder="e.g. 150"
-                            value={tier.price}
-                            onChange={(e) => {
-                              const newTiers = [...editForm.wholesaleTiers];
-                              newTiers[idx].price = Number(e.target.value);
-                              setEditForm({ ...editForm, wholesaleTiers: newTiers });
-                            }}
-                            className="admin-input w-full text-xs"
-                          />
-                        </div>
-                        <button
-                          onClick={() => setEditForm({ ...editForm, wholesaleTiers: editForm.wholesaleTiers.filter((_, i) => i !== idx) })}
-                          className="text-red-500 p-1 hover:bg-red-50 rounded mt-4"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => setEditForm({ ...editForm, wholesaleTiers: [...editForm.wholesaleTiers, { minQuantity: 0, price: 0 }] })}
-                      className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1"
-                    >
-                      <PlusCircle className="h-3 w-3" /> Add Price Tier
-                    </button>
                   </div>
 
                   <div className="pt-2 space-y-3">
