@@ -342,34 +342,6 @@ export default function ProductsPage() {
                   </select>
                 </div>
 
-                {/* --- CREDIT SPECIFIC FIELDS --- */}
-                {tab === "credit" && (
-                  <div className="border-t pt-4 space-y-3 bg-blue-50/30 p-3 rounded-lg border-blue-100">
-                    <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest">Installment Details</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Down Payment (Min)</label>
-                        <input
-                          type="number"
-                          placeholder="e.g. 1500"
-                          value={form.creditMinimum}
-                          onChange={(e) => setForm({ ...form, creditMinimum: e.target.value })}
-                          className="admin-input w-full"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Monthly Installment</label>
-                        <input
-                          placeholder="e.g. 250/month"
-                          value={form.creditMessage}
-                          onChange={(e) => setForm({ ...form, creditMessage: e.target.value })}
-                          className="admin-input w-full"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* --- FLASH SALE SPECIFIC FIELDS --- */}
                 {tab === "flash" && (
                   <div className="border-t pt-4 space-y-3 bg-red-50/30 p-3 rounded-lg border-red-100">
@@ -589,7 +561,7 @@ export default function ProductsPage() {
                     }}
                     className="btn-primary"
                   >
-                    {creating ? "Creating..." : tab === "credit" ? "Create Credit Product" : "Save Product"}
+                    {creating ? "Creating..." : "Save Product"}
                   </button>
                 </div>
               </div>
