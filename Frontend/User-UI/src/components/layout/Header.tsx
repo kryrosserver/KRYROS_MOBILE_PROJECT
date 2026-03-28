@@ -427,41 +427,55 @@ export function Header() {
                       <div className="flex flex-col gap-1">
                         <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
                         {searchResults.map((product) => (
-                          <Link
+                          <div
                             key={product.id}
-                            href={`/product/${product.slug || product.id}`}
-                            onClick={() => {
-                              setSearchOpen(false);
-                              setSearchQuery("");
-                            }}
                             className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
                           >
-                            <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
-                              <Image
-                                src={product.images?.[0]?.url || product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
-                                alt={product.name}
-                                fill
-                                className="object-contain p-1"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-sm font-black text-blue-600">{formatPrice(product.price)}</span>
-                                {product.discountPercentage && product.discountPercentage > 0 && (
-                                  <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                                    -{product.discountPercentage}%
+                            <Link
+                              href={`/product/${product.slug || product.id}`}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchQuery("");
+                              }}
+                              className="flex items-center gap-4 flex-1 min-w-0"
+                            >
+                              <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
+                                <Image
+                                  src={product.images?.[0]?.url || product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                                  alt={product.name}
+                                  fill
+                                  className="object-contain p-1"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
+                                  {product.discountPercentage && product.discountPercentage > 0 && (
+                                    <span className="text-xs text-slate-400 line-through font-medium">
+                                      {formatPrice(product.price / (1 - product.discountPercentage / 100))}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex flex-col gap-0.5 mt-1">
+                                  <span className={`text-[9px] font-black uppercase tracking-widest ${product.stockCurrent > 0 ? "text-green-600" : "text-red-600"}`}>
+                                    IN STOCK: {product.stockCurrent || 0}
                                   </span>
-                                )}
+                                  <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">{product.sku || "N/A"}</span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2.5 mt-1 text-[9px] font-black uppercase tracking-widest">
-                                <span className={`px-1.5 py-0.5 rounded-sm ${product.stockCurrent > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
-                                  {product.stockCurrent > 0 ? "IN STOCK" : "OUT OF STOCK"}
-                                </span>
-                                <span className="text-slate-400 border-l border-slate-200 pl-2.5">SKU: {product.sku || "N/A"}</span>
-                              </div>
-                            </div>
-                          </Link>
+                            </Link>
+                            <button 
+                              className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors"
+                              onClick={() => {
+                                // Add to cart logic would go here
+                                setSearchOpen(false);
+                                setSearchQuery("");
+                              }}
+                            >
+                              Add to cart
+                            </button>
+                          </div>
                         ))}
                         <Link 
                           href={`/shop?q=${searchQuery}`}
@@ -611,59 +625,67 @@ export function Header() {
                       <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Searching...</p>
                     </div>
                   ) : searchResults.length > 0 ? (
-                    <div className="flex flex-col gap-1">
-                      <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
-                      {searchResults.map((product) => (
-                        <Link
-                          key={product.id}
-                          href={`/product/${product.slug || product.id}`}
-                          onClick={() => {
-                            setSearchOpen(false);
-                            setSearchQuery("");
-                          }}
-                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
+                      <div className="flex flex-col gap-1">
+                        <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
+                        {searchResults.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
+                          >
+                            <Link
+                              href={`/product/${product.slug || product.id}`}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchQuery("");
+                              }}
+                              className="flex items-center gap-4 flex-1 min-w-0"
+                            >
+                              <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
+                                <Image
+                                  src={product.images?.[0]?.url || product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                                  alt={product.name}
+                                  fill
+                                  className="object-contain p-1"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
+                                  {product.discountPercentage && product.discountPercentage > 0 && (
+                                    <span className="text-xs text-slate-400 line-through font-medium">
+                                      {formatPrice(product.price / (1 - product.discountPercentage / 100))}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex flex-col gap-0.5 mt-1">
+                                  <span className={`text-[9px] font-black uppercase tracking-widest ${product.stockCurrent > 0 ? "text-green-600" : "text-red-600"}`}>
+                                    IN STOCK: {product.stockCurrent || 0}
+                                  </span>
+                                  <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">{product.sku || "N/A"}</span>
+                                </div>
+                              </div>
+                            </Link>
+                            <button 
+                              className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors"
+                              onClick={() => {
+                                // Add to cart logic would go here
+                                setSearchOpen(false);
+                                setSearchQuery("");
+                              }}
+                            >
+                              Add to cart
+                            </button>
+                          </div>
+                        ))}
+                        <Link 
+                          href={`/shop?q=${searchQuery}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="p-3 text-center text-xs font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors border-t border-slate-50 mt-1"
                         >
-                          <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
-                            <Image
-                              src={product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
-                              alt={product.name}
-                              fill
-                              className="object-contain p-1"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-sm font-black text-blue-600">{formatPrice(product.price)}</span>
-                              {product.discountPercentage && product.discountPercentage > 0 && (
-                                <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                                  -{product.discountPercentage}%
-                                </span>
-                              )}
-                              {product.oldPrice && (
-                                <span className="text-xs text-slate-400 line-through font-medium">{formatPrice(product.oldPrice)}</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2.5 mt-1 text-[9px] font-black uppercase tracking-widest">
-                              <span className={`px-1.5 py-0.5 rounded-sm ${product.stockCurrent > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
-                                {product.stockCurrent > 0 ? "IN STOCK" : "OUT OF STOCK"}
-                              </span>
-                              <span className="text-slate-400 border-l border-slate-200 pl-2.5">SKU: {product.sku || "N/A"}</span>
-                            </div>
-                          </div>
-                          <button className="hidden md:flex bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
-                            Add to cart
-                          </button>
+                          View all results
                         </Link>
-                      ))}
-                      <Link 
-                        href={`/shop?q=${searchQuery}`}
-                        onClick={() => setSearchOpen(false)}
-                        className="p-3 text-center text-xs font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors border-t border-slate-50 mt-1"
-                      >
-                        View all results
-                      </Link>
-                    </div>
+                      </div>
                   ) : (
                     <div className="p-12 text-center">
                       <Search className="h-8 w-8 text-slate-200 mx-auto mb-3" />
