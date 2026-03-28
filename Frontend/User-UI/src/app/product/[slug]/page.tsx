@@ -583,6 +583,35 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </div>
+
+      {/* Mobile Sticky Action Bar - Professional App Feel */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:hidden pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+        <div className="flex gap-4">
+          <button 
+            onClick={handleWishlist}
+            className="h-12 w-12 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 active:bg-slate-50 transition-colors"
+          >
+            <Heart className="h-6 w-6" />
+          </button>
+          
+          <div className="flex-1 grid grid-cols-2 gap-2">
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white font-black h-12 rounded-xl text-[11px] uppercase tracking-wider shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+              onClick={handleAddToCart}
+              disabled={isWholesale && wholesaleAccount?.status !== "APPROVED"}
+            >
+              {isWholesale && wholesaleAccount?.status !== "APPROVED" ? "Wholesale Only" : "Add to cart"}
+            </Button>
+            <Button 
+              className="bg-[#0a192f] hover:bg-[#112240] text-white font-black h-12 rounded-xl text-[11px] uppercase tracking-wider shadow-lg shadow-slate-900/20 active:scale-95 transition-all"
+              onClick={handleBuyNow}
+              disabled={isWholesale && wholesaleAccount?.status !== "APPROVED"}
+            >
+              {isWholesale && wholesaleAccount?.status !== "APPROVED" ? "Account Required" : "Buy Now"}
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

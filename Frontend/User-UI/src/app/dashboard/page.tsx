@@ -121,55 +121,50 @@ export default function DashboardPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Recent Orders */}
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">Recent Orders</h2>
-                <Link href="/dashboard/orders" className="text-sm text-green-600 hover:underline">
+            <div className="rounded-xl bg-white p-6 shadow-sm overflow-hidden">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Package className="h-5 w-5 text-blue-500" />
+                  Recent Orders
+                </h2>
+                <Link href="/dashboard/orders" className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
                   View All
                 </Link>
               </div>
-              <div className="overflow-x-auto">
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="pb-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Order ID
-                      </th>
-                      <th className="pb-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Date
-                      </th>
-                      <th className="pb-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Status
-                      </th>
-                      <th className="pb-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Total
-                      </th>
-                      <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Action
-                      </th>
+                    <tr className="border-b border-slate-100">
+                      <th className="pb-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Order ID</th>
+                      <th className="pb-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Date</th>
+                      <th className="pb-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Status</th>
+                      <th className="pb-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total</th>
+                      <th className="pb-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(orders.slice(0,3)).map((order:any) => (
-                      <tr key={order.id} className="border-b border-slate-100">
+                      <tr key={order.id} className="border-b border-slate-50 last:border-0 group">
                         <td className="py-4">
-                          <span className="font-medium text-slate-900">{order.orderNumber || order.id}</span>
+                          <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{order.orderNumber || order.id}</span>
                         </td>
-                        <td className="py-4 text-sm text-slate-600">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="py-4 text-sm text-slate-600 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
                         <td className="py-4">
-                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
                             (order.status || '').toLowerCase() === "delivered" ? "bg-green-100 text-green-700" :
                             (order.status || '').toLowerCase() === "shipped" ? "bg-blue-100 text-blue-700" :
                             "bg-yellow-100 text-yellow-700"
                           }`}>
-                            {order.status || "—"}
+                            {order.status || "PENDING"}
                           </span>
                         </td>
-                        <td className="py-4 text-sm font-medium text-slate-900">{formatPrice(Number(order.total || 0))}</td>
+                        <td className="py-4 text-sm font-bold text-slate-900">{formatPrice(Number(order.total || 0))}</td>
                         <td className="py-4 text-right">
                           <Link href={`/dashboard/orders/${order.id}`}>
-                            <Button variant="ghost" size="sm">
-                              View
+                            <Button variant="ghost" size="sm" className="font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-blue-600">
+                              Details
                             </Button>
                           </Link>
                         </td>
@@ -177,6 +172,38 @@ export default function DashboardPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card View - Professional App Layout */}
+              <div className="flex flex-col gap-4 md:hidden">
+                {(orders.slice(0,3)).map((order:any) => (
+                  <Link 
+                    key={order.id} 
+                    href={`/dashboard/orders/${order.id}`}
+                    className="flex flex-col gap-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50 active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Number</p>
+                        <p className="font-bold text-slate-900">{order.orderNumber || order.id.slice(0,8)}</p>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-widest ${
+                        (order.status || '').toLowerCase() === "delivered" ? "bg-green-100 text-green-700" :
+                        (order.status || '').toLowerCase() === "shipped" ? "bg-blue-100 text-blue-700" :
+                        "bg-yellow-100 text-yellow-700"
+                      }`}>
+                        {order.status || "PENDING"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Amount</p>
+                        <p className="font-black text-blue-600">{formatPrice(Number(order.total || 0))}</p>
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
 

@@ -97,55 +97,58 @@ export default function CartPage() {
                 const primary = ci.product.images?.find((i) => i.isPrimary)?.url || ci.product.images?.[0]?.url || "";
                 const unitPrice = ci.variant?.price || ci.product.salePrice || ci.product.price;
                 return (
-                <div key={itemId} className="flex gap-4 border-b border-slate-200 p-6 last:border-b-0">
-                  <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                    <Image
-                      src={primary || "/placeholder.png"}
-                      alt={ci.product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  
-                  <div className="flex flex-1 flex-col justify-between">
-                    <div>
-                      <Link href={`/product/${ci.product.id}`} className="font-medium text-slate-900 hover:text-green-500">
-                        {ci.product.name}
-                      </Link>
-                      {ci.variant && (
-                        <p className="mt-1 text-sm text-slate-500">Variant: {ci.variant.value}</p>
-                      )}
+                <div key={itemId} className="flex flex-col sm:flex-row gap-4 border-b border-slate-100 p-4 md:p-6 last:border-b-0 group">
+                  <div className="flex gap-4 w-full">
+                    <div className="relative h-24 w-24 md:h-28 md:w-28 shrink-0 overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
+                      <Image
+                        src={primary || "/placeholder.png"}
+                        alt={ci.product.name}
+                        fill
+                        className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                      />
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-1 flex-col justify-between min-w-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <Link href={`/product/${ci.product.id}`} className="font-bold text-slate-900 hover:text-blue-600 transition-colors truncate block">
+                          {ci.product.name}
+                        </Link>
                         <button
-                          onClick={() => updateQuantity(ci.product.id, ci.variant?.id, ci.quantity - 1)}
-                          className="flex h-8 w-8 items-center justify-center rounded border border-slate-200 text-slate-600 hover:bg-slate-50"
+                          onClick={() => removeItem(ci.product.id, ci.variant?.id)}
+                          className="rounded-lg p-2 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all shrink-0"
                         >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="w-8 text-center font-medium">{ci.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(ci.product.id, ci.variant?.id, ci.quantity + 1)}
-                          className="flex h-8 w-8 items-center justify-center rounded border border-slate-200 text-slate-600 hover:bg-slate-50"
-                        >
-                          <Plus className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
                         </button>
                       </div>
+
+                      {ci.variant && (
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Variant: {ci.variant.value}</p>
+                      )}
                       
-                      <div className="text-right">
-                        <p className="font-bold text-slate-900">{displayPrice(Number(unitPrice * ci.quantity))}</p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center bg-slate-50 rounded-lg border border-slate-100 overflow-hidden h-9 shadow-sm">
+                          <button
+                            onClick={() => updateQuantity(ci.product.id, ci.variant?.id, ci.quantity - 1)}
+                            className="flex h-full px-3 items-center justify-center text-slate-400 hover:bg-white hover:text-blue-600 transition-all disabled:opacity-30"
+                            disabled={ci.quantity <= 1}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="w-8 text-center text-xs font-bold text-slate-700">{ci.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(ci.product.id, ci.variant?.id, ci.quantity + 1)}
+                            className="flex h-full px-3 items-center justify-center text-slate-400 hover:bg-white hover:text-blue-600 transition-all"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+                        
+                        <div className="text-right">
+                          <p className="text-sm font-black text-blue-600 tracking-tight">{displayPrice(Number(unitPrice * ci.quantity))}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <button
-                    onClick={() => removeItem(ci.product.id, ci.variant?.id)}
-                    className="self-start rounded p-2 text-slate-400 hover:bg-red-50 hover:text-red-500"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
                 </div>
               )})}
             </div>
