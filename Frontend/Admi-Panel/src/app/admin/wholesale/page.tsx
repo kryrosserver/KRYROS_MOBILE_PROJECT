@@ -176,7 +176,7 @@ export default function WholesalePage() {
 
   async function compressImage(file: File, maxWidth = 800, quality = 0.85): Promise<string> {
     const blobURL = URL.createObjectURL(file);
-    const img = await new Image();
+    const img = new Image();
     const p = new Promise<HTMLImageElement>((resolve, reject) => {
       img.onload = () => resolve(img);
       img.onerror = reject;
@@ -399,7 +399,6 @@ export default function WholesalePage() {
             </div>
           </div>
         </>
-</div>
       ) : activeTab === "products" ? (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
