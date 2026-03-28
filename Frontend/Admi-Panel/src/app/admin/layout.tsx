@@ -21,7 +21,8 @@ import {
   Menu,
   X,
   Globe,
-  Map as MapIcon
+  Map as MapIcon,
+  Store
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AdminSettingsProvider, useAdminSettings } from "@/providers/AdminSettingsProvider";
@@ -34,7 +35,7 @@ const menuItems = [
   { icon: LayoutGrid, label: "Categories", href: "/admin/categories" },
   { icon: Tag, label: "Brands", href: "/admin/brands" },
   { icon: Package, label: "Products", href: "/admin/products" },
-  { icon: Users, label: "Wholesale", href: "/admin/wholesale" },
+  { icon: Store, label: "Wholesale", href: "/admin/wholesale" },
   { icon: CreditCard, label: "Credit System", href: "/admin/credit" },
   { icon: Wallet, label: "Wallet & Payments", href: "/admin/wallet" },
   { icon: Globe, label: "Countries / Currencies", href: "/admin/countries" },
