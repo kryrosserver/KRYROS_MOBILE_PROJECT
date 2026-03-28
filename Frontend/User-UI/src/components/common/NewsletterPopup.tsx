@@ -6,24 +6,33 @@ import { X, Mail, Send, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cmsApi } from "@/lib/api";
 
 export function NewsletterPopup() {
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [config, setConfig] = useState<any>(null);
 
   useEffect(() => {
-    // Check if user has already dismissed or subscribed
-    const hasSeenPopup = localStorage.getItem("kryros_newsletter_seen");
-    
-    if (!hasSeenPopup) {
-      // Show popup after 3 seconds
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    // Fetch newsletter config from admin
+    cmsApi.getFooterConfig().then(res => {
+      if (res.data && res.data.newsletterPopupEnabled) {
+        setConfig(res.data);
+        
+        // Check if user has already dismissed or subscribed
+        const hasSeenPopup = localStorage.getItem("kryros_newsletter_seen");
+        
+        if (!hasSeenPopup) {
+          // Show popup after configured delay
+          const timer = setTimeout(() => {
+            setIsVisible(true);
+          }, res.data.newsletterPopupDelay || 3000);
+          return () => clearTimeout(timer);
+        }
+      }
+    });
   }, []);
 
   const handleClose = () => {
@@ -93,7 +102,7 @@ export function NewsletterPopup() {
                    <Mail className="h-32 w-32 text-white" />
                 </div>
                 <Image
-                  src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000&auto=format&fit=crop"
+                  src={config?.newsletterPopupImage || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000&auto=format&fit=crop"}
                   alt="Newsletter"
                   fill
                   className="object-cover mix-blend-overlay"
@@ -102,7 +111,7 @@ export function NewsletterPopup() {
                    <div className="bg-kryros-accent/20 backdrop-blur-md px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-2 border border-white/10">
                       KRYROS EXCLUSIVE
                    </div>
-                   <h3 className="text-2xl font-black tracking-tight">Unlock Premium Deals</h3>
+                   <h3 className="text-2xl font-black tracking-tight">{config?.newsletterPopupTitle || "Unlock Premium Deals"}</h3>
                 </div>
               </div>
 
@@ -111,7 +120,9 @@ export function NewsletterPopup() {
                 {!isSubscribed ? (
                   <>
                     <p className="text-slate-600 mb-6 leading-relaxed">
-                      Join our community and be the first to know about <span className="text-kryros-primary font-bold">new arrivals</span>, flash sales, and tech guides.
+                      {config?.newsletterPopupSubtitle || (
+                        <>Join our community and be the first to know about <span className="text-kryros-primary font-bold">new arrivals</span>, flash sales, and tech guides.</>
+                      )}
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">

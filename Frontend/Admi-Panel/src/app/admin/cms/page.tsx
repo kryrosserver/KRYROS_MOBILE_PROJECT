@@ -163,6 +163,7 @@ export default function CMSPage() {
 
   const tabs = [
     { id: "banners", label: "Banners", icon: ImageIcon, count: banners.length },
+    { id: "shop_filters", label: "Shop Filters", icon: Filter, count: sections.filter((s:any) => s.type === "fast_filters" && s.isActive).length },
     { id: "testimonials", label: "Testimonials", icon: MessageSquare, count: sections.filter((s:any) => s.type === "testimonials" && s.isActive).length },
     { id: "wholesale", label: "Wholesale Deals", icon: Star, count: sections.filter((s:any) => s.type === "wholesale_deals" && s.isActive).length },
     { id: "footer", label: "Footer", icon: Layout, count: 0 },
@@ -735,6 +736,233 @@ export default function CMSPage() {
             {!loading && banners.length > 0 && filteredBanners.length === 0 && (
               <div className="p-8 text-center text-sm text-slate-500">
                 No banners match your search "{searchQuery}"
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Shop Filters */}
+      {activeTab === "shop_filters" && (
+        <div className="admin-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900">Dynamic Shop Filters</h2>
+            <button
+              onClick={async () => {
+                const defaults = [
+                  { label: "FEATURED", icon: "🟡", isActive: true },
+                  { label: "BEST SELLERS", icon: "🔥", isActive: true },
+                  { label: "TOP RATED", icon: "⭐", isActive: true },
+                  { label: "SELECT COLOR", icon: "", isActive: true },
+                  { label: "SELECT STORAGE", icon: "", isActive: true },
+                ];
+                const res = await fetch("/internal/admin/cms/sections", {
+                  method: "POST",
+                  credentials: "same-origin",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ type: "fast_filters", title: "Refine Your Search", isActive: true, order: 11, config: { items: defaults } }),
+                });
+                if (res.ok) {
+                  await loadSections();
+                  setMessage("Shop filters initialized successfully");
+                } else {
+                  const t = await res.text();
+                  setError(`Failed to save: ${t}`);
+                }
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium border border-slate-200"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Reset to Defaults
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {sections.filter((s:any) => s.type === "fast_filters").map((s:any) => (
+              <div key={s.id} className="space-y-6 p-6 border border-slate-200 rounded-xl bg-slate-50/30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Section Title</label>
+                    <input 
+                      defaultValue={s.title || "Refine Your Search"} 
+                      className="admin-input font-bold text-lg" 
+                      onBlur={async (e) => {
+                        await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                          method: "PUT",
+                          credentials: "same-origin",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ title: e.target.value }),
+                        });
+                        await loadSections();
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={s.isActive}
+                        onChange={async (e) => {
+                          await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                            method: "PUT",
+                            credentials: "same-origin",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ isActive: e.target.checked }),
+                          });
+                          await loadSections();
+                        }}
+                        className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                      />
+                      <span className="text-sm font-semibold text-slate-700">Section Enabled</span>
+                    </label>
+                    <button
+                      onClick={async () => {
+                        if (confirm("Delete this section entirely?")) {
+                          const res = await fetch(`/internal/admin/cms/sections/${s.id}`, { method: "DELETE", credentials: "same-origin" });
+                          if (res.ok) await loadSections();
+                        }
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    Manage Filter Buttons
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="md:col-span-2">
+                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Button Label</label>
+                      <input placeholder="e.g. FEATURED" className="admin-input" id={`f-label-${s.id}`} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Icon/Emoji</label>
+                      <input placeholder="e.g. 🟡" className="admin-input text-center" id={`f-icon-${s.id}`} />
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        onClick={async () => {
+                          const label = (document.getElementById(`f-label-${s.id}`) as HTMLInputElement).value.trim();
+                          const icon = (document.getElementById(`f-icon-${s.id}`) as HTMLInputElement).value.trim();
+                          if (!label) return alert("Label is required");
+                          
+                          const items = Array.isArray(s.config?.items) ? [...s.config.items] : [];
+                          items.push({ label, icon, isActive: true });
+                          
+                          const res = await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                            method: "PUT",
+                            credentials: "same-origin",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ config: { items } }),
+                          });
+                          if (res.ok) {
+                            (document.getElementById(`f-label-${s.id}`) as HTMLInputElement).value = "";
+                            (document.getElementById(`f-icon-${s.id}`) as HTMLInputElement).value = "";
+                            await loadSections();
+                          }
+                        }}
+                        className="w-full btn-primary h-[42px] flex items-center justify-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" /> Add Filter
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {(Array.isArray(s.config?.items) ? s.config.items : []).map((it:any, idx:number) => (
+                      <div key={idx} className="flex items-center gap-3 p-3 border border-slate-100 rounded-lg hover:border-slate-300 transition-all bg-white group">
+                        <GripVertical className="h-4 w-4 text-slate-300 cursor-grab" />
+                        <div className="h-8 w-8 flex items-center justify-center bg-slate-100 rounded-md font-bold text-lg">
+                          {it.icon || "?"}
+                        </div>
+                        <div className="flex-1">
+                          <input 
+                            defaultValue={it.label} 
+                            className="admin-input-ghost font-bold text-xs uppercase tracking-widest w-full"
+                            onBlur={async (e) => {
+                              const items = [...s.config.items];
+                              items[idx].label = e.target.value;
+                              await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                                method: "PUT",
+                                credentials: "same-origin",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ config: { items } }),
+                              });
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={async () => {
+                              const items = [...s.config.items];
+                              items[idx].isActive = !items[idx].isActive;
+                              await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                                method: "PUT",
+                                credentials: "same-origin",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ config: { items } }),
+                              });
+                              await loadSections();
+                            }}
+                            className={`text-xs font-bold uppercase px-2 py-1 rounded transition-colors ${
+                              it.isActive ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'
+                            }`}
+                          >
+                            {it.isActive ? 'VISIBLE' : 'HIDDEN'}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const items = [...s.config.items];
+                              items.splice(idx, 1);
+                              await fetch(`/internal/admin/cms/sections/${s.id}`, {
+                                method: "PUT",
+                                credentials: "same-origin",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ config: { items } }),
+                              });
+                              await loadSections();
+                            }}
+                            className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {sections.filter((s:any) => s.type === "fast_filters").length === 0 && (
+              <div className="p-12 text-center border-2 border-dashed border-slate-200 rounded-xl">
+                <Filter className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+                <h3 className="text-slate-900 font-bold mb-1">No Shop Filters Created</h3>
+                <p className="text-slate-500 text-sm mb-6">Create your first set of dynamic filters for the shop page.</p>
+                <button
+                  onClick={async () => {
+                    const defaults = [
+                      { label: "FEATURED", icon: "🟡", isActive: true },
+                      { label: "BEST SELLERS", icon: "🔥", isActive: true },
+                      { label: "TOP RATED", icon: "⭐", isActive: true },
+                    ];
+                    const res = await fetch("/internal/admin/cms/sections", {
+                      method: "POST",
+                      credentials: "same-origin",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "fast_filters", title: "Refine Your Search", isActive: true, order: 11, config: { items: defaults } }),
+                    });
+                    if (res.ok) await loadSections();
+                  }}
+                  className="btn-primary"
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Initialize Filters
+                </button>
               </div>
             )}
           </div>

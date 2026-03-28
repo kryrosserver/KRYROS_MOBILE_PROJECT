@@ -38,4 +38,45 @@ export class UpdateFooterConfigDto {
 
   @IsOptional()
   paymentMethods?: any[];
+
+  // Newsletter Popup Config
+  @IsOptional()
+  @IsString()
+  newsletterPopupEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  newsletterPopupTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  newsletterPopupSubtitle?: string;
+
+  @IsOptional()
+  @IsString()
+  newsletterPopupImage?: string;
+
+  @IsOptional()
+  newsletterPopupDelay?: number;
+
+  // Announcement Bar Config
+  @IsOptional()
+  @IsString()
+  announcementBarEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  announcementBarText?: string;
+
+  @IsOptional()
+  @IsString()
+  announcementBarLink?: string;
+
+  @IsOptional()
+  @IsString()
+  announcementBarBgColor?: string;
+
+  @IsOptional()
+  @IsString()
+  announcementBarTextColor?: string;
 }

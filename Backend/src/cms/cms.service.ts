@@ -94,6 +94,30 @@ export class CMSService {
       });
     }
 
+    // Ensure a Fast Filters section exists
+    const fastFilters = await this.prisma.cMSSection.findFirst({
+      where: { type: 'fast_filters' },
+    });
+    if (!fastFilters) {
+      await this.prisma.cMSSection.create({
+        data: {
+          type: 'fast_filters',
+          title: 'Refine Your Search',
+          isActive: true,
+          order: 11,
+          config: {
+            items: [
+              { label: 'FEATURED', icon: '🟡', isActive: true },
+              { label: 'BEST SELLERS', icon: '🔥', isActive: true },
+              { label: 'TOP RATED', icon: '⭐', isActive: true },
+              { label: 'SELECT COLOR', icon: '', isActive: true },
+              { label: 'SELECT STORAGE', icon: '', isActive: true },
+            ],
+          } as any,
+        } as any,
+      });
+    }
+
     // Ensure a Wholesale Deals section exists and enabled (with sample items)
     const wholesale = await this.prisma.cMSSection.findFirst({
       where: { type: 'wholesale_deals' },
@@ -353,6 +377,14 @@ export class CMSService {
           { platform: 'youtube', url: '#' },
         ],
         paymentMethods: [{ name: 'Visa' }, { name: 'Mastercard' }, { name: 'M-Pesa' }],
+        announcementBarEnabled: true,
+        announcementBarText: '30% discount on all products special for November!',
+        announcementBarBgColor: 'bg-kryros-dark',
+        announcementBarTextColor: 'text-kryros-green',
+        newsletterPopupEnabled: true,
+        newsletterPopupTitle: 'Unlock Premium Deals',
+        newsletterPopupSubtitle: 'Join our community and be the first to know about new arrivals, flash sales, and tech guides.',
+        newsletterPopupDelay: 3000,
       } as any,
     });
 

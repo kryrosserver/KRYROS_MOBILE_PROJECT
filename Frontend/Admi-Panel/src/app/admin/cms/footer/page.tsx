@@ -37,6 +37,20 @@ interface FooterConfig {
   copyrightText?: string;
   socialLinks?: Array<{ platform: string; url: string }>;
   paymentMethods?: Array<{ name: string }>;
+  
+  // Newsletter Popup Config
+  newsletterPopupEnabled?: boolean;
+  newsletterPopupTitle?: string;
+  newsletterPopupSubtitle?: string;
+  newsletterPopupImage?: string;
+  newsletterPopupDelay?: number;
+
+  // Announcement Bar Config
+  announcementBarEnabled?: boolean;
+  announcementBarText?: string;
+  announcementBarLink?: string;
+  announcementBarBgColor?: string;
+  announcementBarTextColor?: string;
 }
 
 export default function FooterManagementPage() {
@@ -737,10 +751,58 @@ export default function FooterManagementPage() {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-semibold text-gray-800 mb-3">Newsletter</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">Newsletter & Popup</h4>
+                  <div className="flex items-center gap-2 mb-4">
+                    <input
+                      type="checkbox"
+                      id="newsletterPopupEnabled"
+                      checked={configForm.newsletterPopupEnabled || false}
+                      onChange={(e) => setConfigForm({ ...configForm, newsletterPopupEnabled: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <label htmlFor="newsletterPopupEnabled" className="text-sm font-medium text-gray-700">Enable Newsletter Popup</label>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Popup Title</label>
+                      <input
+                        type="text"
+                        value={configForm.newsletterPopupTitle || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, newsletterPopupTitle: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Popup Delay (ms)</label>
+                      <input
+                        type="number"
+                        value={configForm.newsletterPopupDelay || 3000}
+                        onChange={(e) => setConfigForm({ ...configForm, newsletterPopupDelay: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Popup Subtitle</label>
+                      <textarea
+                        value={configForm.newsletterPopupSubtitle || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, newsletterPopupSubtitle: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows={2}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Popup Image URL</label>
+                      <input
+                        type="text"
+                        value={configForm.newsletterPopupImage || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, newsletterPopupImage: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="border-t pt-4 md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Footer Newsletter Title</label>
                       <input
                         type="text"
                         value={configForm.newsletterTitle || ""}
@@ -748,13 +810,69 @@ export default function FooterManagementPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Footer Newsletter Subtitle</label>
                       <input
                         type="text"
                         value={configForm.newsletterSubtitle || ""}
                         onChange={(e) => setConfigForm({ ...configForm, newsletterSubtitle: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold text-gray-800 mb-3">Announcement Bar</h4>
+                  <div className="flex items-center gap-2 mb-4">
+                    <input
+                      type="checkbox"
+                      id="announcementBarEnabled"
+                      checked={configForm.announcementBarEnabled || false}
+                      onChange={(e) => setConfigForm({ ...configForm, announcementBarEnabled: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <label htmlFor="announcementBarEnabled" className="text-sm font-medium text-gray-700">Enable Announcement Bar</label>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Announcement Text</label>
+                      <input
+                        type="text"
+                        value={configForm.announcementBarText || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, announcementBarText: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Link URL (Optional)</label>
+                      <input
+                        type="text"
+                        value={configForm.announcementBarLink || ""}
+                        onChange={(e) => setConfigForm({ ...configForm, announcementBarLink: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="/shop, /credit, etc."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Background Class</label>
+                      <input
+                        type="text"
+                        value={configForm.announcementBarBgColor || "bg-kryros-dark"}
+                        onChange={(e) => setConfigForm({ ...configForm, announcementBarBgColor: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="bg-kryros-dark, bg-red-600, etc."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Text Color Class</label>
+                      <input
+                        type="text"
+                        value={configForm.announcementBarTextColor || "text-kryros-green"}
+                        onChange={(e) => setConfigForm({ ...configForm, announcementBarTextColor: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="text-kryros-green, text-white, etc."
                       />
                     </div>
                   </div>

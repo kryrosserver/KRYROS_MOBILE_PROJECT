@@ -245,18 +245,18 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
             
             {images.length > 1 && (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
                 {images.map((img: any, idx: number) => (
                   <button 
                     key={idx} 
                     onClick={() => setActiveImageIdx(idx)}
-                    className={`relative aspect-square overflow-hidden rounded-lg bg-white shadow-sm ring-2 transition-all ${idx === activeImageIdx ? 'ring-green-500' : 'ring-slate-200'}`}
+                    className={`relative aspect-square w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white shadow-sm ring-2 transition-all snap-start ${idx === activeImageIdx ? 'ring-blue-600' : 'ring-slate-100 hover:ring-slate-300'}`}
                   >
                     <Image 
                       src={img.url || '/placeholder.jpg'} 
-                      alt="Thumbnail" 
+                      alt={`Thumbnail ${idx + 1}`} 
                       fill 
-                      className="object-contain p-2" 
+                      className="object-contain p-1.5" 
                       unoptimized={typeof img.url === 'string' && img.url.startsWith('data:')}
                     />
                   </button>

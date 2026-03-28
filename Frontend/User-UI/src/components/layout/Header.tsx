@@ -23,17 +23,29 @@ import {
   Instagram,
   Twitter,
 } from "lucide-react"
+import { cmsApi, productsApi, categoriesApi, settingsApi, wishlistApi } from "@/lib/api"
+import { useCart } from "@/providers/CartProvider"
+import { useCurrency } from "@/providers/CurrencyProvider"
+import { Logo } from "@/components/common/Logo"
+import { AuthButtons } from "@/components/layout/AuthButtons"
+import { formatPrice } from "@/lib/utils"
 
 export function AnnouncementBar() {
   const [isVisible, setIsVisible] = useState(false);
-  const [message, setMessage] = useState("30% discount on all products special for November!");
+  const [config, setConfig] = useState<any>(null);
 
   useEffect(() => {
-    // Check session storage to see if closed in current session
-    const isClosed = sessionStorage.getItem("announcement_closed");
-    if (!isClosed) {
-      setIsVisible(true);
-    }
+    // Fetch announcement bar config from admin
+    cmsApi.getFooterConfig().then(res => {
+      if (res.data && res.data.announcementBarEnabled) {
+        // Check session storage to see if closed in current session
+        const isClosed = sessionStorage.getItem("announcement_closed");
+        if (!isClosed) {
+          setConfig(res.data);
+          setIsVisible(true);
+        }
+      }
+    });
   }, []);
 
   const handleClose = () => {
@@ -41,14 +53,20 @@ export function AnnouncementBar() {
     sessionStorage.setItem("announcement_closed", "true");
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || !config) return null;
 
   return (
-    <div className="bg-gradient-to-r from-blue-700 via-purple-700 to-red-600 text-white py-2 px-4 relative overflow-hidden">
+    <div className={`${config.announcementBarBgColor || 'bg-kryros-dark'} ${config.announcementBarTextColor || 'text-kryros-green'} py-2 px-4 relative overflow-hidden transition-colors duration-300`}>
       <div className="container-custom flex items-center justify-center min-h-[24px]">
-        <p className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase">
-          {message}
-        </p>
+        {config.announcementBarLink ? (
+          <Link href={config.announcementBarLink} className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase hover:underline">
+            {config.announcementBarText}
+          </Link>
+        ) : (
+          <p className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase">
+            {config.announcementBarText}
+          </p>
+        )}
         <button 
           onClick={handleClose}
           className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
@@ -136,6 +154,8 @@ export function Header() {
   const [mobileCurrencyOpen, setMobileCurrencyOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en", flag: "🇺🇸" });
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
@@ -213,6 +233,25 @@ export function Header() {
       document.body.style.touchAction = 'auto';
     };
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.length >= 2) {
+        setIsSearching(true);
+        productsApi.getAll({ search: searchQuery, limit: 5 })
+          .then(res => {
+            if (res.data?.products) {
+              setSearchResults(res.data.products);
+            }
+          })
+          .finally(() => setIsSearching(false));
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -445,7 +484,7 @@ export function Header() {
         </div>
 
         {/* Mobile Search Bar - Always Visible on Mobile */}
-        <div className="pb-4 lg:hidden">
+        <div className="pb-4 lg:hidden relative">
           <div className="flex items-stretch overflow-visible rounded-lg border border-slate-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all bg-white shadow-sm h-11">
             <input
               type="text"
@@ -454,6 +493,7 @@ export function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
+              onFocus={() => setSearchOpen(true)}
             />
             
             <div className="flex items-center border-l border-slate-100 h-full relative" ref={categoryPickerRef}>
@@ -517,6 +557,86 @@ export function Header() {
               <Search className="h-4 w-4" />
             </button>
           </div>
+
+          {/* Live Search Results Dropdown - Mobile */}
+          <AnimatePresence>
+            {searchOpen && searchQuery.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 z-[110] overflow-hidden max-h-[70vh] flex flex-col"
+              >
+                <div className="overflow-y-auto custom-scrollbar p-2">
+                  {isSearching ? (
+                    <div className="p-8 text-center">
+                      <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                      <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Searching...</p>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
+                      {searchResults.map((product) => (
+                        <Link
+                          key={product.id}
+                          href={`/product/${product.slug || product.id}`}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
+                        >
+                          <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
+                            <Image
+                              src={product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                              alt={product.name}
+                              fill
+                              className="object-contain p-1"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-sm font-black text-blue-600">{formatPrice(product.price)}</span>
+                              {product.discountPercentage && product.discountPercentage > 0 && (
+                                <span className="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                  -{product.discountPercentage}%
+                                </span>
+                              )}
+                              {product.oldPrice && (
+                                <span className="text-xs text-slate-400 line-through font-medium">{formatPrice(product.oldPrice)}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2.5 mt-1 text-[9px] font-black uppercase tracking-widest">
+                              <span className={`px-1.5 py-0.5 rounded-sm ${product.stockCurrent > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
+                                {product.stockCurrent > 0 ? "IN STOCK" : "OUT OF STOCK"}
+                              </span>
+                              <span className="text-slate-400 border-l border-slate-200 pl-2.5">SKU: {product.sku || "N/A"}</span>
+                            </div>
+                          </div>
+                          <button className="hidden md:flex bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
+                            Add to cart
+                          </button>
+                        </Link>
+                      ))}
+                      <Link 
+                        href={`/shop?q=${searchQuery}`}
+                        onClick={() => setSearchOpen(false)}
+                        className="p-3 text-center text-xs font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors border-t border-slate-50 mt-1"
+                      >
+                        View all results
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center">
+                      <Search className="h-8 w-8 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No products found</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

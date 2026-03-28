@@ -145,6 +145,8 @@ export const walletApi = {
 export const cmsApi = {
   getBanners: () => fetchApi<any[]>('/cms/banners'),
   getSections: () => fetchApi<any[]>('/cms/sections'),
+  getFooter: () => fetchApi<any>('/cms/footer'),
+  getFooterConfig: () => fetchApi<any>('/cms/footer/config'),
 };
 
 // Wishlist API

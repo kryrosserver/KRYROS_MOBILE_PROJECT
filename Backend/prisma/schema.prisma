@@ -817,6 +817,21 @@ model FooterConfig {
   copyrightText     String?
   socialLinks       Json?    // Array of { platform: string, url: string }
   paymentMethods    Json?    // Array of { name: string }
+  
+  // Newsletter Popup Config
+  newsletterPopupEnabled  Boolean @default(true)
+  newsletterPopupTitle    String? @default("Unlock Premium Deals")
+  newsletterPopupSubtitle String? @db.Text
+  newsletterPopupImage    String? // Image for the popup
+  newsletterPopupDelay    Int?    @default(3000) // Delay in ms
+
+  // Announcement Bar Config
+  announcementBarEnabled  Boolean @default(true)
+  announcementBarText     String? @default("30% discount on all products special for November!")
+  announcementBarLink     String?
+  announcementBarBgColor  String? @default("bg-kryros-dark")
+  announcementBarTextColor String? @default("text-kryros-green")
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

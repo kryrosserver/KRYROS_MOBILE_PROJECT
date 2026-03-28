@@ -523,31 +523,74 @@ export default function ProductsPage() {
               </div>
               <div>
                 <div className="border rounded-lg p-4 bg-slate-50">
-                  <p className="text-sm font-medium text-slate-700">Images</p>
-                  <p className="text-xs text-slate-500 mb-2">Upload one or more images. First image becomes primary.</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">Images</p>
+                      <p className="text-xs text-slate-500">Upload 4 or more images. First image is primary.</p>
+                    </div>
+                    {form.images.length > 0 && (
+                      <button 
+                        onClick={() => { setForm(prev => ({ ...prev, images: [] })); setFiles([]); }}
+                        className="text-[10px] font-bold text-red-500 hover:underline"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="file"
                     multiple
                     accept="image/*"
+                    className="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4"
                     onChange={async (e) => {
-                      const files = Array.from(e.target.files || []);
+                      const newFiles = Array.from(e.target.files || []);
                       const previews = await Promise.all(
-                        files.map((file) => compressImage(file, 1800, 0.9))
+                        newFiles.map((file) => compressImage(file, 1800, 0.9))
                       );
-                      setForm((prev) => ({ ...prev, images: previews }));
-                      setFiles(files);
+                      setForm((prev) => ({ ...prev, images: [...prev.images, ...previews] }));
+                      setFiles((prev) => [...prev, ...newFiles]);
                     }}
                   />
-                  {form.images.length > 0 && (
-                    <div className="mt-3 grid grid-cols-3 gap-2">
-                      {form.images.map((src, i) => (
-                        <div key={i} className="aspect-square rounded-md overflow-hidden border bg-white">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                  <div className="grid grid-cols-4 gap-2">
+                    {form.images.map((src, i) => (
+                      <div key={i} className="group relative aspect-square rounded-md overflow-hidden border bg-white shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => {
+                            setForm(prev => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
+                            setFiles(prev => prev.filter((_, idx) => idx !== i));
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] font-bold text-center py-0.5">
+                          {i === 0 ? 'PRIMARY' : `IMAGE ${i + 1}`}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                    {form.images.length < 10 && (
+                      <label className="aspect-square rounded-md border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+                        <PlusCircle className="h-5 w-5 text-slate-300" />
+                        <span className="text-[8px] font-bold text-slate-400 mt-1 uppercase">Add More</span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const newFiles = Array.from(e.target.files || []);
+                            const previews = await Promise.all(
+                              newFiles.map((file) => compressImage(file, 1800, 0.9))
+                            );
+                            setForm((prev) => ({ ...prev, images: [...prev.images, ...previews] }));
+                            setFiles((prev) => [...prev, ...newFiles]);
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-4 flex justify-end">
                   <button
@@ -1352,7 +1395,7 @@ export default function ProductsPage() {
               <div className="space-y-8">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-3">Product Images</label>
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center">
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center relative">
                     <input
                       type="file"
                       id="edit-images"
@@ -1360,32 +1403,45 @@ export default function ProductsPage() {
                       accept="image/*"
                       className="hidden"
                       onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        const previews = await Promise.all(files.map((f) => compressImage(f, 1800, 0.9)));
-                        setEditForm((prev) => ({ ...prev, images: previews }));
-                        setEditFiles(files);
+                        const newFiles = Array.from(e.target.files || []);
+                        const previews = await Promise.all(newFiles.map((f) => compressImage(f, 1800, 0.9)));
+                        setEditForm((prev) => ({ ...prev, images: [...prev.images, ...previews] }));
+                        setEditFiles((prev) => [...prev, ...newFiles]);
                       }}
                     />
                     <label htmlFor="edit-images" className="cursor-pointer">
                       <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm mb-2 text-slate-400">
                         <Package className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-medium text-slate-600">Click to upload new images</p>
+                      <p className="text-sm font-medium text-slate-600">Click to upload images (4+ recommended)</p>
                       <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG (Max 5MB each)</p>
                     </label>
 
                     {editForm.images.length > 0 && (
-                      <div className="mt-6 grid grid-cols-3 gap-3">
+                      <div className="mt-6 grid grid-cols-4 gap-3">
                         {editForm.images.map((src, i) => (
                           <div key={i} className="group relative aspect-square rounded-lg overflow-hidden border bg-white shadow-sm">
                             <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="text-[10px] text-white font-bold uppercase tracking-wider">
-                                {i === 0 ? 'Primary' : `Image ${i + 1}`}
-                              </span>
+                            <button
+                              onClick={() => {
+                                setEditForm(prev => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
+                                setEditFiles(prev => prev.filter((_, idx) => idx !== i));
+                              }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] font-bold text-center py-0.5">
+                              {i === 0 ? 'PRIMARY' : `IMAGE ${i + 1}`}
                             </div>
                           </div>
                         ))}
+                        {editForm.images.length < 10 && (
+                          <label htmlFor="edit-images" className="aspect-square rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+                            <PlusCircle className="h-6 w-6 text-slate-300" />
+                            <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Add More</span>
+                          </label>
+                        )}
                       </div>
                     )}
                   </div>
