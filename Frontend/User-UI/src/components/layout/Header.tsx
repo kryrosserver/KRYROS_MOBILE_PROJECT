@@ -122,6 +122,8 @@ export function Header() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [mobileActiveTab, setMobileActiveTab] = useState<"menu" | "categories">("menu");
   const [mobileCurrencyOpen, setMobileCurrencyOpen] = useState(false);
+  const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en", flag: "🇺🇸" });
   
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
@@ -537,229 +539,271 @@ export function Header() {
               onClick={() => setMobileMenuOpen(false)}
             />
             
-            {/* Sidebar */}
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="relative h-[100dvh] w-80 max-w-[85vw] grid grid-rows-[auto_auto_1fr_auto] bg-white shadow-xl overflow-hidden"
-            >
-              {/* Custom Header with Tabs and Close - Fixed at Top */}
-              <div className="bg-white border-b border-slate-100 flex items-center justify-between z-10">
-                <div className="flex-1 flex bg-slate-50">
-                  <button
-                    onClick={() => setMobileActiveTab("menu")}
-                    className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
-                      mobileActiveTab === "menu"
-                        ? "text-blue-600 bg-white"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    MENU
-                  </button>
-                  <button
-                    onClick={() => setMobileActiveTab("categories")}
-                    className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
-                      mobileActiveTab === "categories"
-                        ? "text-blue-600 bg-white"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    CATEGORIES
-                  </button>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="bg-[#00155a] p-4 text-white shrink-0"
-                  aria-label="Close menu"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              {/* Mobile Currency Selector - Fixed below header */}
-              <div className="bg-slate-50 border-b border-slate-100 px-6 py-3 z-10">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Currency</span>
-                  <div className="relative">
+              {/* Sidebar Content */}
+              <motion.div
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="relative h-[100dvh] w-80 max-w-[85vw] grid grid-rows-[auto_1fr_auto] bg-white shadow-xl overflow-hidden"
+              >
+                {/* Custom Header with Tabs and Close - Fixed at Top */}
+                <div className="bg-white border-b border-slate-100 flex items-center justify-between z-10 shrink-0">
+                  <div className="flex-1 flex bg-slate-50">
                     <button
-                      onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
-                      className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none shadow-sm hover:bg-slate-50 transition-colors"
+                      onClick={() => setMobileActiveTab("menu")}
+                      className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
+                        mobileActiveTab === "menu"
+                          ? "text-blue-600 bg-white"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
                     >
-                      <span>{selectedCountry?.flag}</span>
-                      <span>{selectedCountry?.currencyCode}</span>
-                      <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : ''}`} />
+                      MENU
                     </button>
-
-                    <AnimatePresence>
-                      {mobileCurrencyOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                          className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 z-[160] overflow-hidden"
-                        >
-                          <div className="p-1 max-h-[250px] overflow-y-auto custom-scrollbar">
-                            {countries.map((c) => (
-                              <button
-                                key={c.id}
-                                onClick={() => {
-                                  setCountry(c.code);
-                                  setMobileCurrencyOpen(false);
-                                }}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
-                                  selectedCountry?.code === c.code 
-                                    ? "bg-blue-50 text-blue-600" 
-                                    : "hover:bg-slate-50 text-slate-600"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm">{c.flag}</span>
-                                  <span className="text-xs font-bold uppercase">{c.currencyCode}</span>
-                                </div>
-                                {selectedCountry?.code === c.code && (
-                                  <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scrollable Content Area - Only this part scrolls */}
-              <nav className="overflow-y-auto overscroll-contain custom-scrollbar bg-white py-2">
-                <AnimatePresence mode="wait">
-                  {mobileActiveTab === "menu" ? (
-                    <motion.div
-                      key="menu-tab"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="flex flex-col divide-y divide-slate-100"
+                    <button
+                      onClick={() => setMobileActiveTab("categories")}
+                      className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
+                        mobileActiveTab === "categories"
+                          ? "text-blue-600 bg-white"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
                     >
-                      {[
-                        { name: "Home", href: "/" },
-                        { name: "Shop", href: "/shop" },
-                        { name: "Credit Plans", href: "/credit" },
-                        { name: "Wholesale", href: "/wholesale" },
-                      ].map((item) => (
+                      CATEGORIES
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="bg-[#00155a] p-4 text-white shrink-0"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                {/* Scrollable Content Area */}
+                <nav className="overflow-y-auto overscroll-contain custom-scrollbar bg-white py-2">
+                  <AnimatePresence mode="wait">
+                    {mobileActiveTab === "menu" ? (
+                      <motion.div
+                        key="menu-tab"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex flex-col divide-y divide-slate-100"
+                      >
+                        {[
+                          { name: "Home", href: "/" },
+                          { name: "Shop", href: "/shop" },
+                          { name: "Credit Plans", href: "/credit" },
+                          { name: "Wholesale", href: "/wholesale" },
+                        ].map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                          >
+                            {item.name}
+                            <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
+                          </Link>
+                        ))}
+
+                        {/* Language Selector */}
+                        <div className="relative border-t border-slate-100">
+                          <button
+                            onClick={() => setMobileLanguageOpen(!mobileLanguageOpen)}
+                            className="w-full px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                          >
+                            <span className="flex items-center gap-2">Language</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-slate-400 font-medium">{selectedLanguage.name}</span>
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileLanguageOpen ? 'rotate-180' : '-rotate-90'}`} />
+                            </div>
+                          </button>
+                          <AnimatePresence>
+                            {mobileLanguageOpen && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden bg-slate-50"
+                              >
+                                {[
+                                  { name: "English", code: "en", flag: "🇺🇸" },
+                                  { name: "French", code: "fr", flag: "🇫🇷" },
+                                ].map((lang) => (
+                                  <button
+                                    key={lang.code}
+                                    onClick={() => {
+                                      setSelectedLanguage(lang);
+                                      setMobileLanguageOpen(false);
+                                    }}
+                                    className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center justify-between"
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      <span>{lang.flag}</span>
+                                      {lang.name}
+                                    </span>
+                                    {selectedLanguage.code === lang.code && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+
+                        {/* Currency Selector (Moved to Bottom Section) */}
+                        <div className="relative border-t border-slate-100">
+                          <button
+                            onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
+                            className="w-full px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                          >
+                            <span className="flex items-center gap-2">Currency</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-slate-400 font-medium">{selectedCountry?.currencyCode}</span>
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
+                            </div>
+                          </button>
+                          <AnimatePresence>
+                            {mobileCurrencyOpen && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden bg-slate-50"
+                              >
+                                {countries.map((c) => (
+                                  <button
+                                    key={c.id}
+                                    onClick={() => {
+                                      setCountry(c.code);
+                                      setMobileCurrencyOpen(false);
+                                    }}
+                                    className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center justify-between"
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      <span>{c.flag}</span>
+                                      {c.currencyCode}
+                                    </span>
+                                    {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+
+                        {/* Quick Help */}
                         <Link
-                          key={item.name}
-                          href={item.href}
+                          href="/support"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                          className="px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between border-t border-slate-100"
                         >
-                          {item.name}
+                          Quick Help
                           <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
                         </Link>
-                      ))}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="categories-tab"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="flex flex-col divide-y divide-slate-100"
-                    >
-                      {categories.map((cat) => {
-                        const isExpanded = expandedCategories.includes(cat.id);
-                        const hasBrands = cat.brands?.length > 0;
-                        
-                        const toggleExpand = (e: React.MouseEvent) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setExpandedCategories(prev => 
-                            isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
-                          );
-                        };
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="categories-tab"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex flex-col divide-y divide-slate-100"
+                      >
+                        {categories.map((cat) => {
+                          const isExpanded = expandedCategories.includes(cat.id);
+                          const hasBrands = cat.brands?.length > 0;
+                          
+                          const toggleExpand = (e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setExpandedCategories(prev => 
+                              isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
+                            );
+                          };
 
-                        return (
-                          <div key={cat.id} className="flex flex-col">
-                            <div className="flex items-center justify-between group border-b border-slate-50">
-                              <Link
-                                href={`/shop?category=${cat.slug}`}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="flex-1 flex items-center gap-5 px-6 py-4 transition-all hover:bg-slate-50"
-                              >
-                                <div className="relative h-10 w-10 shrink-0 flex items-center justify-center">
-                                  {cat.image ? (
-                                    <Image 
-                                      src={cat.image} 
-                                      alt={cat.name}
-                                      fill
-                                      className="object-contain"
-                                    />
-                                  ) : (
-                                    <span className="text-xl">📦</span>
-                                  )}
-                                </div>
-                                <span className="text-[15px] font-semibold text-slate-900">
-                                  {cat.name}
-                                </span>
-                              </Link>
-                              
-                              <button
-                                onClick={hasBrands ? toggleExpand : undefined}
-                                className={`px-6 py-5 text-slate-400 ${!hasBrands ? 'cursor-default opacity-40' : 'hover:text-slate-600'}`}
-                                disabled={!hasBrands}
-                              >
-                                <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
-                              </button>
-                            </div>
-
-                            <AnimatePresence>
-                              {hasBrands && isExpanded && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden bg-slate-50/50"
+                          return (
+                            <div key={cat.id} className="flex flex-col">
+                              <div className="flex items-center justify-between group border-b border-slate-50">
+                                <Link
+                                  href={`/shop?category=${cat.slug}`}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                  className="flex-1 flex items-center gap-5 px-6 py-4 transition-all hover:bg-slate-50"
                                 >
-                                  <div className="flex flex-col divide-y divide-slate-100/50 pl-14">
-                                    {cat.brands.map((brand: any) => (
-                                      <Link
-                                        key={brand.id}
-                                        href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="py-3 pr-6 text-xs font-bold text-slate-500 hover:text-blue-600 capitalize transition-colors"
-                                      >
-                                        {brand.name}
-                                      </Link>
-                                    ))}
+                                  <div className="relative h-10 w-10 shrink-0 flex items-center justify-center">
+                                    {cat.image ? (
+                                      <Image 
+                                        src={cat.image} 
+                                        alt={cat.name}
+                                        fill
+                                        className="object-contain"
+                                      />
+                                    ) : (
+                                      <span className="text-xl">📦</span>
+                                    )}
                                   </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </nav>
+                                  <span className="text-[15px] font-semibold text-slate-900">
+                                    {cat.name}
+                                  </span>
+                                </Link>
+                                
+                                <button
+                                  onClick={hasBrands ? toggleExpand : undefined}
+                                  className={`px-6 py-5 text-slate-400 ${!hasBrands ? 'cursor-default opacity-40' : 'hover:text-slate-600'}`}
+                                  disabled={!hasBrands}
+                                >
+                                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                                </button>
+                              </div>
 
-              {/* Sidebar Footer - Fixed at Bottom */}
-              <div className="p-6 pb-12 bg-slate-50 border-t border-slate-100">
-                <a
-                  href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-all shadow-md active:scale-95"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  Chat on WhatsApp
-                </a>
-                <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-bold">
-                  24/7 Customer Support
-                </p>
-              </div>
-            </motion.div>
+                              <AnimatePresence>
+                                {hasBrands && isExpanded && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden bg-slate-50/50"
+                                  >
+                                    <div className="flex flex-col divide-y divide-slate-100/50 pl-14">
+                                      {cat.brands.map((brand: any) => (
+                                        <Link
+                                          key={brand.id}
+                                          href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
+                                          onClick={() => setMobileMenuOpen(false)}
+                                          className="py-3 pr-6 text-xs font-bold text-slate-500 hover:text-blue-600 capitalize transition-colors"
+                                        >
+                                          {brand.name}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </nav>
+
+                {/* Sidebar Footer - Fixed at Bottom */}
+                <div className="p-6 pb-12 bg-slate-50 border-t border-slate-100 shrink-0">
+                  <a
+                    href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-all shadow-md active:scale-95"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    Chat on WhatsApp
+                  </a>
+                  <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-bold">
+                    24/7 Customer Support
+                  </p>
+                </div>
+              </motion.div>
           </div>
         )}
       </AnimatePresence>
