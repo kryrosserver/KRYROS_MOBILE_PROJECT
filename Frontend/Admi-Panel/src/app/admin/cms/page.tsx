@@ -56,6 +56,7 @@ export default function CMSPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [banners, setBanners] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
+  const [footerConfig, setFooterConfig] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editingBanner, setEditingBanner] = useState<any>(null);
@@ -87,6 +88,39 @@ export default function CMSPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  const loadFooterConfig = async () => {
+    try {
+      const res = await fetch("/api/admin/cms/footer/config", { cache: "no-store", credentials: "same-origin" });
+      if (res.ok) {
+        const data = await res.json();
+        setFooterConfig(data);
+      }
+    } catch (err) {
+      console.error("Failed to load footer config:", err);
+    }
+  };
+
+  const handleUpdateConfig = async (updatedConfig: any) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/cms/footer/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(updatedConfig),
+      });
+
+      if (res.ok) {
+        setMessage("Settings updated successfully");
+        await loadFooterConfig();
+      } else {
+        setError("Failed to update settings");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadBanners = async () => {
     setLoading(true);
@@ -132,6 +166,7 @@ export default function CMSPage() {
 
   useEffect(() => {
     loadBanners();
+    loadFooterConfig();
   }, []);
 
   const loadSections = async () => {
@@ -165,9 +200,11 @@ export default function CMSPage() {
   const tabs = [
     { id: "banners", label: "Hero Banners", icon: ImageIcon, count: banners.length },
     { id: "shop_filters", label: "Shop Fast Filters", icon: Filter, count: sections.filter((s:any) => s.type === "fast_filters" && s.isActive).length },
+    { id: "announcement", label: "Announcement Bar", icon: Megaphone, count: footerConfig?.announcementBarEnabled ? 1 : 0 },
+    { id: "newsletter", label: "Newsletter Popup", icon: Sparkles, count: footerConfig?.newsletterPopupEnabled ? 1 : 0 },
     { id: "testimonials", label: "Testimonials", icon: MessageSquare, count: sections.filter((s:any) => s.type === "testimonials" && s.isActive).length },
     { id: "wholesale", label: "Wholesale Deals", icon: Star, count: sections.filter((s:any) => s.type === "wholesale_deals" && s.isActive).length },
-    { id: "footer", label: "Footer, Popups & Bar", icon: Layout, count: 0 },
+    { id: "footer", label: "Footer Links", icon: Layout, count: 0 },
   ];
 
   const filteredBanners = banners.filter((b: any) => {
@@ -1402,21 +1439,180 @@ export default function CMSPage() {
         </div>
       )}
 
+      {/* Announcement Bar Tab */}
+      {activeTab === "announcement" && footerConfig && (
+        <div className="admin-card p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900">Announcement Bar Settings</h2>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={footerConfig.announcementBarEnabled}
+                  onChange={(e) => handleUpdateConfig({ ...footerConfig, announcementBarEnabled: e.target.checked })}
+                  className="w-5 h-5 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm font-bold text-slate-700">Show on Site</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Announcement Message</label>
+              <input
+                type="text"
+                value={footerConfig.announcementBarText || ""}
+                onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarText: e.target.value })}
+                onBlur={() => handleUpdateConfig(footerConfig)}
+                className="admin-input text-lg font-bold"
+                placeholder="e.g. 30% discount on all products special for November!"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Link URL (Optional)</label>
+              <input
+                type="text"
+                value={footerConfig.announcementBarLink || ""}
+                onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarLink: e.target.value })}
+                onBlur={() => handleUpdateConfig(footerConfig)}
+                className="admin-input"
+                placeholder="/shop, /credit, etc."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Background Color</label>
+                <input
+                  type="text"
+                  value={footerConfig.announcementBarBgColor || "bg-kryros-dark"}
+                  onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarBgColor: e.target.value })}
+                  onBlur={() => handleUpdateConfig(footerConfig)}
+                  className="admin-input font-mono text-xs"
+                  placeholder="bg-kryros-dark"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Text Color</label>
+                <input
+                  type="text"
+                  value={footerConfig.announcementBarTextColor || "text-kryros-green"}
+                  onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarTextColor: e.target.value })}
+                  onBlur={() => handleUpdateConfig(footerConfig)}
+                  className="admin-input font-mono text-xs"
+                  placeholder="text-kryros-green"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start gap-3">
+            <div className="p-1.5 bg-blue-100 rounded-lg">
+              <Megaphone className="h-4 w-4 text-blue-600" />
+            </div>
+            <p className="text-xs text-blue-800 leading-relaxed">
+              The announcement bar appears at the very top of your website. It is dismissible by users but will reappear in their next session.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Newsletter Popup Tab */}
+      {activeTab === "newsletter" && footerConfig && (
+        <div className="admin-card p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900">Newsletter Popup Settings</h2>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={footerConfig.newsletterPopupEnabled}
+                  onChange={(e) => handleUpdateConfig({ ...footerConfig, newsletterPopupEnabled: e.target.checked })}
+                  className="w-5 h-5 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm font-bold text-slate-700">Enable Popup</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+            <div>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Popup Title</label>
+              <input
+                type="text"
+                value={footerConfig.newsletterPopupTitle || ""}
+                onChange={(e) => setFooterConfig({ ...footerConfig, newsletterPopupTitle: e.target.value })}
+                onBlur={() => handleUpdateConfig(footerConfig)}
+                className="admin-input font-bold"
+                placeholder="e.g. Unlock Premium Deals"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Popup Delay (ms)</label>
+              <input
+                type="number"
+                value={footerConfig.newsletterPopupDelay || 3000}
+                onChange={(e) => setFooterConfig({ ...footerConfig, newsletterPopupDelay: parseInt(e.target.value) })}
+                onBlur={() => handleUpdateConfig(footerConfig)}
+                className="admin-input"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Popup Subtitle</label>
+              <textarea
+                value={footerConfig.newsletterPopupSubtitle || ""}
+                onChange={(e) => setFooterConfig({ ...footerConfig, newsletterPopupSubtitle: e.target.value })}
+                onBlur={() => handleUpdateConfig(footerConfig)}
+                className="admin-input"
+                rows={2}
+                placeholder="Join our community and be the first to know..."
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Popup Image URL</label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="text"
+                  value={footerConfig.newsletterPopupImage || ""}
+                  onChange={(e) => setFooterConfig({ ...footerConfig, newsletterPopupImage: e.target.value })}
+                  onBlur={() => handleUpdateConfig(footerConfig)}
+                  className="admin-input flex-1"
+                  placeholder="https://..."
+                />
+                {footerConfig.newsletterPopupImage && (
+                  <div className="h-12 w-12 rounded border border-slate-200 overflow-hidden bg-white flex-shrink-0">
+                    <img src={footerConfig.newsletterPopupImage} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-start gap-3">
+            <div className="p-1.5 bg-amber-100 rounded-lg">
+              <Sparkles className="h-4 w-4 text-amber-600" />
+            </div>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              The newsletter popup will appear for first-time visitors after the delay you set. Once closed, it won't show again for 24 hours.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Footer Management */}
       {activeTab === "footer" && (
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
           <div className="mx-auto w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
             <Layout className="h-10 w-10 text-blue-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Footer, Popups & Announcement Bar</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Footer Navigation & Contact Info</h2>
           <p className="text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
-            Take full control of your store's global elements. Manage the <strong>Announcement Bar</strong> (top red bar), 
-            the <strong>Newsletter Popup</strong>, and the entire footer navigation and contact details.
+            Manage your website's bottom navigation, contact details, social links, and copyright text.
           </p>
           <Link href="/admin/cms/footer">
             <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 mx-auto">
               <Settings className="h-5 w-5" />
-              Open Global Settings Manager
+              Open Footer Designer
             </button>
           </Link>
         </div>
