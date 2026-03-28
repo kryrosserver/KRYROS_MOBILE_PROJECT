@@ -83,24 +83,24 @@ export function TopBar() {
   const [selectedLang, setSelectedLang] = useState({ name: "English", code: "en" });
 
   return (
-    <div className="bg-white border-b border-slate-100 py-2 hidden md:block">
-      <div className="container-custom flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-600">
-        <div className="flex items-center gap-6">
+    <div className="bg-white border-b border-slate-100 py-2.5">
+      <div className="container-custom flex items-center justify-between text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-800">
+        <div className="flex items-center gap-3 md:gap-6">
           {/* Languages */}
-          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-blue-600 transition-colors">
+          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors">
             <span>Languages</span>
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3" />
             <div className="absolute top-full left-0 mt-2 w-32 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
               {["English", "French"].map(l => (
-                <div key={l} className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors">{l}</div>
+                <div key={l} className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors lowercase first-letter:uppercase">{l}</div>
               ))}
             </div>
           </div>
 
           {/* Country/Currency */}
-          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-blue-600 transition-colors border-l border-slate-200 pl-6">
+          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6">
             <span>Country</span>
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3" />
             <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
               <div className="max-h-60 overflow-y-auto custom-scrollbar">
                 {countries.map(c => (
@@ -109,8 +109,8 @@ export function TopBar() {
                     onClick={() => setCountry(c.code)}
                     className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors flex items-center justify-between"
                   >
-                    <span>{c.flag} {c.currencyCode}</span>
-                    {selectedCountry?.code === c.code && <div className="h-1 w-1 rounded-full bg-blue-600" />}
+                    <span className="normal-case">{c.flag} {c.currencyCode}</span>
+                    {selectedCountry?.code === c.code && <div className="h-1 w-1 rounded-full bg-kryros-green" />}
                   </div>
                 ))}
               </div>
@@ -118,18 +118,18 @@ export function TopBar() {
           </div>
 
           {/* Quick Help */}
-          <Link href="/support" className="flex items-center gap-1 hover:text-blue-600 transition-colors border-l border-slate-200 pl-6 uppercase">
+          <Link href="/support" className="flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6 uppercase">
             Quick Help
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3" />
           </Link>
         </div>
 
         {/* Social Icons */}
-        <div className="flex items-center gap-4 text-slate-400">
-          <a href="#" className="hover:text-blue-600 transition-colors"><Facebook className="h-3.5 w-3.5" /></a>
-          <a href="#" className="hover:text-pink-600 transition-colors"><Instagram className="h-3.5 w-3.5" /></a>
-          <a href="#" className="hover:text-black transition-colors"><Twitter className="h-3.5 w-3.5" /></a>
-          <a href="#" className="hover:text-green-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /></a>
+        <div className="flex items-center gap-3 md:gap-4 text-slate-900">
+          <a href="#" className="hover:text-kryros-green transition-colors"><Facebook className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
+          <a href="#" className="hover:text-kryros-green transition-colors"><Instagram className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
+          <a href="#" className="hover:text-kryros-green transition-colors"><Twitter className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
+          <a href="#" className="hover:text-kryros-green transition-colors"><MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
         </div>
       </div>
     </div>
