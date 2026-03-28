@@ -19,87 +19,99 @@ import {
   CreditCard,
   Headset,
   MessageCircle,
+  Facebook,
+  Instagram,
+  Twitter,
 } from "lucide-react"
-import { Logo } from "./Logo"
-import { AuthButtons } from "./AuthButtons"
-import { useCart } from "@/providers/CartProvider"
-import { useCurrency } from "@/providers/CurrencyProvider"
-import { wishlistApi, settingsApi, categoriesApi } from "@/lib/api"
-import { formatPrice } from "@/lib/utils"
-import { megaMenuCategories as staticMegaMenuCategories } from "@/lib/store-data"
 
-export function TopBar() {
-  const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 });
-  const { countries, selectedCountry, setCountry, isLoading } = useCurrency();
+export function AnnouncementBar() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [message, setMessage] = useState("30% discount on all products special for November!");
 
   useEffect(() => {
-    settingsApi.getShippingConfig().then(res => {
-      if (res.data) setShippingConfig(res.data);
-    });
+    // Check session storage to see if closed in current session
+    const isClosed = sessionStorage.getItem("announcement_closed");
+    if (!isClosed) {
+      setIsVisible(true);
+    }
   }, []);
 
+  const handleClose = () => {
+    setIsVisible(false);
+    sessionStorage.setItem("announcement_closed", "true");
+  };
+
+  if (!isVisible) return null;
+
   return (
-    <div className="bg-kryros-dark text-primary-foreground md:block hidden">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs">
-        <div className="hidden items-center gap-4 md:flex">
-          <span className="flex items-center gap-1">
-            <Phone className="h-3 w-3" />
-            +260 966 423 719
-          </span>
-          <span className="flex items-center gap-1">
-            <Mail className="h-3 w-3" />
-            kryrosmobile@gmail.com
-          </span>
-        </div>
-        
+    <div className="bg-gradient-to-r from-blue-700 via-purple-700 to-red-600 text-white py-2 px-4 relative overflow-hidden">
+      <div className="container-custom flex items-center justify-center min-h-[24px]">
+        <p className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase">
+          {message}
+        </p>
+        <button 
+          onClick={handleClose}
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
+        >
+          <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function TopBar() {
+  const { countries, selectedCountry, setCountry } = useCurrency();
+  const [selectedLang, setSelectedLang] = useState({ name: "English", code: "en" });
+
+  return (
+    <div className="bg-white border-b border-slate-100 py-2 hidden md:block">
+      <div className="container-custom flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-600">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1 text-kryros-green font-bold">
-              <Truck className="h-3 w-3" />
-              Free Shipping Over {formatPrice(shippingConfig.threshold)}
-            </span>
+          {/* Languages */}
+          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-blue-600 transition-colors">
+            <span>Languages</span>
+            <ChevronDown className="h-3 w-3" />
+            <div className="absolute top-full left-0 mt-2 w-32 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
+              {["English", "French"].map(l => (
+                <div key={l} className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors">{l}</div>
+              ))}
+            </div>
           </div>
 
-          {/* Country Selector */}
-          <div className="relative group">
-            <button className="flex items-center gap-2 hover:text-kryros-green transition-colors font-medium border-l border-white/10 pl-6 py-1">
-              <span>{selectedCountry?.flag || "🏳️"}</span>
-              <span className="uppercase text-white group-hover:text-kryros-green">{selectedCountry?.currencyCode || "USD"}</span>
-              <ChevronDown className="h-3 w-3 text-white group-hover:text-kryros-green" />
-            </button>
-            <div className="absolute right-0 top-full mt-1 w-56 bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-200 z-[100]">
-              <div className="p-3 space-y-1">
-                <p className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">Select Currency</p>
-                <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
-                  {countries.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => setCountry(c.code)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
-                        selectedCountry?.code === c.code 
-                          ? "bg-kryros-green/10 text-kryros-green shadow-sm" 
-                          : "hover:bg-slate-50 text-slate-600 hover:text-slate-900"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl filter drop-shadow-sm">{c.flag || "🏳️"}</span>
-                        <div className="flex flex-col">
-                          <span className="text-[13px] font-bold leading-tight">{c.name}</span>
-                          <span className="text-[10px] font-medium opacity-60 uppercase">{c.currencyCode}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{c.currencySymbol}</span>
-                        {selectedCountry?.code === c.code && (
-                          <div className="h-1.5 w-1.5 rounded-full bg-kryros-green animate-pulse" />
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+          {/* Country/Currency */}
+          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-blue-600 transition-colors border-l border-slate-200 pl-6">
+            <span>Country</span>
+            <ChevronDown className="h-3 w-3" />
+            <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
+              <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                {countries.map(c => (
+                  <div 
+                    key={c.id} 
+                    onClick={() => setCountry(c.code)}
+                    className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors flex items-center justify-between"
+                  >
+                    <span>{c.flag} {c.currencyCode}</span>
+                    {selectedCountry?.code === c.code && <div className="h-1 w-1 rounded-full bg-blue-600" />}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+
+          {/* Quick Help */}
+          <Link href="/support" className="flex items-center gap-1 hover:text-blue-600 transition-colors border-l border-slate-200 pl-6 uppercase">
+            Quick Help
+            <ChevronDown className="h-3 w-3" />
+          </Link>
+        </div>
+
+        {/* Social Icons */}
+        <div className="flex items-center gap-4 text-slate-400">
+          <a href="#" className="hover:text-blue-600 transition-colors"><Facebook className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-pink-600 transition-colors"><Instagram className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-black transition-colors"><Twitter className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-green-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /></a>
         </div>
       </div>
     </div>

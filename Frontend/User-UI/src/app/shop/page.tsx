@@ -52,6 +52,8 @@ async function getCmsSections() {
   }
 }
 
+import { Filter, SlidersHorizontal, Search as SearchIcon } from "lucide-react";
+
 export default async function ShopPage({ searchParams }: { searchParams?: { [key: string]: string } }) {
   const featured = (searchParams?.featured || "").toLowerCase() === "true";
   const credit = (searchParams?.credit || "").toLowerCase() === "true";
@@ -77,6 +79,42 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
       </div>
 
       <CategoryGrid categories={categories} />
+
+      {/* Fast Filters Section - Perfectly Centered */}
+      <div className="mb-12">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center mb-6">Fast Filters:</p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {[
+            { label: "FEATURED", icon: "🟡" },
+            { label: "BEST SELLERS", icon: "🔥" },
+            { label: "TOP RATED", icon: "⭐" },
+            { label: "SELECT COLOR", icon: null },
+            { label: "SELECT STORAGE", icon: null },
+          ].map((f) => (
+            <button key={f.label} className="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-700 hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm flex items-center gap-2">
+              {f.icon && <span>{f.icon}</span>}
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sorting and Filter Bar */}
+      <div className="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
+        <button className="flex items-center gap-2 bg-blue-50 text-blue-600 px-6 py-3 rounded-xl font-black text-xs border border-blue-100 hover:bg-blue-100 transition-all">
+          <Filter className="h-4 w-4" />
+          FILTER
+          <SlidersHorizontal className="ml-2 h-3.5 w-3.5 opacity-50" />
+        </button>
+
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 cursor-pointer group">
+            <span className="text-[11px] font-black text-slate-500 group-hover:text-slate-900 transition-colors uppercase">Default sorting</span>
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+          </div>
+          <SearchIcon className="h-4 w-4 text-slate-400 cursor-pointer hover:text-slate-900 transition-colors" />
+        </div>
+      </div>
 
       <ShopContent groupedData={groupedData} />
     </div>
