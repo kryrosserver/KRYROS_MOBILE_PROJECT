@@ -22,7 +22,8 @@ import {
   X,
   Settings,
   RefreshCw,
-  CreditCard
+  CreditCard,
+  Filter
 } from "lucide-react";
 
 const cmsData = {

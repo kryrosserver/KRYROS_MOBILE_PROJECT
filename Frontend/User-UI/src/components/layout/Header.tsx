@@ -26,7 +26,7 @@ import {
 import { cmsApi, productsApi, categoriesApi, settingsApi, wishlistApi } from "@/lib/api"
 import { useCart } from "@/providers/CartProvider"
 import { useCurrency } from "@/providers/CurrencyProvider"
-import { Logo } from "@/components/common/Logo"
+import { Logo } from "@/components/layout/Logo"
 import { AuthButtons } from "@/components/layout/AuthButtons"
 import { formatPrice } from "@/lib/utils"
 
