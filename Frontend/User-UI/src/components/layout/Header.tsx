@@ -282,14 +282,6 @@ export function Header() {
           : "bg-background border-b border-slate-100"
       }`}
     >
-      {/* Mobile Promo Bar - Sticky with Header */}
-      <div className="bg-kryros-dark text-kryros-green py-2 px-4 text-center text-[11px] font-bold md:hidden border-b border-white/5">
-        <div className="flex items-center justify-center gap-1.5">
-          <Truck className="h-3.5 w-3.5" />
-          <span>Free Shipping on Orders Over {formatPrice(shippingConfig.threshold)}</span>
-        </div>
-      </div>
-
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between gap-4 lg:h-20">
           {/* Logo */}

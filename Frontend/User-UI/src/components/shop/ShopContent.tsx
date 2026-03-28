@@ -47,13 +47,6 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
     <div className="space-y-12">
       {groupedData.map((category) => (
         <section key={category.id} className="relative">
-          {/* Category Header - Perfectly Centered */}
-          <div className="flex flex-col items-center justify-center mb-8 sticky top-0 z-30 bg-white/95 backdrop-blur-md py-6 border-b border-slate-50">
-            <h2 className="text-2xl md:text-4xl font-black text-slate-900 uppercase tracking-tighter text-center">
-              {category.name}
-            </h2>
-          </div>
-
           {/* Dynamic Brand Navigation Bar for this category */}
           <BrandNav brands={category.brands} categorySlug={category.slug} />
 
