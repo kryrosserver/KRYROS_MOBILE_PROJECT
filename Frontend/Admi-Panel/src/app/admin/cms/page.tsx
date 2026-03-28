@@ -163,11 +163,11 @@ export default function CMSPage() {
   }
 
   const tabs = [
-    { id: "banners", label: "Banners", icon: ImageIcon, count: banners.length },
-    { id: "shop_filters", label: "Shop Filters", icon: Filter, count: sections.filter((s:any) => s.type === "fast_filters" && s.isActive).length },
+    { id: "banners", label: "Hero Banners", icon: ImageIcon, count: banners.length },
+    { id: "shop_filters", label: "Shop Fast Filters", icon: Filter, count: sections.filter((s:any) => s.type === "fast_filters" && s.isActive).length },
     { id: "testimonials", label: "Testimonials", icon: MessageSquare, count: sections.filter((s:any) => s.type === "testimonials" && s.isActive).length },
     { id: "wholesale", label: "Wholesale Deals", icon: Star, count: sections.filter((s:any) => s.type === "wholesale_deals" && s.isActive).length },
-    { id: "footer", label: "Footer", icon: Layout, count: 0 },
+    { id: "footer", label: "Footer, Popups & Bar", icon: Layout, count: 0 },
   ];
 
   const filteredBanners = banners.filter((b: any) => {
@@ -1408,15 +1408,15 @@ export default function CMSPage() {
           <div className="mx-auto w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
             <Layout className="h-10 w-10 text-blue-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Footer Management</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Footer, Popups & Announcement Bar</h2>
           <p className="text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
-            Take full control of your store's footer. Manage navigation sections, individual links, 
-            contact details, social media profiles, and accepted payment methods.
+            Take full control of your store's global elements. Manage the <strong>Announcement Bar</strong> (top red bar), 
+            the <strong>Newsletter Popup</strong>, and the entire footer navigation and contact details.
           </p>
           <Link href="/admin/cms/footer">
             <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 mx-auto">
               <Settings className="h-5 w-5" />
-              Open Footer Manager
+              Open Global Settings Manager
             </button>
           </Link>
         </div>
