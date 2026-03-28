@@ -109,12 +109,12 @@ export default function WholesalePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      if (!res.ok) throw new Error("Failed to update status");
-      await load();
-    } catch (e: any) {
-      alert(e.message);
-    } finally {
-      setUpdatingId(null);
+      if (!res.ok) throw new Error("Failed to update status"); 
+      await loadAccounts(); 
+    } catch (e: any) { 
+      alert(e.message); 
+    } finally { 
+      setUpdatingId(null); 
     }
   };
 
