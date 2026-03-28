@@ -47,6 +47,13 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
     <div className="space-y-12">
       {groupedData.map((category) => (
         <section key={category.id} className="relative">
+          {/* Category Header - Perfectly Centered */}
+          <div className="flex flex-col items-center justify-center mb-8 sticky top-0 z-30 bg-white/95 backdrop-blur-md py-6 border-b border-slate-50">
+            <h2 className="text-2xl md:text-4xl font-black text-slate-900 uppercase tracking-tighter text-center">
+              {category.name}
+            </h2>
+          </div>
+
           {/* Dynamic Brand Navigation Bar for this category */}
           <BrandNav brands={category.brands} categorySlug={category.slug} />
 
@@ -58,17 +65,6 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
                 id={`brand-${brand.slug}`}
                 className="scroll-mt-32"
               >
-                {/* Brand Header - Centered with clean line */}
-                <div className="flex flex-col items-center justify-center mb-8">
-                  <div className="h-1 w-12 bg-blue-600 rounded-full mb-3"></div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-800 flex flex-col items-center gap-1 uppercase tracking-tight">
-                    {brand.name}
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                      {brand.products.length} AVAILABLE ITEMS
-                    </span>
-                  </h3>
-                </div>
-
                 {/* Product Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
                   {brand.products.map((product) => (

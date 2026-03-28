@@ -73,12 +73,6 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
 
   return (
     <div className="container-custom py-12">
-      <div className="flex flex-col items-center justify-center mb-12">
-        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight uppercase text-center">
-          {catSection?.title || title}
-        </h1>
-      </div>
-
       <CategoryGrid categories={categories} />
 
       {/* Fast Filters Section - Dynamic from Admin Panel - Now back at Top below Categories */}

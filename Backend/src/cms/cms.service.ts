@@ -110,8 +110,6 @@ export class CMSService {
               { label: 'FEATURED', icon: '🟡', isActive: true },
               { label: 'BEST SELLERS', icon: '🔥', isActive: true },
               { label: 'TOP RATED', icon: '⭐', isActive: true },
-              { label: 'SELECT COLOR', icon: '', isActive: true },
-              { label: 'SELECT STORAGE', icon: '', isActive: true },
             ],
           } as any,
         } as any,
