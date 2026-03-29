@@ -86,13 +86,14 @@ export function TopBar() {
 
   return (
     <div className="bg-white border-b border-slate-100 py-2.5">
-      <div className="container-custom flex items-center justify-between text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-800">
-        <div className="flex items-center gap-3 md:gap-6">
+      <div className="container-custom flex items-center justify-between gap-4">
+        {/* Left Side: Navigation Links */}
+        <div className="flex items-center gap-3 md:gap-6 overflow-x-auto scrollbar-hide no-scrollbar flex-1 min-w-0 py-0.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-800">
           {/* Languages */}
-          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors">
-            <span>Languages</span>
-            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3" />
-            <div className="absolute top-full left-0 mt-2 w-32 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
+          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors shrink-0">
+            <span className="whitespace-nowrap">Languages</span>
+            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 shrink-0" />
+            <div className="absolute top-full left-0 mt-2 w-32 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-2">
               {["English", "French"].map(l => (
                 <div key={l} className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors lowercase first-letter:uppercase">{l}</div>
               ))}
@@ -100,10 +101,10 @@ export function TopBar() {
           </div>
 
           {/* Country/Currency */}
-          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6">
-            <span>Country</span>
-            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3" />
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
+          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6 shrink-0">
+            <span className="whitespace-nowrap">Country</span>
+            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 shrink-0" />
+            <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-2">
               <div className="max-h-60 overflow-y-auto custom-scrollbar">
                 {countries.map(c => (
                   <div 
@@ -120,14 +121,14 @@ export function TopBar() {
           </div>
 
           {/* Quick Help */}
-          <Link href="/support" className="flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6 uppercase">
-            Quick Help
-            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3" />
+          <Link href="/support" className="flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6 uppercase shrink-0">
+            <span className="whitespace-nowrap">Quick Help</span>
+            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 shrink-0" />
           </Link>
         </div>
 
-        {/* Social Icons */}
-        <div className="flex items-center gap-3 md:gap-4 text-slate-900">
+        {/* Social Icons - Hidden on very small screens to save space */}
+        <div className="hidden sm:flex items-center gap-3 md:gap-4 text-slate-900 shrink-0">
           <a href="#" className="hover:text-kryros-green transition-colors"><Facebook className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
           <a href="#" className="hover:text-kryros-green transition-colors"><Instagram className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
           <a href="#" className="hover:text-kryros-green transition-colors"><Twitter className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
@@ -512,7 +513,7 @@ export function Header() {
             >
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-kryros-green text-[10px] font-bold text-accent-foreground">
+                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-kryros-green text-[9px] font-black text-white shadow-sm border border-white">
                   {wishlistCount}
                 </span>
               )}
@@ -526,7 +527,7 @@ export function Header() {
                 aria-label="Shopping Cart"
               >
                 <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-black text-white shadow-sm border border-white">
                   {getItemCount()}
                 </span>
               </Link>
