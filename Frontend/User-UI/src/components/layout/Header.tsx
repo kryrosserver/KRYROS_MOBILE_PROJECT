@@ -315,13 +315,22 @@ export function Header() {
     >
       <div className="mx-auto max-w-7xl px-3 md:px-4">
         <div className="flex h-14 md:h-16 items-center justify-between gap-2 lg:h-20">
-          {/* Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2">
-            <Logo size={isScrolled ? 28 : 32} />
+          {/* Mobile Menu Toggle - Left on Mobile */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="rounded-md p-2 text-slate-700 transition-colors hover:bg-secondary lg:hidden"
+            aria-label="Menu"
+          >
+            <Menu className="h-5.5 w-5.5" />
+          </button>
+
+          {/* Logo - Centered/Left on Desktop, Left/Center on Mobile */}
+          <Link href="/" className="flex shrink-0 items-center gap-2 lg:mr-4">
+            <Logo size={isScrolled ? 26 : 30} />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-1 lg:flex flex-1">
             <Link
               href="/"
               prefetch={true}
@@ -533,31 +542,44 @@ export function Header() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
+            {/* User Account - Mobile Only (Matches Reference Image) */}
+            <Link
+              href="/dashboard"
+              className="lg:hidden flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
+              aria-label="Account"
+            >
+              <User className="h-5.5 w-5.5" />
+            </Link>
+
             <Link
               href="/wishlist"
-              className="relative rounded-lg p-2.5 text-slate-700 transition-all hover:bg-secondary hover:text-kryros-green group/wish"
+              className="group/wish relative flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-kryros-green"
               aria-label="Wishlist"
             >
-              <Heart className="h-5 w-5 md:h-6 md:w-6" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-kryros-green text-[9px] font-black text-white shadow-[0_2px_4px_rgba(34,197,94,0.3)] border-2 border-white ring-1 ring-kryros-green/10">
-                  {wishlistCount}
-                </span>
-              )}
+              <div className="relative">
+                <Heart className="h-5 w-5 md:h-6 md:w-6" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-kryros-green text-[8px] font-black text-white shadow-[0_2px_4px_rgba(34,197,94,0.3)] border-2 border-white ring-1 ring-kryros-green/10">
+                    {wishlistCount}
+                  </span>
+                )}
+              </div>
             </Link>
             
             {/* Cart with Dropdown */}
             <div className="relative group/cart">
               <Link
                 href="/cart"
-                className="relative rounded-lg p-2.5 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
+                className="group/cart-link relative flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
                 aria-label="Shopping Cart"
               >
-                <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
-                <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-blue-600 text-[9px] font-black text-white shadow-[0_2px_4px_rgba(37,99,235,0.3)] border-2 border-white ring-1 ring-blue-600/10">
-                  {getItemCount()}
-                </span>
+                <div className="relative">
+                  <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
+                  <span className="absolute -top-2 -right-2 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-blue-600 text-[8px] font-black text-white shadow-[0_2px_4px_rgba(37,99,235,0.3)] border-2 border-white ring-1 ring-blue-600/10">
+                    {getItemCount()}
+                  </span>
+                </div>
               </Link>
 
               {/* Cart Dropdown - Desktop Only */}
@@ -652,12 +674,20 @@ export function Header() {
             <div className="hidden lg:block ml-2">
               <AuthButtons />
             </div>
+
+            {/* Mobile Search Icon - (Matches Reference Image) */}
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="rounded-md p-2 text-foreground transition-colors hover:bg-secondary lg:hidden"
-              aria-label="Menu"
+              onClick={() => {
+                const searchInput = document.querySelector('input[placeholder="Search for products"]') as HTMLInputElement;
+                if (searchInput) {
+                  searchInput.focus();
+                  searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }}
+              className="lg:hidden flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
+              aria-label="Search"
             >
-              <Menu className="h-5 w-5" />
+              <Search className="h-5.5 w-5.5" />
             </button>
           </div>
         </div>
