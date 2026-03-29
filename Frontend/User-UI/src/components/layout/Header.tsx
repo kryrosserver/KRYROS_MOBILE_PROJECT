@@ -282,11 +282,11 @@ export function Header() {
           : "bg-background border-b border-slate-100"
       }`}
     >
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="flex h-16 items-center justify-between gap-4 lg:h-20">
+      <div className="mx-auto max-w-7xl px-3 md:px-4">
+        <div className="flex h-14 md:h-16 items-center justify-between gap-2 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2">
-            <Logo size={isScrolled ? 32 : 38} />
+            <Logo size={isScrolled ? 28 : 32} />
           </Link>
 
           {/* Desktop Navigation */}

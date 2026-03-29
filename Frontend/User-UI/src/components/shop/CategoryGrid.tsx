@@ -25,17 +25,17 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           <Link
             key={category.id}
             href={`/shop?category=${category.slug}`}
-            className="group relative flex-shrink-0 w-28 md:w-36 flex flex-col items-center"
+            className="group relative flex-shrink-0 w-28 md:w-36 flex flex-col items-center pt-3"
           >
             {/* Professional Card Design - Matches Reference Image */}
-            <div className="relative w-full aspect-[4/5] bg-white rounded-lg overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-blue-200">
-              {/* Blue Count Badge - Positioned Top Left */}
-              <div className="absolute top-2 left-2 z-10 bg-[#3b82f6] text-white text-[9px] font-bold h-4.5 w-4.5 flex items-center justify-center rounded-full shadow-sm">
+            <div className="relative w-full aspect-[4/5] bg-white rounded-lg overflow-visible border border-slate-200 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-blue-200">
+              {/* Blue Count Badge - Positioned Top Left, overlapping the card border */}
+              <div className="absolute -top-2 -left-2 z-20 bg-[#3b82f6] text-white text-[10px] font-black h-6 w-6 flex items-center justify-center rounded-full shadow-lg border-2 border-white ring-1 ring-blue-600/10">
                 {category._count?.products || 0}
               </div>
 
               {/* Category Content */}
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full overflow-hidden rounded-lg">
                 {/* Image Area */}
                 <div className="flex-1 relative w-full p-3 flex items-center justify-center bg-white group-hover:bg-slate-50/30 transition-colors">
                   <div className="relative w-full h-full">
