@@ -44,21 +44,47 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
   }
 
   return (
-    <div className="space-y-12 mt-12">
+    <div className="space-y-16 mt-8 md:mt-12">
       {groupedData.map((category) => (
         <section key={category.id} className="relative">
-          {/* Dynamic Brand Navigation Bar for this category */}
-          <BrandNav brands={category.brands} categorySlug={category.slug} />
+          {/* Category title only if showing "All" */}
+          {groupedData.length > 1 && (
+            <div className="mb-10 flex items-center gap-4">
+              <div className="h-px flex-1 bg-slate-100" />
+              <h2 className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">
+                {category.name}
+              </h2>
+              <div className="h-px flex-1 bg-slate-100" />
+            </div>
+          )}
+
+          {/* Brand Navigation - Only if multiple brands exist and we are in a single category view */}
+          <BrandNav brands={category.brands} categorySlug={category.slug} isSticky={groupedData.length === 1} />
 
           {/* Brand Sections */}
-          <div className="space-y-12 mt-8">
+          <div className="space-y-20 mt-10">
             {category.brands.map((brand) => (
               <div 
                 key={brand.id} 
-                id={`brand-${brand.slug}`}
-                className="scroll-mt-32"
+                id={`${category.slug}-${brand.slug}`}
+                className="scroll-mt-40"
               >
-                {/* Product Grid */}
+                {/* Professional Brand Header - App Style */}
+                <div className="flex flex-col items-center justify-center mb-10 group">
+                  <div className="h-1 w-12 bg-blue-600 rounded-full mb-4 transition-all group-hover:w-20 shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900 uppercase tracking-tight flex flex-col items-center gap-1.5 text-center">
+                    {brand.name}
+                    <div className="flex items-center gap-2">
+                      <span className="h-px w-4 bg-slate-200" />
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        {brand.products.length} Products
+                      </span>
+                      <span className="h-px w-4 bg-slate-200" />
+                    </div>
+                  </h3>
+                </div>
+
+                {/* Product Grid - Automatically 4 columns on desktop, 2 on mobile */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                   {brand.products.map((product) => (
                     <ProductCard key={product.id} product={product} />

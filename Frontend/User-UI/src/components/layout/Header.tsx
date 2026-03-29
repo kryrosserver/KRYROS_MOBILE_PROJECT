@@ -85,54 +85,65 @@ export function TopBar() {
   const [selectedLang, setSelectedLang] = useState({ name: "English", code: "en" });
 
   return (
-    <div className="bg-white border-b border-slate-100 py-2.5">
+    <div className="bg-[#f8fafc] border-b border-slate-200/60 py-1.5 md:py-2">
       <div className="container-custom flex items-center justify-between gap-4">
         {/* Left Side: Navigation Links */}
-        <div className="flex items-center gap-3 md:gap-6 overflow-x-auto scrollbar-hide no-scrollbar flex-1 min-w-0 py-0.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-800">
+        <div className="flex items-center gap-4 md:gap-8 overflow-x-auto scrollbar-hide no-scrollbar flex-1 min-w-0 py-0.5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
           {/* Languages */}
-          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors shrink-0">
-            <span className="whitespace-nowrap">Languages</span>
-            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 shrink-0" />
-            <div className="absolute top-full left-0 mt-2 w-32 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-2">
+          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
+            <span className="whitespace-nowrap flex items-center gap-1.5">
+              <span className="text-slate-400 font-bold">EN</span>
+              {selectedLang.name}
+            </span>
+            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <div className="absolute top-[calc(100%+6px)] left-0 w-36 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
               {["English", "French"].map(l => (
-                <div key={l} className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors lowercase first-letter:uppercase">{l}</div>
+                <div 
+                  key={l} 
+                  onClick={() => setSelectedLang({ name: l, code: l === "English" ? "en" : "fr" })}
+                  className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-wider"
+                >
+                  {l}
+                </div>
               ))}
             </div>
           </div>
 
           {/* Country/Currency */}
-          <div className="relative group cursor-pointer flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6 shrink-0">
-            <span className="whitespace-nowrap">Country</span>
-            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 shrink-0" />
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-xl border border-slate-50 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-2">
+          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
+            <span className="whitespace-nowrap flex items-center gap-1.5">
+              <span className="text-slate-400 font-bold">SHIP:</span>
+              {selectedCountry?.flag} {selectedCountry?.currencyCode}
+            </span>
+            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <div className="absolute top-[calc(100%+6px)] left-0 w-52 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
               <div className="max-h-60 overflow-y-auto custom-scrollbar">
                 {countries.map(c => (
                   <div 
                     key={c.id} 
                     onClick={() => setCountry(c.code)}
-                    className="px-3 py-2 hover:bg-slate-50 rounded-md transition-colors flex items-center justify-between"
+                    className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-between text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-wider"
                   >
-                    <span className="normal-case">{c.flag} {c.currencyCode}</span>
-                    {selectedCountry?.code === c.code && <div className="h-1 w-1 rounded-full bg-kryros-green" />}
+                    <span className="flex items-center gap-2">{c.flag} {c.currencyCode}</span>
+                    {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />}
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Quick Help */}
-          <Link href="/support" className="flex items-center gap-1 hover:text-kryros-green transition-colors border-l border-slate-200 pl-3 md:pl-6 uppercase shrink-0">
-            <span className="whitespace-nowrap">Quick Help</span>
-            <ChevronDown className="h-2.5 w-2.5 md:h-3 md:w-3 shrink-0" />
+          {/* Support */}
+          <Link href="/support" className="flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm uppercase tracking-wider">
+            <span>Support</span>
+            <ChevronDown className="h-3 w-3 text-slate-400" />
           </Link>
         </div>
 
-        {/* Social Icons - Hidden on very small screens to save space */}
-        <div className="hidden sm:flex items-center gap-3 md:gap-4 text-slate-900 shrink-0">
-          <a href="#" className="hover:text-kryros-green transition-colors"><Facebook className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
-          <a href="#" className="hover:text-kryros-green transition-colors"><Instagram className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
-          <a href="#" className="hover:text-kryros-green transition-colors"><Twitter className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
-          <a href="#" className="hover:text-kryros-green transition-colors"><MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4" /></a>
+        {/* Social Icons */}
+        <div className="hidden sm:flex items-center gap-3 text-slate-400 shrink-0">
+          <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Facebook className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Instagram className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Twitter className="h-3.5 w-3.5" /></a>
         </div>
       </div>
     </div>
@@ -505,15 +516,15 @@ export function Header() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 md:gap-2">
             <Link
               href="/wishlist"
-              className="relative rounded-md p-2 text-foreground transition-colors hover:bg-secondary"
+              className="relative rounded-lg p-2.5 text-slate-700 transition-all hover:bg-secondary hover:text-kryros-green group/wish"
               aria-label="Wishlist"
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5 md:h-6 md:w-6" />
               {wishlistCount > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-kryros-green text-[9px] font-black text-white shadow-sm border border-white">
+                <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-kryros-green text-[9px] font-black text-white shadow-[0_2px_4px_rgba(34,197,94,0.3)] border-2 border-white ring-1 ring-kryros-green/10">
                   {wishlistCount}
                 </span>
               )}
@@ -523,11 +534,11 @@ export function Header() {
             <div className="relative group/cart">
               <Link
                 href="/cart"
-                className="relative rounded-md p-2 text-foreground transition-colors hover:bg-secondary"
+                className="relative rounded-lg p-2.5 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
                 aria-label="Shopping Cart"
               >
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-black text-white shadow-sm border border-white">
+                <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
+                <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-blue-600 text-[9px] font-black text-white shadow-[0_2px_4px_rgba(37,99,235,0.3)] border-2 border-white ring-1 ring-blue-600/10">
                   {getItemCount()}
                 </span>
               </Link>
@@ -742,7 +753,11 @@ export function Header() {
                             >
                               <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
                                 <Image
-                                  src={product.images?.[0]?.url || product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                                  src={
+                                    typeof product.images?.[0] === 'string' 
+                                      ? product.images[0] 
+                                      : product.images?.[0]?.url || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"
+                                  }
                                   alt={product.name}
                                   fill
                                   className="object-contain p-1"

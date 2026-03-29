@@ -70,6 +70,12 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
   const categoryParam = searchParams?.category;
   const activeCategory = (categories as any[]).find((c: any) => c.slug === categoryParam);
 
+  // Filter groupedData by active category if selected
+  let filteredGroupedData = groupedData;
+  if (activeCategory) {
+    filteredGroupedData = groupedData.filter((cat: any) => cat.slug === activeCategory.slug);
+  }
+
   let title = "All Products";
   if (featured) title = "Featured Products";
   if (credit) title = "Installment Products";
@@ -137,7 +143,7 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
           </div>
         </div>
 
-        <ShopContent groupedData={groupedData} />
+        <ShopContent groupedData={filteredGroupedData} />
       </div>
     </div>
   );
