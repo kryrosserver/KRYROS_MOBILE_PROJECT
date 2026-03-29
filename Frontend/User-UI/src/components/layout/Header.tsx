@@ -90,18 +90,18 @@ export function TopBar() {
         {/* Left Side: Navigation Links */}
         <div className="flex items-center gap-4 md:gap-8 overflow-x-auto scrollbar-hide no-scrollbar flex-1 min-w-0 py-0.5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
           {/* Languages */}
-          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
+          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-primary transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
             <span className="whitespace-nowrap flex items-center gap-1.5">
               <span className="text-slate-400 font-bold">EN</span>
               {selectedLang.name}
             </span>
-            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-primary transition-colors" />
             <div className="absolute top-[calc(100%+6px)] left-0 w-36 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
               {["English", "French"].map(l => (
                 <div 
                   key={l} 
                   onClick={() => setSelectedLang({ name: l, code: l === "English" ? "en" : "fr" })}
-                  className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-wider"
+                  className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors text-[10px] font-black text-slate-500 hover:text-primary uppercase tracking-wider"
                 >
                   {l}
                 </div>
@@ -110,22 +110,22 @@ export function TopBar() {
           </div>
 
           {/* Country/Currency */}
-          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
+          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-primary transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
             <span className="whitespace-nowrap flex items-center gap-1.5">
               <span className="text-slate-400 font-bold">SHIP:</span>
               {selectedCountry?.flag} {selectedCountry?.currencyCode}
             </span>
-            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-primary transition-colors" />
             <div className="absolute top-[calc(100%+6px)] left-0 w-52 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
               <div className="max-h-60 overflow-y-auto custom-scrollbar">
                 {countries.map(c => (
                   <div 
                     key={c.id} 
                     onClick={() => setCountry(c.code)}
-                    className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-between text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-wider"
+                    className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-between text-[10px] font-black text-slate-500 hover:text-primary uppercase tracking-wider"
                   >
                     <span className="flex items-center gap-2">{c.flag} {c.currencyCode}</span>
-                    {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />}
+                    {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(249,115,22,0.4)]" />}
                   </div>
                 ))}
               </div>
@@ -133,9 +133,9 @@ export function TopBar() {
           </div>
 
           {/* Quick Help Dropdown */}
-          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm uppercase tracking-wider">
+          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-primary transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm uppercase tracking-wider">
             <span>Quick Help</span>
-            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-primary transition-colors" />
             
             {/* Dropdown Container - White with shadow to match reference image */}
             <div className="absolute top-[calc(100%+6px)] right-0 md:left-0 w-48 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[150] p-2 overflow-hidden">
@@ -148,7 +148,7 @@ export function TopBar() {
                 <Link 
                   key={item.name}
                   href={item.href}
-                  className="block px-4 py-3 hover:bg-slate-50 rounded-lg transition-all text-[11px] font-bold text-slate-700 hover:text-blue-600 uppercase tracking-widest border-b border-slate-50 last:border-0"
+                  className="block px-4 py-3 hover:bg-slate-50 rounded-lg transition-all text-[11px] font-bold text-slate-700 hover:text-primary uppercase tracking-widest border-b border-slate-50 last:border-0"
                 >
                   {item.name}
                 </Link>
@@ -159,9 +159,9 @@ export function TopBar() {
 
         {/* Social Icons */}
         <div className="hidden sm:flex items-center gap-3 text-slate-400 shrink-0">
-          <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Facebook className="h-3.5 w-3.5" /></a>
-          <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Instagram className="h-3.5 w-3.5" /></a>
-          <a href="#" className="hover:text-blue-600 transition-all transform hover:scale-110"><Twitter className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-primary transition-all transform hover:scale-110"><Facebook className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-primary transition-all transform hover:scale-110"><Instagram className="h-3.5 w-3.5" /></a>
+          <a href="#" className="hover:text-primary transition-all transform hover:scale-110"><Twitter className="h-3.5 w-3.5" /></a>
         </div>
       </div>
     </div>
@@ -316,20 +316,189 @@ export function Header() {
       }`}
     >
       <div className="mx-auto max-w-7xl px-3 md:px-4">
-        <div className="flex h-14 md:h-16 items-center justify-between gap-2 lg:h-20">
-          {/* Mobile Menu Toggle - Left on Mobile */}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="rounded-md p-2 text-slate-700 transition-colors hover:bg-secondary lg:hidden"
-            aria-label="Menu"
-          >
-            <Menu className="h-5.5 w-5.5" />
-          </button>
+        {/* Mobile Search Bar - Now on top (Matches Reference Image) */}
+        <div className="pt-3 pb-1 lg:hidden relative">
+          <div className="flex items-stretch overflow-visible rounded-lg border border-slate-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all bg-white shadow-sm h-11">
+            <input
+              type="text"
+              placeholder="Search for products"
+              className="flex-1 bg-white px-4 py-0 text-sm focus:outline-none min-w-0 h-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
+              onFocus={() => setSearchOpen(true)}
+            />
+            
+            <div className="flex items-center border-l border-slate-100 h-full relative" ref={categoryPickerRef}>
+              <button 
+                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                className="flex items-center gap-2 px-4 h-full bg-slate-50/50 hover:bg-slate-100 transition-colors"
+              >
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                  {selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name || "ALL" : "ALL"}
+                </span>
+                <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-          {/* Logo - Centered/Left on Desktop, Left/Center on Mobile */}
-          <Link href="/" className="flex shrink-0 items-center gap-2 lg:mr-4">
-            <Logo size={isScrolled ? 26 : 30} />
-          </Link>
+              <AnimatePresence>
+                {categoryDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-56 bg-white rounded-xl shadow-2xl border border-slate-100 z-[100] overflow-hidden"
+                  >
+                    <div className="p-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                      <button
+                        onClick={() => {
+                          setSelectedCategory("");
+                          setCategoryDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between ${
+                          selectedCategory === "" ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        ALL
+                        {selectedCategory === "" && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                      </button>
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            setSelectedCategory(cat.slug);
+                            setCategoryDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between ${
+                            selectedCategory === cat.slug ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-50"
+                          }`}
+                        >
+                          {cat.name}
+                          {selectedCategory === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <button 
+              className="bg-primary px-5 text-white flex items-center justify-center transition-colors hover:bg-primary/90 active:scale-95 h-full"
+              onClick={() => handleSearch(searchQuery)}
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+          
+          {/* Live Search Results Dropdown - Mobile */}
+          <AnimatePresence>
+            {searchOpen && searchQuery.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 z-[110] overflow-hidden max-h-[70vh] flex flex-col"
+              >
+                <div className="overflow-y-auto custom-scrollbar p-2">
+                  {isSearching ? (
+                    <div className="p-8 text-center">
+                      <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Searching...</p>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
+                        {searchResults.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
+                          >
+                            <Link
+                              href={`/product/${product.slug || product.id}`}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchQuery("");
+                              }}
+                              className="flex items-center gap-4 flex-1 min-w-0"
+                            >
+                              <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
+                                <Image
+                                  src={
+                                    typeof product.images?.[0] === 'string' 
+                                      ? product.images[0] 
+                                      : product.images?.[0]?.url || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"
+                                  }
+                                  alt={product.name}
+                                  fill
+                                  className="object-contain p-1"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-primary transition-colors">{product.name}</h4>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
+                                  {product.discountPercentage && product.discountPercentage > 0 && (
+                                    <span className="text-xs text-slate-400 line-through font-medium">
+                                      {formatPrice(product.price / (1 - product.discountPercentage / 100))}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex flex-col gap-0.5 mt-1">
+                                  <span className={`text-[9px] font-black uppercase tracking-widest ${product.stockCurrent > 0 ? "text-green-600" : "text-red-600"}`}>
+                                    IN STOCK: {product.stockCurrent || 0}
+                                  </span>
+                                  <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">{product.sku || "N/A"}</span>
+                                </div>
+                              </div>
+                            </Link>
+                            <button 
+                              className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-primary transition-colors"
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchQuery("");
+                              }}
+                            >
+                              Add to cart
+                            </button>
+                          </div>
+                        ))}
+                        <Link 
+                          href={`/shop?q=${searchQuery}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="p-3 text-center text-xs font-black text-primary uppercase tracking-widest hover:bg-primary/10 transition-colors border-t border-slate-50 mt-1"
+                        >
+                          View all results
+                        </Link>
+                      </div>
+                  ) : (
+                    <div className="p-12 text-center">
+                      <Search className="h-8 w-8 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No products found</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="flex h-14 md:h-16 items-center justify-between gap-2 lg:h-20">
+          {/* Mobile Menu & Logo Together - (Matches Reference Image) */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="rounded-md p-2 text-slate-700 transition-colors hover:bg-secondary lg:hidden"
+              aria-label="Menu"
+            >
+              <Menu className="h-5.5 w-5.5" />
+            </button>
+
+            {/* Logo */}
+            <Link href="/" className="flex shrink-0 items-center gap-2 lg:mr-4">
+              <Logo size={isScrolled ? 26 : 30} />
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-1 lg:flex flex-1">
@@ -462,7 +631,7 @@ export function Header() {
                   <div className="overflow-y-auto custom-scrollbar p-2">
                     {isSearching ? (
                       <div className="p-8 text-center">
-                        <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                        <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                         <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Searching...</p>
                       </div>
                     ) : searchResults.length > 0 ? (
@@ -494,7 +663,7 @@ export function Header() {
                                 />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-primary transition-colors">{product.name}</h4>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
                                   {product.discountPercentage && product.discountPercentage > 0 && (
@@ -512,7 +681,7 @@ export function Header() {
                               </div>
                             </Link>
                             <button 
-                              className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors"
+                              className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-primary transition-colors"
                               onClick={() => {
                                 // Add to cart logic would go here
                                 setSearchOpen(false);
@@ -526,7 +695,7 @@ export function Header() {
                         <Link 
                           href={`/shop?q=${searchQuery}`}
                           onClick={() => setSearchOpen(false)}
-                          className="p-3 text-center text-xs font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors border-t border-slate-50 mt-1"
+                          className="p-3 text-center text-xs font-black text-primary uppercase tracking-widest hover:bg-primary/10 transition-colors border-t border-slate-50 mt-1"
                         >
                           View all results
                         </Link>
@@ -548,7 +717,7 @@ export function Header() {
             {/* User Account - Mobile Only (Matches Reference Image) */}
             <Link
               href="/dashboard"
-              className="lg:hidden flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
+              className="lg:hidden flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-primary"
               aria-label="Account"
             >
               <User className="h-5.5 w-5.5" />
@@ -573,12 +742,12 @@ export function Header() {
             <div className="relative group/cart">
               <Link
                 href="/cart"
-                className="group/cart-link relative flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
+                className="group/cart-link relative flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-primary"
                 aria-label="Shopping Cart"
               >
                 <div className="relative">
                   <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
-                  <span className="absolute -top-2 -right-2 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-blue-600 text-[8px] font-black text-white shadow-[0_2px_4px_rgba(37,99,235,0.3)] border-2 border-white ring-1 ring-blue-600/10">
+                  <span className="absolute -top-2 -right-2 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white shadow-[0_2px_4px_rgba(249,115,22,0.3)] border-2 border-white ring-1 ring-primary/10">
                     {getItemCount()}
                   </span>
                 </div>
@@ -645,7 +814,7 @@ export function Header() {
                           </Link>
                           <Link 
                             href="/checkout"
-                            className="flex items-center justify-center h-10 rounded-lg bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                            className="flex items-center justify-center h-10 rounded-lg bg-primary text-white text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                           >
                             Checkout
                           </Link>
@@ -663,7 +832,7 @@ export function Header() {
                       <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Your cart is empty</p>
                       <Link 
                         href="/shop"
-                        className="inline-block mt-4 text-xs font-black text-blue-600 uppercase tracking-widest hover:underline"
+                        className="inline-block mt-4 text-xs font-black text-primary uppercase tracking-widest hover:underline"
                       >
                         Start Shopping
                       </Link>
@@ -676,194 +845,9 @@ export function Header() {
             <div className="hidden lg:block ml-2">
               <AuthButtons />
             </div>
-
-            {/* Mobile Search Icon - (Matches Reference Image) */}
-            <button
-              onClick={() => {
-                const searchInput = document.querySelector('input[placeholder="Search for products"]') as HTMLInputElement;
-                if (searchInput) {
-                  searchInput.focus();
-                  searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }}
-              className="lg:hidden flex items-center justify-center rounded-lg p-2 text-slate-700 transition-all hover:bg-secondary hover:text-blue-600"
-              aria-label="Search"
-            >
-              <Search className="h-5.5 w-5.5" />
-            </button>
           </div>
-        </div>
-
-        {/* Mobile Search Bar - Always Visible on Mobile */}
-        <div className="pb-4 lg:hidden relative">
-          <div className="flex items-stretch overflow-visible rounded-lg border border-slate-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all bg-white shadow-sm h-11">
-            <input
-              type="text"
-              placeholder="Search for products"
-              className="flex-1 bg-white px-4 py-0 text-sm focus:outline-none min-w-0 h-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
-              onFocus={() => setSearchOpen(true)}
-            />
-            
-            <div className="flex items-center border-l border-slate-100 h-full relative" ref={categoryPickerRef}>
-              <button 
-                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                className="flex items-center gap-2 px-4 h-full bg-slate-50/50 hover:bg-slate-100 transition-colors"
-              >
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                  {selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name || "ALL" : "ALL"}
-                </span>
-                <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {categoryDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-[calc(100%+8px)] w-56 bg-white rounded-xl shadow-2xl border border-slate-100 z-[100] overflow-hidden"
-                  >
-                    <div className="p-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                      <button
-                        onClick={() => {
-                          setSelectedCategory("");
-                          setCategoryDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between ${
-                          selectedCategory === "" ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        ALL
-                        {selectedCategory === "" && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
-                      </button>
-                      {categories.map((cat) => (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            setSelectedCategory(cat.slug);
-                            setCategoryDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-between ${
-                            selectedCategory === cat.slug ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"
-                          }`}
-                        >
-                          {cat.name}
-                          {selectedCategory === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <button 
-              className="bg-blue-600 px-5 text-white flex items-center justify-center transition-colors hover:bg-blue-700 active:scale-95 h-full"
-              onClick={() => handleSearch(searchQuery)}
-            >
-              <Search className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Live Search Results Dropdown - Mobile */}
-          <AnimatePresence>
-            {searchOpen && searchQuery.length >= 2 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 z-[110] overflow-hidden max-h-[70vh] flex flex-col"
-              >
-                <div className="overflow-y-auto custom-scrollbar p-2">
-                  {isSearching ? (
-                    <div className="p-8 text-center">
-                      <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                      <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Searching...</p>
-                    </div>
-                  ) : searchResults.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">Results for "{searchQuery}"</p>
-                        {searchResults.map((product) => (
-                          <div
-                            key={product.id}
-                            className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
-                          >
-                            <Link
-                              href={`/product/${product.slug || product.id}`}
-                              onClick={() => {
-                                setSearchOpen(false);
-                                setSearchQuery("");
-                              }}
-                              className="flex items-center gap-4 flex-1 min-w-0"
-                            >
-                              <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
-                                <Image
-                                  src={
-                                    typeof product.images?.[0] === 'string' 
-                                      ? product.images[0] 
-                                      : product.images?.[0]?.url || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"
-                                  }
-                                  alt={product.name}
-                                  fill
-                                  className="object-contain p-1"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
-                                  {product.discountPercentage && product.discountPercentage > 0 && (
-                                    <span className="text-xs text-slate-400 line-through font-medium">
-                                      {formatPrice(product.price / (1 - product.discountPercentage / 100))}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex flex-col gap-0.5 mt-1">
-                                  <span className={`text-[9px] font-black uppercase tracking-widest ${product.stockCurrent > 0 ? "text-green-600" : "text-red-600"}`}>
-                                    IN STOCK: {product.stockCurrent || 0}
-                                  </span>
-                                  <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">{product.sku || "N/A"}</span>
-                                </div>
-                              </div>
-                            </Link>
-                            <button 
-                              className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-blue-600 transition-colors"
-                              onClick={() => {
-                                // Add to cart logic would go here
-                                setSearchOpen(false);
-                                setSearchQuery("");
-                              }}
-                            >
-                              Add to cart
-                            </button>
-                          </div>
-                        ))}
-                        <Link 
-                          href={`/shop?q=${searchQuery}`}
-                          onClick={() => setSearchOpen(false)}
-                          className="p-3 text-center text-xs font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors border-t border-slate-50 mt-1"
-                        >
-                          View all results
-                        </Link>
-                      </div>
-                  ) : (
-                    <div className="p-12 text-center">
-                      <Search className="h-8 w-8 text-slate-200 mx-auto mb-3" />
-                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No products found</p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
-
-      {/* Mobile Search Bar - Toggled by Search Icon (Removed as it is now always visible) */}
 
       {/* Services bar */}
       <div className="hidden border-t border-border lg:block">
@@ -909,7 +893,7 @@ export function Header() {
                       onClick={() => setMobileActiveTab("menu")}
                       className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
                         mobileActiveTab === "menu"
-                          ? "text-blue-600 bg-white"
+                          ? "text-primary bg-white"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
@@ -919,7 +903,7 @@ export function Header() {
                       onClick={() => setMobileActiveTab("categories")}
                       className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-wider transition-all ${
                         mobileActiveTab === "categories"
-                          ? "text-blue-600 bg-white"
+                          ? "text-primary bg-white"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
@@ -993,92 +977,14 @@ export function Header() {
                                       setSelectedLanguage(lang);
                                       setMobileLanguageOpen(false);
                                     }}
-                                    className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center justify-between"
+                                    className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
                                   >
                                     <span className="flex items-center gap-2">
                                       <span>{lang.flag}</span>
                                       {lang.name}
                                     </span>
-                                    {selectedLanguage.code === lang.code && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
+                                    {selectedLanguage.code === lang.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                   </button>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-
-                        {/* Currency Selector (Moved to Bottom Section) */}
-                        <div className="relative border-t border-slate-100">
-                          <button
-                            onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
-                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
-                          >
-                            <span className="flex items-center gap-2">Currency</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.currencyCode}</span>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
-                            </div>
-                          </button>
-                          <AnimatePresence>
-                            {mobileCurrencyOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-slate-50"
-                              >
-                                {countries.map((c) => (
-                                  <button
-                                    key={c.id}
-                                    onClick={() => {
-                                      setCountry(c.code);
-                                      setMobileCurrencyOpen(false);
-                                    }}
-                                    className="w-full px-10 py-3 text-[11px] font-bold text-slate-600 hover:text-blue-600 flex items-center justify-between"
-                                  >
-                                    <span className="flex items-center gap-2">
-                                      <span>{c.flag}</span>
-                                      {c.currencyCode}
-                                    </span>
-                                    {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
-                                  </button>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-
-                        {/* Quick Help Selector */}
-                        <div className="relative border-t border-slate-100">
-                          <button
-                            onClick={() => setMobileSupportOpen(!mobileSupportOpen)}
-                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
-                          >
-                            <span className="flex items-center gap-2">Quick Help</span>
-                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileSupportOpen ? 'rotate-180' : '-rotate-90'}`} />
-                          </button>
-                          <AnimatePresence>
-                            {mobileSupportOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-slate-50"
-                              >
-                                {[
-                                  { name: "Order Tracking", href: "/orders/track" },
-                                  { name: "Contact", href: "/support" },
-                                  { name: "FAQ", href: "/support#faq" },
-                                  { name: "Find Us", href: "/support#find-us" },
-                                ].map((item) => (
-                                  <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block w-full px-10 py-3 text-[11px] font-bold text-slate-600 hover:text-blue-600 uppercase tracking-wider border-b border-slate-100/50 last:border-0"
-                                  >
-                                    {item.name}
-                                  </Link>
                                 ))}
                               </motion.div>
                             )}
@@ -1093,97 +999,92 @@ export function Header() {
                         exit={{ opacity: 0 }}
                         className="flex flex-col divide-y divide-slate-100"
                       >
-                        {categories.map((cat) => {
-                          const isExpanded = expandedCategories.includes(cat.id);
-                          const hasBrands = cat.brands?.length > 0;
-                          
-                          const toggleExpand = (e: React.MouseEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setExpandedCategories(prev => 
-                              isExpanded ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
-                            );
-                          };
-
-                          return (
-                            <div key={cat.id} className="flex flex-col">
-                              <div className="flex items-center justify-between group border-b border-slate-50">
-                                <Link
-                                  href={`/shop?category=${cat.slug}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="flex-1 flex items-center gap-4 px-5 py-3.5 transition-all hover:bg-slate-50"
-                                >
-                                  <div className="relative h-8 w-8 shrink-0 flex items-center justify-center">
-                                    {cat.image ? (
-                                      <Image 
-                                        src={cat.image} 
-                                        alt={cat.name}
-                                        fill
-                                        className="object-contain"
-                                      />
-                                    ) : (
-                                      <span className="text-lg">📦</span>
-                                    )}
-                                  </div>
-                                  <span className="text-[13px] font-bold text-slate-900 tracking-tight">
-                                    {cat.name}
-                                  </span>
-                                </Link>
-                                
-                                <button
-                                  onClick={hasBrands ? toggleExpand : undefined}
-                                  className={`px-5 py-4 text-slate-400 ${!hasBrands ? 'cursor-default opacity-40' : 'hover:text-slate-600'}`}
-                                  disabled={!hasBrands}
-                                >
-                                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
-                                </button>
-                              </div>
-
-                              <AnimatePresence>
-                                {hasBrands && isExpanded && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-hidden bg-slate-50/50"
-                                  >
-                                    <div className="flex flex-col divide-y divide-slate-100/50 pl-14">
-                                      {cat.brands.map((brand: any) => (
-                                        <Link
-                                          key={brand.id}
-                                          href={`/shop?category=${cat.slug}&brand=${brand.slug}#brand-${brand.slug}`}
-                                          onClick={() => setMobileMenuOpen(false)}
-                                          className="py-3 pr-6 text-xs font-bold text-slate-500 hover:text-blue-600 capitalize transition-colors"
-                                        >
-                                          {brand.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
+                        {categories.map((cat) => (
+                          <div key={cat.id}>
+                            <div className="flex items-center justify-between px-5 py-4">
+                              <Link
+                                href={`/shop?category=${cat.slug}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-[13px] font-bold text-slate-800"
+                              >
+                                {cat.name}
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  if (expandedCategories.includes(cat.id)) {
+                                    setExpandedCategories(expandedCategories.filter(id => id !== cat.id));
+                                  } else {
+                                    setExpandedCategories([...expandedCategories, cat.id]);
+                                  }
+                                }}
+                                className="p-2"
+                              >
+                                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedCategories.includes(cat.id) ? 'rotate-180' : '-rotate-90'}`} />
+                              </button>
                             </div>
-                          );
-                        })}
+                            <AnimatePresence>
+                              {expandedCategories.includes(cat.id) && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden bg-slate-50 px-8 py-2 flex flex-col gap-3"
+                                >
+                                  {cat.brands?.map((brand: any) => (
+                                    <Link
+                                      key={brand.id}
+                                      href={`/shop?category=${cat.slug}&brand=${brand.slug}`}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="text-xs font-bold text-slate-600 hover:text-primary capitalize"
+                                    >
+                                      {brand.name}
+                                    </Link>
+                                  ))}
+                                  <Link
+                                    href={`/shop?category=${cat.slug}`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="text-xs font-black text-primary uppercase tracking-widest mt-1"
+                                  >
+                                    View all {cat.name}
+                                  </Link>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ))}
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </nav>
 
-                {/* Sidebar Footer - Fixed at Bottom */}
-                <div className="p-6 pb-12 bg-slate-50 border-t border-slate-100 shrink-0">
-                  <a
-                    href={`https://wa.me/260966423719?text=${encodeURIComponent("Hello! I need assistance with my order.")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-all shadow-md active:scale-95"
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                    Chat on WhatsApp
-                  </a>
-                  <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-bold">
-                    24/7 Customer Support
-                  </p>
+                {/* Fixed Footer with Auth/Support - Fixed at Bottom */}
+                <div className="p-5 bg-white border-t border-slate-100 shrink-0">
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 h-12 rounded-lg bg-primary text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+                    >
+                      <User className="h-4 w-4" />
+                      My Account
+                    </Link>
+                    <div className="grid grid-cols-2 gap-2">
+                      <a
+                        href="tel:+260970000000"
+                        className="flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                        Call Us
+                      </a>
+                      <a
+                        href="mailto:support@kryros.com"
+                        className="flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        Email
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
           </div>

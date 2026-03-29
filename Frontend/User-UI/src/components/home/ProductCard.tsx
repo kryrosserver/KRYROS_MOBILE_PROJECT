@@ -347,10 +347,23 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
       {/* Content Area */}
       <div className="p-2 md:p-4 flex flex-col flex-1">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="text-[10px] md:text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-blue-600 h-8 md:h-10 mb-1 leading-tight md:leading-normal">
+          <h3 className="text-[10px] md:text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-primary h-8 md:h-10 mb-1 leading-tight md:leading-normal">
             {product?.name}
           </h3>
         </Link>
+
+        {/* Storage Info - (Matches Reference Image) */}
+        <div className="mb-2">
+          {specs.find((s: any) => s.key?.toLowerCase().includes('storage')) ? (
+            <span className="text-[9px] md:text-xs font-bold text-slate-500 uppercase tracking-tight">
+              {specs.find((s: any) => s.key?.toLowerCase().includes('storage')).value}
+            </span>
+          ) : (
+            <span className="text-[9px] md:text-xs font-bold text-slate-300 uppercase tracking-tight italic">
+              Standard Edition
+            </span>
+          )}
+        </div>
 
         {/* Price Section */}
         <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 mb-1 md:mb-2">
@@ -379,7 +392,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         {/* Add to Cart Button */}
         <div className="mt-auto">
           <Button
-            className="w-full bg-[#3b82f6] hover:bg-blue-700 text-white font-black h-8 md:h-11 uppercase tracking-widest text-[8px] md:text-[10px] rounded-md md:rounded-lg shadow-lg shadow-blue-600/10 active:scale-[0.98] transition-all"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-black h-8 md:h-11 uppercase tracking-widest text-[8px] md:text-[10px] rounded-md md:rounded-lg shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);

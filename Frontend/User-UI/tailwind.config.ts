@@ -44,8 +44,8 @@ const config: Config = {
           foreground: 'hsl(var(--card-foreground))',
         },
         kryros: {
-          primary: '#0f172a',
-          'primary-light': '#1e293b',
+          primary: '#f97316',
+          'primary-light': '#fb923c',
           accent: '#22c55e',
           'accent-hover': '#16a34a',
           orange: '#f97316',
