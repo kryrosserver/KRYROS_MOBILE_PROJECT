@@ -314,7 +314,7 @@ function CategoriesGridSection({ categories, sections, loading: externalLoading 
           <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold">{cmsConfig?.title || "Shop by Category"}</h2>
           <p className="text-slate-600 text-sm md:text-base">{cmsConfig?.subtitle || "Browse our wide range of tech products"}</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-4 gap-3 md:gap-4">
           {externalLoading ? (
             [...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl p-4 md:p-6 shadow-sm ring-1 ring-slate-200 animate-pulse">
@@ -390,7 +390,7 @@ function FlashSales({ products, loading = false }: { products: any[], loading?: 
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-4 gap-2 md:gap-6">
           {flashProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -415,7 +415,7 @@ function FeaturedProducts({ products, loading = false }: { products: any[], load
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-4 gap-2 md:gap-6">
           {loading ? (
             [...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-xl h-[350px] animate-pulse">

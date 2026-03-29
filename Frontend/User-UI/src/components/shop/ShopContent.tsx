@@ -84,8 +84,8 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
                   </h3>
                 </div>
 
-                {/* Product Grid - Automatically 4 columns on desktop, 2 on mobile */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                {/* Product Grid - Forced 4 columns on all screens per client request */}
+                <div className="grid grid-cols-4 gap-2 md:gap-6">
                   {brand.products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

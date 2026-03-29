@@ -159,7 +159,7 @@ import Link from "next/link"
                  <p className="text-slate-400 font-medium italic">No wholesale products available currently.</p>
                </div>
              ) : (
-               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+               <div className="grid grid-cols-4 gap-2 md:gap-6">
                  {wholesaleProducts.map((product) => (
                    <ProductCard key={product.id} product={product} />
                  ))}

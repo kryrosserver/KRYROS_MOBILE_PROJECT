@@ -280,7 +280,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   // Grid view
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-xl hover:border-blue-400"
+      className="group relative flex flex-col overflow-hidden rounded-lg bg-white border border-slate-100 transition-all duration-300 hover:shadow-lg"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -291,87 +291,95 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             src={displayImage}
             alt={product?.name || 'Product'}
             fill
-            className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-2 md:p-4 transition-transform duration-500 group-hover:scale-105"
             unoptimized={displayImage.startsWith('data:')}
           />
         </Link>
         
-        {/* Badges - Top Left */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
+        {/* Badges - Top Left (Matches Reference) */}
+        <div className="absolute left-2 top-2 flex flex-col gap-1 z-10">
           {product?.isNew && (
-            <span className="rounded bg-[#00c652] px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#00c652] px-1.5 py-0.5 text-[8px] md:text-[9px] font-black text-white uppercase tracking-widest shadow-sm">
               NEW
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded bg-[#ff4b7d] px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#ffeff2] px-1.5 py-0.5 text-[8px] md:text-[9px] font-black text-[#ff4b7d] uppercase tracking-widest shadow-sm border border-[#ff4b7d]/10">
               {discount}%
             </span>
           )}
-          {product?.isBestSeller && (
-            <span className="rounded bg-[#3b82f6] px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
-              BESTSELLER
-            </span>
-          )}
         </div>
 
-        {/* Action Icons - Middle Bar */}
-        <div className="absolute left-0 right-0 bottom-0 py-2.5 flex items-center justify-center gap-6 bg-white/95 backdrop-blur-sm border-t border-slate-100 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-          <button 
-            onClick={async (e) => {
-              e.preventDefault(); e.stopPropagation();
-              const id = product?.id; if (!id) return;
-              if (!isAuthenticated) { router.push("/login"); return; }
-              if (isWishlisted) { await wishlistApi.remove(id); setIsWishlisted(false); }
-              else { await wishlistApi.add(id); setIsWishlisted(true); }
-              window.dispatchEvent(new Event("wishlist:changed"));
-            }}
-            className={`transition-colors ${isWishlisted ? 'text-pink-500' : 'text-slate-400 hover:text-slate-900'}`}
-          >
-            <Heart className={`h-4.5 w-4.5 ${isWishlisted ? "fill-current" : ""}`} />
-          </button>
-          <button className="text-slate-400 hover:text-slate-900 transition-colors">
-            <RefreshCw className="h-4.5 w-4.5" />
-          </button>
-          <button className="text-slate-400 hover:text-slate-900 transition-colors">
-            <Eye className="h-4.5 w-4.5" />
-          </button>
+        {/* Rating Badge - (Matches Reference Image) */}
+        <div className="absolute left-2 bottom-2 z-10 bg-[#fff9e6] border border-[#ffc107]/20 px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm scale-90 md:scale-100 origin-left">
+          <span className="text-[9px] font-black text-slate-700">5.00</span>
+          <Star className="h-2 w-2 fill-[#ffc107] text-[#ffc107]" />
+          <span className="text-[9px] font-bold text-slate-400">1</span>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex flex-col flex-1 border-t border-slate-100">
+      {/* Action Icons Row - (Matches Reference Image) */}
+      <div className="flex items-center justify-around py-2 border-y border-slate-50 bg-white">
+        <button 
+          onClick={async (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const id = product?.id; if (!id) return;
+            if (!isAuthenticated) { router.push("/login"); return; }
+            if (isWishlisted) { await wishlistApi.remove(id); setIsWishlisted(false); }
+            else { await wishlistApi.add(id); setIsWishlisted(true); }
+            window.dispatchEvent(new Event("wishlist:changed"));
+          }}
+          className={`transition-colors p-1.5 hover:bg-slate-50 rounded-full ${isWishlisted ? 'text-pink-500' : 'text-slate-400 hover:text-slate-900'}`}
+        >
+          <Heart className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isWishlisted ? "fill-current" : ""}`} />
+        </button>
+        <button className="text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full p-1.5 transition-colors">
+          <RefreshCw className="h-3.5 w-3.5 md:h-4 md:w-4" />
+        </button>
+        <button className="text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full p-1.5 transition-colors">
+          <Eye className="h-3.5 w-3.5 md:h-4 md:w-4" />
+        </button>
+        <button className="text-[#00c652] hover:bg-slate-50 rounded-full p-1.5 transition-colors">
+          <Check className="h-3.5 w-3.5 md:h-4 md:w-4 stroke-[3px]" />
+        </button>
+      </div>
+
+      {/* Content Area */}
+      <div className="p-2 md:p-4 flex flex-col flex-1">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-blue-600 h-10 mb-1">
+          <h3 className="text-[10px] md:text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-blue-600 h-8 md:h-10 mb-1 leading-tight md:leading-normal">
             {product?.name}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-base md:text-lg font-black text-[#d11c1c] tracking-tight">
-            {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
-          </span>
+        {/* Price Section */}
+        <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 mb-1 md:mb-2">
           {product?.originalPrice && (
-            <span className="text-xs text-slate-400 line-through font-medium">
+            <span className="text-[9px] md:text-xs text-slate-400 line-through font-medium">
               {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
             </span>
           )}
+          <span className="text-xs md:text-base font-black text-[#d11c1c] tracking-tight">
+            {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
+          </span>
         </div>
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-[#00c652] uppercase tracking-wider">IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}</span>
+        {/* Stock & Rating Stars */}
+        <div className="flex flex-col gap-1 mb-2 md:mb-4">
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] md:text-[10px] font-black text-[#00c652] uppercase tracking-wider">IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}</span>
           </div>
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-3 w-3 ${i < Math.floor(product?.rating || 0) ? "fill-[#ffc107] text-[#ffc107]" : "text-slate-200"}`} />
+              <Star key={i} className={`h-2 w-2 md:h-3 md:w-3 ${i < Math.floor(product?.rating || 0) ? "fill-[#ffc107] text-[#ffc107]" : "text-slate-200"}`} />
             ))}
           </div>
         </div>
 
+        {/* Add to Cart Button */}
         <div className="mt-auto">
           <Button
-            className="w-full bg-[#3b82f6] hover:bg-blue-700 text-white font-black h-11 uppercase tracking-widest text-[10px] rounded-lg shadow-lg shadow-blue-600/10 active:scale-[0.98] transition-all"
+            className="w-full bg-[#3b82f6] hover:bg-blue-700 text-white font-black h-8 md:h-11 uppercase tracking-widest text-[8px] md:text-[10px] rounded-md md:rounded-lg shadow-lg shadow-blue-600/10 active:scale-[0.98] transition-all"
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);
