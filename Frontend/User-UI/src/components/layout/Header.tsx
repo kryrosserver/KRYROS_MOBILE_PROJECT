@@ -136,7 +136,9 @@ export function TopBar() {
           <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm uppercase tracking-wider">
             <span>Quick Help</span>
             <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
-            <div className="absolute top-[calc(100%+6px)] left-0 w-44 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
+            
+            {/* Dropdown Container - White with shadow to match reference image */}
+            <div className="absolute top-[calc(100%+6px)] right-0 md:left-0 w-48 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[150] p-2 overflow-hidden">
               {[
                 { name: "Order Tracking", href: "/orders/track" },
                 { name: "Contact", href: "/support" },
@@ -146,7 +148,7 @@ export function TopBar() {
                 <Link 
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2.5 hover:bg-slate-50 rounded-lg transition-colors text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-wider"
+                  className="block px-4 py-3 hover:bg-slate-50 rounded-lg transition-all text-[11px] font-bold text-slate-700 hover:text-blue-600 uppercase tracking-widest border-b border-slate-50 last:border-0"
                 >
                   {item.name}
                 </Link>
