@@ -132,11 +132,27 @@ export function TopBar() {
             </div>
           </div>
 
-          {/* Support */}
-          <Link href="/support" className="flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm uppercase tracking-wider">
-            <span>Support</span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </Link>
+          {/* Quick Help Dropdown */}
+          <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-blue-600 transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm uppercase tracking-wider">
+            <span>Quick Help</span>
+            <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            <div className="absolute top-[calc(100%+6px)] left-0 w-44 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
+              {[
+                { name: "Order Tracking", href: "/orders/track" },
+                { name: "Contact", href: "/support" },
+                { name: "FAQ", href: "/support#faq" },
+                { name: "Find Us", href: "/support#find-us" },
+              ].map(item => (
+                <Link 
+                  key={item.name}
+                  href={item.href}
+                  className="block px-3 py-2.5 hover:bg-slate-50 rounded-lg transition-colors text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-wider"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Social Icons */}
@@ -167,6 +183,7 @@ export function Header() {
   const [mobileActiveTab, setMobileActiveTab] = useState<"menu" | "categories">("menu");
   const [mobileCurrencyOpen, setMobileCurrencyOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
+  const [mobileSupportOpen, setMobileSupportOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en", flag: "🇺🇸" });
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -907,7 +924,7 @@ export function Header() {
                             key={item.name}
                             href={item.href}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                            className="px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
                           >
                             {item.name}
                             <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
@@ -918,11 +935,11 @@ export function Header() {
                         <div className="relative border-t border-slate-100">
                           <button
                             onClick={() => setMobileLanguageOpen(!mobileLanguageOpen)}
-                            className="w-full px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
                           >
                             <span className="flex items-center gap-2">Language</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-slate-400 font-medium">{selectedLanguage.name}</span>
+                              <span className="text-[11px] text-slate-400 font-medium">{selectedLanguage.name}</span>
                               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileLanguageOpen ? 'rotate-180' : '-rotate-90'}`} />
                             </div>
                           </button>
@@ -962,11 +979,11 @@ export function Header() {
                         <div className="relative border-t border-slate-100">
                           <button
                             onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
-                            className="w-full px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
                           >
                             <span className="flex items-center gap-2">Currency</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-slate-400 font-medium">{selectedCountry?.currencyCode}</span>
+                              <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.currencyCode}</span>
                               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
                             </div>
                           </button>
@@ -985,7 +1002,7 @@ export function Header() {
                                       setCountry(c.code);
                                       setMobileCurrencyOpen(false);
                                     }}
-                                    className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center justify-between"
+                                    className="w-full px-10 py-3 text-[11px] font-bold text-slate-600 hover:text-blue-600 flex items-center justify-between"
                                   >
                                     <span className="flex items-center gap-2">
                                       <span>{c.flag}</span>
@@ -999,15 +1016,42 @@ export function Header() {
                           </AnimatePresence>
                         </div>
 
-                        {/* Quick Help */}
-                        <Link
-                          href="/support"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="px-6 py-5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between border-t border-slate-100"
-                        >
-                          Quick Help
-                          <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
-                        </Link>
+                        {/* Quick Help Selector */}
+                        <div className="relative border-t border-slate-100">
+                          <button
+                            onClick={() => setMobileSupportOpen(!mobileSupportOpen)}
+                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
+                          >
+                            <span className="flex items-center gap-2">Quick Help</span>
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileSupportOpen ? 'rotate-180' : '-rotate-90'}`} />
+                          </button>
+                          <AnimatePresence>
+                            {mobileSupportOpen && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden bg-slate-50"
+                              >
+                                {[
+                                  { name: "Order Tracking", href: "/orders/track" },
+                                  { name: "Contact", href: "/support" },
+                                  { name: "FAQ", href: "/support#faq" },
+                                  { name: "Find Us", href: "/support#find-us" },
+                                ].map((item) => (
+                                  <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block w-full px-10 py-3 text-[11px] font-bold text-slate-600 hover:text-blue-600 uppercase tracking-wider border-b border-slate-100/50 last:border-0"
+                                  >
+                                    {item.name}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -1035,9 +1079,9 @@ export function Header() {
                                 <Link
                                   href={`/shop?category=${cat.slug}`}
                                   onClick={() => setMobileMenuOpen(false)}
-                                  className="flex-1 flex items-center gap-5 px-6 py-4 transition-all hover:bg-slate-50"
+                                  className="flex-1 flex items-center gap-4 px-5 py-3.5 transition-all hover:bg-slate-50"
                                 >
-                                  <div className="relative h-10 w-10 shrink-0 flex items-center justify-center">
+                                  <div className="relative h-8 w-8 shrink-0 flex items-center justify-center">
                                     {cat.image ? (
                                       <Image 
                                         src={cat.image} 
@@ -1046,20 +1090,20 @@ export function Header() {
                                         className="object-contain"
                                       />
                                     ) : (
-                                      <span className="text-xl">📦</span>
+                                      <span className="text-lg">📦</span>
                                     )}
                                   </div>
-                                  <span className="text-[15px] font-semibold text-slate-900">
+                                  <span className="text-[13px] font-bold text-slate-900 tracking-tight">
                                     {cat.name}
                                   </span>
                                 </Link>
                                 
                                 <button
                                   onClick={hasBrands ? toggleExpand : undefined}
-                                  className={`px-6 py-5 text-slate-400 ${!hasBrands ? 'cursor-default opacity-40' : 'hover:text-slate-600'}`}
+                                  className={`px-5 py-4 text-slate-400 ${!hasBrands ? 'cursor-default opacity-40' : 'hover:text-slate-600'}`}
                                   disabled={!hasBrands}
                                 >
-                                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
                                 </button>
                               </div>
 
