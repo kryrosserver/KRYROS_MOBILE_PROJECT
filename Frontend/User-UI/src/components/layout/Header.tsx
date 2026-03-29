@@ -160,7 +160,7 @@ export function Header() {
   const megaMenuRef = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
   const categoryPickerRef = useRef<HTMLDivElement>(null)
-  const { getItemCount } = useCart()
+  const { items, getItemCount, getSubtotal, removeItem } = useCart()
   const { countries, selectedCountry, setCountry } = useCurrency()
 
   useEffect(() => {
