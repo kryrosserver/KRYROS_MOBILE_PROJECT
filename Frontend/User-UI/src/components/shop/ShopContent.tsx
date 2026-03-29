@@ -59,7 +59,7 @@ export function ShopContent({ groupedData }: { groupedData: CategoryGroup[] }) {
                 className="scroll-mt-32"
               >
                 {/* Product Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                   {brand.products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

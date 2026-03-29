@@ -280,43 +280,43 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   // Grid view
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-lg bg-white shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-xl"
+      className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-xl hover:border-blue-400"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Section */}
-      <div className="relative aspect-square overflow-hidden bg-slate-50/50">
+      <div className="relative aspect-square overflow-hidden bg-white">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
           <Image
             src={displayImage}
             alt={product?.name || 'Product'}
             fill
-            className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
             unoptimized={displayImage.startsWith('data:')}
           />
         </Link>
         
-        {/* Badges */}
-        <div className="absolute left-2 top-2 flex flex-col gap-1.5 z-10">
+        {/* Badges - Top Left */}
+        <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
           {product?.isNew && (
-            <span className="rounded-sm bg-green-500 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+            <span className="rounded bg-[#00c652] px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
               NEW
             </span>
           )}
-          {isWholesale && (
-            <span className="rounded-sm bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
-              WHOLESALE
+          {discount > 0 && (
+            <span className="rounded bg-[#ff4b7d] px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+              {discount}%
             </span>
           )}
-          {discount > 0 && (
-            <span className="rounded-sm bg-pink-500 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-              {discount}%
+          {product?.isBestSeller && (
+            <span className="rounded bg-[#3b82f6] px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+              BESTSELLER
             </span>
           )}
         </div>
 
-        {/* Floating Icons */}
-        <div className="absolute right-2 top-2 flex flex-col gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-300 z-10">
+        {/* Action Icons - Middle Bar */}
+        <div className="absolute left-0 right-0 bottom-0 py-2.5 flex items-center justify-center gap-6 bg-white/95 backdrop-blur-sm border-t border-slate-100 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
           <button 
             onClick={async (e) => {
               e.preventDefault(); e.stopPropagation();
@@ -326,118 +326,52 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               else { await wishlistApi.add(id); setIsWishlisted(true); }
               window.dispatchEvent(new Event("wishlist:changed"));
             }}
-            className={`p-2 rounded-full shadow-md bg-white hover:bg-slate-50 transition-colors ${isWishlisted ? 'text-pink-500' : 'text-slate-400'}`}
+            className={`transition-colors ${isWishlisted ? 'text-pink-500' : 'text-slate-400 hover:text-slate-900'}`}
           >
-            <Heart className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`} />
+            <Heart className={`h-4.5 w-4.5 ${isWishlisted ? "fill-current" : ""}`} />
           </button>
-          <button className="p-2 rounded-full shadow-md bg-white hover:bg-slate-50 text-slate-400 transition-colors">
-            <RefreshCw className="h-4 w-4" />
+          <button className="text-slate-400 hover:text-slate-900 transition-colors">
+            <RefreshCw className="h-4.5 w-4.5" />
           </button>
-          <button className="p-2 rounded-full shadow-md bg-white hover:bg-slate-50 text-slate-400 transition-colors">
-            <Eye className="h-4 w-4" />
+          <button className="text-slate-400 hover:text-slate-900 transition-colors">
+            <Eye className="h-4.5 w-4.5" />
           </button>
-        </div>
-
-        {/* Rating Badge */}
-        <div className="absolute left-2 bottom-2 bg-yellow-100/90 backdrop-blur-sm px-1.5 py-0.5 rounded border border-yellow-200 flex items-center gap-1">
-          <span className="text-[10px] font-bold text-yellow-700">{Number(product?.rating || 0).toFixed(1)}</span>
-          <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
-          <span className="text-[10px] text-yellow-600 font-medium">({product?.reviewCount || 0})</span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-3 md:p-4 flex flex-col flex-1 border-t border-slate-50">
+      <div className="p-4 flex flex-col flex-1 border-t border-slate-100">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="text-sm font-bold text-slate-900 line-clamp-2 transition-colors hover:text-blue-600 h-10">
+          <h3 className="text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-blue-600 h-10 mb-1">
             {product?.name}
           </h3>
         </Link>
 
-        <div className="mt-2 flex flex-col">
-          {isCreditPage && product.allowCredit ? (
-            <div className="space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
-              <div className="flex items-baseline justify-between">
-                <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">Deposit:</span>
-                <span className="text-sm font-black text-green-600">{convertPrice(Number(product.creditMinimum)).formatted}</span>
-              </div>
-              <div className="flex items-baseline justify-between border-t border-slate-100 pt-1">
-                <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">Monthly:</span>
-                <span className="text-[11px] font-black text-blue-600">{product.creditMessage || 'Contact Us'}</span>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-base md:text-lg font-extrabold text-red-600 tracking-tight">
-                  {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
-                </span>
-                {isWholesale && unitsPerPack > 1 && (
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded whitespace-nowrap">
-                      Pack of {unitsPerPack}
-                    </span>
-                    {product?.wholesaleMoq > 1 && (
-                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
-                        Min: {product.wholesaleMoq} Packs
-                      </span>
-                    )}
-                  </div>
-                )}
-                {product?.originalPrice && (
-                  <span className="text-xs text-slate-400 line-through">
-                    {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
-                  </span>
-                )}
-              </div>
-              {isWholesale && unitsPerPack > 1 && (
-                <span className="text-[10px] text-slate-500 font-medium">
-                  {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} / unit
-                </span>
-              )}
-              {!isUSD && (
-                <span className="text-[10px] text-slate-400 font-medium">
-                  ≈ {formatPrice(basePrice)} USD
-                </span>
-              )}
-            </>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-base md:text-lg font-black text-[#d11c1c] tracking-tight">
+            {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
+          </span>
+          {product?.originalPrice && (
+            <span className="text-xs text-slate-400 line-through font-medium">
+              {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
+            </span>
           )}
         </div>
 
-        <div className="mt-2 flex items-center gap-1">
-          <span className="text-[10px] font-bold text-green-600 uppercase">In Stock: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}</span>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-black text-[#00c652] uppercase tracking-wider">IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}</span>
+          </div>
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-2.5 w-2.5 ${i < Math.floor(product?.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-slate-200"}`} />
+              <Star key={i} className={`h-3 w-3 ${i < Math.floor(product?.rating || 0) ? "fill-[#ffc107] text-[#ffc107]" : "text-slate-200"}`} />
             ))}
           </div>
         </div>
 
-        {/* Feature Checklist */}
-        <div className="mt-3 space-y-1">
-          {product?.hasFiveYearGuarantee &&
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-                <Check className="h-3 w-3 text-green-500" />
-                <span>5 YEARS GUARANTEE</span>
-            </div>
-          }
-          {product?.hasFreeReturns &&
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-                <Check className="h-3 w-3 text-green-500" />
-                <span>FREE RETURNS</span>
-            </div>
-          }
-          {product?.hasInstallmentOptions &&
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-                <Check className="h-3 w-3 text-green-500" />
-                <span>INSTALLMENT OPTIONS</span>
-            </div>
-          }
-        </div>
-
-        <div className="mt-4 pt-3 border-t border-slate-100">
+        <div className="mt-auto">
           <Button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 uppercase tracking-wider text-xs shadow-md shadow-blue-600/20"
+            className="w-full bg-[#3b82f6] hover:bg-blue-700 text-white font-black h-11 uppercase tracking-widest text-[10px] rounded-lg shadow-lg shadow-blue-600/10 active:scale-[0.98] transition-all"
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);

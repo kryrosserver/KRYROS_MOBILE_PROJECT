@@ -215,18 +215,19 @@ export default function CategoriesPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Category Management</h1>
-          <p className="text-slate-500">Organize your products into logical categories</p>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Category Management</h1>
+          <p className="text-slate-500 text-sm hidden sm:block">Organize your products into logical categories</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={loadCategories} className="btn-secondary flex items-center gap-2">
+        <div className="flex items-center gap-2 md:gap-3">
+          <button onClick={loadCategories} className="btn-secondary flex items-center gap-2 min-h-[44px] px-4 py-2">
             <RefreshCcw className="h-4 w-4" />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2">
+          <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2 min-h-[44px] px-4 py-2">
             <Plus className="h-4 w-4" />
             Add Category
           </button>
@@ -235,24 +236,24 @@ export default function CategoriesPage() {
 
       {/* Homepage CMS Section Settings */}
       {cmsSection && (
-        <div className="admin-card p-6 bg-green-50/50 border-green-100">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+        <div className="admin-card p-4 md:p-6 bg-green-50/50 border-green-100">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
               <Sparkles className="h-5 w-5 fill-current" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Homepage "Shop by Category" Settings</h2>
-              <p className="text-sm text-slate-500">Customize how categories appear on the storefront homepage</p>
+              <h2 className="text-base md:text-lg font-bold text-slate-900">Homepage "Shop by Category" Settings</h2>
+              <p className="text-sm text-slate-500 hidden sm:block">Customize how categories appear on the storefront homepage</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">Section Title</label>
               <input
                 defaultValue={cmsSection.title}
                 onBlur={(e) => handleUpdateCms("title", e.target.value)}
-                className="admin-input w-full bg-white"
+                className="admin-input w-full bg-white min-h-[44px]"
                 placeholder="e.g. Shop by Category"
               />
             </div>
@@ -261,123 +262,135 @@ export default function CategoriesPage() {
               <input
                 defaultValue={cmsSection.subtitle}
                 onBlur={(e) => handleUpdateCms("subtitle", e.target.value)}
-                className="admin-input w-full bg-white"
+                className="admin-input w-full bg-white min-h-[44px]"
                 placeholder="e.g. Browse our wide range of tech products"
               />
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-white/50 rounded-lg border border-green-100/50 flex items-center justify-between">
+          <div className="mt-4 p-3 bg-white/50 rounded-lg border border-green-100/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="text-sm text-slate-600">
-              Currently showing <span className="font-bold text-green-600">{categories.filter(c => c.showOnHome).length}</span> categories on the homepage.
+              Showing <span className="font-bold text-green-600">{categories.filter(c => c.showOnHome).length}</span> categories on the homepage.
             </div>
             <div className="text-xs text-slate-400 italic">
-              {updatingCms ? "Saving changes..." : "Auto-saved on blur"}
+              {updatingCms ? "Saving..." : "Auto-saved on blur"}
             </div>
           </div>
         </div>
       )}
 
+      {/* Categories Table Card */}
       <div className="admin-card overflow-hidden">
-        <div className="p-4 border-b bg-slate-50 flex items-center gap-4">
-          <div className="relative flex-1">
+        {/* Search Bar */}
+        <div className="p-3 md:p-4 border-b bg-slate-50">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="admin-input pl-10 w-full"
+              className="admin-input pl-10 w-full min-h-[44px]"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        {/* Responsive Table Container */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full text-left min-w-[700px]">
             <thead>
               <tr className="text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 border-b">
-                <th className="px-6 py-3">Category Name</th>
-                <th className="px-6 py-3">Slug</th>
-                <th className="px-6 py-3">Parent</th>
-                <th className="px-6 py-3 text-center">Show on Home</th>
-                <th className="px-6 py-3 text-center">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-4 md:px-6 py-3">Category</th>
+                <th className="px-4 md:px-6 py-3 hidden sm:table-cell">Slug</th>
+                <th className="px-4 md:px-6 py-3 hidden md:table-cell">Parent</th>
+                <th className="px-4 md:px-6 py-3 text-center">Home</th>
+                <th className="px-4 md:px-6 py-3 text-center">Status</th>
+                <th className="px-4 md:px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">Loading categories...</td>
+                  <td colSpan={6} className="px-4 md:px-6 py-12 text-center text-slate-500">Loading categories...</td>
                 </tr>
               ) : filteredCategories.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">No categories found.</td>
+                  <td colSpan={6} className="px-4 md:px-6 py-12 text-center text-slate-500">No categories found.</td>
                 </tr>
               ) : (
                 filteredCategories.map((category) => (
                   <tr key={category.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-3 md:py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden border border-slate-200">
+                        <div className="h-9 md:h-10 w-9 md:w-10 rounded bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden border border-slate-200 shrink-0">
                           {category.image ? (
                             <img src={category.image} alt={category.name} className="h-full w-full object-contain p-1" />
                           ) : (
                             <LayoutGrid className="h-4 w-4" />
                           )}
                         </div>
-                        <div>
-                          <p className="font-medium text-slate-900">{category.name}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-slate-900 truncate max-w-[100px] sm:max-w-[180px]">{category.name}</p>
                           {category.description && (
-                            <p className="text-xs text-slate-500 truncate max-w-[200px]">{category.description}</p>
+                            <p className="text-xs text-slate-500 truncate max-w-[100px] sm:max-w-[180px] sm:hidden">{category.description}</p>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">{category.slug}</code>
+                    <td className="px-4 md:px-6 py-3 md:py-4 hidden sm:table-cell">
+                      <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600 break-all">{category.slug}</code>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
                       {category.parentId ? (
                         <div className="flex items-center gap-1 text-sm text-slate-600">
-                          <ChevronRight className="h-3 w-3 text-slate-400" />
-                          {categories.find(c => c.id === category.parentId)?.name || "Parent"}
+                          <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
+                          <span className="truncate max-w-[100px]">{categories.find(c => c.id === category.parentId)?.name || "Parent"}</span>
                         </div>
                       ) : (
                         <span className="text-slate-400 text-sm">Root</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-center">
                       <button
                         onClick={() => handleToggleHome(category)}
-                        className={`p-1.5 rounded-lg transition-colors ${
+                        className={`p-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
                           category.showOnHome 
                             ? "bg-green-100 text-green-600 hover:bg-green-200" 
                             : "bg-slate-100 text-slate-400 hover:bg-slate-200"
                         }`}
                         title={category.showOnHome ? "Remove from Homepage" : "Show on Homepage"}
+                        aria-label={category.showOnHome ? "Remove from Homepage" : "Show on Homepage"}
                       >
                         <Sparkles className={`h-4 w-4 ${category.showOnHome ? "fill-current" : ""}`} />
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-center">
                       {category.isActive ? (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
                           <CheckCircle2 className="h-3 w-3" />
-                          Active
+                          <span className="hidden xs:inline">Active</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
                           <XCircle className="h-3 w-3" />
-                          Inactive
+                          <span className="hidden xs:inline">Inactive</span>
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleOpenModal(category)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                      <div className="flex items-center justify-end gap-1 md:gap-2">
+                        <button 
+                          onClick={() => handleOpenModal(category)} 
+                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-blue-50"
+                          aria-label="Edit category"
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button onClick={() => handleDelete(category.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                        <button 
+                          onClick={() => handleDelete(category.id)} 
+                          className="p-2 text-slate-400 hover:text-red-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-red-50"
+                          aria-label="Delete category"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -390,17 +403,19 @@ export default function CategoriesPage() {
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b flex items-center justify-between bg-slate-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between bg-slate-50 sticky top-0 z-10">
               <h3 className="font-bold text-slate-900">{editingCategory ? "Edit Category" : "Add New Category"}</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="p-4 md:p-6 space-y-4">
+              {/* Image Preview & Upload */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <div className="h-16 w-16 rounded bg-white border flex items-center justify-center overflow-hidden shrink-0">
                   {form.image ? (
                     <img src={form.image} alt="Preview" className="h-full w-full object-contain p-1" />
@@ -408,7 +423,7 @@ export default function CategoriesPage() {
                     <LayoutGrid className="h-8 w-8 text-slate-300" />
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Category Image</label>
                   <input
                     type="file"
@@ -421,17 +436,18 @@ export default function CategoriesPage() {
                         setFile(f);
                       }
                     }}
-                    className="text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="text-sm text-slate-600 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 min-h-[44px]"
                   />
                 </div>
               </div>
+              
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Category Name</label>
                 <input
                   placeholder="e.g. Phones, Laptops, Accessories"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="admin-input w-full"
+                  className="admin-input w-full min-h-[44px]"
                 />
               </div>
               <div className="space-y-1.5">
@@ -440,7 +456,7 @@ export default function CategoriesPage() {
                   placeholder="e.g. phones (auto-generated if empty)"
                   value={form.slug}
                   onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  className="admin-input w-full"
+                  className="admin-input w-full min-h-[44px]"
                 />
               </div>
               <div className="space-y-1.5">
@@ -448,7 +464,7 @@ export default function CategoriesPage() {
                 <select
                   value={form.parentId}
                   onChange={(e) => setForm({ ...form, parentId: e.target.value })}
-                  className="admin-input w-full"
+                  className="admin-input w-full min-h-[44px]"
                 >
                   <option value="">None (Root Category)</option>
                   {categories
@@ -465,17 +481,17 @@ export default function CategoriesPage() {
                   placeholder="Brief category overview..."
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="admin-input w-full h-24"
+                  className="admin-input w-full h-20 resize-none"
                 />
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="isActive"
                     checked={form.isActive}
                     onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
                   />
                   <label htmlFor="isActive" className="text-sm font-medium text-slate-700">Active</label>
                 </div>
@@ -485,18 +501,18 @@ export default function CategoriesPage() {
                     id="showOnHome"
                     checked={form.showOnHome}
                     onChange={(e) => setForm({ ...form, showOnHome: e.target.checked })}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
                   />
                   <label htmlFor="showOnHome" className="text-sm font-medium text-slate-700">Show on Homepage</label>
                 </div>
               </div>
             </div>
-            <div className="px-6 py-4 border-t bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="btn-secondary">Cancel</button>
+            <div className="px-4 md:px-6 py-4 border-t bg-slate-50 flex justify-end gap-3">
+              <button onClick={() => setShowModal(false)} className="btn-secondary min-h-[44px] px-4 py-2">Cancel</button>
               <button 
                 onClick={handleSave} 
                 disabled={saving}
-                className="btn-primary min-w-[100px]"
+                className="btn-primary min-w-[120px] min-h-[44px] flex items-center justify-center"
               >
                 {saving ? "Saving..." : "Save Category"}
               </button>

@@ -78,8 +78,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       
-      <div className="bg-slate-900 py-12">
-        <div className="mx-auto max-w-7xl px-4">
+      <div className="bg-slate-900 py-8 md:py-12">
+        <div className="mx-auto max-w-7xl px-3 md:px-4">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 text-2xl font-bold text-white">
               {user?.firstName?.[0] || "U"}{user?.lastName?.[0] || ""}
@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
       <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Stats Grid */}
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 md:mb-8 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
           {[
             { label: "Total Orders", value: String(orders.length), icon: Package, color: "bg-blue-500" },
             { label: "Active Installments", value: String(credits.filter((x:any)=> (x.status||'').toLowerCase()==='active').length), icon: CreditCard, color: "bg-green-500" },
@@ -246,31 +246,31 @@ export default function DashboardPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-slate-900">Quick Actions</h2>
-              <div className="space-y-2">
-                <Link href="/shop" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50">
+            <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
+              <h2 className="mb-3 md:mb-4 text-lg font-semibold text-slate-900">Quick Actions</h2>
+              <div className="space-y-1">
+                <Link href="/shop" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50 min-h-[48px]">
                   <div className="flex items-center gap-3">
                     <ShoppingBag className="h-5 w-5 text-green-500" />
                     <span className="text-sm font-medium text-slate-900">Continue Shopping</span>
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-400" />
                 </Link>
-                <Link href="/credit" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50">
+                <Link href="/credit" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50 min-h-[48px]">
                   <div className="flex items-center gap-3">
                     <CreditCard className="h-5 w-5 text-green-500" />
                     <span className="text-sm font-medium text-slate-900">Apply for Credit</span>
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-400" />
                 </Link>
-                <Link href="/dashboard/wallet" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50">
+                <Link href="/dashboard/wallet" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50 min-h-[48px]">
                   <div className="flex items-center gap-3">
                     <Wallet className="h-5 w-5 text-green-500" />
                     <span className="text-sm font-medium text-slate-900">Add to Wallet</span>
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-400" />
                 </Link>
-                <Link href="/dashboard/wishlist" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50">
+                <Link href="/dashboard/wishlist" className="flex items-center justify-between rounded-lg p-3 hover:bg-slate-50 min-h-[48px]">
                   <div className="flex items-center gap-3">
                     <Heart className="h-5 w-5 text-green-500" />
                     <span className="text-sm font-medium text-slate-900">Wishlist</span>

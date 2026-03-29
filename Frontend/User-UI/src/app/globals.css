@@ -86,6 +86,28 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  
+  /* Touch-friendly utilities */
+  .touch-target-min {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mobile-first safe area padding */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive-sm {
+    font-size: 0.875rem;
+  }
+  
+  @media (min-width: 768px) {
+    .text-responsive-sm {
+      font-size: 1rem;
+    }
+  }
 }
 
 /* Custom scrollbar */
@@ -179,7 +201,7 @@ html {
 
 /* Section spacing */
 .section-padding {
-  @apply py-16 px-4 md:px-8 lg:px-16;
+  @apply py-8 md:py-12 lg:py-16 px-3 md:px-4 lg:px-8;
 }
 
 .container-custom {

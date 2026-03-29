@@ -511,16 +511,105 @@ export function Header() {
                 </span>
               )}
             </Link>
-            <Link
-              href="/cart"
-              className="relative rounded-md p-2 text-foreground transition-colors hover:bg-secondary"
-              aria-label="Shopping Cart"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-kryros-orange text-[10px] font-bold text-accent-foreground">
-                {getItemCount()}
-              </span>
-            </Link>
+            
+            {/* Cart with Dropdown */}
+            <div className="relative group/cart">
+              <Link
+                href="/cart"
+                className="relative rounded-md p-2 text-foreground transition-colors hover:bg-secondary"
+                aria-label="Shopping Cart"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                  {getItemCount()}
+                </span>
+              </Link>
+
+              {/* Cart Dropdown - Desktop Only */}
+              <div className="absolute right-0 top-[calc(100%+8px)] w-[340px] bg-white rounded-xl shadow-2xl border border-slate-100 z-[120] overflow-hidden opacity-0 invisible group-hover/cart:opacity-100 group-hover/cart:visible transition-all duration-200 pointer-events-none group-hover/cart:pointer-events-auto">
+                {/* Arrow */}
+                <div className="absolute -top-2 right-4 w-4 h-4 bg-white border-l border-t border-slate-100 rotate-45 z-10" />
+                
+                <div className="p-4 relative bg-white z-20">
+                  {items.length > 0 ? (
+                    <>
+                      <div className="max-h-[350px] overflow-y-auto custom-scrollbar space-y-4 pr-1">
+                        {items.map((item) => (
+                          <div key={item.product.id + (item.variant?.id || '')} className="flex gap-3 relative group/item">
+                            <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-100">
+                              <Image
+                                src={item.product.images?.[0]?.url || item.product.images?.[0] || "/placeholder.jpg"}
+                                alt={item.product.name}
+                                fill
+                                className="object-contain p-1"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0 pr-6">
+                              <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight">{item.product.name}</h4>
+                              <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
+                                {item.variant?.value ? `${item.variant.value}` : ""}
+                              </p>
+                              <p className="text-xs font-black text-red-600 mt-1">
+                                {formatPrice(item.variant?.price || item.product.price)} <span className="text-slate-400 font-bold">x {item.quantity}</span>
+                              </p>
+                            </div>
+                            <button 
+                              onClick={() => removeItem(item.product.id, item.variant?.id)}
+                              className="absolute top-0 right-0 p-1 text-slate-300 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-bold text-slate-500 uppercase tracking-widest text-[10px]">Subtotal:</span>
+                          <span className="font-black text-red-600">{formatPrice(getSubtotal())}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-bold text-slate-900 uppercase tracking-widest text-[10px]">Total:</span>
+                          <span className="font-black text-red-600 text-base">{formatPrice(getSubtotal())}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 mt-4">
+                          <Link 
+                            href="/cart"
+                            className="flex items-center justify-center h-10 rounded-lg bg-slate-100 text-slate-900 text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                          >
+                            View Cart
+                          </Link>
+                          <Link 
+                            href="/checkout"
+                            className="flex items-center justify-center h-10 rounded-lg bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                          >
+                            Checkout
+                          </Link>
+                        </div>
+
+                        <button className="w-full flex items-center justify-center gap-2 h-12 mt-2 border border-slate-200 rounded-lg text-slate-600 text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all">
+                          <Tag className="h-4 w-4" />
+                          Coupons
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <ShoppingCart className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Your cart is empty</p>
+                      <Link 
+                        href="/shop"
+                        className="inline-block mt-4 text-xs font-black text-blue-600 uppercase tracking-widest hover:underline"
+                      >
+                        Start Shopping
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="hidden lg:block ml-2">
               <AuthButtons />
             </div>

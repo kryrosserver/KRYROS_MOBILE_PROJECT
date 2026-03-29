@@ -76,14 +76,14 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
 
   if (loading || !heroBanners.length) {
     return (
-      <div className="relative h-[500px] md:h-[600px] overflow-hidden bg-slate-900 flex items-center justify-center">
+      <div className="relative h-[300px] md:h-[400px] lg:h-[500px] md:h-[600px] overflow-hidden bg-slate-900 flex items-center justify-center">
         <div className="container-custom">
-          <div className="max-w-xl space-y-6">
-            <div className="h-8 w-32 bg-white/10 rounded-full animate-pulse" />
-            <div className="h-16 w-full bg-white/10 rounded-xl animate-pulse" />
-            <div className="h-16 w-3/4 bg-white/10 rounded-xl animate-pulse" />
-            <div className="h-24 w-full bg-white/5 rounded-lg animate-pulse" />
-            <div className="h-12 w-48 bg-white/20 rounded-lg animate-pulse" />
+          <div className="max-w-xl space-y-4 md:space-y-6">
+            <div className="h-6 w-24 md:h-8 w-32 bg-white/10 rounded-full animate-pulse" />
+            <div className="h-12 w-full md:h-16 md:w-full bg-white/10 rounded-xl animate-pulse" />
+            <div className="h-12 w-3/4 md:h-16 md:w-3/4 bg-white/10 rounded-xl animate-pulse" />
+            <div className="h-16 w-full md:h-24 md:w-full bg-white/5 rounded-lg animate-pulse" />
+            <div className="h-10 w-36 md:h-12 md:w-48 bg-white/20 rounded-lg animate-pulse" />
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
   }
 
   return (
-    <div className="relative h-[500px] md:h-[600px] overflow-hidden">
+    <div className="relative h-[300px] md:h-[400px] lg:h-[500px] md:h-[600px] overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -124,7 +124,7 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
             />
           ) : (
             <div className="absolute inset-0 bg-kryros-primary flex items-center justify-center">
-              <span className="text-white/20 text-4xl font-black uppercase tracking-widest">KRYROS</span>
+              <span className="text-white/20 text-2xl md:text-4xl font-black uppercase tracking-widest">KRYROS</span>
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
@@ -132,7 +132,7 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative h-full container-custom">
+      <div className="relative h-full container-custom px-4">
         <div className="h-full flex items-center">
           <AnimatePresence mode="wait">
             <motion.div
@@ -143,19 +143,19 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
               transition={{ duration: 0.5, delay: 0.2 }}
               className="max-w-xl"
             >
-              <span className="inline-block px-4 py-1 bg-kryros-accent text-white text-sm font-medium rounded-full mb-4">
+              <span className="inline-block px-3 py-1 md:px-4 bg-kryros-accent text-white text-xs md:text-sm font-medium rounded-full mb-3 md:mb-4">
                 {heroBanners[currentSlide]?.subtitle}
               </span>
-              <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-4">
+              <h1 className="text-3xl md:text-5xl lg:text-7xl font-display font-bold text-white mb-2 md:mb-4">
                 {heroBanners[currentSlide]?.title}
               </h1>
-              <p className="text-lg text-gray-200 mb-8">
+              <p className="text-sm md:text-lg text-gray-200 mb-4 md:mb-8 hidden sm:block">
                 Discover the latest technology and electronics at unbeatable prices.
               </p>
               <Link href={heroBanners[currentSlide]?.link || "/shop"}>
-                <Button size="lg" className="bg-kryros-orange hover:bg-kryros-orange/90 text-lg px-8">
+                <Button size="lg" className="bg-kryros-orange hover:bg-kryros-orange/90 text-sm md:text-lg px-6 md:px-8">
                   {heroBanners[currentSlide]?.linkText}
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
                 </Button>
               </Link>
             </motion.div>
@@ -164,13 +164,13 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
       </div>
 
       {/* Navigation */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {heroBanners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
-              index === currentSlide ? 'bg-white w-8' : 'bg-white/50'
+            className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${
+              index === currentSlide ? 'bg-white w-6 md:w-8' : 'bg-white/50'
             }`}
           />
         ))}
@@ -180,18 +180,18 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white"
+        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white h-10 w-10 md:h-12 md:w-12"
         onClick={() => setCurrentSlide((prev) => (prev - 1 + heroBanners.length) % heroBanners.length)}
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
       </Button>
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white"
+        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white h-10 w-10 md:h-12 md:w-12"
         onClick={() => setCurrentSlide((prev) => (prev + 1) % heroBanners.length)}
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
       </Button>
     </div>
   )
@@ -199,62 +199,62 @@ function HeroSlider({ banners, loading = false }: { banners: any[], loading?: bo
 
 function WholesaleCreditHighlights() {
   return (
-    <section className="section-padding bg-white">
-      <div className="container-custom">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl bg-slate-900 text-white p-8 flex flex-col justify-between">
+    <section className="section-padding bg-white py-6 md:py-12">
+      <div className="container-custom px-4">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-2">
+          <div className="rounded-2xl bg-slate-900 text-white p-6 md:p-8 flex flex-col justify-between min-h-[180px]">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-green-500/20 px-3 py-1 text-sm font-medium text-green-300">
-                <Package className="h-4 w-4" /> Wholesale
+              <span className="inline-flex items-center gap-2 rounded-full bg-green-500/20 px-3 py-1 text-xs md:text-sm font-medium text-green-300">
+                <Package className="h-3 w-3 md:h-4 md:w-4" /> Wholesale
               </span>
-              <h3 className="mt-4 text-2xl font-bold">Bulk Orders, Better Prices</h3>
-              <p className="mt-2 text-slate-300">Save up to 40% on bulk orders. Perfect for businesses and resellers.</p>
+              <h3 className="mt-3 md:mt-4 text-xl md:text-2xl font-bold">Bulk Orders, Better Prices</h3>
+              <p className="mt-1 md:mt-2 text-sm md:text-base text-slate-300">Save up to 40% on bulk orders. Perfect for businesses and resellers.</p>
             </div>
-            <Link href="/wholesale" className="mt-6 inline-flex items-center gap-2 text-green-400 hover:text-green-300">
-              Explore Wholesale <ArrowRight className="h-4 w-4" />
+            <Link href="/wholesale" className="mt-4 md:mt-6 inline-flex items-center gap-2 text-green-400 hover:text-green-300 text-sm">
+              Explore Wholesale <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
             </Link>
           </div>
 
-          <div className="rounded-2xl bg-green-500 text-white p-8 flex flex-col justify-between">
+          <div className="rounded-2xl bg-green-500 text-white p-6 md:p-8 flex flex-col justify-between min-h-[180px]">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs md:text-sm font-medium text-white">
                 Credit Plans
               </span>
-              <h3 className="mt-4 text-2xl font-bold">Buy Now, Pay Later</h3>
-              <p className="mt-2 text-white/90">0% interest for the first 3 months. Flexible monthly payments up to 24 months.</p>
+              <h3 className="mt-3 md:mt-4 text-xl md:text-2xl font-bold">Buy Now, Pay Later</h3>
+              <p className="mt-1 md:mt-2 text-sm md:text-base text-white/90">0% interest for the first 3 months. Flexible monthly payments up to 24 months.</p>
             </div>
-            <Link href="/credit" className="mt-6 inline-flex items-center gap-2 text-white hover:text-white/90">
-              Apply for Credit <ArrowRight className="h-4 w-4" />
+            <Link href="/credit" className="mt-4 md:mt-6 inline-flex items-center gap-2 text-white hover:text-white/90 text-sm">
+              Apply for Credit <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
             </Link>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+        <div className="mt-4 md:mt-6 grid gap-3 md:gap-4 md:grid-cols-3">
+          <div className="rounded-2xl bg-white p-4 md:p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 shrink-0">
               <Package className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <div className="font-medium text-slate-900">Free Shipping</div>
-              <div className="text-sm text-slate-500">On orders over $500</div>
+              <div className="font-medium text-sm md:text-base text-slate-900">Free Shipping</div>
+              <div className="text-xs md:text-sm text-slate-500">On orders over $500</div>
             </div>
           </div>
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+          <div className="rounded-2xl bg-white p-4 md:p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 shrink-0">
               <Shield className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <div className="font-medium text-slate-900">Secure Payments</div>
-              <div className="text-sm text-slate-500">100% protected checkout</div>
+              <div className="font-medium text-sm md:text-base text-slate-900">Secure Payments</div>
+              <div className="text-xs md:text-sm text-slate-500">100% protected checkout</div>
             </div>
           </div>
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+          <div className="rounded-2xl bg-white p-4 md:p-6 shadow-sm ring-1 ring-slate-200 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 shrink-0">
               <CreditCard className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <div className="font-medium text-slate-900">Easy Installments</div>
-              <div className="text-sm text-slate-500">Up to 24 months</div>
+              <div className="font-medium text-sm md:text-base text-slate-900">Easy Installments</div>
+              <div className="text-xs md:text-sm text-slate-500">Up to 24 months</div>
             </div>
           </div>
         </div>
@@ -308,17 +308,17 @@ function CategoriesGridSection({ categories, sections, loading: externalLoading 
   if (externalLoading || !displayCategories.length) return null
 
   return (
-    <section className="section-padding bg-slate-50">
-      <div className="container-custom">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-display font-bold">{cmsConfig?.title || "Shop by Category"}</h2>
-          <p className="text-slate-600">{cmsConfig?.subtitle || "Browse our wide range of tech products"}</p>
+    <section className="section-padding bg-slate-50 py-6 md:py-12">
+      <div className="container-custom px-4">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold">{cmsConfig?.title || "Shop by Category"}</h2>
+          <p className="text-slate-600 text-sm md:text-base">{cmsConfig?.subtitle || "Browse our wide range of tech products"}</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
           {externalLoading ? (
             [...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-slate-200 animate-pulse">
-                <div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-slate-100" />
+              <div key={i} className="bg-white rounded-2xl p-4 md:p-6 shadow-sm ring-1 ring-slate-200 animate-pulse">
+                <div className="mx-auto mb-3 h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-100" />
                 <div className="h-4 bg-slate-100 rounded w-1/2 mx-auto" />
                 <div className="h-3 bg-slate-100 rounded w-1/3 mx-auto mt-2" />
               </div>
@@ -328,13 +328,13 @@ function CategoriesGridSection({ categories, sections, loading: externalLoading 
               const Icon = iconFor(cat?.name || '')
               const count = cat?.productCount || 0
               return (
-                <Link key={cat?.id ?? idx} href={`/shop?category=${cat.slug}`} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-                    <Icon className="h-6 w-6 text-green-600" />
+                <Link key={cat?.id ?? idx} href={`/shop?category=${cat.slug}`} className="rounded-2xl bg-white p-4 md:p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow flex flex-col items-center justify-center min-h-[120px]">
+                  <div className="mx-auto mb-2 md:mb-3 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-green-100">
+                    <Icon className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
                   </div>
                   <div className="text-center">
-                    <div className="font-semibold text-slate-900">{cat?.name || 'Category'}</div>
-                    <div className="text-sm text-slate-500">{count} products</div>
+                    <div className="font-semibold text-sm md:text-base text-slate-900">{cat?.name || 'Category'}</div>
+                    <div className="text-xs md:text-sm text-slate-500">{count} products</div>
                   </div>
                 </Link>
               )
@@ -365,32 +365,32 @@ function FlashSales({ products, loading = false }: { products: any[], loading?: 
   const flashProducts = products
 
   return (
-    <section className="py-8 md:py-16 bg-gradient-to-br from-orange-50 to-red-50 overflow-hidden">
-      <div className="container-custom">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-kryros-orange text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg">
-              <Flashlight className="h-4 w-4 md:h-5 md:w-5" />
+    <section className="py-6 md:py-16 bg-gradient-to-br from-orange-50 to-red-50 overflow-hidden">
+      <div className="container-custom px-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-6 gap-3 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-1.5 md:gap-2 bg-kryros-orange text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg">
+              <Flashlight className="h-4 w-4" />
               <span className="font-bold text-sm md:text-base">Flash Sales</span>
             </div>
-            <div className="flex items-center gap-1 text-[11px] md:text-sm text-gray-600">
-              <Clock className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-1 text-[10px] md:text-sm text-gray-600">
+              <Clock className="h-3 w-3 md:h-3.5 md:w-3.5" />
               Ends in:
             </div>
             <div className="flex gap-1">
               {['days', 'hours', 'minutes', 'seconds'].map((unit) => (
-                <div key={unit} className="bg-kryros-primary text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-sm font-bold min-w-[30px] md:min-w-[40px] text-center">
+                <div key={unit} className="bg-kryros-primary text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-sm font-bold min-w-[24px] md:min-w-[40px] text-center">
                   {isMounted ? String(timeLeft[unit as keyof typeof timeLeft]).padStart(2, '0') : '--'}
                 </div>
               ))}
             </div>
           </div>
-          <Link href="/flash-sales" className="text-kryros-orange text-sm font-medium hover:underline flex items-center gap-1">
-            View All <ArrowRight className="h-4 w-4" />
+          <Link href="/flash-sales" className="text-kryros-orange text-xs md:text-sm font-medium hover:underline flex items-center gap-1">
+            View All <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
           {flashProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

@@ -76,12 +76,12 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
   if (activeCategory) title = activeCategory.name;
 
   return (
-    <div className="py-8">
+    <div className="py-6 md:py-8">
       {/* Title & Category Section - Light Background, Grouped & Centered */}
-      <div className="bg-slate-50/50 py-10 mb-8 border-b border-slate-100">
-        <div className="container-custom">
-          <div className="flex flex-col items-center justify-center mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase text-center">
+      <div className="bg-slate-50/50 py-6 md:py-10 mb-6 md:mb-8 border-b border-slate-100">
+        <div className="container-custom px-3 md:px-4">
+          <div className="flex flex-col items-center justify-center mb-6 md:mb-8">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight uppercase text-center">
               {activeCategory ? activeCategory.name : "ALL PRODUCTS"}
             </h1>
           </div>
@@ -89,7 +89,7 @@ export default async function ShopPage({ searchParams }: { searchParams?: { [key
         </div>
       </div>
 
-      <div className="container-custom px-4 md:px-6">
+      <div className="container-custom px-3 md:px-6">
         {/* Filter Section - Matches Reference Exactly */}
         <div className="mb-10 space-y-8">
           {/* 1. Fast Filters */}
