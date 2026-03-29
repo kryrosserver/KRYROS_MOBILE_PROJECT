@@ -22,6 +22,8 @@ import {
   Facebook,
   Instagram,
   Twitter,
+  Trash2,
+  Tag,
 } from "lucide-react"
 import { cmsApi, productsApi, categoriesApi, settingsApi, wishlistApi } from "@/lib/api"
 import { useCart } from "@/providers/CartProvider"
