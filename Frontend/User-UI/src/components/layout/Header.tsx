@@ -441,7 +441,11 @@ export function Header() {
                             >
                               <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0">
                                 <Image
-                                  src={product.images?.[0]?.url || product.images?.[0] || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                                  src={
+                                    typeof product.images?.[0] === 'string' 
+                                      ? product.images[0] 
+                                      : product.images?.[0]?.url || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"
+                                  }
                                   alt={product.name}
                                   fill
                                   className="object-contain p-1"
@@ -538,7 +542,11 @@ export function Header() {
                           <div key={item.product.id + (item.variant?.id || '')} className="flex gap-3 relative group/item">
                             <div className="relative h-16 w-16 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-100">
                               <Image
-                                src={item.product.images?.[0]?.url || item.product.images?.[0] || "/placeholder.jpg"}
+                                src={
+                                  typeof item.product.images?.[0] === 'string'
+                                    ? item.product.images[0]
+                                    : item.product.images?.[0]?.url || "/placeholder.jpg"
+                                }
                                 alt={item.product.name}
                                 fill
                                 className="object-contain p-1"
