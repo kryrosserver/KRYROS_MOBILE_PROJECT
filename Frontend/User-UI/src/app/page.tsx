@@ -10,7 +10,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    productsApi.getAll({ limit: 8 }).then((res) => {
+    productsApi.getAll({ isFeatured: true, limit: 8 }).then((res) => {
       if (res.data?.products) {
         setProducts(res.data.products)
       }

@@ -76,7 +76,15 @@ export const authApi = {
 
 // Products API
 export const productsApi = {
-  getAll: (params?: { category?: string; search?: string; page?: number; limit?: number }) => {
+  getAll: (params?: { 
+    category?: string; 
+    search?: string; 
+    page?: number; 
+    limit?: number;
+    isFlashSale?: boolean;
+    isWholesaleOnly?: boolean;
+    isFeatured?: boolean;
+  }) => {
     const query = new URLSearchParams(params as any).toString();
     return fetchApi<{ products: any[]; total: number }>(`/products?${query}`);
   },
