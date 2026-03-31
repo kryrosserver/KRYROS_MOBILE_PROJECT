@@ -35,7 +35,7 @@ export default function CartPage() {
                 <div className="h-20 w-20 md:h-24 md:w-24 bg-slate-50 rounded-xl flex-shrink-0 overflow-hidden relative">
                   {item.product.images && item.product.images[0] && (
                     <img 
-                      src={item.product.images[0].url || item.product.images[0]} 
+                      src={typeof item.product.images[0] === 'string' ? item.product.images[0] : item.product.images[0].url} 
                       alt={item.product.name}
                       className="w-full h-full object-cover"
                     />
