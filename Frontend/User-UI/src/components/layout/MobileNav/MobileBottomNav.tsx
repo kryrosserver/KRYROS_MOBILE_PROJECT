@@ -16,14 +16,15 @@ export default function MobileBottomNav() {
     { label: "Cart", icon: ShoppingBag, href: "/cart", badge: cartCount },
     { label: "Account", icon: User, href: "/dashboard" },
     { label: "Search", icon: Search, href: "/shop" },
-  ];
+  ] as const;
 
   return (
     // "Clear" design - matches client request
     <div className="fixed bottom-0 left-0 right-0 z-[100] h-16 bg-white/95 backdrop-blur-sm md:hidden flex items-center justify-around px-2 pb-safe transition-all duration-300">
       {navItems.map((item) => {
-        const Icon = item.icon
-        const isActive = pathname === item.href
+        const Icon = item.icon;
+        const isActive = pathname === item.href;
+        const badge = "badge" in item ? item.badge : 0;
 
         return (
           <Link
@@ -35,9 +36,9 @@ export default function MobileBottomNav() {
           >
             <div className="relative">
               <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
-              {item.badge > 0 && (
+              {badge > 0 && (
                 <span className="absolute -top-2 -right-2 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white border-2 border-white">
-                  {item.badge}
+                  {badge}
                 </span>
               )}
             </div>
