@@ -418,7 +418,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     <div className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity">
                       <div className="relative h-12 w-12 shrink-0 rounded border border-slate-100 overflow-hidden bg-slate-50">
                         <Image 
-                          src={(accessory.images && accessory.images[0]?.url) || '/placeholder.jpg'} 
+                          src={typeof accessory.images?.[0] === 'string' ? accessory.images[0] : accessory.images?.[0]?.url || '/placeholder.jpg'} 
                           alt={accessory.name || "Accessory"} 
                           fill 
                           className="object-contain p-1" 
