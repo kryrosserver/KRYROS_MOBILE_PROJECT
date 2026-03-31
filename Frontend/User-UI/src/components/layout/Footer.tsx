@@ -43,7 +43,9 @@ export function Footer() {
         <div className="grid lg:grid-cols-4 gap-12 md:gap-20 mb-20">
           {/* Brand Info */}
           <div className="space-y-8 col-span-1 lg:col-span-1">
-            <Logo />
+            <Link href="/">
+              <Logo />
+            </Link>
             <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-xs">
               Zambia's premium destination for mobile technology, accessories, and flexible financing solutions.
             </p>
