@@ -5,6 +5,8 @@ import { categoriesApi } from "@/lib/api"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
+import { resolveImageUrl } from "@/lib/utils"
+
 export function CategoriesGrid() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,9 +45,13 @@ export function CategoriesGrid() {
               className="group relative aspect-square bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center p-8 hover:border-primary/20 hover:shadow-md transition-all overflow-hidden"
             >
               <div className="relative z-10 text-center space-y-4">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white transition-colors">
-                  {category.icon ? (
-                    <img src={category.icon} alt={category.name} className="h-8 w-8 object-contain" />
+                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white transition-colors overflow-hidden">
+                  {category.image || category.icon ? (
+                    <img 
+                      src={resolveImageUrl(category.image || category.icon)} 
+                      alt={category.name} 
+                      className="h-full w-full object-cover" 
+                    />
                   ) : (
                     <span className="text-xl font-black">{category.name[0]}</span>
                   )}
