@@ -1,121 +1,211 @@
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const KryrosMobileApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class KryrosMobileApp extends StatelessWidget {
+  const KryrosMobileApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Kryros Mobile',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const WebViewScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class WebViewScreen extends StatefulWidget {
+  const WebViewScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<WebViewScreen> createState() => _WebViewScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _WebViewScreenState extends State<WebViewScreen> {
+  late final WebViewController controller;
+  bool isLoading = true;
+  String currentUrl = 'https://kryros.com/';
+  bool hasError = false;
+  
+  // URLs for fallback - primary and backup
+  static const String primaryUrl = 'https://kryros.com/';
+  static const String backupUrl = 'https://kryrosweb-dr6p.onrender.com/';
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _initWebViewController(primaryUrl);
+  }
+
+  Future<void> _initWebViewController(String url) async {
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0xFF000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {
+            setState(() {
+              isLoading = true;
+              hasError = false;
+              currentUrl = url;
+            });
+          },
+          onPageFinished: (String url) {
+            setState(() {
+              isLoading = false;
+              currentUrl = url;
+            });
+          },
+          onWebResourceError: (WebResourceError error) {
+            _handleError();
+          },
+          onNavigationRequest: (NavigationRequest request) {
+            // Allow all navigation requests
+            return NavigationDecision.navigate;
+          },
+        ),
+      );
+
+    await controller.loadRequest(Uri.parse(url));
+  }
+
+  Future<void> _handleError() async {
+    if (!hasError && currentUrl == primaryUrl) {
+      // Try the backup URL if primary fails
+      setState(() {
+        hasError = true;
+        isLoading = true;
+      });
+      await _initWebViewController(backupUrl);
+    } else {
+      setState(() {
+        isLoading = false;
+        hasError = true;
+      });
+    }
+  }
+
+  Future<void> _retryWithFallback() async {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      isLoading = true;
+      hasError = false;
     });
+    
+    // Try backup URL first if primary failed
+    if (currentUrl == primaryUrl) {
+      await _initWebViewController(backupUrl);
+    } else {
+      // Try primary URL
+      await _initWebViewController(primaryUrl);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: Stack(
+        children: [
+          // WebView
+          WebViewWidget(controller: controller),
+          
+          // Loading indicator
+          if (isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurple,
+              ),
+            ),
+          
+          // Error view with retry button
+          if (hasError && !isLoading)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Unable to load the app',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Please check your internet connection',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _retryWithFallback,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+      
+      // Bottom navigation bar for URL switching
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            // Refresh button
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                controller.reload();
+              },
+              tooltip: 'Refresh',
+            ),
+            
+            // Current URL indicator
+            Expanded(
+              child: Text(
+                currentUrl == primaryUrl ? 'kryros.com' : 'render.com',
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+            
+            // Switch URL button (manual fallback)
+            IconButton(
+              icon: const Icon(Icons.swap_horiz),
+              onPressed: () async {
+                if (currentUrl == primaryUrl) {
+                  await _initWebViewController(backupUrl);
+                } else {
+                  await _initWebViewController(primaryUrl);
+                }
+              },
+              tooltip: 'Switch URL',
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
