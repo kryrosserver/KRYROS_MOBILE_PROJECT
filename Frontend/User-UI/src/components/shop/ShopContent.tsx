@@ -149,7 +149,6 @@ export function ShopContent() {
 
       {/* Main Content */}
       <div className="py-8 md:py-12">
-      <div className="py-8 md:py-12">
         <div className="container-custom">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar */}
