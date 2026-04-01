@@ -20,68 +20,101 @@ export default function HomePage() {
   useEffect(() => {
     // Parallel fetch
     Promise.all([
-      productsApi.getAll({ isFeatured: true, limit: 8 }),
-      cmsApi.getBanners()
-    ]).then(([productsRes, bannersRes]) => {
-      if (productsRes.data?.products) {
-        setProducts(productsRes.data.products)
+      productsApi.getFeatured(),
+      cmsApi.getBanners(),
+      cmsApi.getSections()
+    ]).then(([productsRes, bannersRes, sectionsRes]) => {
+      // 1. Handle Products
+      if (Array.isArray(productsRes.data)) {
+        setProducts(productsRes.data)
+      } else if ((productsRes.data as any)?.products) {
+        setProducts((productsRes.data as any).products)
       }
+
+      // 2. Handle Banners
       if (bannersRes.data) {
         setBanners(bannersRes.data)
       }
+
+      // 3. Handle Sections (Fallback for Featured Products if not in productsRes)
+      if (sectionsRes.data && (!productsRes.data || productsRes.data.length === 0)) {
+        const featuredSection = sectionsRes.data.find((s: any) => 
+          s.type === 'FEATURED_PRODUCTS' || s.name?.toLowerCase().includes('featured')
+        )
+        if (featuredSection?.items) {
+          setProducts(featuredSection.items)
+        }
+      }
+
+      setLoading(false)
+    }).catch(err => {
+      console.error("Error fetching homepage data:", err)
       setLoading(false)
     })
   }, [])
 
-  // Filter banners to separate Hero and Sidebar/Promotion banners
-  const heroBanner = banners.find(b => b.type === 'HERO') || banners[0]
+  // Filter banners
+  const heroBanners = banners.filter(b => b.type === 'HERO')
+  const heroBanner = heroBanners[0] || banners[0]
   const promoBanners = banners.filter(b => b.type === 'PROMOTION').slice(0, 2)
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="bg-slate-50 border-b border-slate-100">
-        <div className="container-custom py-8 md:py-12">
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Main Hero Banner */}
-            <div className="flex-1 relative min-h-[400px] md:min-h-[500px] rounded-[2.5rem] overflow-hidden bg-slate-900 text-white shadow-2xl group">
-              <div className="absolute inset-0 z-0">
-                {heroBanner?.image ? (
-                  <img 
-                    src={resolveImageUrl(heroBanner.image)} 
-                    alt={heroBanner.title} 
-                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
-                )}
-              </div>
-              
-              <div className="relative z-10 h-full flex flex-col justify-center p-10 md:p-16 space-y-6 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/30 w-fit">
-                  {heroBanner?.subtitle || "Featured Collection"}
+      {/* Hero Section - Redesigned for better banner containment */}
+      <section className="bg-slate-50 border-b border-slate-100 overflow-hidden">
+        <div className="container-custom py-6 md:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Main Hero Banner - Spans 8 columns */}
+            <div className="lg:col-span-8 relative min-h-[350px] md:min-h-[500px] rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-slate-900 text-white shadow-xl group">
+              {heroBanner ? (
+                <>
+                  <div className="absolute inset-0 z-0">
+                    {heroBanner.image ? (
+                      <img 
+                        src={resolveImageUrl(heroBanner.image)} 
+                        alt={heroBanner.title} 
+                        className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-1000"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  </div>
+                  
+                  <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-16 space-y-4 md:space-y-6 max-w-2xl">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
+                      {heroBanner.subtitle || "Exclusive Deal"}
+                    </div>
+                    <h1 className="text-3xl md:text-6xl font-black leading-[0.95] uppercase tracking-tighter">
+                      {heroBanner.title}
+                    </h1>
+                    <p className="text-slate-200 text-sm md:text-lg font-medium leading-relaxed line-clamp-2 max-w-md">
+                      {heroBanner.desc || heroBanner.description}
+                    </p>
+                    <div className="pt-2 md:pt-4">
+                      <Link href={heroBanner.link || "/shop"}>
+                        <Button className="h-12 md:h-14 px-8 md:px-10 font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                          Explore Now <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="h-full flex items-center justify-center p-12 text-center">
+                   <div className="space-y-6">
+                      <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Premium Tech <br/><span className="text-primary">Experience</span></h1>
+                      <Link href="/shop"><Button className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest">Shop Collection</Button></Link>
+                   </div>
                 </div>
-                <h1 className="text-4xl md:text-7xl font-black leading-[0.95] uppercase tracking-tighter">
-                  {heroBanner?.title || <>Premium <span className="text-primary">Tech</span> Experience</>}
-                </h1>
-                <p className="text-slate-300 text-lg font-medium leading-relaxed line-clamp-3">
-                  {heroBanner?.desc || heroBanner?.description || "Explore the latest smartphones and accessories with flexible payment plans."}
-                </p>
-                <div className="flex flex-wrap gap-4 pt-4">
-                  <Link href={heroBanner?.link || "/shop"}>
-                    <Button className="h-14 px-10 font-black uppercase tracking-widest text-sm rounded-2xl shadow-xl shadow-primary/20">
-                      Shop Now <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Sidebar Promotion Banners */}
-            <div className="w-full lg:w-[380px] flex flex-col gap-6">
+            {/* Sidebar Promotion Banners - Spans 4 columns */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
               {promoBanners.length > 0 ? (
                 promoBanners.map((promo, idx) => (
-                  <div key={idx} className="flex-1 relative min-h-[200px] rounded-[2rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-sm">
+                  <div key={idx} className="flex-1 relative min-h-[180px] rounded-[2rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-sm">
                     <div className="absolute inset-0 z-0">
                       {promo.image && (
                         <img 
@@ -90,38 +123,38 @@ export default function HomePage() {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent opacity-80" />
                     </div>
-                    <div className="relative z-10 h-full flex flex-col justify-center p-8 text-white space-y-3">
+                    <div className="relative z-10 h-full flex flex-col justify-center p-8 text-white space-y-2">
                       <span className="text-[10px] font-black uppercase tracking-widest text-primary">{promo.subtitle}</span>
-                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">{promo.title}</h3>
-                      <Link href={promo.link || "/shop"} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
-                        Browse <ArrowRight className="h-3 w-3" />
+                      <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight leading-none">{promo.title}</h3>
+                      <Link href={promo.link || "/shop"} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-primary transition-all pt-2">
+                        View Details <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
                   </div>
                 ))
               ) : (
                 <>
-                  <div className="flex-1 relative min-h-[200px] rounded-[2rem] overflow-hidden bg-blue-600 text-white p-8 group">
-                    <div className="relative z-10 space-y-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">New Arrival</span>
-                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">iPhone 15 <br/>Series</h3>
-                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2">
+                  <div className="flex-1 relative min-h-[180px] rounded-[2rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8 group shadow-lg">
+                    <div className="relative z-10 space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
+                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">Latest <br/>Smartphones</h3>
+                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
                         Shop Now <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                    <Smartphone className="absolute -bottom-4 -right-4 h-32 w-32 text-blue-500/30 -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                    <Smartphone className="absolute -bottom-4 -right-4 h-28 w-28 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
                   </div>
-                  <div className="flex-1 relative min-h-[200px] rounded-[2rem] overflow-hidden bg-primary text-white p-8 group">
-                    <div className="relative z-10 space-y-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Special Offer</span>
-                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">Up to 20% <br/>Off Audio</h3>
-                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2">
-                        Get Deal <ArrowRight className="h-3 w-3" />
+                  <div className="flex-1 relative min-h-[180px] rounded-[2rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-8 group shadow-lg">
+                    <div className="relative z-10 space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Special</span>
+                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">Premium <br/>Accessories</h3>
+                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
+                        Explore <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                    <div className="absolute -bottom-10 -right-10 h-40 w-40 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -bottom-10 -right-10 h-32 w-32 bg-primary/20 rounded-full blur-2xl" />
                   </div>
                 </>
               )}
