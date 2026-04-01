@@ -6,11 +6,17 @@ import { ProductCard } from "@/components/home/ProductCard"
 import { resolveImageUrl } from "@/lib/utils"
 import { CategoriesGrid } from "@/components/home/CategoriesGrid"
 import { PromoBanners } from "@/components/home/PromoBanners"
-import { BlogSection } from "@/components/home/BlogSection"
 import { CreditSection } from "@/components/home/CreditSection"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Smartphone, ShieldCheck, Truck } from "lucide-react"
 import Link from "next/link"
+
+// Import Swiper components and styles
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination, EffectFade } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
+import 'swiper/css/effect-fade'
 
 export default function HomePage() {
   const [products, setProducts] = useState<any[]>([])
@@ -21,29 +27,21 @@ export default function HomePage() {
     // Parallel fetch
     Promise.all([
       productsApi.getFeatured(),
-      cmsApi.getBanners(),
-      cmsApi.getSections()
-    ]).then(([productsRes, bannersRes, sectionsRes]) => {
-      // 1. Handle Products
-      if (Array.isArray(productsRes.data)) {
-        setProducts(productsRes.data)
-      } else if ((productsRes.data as any)?.products) {
+      cmsApi.getBanners()
+    ]).then(([productsRes, bannersRes]) => {
+      // 1. Handle Products (Actual Featured Products)
+      // If getFeatured returns { products: [...] }
+      if (productsRes.data && (productsRes.data as any).products) {
         setProducts((productsRes.data as any).products)
+      } 
+      // If getFeatured returns [...]
+      else if (Array.isArray(productsRes.data)) {
+        setProducts(productsRes.data)
       }
 
       // 2. Handle Banners
       if (bannersRes.data) {
         setBanners(bannersRes.data)
-      }
-
-      // 3. Handle Sections (Fallback for Featured Products if not in productsRes)
-      if (sectionsRes.data && (!productsRes.data || productsRes.data.length === 0)) {
-        const featuredSection = sectionsRes.data.find((s: any) => 
-          s.type === 'FEATURED_PRODUCTS' || s.name?.toLowerCase().includes('featured')
-        )
-        if (featuredSection?.items) {
-          setProducts(featuredSection.items)
-        }
       }
 
       setLoading(false)
@@ -55,53 +53,64 @@ export default function HomePage() {
 
   // Filter banners
   const heroBanners = banners.filter(b => b.type === 'HERO')
-  const heroBanner = heroBanners[0] || banners[0]
   const promoBanners = banners.filter(b => b.type === 'PROMOTION').slice(0, 2)
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero Section - Redesigned for better banner containment */}
+      {/* Hero Section - Redesigned with Swiper Slider */}
       <section className="bg-slate-50 border-b border-slate-100 overflow-hidden">
         <div className="container-custom py-6 md:py-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Main Hero Banner - Spans 8 columns */}
-            <div className="lg:col-span-8 relative min-h-[350px] md:min-h-[500px] rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-slate-900 text-white shadow-xl group">
-              {heroBanner ? (
-                <>
-                  <div className="absolute inset-0 z-0">
-                    {heroBanner.image ? (
-                      <img 
-                        src={resolveImageUrl(heroBanner.image)} 
-                        alt={heroBanner.title} 
-                        className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-1000"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  </div>
-                  
-                  <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-16 space-y-4 md:space-y-6 max-w-2xl">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
-                      {heroBanner.subtitle || "Exclusive Deal"}
-                    </div>
-                    <h1 className="text-3xl md:text-6xl font-black leading-[0.95] uppercase tracking-tighter">
-                      {heroBanner.title}
-                    </h1>
-                    <p className="text-slate-200 text-sm md:text-lg font-medium leading-relaxed line-clamp-2 max-w-md">
-                      {heroBanner.desc || heroBanner.description}
-                    </p>
-                    <div className="pt-2 md:pt-4">
-                      <Link href={heroBanner.link || "/shop"}>
-                        <Button className="h-12 md:h-14 px-8 md:px-10 font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 transition-all">
-                          Explore Now <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </>
+            {/* Main Hero Banner Slider - Spans 8 columns */}
+            <div className="lg:col-span-8 relative min-h-[350px] md:min-h-[500px] rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-slate-900 shadow-xl group">
+              {heroBanners.length > 0 ? (
+                <Swiper
+                  modules={[Autoplay, Pagination, EffectFade]}
+                  effect="fade"
+                  pagination={{ clickable: true }}
+                  autoplay={{ delay: 5000, disableOnInteraction: false }}
+                  className="h-full w-full"
+                >
+                  {heroBanners.map((banner, index) => (
+                    <SwiperSlide key={banner.id || index}>
+                      <div className="relative h-full w-full flex flex-col justify-end">
+                        <div className="absolute inset-0 z-0">
+                          {banner.image ? (
+                            <img 
+                              src={resolveImageUrl(banner.image)} 
+                              alt={banner.title} 
+                              className="w-full h-full object-cover opacity-70"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        </div>
+                        
+                        <div className="relative z-10 p-8 md:p-16 space-y-4 md:space-y-6 max-w-2xl">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
+                            {banner.subtitle || "Exclusive Deal"}
+                          </div>
+                          <h1 className="text-3xl md:text-6xl font-black leading-[0.95] uppercase tracking-tighter text-white">
+                            {banner.title}
+                          </h1>
+                          <p className="text-slate-200 text-sm md:text-lg font-medium leading-relaxed line-clamp-2 max-w-md">
+                            {banner.desc || banner.description}
+                          </p>
+                          <div className="pt-2 md:pt-4">
+                            <Link href={banner.link || "/shop"}>
+                              <Button className="h-12 md:h-14 px-8 md:px-10 font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                                Explore Now <ArrowRight className="h-4 w-4 ml-2" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
               ) : (
-                <div className="h-full flex items-center justify-center p-12 text-center">
+                <div className="h-full flex items-center justify-center p-12 text-center text-white">
                    <div className="space-y-6">
                       <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Premium Tech <br/><span className="text-primary">Experience</span></h1>
                       <Link href="/shop"><Button className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest">Shop Collection</Button></Link>
@@ -226,9 +235,6 @@ export default function HomePage() {
 
       {/* Credit Section */}
       <CreditSection />
-
-      {/* Blog Section */}
-      <BlogSection />
     </main>
   )
 }

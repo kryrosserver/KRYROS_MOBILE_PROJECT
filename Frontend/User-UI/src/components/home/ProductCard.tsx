@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Heart, ShoppingCart, Eye, Star, ArrowRight, CreditCard, RefreshCw, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, resolveImageUrl } from "@/lib/utils";
 import { wishlistApi } from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -120,7 +120,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
       >
         <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-lg bg-slate-100">
           <Image
-            src={displayImage}
+            src={resolveImageUrl(displayImage)}
             alt={product?.name || 'Product'}
             fill
             className="object-cover"
@@ -288,7 +288,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
       <div className="relative aspect-square overflow-hidden bg-white">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
           <Image
-            src={displayImage}
+            src={resolveImageUrl(displayImage)}
             alt={product?.name || 'Product'}
             fill
             className="object-contain p-2 md:p-4 transition-transform duration-500 group-hover:scale-105"
