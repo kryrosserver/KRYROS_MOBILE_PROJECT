@@ -10,9 +10,9 @@ export default function FlashSalesPage() {
 
   useEffect(() => {
     // Fetch flash sale products
-    productsApi.getAll({ isFlashSale: true, limit: 12 }).then((res) => {
-      if (res.data?.products) {
-        setProducts(res.data.products)
+    productsApi.getFlashSales().then((res) => {
+      if (res.data) {
+        setProducts(res.data)
       }
       setLoading(false)
     })

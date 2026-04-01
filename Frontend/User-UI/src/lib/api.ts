@@ -77,27 +77,45 @@ export const authApi = {
 // Products API
 export const productsApi = {
   getAll: (params?: { 
-    category?: string; 
+    categoryId?: string; 
     search?: string; 
-    page?: number; 
-    limit?: number;
-    isFlashSale?: boolean;
-    isWholesaleOnly?: boolean;
-    isFeatured?: boolean;
+    skip?: number; 
+    take?: number;
+    featured?: boolean;
+    allowCredit?: boolean;
+    showInactive?: boolean;
   }) => {
-    const query = new URLSearchParams(params as any).toString();
-    return fetchApi<{ products: any[]; total: number }>(`/products?${query}`);
+    // Build query string with correct parameter names
+    const queryParams = new URLSearchParams();
+    
+    if (params?.categoryId) queryParams.append('categoryId', params.categoryId);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.skip !== undefined) queryParams.append('skip', String(params.skip));
+    if (params?.take !== undefined) queryParams.append('take', String(params.take));
+    if (params?.featured !== undefined) queryParams.append('featured', String(params.featured));
+    if (params?.allowCredit !== undefined) queryParams.append('allowCredit', String(params.allowCredit));
+    if (params?.showInactive !== undefined) queryParams.append('showInactive', String(params.showInactive));
+    
+    const query = queryParams.toString();
+    return fetchApi<{ data: any[]; meta: { total: number; skip: number; take: number } }>(`/products${query ? '?' + query : ''}`);
   },
 
   getById: (id: string) => fetchApi<any>(`/products/${id}`),
 
-  getFeatured: () => fetchApi<any[]>('/products/featured'),
+  getFeatured: (take?: number) => {
+    const query = take ? `?take=${take}` : '';
+    return fetchApi<any[]>(`/products/featured${query}`);
+  },
 
   getFlashSales: () => fetchApi<any[]>('/products/flash-sales'),
 
   getCredit: (params?: { skip?: number; take?: number }) => {
-    const query = new URLSearchParams(params as any).toString();
-    return fetchApi<any>(`/products/credit?${query}`);
+    const queryParams = new URLSearchParams();
+    if (params?.skip !== undefined) queryParams.append('skip', String(params.skip));
+    if (params?.take !== undefined) queryParams.append('take', String(params.take));
+    
+    const query = queryParams.toString();
+    return fetchApi<{ data: any[]; meta: { total: number; skip: number; take: number } }>(`/products/credit${query ? '?' + query : ''}`);
   },
 };
 

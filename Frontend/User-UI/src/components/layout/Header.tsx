@@ -271,10 +271,10 @@ export function Header() {
     const delayDebounceFn = setTimeout(() => {
       if (searchQuery.length >= 2) {
         setIsSearching(true);
-        productsApi.getAll({ search: searchQuery, limit: 5 })
+        productsApi.getAll({ search: searchQuery, take: 5 })
           .then(res => {
-            if (res.data?.products) {
-              setSearchResults(res.data.products);
+            if (res.data?.data) {
+              setSearchResults(res.data.data);
             }
           })
           .finally(() => setIsSearching(false));

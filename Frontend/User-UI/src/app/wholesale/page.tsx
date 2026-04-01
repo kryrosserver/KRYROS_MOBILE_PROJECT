@@ -9,10 +9,10 @@ export default function WholesalePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Fetch wholesale products
-    productsApi.getAll({ isWholesaleOnly: true, limit: 12 }).then((res) => {
-      if (res.data?.products) {
-        setProducts(res.data.products)
+    // Fetch wholesale products  
+    productsApi.getAll({ take: 12 }).then((res) => {
+      if (res.data?.data) {
+        setProducts(res.data.data)
       }
       setLoading(false)
     })
