@@ -30,42 +30,49 @@ export default function HomePage() {
       productsApi.getFeatured(),
       cmsApi.getBanners(),
       cmsApi.getSections()
-    ]).then(([productsRes, bannersRes, sectionsRes]) => {
-      // 1. Handle Banners (Fetch first to know what we have)
+    ]).then(async ([productsRes, bannersRes, sectionsRes]) => {
+      // 1. Handle Banners
       const allBanners = bannersRes.data || []
       setBanners(allBanners)
 
       // 2. Handle Products (Featured Products)
       let featuredItems: any[] = []
 
-      // Check direct productsRes first
-      if (Array.isArray(productsRes.data)) {
-        featuredItems = productsRes.data
-      } else if ((productsRes.data as any)?.products) {
-        featuredItems = (productsRes.data as any).products
-      }
+      // Helper to check if an item is a real product (must have price)
+      const isRealProduct = (item: any) => item && item.price !== undefined && item.price !== null;
 
-      // If featuredItems is empty or contains things that look like banners (have "link" but no "price")
-      // then we look into CMS sections for actual products
-      const looksLikeBanners = featuredItems.length > 0 && featuredItems.every(item => item.link && !item.price)
+      // Check direct featured products
+      const directFeatured = Array.isArray(productsRes.data) 
+        ? productsRes.data 
+        : (productsRes.data as any)?.products || [];
       
-      if (featuredItems.length === 0 || looksLikeBanners) {
-        if (sectionsRes.data) {
-          const featuredSection = sectionsRes.data.find((s: any) => 
-            s.type === 'FEATURED_PRODUCTS' || 
-            s.name?.toLowerCase().includes('featured')
-          )
-          if (featuredSection?.items && Array.isArray(featuredSection.items)) {
-            // Ensure these are products (have prices)
-            featuredItems = featuredSection.items.filter((item: any) => item.price || item.name)
-          }
+      featuredItems = directFeatured.filter(isRealProduct);
+
+      // If still no real products, check CMS sections
+      if (featuredItems.length === 0 && sectionsRes.data) {
+        const featuredSection = sectionsRes.data.find((s: any) => 
+          s.type === 'FEATURED_PRODUCTS' || 
+          s.name?.toLowerCase().includes('featured')
+        )
+        if (featuredSection?.items) {
+          featuredItems = featuredSection.items.filter(isRealProduct);
         }
       }
 
-      // Final check: if we still have banners in products, clear them
-      // We only want products in the products grid
-      setProducts(featuredItems.filter(item => item.price !== undefined))
+      // FINAL FALLBACK: If still no featured products, fetch latest products from store
+      if (featuredItems.length === 0) {
+        try {
+          const latestRes = await productsApi.getAll({ limit: 8 });
+          const latestProducts = Array.isArray(latestRes.data) 
+            ? latestRes.data 
+            : (latestRes.data as any)?.products || [];
+          featuredItems = latestProducts.filter(isRealProduct);
+        } catch (e) {
+          console.error("Fallback fetch failed", e);
+        }
+      }
 
+      setProducts(featuredItems);
       setLoading(false)
     }).catch(err => {
       console.error("Error fetching homepage data:", err)
@@ -83,8 +90,8 @@ export default function HomePage() {
     b.isMain === true
   )
 
-  // Fallback: If no HERO banners found, but we have banners, use the first few for the slider
-  const sliderBanners = heroBanners.length > 0 ? heroBanners : banners.slice(0, 3)
+  // Use all banners if no specific HERO ones are found, otherwise use HERO ones
+  const sliderBanners = heroBanners.length > 0 ? heroBanners : banners;
   
   // Promotion banners for the sidebar (anything specifically marked or just the rest)
   const promoBanners = banners.filter(b => b.type === 'PROMOTION' || b.position === 'sidebar').slice(0, 2)
@@ -96,7 +103,7 @@ export default function HomePage() {
         <div className="container-custom py-6 md:py-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Main Hero Banner Slider */}
-            <div className="lg:col-span-8 relative min-h-[400px] md:min-h-[550px] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-900 shadow-2xl group">
+            <div className="lg:col-span-8 relative min-h-[400px] md:min-h-[600px] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-900 shadow-2xl group">
               {sliderBanners.length > 0 ? (
                 <Swiper
                   modules={[Autoplay, Pagination, EffectFade]}
@@ -105,39 +112,45 @@ export default function HomePage() {
                     clickable: true,
                     bulletActiveClass: 'swiper-pagination-bullet-active bg-primary w-8 rounded-full'
                   }}
-                  autoplay={{ delay: 6000, disableOnInteraction: false }}
+                  autoplay={{ delay: 5000, disableOnInteraction: false }}
+                  loop={sliderBanners.length > 1}
                   className="h-full w-full"
                 >
                   {sliderBanners.map((banner, index) => (
                     <SwiperSlide key={banner.id || index}>
-                      <div className="relative h-full w-full flex flex-col justify-end">
+                      <div className="relative h-full w-full flex flex-col justify-end min-h-[400px] md:min-h-[600px]">
                         <div className="absolute inset-0 z-0">
                           {banner.image ? (
                             <img 
                               src={resolveImageUrl(banner.image)} 
                               alt={banner.title} 
-                              className="w-full h-full object-cover opacity-80"
+                              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
                           )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                          {/* Stronger overlay for better text readability */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                         </div>
                         
                         <div className="relative z-10 p-10 md:p-20 space-y-6 max-w-2xl">
-                          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
-                            {banner.subtitle || "New Arrival"}
-                          </div>
-                          <h1 className="text-4xl md:text-7xl font-black leading-[0.9] uppercase tracking-tighter text-white drop-shadow-sm">
+                          {banner.subtitle && (
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
+                              {banner.subtitle}
+                            </div>
+                          )}
+                          <h1 className="text-4xl md:text-7xl font-black leading-[0.9] uppercase tracking-tighter text-white drop-shadow-lg">
                             {banner.title}
                           </h1>
-                          <p className="text-slate-200 text-base md:text-xl font-medium leading-relaxed line-clamp-2 max-w-lg opacity-90">
-                            {banner.desc || banner.description}
-                          </p>
+                          {(banner.desc || banner.description) && (
+                            <p className="text-slate-200 text-base md:text-xl font-medium leading-relaxed line-clamp-2 max-w-lg opacity-90 drop-shadow-md">
+                              {banner.desc || banner.description}
+                            </p>
+                          )}
                           <div className="pt-4">
                             <Link href={banner.link || "/shop"}>
                               <Button className="h-14 md:h-16 px-10 md:px-12 font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
-                                Shop Now <ArrowRight className="h-5 w-5 ml-2" />
+                                {banner.buttonText || "Shop Now"} <ArrowRight className="h-5 w-5 ml-2" />
                               </Button>
                             </Link>
                           </div>
