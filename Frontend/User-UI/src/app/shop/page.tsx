@@ -88,29 +88,7 @@ export default function ShopPage() {
       {/* Main Content */}
       <div className="py-8 md:py-12">
         <div className="container-custom">
-          {/* Payment Plan & Shipping - TOP */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {/* Need a Payment Plan */}
-            <div className="bg-gradient-to-br from-blue-600 to-primary p-6 rounded-2xl text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-black uppercase">Need a Payment Plan?</h3>
-                  <p className="text-sm text-blue-100 mt-1">Most items available on flexible 3-12 month installments.</p>
-                </div>
-                <div className="text-3xl">💳</div>
-              </div>
-              <button className="w-full h-10 mt-4 bg-white text-blue-600 font-black uppercase text-xs rounded-lg">Learn More</button>
-            </div>
-
-            {/* Shipping Info */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div><div className="text-2xl">🚚</div><p className="text-xs font-bold">Free shipping on orders above 2,000 Tk</p></div>
-                <div><div className="text-2xl">⚡</div><p className="text-xs font-bold">Fast delivery 24-48 hours</p></div>
-                <div><div className="text-2xl">↩️</div><p className="text-xs font-bold">Easy returns within 7 days</p></div>
-              </div>
-            </div>
-          </div>
+          
 
           {/* Products */}
           <div>
