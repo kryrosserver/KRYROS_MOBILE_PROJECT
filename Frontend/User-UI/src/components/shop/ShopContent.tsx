@@ -152,26 +152,47 @@ export function ShopContent() {
         <div className="container-custom">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar */}
-            <aside className="w-full lg:w-72 space-y-6 flex-shrink-0 order-2 lg:order-1">
+            <aside className="w-full lg:w-72 space-y-5 flex-shrink-0 order-2 lg:order-1">
               {/* Credit Section */}
-              <div className="bg-gradient-to-br from-blue-600 to-primary p-6 md:p-8 rounded-2xl text-white relative overflow-hidden group hover:shadow-lg transition-shadow">
-                <div className="relative z-10 space-y-4">
-                  <div className="flex items-start justify-between">
+              <div className="bg-gradient-to-br from-blue-600 to-primary p-6 md:p-7 rounded-xl text-white relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight leading-tight">
+                      <h3 className="text-base md:text-lg font-black uppercase tracking-tight leading-tight">
                         Flexible Payment Plans
                       </h3>
-                      <p className="text-xs md:text-sm text-blue-100 font-medium mt-2 leading-relaxed">
-                        3-12 months installments available.
+                      <p className="text-xs md:text-sm text-blue-100 font-medium mt-1.5 leading-relaxed">
+                        3-12 month installments on most items.
                       </p>
                     </div>
-                    <div className="text-3xl">💳</div>
+                    <div className="text-2xl flex-shrink-0">💳</div>
                   </div>
-                  <button className="w-full h-10 bg-white text-blue-600 font-black uppercase tracking-widest text-xs rounded-lg hover:bg-blue-50 transition-colors">
+                  <button className="w-full h-10 bg-white text-blue-600 font-bold uppercase tracking-wide text-xs rounded-lg hover:bg-blue-50 transition-colors duration-200">
                     Learn More
                   </button>
                 </div>
-                <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+                <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+              </div>
+
+              {/* Shipping Info */}
+              <div className="bg-white p-5 md:p-6 rounded-xl border border-slate-100 shadow-sm space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <span className="text-lg">🚚</span> Shipping
+                </h4>
+                <div className="space-y-2.5 text-xs md:text-sm">
+                  <div className="flex gap-2.5 items-start">
+                    <span className="text-sm flex-shrink-0 mt-0.5">✓</span>
+                    <span className="text-slate-600"><span className="font-bold text-slate-900">Free</span> on orders above 2,000 Tk</span>
+                  </div>
+                  <div className="flex gap-2.5 items-start">
+                    <span className="text-sm flex-shrink-0 mt-0.5">✓</span>
+                    <span className="text-slate-600"><span className="font-bold text-slate-900">24-48</span> hour delivery</span>
+                  </div>
+                  <div className="flex gap-2.5 items-start">
+                    <span className="text-sm flex-shrink-0 mt-0.5">✓</span>
+                    <span className="text-slate-600"><span className="font-bold text-slate-900">7-day</span> easy returns</span>
+                  </div>
+                </div>
               </div>
             </aside>
 
