@@ -85,6 +85,14 @@ export default function ShopPage() {
         </div>
       </div>
 
+      {/* Search Filter */}
+      <div className="py-6">
+        <div className="relative max-w-md mx-auto">
+          <input type="text" placeholder="Search for products..." className="w-full px-4 py-3 pl-12 border border-slate-300 rounded-lg" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="py-8 md:py-12">
         <div className="container-custom">
