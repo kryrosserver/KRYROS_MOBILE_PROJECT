@@ -60,7 +60,7 @@ export default function ShopPage() {
           {/* Main Title */}
           <div className="space-y-4">
             <div>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tight leading-tight">
+              <h1 className="text-center text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tight leading-tight">
                 {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
               </h1>
               <div className="h-1.5 w-24 md:w-32 bg-gradient-to-r from-blue-600 to-primary rounded-full mt-4"></div>
