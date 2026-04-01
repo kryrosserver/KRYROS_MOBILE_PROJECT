@@ -61,22 +61,17 @@ export default function ShopPage() {
           <div className="space-y-4">
             <div>
               <h1 className="text-center text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tight leading-tight">
-                {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
+                {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "Shop"}
               </h1>
-              <div className="h-1.5 w-24 md:w-32 bg-gradient-to-r from-blue-600 to-primary rounded-full mt-4"></div>
+              <div className="h-2 w-32 bg-primary mx-auto rounded-full mt-4"></div>
             </div>
           </div>
 
           
 
-          {/* Category Grid */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-1 rounded-full bg-primary"></div>
-              <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-500">
-                Browse by Category
-              </h2>
-            </div>
+          {/* Category Grid - CENTERED */}
+          <div className="space-y-4 text-center">
+            <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-500">Browse by Category</h2>
             <div className="py-4">
               <Suspense fallback={null}>
                 <CategoryGrid categories={categories} />
@@ -84,8 +79,7 @@ export default function ShopPage() {
             </div>
           </div>
 
-          {/* Quick Filters */}
-          <div className="space-y-4">
+          
             <div className="flex items-center justify-between flex-wrap gap-4">
               {/* Left: Fast Filters */}
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
