@@ -83,45 +83,57 @@ export default function HomePage() {
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
                           )}
-                          {/* Stronger overlay for better text readability */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                          {/* Darker base overlay for mobile to support glass card readability */}
+                          <div className="md:hidden absolute inset-0 bg-black/40" />
+                          {/* Desktop gradient overlay */}
+                          <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                         </div>
                         
-                        <div className="relative z-10 p-8 md:p-20 space-y-4 md:space-y-6 max-w-2xl">
+                        {/* Immersive Mobile Layout: Floating Glass Spotlight */}
+                        <div className="md:hidden relative z-10 w-full p-6 pb-12">
+                          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 space-y-6 shadow-2xl text-center">
+                            {banner.subtitle && (
+                              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/30 mx-auto">
+                                {banner.subtitle}
+                              </div>
+                            )}
+                            <h1 className="text-3xl font-black leading-tight uppercase tracking-tight text-white drop-shadow-sm">
+                              {banner.title}
+                            </h1>
+                            {(banner.desc || banner.description) && (
+                              <p className="text-slate-200 text-sm font-medium leading-relaxed line-clamp-2 opacity-90">
+                                {banner.desc || banner.description}
+                              </p>
+                            )}
+                            <div className="pt-2">
+                              <Link href={banner.link || "/shop"}>
+                                <Button className="w-full h-14 bg-primary text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-primary/20">
+                                  {banner.buttonText || "Shop Now"} <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Professional Desktop Layout: Classic Sidebar Spotlight */}
+                        <div className="hidden md:flex relative z-10 p-20 space-y-6 max-w-2xl flex-col">
                           {banner.subtitle && (
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
                               {banner.subtitle}
                             </div>
                           )}
-                          
-                          {/* Immersive Mobile Heading */}
-                          <div className="md:hidden space-y-3">
-                            <h1 className="text-3xl font-black leading-tight uppercase tracking-tight text-white drop-shadow-xl">
-                              {banner.title}
-                            </h1>
-                            {(banner.desc || banner.description) && (
-                              <p className="text-slate-200 text-sm font-medium leading-relaxed line-clamp-2 opacity-90 drop-shadow-md">
-                                {banner.desc || banner.description}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Professional Desktop Heading */}
-                          <div className="hidden md:block space-y-6">
-                            <h1 className="text-4xl md:text-7xl font-black leading-[0.9] uppercase tracking-tighter text-white drop-shadow-lg">
-                              {banner.title}
-                            </h1>
-                            {(banner.desc || banner.description) && (
-                              <p className="text-slate-200 text-base md:text-xl font-medium leading-relaxed line-clamp-2 max-w-lg opacity-90 drop-shadow-md">
-                                {banner.desc || banner.description}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="pt-2 md:pt-4">
+                          <h1 className="text-4xl md:text-7xl font-black leading-[0.9] uppercase tracking-tighter text-white drop-shadow-lg">
+                            {banner.title}
+                          </h1>
+                          {(banner.desc || banner.description) && (
+                            <p className="text-slate-200 text-base md:text-xl font-medium leading-relaxed line-clamp-2 max-w-lg opacity-90 drop-shadow-md">
+                              {banner.desc || banner.description}
+                            </p>
+                          )}
+                          <div className="pt-4">
                             <Link href={banner.link || "/shop"}>
-                              <Button className="h-12 md:h-16 px-8 md:px-12 font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-all">
-                                {banner.buttonText || "Shop Now"} <ArrowRight className="h-4 w-4 ml-2" />
+                              <Button className="h-16 px-12 font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
+                                {banner.buttonText || "Shop Now"} <ArrowRight className="h-5 w-5 ml-2" />
                               </Button>
                             </Link>
                           </div>
