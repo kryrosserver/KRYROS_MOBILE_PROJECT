@@ -80,62 +80,7 @@ export default function ShopPage() {
           </div>
 
           
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              {/* Left: Fast Filters */}
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-400 inline-flex items-center whitespace-nowrap">
-                  <Filter className="h-3 w-3 mr-2" /> Quick Filter:
-                </span>
-
-                {/* Featured */}
-                <button className="group flex items-center gap-2 px-3 md:px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-200 hover:shadow-md">
-                  <span className="group-hover:scale-110 transition-transform">◆</span>
-                  <span className="hidden sm:inline">Featured</span>
-                </button>
-
-                {/* Best Sellers */}
-                <button className="group flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-200 hover:shadow-md">
-                  <span className="group-hover:scale-110 transition-transform">🔥</span>
-                  <span className="hidden sm:inline">Best Sellers</span>
-                </button>
-
-                {/* Top Rated */}
-                <button className="group flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-200 hover:shadow-md">
-                  <span className="group-hover:scale-110 transition-transform">⭐</span>
-                  <span className="hidden sm:inline">Top Rated</span>
-                </button>
-              </div>
-
-              {/* Right: View Toggle */}
-              <div className="hidden lg:flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
-                <button className="h-9 px-3 rounded-lg bg-white shadow-sm text-slate-700 hover:text-primary flex items-center justify-center transition-colors">
-                  <span className="text-xs font-bold">≡≡</span>
-                </button>
-                <button className="h-9 px-3 rounded-lg text-slate-500 hover:text-primary flex items-center justify-center transition-colors">
-                  <span className="text-xs font-bold">⊞⊞</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Secondary Filters */}
-            <div className="flex flex-wrap gap-2 items-stretch">
-              <button className="flex-1 sm:flex-none h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-                <span>🎨</span>
-                <span className="hidden xs:inline">Color</span>
-              </button>
-              <button className="flex-1 sm:flex-none h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-                <span>💾</span>
-                <span className="hidden xs:inline">Storage</span>
-              </button>
-              <button className="flex-1 sm:flex-none h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-                <span>🔍</span>
-                <span className="hidden xs:inline">More</span>
-              </button>
-              <button className="flex-1 sm:flex-none h-10 px-4 bg-white border-2 border-slate-300 hover:border-primary text-slate-700 hover:text-primary rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-1 md:ml-auto">
-                <Filter className="h-3 w-3" />
-                <span className="hidden sm:inline">Filters</span>
-              </button>
-            </div>
+            
           </div>
         </div>
       </div>
