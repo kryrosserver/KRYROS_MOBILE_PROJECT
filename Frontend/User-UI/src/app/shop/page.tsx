@@ -67,12 +67,7 @@ export default function ShopPage() {
             </div>
           </div>
 
-          {/* Subtitle */}
-          <p className="text-slate-600 font-medium text-sm md:text-base max-w-3xl leading-relaxed">
-            {selectedCategory
-              ? `Explore our premium collection. Find the perfect product that meets your needs with our expertly curated selection.`
-              : "Discover our complete collection of premium electronics and devices. Browse by category to find exactly what you're looking for."}
-          </p>
+          
 
           {/* Category Grid */}
           <div className="space-y-4">
