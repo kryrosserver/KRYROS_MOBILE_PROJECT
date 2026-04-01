@@ -151,12 +151,44 @@ export default function ShopPage() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Full width without sidebar */}
       <div className="py-8 md:py-12">
         <div className="container-custom">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar - Credit & Advanced Filters (Optional) */}
-            <aside className="w-full lg:w-72 space-y-6 flex-shrink-0 order-2 lg:order-1">
+          {/* Payment Plan Promo - Top Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {/* Buy on Credit Promo */}
+            <div className="bg-gradient-to-br from-blue-600 to-primary p-6 rounded-2xl text-white relative overflow-hidden group hover:shadow-lg transition-shadow">
+              <div className="relative z-10 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-black uppercase tracking-tight">Need a Payment Plan?</h3>
+                  <p className="text-sm text-blue-100 font-medium mt-1">Most items available on flexible 3-12 month installments.</p>
+                </div>
+                <div className="text-3xl">💳</div>
+              </div>
+              <button className="mt-4 w-full h-10 bg-white text-blue-600 font-black uppercase tracking-widest text-xs rounded-lg hover:bg-blue-50 transition-colors">Learn More</button>
+            </div>
+
+            {/* Shipping Info */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🚚</div>
+                  <p className="text-xs font-bold text-slate-700">Free shipping on orders above 2,000 Tk</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl mb-2">⚡</div>
+                  <p className="text-xs font-bold text-slate-700">Fast delivery within 24-48 hours</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl mb-2">↩️</div>
+                  <p className="text-xs font-bold text-slate-700">Easy returns within 7 days</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Products - Full Width */}
+          <div>
               {/* Buy on Credit Promo */}
               <div className="bg-gradient-to-br from-blue-600 to-primary p-6 md:p-8 rounded-2xl text-white relative overflow-hidden group hover:shadow-lg transition-shadow">
                 <div className="relative z-10 space-y-4">
