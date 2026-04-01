@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { cmsApi } from "@/lib/api"
 import { resolveImageUrl } from "@/lib/utils"
 import { CategoriesGrid } from "@/components/home/CategoriesGrid"
-import { PromoBanners } from "@/components/home/PromoBanners"
 import { CreditSection } from "@/components/home/CreditSection"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Smartphone, ShieldCheck, Truck } from "lucide-react"
@@ -94,7 +93,7 @@ export default function HomePage() {
                               {banner.subtitle}
                             </div>
                           )}
-                          <h1 className="text-4xl md:text-7xl font-black leading-[0.9] uppercase tracking-tighter text-white drop-shadow-lg">
+                          <h1 className="text-3xl md:text-7xl font-black leading-none uppercase tracking-tight md:tracking-tighter text-white drop-shadow-lg">
                             {banner.title}
                           </h1>
                           {(banner.desc || banner.description) && (
@@ -118,7 +117,7 @@ export default function HomePage() {
                 <div className="h-full flex items-center justify-center p-12 text-center text-white">
                    <div className="space-y-8 animate-pulse">
                       <div className="h-8 w-32 bg-white/10 rounded-full mx-auto" />
-                      <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter opacity-20">KRYROS</h1>
+                      <h1 className="text-4xl md:text-8xl font-black uppercase tracking-tight md:tracking-tighter opacity-20">KRYROS</h1>
                       <div className="h-16 w-48 bg-white/10 rounded-2xl mx-auto" />
                    </div>
                 </div>
@@ -154,7 +153,7 @@ export default function HomePage() {
                   <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-10 group shadow-xl">
                     <div className="relative z-10 space-y-3">
                       <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
-                      <h3 className="text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
+                      <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
                       <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
                         Browse Now <ArrowRight className="h-3 w-3" />
                       </Link>
@@ -164,7 +163,7 @@ export default function HomePage() {
                   <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-10 group shadow-xl">
                     <div className="relative z-10 space-y-3">
                       <span className="text-[10px] font-black uppercase tracking-widest text-primary">Limited</span>
-                      <h3 className="text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
+                      <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
                       <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
                         Discover <ArrowRight className="h-3 w-3" />
                       </Link>
@@ -204,9 +203,6 @@ export default function HomePage() {
 
       {/* Categories Grid */}
       <CategoriesGrid />
-
-      {/* Promo Banners */}
-      <PromoBanners />
 
       {/* Credit Section */}
       <CreditSection />
