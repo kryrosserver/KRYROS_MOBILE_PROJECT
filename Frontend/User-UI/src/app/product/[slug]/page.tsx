@@ -585,7 +585,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       </div>
 
       {/* Mobile Sticky Action Bar - Professional App Feel */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:hidden pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:hidden pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] px-5">
         <div className="flex gap-4">
           <button 
             onClick={handleWishlist}
