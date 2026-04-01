@@ -33,58 +33,101 @@ export default function HomePage() {
     })
   }, [])
 
-  // Use the first banner for hero if available
-  const heroBanner = banners[0]
+  // Filter banners to separate Hero and Sidebar/Promotion banners
+  const heroBanner = banners.find(b => b.type === 'HERO') || banners[0]
+  const promoBanners = banners.filter(b => b.type === 'PROMOTION').slice(0, 2)
 
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center overflow-hidden bg-slate-50">
-        <div className="container-custom relative z-10 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20 animate-in fade-in slide-in-from-left-4 duration-500">
-                Premium Tech Hub
+      <section className="bg-slate-50 border-b border-slate-100">
+        <div className="container-custom py-8 md:py-12">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Main Hero Banner */}
+            <div className="flex-1 relative min-h-[400px] md:min-h-[500px] rounded-[2.5rem] overflow-hidden bg-slate-900 text-white shadow-2xl group">
+              <div className="absolute inset-0 z-0">
+                {heroBanner?.image ? (
+                  <img 
+                    src={resolveImageUrl(heroBanner.image)} 
+                    alt={heroBanner.title} 
+                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
+                )}
               </div>
-              <h1 className="text-5xl md:text-8xl font-black text-slate-900 leading-[0.9] uppercase tracking-tighter animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
-                {heroBanner?.title || <>Upgrade Your <span className="text-primary">Digital</span> Lifestyle</>}
-              </h1>
-              <p className="max-w-md text-lg md:text-xl text-slate-500 font-medium leading-relaxed animate-in fade-in slide-in-from-left-4 duration-700 delay-200">
-                {heroBanner?.desc || heroBanner?.description || "Experience the future of mobile technology with Zambia's most trusted provider of premium devices and flexible credit plans."}
-              </p>
-              <div className="flex flex-wrap gap-4 pt-4 animate-in fade-in slide-in-from-left-4 duration-700 delay-300">
-                <Link href="/shop">
-                  <Button className="h-16 px-10 font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/20 rounded-2xl">
-                    Shop Collection <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/credit">
-                  <Button variant="outline" className="h-16 px-10 font-black uppercase tracking-widest text-sm border-2 rounded-2xl">
-                    Buy on Credit
-                  </Button>
-                </Link>
+              
+              <div className="relative z-10 h-full flex flex-col justify-center p-10 md:p-16 space-y-6 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/30 w-fit">
+                  {heroBanner?.subtitle || "Featured Collection"}
+                </div>
+                <h1 className="text-4xl md:text-7xl font-black leading-[0.95] uppercase tracking-tighter">
+                  {heroBanner?.title || <>Premium <span className="text-primary">Tech</span> Experience</>}
+                </h1>
+                <p className="text-slate-300 text-lg font-medium leading-relaxed line-clamp-3">
+                  {heroBanner?.desc || heroBanner?.description || "Explore the latest smartphones and accessories with flexible payment plans."}
+                </p>
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <Link href={heroBanner?.link || "/shop"}>
+                    <Button className="h-14 px-10 font-black uppercase tracking-widest text-sm rounded-2xl shadow-xl shadow-primary/20">
+                      Shop Now <ArrowRight className="h-5 w-5 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
 
-            <div className="relative hidden lg:block animate-in fade-in zoom-in duration-1000">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl -z-10 animate-pulse" />
-              <div className="relative aspect-square bg-white rounded-[4rem] shadow-2xl border border-slate-100 p-4 rotate-3">
-                 <div className="h-full w-full bg-slate-50 rounded-[3.5rem] overflow-hidden">
-                    {heroBanner?.image ? (
-                      <img src={resolveImageUrl(heroBanner.image)} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                         <Smartphone className="h-32 w-32 text-slate-200" />
-                      </div>
-                    )}
-                 </div>
-              </div>
+            {/* Sidebar Promotion Banners */}
+            <div className="w-full lg:w-[380px] flex flex-col gap-6">
+              {promoBanners.length > 0 ? (
+                promoBanners.map((promo, idx) => (
+                  <div key={idx} className="flex-1 relative min-h-[200px] rounded-[2rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-sm">
+                    <div className="absolute inset-0 z-0">
+                      {promo.image && (
+                        <img 
+                          src={resolveImageUrl(promo.image)} 
+                          alt={promo.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+                    </div>
+                    <div className="relative z-10 h-full flex flex-col justify-center p-8 text-white space-y-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">{promo.subtitle}</span>
+                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">{promo.title}</h3>
+                      <Link href={promo.link || "/shop"} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
+                        Browse <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex-1 relative min-h-[200px] rounded-[2rem] overflow-hidden bg-blue-600 text-white p-8 group">
+                    <div className="relative z-10 space-y-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">New Arrival</span>
+                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">iPhone 15 <br/>Series</h3>
+                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2">
+                        Shop Now <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                    <Smartphone className="absolute -bottom-4 -right-4 h-32 w-32 text-blue-500/30 -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                  </div>
+                  <div className="flex-1 relative min-h-[200px] rounded-[2rem] overflow-hidden bg-primary text-white p-8 group">
+                    <div className="relative z-10 space-y-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Special Offer</span>
+                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none">Up to 20% <br/>Off Audio</h3>
+                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2">
+                        Get Deal <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                    <div className="absolute -bottom-10 -right-10 h-40 w-40 bg-white/10 rounded-full blur-2xl" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 -skew-x-12 translate-x-1/2" />
       </section>
 
       {/* Trust Badges */}
