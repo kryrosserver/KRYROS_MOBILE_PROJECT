@@ -57,18 +57,18 @@ export default function ShopPage() {
       {/* Page Heading Section - Enhanced UI/UX */}
       <div className="bg-gradient-to-b from-white via-white to-slate-50/50 border-b border-slate-200">
         <div className="container-custom space-y-8 py-8 md:py-14">
-          {/* Main Title */}
-          <div className="space-y-4">
+          {/* Main Title - CENTERED */}
+          <div className="text-center space-y-4">
             <div>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tight leading-tight">
-                {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter">
+                {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "Shop"}
               </h1>
-              <div className="h-1.5 w-24 md:w-32 bg-gradient-to-r from-blue-600 to-primary rounded-full mt-4"></div>
+              <div className="h-2 w-32 bg-primary mx-auto rounded-full mt-4"></div>
             </div>
           </div>
 
-          {/* Subtitle */}
-          <p className="text-slate-600 font-medium text-sm md:text-base max-w-3xl leading-relaxed">
+          {/* Subtitle - CENTERED */}
+          <p className="text-center text-slate-600 font-medium text-sm md:text-base max-w-2xl mx-auto">
             {selectedCategory
               ? `Explore our premium collection. Find the perfect product that meets your needs with our expertly curated selection.`
               : "Discover our complete collection of premium electronics and devices. Browse by category to find exactly what you're looking for."}
@@ -151,13 +151,35 @@ export default function ShopPage() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - NO SIDEBAR */}
       <div className="py-8 md:py-12">
         <div className="container-custom">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar - Credit & Advanced Filters (Optional) */}
-            <aside className="w-full lg:w-72 space-y-6 flex-shrink-0 order-2 lg:order-1">
-              {/* Buy on Credit Promo */}
+          {/* Payment Plan & Shipping - TOP SECTION */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {/* Buy on Credit Promo */}
+            <div className="bg-gradient-to-br from-blue-600 to-primary p-6 rounded-2xl text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-black uppercase">Need a Payment Plan?</h3>
+                  <p className="text-sm text-blue-100 mt-1">Most items available on flexible 3-12 month installments.</p>
+                </div>
+                <div className="text-3xl">💳</div>
+              </div>
+              <button className="w-full h-10 mt-4 bg-white text-blue-600 font-black uppercase text-xs rounded-lg">Learn More</button>
+            </div>
+
+            {/* Shipping Info */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div><div className="text-2xl">🚚</div><p className="text-xs font-bold">Free shipping on orders above 2,000 Tk</p></div>
+                <div><div className="text-2xl">⚡</div><p className="text-xs font-bold">Fast delivery 24-48 hours</p></div>
+                <div><div className="text-2xl">↩️</div><p className="text-xs font-bold">Easy returns within 7 days</p></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Products - FULL WIDTH */}
+          <div>
               <div className="bg-gradient-to-br from-blue-600 to-primary p-6 md:p-8 rounded-2xl text-white relative overflow-hidden group hover:shadow-lg transition-shadow">
                 <div className="relative z-10 space-y-4">
                   <div className="flex items-start justify-between">
