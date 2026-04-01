@@ -10,7 +10,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
+      <div className="container-custom min-h-[60vh] flex flex-col items-center justify-center py-12">
         <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
           <ShoppingCart className="h-10 w-10 text-slate-200" />
         </div>

@@ -24,8 +24,8 @@ export function CategoriesGrid() {
 
   return (
     <section className="py-8 md:py-24">
-      <div className="container-custom px-0 md:px-4">
-        <div className="flex items-center justify-between gap-4 mb-6 md:mb-16 px-4 md:px-0">
+      <div className="container-custom">
+        <div className="flex items-center justify-between gap-4 mb-6 md:mb-16">
           <div>
             <h2 className="text-xl md:text-5xl font-black text-slate-900 uppercase tracking-tight leading-tight">
               Featured <span className="text-primary">Categories</span>
@@ -37,7 +37,7 @@ export function CategoriesGrid() {
         </div>
 
         {/* Mobile Horizontal Scroll Carousel */}
-        <div className="md:hidden flex overflow-x-auto gap-3 px-4 pb-4 scroll-smooth snap-x snap-mandatory scrollbar-hide">
+        <div className="md:hidden -mx-5 flex overflow-x-auto gap-3 px-5 pb-4 scroll-smooth snap-x snap-mandatory scrollbar-hide">
           {categories.map((category, idx) => {
             // Assign different gradients/labels based on index or category name
             const designs = [

@@ -210,7 +210,7 @@ export default function HomePage() {
 
       {/* Trust Badges Section */}
       <section className="bg-white py-4 md:py-10">
-        <div className="container-custom px-4">
+        <div className="container-custom">
           <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] p-6 md:p-12 border border-slate-100 shadow-xl shadow-slate-100/50">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4">
               <div className="flex flex-row items-center gap-3 md:gap-4 text-left">
