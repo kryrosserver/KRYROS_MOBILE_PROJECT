@@ -93,8 +93,8 @@ export default function HomePage() {
                               {banner.subtitle}
                             </div>
                           )}
-                          {/* Mobile-specific heading - simpler and cleaner */}
-                          <h1 className="md:hidden text-2xl font-bold text-white">
+                          {/* Mobile-specific heading - completely different professional style */}
+                          <h1 className="md:hidden text-center text-white text-2xl font-semibold tracking-wide pb-3 border-b-4 border-primary">
                             {banner.title}
                           </h1>
                           {/* Desktop heading - bigger and bolder */}
@@ -122,8 +122,8 @@ export default function HomePage() {
                 <div className="h-full flex items-center justify-center p-12 text-center text-white">
                    <div className="space-y-8 animate-pulse">
                       <div className="h-8 w-32 bg-white/10 rounded-full mx-auto" />
-                      {/* Mobile fallback heading */}
-                       <h1 className="md:hidden text-3xl font-bold uppercase opacity-20">KRYROS</h1>
+                      {/* Mobile fallback heading - different style */}
+                       <h1 className="md:hidden text-center text-white text-3xl font-medium tracking-widest opacity-60 pb-2 border-b-2 border-white/20">KRYROS</h1>
                        {/* Desktop fallback heading */}
                        <h1 className="hidden md:block text-4xl md:text-8xl font-black uppercase tracking-tight md:tracking-tighter opacity-20">KRYROS</h1>
                       <div className="h-16 w-48 bg-white/10 rounded-2xl mx-auto" />
@@ -161,7 +161,7 @@ export default function HomePage() {
                   <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-10 group shadow-xl">
                     <div className="relative z-10 space-y-3">
                       <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
-                      <h3 className="md:hidden text-lg font-bold uppercase">Smartphones</h3>
+                      <h3 className="md:hidden font-medium uppercase text-sm">Smartphones</h3>
                       <h3 className="hidden md:block text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
                       <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
                         Browse Now <ArrowRight className="h-3 w-3" />
@@ -172,7 +172,7 @@ export default function HomePage() {
                   <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-10 group shadow-xl">
                     <div className="relative z-10 space-y-3">
                       <span className="text-[10px] font-black uppercase tracking-widest text-primary">Limited</span>
-                      <h3 className="md:hidden text-lg font-bold uppercase">Accessories</h3>
+                      <h3 className="md:hidden font-medium uppercase text-sm">Accessories</h3>
                       <h3 className="hidden md:block text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
                       <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
                         Discover <ArrowRight className="h-3 w-3" />
