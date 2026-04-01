@@ -54,10 +54,15 @@ export function CreditSection() {
               ))}
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 flex flex-row items-center gap-4">
               <Link href="/credit">
                 <Button className="h-12 md:h-16 px-8 md:px-12 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-xs md:text-sm rounded-lg md:rounded-xl shadow-2xl shadow-primary/20 flex items-center gap-2 group">
                   Apply Now <ArrowRight className="h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="/about">
+                <Button variant="outline" className="h-12 md:h-16 px-6 md:px-10 border-white/20 text-white hover:bg-white/10 font-black uppercase tracking-widest text-xs md:text-sm rounded-lg md:rounded-xl">
+                  Learn More
                 </Button>
               </Link>
             </div>
