@@ -90,26 +90,21 @@ export default function HomePage() {
                           <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                         </div>
                         
-                        {/* Immersive Mobile Layout: Floating Glass Spotlight */}
-                        <div className="md:hidden relative z-10 w-full p-6 pb-12">
-                          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 space-y-6 shadow-2xl text-center">
+                        {/* Professional Mobile Layout: Direct Image Overlay (App Style) */}
+                        <div className="md:hidden relative z-10 w-full h-full flex flex-col justify-end p-8 pb-14">
+                          <div className="space-y-4">
                             {banner.subtitle && (
-                              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/30 mx-auto">
+                              <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20">
                                 {banner.subtitle}
                               </div>
                             )}
-                            <h1 className="text-3xl font-black leading-tight uppercase tracking-tight text-white drop-shadow-sm">
+                            <h1 className="text-4xl font-black leading-[1.1] uppercase tracking-tight text-white drop-shadow-xl max-w-[80%]">
                               {banner.title}
                             </h1>
-                            {(banner.desc || banner.description) && (
-                              <p className="text-slate-200 text-sm font-medium leading-relaxed line-clamp-2 opacity-90">
-                                {banner.desc || banner.description}
-                              </p>
-                            )}
                             <div className="pt-2">
                               <Link href={banner.link || "/shop"}>
-                                <Button className="w-full h-14 bg-primary text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-primary/20">
-                                  {banner.buttonText || "Shop Now"} <ArrowRight className="h-4 w-4 ml-2" />
+                                <Button className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-2xl shadow-primary/40 flex items-center gap-2">
+                                  {banner.buttonText || "Shop Now"} <ArrowRight className="h-4 w-4" />
                                 </Button>
                               </Link>
                             </div>
@@ -157,11 +152,11 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Sidebar Promotion Banners */}
-            <div className="lg:col-span-4 grid grid-cols-2 lg:flex lg:flex-col gap-4 md:gap-6">
+            {/* Sidebar Promotion Banners - Desktop Only */}
+            <div className="hidden lg:flex lg:col-span-4 lg:flex-col gap-6">
               {promoBanners.length > 0 ? (
                 promoBanners.map((promo, idx) => (
-                  <div key={idx} className="flex-1 relative min-h-[160px] md:min-h-[190px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-md">
+                  <div key={idx} className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-md">
                     <div className="absolute inset-0 z-0">
                       {promo.image && (
                         <img 
@@ -172,10 +167,10 @@ export default function HomePage() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent" />
                     </div>
-                    <div className="relative z-10 h-full flex flex-col justify-center p-6 md:p-10 text-white space-y-2 md:space-y-3">
-                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary">{promo.subtitle}</span>
-                      <h3 className="text-lg md:text-2xl font-black uppercase tracking-tight leading-none drop-shadow-sm">{promo.title}</h3>
-                      <Link href={promo.link || "/shop"} className="text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-primary transition-all pt-1 md:pt-2 group/link">
+                    <div className="relative z-10 h-full flex flex-col justify-center p-10 text-white space-y-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">{promo.subtitle}</span>
+                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none drop-shadow-sm">{promo.title}</h3>
+                      <Link href={promo.link || "/shop"} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-primary transition-all pt-2 group/link">
                         Explore <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
                       </Link>
                     </div>
@@ -183,25 +178,25 @@ export default function HomePage() {
                 ))
               ) : (
                 <>
-                  <div className="flex-1 relative min-h-[160px] md:min-h-[190px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 md:p-10 group shadow-xl">
-                    <div className="relative z-10 space-y-2 md:space-y-3">
-                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
-                      <h3 className="text-lg md:text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
-                      <Link href="/shop" className="text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2 md:pt-4">
-                        Browse <ArrowRight className="h-3 w-3" />
+                  <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-10 group shadow-xl">
+                    <div className="relative z-10 space-y-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
+                      <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
+                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
+                        Browse Now <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                    <Smartphone className="absolute -bottom-4 -right-4 h-24 w-24 md:h-32 md:w-32 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-700" />
+                    <Smartphone className="absolute -bottom-4 -right-4 h-32 w-32 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-700" />
                   </div>
-                  <div className="flex-1 relative min-h-[160px] md:min-h-[190px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 md:p-10 group shadow-xl">
-                    <div className="relative z-10 space-y-2 md:space-y-3">
-                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary">Limited</span>
-                      <h3 className="text-lg md:text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
-                      <Link href="/shop" className="text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2 md:pt-4">
+                  <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-10 group shadow-xl">
+                    <div className="relative z-10 space-y-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Limited</span>
+                      <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
+                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
                         Discover <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                    <div className="absolute -bottom-10 -right-10 h-32 w-32 md:h-40 md:w-40 bg-primary/20 rounded-full blur-2xl" />
+                    <div className="absolute -bottom-10 -right-10 h-40 w-40 bg-primary/20 rounded-full blur-2xl" />
                   </div>
                 </>
               )}
@@ -210,32 +205,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <div className="bg-white py-10 border-b border-slate-50">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary"><Truck className="h-5 w-5" /></div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Fast Delivery</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary"><ShieldCheck className="h-5 w-5" /></div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Genuine Tech</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary"><Smartphone className="h-5 w-5" /></div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Verified Seller</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary"><ArrowRight className="h-5 w-5" /></div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Pay on Credit</span>
+      {/* Categories Grid (Horizontal Carousel on Mobile) */}
+      <CategoriesGrid />
+
+      {/* Trust Badges Section */}
+      <section className="bg-white py-4 md:py-10">
+        <div className="container-custom px-4">
+          <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] p-6 md:p-12 border border-slate-100 shadow-xl shadow-slate-100/50">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4">
+              <div className="flex flex-row items-center gap-3 md:gap-4 text-left">
+                <div className="h-10 w-10 md:h-14 md:w-14 shrink-0 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100">
+                  <Truck className="h-5 w-5 md:h-6 md:w-6" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="block text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-900 leading-tight">Fast Delivery</span>
+                  <p className="hidden md:block text-[10px] text-slate-500 font-medium uppercase tracking-tight">Express Shipping</p>
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-3 md:gap-4 text-left">
+                <div className="h-10 w-10 md:h-14 md:w-14 shrink-0 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100">
+                  <ShieldCheck className="h-5 w-5 md:h-6 md:w-6" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="block text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-900 leading-tight">Genuine Tech</span>
+                  <p className="hidden md:block text-[10px] text-slate-500 font-medium uppercase tracking-tight">100% Authentic</p>
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-3 md:gap-4 text-left">
+                <div className="h-10 w-10 md:h-14 md:w-14 shrink-0 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100">
+                  <Smartphone className="h-5 w-5 md:h-6 md:w-6" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="block text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-900 leading-tight">Verified Seller</span>
+                  <p className="hidden md:block text-[10px] text-slate-500 font-medium uppercase tracking-tight">Trusted Platform</p>
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-3 md:gap-4 text-left">
+                <div className="h-10 w-10 md:h-14 md:w-14 shrink-0 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100">
+                  <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="block text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-900 leading-tight">Pay on Credit</span>
+                  <p className="hidden md:block text-[10px] text-slate-500 font-medium uppercase tracking-tight">Flexible Terms</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Categories Grid */}
-      <CategoriesGrid />
+      </section>
 
       {/* Promo Banners (Flash Sale / Wholesale) */}
       <PromoBanners />
