@@ -57,26 +57,31 @@ export default function ShopPage() {
       {/* Page Heading Section - Enhanced UI/UX */}
       <div className="bg-gradient-to-b from-white via-white to-slate-50/50 border-b border-slate-200">
         <div className="container-custom space-y-8 py-8 md:py-14">
-          {/* Main Title - Centered */}
-          <div className="text-center space-y-4">
+          {/* Main Title */}
+          <div className="space-y-4">
             <div>
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 uppercase tracking-tighter">
+              <h1 className="text-center text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 uppercase tracking-tight leading-tight">
                 {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "Shop"}
               </h1>
-              <div className="h-2 w-32 bg-primary mx-auto rounded-full mt-4"></div>
+              <div className="h-1.5 w-24 md:w-32 bg-gradient-to-r from-blue-600 to-primary rounded-full mt-4"></div>
             </div>
           </div>
 
-          {/* Subtitle - Centered */}
-          <p className="text-slate-600 font-medium text-sm md:text-base max-w-2xl mx-auto text-center">
+          {/* Subtitle */}
+          <p className="text-slate-600 font-medium text-sm md:text-base max-w-3xl leading-relaxed">
             {selectedCategory
               ? `Explore our premium collection. Find the perfect product that meets your needs with our expertly curated selection.`
               : "Discover our complete collection of premium electronics and devices. Browse by category to find exactly what you're looking for."}
           </p>
 
-          {/* Category Grid - Centered */}
-          <div className="space-y-4 text-center">
-            <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-500">Browse by Category</h2>
+          {/* Category Grid */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-1 rounded-full bg-primary"></div>
+              <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-500">
+                Browse by Category
+              </h2>
+            </div>
             <div className="py-4">
               <Suspense fallback={null}>
                 <CategoryGrid categories={categories} />
