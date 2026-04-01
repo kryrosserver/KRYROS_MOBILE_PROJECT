@@ -152,8 +152,8 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Sidebar Promotion Banners - Desktop Only */}
-            <div className="hidden lg:flex lg:col-span-4 lg:flex-col gap-6">
+            {/* Sidebar Promotion Banners */}
+            <div className="hidden md:flex lg:col-span-4 flex-col gap-6">
               {promoBanners.length > 0 ? (
                 promoBanners.map((promo, idx) => (
                   <div key={idx} className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-md">
@@ -205,9 +205,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories Grid (Horizontal Carousel on Mobile) */}
-      <CategoriesGrid />
-
       {/* Trust Badges Section */}
       <section className="bg-white py-4 md:py-10">
         <div className="container-custom">
@@ -242,7 +239,7 @@ export default function HomePage() {
               </div>
               <div className="flex flex-row items-center gap-3 md:gap-4 text-left">
                 <div className="h-10 w-10 md:h-14 md:w-14 shrink-0 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100">
-                  <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
+                  <ArrowRight className="h-5 w-5 md:h-6 md:w-5" />
                 </div>
                 <div className="space-y-0.5">
                   <span className="block text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-900 leading-tight">Pay on Credit</span>
@@ -254,8 +251,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Promo Banners (Flash Sale / Wholesale) */}
-      <PromoBanners />
+      {/* Categories Grid (Horizontal Carousel on Mobile) */}
+      <CategoriesGrid />
 
       {/* Credit Section */}
       <CreditSection />

@@ -84,26 +84,26 @@ export function CategoriesGrid() {
         </div>
 
         {/* Desktop Grid Layout */}
-        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-8">
           {categories.map((category) => (
             <Link 
               key={category.id} 
               href={`/shop?category=${category.id}`}
-              className="group relative aspect-square bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center p-8 hover:border-primary/20 hover:shadow-md transition-all overflow-hidden"
+              className="group relative aspect-square bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center p-10 hover:border-primary/20 hover:shadow-xl transition-all overflow-hidden"
             >
-              <div className="relative z-10 text-center space-y-4">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white transition-colors overflow-hidden">
+              <div className="relative z-10 text-center space-y-6">
+                <div className="h-20 w-20 md:h-24 md:w-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white transition-all overflow-hidden shadow-inner">
                   {category.image || category.icon ? (
                     <img 
                       src={resolveImageUrl(category.image || category.icon)} 
                       alt={category.name} 
-                      className="h-full w-full object-cover" 
+                      className="h-full w-full object-contain p-4 group-hover:scale-110 transition-transform" 
                     />
                   ) : (
-                    <span className="text-xl font-black">{category.name[0]}</span>
+                    <span className="text-2xl font-black">{category.name[0]}</span>
                   )}
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-tight text-slate-900 group-hover:text-primary transition-colors line-clamp-1">{category.name}</h3>
+                <h3 className="text-xs md:text-sm font-black uppercase tracking-tight text-slate-900 group-hover:text-primary transition-colors line-clamp-1">{category.name}</h3>
               </div>
               <div className="absolute -bottom-4 -right-4 h-12 w-12 bg-slate-50 rounded-full group-hover:bg-primary/5 transition-colors" />
             </Link>
