@@ -87,29 +87,41 @@ export default function HomePage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                         </div>
                         
-                        <div className="relative z-10 p-10 md:p-20 space-y-6 max-w-2xl">
+                        <div className="relative z-10 p-8 md:p-20 space-y-4 md:space-y-6 max-w-2xl">
                           {banner.subtitle && (
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest w-fit shadow-lg shadow-primary/20">
                               {banner.subtitle}
                             </div>
                           )}
-                          {/* Mobile-specific heading - completely different professional style */}
-                          <h1 className="md:hidden text-center text-white text-2xl font-semibold tracking-wide pb-3 border-b-4 border-primary">
-                            {banner.title}
-                          </h1>
-                          {/* Desktop heading - bigger and bolder */}
-                          <h1 className="hidden md:block text-3xl md:text-7xl font-black leading-none uppercase tracking-tight md:tracking-tighter text-white drop-shadow-lg">
-                            {banner.title}
-                          </h1>
-                          {(banner.desc || banner.description) && (
-                            <p className="text-slate-200 text-base md:text-xl font-medium leading-relaxed line-clamp-2 max-w-lg opacity-90 drop-shadow-md">
-                              {banner.desc || banner.description}
-                            </p>
-                          )}
-                          <div className="pt-4">
+                          
+                          {/* Immersive Mobile Heading */}
+                          <div className="md:hidden space-y-3">
+                            <h1 className="text-3xl font-black leading-tight uppercase tracking-tight text-white drop-shadow-xl">
+                              {banner.title}
+                            </h1>
+                            {(banner.desc || banner.description) && (
+                              <p className="text-slate-200 text-sm font-medium leading-relaxed line-clamp-2 opacity-90 drop-shadow-md">
+                                {banner.desc || banner.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Professional Desktop Heading */}
+                          <div className="hidden md:block space-y-6">
+                            <h1 className="text-4xl md:text-7xl font-black leading-[0.9] uppercase tracking-tighter text-white drop-shadow-lg">
+                              {banner.title}
+                            </h1>
+                            {(banner.desc || banner.description) && (
+                              <p className="text-slate-200 text-base md:text-xl font-medium leading-relaxed line-clamp-2 max-w-lg opacity-90 drop-shadow-md">
+                                {banner.desc || banner.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="pt-2 md:pt-4">
                             <Link href={banner.link || "/shop"}>
-                              <Button className="h-14 md:h-16 px-10 md:px-12 font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
-                                {banner.buttonText || "Shop Now"} <ArrowRight className="h-5 w-5 ml-2" />
+                              <Button className="h-12 md:h-16 px-8 md:px-12 font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-all">
+                                {banner.buttonText || "Shop Now"} <ArrowRight className="h-4 w-4 ml-2" />
                               </Button>
                             </Link>
                           </div>
