@@ -55,7 +55,7 @@ export default function ShopPage() {
   return (
     <main className="min-h-screen bg-slate-50">
       {/* Page Heading Section - Enhanced UI/UX */}
-      <div className="bg-gradient-to-b from-white via-white to-slate-50/50 border-b border-slate-200">
+      <div className="bg-white border-b border-slate-200">
         <div className="container-custom space-y-8 py-8 md:py-14">
           {/* Main Title */}
           <div className="space-y-4">
@@ -71,7 +71,7 @@ export default function ShopPage() {
 
           {/* Category Grid - CENTERED */}
           <div className="space-y-4 text-center">
-            <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-500">Browse by Category</h2>
+            
             <div className="py-4">
               <Suspense fallback={null}>
                 <CategoryGrid categories={categories} />
