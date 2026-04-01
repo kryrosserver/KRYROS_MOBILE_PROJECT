@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { productsApi, cmsApi } from "@/lib/api"
-import { ProductCard } from "@/components/home/ProductCard"
+import { cmsApi } from "@/lib/api"
 import { resolveImageUrl } from "@/lib/utils"
 import { CategoriesGrid } from "@/components/home/CategoriesGrid"
 import { PromoBanners } from "@/components/home/PromoBanners"
@@ -19,63 +18,19 @@ import 'swiper/css/pagination'
 import 'swiper/css/effect-fade'
 
 export default function HomePage() {
-  const [products, setProducts] = useState<any[]>([])
   const [banners, setBanners] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    // Parallel fetch
-    Promise.all([
-      productsApi.getFeatured(),
-      cmsApi.getBanners(),
-      cmsApi.getSections()
-    ]).then(async ([productsRes, bannersRes, sectionsRes]) => {
-      // 1. Handle Banners
-      const allBanners = bannersRes.data || []
-      setBanners(allBanners)
-
-      // 2. Handle Products (Featured Products)
-      let featuredItems: any[] = []
-
-      // Helper to check if an item is a real product (must have price)
-      const isRealProduct = (item: any) => item && item.price !== undefined && item.price !== null;
-
-      // Check direct featured products
-      const directFeatured = Array.isArray(productsRes.data) 
-        ? productsRes.data 
-        : (productsRes.data as any)?.products || [];
-      
-      featuredItems = directFeatured.filter(isRealProduct);
-
-      // If still no real products, check CMS sections
-      if (featuredItems.length === 0 && sectionsRes.data) {
-        const featuredSection = sectionsRes.data.find((s: any) => 
-          s.type === 'FEATURED_PRODUCTS' || 
-          s.name?.toLowerCase().includes('featured')
-        )
-        if (featuredSection?.items) {
-          featuredItems = featuredSection.items.filter(isRealProduct);
-        }
+    // Fetch Banners
+    cmsApi.getBanners().then((res) => {
+      if (res.data) {
+        setBanners(res.data)
       }
-
-      // FINAL FALLBACK: If still no featured products, fetch latest products from store
-      if (featuredItems.length === 0) {
-        try {
-          const latestRes = await productsApi.getAll({ limit: 8 });
-          const latestProducts = Array.isArray(latestRes.data) 
-            ? latestRes.data 
-            : (latestRes.data as any)?.products || [];
-          featuredItems = latestProducts.filter(isRealProduct);
-        } catch (e) {
-          console.error("Fallback fetch failed", e);
-        }
-      }
-
-      setProducts(featuredItems);
       setLoading(false)
     }).catch(err => {
-      console.error("Error fetching homepage data:", err)
+      console.error("Error fetching banners:", err)
       setLoading(false)
     })
   }, [])
@@ -249,37 +204,6 @@ export default function HomePage() {
 
       {/* Categories Grid */}
       <CategoriesGrid />
-
-      {/* Featured Products Grid */}
-      <section className="py-24 bg-slate-50">
-        <div className="container-custom">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-            <div className="max-w-xl">
-              <h2 className="text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight leading-tight">
-                Featured <span className="text-primary">Products</span>
-              </h2>
-              <p className="mt-4 text-slate-500 font-medium">Carefully selected premium technology for your daily needs.</p>
-            </div>
-            <Link href="/shop" className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2 group hover:underline">
-              Browse All Products <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="aspect-[3/4] bg-white rounded-[2.5rem] animate-pulse border border-slate-100" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* Promo Banners */}
       <PromoBanners />
