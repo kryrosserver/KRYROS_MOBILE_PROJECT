@@ -42,34 +42,34 @@ export function PromoBanners() {
   const displayBanners = banners.length > 0 ? banners : defaultBanners
 
   return (
-    <section className="py-24">
+    <section className="py-12 md:py-24">
       <div className="container-custom">
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {displayBanners.map((banner, i) => (
             <Link 
               key={i} 
               href={banner.href || banner.link || "#"}
-              className={`relative overflow-hidden group rounded-[3rem] border border-slate-100 p-12 md:p-16 ${banner.color || 'bg-slate-50'} hover:shadow-xl transition-all duration-500 min-h-[300px]`}
+              className={`relative overflow-hidden group rounded-[2rem] md:rounded-[3rem] border border-slate-100 p-8 md:p-16 ${banner.color || 'bg-slate-50'} hover:shadow-xl transition-all duration-500 min-h-[250px] md:min-h-[300px]`}
             >
-              <div className="relative z-10 flex flex-col h-full justify-between gap-8">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 bg-white rounded-2xl shadow-sm flex items-center justify-center overflow-hidden">
+              <div className="relative z-10 flex flex-col h-full justify-between gap-6 md:gap-8">
+                <div className="space-y-4 md:space-y-6">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-xl md:rounded-2xl shadow-sm flex items-center justify-center overflow-hidden">
                       {banner.image ? (
                         <img src={resolveImageUrl(banner.image)} alt={banner.title} className="h-full w-full object-cover" />
                       ) : (
                         banner.icon || <Gift className="h-8 w-8 text-primary" />
                       )}
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">{banner.subtitle}</span>
+                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary">{banner.subtitle}</span>
                   </div>
-                  <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-slate-900 leading-[0.95]">
+                  <h3 className="text-2xl md:text-5xl font-black uppercase tracking-tight text-slate-900 leading-[0.95]">
                     {banner.title}
                   </h3>
-                  <p className="text-lg text-slate-500 font-medium max-w-xs">{banner.desc || banner.description}</p>
+                  <p className="text-sm md:text-lg text-slate-500 font-medium max-w-[200px] md:max-w-xs">{banner.desc || banner.description}</p>
                 </div>
                 
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-900 group-hover:gap-4 transition-all">
+                <div className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-900 group-hover:gap-4 transition-all">
                   Shop Now <ArrowRight className="h-4 w-4" />
                 </div>
               </div>

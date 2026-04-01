@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { cmsApi } from "@/lib/api"
 import { resolveImageUrl } from "@/lib/utils"
 import { CategoriesGrid } from "@/components/home/CategoriesGrid"
+import { PromoBanners } from "@/components/home/PromoBanners"
 import { CreditSection } from "@/components/home/CreditSection"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Smartphone, ShieldCheck, Truck } from "lucide-react"
@@ -157,10 +158,10 @@ export default function HomePage() {
             </div>
 
             {/* Sidebar Promotion Banners */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
+            <div className="lg:col-span-4 grid grid-cols-2 lg:flex lg:flex-col gap-4 md:gap-6">
               {promoBanners.length > 0 ? (
                 promoBanners.map((promo, idx) => (
-                  <div key={idx} className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-md">
+                  <div key={idx} className="flex-1 relative min-h-[160px] md:min-h-[190px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden group bg-slate-100 border border-slate-200 shadow-md">
                     <div className="absolute inset-0 z-0">
                       {promo.image && (
                         <img 
@@ -171,10 +172,10 @@ export default function HomePage() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent" />
                     </div>
-                    <div className="relative z-10 h-full flex flex-col justify-center p-10 text-white space-y-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">{promo.subtitle}</span>
-                      <h3 className="text-2xl font-black uppercase tracking-tight leading-none drop-shadow-sm">{promo.title}</h3>
-                      <Link href={promo.link || "/shop"} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-primary transition-all pt-2 group/link">
+                    <div className="relative z-10 h-full flex flex-col justify-center p-6 md:p-10 text-white space-y-2 md:space-y-3">
+                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary">{promo.subtitle}</span>
+                      <h3 className="text-lg md:text-2xl font-black uppercase tracking-tight leading-none drop-shadow-sm">{promo.title}</h3>
+                      <Link href={promo.link || "/shop"} className="text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-primary transition-all pt-1 md:pt-2 group/link">
                         Explore <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
                       </Link>
                     </div>
@@ -182,27 +183,25 @@ export default function HomePage() {
                 ))
               ) : (
                 <>
-                  <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-10 group shadow-xl">
-                    <div className="relative z-10 space-y-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
-                      <h3 className="md:hidden font-medium uppercase text-sm">Smartphones</h3>
-                      <h3 className="hidden md:block text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
-                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
-                        Browse Now <ArrowRight className="h-3 w-3" />
+                  <div className="flex-1 relative min-h-[160px] md:min-h-[190px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 md:p-10 group shadow-xl">
+                    <div className="relative z-10 space-y-2 md:space-y-3">
+                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-blue-200">Featured</span>
+                      <h3 className="text-lg md:text-3xl font-black uppercase tracking-tight leading-none">Smartphones</h3>
+                      <Link href="/shop" className="text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2 md:pt-4">
+                        Browse <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                    <Smartphone className="absolute -bottom-4 -right-4 h-32 w-32 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-700" />
+                    <Smartphone className="absolute -bottom-4 -right-4 h-24 w-24 md:h-32 md:w-32 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-700" />
                   </div>
-                  <div className="flex-1 relative min-h-[190px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-10 group shadow-xl">
-                    <div className="relative z-10 space-y-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Limited</span>
-                      <h3 className="md:hidden font-medium uppercase text-sm">Accessories</h3>
-                      <h3 className="hidden md:block text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
-                      <Link href="/shop" className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-4">
+                  <div className="flex-1 relative min-h-[160px] md:min-h-[190px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 md:p-10 group shadow-xl">
+                    <div className="relative z-10 space-y-2 md:space-y-3">
+                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary">Limited</span>
+                      <h3 className="text-lg md:text-3xl font-black uppercase tracking-tight leading-none">Accessories</h3>
+                      <Link href="/shop" className="text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all pt-2 md:pt-4">
                         Discover <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                    <div className="absolute -bottom-10 -right-10 h-40 w-40 bg-primary/20 rounded-full blur-2xl" />
+                    <div className="absolute -bottom-10 -right-10 h-32 w-32 md:h-40 md:w-40 bg-primary/20 rounded-full blur-2xl" />
                   </div>
                 </>
               )}
@@ -237,6 +236,9 @@ export default function HomePage() {
 
       {/* Categories Grid */}
       <CategoriesGrid />
+
+      {/* Promo Banners (Flash Sale / Wholesale) */}
+      <PromoBanners />
 
       {/* Credit Section */}
       <CreditSection />
