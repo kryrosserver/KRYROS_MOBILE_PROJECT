@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { productsApi, categoriesApi } from "@/lib/api"
 import { ProductCard } from "@/components/home/ProductCard"
 import { CategoryGrid } from "@/components/shop/CategoryGrid"
@@ -83,7 +83,9 @@ export default function ShopPage() {
               </h2>
             </div>
             <div className="py-4">
-              <CategoryGrid categories={categories} />
+              <Suspense fallback={null}>
+                <CategoryGrid categories={categories} />
+              </Suspense>
             </div>
           </div>
 

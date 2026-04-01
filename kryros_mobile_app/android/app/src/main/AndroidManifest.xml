@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internet permission for webview to load URLs -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:usesCleartextTraffic="true"
         android:label="kryros_mobile"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
