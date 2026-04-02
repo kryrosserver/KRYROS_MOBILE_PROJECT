@@ -609,7 +609,11 @@ export default function WholesalePage() {
                         setForm({
                           name: "", sku: "", price: "", description: "", categorySlug: "", brandId: "",
                           stockTotal: "100", stockCurrent: "100", wholesalePrice: "", unitsPerPack: "1",
-                          wholesaleMoq: "1", isActive: true, images: [], wholesaleTiers: []
+                          wholesaleMoq: "1", isActive: true, 
+                          hasFiveYearGuarantee: true, fiveYearGuaranteeText: "5 Year Guarantee",
+                          hasFreeReturns: true, freeReturnsText: "Free Returns",
+                          hasInstallmentOptions: true, installmentOptionsText: "Installment Options",
+                          images: [], wholesaleTiers: []
                         });
                         setFiles([]);
                         await loadProducts();

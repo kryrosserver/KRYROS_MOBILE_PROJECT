@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarColor: Colors.white,
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
   runApp(const KryrosMobileApp());
 }
 
@@ -14,7 +23,7 @@ class KryrosMobileApp extends StatelessWidget {
       title: 'Kryros Mobile',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF6B00)),
         useMaterial3: true,
       ),
       home: const WebViewScreen(),
@@ -29,11 +38,13 @@ class WebViewScreen extends StatefulWidget {
   State<WebViewScreen> createState() => _WebViewScreenState();
 }
 
-class _WebViewScreenState extends State<WebViewScreen> {
+class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProviderStateMixin {
   late final WebViewController controller;
   bool isLoading = true;
   String currentUrl = 'https://kryros.com/';
   bool hasError = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
   
   // URLs for fallback - primary and backup
   static const String primaryUrl = 'https://kryros.com/';
@@ -42,13 +53,26 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.8, end: 1.1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _initWebViewController(primaryUrl);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _initWebViewController(String url) async {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF000000))
+      ..setBackgroundColor(const Color(0xFFFFFFFF))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
@@ -59,16 +83,20 @@ class _WebViewScreenState extends State<WebViewScreen> {
             });
           },
           onPageFinished: (String url) {
-            setState(() {
-              isLoading = false;
-              currentUrl = url;
+            // Give the animation a bit more time for a smooth transition
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                setState(() {
+                  isLoading = false;
+                  currentUrl = url;
+                });
+              }
             });
           },
           onWebResourceError: (WebResourceError error) {
             _handleError();
           },
           onNavigationRequest: (NavigationRequest request) {
-            // Allow all navigation requests
             return NavigationDecision.navigate;
           },
         ),
@@ -79,7 +107,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   Future<void> _handleError() async {
     if (!hasError && currentUrl == primaryUrl) {
-      // Try the backup URL if primary fails
       setState(() {
         hasError = true;
         isLoading = true;
@@ -99,11 +126,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
       hasError = false;
     });
     
-    // Try backup URL first if primary failed
     if (currentUrl == primaryUrl) {
       await _initWebViewController(backupUrl);
     } else {
-      // Try primary URL
       await _initWebViewController(primaryUrl);
     }
   }
@@ -111,99 +136,101 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // WebView
-          WebViewWidget(controller: controller),
-          
-          // Loading indicator
-          if (isLoading)
-            const Center(
-              child: CircularProgressIndicator(
-                color: Colors.deepPurple,
-              ),
-            ),
-          
-          // Error view with retry button
-          if (hasError && !isLoading)
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Unable to load the app',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Please check your internet connection',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _retryWithFallback,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Try Again'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-      
-      // Bottom navigation bar for URL switching
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+      body: SafeArea(
+        child: Stack(
           children: [
-            // Refresh button
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                controller.reload();
-              },
-              tooltip: 'Refresh',
-            ),
+            // WebView
+            WebViewWidget(controller: controller),
             
-            // Current URL indicator
-            Expanded(
-              child: Text(
-                currentUrl == primaryUrl ? 'kryros.com' : 'render.com',
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
+            // Animated Splash Screen / Loading Indicator
+            if (isLoading)
+              Container(
+                color: Colors.white,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ScaleTransition(
+                        scale: _animation,
+                        child: SvgPicture.asset(
+                          'assets/images/logo.svg',
+                          width: 150,
+                          height: 150,
+                          // Fallback to Icon if SVG not found
+                          placeholderBuilder: (BuildContext context) => const Icon(
+                            Icons.shopping_cart,
+                            size: 100,
+                            color: Color(0xFFFF6B00),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                      const SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFFF6B00),
+                          strokeWidth: 3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
             
-            // Switch URL button (manual fallback)
-            IconButton(
-              icon: const Icon(Icons.swap_horiz),
-              onPressed: () async {
-                if (currentUrl == primaryUrl) {
-                  await _initWebViewController(backupUrl);
-                } else {
-                  await _initWebViewController(primaryUrl);
-                }
-              },
-              tooltip: 'Switch URL',
-            ),
+            // Error view with retry button
+            if (hasError && !isLoading)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 80,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'UNABLE TO LOAD KRYROS',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.black,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Please check your internet connection and try again.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 40),
+                      ElevatedButton(
+                        onPressed: _retryWithFallback,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B00),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 48,
+                            vertical: 18,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'RETRY CONNECTION',
+                          style: TextStyle(fontWeight: FontWeight.black, letterSpacing: 1.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
