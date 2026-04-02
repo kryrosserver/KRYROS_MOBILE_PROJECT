@@ -10,9 +10,13 @@ export default function WholesalePage() {
 
   useEffect(() => {
     // Fetch wholesale products  
-    productsApi.getAll({ take: 12 }).then((res) => {
-      if (res.data?.data) {
-        setProducts(res.data.data)
+    productsApi.getAll({ 
+      take: 40,
+      isWholesaleOnly: true
+    }).then((res) => {
+      if (res.data) {
+        const productList = (res.data as any).data || (Array.isArray(res.data) ? res.data : []);
+        setProducts(productList)
       }
       setLoading(false)
     })

@@ -44,7 +44,9 @@ function ShopContent() {
       categoryId: categoryId || undefined,
       search: search || undefined,
       take: 40,
-      showInactive: true // Show all products from admin panel to help debug
+      isWholesaleOnly: false,
+      allowCredit: false,
+      showInactive: false // Only show active products in shop
     }).then((res) => {
       // Handle different possible response structures for robustness
       if (res.data) {

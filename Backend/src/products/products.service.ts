@@ -15,9 +15,10 @@ export class ProductsService {
     search?: string;
     isFeatured?: boolean;
     allowCredit?: boolean;
+    isWholesaleOnly?: boolean;
     showInactive?: boolean;
   }) {
-    const { skip = 0, take = 20, categoryId, search, isFeatured, allowCredit, showInactive } = params;
+    const { skip = 0, take = 20, categoryId, search, isFeatured, allowCredit, isWholesaleOnly, showInactive } = params;
     
     const where: any = {};
     if (!showInactive) {
@@ -27,6 +28,7 @@ export class ProductsService {
     if (categoryId) where.categoryId = categoryId;
     if (isFeatured) where.isFeatured = true;
     if (allowCredit !== undefined) where.allowCredit = allowCredit;
+    if (isWholesaleOnly !== undefined) where.isWholesaleOnly = isWholesaleOnly;
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -121,7 +123,12 @@ export class ProductsService {
 
   async getFeaturedProducts(take = 10) {
     return this.prisma.product.findMany({
-      where: { isFeatured: true, isActive: true },
+      where: { 
+        isFeatured: true, 
+        isActive: true,
+        isWholesaleOnly: false,
+        allowCredit: false
+      },
       take,
       include: {
         category: true,
@@ -141,6 +148,8 @@ export class ProductsService {
       where: {
         isFlashSale: true,
         isActive: true,
+        isWholesaleOnly: false,
+        allowCredit: false,
         flashSaleEnd: { gt: now },
       },
       include: {
@@ -158,8 +167,9 @@ export class ProductsService {
     const products = await this.prisma.product.findMany({
       where: { 
         isActive: true,
+        isWholesaleOnly: false,
+        allowCredit: allowCredit !== undefined ? allowCredit : false,
         ...(isFeatured !== undefined ? { isFeatured } : {}),
-        ...(allowCredit !== undefined ? { allowCredit } : {})
       },
       include: { 
         images: true, 

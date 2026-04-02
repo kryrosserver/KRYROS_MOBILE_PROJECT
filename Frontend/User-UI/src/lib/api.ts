@@ -83,6 +83,7 @@ export const productsApi = {
     take?: number;
     featured?: boolean;
     allowCredit?: boolean;
+    isWholesaleOnly?: boolean;
     showInactive?: boolean;
   }) => {
     // Build query string with correct parameter names
@@ -94,6 +95,7 @@ export const productsApi = {
     if (params?.take !== undefined) queryParams.append('take', String(params.take));
     if (params?.featured !== undefined) queryParams.append('featured', String(params.featured));
     if (params?.allowCredit !== undefined) queryParams.append('allowCredit', String(params.allowCredit));
+    if (params?.isWholesaleOnly !== undefined) queryParams.append('isWholesaleOnly', String(params.isWholesaleOnly));
     if (params?.showInactive !== undefined) queryParams.append('showInactive', String(params.showInactive));
     
     const query = queryParams.toString();

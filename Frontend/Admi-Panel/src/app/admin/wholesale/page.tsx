@@ -95,6 +95,12 @@ export default function WholesalePage() {
     unitsPerPack: "1",
     wholesaleMoq: "1",
     isActive: true,
+    hasFiveYearGuarantee: true,
+    fiveYearGuaranteeText: "5 Year Guarantee",
+    hasFreeReturns: true,
+    freeReturnsText: "Free Returns",
+    hasInstallmentOptions: true,
+    installmentOptionsText: "Installment Options",
     images: [] as string[],
     wholesaleTiers: [] as { minQuantity: number; price: number }[],
   });
@@ -114,6 +120,12 @@ export default function WholesalePage() {
     unitsPerPack: "1",
     wholesaleMoq: "1",
     isActive: true,
+    hasFiveYearGuarantee: true,
+    fiveYearGuaranteeText: "",
+    hasFreeReturns: true,
+    freeReturnsText: "",
+    hasInstallmentOptions: true,
+    installmentOptionsText: "",
     images: [] as string[],
     wholesaleTiers: [] as { minQuantity: number; price: number }[],
   });
@@ -451,6 +463,64 @@ export default function WholesalePage() {
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
                     <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="admin-input h-24" placeholder="Wholesale product description..." />
                   </div>
+                  
+                  {/* Guarantee & Details Section */}
+                  <div className="bg-white p-4 rounded-lg border border-slate-200 space-y-3">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Guarantee & Details</p>
+                    <div className="space-y-3">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.hasFiveYearGuarantee}
+                            onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
+                            className="w-3.5 h-3.5 text-blue-500 rounded"
+                          />
+                          Show Guarantee
+                        </label>
+                        <input
+                          placeholder="Guarantee Text (e.g. 5 YEARS GUARANTEE)"
+                          value={form.fiveYearGuaranteeText}
+                          onChange={(e) => setForm({ ...form, fiveYearGuaranteeText: e.target.value })}
+                          className="admin-input text-xs min-h-[32px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.hasFreeReturns}
+                            onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
+                            className="w-3.5 h-3.5 text-blue-500 rounded"
+                          />
+                          Show Free Returns
+                        </label>
+                        <input
+                          placeholder="Returns Text (e.g. FREE RETURNS)"
+                          value={form.freeReturnsText}
+                          onChange={(e) => setForm({ ...form, freeReturnsText: e.target.value })}
+                          className="admin-input text-xs min-h-[32px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.hasInstallmentOptions}
+                            onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
+                            className="w-3.5 h-3.5 text-blue-500 rounded"
+                          />
+                          Show Installment Options
+                        </label>
+                        <input
+                          placeholder="Installment Text (e.g. INSTALLMENT OPTIONS)"
+                          value={form.installmentOptionsText}
+                          onChange={(e) => setForm({ ...form, installmentOptionsText: e.target.value })}
+                          className="admin-input text-xs min-h-[32px]"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -507,11 +577,19 @@ export default function WholesalePage() {
                         fd.append("wholesalePrice", form.wholesalePrice);
                         fd.append("price", form.price || form.wholesalePrice);
                         fd.append("isWholesaleOnly", "true");
+                        fd.append("allowCredit", "false");
                         fd.append("unitsPerPack", form.unitsPerPack);
                         fd.append("wholesaleMoq", form.wholesaleMoq);
                         fd.append("categorySlug", form.categorySlug || "general");
                         fd.append("description", form.description);
                         fd.append("isActive", String(form.isActive));
+                        
+                        fd.append("hasFiveYearGuarantee", String(form.hasFiveYearGuarantee));
+                        if (form.fiveYearGuaranteeText) fd.append("fiveYearGuaranteeText", form.fiveYearGuaranteeText);
+                        fd.append("hasFreeReturns", String(form.hasFreeReturns));
+                        if (form.freeReturnsText) fd.append("freeReturnsText", form.freeReturnsText);
+                        fd.append("hasInstallmentOptions", String(form.hasInstallmentOptions));
+                        if (form.installmentOptionsText) fd.append("installmentOptionsText", form.installmentOptionsText);
                         
                         files.forEach(f => fd.append("images", f));
                         
@@ -607,6 +685,12 @@ export default function WholesalePage() {
                               unitsPerPack: String(p.unitsPerPack || 1),
                               wholesaleMoq: String(p.wholesaleMoq || 1),
                               isActive: p.isActive !== false,
+                              hasFiveYearGuarantee: !!p.hasFiveYearGuarantee,
+                              fiveYearGuaranteeText: p.fiveYearGuaranteeText || "",
+                              hasFreeReturns: !!p.hasFreeReturns,
+                              freeReturnsText: p.freeReturnsText || "",
+                              hasInstallmentOptions: !!p.hasInstallmentOptions,
+                              installmentOptionsText: p.installmentOptionsText || "",
                               images: p.images?.map(img => img.url) || [],
                               wholesaleTiers: tiers.map((t: any) => ({ minQuantity: t.minQuantity, price: Number(t.price) })),
                             });
@@ -857,6 +941,64 @@ export default function WholesalePage() {
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Description</label>
                   <textarea value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} className="admin-input h-32" />
                 </div>
+
+                {/* Guarantee & Details Section */}
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Guarantee & Details</p>
+                  <div className="space-y-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.hasFiveYearGuarantee}
+                          onChange={(e) => setEditForm({ ...editForm, hasFiveYearGuarantee: e.target.checked })}
+                          className="w-3.5 h-3.5 text-blue-500 rounded"
+                        />
+                        Show Guarantee
+                      </label>
+                      <input
+                        placeholder="Guarantee Text (e.g. 5 YEARS GUARANTEE)"
+                        value={editForm.fiveYearGuaranteeText}
+                        onChange={(e) => setEditForm({ ...editForm, fiveYearGuaranteeText: e.target.value })}
+                        className="admin-input-ghost text-xs bg-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.hasFreeReturns}
+                          onChange={(e) => setEditForm({ ...editForm, hasFreeReturns: e.target.checked })}
+                          className="w-3.5 h-3.5 text-blue-500 rounded"
+                        />
+                        Show Free Returns
+                      </label>
+                      <input
+                        placeholder="Returns Text (e.g. FREE RETURNS)"
+                        value={editForm.freeReturnsText}
+                        onChange={(e) => setEditForm({ ...editForm, freeReturnsText: e.target.value })}
+                        className="admin-input-ghost text-xs bg-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.hasInstallmentOptions}
+                          onChange={(e) => setEditForm({ ...editForm, hasInstallmentOptions: e.target.checked })}
+                          className="w-3.5 h-3.5 text-blue-500 rounded"
+                        />
+                        Show Installment Options
+                      </label>
+                      <input
+                        placeholder="Installment Text (e.g. INSTALLMENT OPTIONS)"
+                        value={editForm.installmentOptionsText}
+                        onChange={(e) => setEditForm({ ...editForm, installmentOptionsText: e.target.value })}
+                        className="admin-input-ghost text-xs bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-6">
@@ -921,6 +1063,14 @@ export default function WholesalePage() {
                         fd.append("categorySlug", editForm.categorySlug);
                         fd.append("description", editForm.description);
                         fd.append("isWholesaleOnly", "true");
+                        fd.append("allowCredit", "false");
+                        
+                        fd.append("hasFiveYearGuarantee", String(editForm.hasFiveYearGuarantee));
+                        if (editForm.fiveYearGuaranteeText) fd.append("fiveYearGuaranteeText", editForm.fiveYearGuaranteeText);
+                        fd.append("hasFreeReturns", String(editForm.hasFreeReturns));
+                        if (editForm.freeReturnsText) fd.append("freeReturnsText", editForm.freeReturnsText);
+                        fd.append("hasInstallmentOptions", String(editForm.hasInstallmentOptions));
+                        if (editForm.installmentOptionsText) fd.append("installmentOptionsText", editForm.installmentOptionsText);
                         
                         editFiles.forEach(f => fd.append("images", f));
                         // Also handle existing images if needed (depends on how backend handles updates)

@@ -1,10 +1,29 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ShieldCheck, Clock, CheckCircle2, ArrowRight, Wallet, Percent } from "lucide-react"
+import { ShieldCheck, Clock, CheckCircle2, ArrowRight, Wallet, Percent, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { productsApi } from "@/lib/api"
+import { ProductCard } from "@/components/home/ProductCard"
 
 export default function CreditPage() {
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    productsApi.getAll({ 
+      take: 20, 
+      allowCredit: true,
+      isWholesaleOnly: false 
+    }).then(res => {
+      if (res.data) {
+        const productList = (res.data as any).data || (Array.isArray(res.data) ? res.data : []);
+        setProducts(productList)
+      }
+      setLoading(false)
+    })
+  }, [])
   const features = [
     {
       icon: <Clock className="h-6 w-6 text-primary" />,
@@ -123,6 +142,45 @@ export default function CreditPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Credit Products Listing */}
+      <section className="py-24 border-b border-slate-100">
+        <div className="container-custom">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <span className="text-xs font-black text-primary uppercase tracking-[0.2em]">Available Now</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight">Products on <span className="text-primary">Credit</span></h2>
+              <p className="mt-4 text-slate-500 font-medium text-lg">Browse our latest collection available for flexible payment plans.</p>
+            </div>
+            <Link href="/shop?allowCredit=true">
+              <Button variant="ghost" className="font-black uppercase tracking-widest text-xs hover:bg-slate-100 px-6 h-12">
+                View All <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="aspect-[3/4] bg-slate-100 rounded-3xl animate-pulse" />
+              ))}
+            </div>
+          ) : products.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white p-20 rounded-[3rem] text-center border border-dashed border-slate-200">
+              <p className="text-slate-400 font-bold uppercase tracking-widest">No credit products found at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -354,12 +354,40 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </div>
 
         {/* Stock Status */}
-        <div className="flex flex-col gap-2 mb-3 md:mb-6">
+        <div className="flex flex-col gap-2 mb-3 md:mb-4">
           <div className="flex items-center gap-1">
             <span className="text-[10px] md:text-xs font-black text-[#00c652] uppercase tracking-wider">
               IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}
             </span>
           </div>
+        </div>
+
+        {/* Product Details / Guarantees */}
+        <div className="mb-4 space-y-1.5 border-t border-slate-50 pt-3">
+          {product?.hasFiveYearGuarantee && (
+            <div className="flex items-center gap-2">
+              <Check className="h-3 w-3 text-[#00c652]" />
+              <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                {product.fiveYearGuaranteeText || '5 YEARS GUARANTEE'}
+              </span>
+            </div>
+          )}
+          {product?.hasFreeReturns && (
+            <div className="flex items-center gap-2">
+              <Check className="h-3 w-3 text-[#00c652]" />
+              <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                {product.freeReturnsText || 'FREE RETURNS'}
+              </span>
+            </div>
+          )}
+          {product?.hasInstallmentOptions && (
+            <div className="flex items-center gap-2">
+              <Check className="h-3 w-3 text-[#00c652]" />
+              <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                {product.installmentOptionsText || 'INSTALLMENT OPTIONS'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Add to Cart Button */}

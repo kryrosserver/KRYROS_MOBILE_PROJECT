@@ -24,6 +24,7 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('featured') featured?: string,
     @Query('allowCredit') allowCredit?: string,
+    @Query('isWholesaleOnly') isWholesaleOnly?: string,
     @Query('showInactive') showInactive?: string,
   ) {
     return this.productsService.findAll({
@@ -33,6 +34,7 @@ export class ProductsController {
       search,
       isFeatured: featured === 'true' ? true : (featured === 'false' ? false : undefined),
       allowCredit: allowCredit === 'true' ? true : (allowCredit === 'false' ? false : undefined),
+      isWholesaleOnly: isWholesaleOnly === 'true' ? true : (isWholesaleOnly === 'false' ? false : undefined),
       showInactive: showInactive === 'true' ? true : (showInactive === 'false' ? false : undefined),
     });
   }
