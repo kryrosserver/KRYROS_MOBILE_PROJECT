@@ -22,7 +22,12 @@ function ShopContent() {
   // Fetch categories on mount
   useEffect(() => {
     categoriesApi.getAll().then(res => {
-      if (res.data) setCategories(res.data)
+      // In fetchApi, res.data is the JSON response from server
+      if (res.data) {
+        setCategories(res.data as any[])
+      } else if (res.error) {
+        console.error('Failed to fetch categories:', res.error)
+      }
     })
   }, [])
 
@@ -41,8 +46,15 @@ function ShopContent() {
       take: 40,
       showInactive: true // Show all products from admin panel to help debug
     }).then((res) => {
-      if (res.data?.data) {
-        setProducts(res.data.data)
+      // Handle different possible response structures for robustness
+      if (res.data) {
+        const productList = (res.data as any).data || (Array.isArray(res.data) ? res.data : null);
+        if (productList) {
+          setProducts(productList)
+        } else {
+          console.warn('Could not find product list in API response:', res.data)
+          setProducts([])
+        }
       } else if (res.error) {
         console.error('Failed to fetch products:', res.error)
         setProducts([])
