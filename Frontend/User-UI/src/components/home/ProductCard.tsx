@@ -69,29 +69,37 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const isCreditPage = typeof window !== 'undefined' && window.location.pathname.includes('/credit');
   const isWholesalePage = typeof window !== 'undefined' && window.location.pathname.includes('/wholesale');
 
-  // Logic: If we are on wholesale page, use wholesalePrice if available. 
-  // Otherwise, use regular price.
-  const basePrice = (isWholesalePage && product?.wholesalePrice) 
-    ? Number(product.wholesalePrice) 
+  // Logic: Use salePrice if available, otherwise regular price.
+  // basePrice is the price the user actually pays.
+  const basePrice = product?.salePrice 
+    ? Number(product.salePrice) 
     : Number(product?.price ?? 0);
 
+  // originalPrice is the price before discount (if salePrice exists).
+  const originalPrice = product?.salePrice ? Number(product.price) : null;
+
   const priceInfo = convertPrice(basePrice);
-  const originalPriceInfo = product?.originalPrice ? convertPrice(Number(product.originalPrice)) : null;
+  const originalPriceInfo = originalPrice ? convertPrice(originalPrice) : null;
   const isUSD = !selectedCountry || selectedCountry.code === "US";
 
   // Extract key specs (RAM, Storage, etc.)
-  const specs = Array.isArray(product?.specifications) 
-    ? product.specifications 
-    : (typeof product?.specifications === 'string' ? JSON.parse(product.specifications) : []);
+  let specs: any[] = [];
+  try {
+    specs = Array.isArray(product?.specifications) 
+      ? product.specifications 
+      : (typeof product?.specifications === 'string' ? JSON.parse(product.specifications) : []);
+  } catch (e) {
+    console.warn('Failed to parse specifications for product:', product?.id);
+    specs = [];
+  }
   
   // Look for RAM, Storage, or any first 2 specs
   const importantKeys = ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen', 'size', 'capacity'];
   let displaySpecs = specs.filter((s: any) => 
-    importantKeys.some(k => s.key?.toLowerCase().includes(k))
+    s.key && importantKeys.some(k => s.key.toLowerCase().includes(k))
   ).map((s: any) => ({
     ...s,
-    // Shorten very long values (e.g., screen details) to keep the card clean
-    value: s.value.length > 20 ? s.value.split(',')[0].slice(0, 20) + (s.value.length > 20 ? '...' : '') : s.value
+    value: s.value.length > 20 ? s.value.split(',')[0].slice(0, 20) + '...' : s.value
   })).slice(0, 2);
 
   // If no "important" specs found, just take the first two available
@@ -102,9 +110,10 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     })).slice(0, 2);
   }
   
-  const discount = product?.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : product?.discount;
+  // Calculate discount: use manual discountPercentage if available, or calculate from price/salePrice
+  const discount = product?.discountPercentage 
+    ? product.discountPercentage
+    : (originalPrice ? Math.round(((originalPrice - basePrice) / originalPrice) * 100) : 0);
 
   const isWholesale = product?.isWholesaleOnly;
   const unitsPerPack = product?.unitsPerPack || 1;
@@ -210,9 +219,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                         )}
                       </div>
                     )}
-                    {product?.originalPrice && (
+                    {originalPrice && (
                       <span className="text-sm text-slate-500 line-through">
-                        {isUSD ? formatPrice(Number(product.originalPrice)) : originalPriceInfo?.formatted}
+                        {isUSD ? formatPrice(originalPrice) : originalPriceInfo?.formatted}
                       </span>
                     )}
                   </div>
@@ -334,9 +343,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
         {/* Price Section */}
         <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-2 md:mb-4">
-          {product?.originalPrice && (
+          {originalPrice && (
             <span className="text-[11px] md:text-sm text-slate-400 line-through font-medium">
-              {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
+              {isUSD ? formatPrice(originalPrice) : originalPriceInfo?.formatted}
             </span>
           )}
           <span className="text-sm md:text-xl font-black text-[#d11c1c] tracking-tight">
