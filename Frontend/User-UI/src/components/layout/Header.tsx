@@ -1005,9 +1005,19 @@ export function Header() {
                               <Link
                                 href={`/shop?category=${cat.slug}`}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-[13px] font-bold text-slate-800"
+                                className="flex items-center gap-4 flex-1"
                               >
-                                {cat.name}
+                                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                                  <Image
+                                    src={cat.image || "/placeholder.jpg"}
+                                    alt={cat.name}
+                                    fill
+                                    className="object-contain p-1"
+                                  />
+                                </div>
+                                <span className="text-[13px] font-bold text-slate-800">
+                                  {cat.name}
+                                </span>
                               </Link>
                               <button
                                 onClick={() => {

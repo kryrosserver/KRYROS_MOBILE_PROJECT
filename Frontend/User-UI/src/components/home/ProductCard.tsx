@@ -300,7 +300,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             src={resolveImageUrl(displayImage)}
             alt={product?.name || 'Product'}
             fill
-            className="object-contain p-2 md:p-6 transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-1 md:p-4 transition-transform duration-500 group-hover:scale-105"
             unoptimized={displayImage.startsWith('data:')}
           />
         </Link>
@@ -353,17 +353,12 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </span>
         </div>
 
-        {/* Stock & Rating Stars */}
+        {/* Stock Status */}
         <div className="flex flex-col gap-2 mb-3 md:mb-6">
           <div className="flex items-center gap-1">
             <span className="text-[10px] md:text-xs font-black text-[#00c652] uppercase tracking-wider">
               IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}
             </span>
-          </div>
-          <div className="flex gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-2.5 w-2.5 md:h-4 md:w-4 ${i < Math.floor(product?.rating || 0) ? "fill-[#ffc107] text-[#ffc107]" : "text-slate-200"}`} />
-            ))}
           </div>
         </div>
 
