@@ -35,6 +35,12 @@ type Product = {
   discountPercentage?: number | null;
   stockTotal?: number;
   stockCurrent?: number;
+  hasFiveYearGuarantee?: boolean;
+  fiveYearGuaranteeText?: string | null;
+  hasFreeReturns?: boolean;
+  freeReturnsText?: string | null;
+  hasInstallmentOptions?: boolean;
+  installmentOptionsText?: string | null;
   wholesalePrice?: number | null;
   isWholesaleOnly?: boolean;
   unitsPerPack?: number;
