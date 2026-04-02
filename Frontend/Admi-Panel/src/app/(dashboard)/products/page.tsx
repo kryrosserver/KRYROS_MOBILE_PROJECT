@@ -854,6 +854,11 @@ export default function ProductsPage() {
                   if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
                   formData.append("isActive", String(editForm.isActive));
                   formData.append("isFeatured", String(editForm.isFeatured));
+
+                  // STRICT RETAIL FLAGS - Dedicated Page Upload
+                  formData.append("isWholesaleOnly", "false");
+                  formData.append("allowCredit", "false");
+
                   formData.append("isNew", String(editForm.isNew));
                   if (editForm.discountPercentage) formData.append("discountPercentage", String(Number(editForm.discountPercentage)));
                   if (editForm.stockTotal) formData.append("stockTotal", String(Number(editForm.stockTotal)));

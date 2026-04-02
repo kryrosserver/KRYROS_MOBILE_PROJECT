@@ -197,7 +197,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.black,
+                          fontWeight: FontWeight.w900,
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -224,7 +224,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
                         ),
                         child: const Text(
                           'RETRY CONNECTION',
-                          style: TextStyle(fontWeight: FontWeight.black, letterSpacing: 1.5),
+                          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                         ),
                       ),
                     ],

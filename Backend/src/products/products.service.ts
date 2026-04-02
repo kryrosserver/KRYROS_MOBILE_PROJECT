@@ -27,8 +27,27 @@ export class ProductsService {
     
     if (categoryId) where.categoryId = categoryId;
     if (isFeatured) where.isFeatured = true;
-    if (allowCredit !== undefined) where.allowCredit = allowCredit;
-    if (isWholesaleOnly !== undefined) where.isWholesaleOnly = isWholesaleOnly;
+
+    // Strict separation:
+    // 1. If allowCredit is true, show ONLY credit products.
+    // 2. If isWholesaleOnly is true, show ONLY wholesale products.
+    // 3. If BOTH are undefined/false (default shop), show ONLY retail products.
+    if (allowCredit === true) {
+      where.allowCredit = true;
+      where.isWholesaleOnly = false;
+    } else if (isWholesaleOnly === true) {
+      where.isWholesaleOnly = true;
+      where.allowCredit = false;
+    } else if (allowCredit === false || isWholesaleOnly === false) {
+      // Explicit false requests should also enforce separation
+      if (allowCredit === false) where.allowCredit = false;
+      if (isWholesaleOnly === false) where.isWholesaleOnly = false;
+    } else {
+      // Default shop (both undefined) - show ONLY retail
+      where.allowCredit = false;
+      where.isWholesaleOnly = false;
+    }
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -268,7 +287,9 @@ export class ProductsService {
         brandId,
         isActive: data.isActive ?? true,
         isFeatured: data.isFeatured ?? false,
-        allowCredit: data.allowCredit ?? false,
+        // Ensure mutual exclusivity
+        allowCredit: data.allowCredit === true && data.isWholesaleOnly !== true,
+        isWholesaleOnly: data.isWholesaleOnly === true,
         creditMinimum: data.creditMinimum ?? null,
         creditMessage: data.creditMessage ?? null,
         deliveryInfo: data.deliveryInfo ?? null,
@@ -372,7 +393,9 @@ export class ProductsService {
         brandId,
         isActive: data.isActive ?? true,
         isFeatured: data.isFeatured ?? false,
-        allowCredit: data.allowCredit ?? false,
+        // Ensure mutual exclusivity
+        allowCredit: data.allowCredit === true && data.isWholesaleOnly !== true,
+        isWholesaleOnly: data.isWholesaleOnly === true,
         creditMinimum: data.creditMinimum ?? null,
         creditMessage: data.creditMessage ?? null,
         deliveryInfo: data.deliveryInfo ?? null,
@@ -492,7 +515,9 @@ export class ProductsService {
         price: data.price ?? undefined,
         isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
         isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : undefined,
-        allowCredit: typeof data.allowCredit === 'boolean' ? data.allowCredit : undefined,
+        // Mutual exclusivity logic for updates
+        allowCredit: data.allowCredit === true ? true : (data.isWholesaleOnly === true ? false : (typeof data.allowCredit === 'boolean' ? data.allowCredit : undefined)),
+        isWholesaleOnly: data.isWholesaleOnly === true ? true : (data.allowCredit === true ? false : (typeof data.isWholesaleOnly === 'boolean' ? data.isWholesaleOnly : undefined)),
         creditMinimum: typeof data.creditMinimum === 'number' ? data.creditMinimum : undefined,
         creditMessage: data.creditMessage !== undefined ? data.creditMessage : undefined,
         deliveryInfo: data.deliveryInfo !== undefined ? data.deliveryInfo : undefined,

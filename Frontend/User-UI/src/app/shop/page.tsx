@@ -46,7 +46,7 @@ function ShopContent() {
       take: 40,
       isWholesaleOnly: false,
       allowCredit: false,
-      showInactive: false // Only show active products in shop
+      showInactive: false
     }).then((res) => {
       // Handle different possible response structures for robustness
       if (res.data) {

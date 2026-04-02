@@ -12,7 +12,8 @@ export default function WholesalePage() {
     // Fetch wholesale products  
     productsApi.getAll({ 
       take: 40,
-      isWholesaleOnly: true
+      isWholesaleOnly: true,
+      allowCredit: false
     }).then((res) => {
       if (res.data) {
         const productList = (res.data as any).data || (Array.isArray(res.data) ? res.data : []);

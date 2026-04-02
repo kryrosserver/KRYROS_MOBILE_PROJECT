@@ -582,8 +582,11 @@ export default function WholesalePage() {
                         fd.append("sku", form.sku);
                         fd.append("wholesalePrice", form.wholesalePrice);
                         fd.append("price", form.price || form.wholesalePrice);
+                        
+                        // STRICT WHOLESALE FLAGS - Dedicated Page Upload
                         fd.append("isWholesaleOnly", "true");
                         fd.append("allowCredit", "false");
+                        
                         fd.append("unitsPerPack", form.unitsPerPack);
                         fd.append("wholesaleMoq", form.wholesaleMoq);
                         fd.append("categorySlug", form.categorySlug || "general");

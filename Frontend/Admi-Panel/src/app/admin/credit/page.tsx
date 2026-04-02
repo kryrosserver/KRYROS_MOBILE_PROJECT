@@ -506,8 +506,11 @@ export default function CreditPage() {
                         fd.append("name", form.name);
                         fd.append("sku", form.sku);
                         fd.append("price", form.price);
+                        
+                        // STRICT CREDIT FLAGS - Dedicated Page Upload
                         fd.append("allowCredit", "true");
                         fd.append("isWholesaleOnly", "false");
+                        
                         fd.append("creditMinimum", form.creditMinimum);
                         fd.append("creditMessage", form.creditMessage);
                         fd.append("categorySlug", form.categorySlug || "general");

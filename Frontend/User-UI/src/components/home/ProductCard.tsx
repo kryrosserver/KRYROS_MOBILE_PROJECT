@@ -116,6 +116,10 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     : (originalPrice ? Math.round(((originalPrice - basePrice) / originalPrice) * 100) : 0);
 
   const isWholesale = product?.isWholesaleOnly;
+  const isCredit = product?.allowCredit;
+  const productPath = isWholesale ? '/wholesale' : (isCredit ? '/credit' : '/product');
+  const productHref = `${productPath}/${product?.slug ?? product?.id}`;
+
   const unitsPerPack = product?.unitsPerPack || 1;
   const unitPrice = basePrice / unitsPerPack;
   const unitPriceInfo = convertPrice(unitPrice);
@@ -145,6 +149,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               Wholesale
             </span>
           )}
+          {isCredit && (
+            <span className="absolute left-2 top-2 rounded bg-green-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+              Credit
+            </span>
+          )}
           {discount && (
             <span className="absolute left-2 top-2 rounded bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
               -{discount}%
@@ -155,7 +164,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         <div className="flex flex-1 flex-col justify-between">
           <div>
             <p className="text-xs text-slate-500">{displayBrand}</p>
-            <Link href={`/product/${product?.slug ?? product?.id}`}>
+            <Link href={productHref}>
               <h3 className="mt-1 text-lg font-semibold text-slate-900 transition-colors group-hover:text-green-500">
                 {product?.name}
               </h3>
@@ -295,7 +304,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     >
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden bg-white">
-        <Link href={`/product/${product?.slug ?? product?.id}`}>
+        <Link href={productHref}>
           <Image
             src={resolveImageUrl(displayImage)}
             alt={product?.name || 'Product'}
@@ -312,6 +321,16 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               NEW
             </span>
           )}
+          {isWholesale && (
+            <span className="rounded bg-indigo-600 px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+              WHOLESALE
+            </span>
+          )}
+          {isCredit && (
+            <span className="rounded bg-green-600 px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+              CREDIT
+            </span>
+          )}
           {discount > 0 && (
             <span className="rounded bg-[#ffeff2] px-2 py-1 text-[9px] md:text-[10px] font-black text-[#ff4b7d] uppercase tracking-widest shadow-sm border border-[#ff4b7d]/10">
               {discount}%
@@ -322,7 +341,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
       {/* Content Area */}
       <div className="p-3 md:p-5 flex flex-col flex-1">
-        <Link href={`/product/${product?.slug ?? product?.id}`}>
+        <Link href={productHref}>
           <h3 className="text-[13px] md:text-base font-bold text-slate-800 line-clamp-2 transition-colors hover:text-primary h-10 md:h-12 mb-2 leading-tight md:leading-normal">
             {product?.name}
           </h3>
