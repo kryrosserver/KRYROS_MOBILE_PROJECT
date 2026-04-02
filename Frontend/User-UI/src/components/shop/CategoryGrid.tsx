@@ -23,8 +23,8 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
 
   return (
     <div className="w-full flex justify-center">
-      {/* Centered Horizontal Scroll Container - Added pt-4 to prevent badge clipping */}
-      <div className="flex overflow-x-auto pt-4 pb-6 gap-4 scrollbar-hide justify-start md:justify-center px-6 max-w-full">
+      {/* Centered Horizontal Scroll Container - Added top padding to prevent badge clipping */}
+      <div className="flex overflow-x-auto pt-6 pb-6 gap-6 scrollbar-hide justify-start md:justify-center px-8 max-w-full">
         {/* "All" Category Option */}
         <Link
           href="/shop"

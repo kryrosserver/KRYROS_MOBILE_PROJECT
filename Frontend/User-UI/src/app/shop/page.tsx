@@ -147,16 +147,16 @@ function ShopContent() {
             </button>
           </div>
 
-          {/* Products Grid - Keeping your original ProductCard usage */}
-          <div className="pt-4">
+          {/* Products Grid */}
+          <div className="pt-2">
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
                 {[...Array(10)].map((_, i) => (
                   <div key={i} className="aspect-[3/4] bg-slate-50 rounded-2xl animate-pulse" />
                 ))}
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

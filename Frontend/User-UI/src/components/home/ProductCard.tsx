@@ -291,100 +291,69 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             src={resolveImageUrl(displayImage)}
             alt={product?.name || 'Product'}
             fill
-            className="object-contain p-2 md:p-4 transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-2 md:p-6 transition-transform duration-500 group-hover:scale-105"
             unoptimized={displayImage.startsWith('data:')}
           />
         </Link>
         
-        {/* Badges - Top Left (Matches Reference) */}
+        {/* Badges - Top Left */}
         <div className="absolute left-2 top-2 flex flex-col gap-1 z-10">
           {product?.isNew && (
-            <span className="rounded bg-[#00c652] px-1.5 py-0.5 text-[8px] md:text-[9px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#00c652] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
               NEW
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded bg-[#ffeff2] px-1.5 py-0.5 text-[8px] md:text-[9px] font-black text-[#ff4b7d] uppercase tracking-widest shadow-sm border border-[#ff4b7d]/10">
+            <span className="rounded bg-[#ffeff2] px-2 py-1 text-[9px] md:text-[10px] font-black text-[#ff4b7d] uppercase tracking-widest shadow-sm border border-[#ff4b7d]/10">
               {discount}%
             </span>
           )}
         </div>
-
-        {/* Rating Badge - (Matches Reference Image) */}
-        <div className="absolute left-2 bottom-2 z-10 bg-[#fff9e6] border border-[#ffc107]/20 px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm scale-90 md:scale-100 origin-left">
-          <span className="text-[9px] font-black text-slate-700">5.00</span>
-          <Star className="h-2 w-2 fill-[#ffc107] text-[#ffc107]" />
-          <span className="text-[9px] font-bold text-slate-400">1</span>
-        </div>
-      </div>
-
-      {/* Action Icons Row - (Matches Reference Image) */}
-      <div className="flex items-center justify-around py-2 border-y border-slate-50 bg-white">
-        <button 
-          onClick={async (e) => {
-            e.preventDefault(); e.stopPropagation();
-            const id = product?.id; if (!id) return;
-            if (!isAuthenticated) { router.push("/login"); return; }
-            if (isWishlisted) { await wishlistApi.remove(id); setIsWishlisted(false); }
-            else { await wishlistApi.add(id); setIsWishlisted(true); }
-            window.dispatchEvent(new Event("wishlist:changed"));
-          }}
-          className={`transition-colors p-1.5 hover:bg-slate-50 rounded-full ${isWishlisted ? 'text-pink-500' : 'text-slate-400 hover:text-slate-900'}`}
-        >
-          <Heart className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isWishlisted ? "fill-current" : ""}`} />
-        </button>
-        <button className="text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full p-1.5 transition-colors">
-          <RefreshCw className="h-3.5 w-3.5 md:h-4 md:w-4" />
-        </button>
-        <button className="text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-full p-1.5 transition-colors">
-          <Eye className="h-3.5 w-3.5 md:h-4 md:w-4" />
-        </button>
-        <button className="text-[#00c652] hover:bg-slate-50 rounded-full p-1.5 transition-colors">
-          <Check className="h-3.5 w-3.5 md:h-4 md:w-4 stroke-[3px]" />
-        </button>
       </div>
 
       {/* Content Area */}
-      <div className="p-2 md:p-4 flex flex-col flex-1">
+      <div className="p-3 md:p-5 flex flex-col flex-1">
         <Link href={`/product/${product?.slug ?? product?.id}`}>
-          <h3 className="text-[10px] md:text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-primary h-8 md:h-10 mb-1 leading-tight md:leading-normal">
+          <h3 className="text-[13px] md:text-base font-bold text-slate-800 line-clamp-2 transition-colors hover:text-primary h-10 md:h-12 mb-2 leading-tight md:leading-normal">
             {product?.name}
           </h3>
         </Link>
 
-        {/* Storage Info - (Matches Reference Image) */}
-        <div className="mb-2">
+        {/* Storage Info */}
+        <div className="mb-3">
           {specs.find((s: any) => s.key?.toLowerCase().includes('storage')) ? (
-            <span className="text-[9px] md:text-xs font-bold text-slate-500 uppercase tracking-tight">
+            <span className="text-[11px] md:text-sm font-bold text-slate-500 uppercase tracking-tight">
               {specs.find((s: any) => s.key?.toLowerCase().includes('storage')).value}
             </span>
           ) : (
-            <span className="text-[9px] md:text-xs font-bold text-slate-300 uppercase tracking-tight italic">
+            <span className="text-[11px] md:text-sm font-bold text-slate-300 uppercase tracking-tight italic">
               Standard Edition
             </span>
           )}
         </div>
 
         {/* Price Section */}
-        <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 mb-1 md:mb-2">
+        <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-2 md:mb-4">
           {product?.originalPrice && (
-            <span className="text-[9px] md:text-xs text-slate-400 line-through font-medium">
+            <span className="text-[11px] md:text-sm text-slate-400 line-through font-medium">
               {isUSD ? formatPrice(Number(product.originalPrice || 0)) : originalPriceInfo?.formatted}
             </span>
           )}
-          <span className="text-xs md:text-base font-black text-[#d11c1c] tracking-tight">
+          <span className="text-sm md:text-xl font-black text-[#d11c1c] tracking-tight">
             {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
           </span>
         </div>
 
         {/* Stock & Rating Stars */}
-        <div className="flex flex-col gap-1 mb-2 md:mb-4">
+        <div className="flex flex-col gap-2 mb-3 md:mb-6">
           <div className="flex items-center gap-1">
-            <span className="text-[8px] md:text-[10px] font-black text-[#00c652] uppercase tracking-wider">IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}</span>
+            <span className="text-[10px] md:text-xs font-black text-[#00c652] uppercase tracking-wider">
+              IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}
+            </span>
           </div>
-          <div className="flex gap-0.5">
+          <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-2 w-2 md:h-3 md:w-3 ${i < Math.floor(product?.rating || 0) ? "fill-[#ffc107] text-[#ffc107]" : "text-slate-200"}`} />
+              <Star key={i} className={`h-2.5 w-2.5 md:h-4 md:w-4 ${i < Math.floor(product?.rating || 0) ? "fill-[#ffc107] text-[#ffc107]" : "text-slate-200"}`} />
             ))}
           </div>
         </div>
@@ -392,7 +361,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         {/* Add to Cart Button */}
         <div className="mt-auto">
           <Button
-            className="w-full bg-primary hover:bg-primary/90 text-white font-black h-8 md:h-11 uppercase tracking-widest text-[8px] md:text-[10px] rounded-md md:rounded-lg shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-black h-10 md:h-12 uppercase tracking-widest text-[10px] md:text-xs rounded-md md:rounded-lg shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);
