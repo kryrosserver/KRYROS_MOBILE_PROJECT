@@ -529,7 +529,11 @@ export default function CreditPage() {
                         setShowCreate(false);
                         setForm({
                           name: "", sku: "", price: "", description: "", categorySlug: "", brandId: "",
-                          allowCredit: true, creditMinimum: "", creditMessage: "", isActive: true, images: []
+                          allowCredit: true, creditMinimum: "", creditMessage: "", isActive: true,
+                          hasFiveYearGuarantee: true, fiveYearGuaranteeText: "5 Year Guarantee",
+                          hasFreeReturns: true, freeReturnsText: "Free Returns",
+                          hasInstallmentOptions: true, installmentOptionsText: "Installment Options",
+                          images: []
                         });
                         setFiles([]);
                         loadData();
