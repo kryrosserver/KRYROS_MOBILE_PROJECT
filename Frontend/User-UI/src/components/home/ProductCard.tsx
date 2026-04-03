@@ -317,17 +317,17 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         {/* Badges - Top Left */}
         <div className="absolute left-2 top-2 flex flex-col gap-1 z-10">
           {product?.isNew && (
-            <span className="rounded bg-[#00c652] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#1FA89A] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
               NEW
             </span>
           )}
           {isWholesale && (
-            <span className="rounded bg-indigo-600 px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#2A3A4A] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
               WHOLESALE
             </span>
           )}
           {isCredit && (
-            <span className="rounded bg-green-600 px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#1FA89A] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
               CREDIT
             </span>
           )}
@@ -375,7 +375,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         {/* Stock Status */}
         <div className="flex flex-col gap-2 mb-3 md:mb-4">
           <div className="flex items-center gap-1">
-            <span className="text-[10px] md:text-xs font-black text-[#00c652] uppercase tracking-wider">
+            <span className="text-[10px] md:text-xs font-black text-[#1FA89A] uppercase tracking-wider">
               IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}
             </span>
           </div>
@@ -385,7 +385,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         <div className="mb-4 space-y-1.5 border-t border-slate-50 pt-3">
           {product?.hasFiveYearGuarantee && (
             <div className="flex items-center gap-2">
-              <Check className="h-3 w-3 text-[#00c652]" />
+              <Check className="h-3 w-3 text-[#1FA89A]" />
               <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
                 {product.fiveYearGuaranteeText || '5 YEARS GUARANTEE'}
               </span>
@@ -393,7 +393,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
           {product?.hasFreeReturns && (
             <div className="flex items-center gap-2">
-              <Check className="h-3 w-3 text-[#00c652]" />
+              <Check className="h-3 w-3 text-[#1FA89A]" />
               <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
                 {product.freeReturnsText || 'FREE RETURNS'}
               </span>
@@ -401,7 +401,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
           {product?.hasInstallmentOptions && (
             <div className="flex items-center gap-2">
-              <Check className="h-3 w-3 text-[#00c652]" />
+              <Check className="h-3 w-3 text-[#1FA89A]" />
               <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
                 {product.installmentOptionsText || 'INSTALLMENT OPTIONS'}
               </span>
@@ -409,17 +409,20 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart Button */}
+        {/* CTA Section */}
         <div className="mt-auto">
-          <Button
-            className="w-full bg-primary hover:bg-primary/90 text-white font-black h-10 md:h-12 uppercase tracking-widest text-[10px] md:text-xs rounded-md md:rounded-lg shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
+          <Button 
+            className="w-full h-11 md:h-12 bg-[#1FA89A] hover:bg-[#1FA89A]/90 text-white font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl shadow-xl shadow-[#1FA89A]/20 flex items-center justify-center gap-2 group/btn transition-all active:scale-95"
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);
-              toast({ title: "Added to Cart", description: `${product.name} has been added.` });
+              toast({
+                title: "Added to cart",
+                description: `${product.name} has been added to your cart.`,
+              });
             }}
           >
-            Add to cart
+            ADD TO CART
           </Button>
         </div>
       </div>

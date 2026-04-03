@@ -2,12 +2,13 @@
 
 import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { productsApi, categoriesApi } from "@/lib/api"
+import { productsApi, categoriesApi, brandsApi } from "@/lib/api"
 import { ProductCard } from "@/components/home/ProductCard"
 import { CategoryGrid } from "@/components/shop/CategoryGrid"
-import { Search, ChevronDown, LayoutGrid, List, Filter, SlidersHorizontal } from "lucide-react"
+import { Search, ChevronDown, LayoutGrid, List, Filter, SlidersHorizontal, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { resolveImageUrl } from "@/lib/utils"
 
 function ShopContent() {
   const searchParams = useSearchParams()
@@ -15,21 +16,53 @@ function ShopContent() {
   
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [brands, setBrands] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [showSearchInput, setShowSearchInput] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Fetch categories on mount
+  // Fetch categories and brands on mount
   useEffect(() => {
-    categoriesApi.getAll().then(res => {
-      // In fetchApi, res.data is the JSON response from server
-      if (res.data) {
-        setCategories(res.data as any[])
-      } else if (res.error) {
-        console.error('Failed to fetch categories:', res.error)
+    Promise.all([
+      categoriesApi.getAll(),
+      brandsApi.getAll()
+    ]).then(([catRes, brandRes]) => {
+      if (catRes.data) {
+        setCategories(catRes.data as any[])
+      }
+      if (brandRes.data) {
+        setBrands(brandRes.data as any[])
       }
     })
   }, [])
+
+  // Handle search parameter from mobile bottom nav
+  useEffect(() => {
+    if (searchParams.get('search') === 'true') {
+      setShowSearchInput(true)
+      setTimeout(() => searchInputRef.current?.focus(), 100)
+    }
+  }, [searchParams])
+
+  const scrollToBrand = (brandSlug: string) => {
+    const element = document.getElementById(`brand-${brandSlug}`)
+    if (element) {
+      const headerOffset = 100
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" })
+    }
+  }
+
+  // Group products by brand if needed, or just filter
+  const groupedProducts = brands.map(brand => ({
+    ...brand,
+    products: products.filter(p => p.brandId === brand.id)
+  })).filter(b => b.products.length > 0)
+
+  const otherProducts = products.filter(p => !p.brandId || !brands.find(b => b.id === p.brandId))
 
   // Re-fetch products when category or search changes
   useEffect(() => {
@@ -85,11 +118,36 @@ function ShopContent() {
           </h1>
 
           {/* Category Cards Grid - Horizontal scroll exactly like image */}
-          <div className="mb-16">
+          <div className="mb-8">
             <Suspense fallback={<div className="h-40 bg-slate-50 animate-pulse rounded-2xl" />}>
               <CategoryGrid categories={categories} />
             </Suspense>
           </div>
+
+          {/* Brand Quick Links - Red boxes from image */}
+          {brands.length > 0 && (
+            <div className="mb-12">
+              <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                {brands.map((brand) => (
+                  <button
+                    key={brand.id}
+                    onClick={() => scrollToBrand(brand.slug)}
+                    className="flex-shrink-0 min-w-[120px] h-14 bg-white border-2 border-red-500 rounded-lg flex items-center justify-center px-4 hover:bg-red-50 transition-all shadow-sm group"
+                  >
+                    {brand.logo ? (
+                      <img 
+                        src={resolveImageUrl(brand.logo)} 
+                        alt={brand.name} 
+                        className="h-8 object-contain group-hover:scale-110 transition-transform" 
+                      />
+                    ) : (
+                      <span className="text-xs font-black text-red-600 uppercase tracking-widest">{brand.name}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -128,8 +186,8 @@ function ShopContent() {
           </div>
 
           {/* Toolbar Row: Filter, Sorting, Search Icon */}
-          <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8">
-            <div className="flex items-center gap-8">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8 gap-4">
+            <div className={`flex items-center gap-8 transition-all duration-300 ${showSearchInput ? 'opacity-0 invisible w-0 overflow-hidden' : 'opacity-100 visible'}`}>
               {/* Filter Button - Exactly like image */}
               <button className="h-11 px-6 bg-[#ebf2ff] border border-[#3b82f6]/30 text-[#3b82f6] rounded-lg font-bold flex items-center gap-3 hover:bg-[#dfe9ff] transition-colors">
                 <span className="text-base">Filter</span>
@@ -137,14 +195,47 @@ function ShopContent() {
               </button>
               
               {/* Sorting - Just text and chevron */}
-              <div className="flex items-center gap-2 cursor-pointer group">
+              <div className="hidden sm:flex items-center gap-2 cursor-pointer group">
                 <span className="text-[15px] font-medium text-slate-600 group-hover:text-slate-900">Default sorting</span>
                 <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-slate-600" />
               </div>
             </div>
 
+            {/* Search Input Area */}
+            <div className={`flex-1 flex items-center gap-2 transition-all duration-300 ${showSearchInput ? 'opacity-100 visible' : 'hidden'}`}>
+              <form onSubmit={handleSearch} className="flex-1 relative">
+                <Input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search products..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-11 w-full bg-slate-50 border-slate-200 rounded-lg pl-10 pr-4 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              </form>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setShowSearchInput(false)
+                  setSearch("")
+                  fetchProducts(selectedCategory || undefined)
+                }}
+                className="text-slate-500 font-bold text-xs uppercase tracking-widest"
+              >
+                Cancel
+              </Button>
+            </div>
+
             {/* Search Icon on the right */}
-            <button className="p-2 text-slate-700 hover:text-blue-600 transition-colors">
+            <button 
+              onClick={() => {
+                setShowSearchInput(true)
+                setTimeout(() => searchInputRef.current?.focus(), 100)
+              }}
+              className={`p-2 text-slate-700 hover:text-blue-600 transition-colors ${showSearchInput ? 'hidden' : 'block'}`}
+            >
               <Search className="h-5 w-5" />
             </button>
           </div>
@@ -158,10 +249,48 @@ function ShopContent() {
                 ))}
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+              <div className="space-y-16">
+                {/* Brand Grouped Sections */}
+                {groupedProducts.map((brand) => (
+                  <section key={brand.id} id={`brand-${brand.slug}`} className="scroll-mt-24 animate-in fade-in duration-700">
+                    <div className="flex items-center justify-between mb-8 border-l-4 border-red-500 pl-4">
+                      <div className="flex items-center gap-4">
+                        {brand.logo ? (
+                          <img src={resolveImageUrl(brand.logo)} alt={brand.name} className="h-8 object-contain" />
+                        ) : (
+                          <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">{brand.name}</h2>
+                        )}
+                        <span className="bg-slate-100 text-[10px] font-black px-2.5 py-1 rounded-full text-slate-500 uppercase tracking-widest">
+                          {brand.products.length} Products
+                        </span>
+                      </div>
+                      <Link href={`/shop?brand=${brand.slug}`} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:gap-2.5 transition-all">
+                        View All <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                      {brand.products.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
                 ))}
+
+                {/* Other Products Section */}
+                {otherProducts.length > 0 && (
+                  <section className="animate-in fade-in duration-700">
+                    <div className="flex items-center gap-4 mb-8 border-l-4 border-slate-200 pl-4">
+                      <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">
+                        {groupedProducts.length > 0 ? "Other Products" : "Available Products"}
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                      {otherProducts.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
+                )}
               </div>
             ) : (
               <div className="py-20 text-center">

@@ -7,6 +7,8 @@ import { CurrencyProvider } from '@/providers/CurrencyProvider'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { Header } from '@/components/layout/Header'
 import { Toaster } from '@/components/ui/toaster'
+import { WhatsAppWidget } from '@/components/whatsapp/WhatsAppWidget'
+import MobileBottomNav from '@/components/layout/MobileNav/MobileBottomNav'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -41,6 +43,8 @@ export default function RootLayout({
                   <main className="flex-grow">
                     {children}
                   </main>
+                  <WhatsAppWidget />
+                  <MobileBottomNav />
                 </div>
                 <Toaster />
               </CartProvider>

@@ -127,6 +127,12 @@ export const categoriesApi = {
   getBySlug: (slug: string) => fetchApi<any>(`/categories/${slug}`),
 };
 
+// Brands API
+export const brandsApi = {
+  getAll: () => fetchApi<any[]>('/brands'),
+  getById: (id: string) => fetchApi<any>(`/brands/${id}`),
+};
+
 // Orders API
 export const ordersApi = {
   create: (orderData: any) =>

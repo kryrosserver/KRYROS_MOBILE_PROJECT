@@ -12,10 +12,10 @@ export default function MobileBottomNav() {
 
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
-    { label: "Store", icon: Store, href: "/shop" },
+    { label: "Shop", icon: Store, href: "/shop" },
     { label: "Cart", icon: ShoppingBag, href: "/cart", badge: cartCount },
     { label: "Account", icon: User, href: "/dashboard" },
-    { label: "Search", icon: Search, href: "/shop" },
+    { label: "Search", icon: Search, href: "/shop?search=true" },
   ] as const;
 
   return (

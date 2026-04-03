@@ -13,16 +13,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 25 95% 53%; /* Vibrant Orange */
+    --primary: 175 69% 39%; /* #1FA89A Teal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 95% 96%;
-    --secondary-foreground: 25 95% 20%;
+    --secondary: 175 69% 96%;
+    --secondary-foreground: 175 69% 10%;
 
-    --muted: 25 20% 96%;
-    --muted-foreground: 25 10% 40%;
+    --muted: 210 27% 96%;
+    --muted-foreground: 210 27% 40%;
 
-    --accent: 25 95% 53%;
+    --accent: 210 27% 23%; /* #2A3A4A Navy */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;

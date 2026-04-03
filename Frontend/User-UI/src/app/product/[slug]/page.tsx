@@ -206,7 +206,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {/* Badges */}
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 {p.isNew && (
-                  <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-widest">
+                  <span className="bg-[#1FA89A] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-widest">
                     New Arrival
                   </span>
                 )}
@@ -355,7 +355,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   </div>
                   
                   <Button 
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95 disabled:bg-slate-300"
+                    className="flex-1 bg-[#1FA89A] hover:bg-[#1FA89A]/90 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95 disabled:bg-slate-300"
                     onClick={handleAddToCart}
                     disabled={isWholesale && wholesaleAccount?.status !== "APPROVED"}
                   >
@@ -367,17 +367,17 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <div className="flex gap-2">
                     <button 
                       onClick={handleWishlist}
-                      className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 shadow-sm"
+                      className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-[#1FA89A] hover:bg-[#1FA89A]/5 shadow-sm"
                     >
                       <Heart className="h-5 w-5" />
                     </button>
-                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-blue-600 hover:bg-blue-50 shadow-sm">
+                    <button className="h-12 w-12 flex items-center justify-center rounded-md border border-slate-200 bg-white text-[#1FA89A] hover:bg-[#1FA89A]/5 shadow-sm">
                       <RefreshCw className="h-5 w-5" />
                     </button>
                   </div>
                   
                   <Button 
-                    className="flex-1 bg-[#0a192f] hover:bg-[#112240] text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95 disabled:bg-slate-300"
+                    className="flex-1 bg-[#2A3A4A] hover:bg-[#2A3A4A]/90 text-white font-bold h-12 uppercase tracking-widest text-sm shadow-lg active:scale-95 disabled:bg-slate-300"
                     onClick={handleBuyNow}
                     disabled={isWholesale && wholesaleAccount?.status !== "APPROVED"}
                   >
