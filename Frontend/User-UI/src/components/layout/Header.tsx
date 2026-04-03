@@ -66,7 +66,7 @@ export function AnnouncementBar() {
           </Link>
         ) : (
           <p className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase">
-            {config.announcementBarText}
+            {config.announcementBarText?.toUpperCase()}
           </p>
         )}
         <button 
@@ -946,49 +946,6 @@ export function Header() {
                             <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" />
                           </Link>
                         ))}
-
-                        {/* Currency Selector - Added back per user request */}
-                        <div className="relative border-t border-slate-100">
-                          <button
-                            onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
-                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
-                          >
-                            <span className="flex items-center gap-2">Currency / Ship To</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.flag} {selectedCountry?.currencyCode}</span>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
-                            </div>
-                          </button>
-                          <AnimatePresence>
-                            {mobileCurrencyOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-slate-50"
-                              >
-                                <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                                  {countries.map((c) => (
-                                    <button
-                                      key={c.id}
-                                      onClick={() => {
-                                        setCountry(c.code);
-                                        setMobileCurrencyOpen(false);
-                                      }}
-                                      className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
-                                    >
-                                      <span className="flex items-center gap-2">
-                                        <span>{c.flag}</span>
-                                        {c.name} ({c.currencyCode})
-                                      </span>
-                                      {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
-                                    </button>
-                                  ))}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
 
                         {/* Currency Selector - Added back per user request */}
                         <div className="relative border-t border-slate-100">

@@ -93,11 +93,9 @@ export default function CheckoutPage() {
         formData.stateName,
         formData.cityName
       ).then(res => {
-        if (res.data) {
+        if (res.data && res.data.length > 0) {
           setShippingMethods(res.data)
-          if (res.data.length > 0) {
-            setFormData(prev => ({ ...prev, shippingMethodId: res.data[0].id }))
-          }
+          setFormData(prev => ({ ...prev, shippingMethodId: res.data[0].id }))
         }
         setLoading(false)
       }).catch(() => setLoading(false))
