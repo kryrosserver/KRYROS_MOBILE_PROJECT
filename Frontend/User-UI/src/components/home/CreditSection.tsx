@@ -4,7 +4,7 @@ import { Clock, Wallet, Percent, ShieldCheck, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-export function CreditSection() {
+export function CreditSection({ section }: { section?: any }) {
   const benefits = [
     {
       icon: <Clock className="h-5 w-5 md:h-6 md:w-6" />,
@@ -24,7 +24,10 @@ export function CreditSection() {
   ]
 
   return (
-    <section className="py-12 md:py-24 bg-[#0a1121] text-white overflow-hidden relative">
+    <section 
+      className="py-12 md:py-24 text-white overflow-hidden relative"
+      style={{ backgroundColor: section?.backgroundColor || '#0a1121' }}
+    >
       <div className="container-custom relative z-10">
         <div className="grid lg:grid-cols-12 gap-12 md:gap-16 items-start">
           
@@ -32,12 +35,10 @@ export function CreditSection() {
           <div className="lg:col-span-7 space-y-10">
             <div className="space-y-6">
               <h2 className="text-[32px] md:text-7xl font-black uppercase tracking-tight leading-[1.05] md:leading-[1]">
-                Get the Tech You <br className="hidden md:block" />
-                <span className="text-primary">Want</span>, Pay Later.
+                {section?.title || "Get the Tech You Want, Pay Later."}
               </h2>
               <p className="text-sm md:text-xl text-slate-400 font-medium leading-relaxed max-w-xl">
-                Our flexible credit plans allow you to own the latest mobile technology 
-                with manageable monthly installments.
+                {section?.subtitle || "Our flexible credit plans allow you to own the latest mobile technology with manageable monthly installments."}
               </p>
             </div>
             

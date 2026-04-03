@@ -775,6 +775,28 @@ model CMSSection {
   @@map("cms_sections")
 }
 
+model HomePageSection {
+  id                String    @id @default(uuid())
+  type              String    // e.g., "HeroBanner", "ProductGrid", "CategoryList", "TextBlock"
+  order             Int       @default(0)
+  isActive          Boolean   @default(true)
+  title             String?
+  subtitle          String?
+  description       String?   @db.Text
+  backgroundColor   String?
+  textColor         String?
+  imageUrl          String?
+  videoUrl          String?
+  link              String?
+  linkText          String?
+  config            Json?     // Flexible JSON for specific settings (e.g., categorySlug, productLimit)
+  animation         String?   // e.g., "fadeIn", "slideInLeft", "zoomIn"
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("homepage_sections")
+}
+
 // ==================== FOOTER MANAGEMENT ====================
 
 model FooterSection {

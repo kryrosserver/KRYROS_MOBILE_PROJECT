@@ -12,11 +12,62 @@ import { UpdateFooterSectionDto } from './dto/update-footer-section.dto';
 import { CreateFooterLinkDto } from './dto/create-footer-link.dto';
 import { UpdateFooterLinkDto } from './dto/update-footer-link.dto';
 import { UpdateFooterConfigDto } from './dto/update-footer-config.dto';
+import { CreateHomePageSectionDto } from './dto/create-homepage-section.dto';
+import { UpdateHomePageSectionDto } from './dto/update-homepage-section.dto';
 
 @ApiTags('CMS')
 @Controller('cms')
 export class CMSController {
   constructor(private cmsService: CMSService) {}
+
+  // ==================== HOME PAGE SECTIONS ====================
+
+  @Get('homepage-sections')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get active homepage sections' })
+  getHomePageSections() {
+    return this.cmsService.getHomePageSections();
+  }
+
+  @Get('homepage-sections/manage')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all homepage sections (admin)' })
+  listHomePageSections() {
+    return this.cmsService.listHomePageSections();
+  }
+
+  @Post('homepage-sections')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create homepage section' })
+  createHomePageSection(@Body() data: CreateHomePageSectionDto) {
+    return this.cmsService.createHomePageSection(data);
+  }
+
+  @Put('homepage-sections/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update homepage section' })
+  updateHomePageSection(@Param('id') id: string, @Body() data: UpdateHomePageSectionDto) {
+    return this.cmsService.updateHomePageSection(id, data);
+  }
+
+  @Delete('homepage-sections/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete homepage section' })
+  deleteHomePageSection(@Param('id') id: string) {
+    return this.cmsService.deleteHomePageSection(id);
+  }
+
+  @Post('homepage-sections/seed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed default homepage sections (admin)' })
+  seedHomePageSections() {
+    return this.cmsService.seedHomePageSections();
+  }
 
   @Get('banners')
   @UseInterceptors(CacheInterceptor)

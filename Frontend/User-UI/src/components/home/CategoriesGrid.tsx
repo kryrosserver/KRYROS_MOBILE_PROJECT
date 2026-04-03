@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react"
 
 import { resolveImageUrl } from "@/lib/utils"
 
-export function CategoriesGrid() {
+export function CategoriesGrid({ section }: { section?: any }) {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -28,7 +28,7 @@ export function CategoriesGrid() {
         <div className="flex items-center justify-between gap-4 mb-6 md:mb-16">
           <div>
             <h2 className="text-xl md:text-5xl font-black text-slate-900 uppercase tracking-tight leading-tight">
-              Featured <span className="text-primary">Categories</span>
+              {section?.title || "Featured"} <span className="text-primary">{section?.subtitle || "Categories"}</span>
             </h2>
           </div>
           <Link href="/shop" className="text-[10px] md:text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2 group hover:underline">

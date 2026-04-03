@@ -9,10 +9,110 @@ import { UpdateFooterSectionDto } from './dto/update-footer-section.dto';
 import { CreateFooterLinkDto } from './dto/create-footer-link.dto';
 import { UpdateFooterLinkDto } from './dto/update-footer-link.dto';
 import { UpdateFooterConfigDto } from './dto/update-footer-config.dto';
+import { CreateHomePageSectionDto } from './dto/create-homepage-section.dto';
+import { UpdateHomePageSectionDto } from './dto/update-homepage-section.dto';
 
 @Injectable()
 export class CMSService {
   constructor(private prisma: PrismaService) {}
+
+  // ==================== HOME PAGE SECTIONS ====================
+
+  async getHomePageSections() {
+    return this.prisma.homePageSection.findMany({
+      where: { isActive: true },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async listHomePageSections() {
+    return this.prisma.homePageSection.findMany({
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async createHomePageSection(data: CreateHomePageSectionDto) {
+    return this.prisma.homePageSection.create({
+      data: { ...data } as any,
+    });
+  }
+
+  async updateHomePageSection(id: string, data: UpdateHomePageSectionDto) {
+    return this.prisma.homePageSection.update({
+      where: { id },
+      data: { ...data } as any,
+    });
+  }
+
+  async deleteHomePageSection(id: string) {
+    return this.prisma.homePageSection.delete({
+      where: { id },
+    });
+  }
+
+  async seedHomePageSections() {
+    const existing = await this.prisma.homePageSection.findFirst();
+    if (existing) return { success: true, message: 'HomePage sections already seeded' };
+
+    const defaultSections = [
+      {
+        type: 'HeroSlider',
+        order: 1,
+        isActive: true,
+        title: 'Main Hero Slider',
+        subtitle: 'Banners from the banner manager will show here',
+        animation: 'fadeIn',
+        config: { showBanners: true, type: 'HERO' }
+      },
+      {
+        type: 'TrustBadges',
+        order: 2,
+        isActive: true,
+        title: 'Our Guarantees',
+        subtitle: 'Why shop with us',
+        backgroundColor: '#ffffff',
+        animation: 'slideUp',
+        config: {
+          items: [
+            { icon: 'Truck', title: 'Fast Delivery', subtitle: 'Express Shipping' },
+            { icon: 'ShieldCheck', title: 'Genuine Tech', subtitle: '100% Authentic' },
+            { icon: 'Smartphone', title: 'Verified Seller', subtitle: 'Trusted Platform' },
+            { icon: 'ArrowRight', title: 'Pay on Credit', subtitle: 'Flexible Terms' }
+          ]
+        }
+      },
+      {
+        type: 'CategoriesGrid',
+        order: 3,
+        isActive: true,
+        title: 'Shop by Category',
+        subtitle: 'Browse our collections',
+        animation: 'zoomIn'
+      },
+      {
+        type: 'ProductGrid',
+        order: 4,
+        isActive: true,
+        title: 'Featured Products',
+        config: { limit: 8, filter: 'featured' },
+        animation: 'slideUp',
+      },
+      {
+        type: 'CreditSection',
+        order: 5,
+        isActive: true,
+        title: 'Kryros Credit',
+        subtitle: 'Buy now, pay later',
+        animation: 'fadeIn'
+      }
+    ];
+
+    for (const section of defaultSections) {
+      await this.prisma.homePageSection.create({ data: section as any });
+    }
+
+    return { success: true, message: 'HomePage sections seeded' };
+  }
 
   async getBanners() {
     return this.prisma.cMSBanner.findMany({
