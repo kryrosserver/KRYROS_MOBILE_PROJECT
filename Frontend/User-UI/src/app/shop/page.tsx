@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState, Suspense, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { productsApi, categoriesApi, brandsApi } from "@/lib/api"
 import { ProductCard } from "@/components/home/ProductCard"
