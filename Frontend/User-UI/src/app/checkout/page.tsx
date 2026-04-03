@@ -94,8 +94,10 @@ export default function CheckoutPage() {
         formData.cityName
       ).then(res => {
         if (res.data && res.data.length > 0) {
-          setShippingMethods(res.data)
-          setFormData(prev => ({ ...prev, shippingMethodId: res.data[0].id }))
+          const methods = res.data;
+          const firstId = methods[0].id;
+          setShippingMethods(methods);
+          setFormData(prev => ({ ...prev, shippingMethodId: firstId }));
         }
         setLoading(false)
       }).catch(() => setLoading(false))
