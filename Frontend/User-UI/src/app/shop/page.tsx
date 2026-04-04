@@ -26,18 +26,43 @@ function ShopContent() {
 
   // Fetch categories and brands on mount
   useEffect(() => {
-    Promise.all([
-      categoriesApi.getAll(),
-      brandsApi.getAll()
-    ]).then(([catRes, brandRes]) => {
-      if (catRes.data) {
-        setCategories(catRes.data as any[])
+    // Start loading immediately
+    setLoading(true);
+
+    const loadInitialData = async () => {
+      try {
+        const [catRes, brandRes] = await Promise.all([
+          categoriesApi.getAll(),
+          brandsApi.getAll()
+        ]);
+
+        let fetchedCategories: any[] = [];
+        if (catRes.data) {
+          fetchedCategories = catRes.data as any[];
+          setCategories(fetchedCategories);
+        }
+
+        if (brandRes.data) {
+          setBrands(brandRes.data as any[]);
+        }
+
+        // Determine category from URL slug
+        const categoryFromUrl = categorySlug 
+          ? fetchedCategories.find(c => c.slug === categorySlug)?.id 
+          : null;
+        
+        setSelectedCategory(categoryFromUrl || null);
+        
+        // Fetch products immediately after getting categories
+        await fetchProducts(categoryFromUrl || undefined);
+      } catch (err) {
+        console.error('Initial load error:', err);
+        setLoading(false);
       }
-      if (brandRes.data) {
-        setBrands(brandRes.data as any[])
-      }
-    })
-  }, [])
+    };
+
+    loadInitialData();
+  }, []);
 
   // Handle search parameter from mobile bottom nav
   useEffect(() => {
@@ -65,24 +90,32 @@ function ShopContent() {
 
   const otherProducts = products.filter(p => !p.brandId || !brands.find(b => b.id === p.brandId))
 
-  // Re-fetch products when category or search changes
+  // Re-fetch products when category slug changes (navigation)
   useEffect(() => {
-    const category = categorySlug ? categories.find(c => c.slug === categorySlug)?.id : null
-    setSelectedCategory(category || null)
-    fetchProducts(category || undefined)
-  }, [categorySlug, categories])
+    // Skip if categories aren't loaded yet (handled by initial mount)
+    if (categories.length === 0) return;
 
-  const fetchProducts = (categoryId?: string) => {
+    const category = categorySlug ? categories.find(c => c.slug === categorySlug)?.id : null;
+    
+    // Only fetch if the category actually changed
+    if (category !== selectedCategory) {
+      setSelectedCategory(category || null);
+      fetchProducts(category || undefined);
+    }
+  }, [categorySlug]);
+
+  const fetchProducts = async (categoryId?: string) => {
     setLoading(true)
-    productsApi.getAll({ 
-      categoryId: categoryId || undefined,
-      search: search || undefined,
-      take: 40,
-      isWholesaleOnly: false,
-      allowCredit: false,
-      showInactive: false
-    }).then((res) => {
-      // Handle different possible response structures for robustness
+    try {
+      const res = await productsApi.getAll({ 
+        categoryId: categoryId || undefined,
+        search: search || undefined,
+        take: 40,
+        isWholesaleOnly: false,
+        allowCredit: false,
+        showInactive: false
+      });
+
       if (res.data) {
         const productList = (res.data as any).data || (Array.isArray(res.data) ? res.data : null);
         if (productList) {
@@ -95,12 +128,12 @@ function ShopContent() {
         console.error('Failed to fetch products:', res.error)
         setProducts([])
       }
-      setLoading(false)
-    }).catch(err => {
+    } catch (err) {
       console.error('Fetch error:', err)
       setProducts([])
+    } finally {
       setLoading(false)
-    })
+    }
   }
 
   const handleSearch = (e: React.FormEvent) => {
