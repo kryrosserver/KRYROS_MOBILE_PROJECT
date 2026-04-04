@@ -23,7 +23,7 @@ class KryrosMobileApp extends StatelessWidget {
       title: 'Kryros Mobile',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF6B00)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1FA89A)),
         useMaterial3: true,
       ),
       home: const WebViewScreen(),
@@ -160,7 +160,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
                           placeholderBuilder: (BuildContext context) => const Icon(
                             Icons.shopping_cart,
                             size: 100,
-                            color: Color(0xFFFF6B00),
+                            color: Color(0xFF1FA89A),
                           ),
                         ),
                       ),
@@ -169,7 +169,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
                         width: 40,
                         height: 40,
                         child: CircularProgressIndicator(
-                          color: Color(0xFFFF6B00),
+                          color: Color(0xFF1FA89A),
                           strokeWidth: 3,
                         ),
                       ),
