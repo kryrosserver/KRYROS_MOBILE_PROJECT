@@ -36,13 +36,13 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           delay: 3000,
           disableOnInteraction: false,
         }}
-        className="category-swiper pt-6 pb-10 px-8"
+        className="category-swiper pt-6 pb-10"
         breakpoints={{
-          320: { slidesPerView: 2.5, spaceBetween: 16 },
-          480: { slidesPerView: 3.2, spaceBetween: 16 },
-          640: { slidesPerView: 4.2, spaceBetween: 20 },
-          768: { slidesPerView: 5.2, spaceBetween: 24 },
-          1024: { slidesPerView: 6.2, spaceBetween: 24 },
+          320: { slidesPerView: "auto", spaceBetween: 12 },
+          480: { slidesPerView: "auto", spaceBetween: 16 },
+          640: { slidesPerView: "auto", spaceBetween: 20 },
+          768: { slidesPerView: "auto", spaceBetween: 24 },
+          1024: { slidesPerView: "auto", spaceBetween: 24 },
         }}
       >
         {/* "All" Category Slide */}
@@ -129,9 +129,6 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
       <style jsx global>{`
         .category-swiper .swiper-slide {
           height: auto;
-        }
-        .category-swiper {
-          overflow: visible !important;
         }
       `}</style>
     </div>

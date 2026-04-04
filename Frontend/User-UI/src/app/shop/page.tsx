@@ -50,9 +50,9 @@ function ShopContent() {
   const scrollToBrand = (brandSlug: string) => {
     const element = document.getElementById(`brand-${brandSlug}`)
     if (element) {
-      const headerOffset = 100
+      const headerOffset = window.innerWidth < 768 ? 130 : 100
       const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+      const offsetPosition = elementPosition + window.scrollY - headerOffset
       window.scrollTo({ top: offsetPosition, behavior: "smooth" })
     }
   }
@@ -109,12 +109,12 @@ function ShopContent() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white pb-24">
       {/* Page Heading Section - Clean white background */}
-      <div className="bg-white pt-16 pb-8">
+      <div className="bg-white pt-24 md:pt-32 pb-8">
         <div className="container-custom">
           {/* Main Title - ALL PRODUCTS (Centered, clean) */}
-          <h1 className="text-center text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight mb-16">
+          <h1 className="text-center text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight mb-12">
             {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
           </h1>
 
@@ -128,7 +128,7 @@ function ShopContent() {
           {/* Brand Quick Links - Red boxes from image */}
           {brands.length > 0 && (
             <div className="mb-12">
-              <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+              <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
                 {brands.map((brand) => (
                   <button
                     key={brand.id}
@@ -158,7 +158,7 @@ function ShopContent() {
           {/* Fast Filters Section */}
           <div className="space-y-4 mb-8">
             <h3 className="text-[15px] font-bold text-slate-700">Fast Filters:</h3>
-            <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
               {/* Featured */}
               <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-blue-400 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-yellow-400 text-sm">⭐</span> FEATURED
