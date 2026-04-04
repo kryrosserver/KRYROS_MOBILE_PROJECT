@@ -254,19 +254,21 @@ function ShopContent() {
                 {/* Brand Grouped Sections */}
                 {groupedProducts.map((brand: any) => (
                   <section key={brand.id} id={`brand-${brand.slug}`} className="scroll-mt-24 animate-in fade-in duration-700">
-                    <div className="flex items-center justify-between mb-8 border-l-4 border-red-500 pl-4">
+                    <div className="flex items-center justify-between mb-8 border-l-4 border-primary pl-4 bg-slate-50/50 py-3 pr-4 rounded-r-xl">
                       <div className="flex items-center gap-4">
                         {brand.logo ? (
-                          <img src={resolveImageUrl(brand.logo)} alt={brand.name} className="h-8 object-contain" />
+                          <div className="bg-white p-1.5 rounded-lg border border-slate-100 shadow-sm">
+                            <img src={resolveImageUrl(brand.logo)} alt={brand.name} className="h-6 md:h-8 object-contain" />
+                          </div>
                         ) : (
-                          <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">{brand.name}</h2>
+                          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900">{brand.name}</h2>
                         )}
-                        <span className="bg-slate-100 text-[10px] font-black px-2.5 py-1 rounded-full text-slate-500 uppercase tracking-widest">
-                          {brand.products.length} Products
+                        <span className="bg-primary/10 text-[10px] font-black px-2.5 py-1 rounded-full text-primary uppercase tracking-widest">
+                          {brand.products.length} Items
                         </span>
                       </div>
-                      <Link href={`/shop?brand=${brand.slug}`} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:gap-2.5 transition-all">
-                        View All <ArrowRight className="h-3 w-3" />
+                      <Link href={`/shop?brand=${brand.slug}`} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:gap-2.5 transition-all bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
+                        Explore <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">

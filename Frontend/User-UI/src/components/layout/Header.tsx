@@ -111,12 +111,12 @@ export function TopBar() {
 
           {/* Country/Currency */}
           <div className="relative group cursor-pointer flex items-center gap-1.5 hover:text-primary transition-all shrink-0 bg-white px-2.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
-            <span className="whitespace-nowrap flex items-center gap-1.5">
-              <span className="text-slate-400 font-bold">SHIP:</span>
-              {selectedCountry?.flag} {selectedCountry?.currencyCode}
+            <span className="whitespace-nowrap flex items-center gap-1.5 uppercase font-bold text-slate-700">
+              <span className="text-slate-400">{selectedCountry?.flag}</span>
+              ({selectedCountry?.currencyCode})
             </span>
             <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-primary transition-colors" />
-            <div className="absolute top-[calc(100%+6px)] left-0 w-52 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
+            <div className="absolute top-[calc(100%+6px)] left-0 w-40 bg-white shadow-2xl border border-slate-100 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] p-1.5 overflow-hidden">
               <div className="max-h-60 overflow-y-auto custom-scrollbar">
                 {countries.map(c => (
                   <div 
@@ -124,7 +124,7 @@ export function TopBar() {
                     onClick={() => setCountry(c.code)}
                     className="px-3 py-2 hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-between text-[10px] font-black text-slate-500 hover:text-primary uppercase tracking-wider"
                   >
-                    <span className="flex items-center gap-2">{c.flag} {c.currencyCode}</span>
+                    <span className="flex items-center gap-2">{c.flag} ({c.currencyCode})</span>
                     {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(249,115,22,0.4)]" />}
                   </div>
                 ))}
@@ -953,9 +953,9 @@ export function Header() {
                             onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
                             className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
                           >
-                            <span className="flex items-center gap-2">Currency / Ship To</span>
+                            <span className="flex items-center gap-2">Currency</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.flag} {selectedCountry?.currencyCode}</span>
+                              <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.flag} ({selectedCountry?.currencyCode})</span>
                               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
                             </div>
                           </button>
@@ -977,9 +977,9 @@ export function Header() {
                                       }}
                                       className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
                                     >
-                                      <span className="flex items-center gap-2">
+                                      <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider">
                                         <span>{c.flag}</span>
-                                        {c.name} ({c.currencyCode})
+                                        ({c.currencyCode})
                                       </span>
                                       {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                     </button>

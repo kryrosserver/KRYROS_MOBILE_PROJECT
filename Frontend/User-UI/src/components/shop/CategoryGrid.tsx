@@ -55,25 +55,25 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           >
             <div className={`relative w-full aspect-[1/1.2] bg-white rounded-xl overflow-visible border-2 transition-all duration-300 ${
               !activeCategory 
-                ? "border-blue-500 shadow-lg" 
-                : "border-slate-50 shadow-sm group-hover:shadow-md group-hover:border-blue-200"
+                ? "border-primary shadow-lg" 
+                : "border-slate-50 shadow-sm group-hover:shadow-md group-hover:border-primary/20"
             }`}>
-              <div className={`absolute -top-1.5 -left-1.5 z-20 bg-[#3b82f6] text-white text-[10px] font-black h-6 w-6 flex items-center justify-center rounded-full shadow-md ${
-                !activeCategory ? "bg-blue-600" : "bg-blue-500"
+              <div className={`absolute -top-2.5 -left-2.5 z-20 bg-primary text-white text-[10px] font-black h-7 w-7 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
+                !activeCategory ? "scale-110" : ""
               }`}>
                 ∞
               </div>
               <div className="flex flex-col h-full p-3">
                 <div className="flex-1 relative w-full flex items-center justify-center">
                   <div className={`text-2xl font-black transition-colors ${
-                    !activeCategory ? "text-blue-600" : "text-slate-200 group-hover:text-blue-200"
+                    !activeCategory ? "text-primary" : "text-slate-200 group-hover:text-primary/30"
                   }`}>
                     ALL
                   </div>
                 </div>
                 <div className="text-center pt-2">
                   <span className={`text-xs md:text-sm font-bold transition-colors ${
-                    !activeCategory ? "text-blue-600" : "text-slate-700 group-hover:text-blue-600"
+                    !activeCategory ? "text-primary" : "text-slate-700 group-hover:text-primary"
                   }`}>
                     All Products
                   </span>
@@ -93,34 +93,36 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
                   isActive ? "scale-105" : "hover:scale-105"
                 }`}
               >
-                <div className={`relative w-full aspect-[1/1.2] bg-white rounded-xl overflow-visible border-2 transition-all duration-300 ${
-                  isActive 
-                    ? "border-blue-500 shadow-lg" 
-                    : "border-slate-50 shadow-sm group-hover:shadow-md group-hover:border-blue-200"
+              <div className={`relative w-full aspect-[1/1.2] bg-white rounded-xl overflow-visible border-2 transition-all duration-300 ${
+                isActive 
+                  ? "border-primary shadow-lg" 
+                  : "border-slate-50 shadow-sm group-hover:shadow-md group-hover:border-primary/20"
+              }`}>
+                <div className={`absolute -top-2.5 -left-2.5 z-20 bg-primary text-white text-[10px] font-black h-7 w-7 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
+                  isActive ? "scale-110" : ""
                 }`}>
-                  <div className="absolute -top-1.5 -left-1.5 z-20 bg-[#3b82f6] text-white text-[10px] font-black h-6 w-6 flex items-center justify-center rounded-full shadow-md">
-                    {category._count?.products || 0}
+                  {category._count?.products || 0}
+                </div>
+                <div className="flex flex-col h-full p-3">
+                  <div className="flex-1 relative w-full flex items-center justify-center">
+                    <div className="relative w-full h-[85%]">
+                      <Image
+                        src={category.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
+                        alt={category.name}
+                        fill
+                        className="object-contain transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
                   </div>
-                  <div className="flex flex-col h-full p-3">
-                    <div className="flex-1 relative w-full flex items-center justify-center">
-                      <div className="relative w-full h-[85%]">
-                        <Image
-                          src={category.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&h=200&fit=crop"}
-                          alt={category.name}
-                          fill
-                          className="object-contain transition-transform duration-300 group-hover:scale-110"
-                        />
-                      </div>
-                    </div>
-                    <div className="text-center pt-2">
-                      <span className={`text-xs md:text-sm font-bold text-slate-700 transition-colors ${
-                        isActive ? "text-blue-600" : "group-hover:text-blue-600"
-                      }`}>
-                        {category.name}
-                      </span>
-                    </div>
+                  <div className="text-center pt-2">
+                    <span className={`text-xs md:text-sm font-bold transition-colors ${
+                      isActive ? "text-primary" : "text-slate-700 group-hover:text-primary"
+                    }`}>
+                      {category.name}
+                    </span>
                   </div>
                 </div>
+              </div>
               </Link>
             </SwiperSlide>
           );
