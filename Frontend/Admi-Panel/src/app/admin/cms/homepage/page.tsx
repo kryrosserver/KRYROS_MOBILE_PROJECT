@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Plus, 
   GripVertical, 
@@ -22,11 +22,18 @@ import {
   PlayCircle,
   ShieldCheck,
   CreditCard,
-  Layers
+  Layers,
+  LucideIcon
 } from "lucide-react";
-import { resolveImageUrl } from "@/lib/utils";
 
-const SECTION_TYPES = [
+interface SectionType {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  description: string;
+}
+
+const SECTION_TYPES: SectionType[] = [
   { id: "HeroSlider", label: "Hero Slider", icon: Layers, description: "Main promotional slider using banners" },
   { id: "TrustBadges", label: "Trust Badges", icon: ShieldCheck, description: "Display features like Fast Delivery, Secure Payment" },
   { id: "ProductGrid", label: "Product Grid", icon: Grid, description: "Display a grid of products from a category" },
@@ -45,7 +52,7 @@ export default function HomePageCMS() {
   const [saving, setSaving] = useState(false);
   
   const [form, setForm] = useState({
-    type: "HeroBanner",
+    type: "HeroSlider",
     title: "",
     subtitle: "",
     description: "",
@@ -67,10 +74,11 @@ export default function HomePageCMS() {
       const res = await fetch("/internal/admin/cms/homepage-sections/manage", { credentials: "same-origin" });
       if (res.ok) {
         const data = await res.json();
-        setSections(data);
+        setSections(Array.isArray(data) ? data : []);
       }
     } catch (err) {
       console.error("Failed to load sections", err);
+      setSections([]);
     } finally {
       setLoading(false);
     }
@@ -177,10 +185,10 @@ export default function HomePageCMS() {
           onClick={() => {
             setEditingSection(null);
             setForm({
-              type: "HeroBanner", title: "", subtitle: "", description: "",
+              type: "HeroSlider", title: "", subtitle: "", description: "",
               backgroundColor: "#ffffff", textColor: "#000000", imageUrl: "",
               videoUrl: "", link: "", linkText: "Learn More",
-              order: sections.length + 1, isActive: true, animation: "none", config: {}
+              order: (sections?.length || 0) + 1, isActive: true, animation: "none", config: {}
             });
             setShowAdd(true);
           }}
@@ -205,20 +213,23 @@ export default function HomePageCMS() {
               <div>
                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Section Type</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {SECTION_TYPES.map(type => (
-                    <button
-                      key={type.id}
-                      onClick={() => setForm({ ...form, type: type.id })}
-                      className={`p-3 rounded-xl border-2 transition-all text-left flex flex-col items-center gap-2 ${
-                        form.type === type.id 
-                          ? 'border-green-500 bg-green-50 text-green-700' 
-                          : 'border-slate-100 hover:border-slate-300 text-slate-600'
-                      }`}
-                    >
-                      <type.icon className="h-5 w-5" />
-                      <span className="text-[10px] font-bold uppercase text-center">{type.label}</span>
-                    </button>
-                  ))}
+                  {SECTION_TYPES.map(type => {
+                    const IconComp = type.icon;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => setForm({ ...form, type: type.id })}
+                        className={`p-3 rounded-xl border-2 transition-all text-left flex flex-col items-center gap-2 ${
+                          form.type === type.id 
+                            ? 'border-green-500 bg-green-50 text-green-700' 
+                            : 'border-slate-100 hover:border-slate-300 text-slate-600'
+                        }`}
+                      >
+                        <IconComp className="h-5 w-5" />
+                        <span className="text-[10px] font-bold uppercase text-center">{type.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -227,7 +238,7 @@ export default function HomePageCMS() {
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Section Title</label>
                   <input 
                     value={form.title} 
-                    onChange={e => setForm({...form, title: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, title: e.target.value})}
                     className="admin-input" 
                     placeholder="Main Title"
                   />
@@ -236,7 +247,7 @@ export default function HomePageCMS() {
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Subtitle</label>
                   <input 
                     value={form.subtitle} 
-                    onChange={e => setForm({...form, subtitle: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, subtitle: e.target.value})}
                     className="admin-input" 
                     placeholder="Small Subtitle"
                   />
@@ -247,7 +258,7 @@ export default function HomePageCMS() {
                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Description</label>
                 <textarea 
                   value={form.description} 
-                  onChange={e => setForm({...form, description: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm({...form, description: e.target.value})}
                   className="admin-input h-24 resize-none" 
                   placeholder="Detailed description..."
                 />
@@ -260,12 +271,12 @@ export default function HomePageCMS() {
                     <input 
                       type="color"
                       value={form.backgroundColor} 
-                      onChange={e => setForm({...form, backgroundColor: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, backgroundColor: e.target.value})}
                       className="h-10 w-12 rounded border p-1"
                     />
                     <input 
                       value={form.backgroundColor} 
-                      onChange={e => setForm({...form, backgroundColor: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, backgroundColor: e.target.value})}
                       className="admin-input flex-1 font-mono uppercase"
                     />
                   </div>
@@ -276,12 +287,12 @@ export default function HomePageCMS() {
                     <input 
                       type="color"
                       value={form.textColor} 
-                      onChange={e => setForm({...form, textColor: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, textColor: e.target.value})}
                       className="h-10 w-12 rounded border p-1"
                     />
                     <input 
                       value={form.textColor} 
-                      onChange={e => setForm({...form, textColor: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, textColor: e.target.value})}
                       className="admin-input flex-1 font-mono uppercase"
                     />
                   </div>
@@ -295,7 +306,7 @@ export default function HomePageCMS() {
                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Image URL</label>
                 <input 
                   value={form.imageUrl} 
-                  onChange={e => setForm({...form, imageUrl: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, imageUrl: e.target.value})}
                   className="admin-input" 
                   placeholder="https://images.unsplash.com/..."
                 />
@@ -306,7 +317,7 @@ export default function HomePageCMS() {
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Button Link</label>
                   <input 
                     value={form.link} 
-                    onChange={e => setForm({...form, link: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, link: e.target.value})}
                     className="admin-input" 
                     placeholder="/shop or https://..."
                   />
@@ -315,7 +326,7 @@ export default function HomePageCMS() {
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Button Text</label>
                   <input 
                     value={form.linkText} 
-                    onChange={e => setForm({...form, linkText: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, linkText: e.target.value})}
                     className="admin-input" 
                     placeholder="Shop Now"
                   />
@@ -326,7 +337,7 @@ export default function HomePageCMS() {
                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Entrance Animation</label>
                 <select 
                   value={form.animation}
-                  onChange={e => setForm({...form, animation: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({...form, animation: e.target.value})}
                   className="admin-input"
                 >
                   {ANIMATIONS.map(anim => (
@@ -338,25 +349,25 @@ export default function HomePageCMS() {
               {form.type === 'TrustBadges' && (
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Badge Config</h3>
-                  {(form.config.items || []).map((item: any, idx: number) => (
+                  {(form.config?.items || []).map((item: any, idx: number) => (
                     <div key={idx} className="flex gap-2 items-end">
                       <div className="flex-1 space-y-2">
                         <input 
                           value={item.title}
-                          onChange={e => {
-                            const newItems = [...form.config.items];
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const newItems = [...(form.config?.items || [])];
                             newItems[idx].title = e.target.value;
-                            setForm({ ...form, config: { ...form.config, items: newItems } });
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
                           }}
                           className="admin-input py-1 text-xs" 
                           placeholder="Title"
                         />
                         <input 
                           value={item.subtitle}
-                          onChange={e => {
-                            const newItems = [...form.config.items];
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const newItems = [...(form.config?.items || [])];
                             newItems[idx].subtitle = e.target.value;
-                            setForm({ ...form, config: { ...form.config, items: newItems } });
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
                           }}
                           className="admin-input py-1 text-xs" 
                           placeholder="Subtitle"
@@ -364,10 +375,10 @@ export default function HomePageCMS() {
                       </div>
                       <select 
                         value={item.icon}
-                        onChange={e => {
-                          const newItems = [...form.config.items];
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                          const newItems = [...(form.config?.items || [])];
                           newItems[idx].icon = e.target.value;
-                          setForm({ ...form, config: { ...form.config, items: newItems } });
+                          setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
                         }}
                         className="admin-input py-1 text-xs w-24"
                       >
@@ -378,8 +389,8 @@ export default function HomePageCMS() {
                       </select>
                       <button 
                         onClick={() => {
-                          const newItems = form.config.items.filter((_: any, i: number) => i !== idx);
-                          setForm({ ...form, config: { ...form.config, items: newItems } });
+                          const newItems = (form.config?.items || []).filter((_: any, i: number) => i !== idx);
+                          setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
                         }}
                         className="p-2 text-red-500 hover:bg-red-50 rounded"
                       >
@@ -389,8 +400,8 @@ export default function HomePageCMS() {
                   ))}
                   <button 
                     onClick={() => {
-                      const newItems = [...(form.config.items || []), { title: 'New Badge', subtitle: 'Description', icon: 'Truck' }];
-                      setForm({ ...form, config: { ...form.config, items: newItems } });
+                      const newItems = [...(form.config?.items || []), { title: 'New Badge', subtitle: 'Description', icon: 'Truck' }];
+                      setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
                     }}
                     className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
                   >
@@ -407,16 +418,16 @@ export default function HomePageCMS() {
                       <label className="text-[10px] font-bold uppercase text-slate-400">Limit</label>
                       <input 
                         type="number"
-                        value={form.config.limit || 8}
-                        onChange={e => setForm({ ...form, config: { ...form.config, limit: parseInt(e.target.value) } })}
+                        value={form.config?.limit || 8}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, config: { ...(form.config || {}), limit: parseInt(e.target.value) } })}
                         className="admin-input py-1 text-xs"
                       />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold uppercase text-slate-400">Filter</label>
                       <select 
-                        value={form.config.filter || 'all'}
-                        onChange={e => setForm({ ...form, config: { ...form.config, filter: e.target.value } })}
+                        value={form.config?.filter || 'all'}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({ ...form, config: { ...(form.config || {}), filter: e.target.value } })}
                         className="admin-input py-1 text-xs"
                       >
                         <option value="all">All Products</option>
@@ -494,7 +505,11 @@ export default function HomePageCMS() {
               </div>
 
               <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
-                {SECTION_TYPES.find(t => t.id === section.type)?.icon({ className: "h-6 w-6 text-slate-500" }) || <Layout className="h-6 w-6 text-slate-500" />}
+                {(() => {
+                  const typeInfo = SECTION_TYPES.find(t => t.id === section.type);
+                  const IconComp = typeInfo?.icon || Layout;
+                  return <IconComp className="h-6 w-6 text-slate-500" />;
+                })()}
               </div>
 
               <div className="flex-1 min-w-0">
