@@ -14,16 +14,31 @@ type NotificationItem = {
 type AdminSettingsState = {
   companyName: string;
   logoDataUrl: string | null;
+  accentColor: string;
+  theme: "light" | "dark" | "system";
+  emailSettings: {
+    orders: boolean;
+    payments: boolean;
+    credit: boolean;
+  };
+  pushSettings: {
+    orders: boolean;
+    payments: boolean;
+  };
   notifications: NotificationItem[];
   unseenCount: number;
   setCompanyName: (s: string) => void;
   setLogoDataUrl: (d: string | null) => void;
+  setAccentColor: (c: string) => void;
+  setTheme: (t: "light" | "dark" | "system") => void;
+  setEmailSettings: (s: { orders: boolean; payments: boolean; credit: boolean }) => void;
+  setPushSettings: (s: { orders: boolean; payments: boolean }) => void;
   addNotifications: (items: NotificationItem[]) => void;
   markAllRead: () => void;
 };
 
 const Ctx = createContext<AdminSettingsState | null>(null);
-const LS_KEY = "kryros_admin_settings";
+const LS_KEY = "kryros_admin_settings_v2";
 const LS_NOTIFS = "kryros_admin_notifications";
 
 function readLS<T>(key: string, fallback: T): T {
@@ -46,13 +61,28 @@ function writeLS<T>(key: string, val: T) {
 export function AdminSettingsProvider({ children }: { children: React.ReactNode }) {
   const [companyName, setCompanyName] = useState<string>("KRYROS");
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [accentColor, setAccentColor] = useState<string>("#22c55e");
+  const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
+  const [emailSettings, setEmailSettings] = useState({ orders: true, payments: true, credit: true });
+  const [pushSettings, setPushSettings] = useState({ orders: true, payments: true });
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const init = readLS(LS_KEY, { companyName: "KRYROS", logoDataUrl: null as string | null });
+    const init = readLS(LS_KEY, { 
+      companyName: "KRYROS", 
+      logoDataUrl: null,
+      accentColor: "#22c55e",
+      theme: "light",
+      emailSettings: { orders: true, payments: true, credit: true },
+      pushSettings: { orders: true, payments: true }
+    });
     setCompanyName(init.companyName);
     setLogoDataUrl(init.logoDataUrl);
+    setAccentColor(init.accentColor || "#22c55e");
+    setTheme(init.theme || "light");
+    setEmailSettings(init.emailSettings || { orders: true, payments: true, credit: true });
+    setPushSettings(init.pushSettings || { orders: true, payments: true });
 
     const initNotifs = readLS<NotificationItem[]>(LS_NOTIFS, []);
     setNotifications(initNotifs);
@@ -61,8 +91,26 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (!isLoaded) return;
-    writeLS(LS_KEY, { companyName, logoDataUrl });
-  }, [companyName, logoDataUrl, isLoaded]);
+    writeLS(LS_KEY, { 
+      companyName, 
+      logoDataUrl, 
+      accentColor, 
+      theme, 
+      emailSettings, 
+      pushSettings 
+    });
+    
+    // Apply theme to document
+    const root = window.document.documentElement;
+    if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    
+    // Apply accent color as CSS variable
+    root.style.setProperty('--accent-color', accentColor);
+  }, [companyName, logoDataUrl, accentColor, theme, emailSettings, pushSettings, isLoaded]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -86,10 +134,18 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
   const value: AdminSettingsState = {
     companyName,
     logoDataUrl,
+    accentColor,
+    theme,
+    emailSettings,
+    pushSettings,
     notifications,
     unseenCount,
     setCompanyName,
     setLogoDataUrl,
+    setAccentColor,
+    setTheme,
+    setEmailSettings,
+    setPushSettings,
     addNotifications,
     markAllRead,
   };

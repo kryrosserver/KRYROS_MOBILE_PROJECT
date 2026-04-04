@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { 
-  Settings, 
   Building, 
   Mail, 
   Phone, 
@@ -16,7 +15,6 @@ import {
   Save,
   Upload,
   Check,
-  Truck,
   Plus,
   Trash2,
   Edit2,
@@ -53,7 +51,14 @@ export default function SettingsPage() {
     isActive: true
   });
 
-  const { companyName, setCompanyName, logoDataUrl, setLogoDataUrl } = useAdminSettings();
+  const { 
+    companyName, setCompanyName, 
+    logoDataUrl, setLogoDataUrl,
+    accentColor, setAccentColor,
+    theme, setTheme,
+    emailSettings, setEmailSettings,
+    pushSettings, setPushSettings
+  } = useAdminSettings();
 
   useEffect(() => {
     if (activeTab === "shipping") {
@@ -142,13 +147,14 @@ export default function SettingsPage() {
   };
 
   const handleSave = async () => {
-    // This is for other tabs if needed
     setIsSaving(true);
+    // Logic is handled by provider's useEffect on state changes, 
+    // but we show a success state here for UX
     setTimeout(() => {
       setIsSaving(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    }, 1000);
+    }, 800);
   };
 
   const tabs = [
@@ -160,7 +166,6 @@ export default function SettingsPage() {
   ];
 
   const companySettings = {
-    name: "KRYROS MOBILE TECH LIMITED",
     email: "kryrosmobile@gmail.com",
     phone: "+260966423719",
     address: " Lusaka, Zambia",
@@ -168,15 +173,6 @@ export default function SettingsPage() {
     timezone: "Africa/Lusaka",
     currency: "USD",
     language: "English"
-  };
-
-  const notificationSettings = {
-    emailOrders: true,
-    emailPayments: true,
-    emailCredit: true,
-    pushOrders: true,
-    pushPayments: true,
-    pushCredit: false
   };
 
   const paymentSettings = {
@@ -246,7 +242,7 @@ export default function SettingsPage() {
                   <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
-                    defaultValue={companyName || companySettings.name}
+                    value={companyName}
                     onChange={(e)=> setCompanyName(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
@@ -385,21 +381,36 @@ export default function SettingsPage() {
                     <span className="font-medium text-slate-900">Order Notifications</span>
                     <p className="text-sm text-slate-500">Receive emails for new orders</p>
                   </div>
-                  <input type="checkbox" defaultChecked={notificationSettings.emailOrders} className="h-5 w-5 rounded text-green-500" />
+                  <input 
+                    type="checkbox" 
+                    checked={emailSettings.orders} 
+                    onChange={(e) => setEmailSettings({...emailSettings, orders: e.target.checked})}
+                    className="h-5 w-5 rounded text-green-500" 
+                  />
                 </label>
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
                     <span className="font-medium text-slate-900">Payment Notifications</span>
                     <p className="text-sm text-slate-500">Receive emails for payments</p>
                   </div>
-                  <input type="checkbox" defaultChecked={notificationSettings.emailPayments} className="h-5 w-5 rounded text-green-500" />
+                  <input 
+                    type="checkbox" 
+                    checked={emailSettings.payments} 
+                    onChange={(e) => setEmailSettings({...emailSettings, payments: e.target.checked})}
+                    className="h-5 w-5 rounded text-green-500" 
+                  />
                 </label>
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
                     <span className="font-medium text-slate-900">Credit System</span>
                     <p className="text-sm text-slate-500">Receive emails for credit updates</p>
                   </div>
-                  <input type="checkbox" defaultChecked={notificationSettings.emailCredit} className="h-5 w-5 rounded text-green-500" />
+                  <input 
+                    type="checkbox" 
+                    checked={emailSettings.credit} 
+                    onChange={(e) => setEmailSettings({...emailSettings, credit: e.target.checked})}
+                    className="h-5 w-5 rounded text-green-500" 
+                  />
                 </label>
               </div>
             </div>
@@ -412,14 +423,24 @@ export default function SettingsPage() {
                     <span className="font-medium text-slate-900">Order Notifications</span>
                     <p className="text-sm text-slate-500">Push notifications for new orders</p>
                   </div>
-                  <input type="checkbox" defaultChecked={notificationSettings.pushOrders} className="h-5 w-5 rounded text-green-500" />
+                  <input 
+                    type="checkbox" 
+                    checked={pushSettings.orders} 
+                    onChange={(e) => setPushSettings({...pushSettings, orders: e.target.checked})}
+                    className="h-5 w-5 rounded text-green-500" 
+                  />
                 </label>
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
                     <span className="font-medium text-slate-900">Payment Notifications</span>
                     <p className="text-sm text-slate-500">Push notifications for payments</p>
                   </div>
-                  <input type="checkbox" defaultChecked={notificationSettings.pushPayments} className="h-5 w-5 rounded text-green-500" />
+                  <input 
+                    type="checkbox" 
+                    checked={pushSettings.payments} 
+                    onChange={(e) => setPushSettings({...pushSettings, payments: e.target.checked})}
+                    className="h-5 w-5 rounded text-green-500" 
+                  />
                 </label>
               </div>
             </div>
@@ -536,17 +557,6 @@ export default function SettingsPage() {
                 </label>
               </div>
             </div>
-
-            <div className="pt-6 border-t border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Danger Zone</h3>
-              <div className="p-4 border border-red-200 bg-red-50 rounded-xl">
-                <h4 className="font-semibold text-red-600">Reset All Settings</h4>
-                <p className="text-sm text-red-500 mt-1">This will reset all settings to default values. This action cannot be undone.</p>
-                <button className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                  Reset to Default
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
@@ -555,41 +565,48 @@ export default function SettingsPage() {
             <div>
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Theme</h3>
               <div className="grid grid-cols-3 gap-4">
-                <label className="cursor-pointer">
-                  <input type="radio" name="theme" value="light" defaultChecked className="peer sr-only" />
-                  <div className="p-4 border-2 border-slate-200 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 transition-all">
-                    <div className="h-20 bg-white border border-slate-200 rounded-lg mb-2"></div>
-                    <span className="text-sm font-medium text-slate-900">Light</span>
-                  </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="radio" name="theme" value="dark" className="peer sr-only" />
-                  <div className="p-4 border-2 border-slate-200 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 transition-all">
-                    <div className="h-20 bg-slate-900 border border-slate-700 rounded-lg mb-2"></div>
-                    <span className="text-sm font-medium text-slate-900">Dark</span>
-                  </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="radio" name="theme" value="system" className="peer sr-only" />
-                  <div className="p-4 border-2 border-slate-200 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 transition-all">
-                    <div className="h-20 bg-gradient-to-r from-white to-slate-900 border border-slate-200 rounded-lg mb-2"></div>
-                    <span className="text-sm font-medium text-slate-900">System</span>
-                  </div>
-                </label>
+                {["light", "dark", "system"].map((t) => (
+                  <label key={t} className="cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="theme" 
+                      value={t} 
+                      checked={theme === t} 
+                      onChange={() => setTheme(t as any)}
+                      className="peer sr-only" 
+                    />
+                    <div className="p-4 border-2 border-slate-200 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 transition-all">
+                      <div className={`h-20 rounded-lg mb-2 ${
+                        t === 'light' ? 'bg-white border border-slate-200' : 
+                        t === 'dark' ? 'bg-slate-900 border border-slate-700' : 
+                        'bg-gradient-to-r from-white to-slate-900 border border-slate-200'
+                      }`}></div>
+                      <span className="text-sm font-medium text-slate-900 capitalize">{t}</span>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
 
             <div className="pt-6 border-t border-slate-200">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Accent Color</h3>
-              <div className="flex gap-3">
-                {["#22c55e", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#ec4899"].map((color) => (
+              <div className="flex flex-wrap gap-4">
+                {["#22c55e", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#ec4899", "#14b8a6", "#0f172a"].map((color) => (
                   <button
                     key={color}
-                    className={`h-10 w-10 rounded-full border-2 ${color === "#22c55e" ? "border-slate-900" : "border-transparent"}`}
+                    onClick={() => setAccentColor(color)}
+                    className={`h-12 w-12 rounded-full border-4 transition-all hover:scale-110 flex items-center justify-center ${
+                      accentColor === color ? "border-slate-900 shadow-lg" : "border-transparent"
+                    }`}
                     style={{ backgroundColor: color }}
-                  />
+                  >
+                    {accentColor === color && <Check className="h-5 w-5 text-white" />}
+                  </button>
                 ))}
               </div>
+              <p className="mt-4 text-sm text-slate-500">
+                Current Accent: <span className="font-mono font-bold uppercase" style={{ color: accentColor }}>{accentColor}</span>
+              </p>
             </div>
 
             <div className="pt-6 border-t border-slate-200">
