@@ -888,12 +888,12 @@ export function Header() {
                 </nav>
 
                 {/* Fixed Footer with Auth/Support - Fixed at Bottom */}
-                <div className="p-5 bg-white border-t border-slate-100 shrink-0 mb-safe">
-                  <div className="flex flex-col gap-3">
+                <div className="px-5 pt-4 pb-6 bg-white border-t border-slate-100 shrink-0">
+                  <div className="flex flex-col gap-2.5">
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-2 h-12 rounded-lg bg-primary text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+                      className="flex items-center justify-center gap-2 h-11 rounded-lg bg-primary text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary/20"
                     >
                       <User className="h-4 w-4" />
                       My Account
@@ -901,14 +901,14 @@ export function Header() {
                     <div className="grid grid-cols-2 gap-2">
                       <a
                         href="tel:+260966423719"
-                        className="flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
+                        className="flex items-center justify-center gap-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
                       >
                         <Phone className="h-3.5 w-3.5" />
                         Call Us
                       </a>
                       <a
                         href="mailto:kryrosmobile@gmail.com"
-                        className="flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
+                        className="flex items-center justify-center gap-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
                       >
                         <Mail className="h-3.5 w-3.5" />
                         Email
@@ -919,7 +919,7 @@ export function Header() {
                       href="https://wa.me/260966423719"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#25D366] text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-100"
+                      className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#25D366] text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-green-100"
                     >
                       <MessageCircle className="h-4 w-4" />
                       WhatsApp Support
