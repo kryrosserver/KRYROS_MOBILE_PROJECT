@@ -1123,20 +1123,30 @@ export function Header() {
                     </Link>
                     <div className="grid grid-cols-2 gap-2">
                       <a
-                        href="tel:+260970000000"
+                        href="tel:+260966423719"
                         className="flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
                       >
                         <Phone className="h-3.5 w-3.5" />
                         Call Us
                       </a>
                       <a
-                        href="mailto:support@kryros.com"
+                        href="mailto:kryrosmobile@gmail.com"
                         className="flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider"
                       >
                         <Mail className="h-3.5 w-3.5" />
                         Email
                       </a>
                     </div>
+                    {/* WhatsApp Support Button */}
+                    <a
+                      href="https://wa.me/260966423719"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#25D366] text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-100"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      WhatsApp Support
+                    </a>
                   </div>
                 </div>
               </motion.div>

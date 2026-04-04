@@ -1,14 +1,43 @@
 "use client"
 
-import { Home, Store, ShoppingBag, User, Search, ArrowLeftCircle } from "lucide-react"
+import { Home, Store, ShoppingBag, User, Search } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCart } from "@/providers/CartProvider"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
   const { getItemCount } = useCart()
   const cartCount = getItemCount()
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') {
+        const currentScrollY = window.scrollY
+        
+        // If scrolling down, hide the bar. If scrolling up, show it.
+        // Also show it if we are at the very top
+        if (currentScrollY < 10) {
+          setIsVisible(true)
+        } else if (currentScrollY > lastScrollY) {
+          setIsVisible(false)
+        } else {
+          setIsVisible(true)
+        }
+        
+        setLastScrollY(currentScrollY)
+      }
+    }
+
+    window.addEventListener('scroll', controlNavbar)
+    return () => {
+      window.removeEventListener('scroll', controlNavbar)
+    }
+  }, [lastScrollY])
 
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
@@ -19,35 +48,44 @@ export default function MobileBottomNav() {
   ] as const;
 
   return (
-    // "Clear" design - matches client request
-    <div className="fixed bottom-0 left-0 right-0 z-[100] h-16 bg-white/95 backdrop-blur-sm md:hidden flex items-center justify-around px-2 pb-safe transition-all duration-300">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = pathname === item.href;
-        const badge = "badge" in item ? item.badge : 0;
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          exit={{ y: 100 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="fixed bottom-0 left-0 right-0 z-[100] h-16 bg-white/95 backdrop-blur-md md:hidden flex items-center justify-around px-2 pb-safe border-t border-slate-100 shadow-[0_-8px_30px_rgb(0,0,0,0.04)]"
+        >
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            const badge = "badge" in item ? item.badge : 0;
 
-        return (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={`relative flex flex-col items-center justify-center gap-1 min-w-[64px] transition-all ${
-              isActive ? "text-primary scale-110" : "text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            <div className="relative">
-              <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
-              {badge > 0 && (
-                <span className="absolute -top-2 -right-2 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white border-2 border-white">
-                  {badge}
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`relative flex flex-col items-center justify-center gap-1 min-w-[64px] transition-all duration-300 ${
+                  isActive ? "text-primary scale-105" : "text-black hover:text-primary"
+                }`}
+              >
+                <div className="relative">
+                  <Icon className={`h-5 w-5 ${isActive ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
+                  {badge > 0 && (
+                    <span className="absolute -top-2 -right-2 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white border-2 border-white">
+                      {badge}
+                    </span>
+                  )}
+                </div>
+                <span className={`text-[9px] font-black uppercase tracking-widest transition-opacity ${isActive ? "opacity-100" : "opacity-70"}`}>
+                  {item.label}
                 </span>
-              )}
-            </div>
-            <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-60"}`}>
-              {item.label}
-            </span>
-          </Link>
-        )
-      })}
-    </div>
+              </Link>
+            )
+          })}
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

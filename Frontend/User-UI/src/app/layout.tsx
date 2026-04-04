@@ -43,7 +43,6 @@ export default function RootLayout({
                   <main className="flex-grow">
                     {children}
                   </main>
-                  <WhatsAppWidget />
                   <MobileBottomNav />
                 </div>
                 <Toaster />
