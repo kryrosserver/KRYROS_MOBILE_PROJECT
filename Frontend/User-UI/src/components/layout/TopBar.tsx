@@ -10,7 +10,7 @@ export function TopBar() {
   const [selectedLang, setSelectedLang] = useState({ name: "English", code: "en" });
 
   return (
-    <div className="hidden lg:block bg-[#f8fafc] border-b border-slate-200/60 py-1.5 md:py-2">
+    <div className="hidden lg:flex bg-[#f8fafc] border-b border-slate-200/60 py-1.5 md:py-2">
       <div className="container-custom flex items-center justify-between gap-4">
         {/* Left Side: Navigation Links */}
         <div className="flex items-center gap-4 md:gap-8 overflow-x-auto scrollbar-hide no-scrollbar flex-1 min-w-0 py-0.5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.1em] text-slate-600">
