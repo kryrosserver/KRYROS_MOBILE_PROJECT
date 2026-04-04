@@ -306,15 +306,18 @@ export function Header() {
   ].filter((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <header
-      className={`sticky top-0 transition-all duration-300 ${
-        mobileMenuOpen ? "z-[100]" : "z-50"
-      } ${
-        isScrolled
-          ? "bg-background/80 shadow-lg backdrop-blur-lg border-b border-border/40"
-          : "bg-background border-b border-slate-100"
-      }`}
-    >
+    <>
+      <AnnouncementBar />
+      <TopBar />
+      <header
+        className={`sticky top-0 transition-all duration-300 ${
+          mobileMenuOpen ? "z-[100]" : "z-50"
+        } ${
+          isScrolled
+            ? "bg-background/80 shadow-lg backdrop-blur-lg border-b border-border/40"
+            : "bg-background border-b border-slate-100"
+        }`}
+      >
       <div className="mx-auto max-w-7xl px-3 md:px-4">
         {/* Mobile Search Bar - Now on top (Matches Reference Image) */}
         <div className="pt-3 pb-1 lg:hidden relative">
