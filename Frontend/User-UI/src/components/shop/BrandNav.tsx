@@ -26,13 +26,13 @@ export function BrandNav() {
   if (loading) return null
 
   return (
-    <div className="bg-white border-b border-slate-100 overflow-x-auto scrollbar-none sticky top-[72px] z-40">
-      <div className="container-custom py-4 flex items-center justify-center gap-12 min-w-max">
+    <div className="bg-white border-b border-slate-100 overflow-x-auto scrollbar-hide no-scrollbar sticky top-[72px] lg:top-[80px] z-40">
+      <div className="px-4 py-4 flex items-center gap-3 min-w-max md:justify-center">
         {brands.map((brand) => (
           <Link 
             key={brand.id} 
             href={`/shop?search=${brand.name}`}
-            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors px-2"
+            className="group flex items-center justify-center px-6 py-2.5 rounded-xl border-2 border-slate-100 bg-white text-[11px] font-black uppercase tracking-widest text-slate-500 hover:border-kryros-green hover:text-kryros-green hover:bg-kryros-green/5 transition-all duration-300 shadow-sm hover:shadow-md active:scale-95"
           >
             {brand.name}
           </Link>

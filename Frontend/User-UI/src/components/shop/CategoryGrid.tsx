@@ -36,7 +36,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           delay: 3000,
           disableOnInteraction: false,
         }}
-        className="category-swiper pt-6 pb-10"
+        className="category-swiper pt-6 pb-10 !overflow-visible"
         breakpoints={{
           320: { slidesPerView: "auto", spaceBetween: 12 },
           480: { slidesPerView: "auto", spaceBetween: 16 },

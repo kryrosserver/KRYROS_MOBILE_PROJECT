@@ -164,11 +164,11 @@ export function Header() {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col sticky top-0 z-[100]">
       <AnnouncementBar />
       <TopBar />
       <header
-        className={`sticky top-0 transition-all duration-300 ${
+        className={`transition-all duration-300 ${
           mobileMenuOpen ? "z-[100]" : "z-50"
         } ${
           isScrolled
@@ -176,7 +176,7 @@ export function Header() {
             : "bg-background border-b border-slate-100"
         }`}
       >
-        <div className="mx-auto max-w-7xl px-3 md:px-4">
+        <div className="mx-auto max-w-7xl px-4 md:px-6">
           {/* Mobile Search Bar - Now on top (Matches Reference Image) */}
           <div className="pt-3 pb-1 lg:hidden relative">
             <div className="flex items-stretch overflow-visible rounded-lg border border-slate-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all bg-white shadow-sm h-11">
@@ -592,7 +592,7 @@ export function Header() {
                 <div className="relative">
                   <Heart className="h-5 w-5 md:h-6 md:w-6" />
                   {wishlistCount > 0 && (
-                    <span className="absolute -top-2 -right-2 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-kryros-green text-[8px] font-black text-white shadow-[0_2px_4px_rgba(34,197,94,0.3)] border-2 border-white ring-1 ring-kryros-green/10">
+                    <span className="absolute -top-1.5 -right-1.5 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-kryros-green text-[8px] font-black text-white shadow-[0_2px_4px_rgba(34,197,94,0.3)] border-2 border-white ring-1 ring-kryros-green/10">
                       {wishlistCount}
                     </span>
                   )}
@@ -608,7 +608,7 @@ export function Header() {
                 >
                   <div className="relative">
                     <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
-                    <span className="absolute -top-2 -right-2 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white shadow-[0_2px_4px_rgba(249,115,22,0.3)] border-2 border-white ring-1 ring-primary/10">
+                    <span className="absolute -top-1.5 -right-1.5 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white shadow-[0_2px_4px_rgba(249,115,22,0.3)] border-2 border-white ring-1 ring-primary/10">
                       {getItemCount()}
                     </span>
                   </div>
@@ -809,92 +809,7 @@ export function Header() {
                           </Link>
                         ))}
 
-                        {/* Currency Selector - Added back per user request */}
-                        <div className="relative border-t border-slate-100">
-                          <button
-                            onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
-                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
-                          >
-                            <span className="flex items-center gap-2">Currency</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.flag} ({selectedCountry?.currencyCode})</span>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
-                            </div>
-                          </button>
-                          <AnimatePresence>
-                            {mobileCurrencyOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-slate-50"
-                              >
-                                <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                                  {countries.map((c) => (
-                                    <button
-                                      key={c.id}
-                                      onClick={() => {
-                                        setCountry(c.code);
-                                        setMobileCurrencyOpen(false);
-                                      }}
-                                      className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
-                                    >
-                                      <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider">
-                                        <span>{c.flag}</span>
-                                        ({c.currencyCode})
-                                      </span>
-                                      {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
-                                    </button>
-                                  ))}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-
-                        {/* Language Selector */}
-                        <div className="relative border-t border-slate-100">
-                          <button
-                            onClick={() => setMobileLanguageOpen(!mobileLanguageOpen)}
-                            className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-50 flex items-center justify-between"
-                          >
-                            <span className="flex items-center gap-2">Language</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-slate-400 font-medium">{selectedLanguage.name}</span>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileLanguageOpen ? 'rotate-180' : '-rotate-90'}`} />
-                            </div>
-                          </button>
-                          <AnimatePresence>
-                            {mobileLanguageOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-slate-50"
-                              >
-                                {[
-                                  { name: "English", code: "en", flag: "🇺🇸" },
-                                  { name: "French", code: "fr", flag: "🇫🇷" },
-                                ].map((lang) => (
-                                  <button
-                                    key={lang.code}
-                                    onClick={() => {
-                                      setSelectedLanguage(lang);
-                                      setMobileLanguageOpen(false);
-                                    }}
-                                    className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
-                                  >
-                                    <span className="flex items-center gap-2">
-                                      <span>{lang.flag}</span>
-                                      {lang.name}
-                                    </span>
-                                    {selectedLanguage.code === lang.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
-                                  </button>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
+                        {/* Language & Currency removed on mobile per user request */}
                       </motion.div>
                     ) : (
                       <motion.div

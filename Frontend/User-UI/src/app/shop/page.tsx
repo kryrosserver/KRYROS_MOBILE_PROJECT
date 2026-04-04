@@ -125,7 +125,7 @@ function ShopContent() {
             </Suspense>
           </div>
 
-          {/* Brand Quick Links - Red boxes from image */}
+          {/* Brand Quick Links - Updated to Brand Teal (#1FA89A) */}
           {brands.length > 0 && (
             <div className="mb-12">
               <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
@@ -133,7 +133,7 @@ function ShopContent() {
                   <button
                     key={brand.id}
                     onClick={() => scrollToBrand(brand.slug)}
-                    className="flex-shrink-0 min-w-[120px] h-14 bg-white border-2 border-red-500 rounded-lg flex items-center justify-center px-4 hover:bg-red-50 transition-all shadow-sm group"
+                    className="flex-shrink-0 min-w-[120px] h-14 bg-white border-2 border-[#1FA89A]/30 rounded-lg flex items-center justify-center px-4 hover:bg-[#1FA89A]/5 hover:border-[#1FA89A] transition-all shadow-sm group"
                   >
                     {brand.logo ? (
                       <img 
@@ -142,7 +142,7 @@ function ShopContent() {
                         className="h-8 object-contain group-hover:scale-110 transition-transform" 
                       />
                     ) : (
-                      <span className="text-xs font-black text-red-600 uppercase tracking-widest">{brand.name}</span>
+                      <span className="text-xs font-black text-[#1FA89A] uppercase tracking-widest">{brand.name}</span>
                     )}
                   </button>
                 ))}
@@ -155,32 +155,32 @@ function ShopContent() {
       {/* Filters & Products Section */}
       <div className="pb-12">
         <div className="container-custom">
-          {/* Fast Filters Section */}
+          {/* Fast Filters Section - Updated to Teal */}
           <div className="space-y-4 mb-8">
             <h3 className="text-[15px] font-bold text-slate-700">Fast Filters:</h3>
             <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
               {/* Featured */}
-              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-blue-400 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-yellow-400 text-sm">⭐</span> FEATURED
               </button>
 
               {/* Best Sellers */}
-              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-blue-400 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-orange-500 text-sm">🔥</span> BEST SELLERS
               </button>
 
               {/* Top Rated */}
-              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-blue-400 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-pink-400 text-sm">👍</span> TOP RATED
               </button>
 
               {/* Select Color */}
-              <button className="flex-shrink-0 px-6 py-2.5 bg-white border border-slate-200 hover:border-blue-400 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 px-6 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 SELECT COLOR
               </button>
 
               {/* Select Storage */}
-              <button className="flex-shrink-0 px-6 py-2.5 bg-white border border-slate-200 hover:border-blue-400 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 px-6 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 SELECT STORAGE
               </button>
             </div>
@@ -189,8 +189,8 @@ function ShopContent() {
           {/* Toolbar Row: Filter, Sorting, Search Icon */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8 gap-4">
             <div className={`flex items-center gap-8 transition-all duration-300 ${showSearchInput ? 'opacity-0 invisible w-0 overflow-hidden' : 'opacity-100 visible'}`}>
-              {/* Filter Button - Exactly like image */}
-              <button className="h-11 px-6 bg-[#ebf2ff] border border-[#3b82f6]/30 text-[#3b82f6] rounded-lg font-bold flex items-center gap-3 hover:bg-[#dfe9ff] transition-colors">
+              {/* Filter Button - Updated to Teal */}
+              <button className="h-11 px-6 bg-[#1FA89A]/10 border border-[#1FA89A]/30 text-[#1FA89A] rounded-lg font-bold flex items-center gap-3 hover:bg-[#1FA89A]/20 transition-colors">
                 <span className="text-base">Filter</span>
                 <SlidersHorizontal className="h-4 w-4" />
               </button>
