@@ -69,7 +69,14 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const init = readLS(LS_KEY, { 
+    const init = readLS<{
+      companyName: string;
+      logoDataUrl: string | null;
+      accentColor: string;
+      theme: "light" | "dark" | "system";
+      emailSettings: { orders: boolean; payments: boolean; credit: boolean };
+      pushSettings: { orders: boolean; payments: boolean };
+    }>(LS_KEY, { 
       companyName: "KRYROS", 
       logoDataUrl: null,
       accentColor: "#22c55e",
@@ -80,7 +87,11 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
     setCompanyName(init.companyName);
     setLogoDataUrl(init.logoDataUrl);
     setAccentColor(init.accentColor || "#22c55e");
-    setTheme(init.theme || "light");
+    if (init.theme === "light" || init.theme === "dark" || init.theme === "system") {
+      setTheme(init.theme);
+    } else {
+      setTheme("light");
+    }
     setEmailSettings(init.emailSettings || { orders: true, payments: true, credit: true });
     setPushSettings(init.pushSettings || { orders: true, payments: true });
 
