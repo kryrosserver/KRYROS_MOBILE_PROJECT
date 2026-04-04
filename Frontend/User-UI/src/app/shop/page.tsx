@@ -252,7 +252,7 @@ function ShopContent() {
             ) : products.length > 0 ? (
               <div className="space-y-16">
                 {/* Brand Grouped Sections */}
-                {groupedProducts.map((brand) => (
+                {groupedProducts.map((brand: any) => (
                   <section key={brand.id} id={`brand-${brand.slug}`} className="scroll-mt-24 animate-in fade-in duration-700">
                     <div className="flex items-center justify-between mb-8 border-l-4 border-red-500 pl-4">
                       <div className="flex items-center gap-4">
@@ -270,7 +270,7 @@ function ShopContent() {
                       </Link>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
-                      {brand.products.map((product) => (
+                      {brand.products.map((product: any) => (
                         <ProductCard key={product.id} product={product} />
                       ))}
                     </div>
@@ -286,7 +286,7 @@ function ShopContent() {
                       </h2>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
-                      {otherProducts.map((product) => (
+                      {otherProducts.map((product: any) => (
                         <ProductCard key={product.id} product={product} />
                       ))}
                     </div>
