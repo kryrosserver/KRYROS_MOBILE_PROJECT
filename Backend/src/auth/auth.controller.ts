@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -12,7 +13,23 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  async register(@Body() createUserDto: CreateUserDto) {
+  async register(@Body() createUserDto: CreateUserDto, @Request() req) {
+    // If a privileged role is requested, verify the requester is a SUPER_ADMIN
+    if (createUserDto.role && createUserDto.role !== UserRole.CUSTOMER) {
+      // Manual check for JWT since register is generally public
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        throw new UnauthorizedException('Authorization header missing for privileged role creation');
+      }
+      
+      const token = authHeader.split(' ')[1];
+      const payload = await this.authService.validateToken(token);
+      
+      if (!payload || payload.role !== UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Only Super Admins can create accounts with privileged roles');
+      }
+    }
+
     return this.authService.register(createUserDto);
   }
 
