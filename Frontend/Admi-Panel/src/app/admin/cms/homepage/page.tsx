@@ -76,6 +76,23 @@ export default function HomePageCMS() {
     }
   };
 
+  const seedSections = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/internal/admin/cms/homepage-sections/seed", { 
+        method: "POST",
+        credentials: "same-origin"
+      });
+      const data = await res.json();
+      alert(data.message || "Seeding operation finished");
+      loadSections();
+    } catch (err) {
+      alert("Failed to seed sections. Check server logs.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => { loadSections(); }, []);
 
   const handleSave = async () => {
@@ -522,18 +539,12 @@ export default function HomePageCMS() {
             <div className="p-12 text-center">
               <Layout className="h-12 w-12 text-slate-200 mx-auto mb-3" />
               <h3 className="text-slate-900 font-bold uppercase tracking-widest mb-1">No Sections Created</h3>
-              <p className="text-slate-500 text-sm mb-6">Start building your homepage by adding your first section.</p>
+              <p className="text-slate-500 text-sm mb-6">Start building your KRYROS homepage by adding your first section or restore the defaults.</p>
               <button 
-                onClick={async () => {
-                  const res = await fetch("/internal/admin/cms/homepage-sections/seed", { 
-                    method: "POST",
-                    credentials: "same-origin"
-                  });
-                  if (res.ok) loadSections();
-                }}
+                onClick={seedSections}
                 className="btn-secondary flex items-center gap-2 mx-auto"
               >
-                <RefreshCw className="h-4 w-4" /> Seed Default Sections
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Restore Default Sections
               </button>
             </div>
           )}

@@ -51,8 +51,11 @@ export class CMSService {
   }
 
   async seedHomePageSections() {
-    const existing = await this.prisma.homePageSection.findFirst();
-    if (existing) return { success: true, message: 'HomePage sections already seeded' };
+    // Check if we already have these specific sections to avoid duplicates
+    const count = await this.prisma.homePageSection.count();
+    if (count > 0) {
+      return { success: true, message: `HomePage already has ${count} sections. Delete them first if you want to re-seed.` };
+    }
 
     const defaultSections = [
       {
@@ -101,7 +104,7 @@ export class CMSService {
         type: 'CreditSection',
         order: 5,
         isActive: true,
-        title: 'Kryros Credit',
+        title: 'KRYROS Credit',
         subtitle: 'Buy now, pay later',
         animation: 'fadeIn'
       }
@@ -111,7 +114,7 @@ export class CMSService {
       await this.prisma.homePageSection.create({ data: section as any });
     }
 
-    return { success: true, message: 'HomePage sections seeded' };
+    return { success: true, message: 'HomePage sections seeded successfully' };
   }
 
   async getBanners() {
