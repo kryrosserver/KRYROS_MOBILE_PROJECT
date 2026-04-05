@@ -24,11 +24,23 @@ function ShopContent() {
   const [showSearchInput, setShowSearchInput] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Fetch categories and brands on mount
+  // Synchronize category slug with selected category ID
   useEffect(() => {
-    // Start loading immediately
-    setLoading(true);
+    if (categories.length === 0) return;
 
+    const categoryId = categorySlug 
+      ? categories.find(c => c.slug === categorySlug)?.id 
+      : null;
+    
+    // Always update selected category to match the URL slug
+    setSelectedCategory(categoryId || null);
+    
+    // Fetch products whenever the category changes
+    fetchProducts(categoryId || undefined);
+  }, [categorySlug, categories]);
+
+  // Initial load for categories and brands only
+  useEffect(() => {
     const loadInitialData = async () => {
       try {
         const [catRes, brandRes] = await Promise.all([
@@ -36,28 +48,15 @@ function ShopContent() {
           brandsApi.getAll()
         ]);
 
-        let fetchedCategories: any[] = [];
         if (catRes.data) {
-          fetchedCategories = catRes.data as any[];
-          setCategories(fetchedCategories);
+          setCategories(catRes.data as any[]);
         }
 
         if (brandRes.data) {
           setBrands(brandRes.data as any[]);
         }
-
-        // Determine category from URL slug
-        const categoryFromUrl = categorySlug 
-          ? fetchedCategories.find(c => c.slug === categorySlug)?.id 
-          : null;
-        
-        setSelectedCategory(categoryFromUrl || null);
-        
-        // Fetch products immediately after getting categories
-        await fetchProducts(categoryFromUrl || undefined);
       } catch (err) {
         console.error('Initial load error:', err);
-        setLoading(false);
       }
     };
 
@@ -89,20 +88,6 @@ function ShopContent() {
   })).filter(b => b.products.length > 0)
 
   const otherProducts = products.filter(p => !p.brandId || !brands.find(b => b.id === p.brandId))
-
-  // Re-fetch products when category slug changes (navigation)
-  useEffect(() => {
-    // Skip if categories aren't loaded yet (handled by initial mount)
-    if (categories.length === 0) return;
-
-    const category = categorySlug ? categories.find(c => c.slug === categorySlug)?.id : null;
-    
-    // Only fetch if the category actually changed
-    if (category !== selectedCategory) {
-      setSelectedCategory(category || null);
-      fetchProducts(category || undefined);
-    }
-  }, [categorySlug]);
 
   const fetchProducts = async (categoryId?: string) => {
     setLoading(true)
@@ -142,17 +127,17 @@ function ShopContent() {
   }
 
   return (
-    <main className="min-h-screen bg-white pb-24 w-full">
+    <main className="min-h-screen bg-white pb-24 w-full overflow-x-hidden">
       {/* Page Heading Section - Clean white background */}
       <div className="bg-white pt-16 md:pt-32 pb-8 w-full">
-        <div className="w-full mx-auto px-4 md:px-8 max-w-7xl">
+        <div className="mx-auto px-4 md:px-8 max-w-7xl w-full">
           {/* Main Title - ALL PRODUCTS (Centered, clean) */}
-          <h1 className="text-center text-xl sm:text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight mb-8">
+          <h1 className="text-center text-xl sm:text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight mb-8 w-full">
             {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
           </h1>
 
           {/* Category Cards Grid - Horizontal scroll exactly like image */}
-          <div className="mb-8 w-full">
+          <div className="mb-8 w-full overflow-hidden">
             <Suspense fallback={<div className="h-40 bg-slate-50 animate-pulse rounded-2xl w-full" />}>
               <CategoryGrid categories={categories} />
             </Suspense>
@@ -160,8 +145,8 @@ function ShopContent() {
 
           {/* Brand Quick Links - Updated to Brand Teal (#1FA89A) */}
           {brands.length > 0 && (
-            <div className="mb-8 w-full">
-              <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="mb-8 w-full overflow-hidden">
+              <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 w-full">
                 {brands.map((brand) => (
                   <button
                     key={brand.id}
@@ -187,11 +172,11 @@ function ShopContent() {
 
       {/* Filters & Products Section */}
       <div className="pb-12 w-full">
-        <div className="w-full mx-auto px-4 md:px-8 max-w-7xl">
+        <div className="mx-auto px-4 md:px-8 max-w-7xl w-full">
           {/* Fast Filters Section - Updated to Teal */}
-          <div className="space-y-4 mb-8 w-full">
+          <div className="space-y-4 mb-8 w-full overflow-hidden">
             <h3 className="text-sm font-bold text-slate-700">Fast Filters:</h3>
-            <div className="flex overflow-x-auto pb-4 gap-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex overflow-x-auto pb-4 gap-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 w-full">
               {/* Featured */}
               <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-yellow-400 text-xs">⭐</span> FEATURED

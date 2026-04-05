@@ -25,7 +25,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <div className="w-full relative px-4 sm:px-0">
+    <div className="w-full relative px-4 sm:px-0 overflow-hidden">
       <Swiper
         modules={[Autoplay, Navigation]}
         spaceBetween={16}
@@ -36,7 +36,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           delay: 3000,
           disableOnInteraction: false,
         }}
-        className="category-swiper pt-2 pb-6 !overflow-visible"
+        className="category-swiper pt-2 pb-6"
         breakpoints={{
           320: { spaceBetween: 12 },
           640: { spaceBetween: 16 },

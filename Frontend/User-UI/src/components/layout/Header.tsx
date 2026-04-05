@@ -164,11 +164,11 @@ export function Header() {
   };
 
   return (
-    <div className="flex flex-col sticky top-0 z-[100]">
+    <div className="flex flex-col sticky top-0 z-[100] w-full bg-white">
       <AnnouncementBar />
       <TopBar />
       <header
-        className={`transition-all duration-300 ${
+        className={`w-full transition-all duration-300 ${
           mobileMenuOpen ? "z-[100]" : "z-50"
         } ${
           isScrolled
@@ -176,14 +176,14 @@ export function Header() {
             : "bg-background border-b border-slate-100"
         }`}
       >
-        <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <div className="mx-auto max-w-7xl px-4 md:px-6 w-full">
           {/* Mobile Search Bar - Now on top (Matches Reference Image) */}
-          <div className="pt-3 pb-1 lg:hidden relative">
-            <div className="flex items-stretch overflow-visible rounded-lg border border-slate-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all bg-white shadow-sm h-11">
+          <div className="pt-3 pb-1 lg:hidden relative w-full overflow-visible">
+            <div className="flex items-stretch rounded-lg border border-slate-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all bg-white shadow-sm h-11 w-full overflow-hidden">
               <input
                 type="text"
                 placeholder="Search for products"
-                className="flex-1 bg-white px-4 py-0 text-sm focus:outline-none min-w-0 h-full"
+                className="flex-1 bg-white px-4 py-0 text-sm focus:outline-none min-w-0 h-full w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
@@ -809,7 +809,95 @@ export function Header() {
                           </Link>
                         ))}
 
-                        {/* Language & Currency removed on mobile per user request */}
+                        {/* Language & Currency Selector - Added inside Sidebar */}
+                        <div className="flex flex-col divide-y divide-slate-100 bg-slate-50/50">
+                          {/* Currency Selector */}
+                          <div className="relative">
+                            <button
+                              onClick={() => setMobileCurrencyOpen(!mobileCurrencyOpen)}
+                              className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-100 flex items-center justify-between"
+                            >
+                              <span className="flex items-center gap-2">Currency</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-slate-400 font-medium">{selectedCountry?.flag} ({selectedCountry?.currencyCode})</span>
+                                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileCurrencyOpen ? 'rotate-180' : '-rotate-90'}`} />
+                              </div>
+                            </button>
+                            <AnimatePresence>
+                              {mobileCurrencyOpen && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden bg-white"
+                                >
+                                  <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                                    {countries.map((c) => (
+                                      <button
+                                        key={c.id}
+                                        onClick={() => {
+                                          setCountry(c.code);
+                                          setMobileCurrencyOpen(false);
+                                        }}
+                                        className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
+                                      >
+                                        <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider">
+                                          <span>{c.flag}</span>
+                                          ({c.currencyCode})
+                                        </span>
+                                        {selectedCountry?.code === c.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+                          {/* Language Selector */}
+                          <div className="relative">
+                            <button
+                              onClick={() => setMobileLanguageOpen(!mobileLanguageOpen)}
+                              className="w-full px-5 py-4 text-[13px] font-bold text-slate-800 transition-colors hover:bg-slate-100 flex items-center justify-between"
+                            >
+                              <span className="flex items-center gap-2">Language</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-slate-400 font-medium">{selectedLanguage.name}</span>
+                                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileLanguageOpen ? 'rotate-180' : '-rotate-90'}`} />
+                              </div>
+                            </button>
+                            <AnimatePresence>
+                              {mobileLanguageOpen && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden bg-white"
+                                >
+                                  {[
+                                    { name: "English", code: "en", flag: "🇺🇸" },
+                                    { name: "French", code: "fr", flag: "🇫🇷" },
+                                  ].map((lang) => (
+                                    <button
+                                      key={lang.code}
+                                      onClick={() => {
+                                        setSelectedLanguage(lang);
+                                        setMobileLanguageOpen(false);
+                                      }}
+                                      className="w-full px-10 py-3 text-xs font-bold text-slate-600 hover:text-primary flex items-center justify-between"
+                                    >
+                                      <span className="flex items-center gap-2">
+                                        <span>{lang.flag}</span>
+                                        {lang.name}
+                                      </span>
+                                      {selectedLanguage.code === lang.code && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
                       </motion.div>
                     ) : (
                       <motion.div
