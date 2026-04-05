@@ -1288,11 +1288,19 @@ export default function CMSPage() {
                   try {
                     const { id, createdAt, updatedAt, ...payload } = footerConfig;
                     
+                    // Clean boolean and number values
+                    const cleanPayload = {
+                      ...payload,
+                      announcementBarEnabled: Boolean(payload.announcementBarEnabled),
+                      newsletterPopupEnabled: Boolean(payload.newsletterPopupEnabled),
+                      newsletterPopupDelay: Number(payload.newsletterPopupDelay || 3000)
+                    };
+
                     const res = await fetch("/api/admin/cms/footer/config", {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       credentials: "same-origin",
-                      body: JSON.stringify(payload),
+                      body: JSON.stringify(cleanPayload),
                     });
                     
                     const data = await res.json();

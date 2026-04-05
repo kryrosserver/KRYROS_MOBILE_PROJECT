@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsBoolean, IsNumber } from 'class-validator';
 
 export class UpdateFooterConfigDto {
   @IsOptional()
@@ -41,7 +41,7 @@ export class UpdateFooterConfigDto {
 
   // Newsletter Popup Config
   @IsOptional()
-  @IsString()
+  @IsBoolean()
   newsletterPopupEnabled?: boolean;
 
   @IsOptional()
@@ -57,11 +57,12 @@ export class UpdateFooterConfigDto {
   newsletterPopupImage?: string;
 
   @IsOptional()
+  @IsNumber()
   newsletterPopupDelay?: number;
 
   // Announcement Bar Config
   @IsOptional()
-  @IsString()
+  @IsBoolean()
   announcementBarEnabled?: boolean;
 
   @IsOptional()
