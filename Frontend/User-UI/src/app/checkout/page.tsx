@@ -228,104 +228,104 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-12 md:py-20">
-      <div className="container-custom">
-        <div className="flex flex-col lg:flex-row gap-12">
+    <main className="min-h-screen bg-slate-50 py-8 md:py-20 w-full overflow-x-hidden">
+      <div className="container-custom px-4 md:px-8">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-12">
           {/* Checkout Steps */}
-          <div className="flex-1 space-y-10">
-            <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex-1 space-y-6 md:space-y-10">
+            <div className="flex items-center gap-2 mb-6 md:mb-8 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
               {[
-                { id: "INFORMATION", label: "Information", icon: User },
-                { id: "SHIPPING", label: "Shipping", icon: Truck },
-                { id: "PAYMENT", label: "Payment", icon: CreditCard },
+                { id: "INFORMATION", label: "Info", icon: User },
+                { id: "SHIPPING", label: "Ship", icon: Truck },
+                { id: "PAYMENT", label: "Pay", icon: CreditCard },
               ].map((s, idx) => (
                 <div key={s.id} className="flex items-center gap-2 shrink-0">
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
+                  <div className={`flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full border transition-all ${
                     step === s.id 
                       ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
                       : step === "COMPLETE" || (idx === 0 && step !== "INFORMATION") || (idx === 1 && step === "PAYMENT")
                       ? "bg-green-50 border-green-200 text-green-600"
                       : "bg-white border-slate-200 text-slate-400"
                   }`}>
-                    <s.icon className="h-4 w-4" />
-                    <span className="text-xs font-black uppercase tracking-widest">{s.label}</span>
+                    <s.icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">{s.label}</span>
                   </div>
-                  {idx < 2 && <div className="h-px w-8 bg-slate-200" />}
+                  {idx < 2 && <div className="h-px w-4 md:w-8 bg-slate-200" />}
                 </div>
               ))}
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600">
-                <AlertCircle className="h-5 w-5" />
-                <p className="text-sm font-bold">{error}</p>
+              <div className="p-3 md:p-4 bg-red-50 border border-red-100 rounded-xl md:rounded-2xl flex items-center gap-3 text-red-600">
+                <AlertCircle className="h-4 w-4 md:h-5 md:w-5" />
+                <p className="text-xs md:text-sm font-bold">{error}</p>
               </div>
             )}
 
-            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+            <div className="bg-white p-6 md:p-12 rounded-3xl md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
               {step === "INFORMATION" && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="grid gap-6">
-                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">Contact Information</h3>
+                <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="grid gap-4 md:gap-6">
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-slate-900">Contact Info</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email Address</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Email Address</label>
                         <Input 
                           placeholder="your@email.com" 
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
-                          className="h-12 rounded-xl"
+                          className="h-11 md:h-12 rounded-xl text-sm"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Phone Number</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Phone Number</label>
                         <Input 
                           placeholder="+260..." 
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                          className="h-12 rounded-xl"
+                          className="h-11 md:h-12 rounded-xl text-sm"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid gap-6">
-                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">Delivery Address</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:gap-6">
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-slate-900">Delivery Address</h3>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
                         <Input 
                           placeholder="John" 
                           value={formData.firstName}
                           onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                          className="h-12 rounded-xl"
+                          className="h-11 md:h-12 rounded-xl text-sm"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
                         <Input 
                           placeholder="Doe" 
                           value={formData.lastName}
                           onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                          className="h-12 rounded-xl"
+                          className="h-11 md:h-12 rounded-xl text-sm"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Street Address</label>
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Street Address</label>
                       <Input 
                         placeholder="House No, Street, Area" 
                         value={formData.street}
                         onChange={(e) => setFormData({...formData, street: e.target.value})}
-                        className="h-12 rounded-xl"
+                        className="h-11 md:h-12 rounded-xl text-sm"
                       />
                     </div>
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Country</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Country</label>
                         <select 
-                          className="w-full h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
+                          className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
                           value={formData.countryId}
                           onChange={(e) => setFormData({...formData, countryId: e.target.value})}
                         >
@@ -334,9 +334,9 @@ export default function CheckoutPage() {
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">State / Province</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">State / Province</label>
                         <select 
-                          className="w-full h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
+                          className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
                           value={formData.stateId}
                           onChange={(e) => setFormData({...formData, stateId: e.target.value})}
                           disabled={!formData.countryId}
@@ -346,9 +346,9 @@ export default function CheckoutPage() {
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">City / Town</label>
+                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">City / Town</label>
                         <select 
-                          className="w-full h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
+                          className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
                           value={formData.cityId}
                           onChange={(e) => setFormData({...formData, cityId: e.target.value})}
                           disabled={!formData.stateId}
@@ -363,57 +363,57 @@ export default function CheckoutPage() {
                   <div className="pt-4">
                     <Button 
                       onClick={handleNext}
-                      className="w-full md:w-auto h-14 px-12 font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20"
+                      className="w-full md:w-auto h-12 md:h-14 px-8 md:px-12 font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 text-xs md:text-sm"
                     >
-                      Continue to Shipping <ChevronRight className="h-4 w-4 ml-2" />
+                      Continue <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 </div>
               )}
 
               {step === "SHIPPING" && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">Shipping Method</h3>
-                    <p className="text-slate-500 text-sm">Select your preferred delivery option</p>
+                <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-2">
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-slate-900">Shipping Method</h3>
+                    <p className="text-slate-500 text-xs md:text-sm">Select your preferred delivery option</p>
                   </div>
 
                   {loading ? (
                     <div className="py-12 flex flex-col items-center justify-center gap-4">
                       <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Finding best rates...</p>
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Finding best rates...</p>
                     </div>
                   ) : (
-                    <div className="grid gap-4">
+                    <div className="grid gap-3 md:gap-4">
                       {shippingMethods.length > 0 ? (
                         shippingMethods.map((method) => (
                           <div 
                             key={method.id}
                             onClick={() => setFormData({...formData, shippingMethodId: method.id})}
-                            className={`p-6 border-2 rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
+                            className={`p-4 md:p-6 border-2 rounded-2xl md:rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
                               formData.shippingMethodId === method.id 
                                 ? "border-primary bg-primary/5 shadow-lg shadow-primary/5" 
                                 : "border-slate-100 hover:border-slate-200"
                             }`}
                           >
-                            <div className="flex items-center gap-4">
-                              <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            <div className="flex items-center gap-3 md:gap-4">
+                              <div className={`h-5 w-5 md:h-6 md:w-6 rounded-full border-2 flex items-center justify-center transition-all ${
                                 formData.shippingMethodId === method.id ? "border-primary" : "border-slate-200"
                               }`}>
-                                {formData.shippingMethodId === method.id && <div className="h-3 w-3 rounded-full bg-primary" />}
+                                {formData.shippingMethodId === method.id && <div className="h-2.5 w-2.5 md:h-3 md:w-3 rounded-full bg-primary" />}
                               </div>
-                              <div className="space-y-1">
-                                <p className="font-black text-slate-900 uppercase tracking-tight">{method.name}</p>
-                                <p className="text-xs text-slate-500 font-medium">Estimated Delivery: {method.estimatedDays || "2-5 days"}</p>
+                              <div className="space-y-0.5 md:space-y-1">
+                                <p className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">{method.name}</p>
+                                <p className="text-[10px] md:text-xs text-slate-500 font-medium">Delivery: {method.estimatedDays || "2-5 days"}</p>
                               </div>
                             </div>
-                            <span className="font-black text-primary">{formatPrice(method.price || method.fee)}</span>
+                            <span className="text-sm md:text-base font-black text-primary">{formatPrice(method.price || method.fee)}</span>
                           </div>
                         ))
                       ) : (
-                        <div className="p-8 border-2 border-dashed border-slate-100 rounded-[2rem] text-center">
-                          <Truck className="h-10 w-10 text-slate-200 mx-auto mb-4" />
-                          <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No shipping methods available for this location.</p>
+                        <div className="p-8 border-2 border-dashed border-slate-100 rounded-2xl md:rounded-[2rem] text-center">
+                          <Truck className="h-8 w-8 md:h-10 md:w-10 text-slate-200 mx-auto mb-4" />
+                          <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">No shipping available for this location.</p>
                         </div>
                       )}
                     </div>
@@ -423,71 +423,71 @@ export default function CheckoutPage() {
                     <Button 
                       variant="outline"
                       onClick={handleBack}
-                      className="h-14 px-8 font-black uppercase tracking-widest rounded-2xl border-slate-200"
+                      className="h-12 md:h-14 px-8 font-black uppercase tracking-widest rounded-xl md:rounded-2xl border-slate-200 text-xs"
                     >
                       <ChevronLeft className="h-4 w-4 mr-2" /> Back
                     </Button>
                     <Button 
                       onClick={handleNext}
                       disabled={!formData.shippingMethodId}
-                      className="flex-1 h-14 font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20"
+                      className="flex-1 h-12 md:h-14 font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 text-xs md:text-sm"
                     >
-                      Continue to Payment <ChevronRight className="h-4 w-4 ml-2" />
+                      Continue <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 </div>
               )}
 
               {step === "PAYMENT" && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">Payment Method</h3>
-                    <p className="text-slate-500 text-sm">Choose how you want to pay</p>
+                <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-2">
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-slate-900">Payment Method</h3>
+                    <p className="text-slate-500 text-xs md:text-sm">Choose how you want to pay</p>
                   </div>
 
-                  <div className="grid gap-4">
+                  <div className="grid gap-3 md:gap-4">
                     <div 
                       onClick={() => setFormData({...formData, paymentMethod: "WHATSAPP"})}
-                      className={`p-6 border-2 rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
+                      className={`p-4 md:p-6 border-2 rounded-2xl md:rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
                         formData.paymentMethod === "WHATSAPP" 
                           ? "border-primary bg-primary/5" 
                           : "border-slate-100 hover:border-slate-200"
                       }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <div className={`h-5 w-5 md:h-6 md:w-6 rounded-full border-2 flex items-center justify-center transition-all ${
                           formData.paymentMethod === "WHATSAPP" ? "border-primary" : "border-slate-200"
                         }`}>
-                          {formData.paymentMethod === "WHATSAPP" && <div className="h-3 w-3 rounded-full bg-primary" />}
+                          {formData.paymentMethod === "WHATSAPP" && <div className="h-2.5 w-2.5 md:h-3 md:w-3 rounded-full bg-primary" />}
                         </div>
-                        <div className="space-y-1">
-                          <p className="font-black text-slate-900 uppercase tracking-tight">WhatsApp Payment</p>
-                          <p className="text-xs text-slate-500 font-medium">Place order and pay via WhatsApp (Fastest)</p>
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">WhatsApp Payment</p>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Place order and pay via WhatsApp</p>
                         </div>
                       </div>
-                      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" className="h-8 w-8" alt="WhatsApp" />
+                      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" className="h-6 w-6 md:h-8 md:w-8" alt="WhatsApp" />
                     </div>
 
                     <div 
                       onClick={() => setFormData({...formData, paymentMethod: "BANK_TRANSFER"})}
-                      className={`p-6 border-2 rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
+                      className={`p-4 md:p-6 border-2 rounded-2xl md:rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
                         formData.paymentMethod === "BANK_TRANSFER" 
                           ? "border-primary bg-primary/5" 
                           : "border-slate-100 hover:border-slate-200"
                       }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <div className={`h-5 w-5 md:h-6 md:w-6 rounded-full border-2 flex items-center justify-center transition-all ${
                           formData.paymentMethod === "BANK_TRANSFER" ? "border-primary" : "border-slate-200"
                         }`}>
-                          {formData.paymentMethod === "BANK_TRANSFER" && <div className="h-3 w-3 rounded-full bg-primary" />}
+                          {formData.paymentMethod === "BANK_TRANSFER" && <div className="h-2.5 w-2.5 md:h-3 md:w-3 rounded-full bg-primary" />}
                         </div>
-                        <div className="space-y-1">
-                          <p className="font-black text-slate-900 uppercase tracking-tight">Bank / Mobile Money</p>
-                          <p className="text-xs text-slate-500 font-medium">Direct Transfer or Mobile Money Payment</p>
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">Bank / Mobile Money</p>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Direct Transfer or Mobile Money</p>
                         </div>
                       </div>
-                      <CreditCard className="h-6 w-6 text-slate-400" />
+                      <CreditCard className="h-5 w-5 md:h-6 md:w-6 text-slate-400" />
                     </div>
                   </div>
 
@@ -495,16 +495,16 @@ export default function CheckoutPage() {
                     <Button 
                       variant="outline"
                       onClick={handleBack}
-                      className="h-14 px-8 font-black uppercase tracking-widest rounded-2xl border-slate-200"
+                      className="h-12 md:h-14 px-8 font-black uppercase tracking-widest rounded-xl md:rounded-2xl border-slate-200 text-xs"
                     >
                       <ChevronLeft className="h-4 w-4 mr-2" /> Back
                     </Button>
                     <Button 
                       onClick={handlePlaceOrder}
                       disabled={loading}
-                      className="flex-1 h-14 font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 bg-slate-900"
+                      className="flex-1 h-12 md:h-14 font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 bg-green-600 hover:bg-green-700 text-xs md:text-sm"
                     >
-                      {loading ? "Processing..." : "Complete Order"} <ChevronRight className="h-4 w-4 ml-2" />
+                      {loading ? "Processing..." : "Place Order via WhatsApp"}
                     </Button>
                   </div>
                 </div>
