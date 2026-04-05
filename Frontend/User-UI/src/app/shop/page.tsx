@@ -143,7 +143,7 @@ function ShopContent() {
             </Suspense>
           </div>
 
-          {/* Brand Quick Links - Updated to Brand Teal (#1FA89A) */}
+          {/* Brand Quick Links - Updated to Brand Color (#2A3A4A) */}
           {brands.length > 0 && (
             <div className="mb-8 w-full overflow-hidden">
               <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 w-full">
@@ -151,7 +151,7 @@ function ShopContent() {
                   <button
                     key={brand.id}
                     onClick={() => scrollToBrand(brand.slug)}
-                    className="flex-shrink-0 min-w-[100px] h-12 bg-white border-2 border-[#1FA89A]/20 rounded-lg flex items-center justify-center px-4 hover:bg-[#1FA89A]/5 hover:border-[#1FA89A] transition-all shadow-sm group"
+                    className="flex-shrink-0 min-w-[100px] h-12 bg-white border-2 border-[#2A3A4A]/10 rounded-lg flex items-center justify-center px-4 hover:bg-[#2A3A4A]/5 hover:border-[#2A3A4A] transition-all shadow-sm group"
                   >
                     {brand.logo ? (
                       <img 
@@ -160,7 +160,7 @@ function ShopContent() {
                         className="h-6 object-contain group-hover:scale-110 transition-transform" 
                       />
                     ) : (
-                      <span className="text-[10px] font-black text-[#1FA89A] uppercase tracking-widest">{brand.name}</span>
+                      <span className="text-[10px] font-black text-[#2A3A4A] uppercase tracking-widest">{brand.name}</span>
                     )}
                   </button>
                 ))}

@@ -11,8 +11,8 @@ interface LogoProps {
 
 export function Logo({ size = 32, className }: LogoProps) {
   return (
-    <div className={cn("flex items-center gap-2 group", className)}>
-      <div className="relative shrink-0">
+    <div className={cn("flex items-center gap-2.5 group", className)}>
+      <div className="relative shrink-0 flex items-center justify-center">
         <Image 
           src="/logo.png" 
           alt="Kryros Logo" 
@@ -21,16 +21,10 @@ export function Logo({ size = 32, className }: LogoProps) {
           className="object-contain"
         />
       </div>
-      <div className="flex flex-col">
+      <div className="flex items-center h-full">
         <span 
           className="font-black text-[#2A3A4A] uppercase tracking-tighter leading-none"
-          style={{ fontSize: size * 0.625 }}
-        >
-          KRYROS
-        </span>
-        <span 
-          className="font-black text-[#1FA89A] uppercase tracking-[0.2em] leading-none mt-1"
-          style={{ fontSize: size * 0.25 }}
+          style={{ fontSize: size * 0.65 }}
         >
           KRYROS
         </span>

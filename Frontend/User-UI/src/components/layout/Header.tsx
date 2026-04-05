@@ -592,7 +592,7 @@ export function Header() {
                 <div className="relative">
                   <Heart className="h-5 w-5 md:h-6 md:w-6" />
                   {wishlistCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-kryros-green text-[8px] font-black text-white shadow-[0_2px_4px_rgba(34,197,94,0.3)] border-2 border-white ring-1 ring-kryros-green/10">
+                    <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-[#2A3A4A] text-[9px] font-black text-white shadow-[0_2px_4px_rgba(42,58,74,0.3)] border-2 border-white">
                       {wishlistCount}
                     </span>
                   )}
@@ -608,7 +608,7 @@ export function Header() {
                 >
                   <div className="relative">
                     <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
-                    <span className="absolute -top-1.5 -right-1.5 flex h-[16px] min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white shadow-[0_2px_4px_rgba(249,115,22,0.3)] border-2 border-white ring-1 ring-primary/10">
+                    <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-[#2A3A4A] text-[9px] font-black text-white shadow-[0_2px_4px_rgba(42,58,74,0.3)] border-2 border-white">
                       {getItemCount()}
                     </span>
                   </div>
