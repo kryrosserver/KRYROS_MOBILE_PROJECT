@@ -1286,11 +1286,13 @@ export default function CMSPage() {
                   setError(null);
                   setMessage(null);
                   try {
+                    const { id, createdAt, updatedAt, ...payload } = footerConfig;
+                    
                     const res = await fetch("/api/admin/cms/footer/config", {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       credentials: "same-origin",
-                      body: JSON.stringify(footerConfig),
+                      body: JSON.stringify(payload),
                     });
                     
                     const data = await res.json();

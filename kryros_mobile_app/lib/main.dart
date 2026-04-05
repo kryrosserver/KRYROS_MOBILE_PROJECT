@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,7 +97,28 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
           onWebResourceError: (WebResourceError error) {
             _handleError();
           },
-          onNavigationRequest: (NavigationRequest request) {
+          onNavigationRequest: (NavigationRequest request) async {
+            final String url = request.url;
+            
+            // Handle WhatsApp, Phone, Email, and other external links
+            if (url.startsWith('whatsapp:') || 
+                url.startsWith('https://wa.me/') ||
+                url.startsWith('tel:') || 
+                url.startsWith('mailto:') ||
+                url.contains('maps.google.com') ||
+                url.contains('facebook.com')) {
+              
+              try {
+                final Uri uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  return NavigationDecision.prevent;
+                }
+              } catch (e) {
+                debugPrint('Error launching external URL: $e');
+              }
+            }
+            
             return NavigationDecision.navigate;
           },
         ),
