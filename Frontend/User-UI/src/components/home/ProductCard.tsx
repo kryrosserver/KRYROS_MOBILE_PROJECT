@@ -416,10 +416,6 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);
-              toast({
-                title: "Added to cart",
-                description: `${product.name} has been added to your cart.`,
-              });
             }}
           >
             ADD TO CART

@@ -544,7 +544,7 @@ export function Header() {
                               <button 
                                 className="px-4 py-2 text-xs font-bold text-slate-900 hover:text-primary transition-colors"
                                 onClick={() => {
-                                  // Add to cart logic would go here
+                                  addItem(product);
                                   setSearchOpen(false);
                                   setSearchQuery("");
                                 }}
