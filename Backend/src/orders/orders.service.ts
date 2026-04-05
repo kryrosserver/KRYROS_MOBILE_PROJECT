@@ -314,7 +314,8 @@ export class OrdersService {
     const tax = subtotal * 0.16; // 16% VAT
     const total = subtotal + tax + shipping;
 
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    // Simplified Order ID: random 7-character alphanumeric string
+    const orderNumber = Math.random().toString(36).substr(2, 7).toUpperCase();
 
     // 4. Prisma Transaction
     return this.prisma.$transaction(async (tx) => {

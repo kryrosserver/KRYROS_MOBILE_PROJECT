@@ -8,8 +8,8 @@ export class SettingsService implements OnModuleInit {
   async onModuleInit() {
     // Seed default settings if they don't exist
     const defaultSettings = [
-      { key: 'shipping_fee', value: '50', type: 'number', category: 'shipping' },
-      { key: 'free_shipping_threshold', value: '5000', type: 'number', category: 'shipping' },
+      { key: 'shipping_fee', value: '25', type: 'number', category: 'shipping' },
+      { key: 'free_shipping_threshold', value: '500', type: 'number', category: 'shipping' },
     ];
 
     for (const s of defaultSettings) {

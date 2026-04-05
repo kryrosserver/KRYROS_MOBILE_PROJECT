@@ -89,10 +89,10 @@ export default function TrackOrderPage() {
                 <div className="flex flex-col md:flex-row justify-between gap-6 border-b border-slate-50 pb-8">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</p>
-                    <h2 className="text-2xl font-black text-primary uppercase tracking-tight mt-1">{order.status}</h2>
+                    <h2 className="text-2xl font-black text-primary uppercase tracking-tight mt-1">{order.status || order.shippingStatus}</h2>
                   </div>
                   <div className="text-left md:text-right">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order ID</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Number</p>
                     <p className="font-bold text-slate-900 mt-1">#{order.orderNumber}</p>
                   </div>
                 </div>

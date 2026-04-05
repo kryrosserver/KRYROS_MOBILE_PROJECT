@@ -104,7 +104,7 @@ export default function CartPage() {
 
             <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
               <p className="text-xs font-bold text-primary uppercase tracking-widest text-center">
-                Free delivery on orders over K1,000
+                Free delivery on orders over $500
               </p>
             </div>
           </div>
