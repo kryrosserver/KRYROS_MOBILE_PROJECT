@@ -36,23 +36,26 @@ export function AnnouncementBar() {
 
   return (
     <div 
-      className="py-2 px-4 relative overflow-hidden transition-colors duration-300"
+      className="py-2 px-4 relative overflow-hidden transition-all duration-300"
       style={{
         backgroundColor: isBgHex ? config.announcementBarBgColor : undefined,
       }}
     >
       <div 
-        className={`container-custom flex items-center justify-center min-h-[24px] ${!isBgHex ? (config.announcementBarBgColor || 'bg-kryros-dark') : ''} ${!isTextHex ? (config.announcementBarTextColor || 'text-kryros-green') : ''}`}
+        className={`container-custom flex items-center justify-center min-h-[24px] ${!isBgHex ? (config.announcementBarBgColor || 'bg-[#1e293b]') : ''}`}
         style={{
           color: isTextHex ? config.announcementBarTextColor : undefined
         }}
       >
         {config.announcementBarLink ? (
-          <Link href={config.announcementBarLink} className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase hover:underline">
+          <Link 
+            href={config.announcementBarLink} 
+            className={`text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase hover:underline ${!isTextHex ? (config.announcementBarTextColor || 'text-kryros-green') : ''}`}
+          >
             {config.announcementBarText}
           </Link>
         ) : (
-          <p className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase">
+          <p className={`text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase ${!isTextHex ? (config.announcementBarTextColor || 'text-kryros-green') : ''}`}>
             {config.announcementBarText?.toUpperCase()}
           </p>
         )}
