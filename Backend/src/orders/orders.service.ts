@@ -96,8 +96,8 @@ export class OrdersService {
         AND: [
           {
             OR: [
-              { orderNumber: orderNumber },
-              { id: orderNumber }
+              { orderNumber: { equals: orderNumber, mode: 'insensitive' } },
+              { id: { equals: orderNumber, mode: 'insensitive' } }
             ]
           },
           {

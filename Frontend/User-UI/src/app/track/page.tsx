@@ -21,7 +21,7 @@ export default function TrackOrderPage() {
 
     try {
       // Clean order number (remove # if present and trim)
-      const cleanOrderNumber = orderNumber.replace("#", "").trim()
+      const cleanOrderNumber = orderNumber.replace(/#/g, "").trim()
       const res = await ordersApi.trackOrder(cleanOrderNumber, email.trim())
       if (res.data) {
         setOrder(res.data)
