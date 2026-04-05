@@ -36,13 +36,17 @@ export function AnnouncementBar() {
 
   return (
     <div 
-      className={`py-2 px-4 relative overflow-hidden transition-colors duration-300 ${!isBgHex ? (config.announcementBarBgColor || 'bg-kryros-dark') : ''} ${!isTextHex ? (config.announcementBarTextColor || 'text-kryros-green') : ''}`}
+      className="py-2 px-4 relative overflow-hidden transition-colors duration-300"
       style={{
         backgroundColor: isBgHex ? config.announcementBarBgColor : undefined,
-        color: isTextHex ? config.announcementBarTextColor : undefined
       }}
     >
-      <div className="container-custom flex items-center justify-center min-h-[24px]">
+      <div 
+        className={`container-custom flex items-center justify-center min-h-[24px] ${!isBgHex ? (config.announcementBarBgColor || 'bg-kryros-dark') : ''} ${!isTextHex ? (config.announcementBarTextColor || 'text-kryros-green') : ''}`}
+        style={{
+          color: isTextHex ? config.announcementBarTextColor : undefined
+        }}
+      >
         {config.announcementBarLink ? (
           <Link href={config.announcementBarLink} className="text-[11px] md:text-sm font-bold tracking-wide text-center px-8 uppercase hover:underline">
             {config.announcementBarText}
