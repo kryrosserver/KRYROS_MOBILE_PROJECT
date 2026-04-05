@@ -795,6 +795,7 @@ export function Header() {
                         {[
                           { name: "Home", href: "/" },
                           { name: "Shop", href: "/shop" },
+                          { name: "Track Order", href: "/track" },
                           { name: "Credit Plans", href: "/credit" },
                           { name: "Wholesale", href: "/wholesale" },
                         ].map((item) => (
