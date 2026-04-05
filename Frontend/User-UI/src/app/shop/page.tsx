@@ -142,40 +142,40 @@ function ShopContent() {
   }
 
   return (
-    <main className="min-h-screen bg-white pb-24">
+    <main className="min-h-screen bg-white pb-24 w-full">
       {/* Page Heading Section - Clean white background */}
-      <div className="bg-white pt-24 md:pt-32 pb-8">
-        <div className="container-custom">
+      <div className="bg-white pt-16 md:pt-32 pb-8 w-full">
+        <div className="w-full mx-auto px-4 md:px-8 max-w-7xl">
           {/* Main Title - ALL PRODUCTS (Centered, clean) */}
-          <h1 className="text-center text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight mb-12">
+          <h1 className="text-center text-xl sm:text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight mb-8">
             {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
           </h1>
 
           {/* Category Cards Grid - Horizontal scroll exactly like image */}
-          <div className="mb-8">
-            <Suspense fallback={<div className="h-40 bg-slate-50 animate-pulse rounded-2xl" />}>
+          <div className="mb-8 w-full">
+            <Suspense fallback={<div className="h-40 bg-slate-50 animate-pulse rounded-2xl w-full" />}>
               <CategoryGrid categories={categories} />
             </Suspense>
           </div>
 
           {/* Brand Quick Links - Updated to Brand Teal (#1FA89A) */}
           {brands.length > 0 && (
-            <div className="mb-12">
-              <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+            <div className="mb-8 w-full">
+              <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                 {brands.map((brand) => (
                   <button
                     key={brand.id}
                     onClick={() => scrollToBrand(brand.slug)}
-                    className="flex-shrink-0 min-w-[120px] h-14 bg-white border-2 border-[#1FA89A]/30 rounded-lg flex items-center justify-center px-4 hover:bg-[#1FA89A]/5 hover:border-[#1FA89A] transition-all shadow-sm group"
+                    className="flex-shrink-0 min-w-[100px] h-12 bg-white border-2 border-[#1FA89A]/20 rounded-lg flex items-center justify-center px-4 hover:bg-[#1FA89A]/5 hover:border-[#1FA89A] transition-all shadow-sm group"
                   >
                     {brand.logo ? (
                       <img 
                         src={resolveImageUrl(brand.logo)} 
                         alt={brand.name} 
-                        className="h-8 object-contain group-hover:scale-110 transition-transform" 
+                        className="h-6 object-contain group-hover:scale-110 transition-transform" 
                       />
                     ) : (
-                      <span className="text-xs font-black text-[#1FA89A] uppercase tracking-widest">{brand.name}</span>
+                      <span className="text-[10px] font-black text-[#1FA89A] uppercase tracking-widest">{brand.name}</span>
                     )}
                   </button>
                 ))}
@@ -186,51 +186,41 @@ function ShopContent() {
       </div>
 
       {/* Filters & Products Section */}
-      <div className="pb-12">
-        <div className="container-custom">
+      <div className="pb-12 w-full">
+        <div className="w-full mx-auto px-4 md:px-8 max-w-7xl">
           {/* Fast Filters Section - Updated to Teal */}
-          <div className="space-y-4 mb-8">
-            <h3 className="text-[15px] font-bold text-slate-700">Fast Filters:</h3>
-            <div className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+          <div className="space-y-4 mb-8 w-full">
+            <h3 className="text-sm font-bold text-slate-700">Fast Filters:</h3>
+            <div className="flex overflow-x-auto pb-4 gap-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
               {/* Featured */}
-              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
-                <span className="text-yellow-400 text-sm">⭐</span> FEATURED
+              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+                <span className="text-yellow-400 text-xs">⭐</span> FEATURED
               </button>
 
               {/* Best Sellers */}
-              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
-                <span className="text-orange-500 text-sm">🔥</span> BEST SELLERS
+              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+                <span className="text-orange-500 text-xs">🔥</span> BEST SELLERS
               </button>
 
               {/* Top Rated */}
-              <button className="flex-shrink-0 flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
-                <span className="text-pink-400 text-sm">👍</span> TOP RATED
-              </button>
-
-              {/* Select Color */}
-              <button className="flex-shrink-0 px-6 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
-                SELECT COLOR
-              </button>
-
-              {/* Select Storage */}
-              <button className="flex-shrink-0 px-6 py-2.5 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
-                SELECT STORAGE
+              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+                <span className="text-pink-400 text-xs">👍</span> TOP RATED
               </button>
             </div>
           </div>
 
           {/* Toolbar Row: Filter, Sorting, Search Icon */}
-          <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8 gap-4">
-            <div className={`flex items-center gap-8 transition-all duration-300 ${showSearchInput ? 'opacity-0 invisible w-0 overflow-hidden' : 'opacity-100 visible'}`}>
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6 gap-2">
+            <div className={`flex items-center gap-4 transition-all duration-300 ${showSearchInput ? 'opacity-0 invisible w-0 overflow-hidden' : 'opacity-100 visible'}`}>
               {/* Filter Button - Updated to Teal */}
-              <button className="h-11 px-6 bg-[#1FA89A]/10 border border-[#1FA89A]/30 text-[#1FA89A] rounded-lg font-bold flex items-center gap-3 hover:bg-[#1FA89A]/20 transition-colors">
-                <span className="text-base">Filter</span>
+              <button className="h-10 px-4 bg-[#1FA89A]/10 border border-[#1FA89A]/30 text-[#1FA89A] rounded-lg font-bold flex items-center gap-2 transition-colors">
+                <span className="text-sm">Filter</span>
                 <SlidersHorizontal className="h-4 w-4" />
               </button>
               
               {/* Sorting - Just text and chevron */}
               <div className="hidden sm:flex items-center gap-2 cursor-pointer group">
-                <span className="text-[15px] font-medium text-slate-600 group-hover:text-slate-900">Default sorting</span>
+                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900">Default sorting</span>
                 <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-slate-600" />
               </div>
             </div>
@@ -244,7 +234,7 @@ function ShopContent() {
                   placeholder="Search products..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-11 w-full bg-slate-50 border-slate-200 rounded-lg pl-10 pr-4 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="h-10 w-full bg-slate-50 border-slate-200 rounded-lg pl-9 pr-3 text-sm focus:ring-[#1FA89A]/20 focus:border-[#1FA89A]"
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               </form>
@@ -256,7 +246,7 @@ function ShopContent() {
                   setSearch("")
                   fetchProducts(selectedCategory || undefined)
                 }}
-                className="text-slate-500 font-bold text-xs uppercase tracking-widest"
+                className="text-slate-500 font-bold text-[10px] uppercase tracking-widest"
               >
                 Cancel
               </Button>
@@ -268,14 +258,14 @@ function ShopContent() {
                 setShowSearchInput(true)
                 setTimeout(() => searchInputRef.current?.focus(), 100)
               }}
-              className={`p-2 text-slate-700 hover:text-blue-600 transition-colors ${showSearchInput ? 'hidden' : 'block'}`}
+              className={`p-2 text-slate-700 hover:text-[#1FA89A] transition-colors ${showSearchInput ? 'hidden' : 'block'}`}
             >
               <Search className="h-5 w-5" />
             </button>
           </div>
 
           {/* Products Grid */}
-          <div className="pt-2">
+          <div className="pt-2 w-full">
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
                 {[...Array(10)].map((_, i) => (
@@ -283,24 +273,24 @@ function ShopContent() {
                 ))}
               </div>
             ) : products.length > 0 ? (
-              <div className="space-y-16">
+              <div className="space-y-12 w-full">
                 {/* Brand Grouped Sections */}
                 {groupedProducts.map((brand: any) => (
-                  <section key={brand.id} id={`brand-${brand.slug}`} className="scroll-mt-24 animate-in fade-in duration-700">
-                    <div className="flex items-center justify-between mb-8 border-l-4 border-primary pl-4 bg-slate-50/50 py-3 pr-4 rounded-r-xl">
-                      <div className="flex items-center gap-4">
+                  <section key={brand.id} id={`brand-${brand.slug}`} className="scroll-mt-24 animate-in fade-in duration-700 w-full">
+                    <div className="flex items-center justify-between mb-6 border-l-4 border-primary pl-4 bg-slate-50/50 py-2.5 pr-4 rounded-r-xl">
+                      <div className="flex items-center gap-3">
                         {brand.logo ? (
-                          <div className="bg-white p-1.5 rounded-lg border border-slate-100 shadow-sm">
-                            <img src={resolveImageUrl(brand.logo)} alt={brand.name} className="h-6 md:h-8 object-contain" />
+                          <div className="bg-white p-1 rounded-lg border border-slate-100 shadow-sm">
+                            <img src={resolveImageUrl(brand.logo)} alt={brand.name} className="h-5 md:h-7 object-contain" />
                           </div>
                         ) : (
-                          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900">{brand.name}</h2>
+                          <h2 className="text-lg md:text-2xl font-black uppercase tracking-tight text-slate-900">{brand.name}</h2>
                         )}
-                        <span className="bg-primary/10 text-[10px] font-black px-2.5 py-1 rounded-full text-primary uppercase tracking-widest">
+                        <span className="bg-primary/10 text-[9px] font-black px-2 py-0.5 rounded-full text-primary uppercase tracking-widest">
                           {brand.products.length} Items
                         </span>
                       </div>
-                      <Link href={`/shop?brand=${brand.slug}`} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:gap-2.5 transition-all bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
+                      <Link href={`/shop?brand=${brand.slug}`} className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
                         Explore <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
@@ -314,9 +304,9 @@ function ShopContent() {
 
                 {/* Other Products Section */}
                 {otherProducts.length > 0 && (
-                  <section className="animate-in fade-in duration-700">
-                    <div className="flex items-center gap-4 mb-8 border-l-4 border-slate-200 pl-4">
-                      <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">
+                  <section className="animate-in fade-in duration-700 w-full">
+                    <div className="flex items-center gap-4 mb-6 border-l-4 border-slate-200 pl-4">
+                      <h2 className="text-lg md:text-2xl font-black uppercase tracking-tight text-slate-900">
                         {groupedProducts.length > 0 ? "Other Products" : "Available Products"}
                       </h2>
                     </div>
@@ -329,18 +319,18 @@ function ShopContent() {
                 )}
               </div>
             ) : (
-              <div className="py-20 text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-50 mb-6">
-                  <Search className="h-10 w-10 text-slate-200" />
+              <div className="py-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                  <Search className="h-8 w-8 text-slate-200" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">No Products Found</h3>
-                <p className="text-slate-500 mb-8">Try adjusting your filters or search terms.</p>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">No Products Found</h3>
+                <p className="text-sm text-slate-500 mb-6">Try adjusting your filters or search terms.</p>
                 <Button 
                   onClick={() => {
                     setSearch("")
                     window.location.href = "/shop"
                   }}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-[#1FA89A] hover:bg-[#1FA89A]/90"
                 >
                   Clear All Filters
                 </Button>
