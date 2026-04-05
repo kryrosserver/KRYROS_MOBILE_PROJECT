@@ -111,6 +111,7 @@ export function getTimeRemaining(endTime: Date | string): {
 
 export function generateWhatsAppMessage(data: {
   orderNumber: string
+  orderId?: string
   customer: { firstName: string; lastName: string; phone: string; email: string }
   address: {
     street: string
@@ -143,7 +144,9 @@ export function generateWhatsAppMessage(data: {
   message += `*💰 Total: ${format(data.total)}*\n`
   if (data.notes) message += `*📝 Note:* ${data.notes}\n`
   
-  message += `\n*🚚 Track:* https://kryros.com/track-order?id=${data.orderNumber}&email=${encodeURIComponent(data.customer.email)}\n\n`
+  message += `\n*🚚 Track:* https://kryros.com/track\n`
+  message += `*Order Number:* ${data.orderNumber}\n`
+  message += `*Email Address:* ${data.customer.email}\n\n`
   
   message += `_Please send payment details to complete this order. Thanks!_`
 

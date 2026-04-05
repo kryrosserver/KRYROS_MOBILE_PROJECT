@@ -187,6 +187,7 @@ export default function CheckoutPage() {
         if (formData.paymentMethod === "WHATSAPP") {
           const message = generateWhatsAppMessage({
             orderNumber: order.orderNumber,
+            orderId: order.id,
             customer: {
               firstName: formData.firstName,
               lastName: formData.lastName,

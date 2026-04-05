@@ -20,7 +20,9 @@ export default function TrackOrderPage() {
     setOrder(null)
 
     try {
-      const res = await ordersApi.trackOrder(orderNumber, email)
+      // Clean order number (remove # if present and trim)
+      const cleanOrderNumber = orderNumber.replace("#", "").trim()
+      const res = await ordersApi.trackOrder(cleanOrderNumber, email.trim())
       if (res.data) {
         setOrder(res.data)
       } else {
