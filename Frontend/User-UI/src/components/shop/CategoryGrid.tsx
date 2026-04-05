@@ -45,7 +45,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
         }}
       >
         {/* "All" Category Slide */}
-        <SwiperSlide className="!w-[100px] sm:!w-32 md:!w-40">
+        <SwiperSlide className="!w-[100px] sm:!w-32 md:!w-40 !p-1">
           <Link
             href="/shop"
             className={`group relative flex flex-col items-center transition-all ${
@@ -57,7 +57,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
                 ? "border-primary shadow-lg ring-1 ring-primary/20" 
                 : "border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-primary/20"
             }`}>
-              <div className={`absolute -top-2 -left-2 z-20 bg-primary text-white text-[8px] font-black h-6 w-6 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
+              <div className={`absolute -top-1 -left-1 z-20 bg-primary text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
                 !activeCategory ? "scale-110" : ""
               }`}>
                 ∞
@@ -85,7 +85,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
         {categories.map((category) => {
           const isActive = activeCategory === category.slug;
           return (
-            <SwiperSlide key={category.id} className="!w-[100px] sm:!w-32 md:!w-40">
+            <SwiperSlide key={category.id} className="!w-[100px] sm:!w-32 md:!w-40 !p-1">
               <Link
                 href={`/shop?category=${category.slug}`}
                 className={`group relative flex flex-col items-center transition-all ${
@@ -97,7 +97,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
                   ? "border-primary shadow-lg ring-1 ring-primary/20" 
                   : "border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-primary/20"
               }`}>
-                <div className={`absolute -top-2 -left-2 z-20 bg-primary text-white text-[8px] font-black h-6 w-6 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
+                <div className={`absolute -top-1 -left-1 z-20 bg-primary text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
                   isActive ? "scale-110" : ""
                 }`}>
                   {category._count?.products || 0}
