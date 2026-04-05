@@ -62,7 +62,7 @@ export function CreditSection({ section }: { section?: any }) {
                 </Button>
               </Link>
               <Link href="/about">
-                <Button variant="outline" className="h-12 md:h-16 px-6 md:px-10 border-white/20 text-white hover:bg-white/10 font-black uppercase tracking-widest text-xs md:text-sm rounded-lg md:rounded-xl">
+                <Button variant="outline" className="h-12 md:h-16 px-6 md:px-10 border-white/20 text-white hover:bg-white/10 font-black uppercase tracking-widest text-xs md:text-sm rounded-lg md:rounded-xl bg-transparent">
                   Learn More
                 </Button>
               </Link>

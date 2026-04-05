@@ -50,6 +50,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (product: Product, variant?: ProductVariant, quantity = 1) => {
+      let isUpdate = false;
       setItems((currentItems) => {
         const existingItemIndex = currentItems.findIndex(
           (item) =>
@@ -58,21 +59,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
         )
 
         if (existingItemIndex > -1) {
+          isUpdate = true;
           const updatedItems = [...currentItems]
           updatedItems[existingItemIndex].quantity += quantity
-          toast({
-            title: 'Cart updated',
-            description: `${product.name} quantity updated`,
-          })
           return updatedItems
         }
 
+        return [...currentItems, { product, variant, quantity }]
+      })
+
+      if (isUpdate) {
+        toast({
+          title: 'Cart updated',
+          description: `${product.name} quantity updated`,
+        })
+      } else {
         toast({
           title: 'Added to cart',
           description: `${product.name} added to your cart`,
         })
-        return [...currentItems, { product, variant, quantity }]
-      })
+      }
       setIsCartOpen(true)
     },
     [toast]
@@ -89,7 +95,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       toast({
         title: 'Removed from cart',
         description: 'Item removed from your cart',
-        variant: 'destructive',
+        className: "bg-white border-slate-200 text-slate-900 shadow-xl",
       })
     },
     [toast]

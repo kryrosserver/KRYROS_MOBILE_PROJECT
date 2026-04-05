@@ -178,17 +178,17 @@ function ShopContent() {
             <h3 className="text-sm font-bold text-slate-700">Fast Filters:</h3>
             <div className="flex overflow-x-auto pb-4 gap-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 w-full">
               {/* Featured */}
-              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#2A3A4A] hover:text-[#2A3A4A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-yellow-400 text-xs">⭐</span> FEATURED
               </button>
 
               {/* Best Sellers */}
-              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#2A3A4A] hover:text-[#2A3A4A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-orange-500 text-xs">🔥</span> BEST SELLERS
               </button>
 
               {/* Top Rated */}
-              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#1FA89A] hover:text-[#1FA89A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
+              <button className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-[#2A3A4A] hover:text-[#2A3A4A] rounded-full text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all shadow-sm">
                 <span className="text-pink-400 text-xs">👍</span> TOP RATED
               </button>
             </div>
@@ -197,8 +197,8 @@ function ShopContent() {
           {/* Toolbar Row: Filter, Sorting, Search Icon */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6 gap-2">
             <div className={`flex items-center gap-4 transition-all duration-300 ${showSearchInput ? 'opacity-0 invisible w-0 overflow-hidden' : 'opacity-100 visible'}`}>
-              {/* Filter Button - Updated to Teal */}
-              <button className="h-10 px-4 bg-[#1FA89A]/10 border border-[#1FA89A]/30 text-[#1FA89A] rounded-lg font-bold flex items-center gap-2 transition-colors">
+              {/* Filter Button - Updated to Brand Color */}
+              <button className="h-10 px-4 bg-[#2A3A4A]/10 border border-[#2A3A4A]/30 text-[#2A3A4A] rounded-lg font-bold flex items-center gap-2 transition-colors">
                 <span className="text-sm">Filter</span>
                 <SlidersHorizontal className="h-4 w-4" />
               </button>
@@ -219,7 +219,7 @@ function ShopContent() {
                   placeholder="Search products..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-10 w-full bg-slate-50 border-slate-200 rounded-lg pl-9 pr-3 text-sm focus:ring-[#1FA89A]/20 focus:border-[#1FA89A]"
+                  className="h-10 w-full bg-slate-50 border-slate-200 rounded-lg pl-9 pr-3 text-sm focus:ring-[#2A3A4A]/20 focus:border-[#2A3A4A]"
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               </form>
@@ -243,7 +243,7 @@ function ShopContent() {
                 setShowSearchInput(true)
                 setTimeout(() => searchInputRef.current?.focus(), 100)
               }}
-              className={`p-2 text-slate-700 hover:text-[#1FA89A] transition-colors ${showSearchInput ? 'hidden' : 'block'}`}
+              className={`p-2 text-slate-700 hover:text-[#2A3A4A] transition-colors ${showSearchInput ? 'hidden' : 'block'}`}
             >
               <Search className="h-5 w-5" />
             </button>
