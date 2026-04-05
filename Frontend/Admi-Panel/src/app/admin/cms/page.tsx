@@ -1283,6 +1283,8 @@ export default function CMSPage() {
                     return;
                   }
                   setSaving(true);
+                  setError(null);
+                  setMessage(null);
                   try {
                     const res = await fetch("/api/admin/cms/footer/config", {
                       method: "PUT",
@@ -1290,14 +1292,18 @@ export default function CMSPage() {
                       credentials: "same-origin",
                       body: JSON.stringify(footerConfig),
                     });
+                    
+                    const data = await res.json();
+                    
                     if (res.ok) {
                       setMessage("Announcement bar updated successfully");
-                      setError(null);
+                      // Re-load to ensure we have the absolute latest from DB
+                      await loadFooterConfig();
                     } else {
-                      setError("Failed to update announcement bar");
+                      setError(data.error || "Failed to update announcement bar");
                     }
                   } catch (err) {
-                    setError("Network error occurred");
+                    setError("Network error occurred while saving");
                   } finally {
                     setSaving(false);
                   }

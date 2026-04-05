@@ -21,8 +21,8 @@ async function fetchApi<T>(
     // Determine revalidation time based on endpoint
     let revalidate: number | false = 60; // Default 1 minute
     
-    if (endpoint.includes('/categories') || endpoint.includes('/cms/sections') || endpoint.includes('/settings')) {
-      revalidate = 3600; // 1 hour for relatively static data
+    if (endpoint.includes('/categories') || endpoint.includes('/cms/sections') || endpoint.includes('/settings') || endpoint.includes('/cms/footer/config')) {
+      revalidate = 0; // Disable cache for these to ensure instant updates
     } else if (endpoint.includes('/products')) {
       revalidate = 600; // 10 minutes for products
     }
