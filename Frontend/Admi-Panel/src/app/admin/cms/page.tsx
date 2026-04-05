@@ -1256,23 +1256,33 @@ export default function CMSPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Background Color</label>
-                <input
-                  type="text"
-                  value={footerConfig.announcementBarBgColor || "bg-kryros-dark"}
-                  onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarBgColor: e.target.value })}
-                  className="admin-input font-mono text-xs"
-                  placeholder="bg-kryros-dark"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={footerConfig.announcementBarBgColor || "bg-kryros-dark"}
+                    onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarBgColor: e.target.value })}
+                    className="admin-input font-mono text-xs flex-1"
+                    placeholder="e.g. #1FA89A or bg-primary"
+                  />
+                  {footerConfig.announcementBarBgColor?.startsWith('#') && (
+                    <div className="w-10 h-10 rounded border border-slate-200 shadow-sm shrink-0" style={{ backgroundColor: footerConfig.announcementBarBgColor }} />
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Text Color</label>
-                <input
-                  type="text"
-                  value={footerConfig.announcementBarTextColor || "text-kryros-green"}
-                  onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarTextColor: e.target.value })}
-                  className="admin-input font-mono text-xs"
-                  placeholder="text-kryros-green"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={footerConfig.announcementBarTextColor || "text-kryros-green"}
+                    onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarTextColor: e.target.value })}
+                    className="admin-input font-mono text-xs flex-1"
+                    placeholder="e.g. #FFFFFF or text-white"
+                  />
+                  {footerConfig.announcementBarTextColor?.startsWith('#') && (
+                    <div className="w-10 h-10 rounded border border-slate-200 shadow-sm shrink-0" style={{ backgroundColor: footerConfig.announcementBarTextColor }} />
+                  )}
+                </div>
               </div>
             </div>
             <div className="md:col-span-2 flex justify-end mt-4">
