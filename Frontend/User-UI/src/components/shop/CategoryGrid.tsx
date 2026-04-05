@@ -54,10 +54,10 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           >
             <div className={`relative w-full aspect-[1/1.1] bg-white rounded-xl overflow-visible border transition-all duration-300 ${
               !activeCategory 
-                ? "border-primary shadow-lg ring-1 ring-primary/20" 
-                : "border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-primary/20"
+                ? "border-[#2A3A4A] shadow-lg ring-1 ring-[#2A3A4A]/20" 
+                : "border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-[#2A3A4A]/20"
             }`}>
-              <div className={`absolute -top-1 -left-1 z-20 bg-primary text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
+              <div className={`absolute -top-1 -left-1 z-20 bg-[#2A3A4A] text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
                 !activeCategory ? "scale-110" : ""
               }`}>
                 ∞
@@ -65,14 +65,14 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
               <div className="flex flex-col h-full p-2 md:p-3">
                 <div className="flex-1 relative w-full flex items-center justify-center">
                   <div className={`text-lg md:text-2xl font-black transition-colors ${
-                    !activeCategory ? "text-primary" : "text-slate-200 group-hover:text-primary/30"
+                    !activeCategory ? "text-[#2A3A4A]" : "text-slate-200 group-hover:text-[#2A3A4A]/30"
                   }`}>
                     ALL
                   </div>
                 </div>
                 <div className="text-center pt-1 md:pt-2">
                   <span className={`text-[10px] md:text-xs font-bold transition-colors block truncate ${
-                    !activeCategory ? "text-primary" : "text-slate-700 group-hover:text-primary"
+                    !activeCategory ? "text-[#2A3A4A]" : "text-slate-700 group-hover:text-[#2A3A4A]"
                   }`}>
                     All Products
                   </span>
@@ -94,10 +94,10 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
               >
               <div className={`relative w-full aspect-[1/1.1] bg-white rounded-xl overflow-visible border transition-all duration-300 ${
                 isActive 
-                  ? "border-primary shadow-lg ring-1 ring-primary/20" 
-                  : "border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-primary/20"
+                  ? "border-[#2A3A4A] shadow-lg ring-1 ring-[#2A3A4A]/20" 
+                  : "border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-[#2A3A4A]/20"
               }`}>
-                <div className={`absolute -top-1 -left-1 z-20 bg-primary text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
+                <div className={`absolute -top-1 -left-1 z-20 bg-[#2A3A4A] text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full shadow-lg border-2 border-white ${
                   isActive ? "scale-110" : ""
                 }`}>
                   {category._count?.products || 0}
@@ -115,7 +115,7 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
                   </div>
                   <div className="text-center pt-1 md:pt-2">
                     <span className={`text-[10px] md:text-xs font-bold transition-colors block truncate ${
-                      isActive ? "text-primary" : "text-slate-700 group-hover:text-primary"
+                      isActive ? "text-[#2A3A4A]" : "text-slate-700 group-hover:text-[#2A3A4A]"
                     }`}>
                       {category.name}
                     </span>
