@@ -1239,7 +1239,6 @@ export default function CMSPage() {
                 type="text"
                 value={footerConfig.announcementBarText || ""}
                 onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarText: e.target.value })}
-                onBlur={() => handleUpdateConfig(footerConfig)}
                 className="admin-input text-lg font-bold"
                 placeholder="e.g. 30% discount on all products special for November!"
               />
@@ -1250,7 +1249,6 @@ export default function CMSPage() {
                 type="text"
                 value={footerConfig.announcementBarLink || ""}
                 onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarLink: e.target.value })}
-                onBlur={() => handleUpdateConfig(footerConfig)}
                 className="admin-input"
                 placeholder="/shop, /credit, etc."
               />
@@ -1262,7 +1260,6 @@ export default function CMSPage() {
                   type="text"
                   value={footerConfig.announcementBarBgColor || "bg-kryros-dark"}
                   onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarBgColor: e.target.value })}
-                  onBlur={() => handleUpdateConfig(footerConfig)}
                   className="admin-input font-mono text-xs"
                   placeholder="bg-kryros-dark"
                 />
@@ -1273,11 +1270,43 @@ export default function CMSPage() {
                   type="text"
                   value={footerConfig.announcementBarTextColor || "text-kryros-green"}
                   onChange={(e) => setFooterConfig({ ...footerConfig, announcementBarTextColor: e.target.value })}
-                  onBlur={() => handleUpdateConfig(footerConfig)}
                   className="admin-input font-mono text-xs"
                   placeholder="text-kryros-green"
                 />
               </div>
+            </div>
+            <div className="md:col-span-2 flex justify-end mt-4">
+              <button
+                onClick={async () => {
+                  if (!footerConfig.announcementBarText?.trim()) {
+                    setError("Announcement message cannot be empty");
+                    return;
+                  }
+                  setSaving(true);
+                  try {
+                    const res = await fetch("/api/admin/cms/footer/config", {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "same-origin",
+                      body: JSON.stringify(footerConfig),
+                    });
+                    if (res.ok) {
+                      setMessage("Announcement bar updated successfully");
+                      setError(null);
+                    } else {
+                      setError("Failed to update announcement bar");
+                    }
+                  } catch (err) {
+                    setError("Network error occurred");
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="px-8 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all shadow-md disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Announcement"}
+              </button>
             </div>
           </div>
 
