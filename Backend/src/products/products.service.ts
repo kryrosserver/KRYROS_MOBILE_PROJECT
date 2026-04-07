@@ -35,7 +35,7 @@ export class ProductsService {
     if (allowCredit === true) {
       where.allowCredit = true;
       where.isWholesaleOnly = false;
-      where.creditMinimum = { not: null }; // Ensure it's a real credit product
+      where.creditMinimum = { gt: 0 }; // Ensure it's a real credit product with a positive monthly payment
     } else if (isWholesaleOnly === true) {
       where.isWholesaleOnly = true;
       where.allowCredit = false;
@@ -96,6 +96,15 @@ export class ProductsService {
       ]);
       return { data: products, meta: { total, skip, take } };
     }
+  }
+
+  async resetCreditFlags() {
+    return this.prisma.product.updateMany({
+      data: {
+        allowCredit: false,
+        creditMinimum: 0,
+      },
+    });
   }
 
   async findById(id: string) {

@@ -62,7 +62,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     if (country) {
       setSelectedCountry(country);
       localStorage.setItem("selected_country_code", code);
-      // Optional: window.location.reload() to ensure all components update correctly
+      // Force a full page reload to clear any cached price states in children
+      window.location.reload();
     }
   };
 

@@ -39,6 +39,12 @@ export class ProductsController {
     });
   }
 
+  @Post('reset-credit')
+  @ApiOperation({ summary: 'Reset all product credit flags (Emergency cleanup)' })
+  resetCreditFlags() {
+    return this.productsService.resetCreditFlags();
+  }
+
   @Get('credit')
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get products available for credit' })

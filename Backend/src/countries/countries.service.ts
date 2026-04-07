@@ -98,38 +98,41 @@ export class CountriesService implements OnModuleInit {
         rates = response.data.rates;
       } catch (fallbackError) {
         this.logger.error('All exchange rate providers failed.', fallbackError.message);
-        throw new BadRequestException('Failed to fetch live rates from all providers');
+        return { success: false, error: 'All providers failed' };
       }
     }
 
-    if (!rates) {
-      throw new BadRequestException('Received empty rates from providers');
-    }
+    if (rates) {
+      // Update ALL countries that have a currency code in the rates list
+      // This ensures even newly added countries without autoRate: true get an initial rate
+      try {
+        const allCountries = await this.prisma.country.findMany();
+        let updatedCount = 0;
 
-    try {
-      const autoRateCountries = await this.prisma.country.findMany({
-        where: { autoRate: true, status: true },
-      });
+        for (const country of allCountries) {
+          // Skip USD as it's the base
+          if (country.currencyCode === 'USD') continue;
 
-      for (const country of autoRateCountries) {
-        const newRate = rates[country.currencyCode];
-        if (newRate) {
-          await this.prisma.country.update({
-            where: { id: country.id },
-            data: {
-              exchangeRate: parseFloat(newRate.toFixed(4)),
-              lastRateUpdate: new Date(),
-            },
-          });
-          this.logger.log(`Updated rate for ${country.currencyCode}: ${newRate}`);
+          const newRate = rates[country.currencyCode];
+          if (newRate) {
+            await this.prisma.country.update({
+              where: { id: country.id },
+              data: {
+                exchangeRate: parseFloat(newRate.toFixed(4)),
+                lastRateUpdate: new Date(),
+              },
+            });
+            updatedCount++;
+            this.logger.log(`Updated rate for ${country.currencyCode}: ${newRate}`);
+          }
         }
+        return { success: true, updated: updatedCount };
+      } catch (dbError) {
+        this.logger.error('Failed to save updated rates to database', dbError.message);
+        return { success: false, error: `Failed to save rates: ${dbError.message}` };
       }
-      this.logger.log('Exchange rates updated successfully');
-      return { message: 'Rates updated successfully', updated: autoRateCountries.length };
-    } catch (dbError) {
-      this.logger.error('Failed to save updated rates to database', dbError.message);
-      throw new BadRequestException(`Failed to save rates: ${dbError.message}`);
     }
+    return { success: false, error: 'No rates data' };
   }
 
   async create(createCountryDto: CreateCountryDto) {
