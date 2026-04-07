@@ -39,6 +39,7 @@ export default function CheckoutPage() {
   const [states, setStates] = useState<any[]>([])
   const [cities, setCities] = useState<any[]>([])
   const [shippingMethods, setShippingMethods] = useState<any[]>([])
+  const selectedCountry = countries.find(c => c.id === formData.countryId)
 
   const [formData, setFormData] = useState({
     email: "",
