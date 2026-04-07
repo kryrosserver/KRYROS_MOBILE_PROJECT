@@ -13,8 +13,8 @@ export default function AboutPage() {
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-4">Our Mission</h2>
               <p className="text-lg text-slate-600 leading-relaxed font-medium">
-                Kryros Mobile Tech Limited is a leading provider of premium mobile technology and accessories in Zambia. 
-                We are dedicated to making high-quality tech accessible to everyone through innovative financing 
+                Kryros Global Tech Limited is a leading provider of premium technology and accessories across the globe. 
+                We are dedicated to making high-quality tech accessible to our customers through innovative financing 
                 solutions and competitive wholesale opportunities.
               </p>
             </section>
@@ -24,7 +24,7 @@ export default function AboutPage() {
               <p className="text-slate-600 leading-relaxed font-medium">
                 Our mission is to empower our customers with the tools they need to succeed in a digital world, 
                 providing not just products, but reliability and support. We specialize in the latest smartphones, 
-                tablets, and mobile accessories from top global brands.
+                tablets, and cutting-edge accessories from top global brands.
               </p>
             </section>
 

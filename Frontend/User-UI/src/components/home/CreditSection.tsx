@@ -38,7 +38,7 @@ export function CreditSection({ section }: { section?: any }) {
                 {section?.title || "Get the Tech You Want, Pay Later."}
               </h2>
               <p className="text-sm md:text-xl text-slate-400 font-medium leading-relaxed max-w-xl">
-                {section?.subtitle || "Our flexible credit plans allow you to own the latest mobile technology with manageable monthly installments."}
+                {section?.subtitle || "Our flexible credit plans allow you to own the latest technology with manageable monthly installments."}
               </p>
             </div>
             

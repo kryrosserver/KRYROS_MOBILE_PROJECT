@@ -15,7 +15,7 @@ export function WhatsAppWidget() {
     return () => clearTimeout(timer)
   }, [])
 
-  const whatsappNumber = "+260971234567" // Example Zambia number
+  const whatsappNumber = "+260971234567" // Support number
   const message = "Hello Kryros, I'm interested in learning more about your products and credit plans."
 
   const handleChat = () => {

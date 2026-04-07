@@ -64,7 +64,7 @@ export default function CreditPage() {
               Get the Tech You <span className="text-primary">Want</span>, Pay Later.
             </h1>
             <p className="mt-8 text-xl text-slate-500 font-medium leading-relaxed">
-              Kryros Credit makes it easier than ever to own the latest mobile technology. 
+              Kryros Credit makes it easier than ever to own the latest technology. 
               Break down your payments into manageable monthly installments.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
@@ -189,7 +189,7 @@ export default function CreditPage() {
         <div className="container-custom">
           <div className="max-w-2xl mx-auto space-y-8">
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight">Ready to Upgrade?</h2>
-            <p className="text-lg text-slate-500 font-medium">Join thousands of Zambians who trust Kryros for their technology needs.</p>
+            <p className="text-lg text-slate-500 font-medium">Join thousands of our customers who trust Kryros Global Tech for their technology needs.</p>
             <Link href="/credit/apply">
               <Button className="h-16 px-12 font-black uppercase tracking-widest rounded-2xl shadow-2xl shadow-primary/20 text-lg">
                 Start My Application

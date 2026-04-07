@@ -22,8 +22,8 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'KRYROS | Premium Mobile Tech',
-  description: 'Your trusted source for premium mobile technology and accessories.',
+  title: 'KRYROS | Premium Global Tech',
+  description: 'Your trusted source for premium technology and accessories across the globe.',
 }
 
 export default function RootLayout({

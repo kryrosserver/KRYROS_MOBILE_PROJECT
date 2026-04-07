@@ -198,7 +198,7 @@ export default function CheckoutPage() {
               street: formData.street,
               city: cities.find(c => c.id === formData.cityId)?.name || formData.cityName,
               state: states.find(s => s.id === formData.stateId)?.name || formData.stateName,
-              country: countries.find(c => c.id === formData.countryId)?.name || "Zambia",
+              country: countries.find(c => c.id === formData.countryId)?.name || "Global",
             },
             items: items.map(item => ({
               name: item.product.name,

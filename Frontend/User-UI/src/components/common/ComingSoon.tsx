@@ -19,7 +19,7 @@ export function ComingSoon() {
               Something <span className="text-primary">Exciting</span> is Building.
             </h1>
             <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-xl mx-auto">
-              We're working hard to bring you the best mobile technology experience in Zambia. 
+              We're working hard to bring you the best global technology experience across the globe. 
               This feature will be available very soon.
             </p>
           </div>

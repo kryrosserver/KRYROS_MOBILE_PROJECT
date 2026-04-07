@@ -120,43 +120,58 @@ export class OrdersService {
           },
         },
         shippingAddress: true,
-      }
-    });
-
-    if (!order) {
-      throw new NotFoundException('Order not found with the provided details');
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+        },
+      },
     }
+  });
 
-    // Return more detailed tracking info
-    return {
-      id: order.id,
-      orderNumber: order.orderNumber,
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      createdAt: order.createdAt,
-      items: order.items.map(item => ({
-        name: item.product.name,
-        quantity: item.quantity,
-        price: Number(item.price),
-        image: item.product.images?.find(i => i.isPrimary)?.url || item.product.images?.[0]?.url,
-        variant: item.variant?.value
-      })),
-      subtotal: Number(order.subtotal),
-      shipping: Number(order.shipping),
-      tax: Number(order.tax),
-      total: Number(order.total),
-      shippingAddress: order.shippingAddress ? {
-        firstName: order.shippingAddress.firstName,
-        lastName: order.shippingAddress.lastName,
-        address: order.shippingAddress.street,
-        city: order.shippingAddress.cityName || order.shippingAddress.city,
-        state: order.shippingAddress.stateName || order.shippingAddress.state,
-        country: order.shippingAddress.country
-      } : null,
-      shippingStatus: order.status
-    };
+  if (!order) {
+    throw new NotFoundException('Order not found with the provided details');
   }
+
+  // Return more detailed tracking info
+  return {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
+    createdAt: order.createdAt,
+    items: order.items.map(item => ({
+      name: item.product.name,
+      quantity: item.quantity,
+      price: Number(item.price),
+      total: Number(item.total),
+      image: item.product.images?.find(i => i.isPrimary)?.url || item.product.images?.[0]?.url,
+      variant: item.variant?.name || item.variant?.value
+    })),
+    subtotal: Number(order.subtotal),
+    shipping: Number(order.shipping),
+    tax: Number(order.tax),
+    discount: Number(order.discount),
+    total: Number(order.total),
+    customer: order.user || (order.shippingAddress ? {
+      firstName: order.shippingAddress.firstName,
+      lastName: order.shippingAddress.lastName,
+      email: order.shippingAddress.email
+    } : null),
+    shippingAddress: order.shippingAddress ? {
+      firstName: order.shippingAddress.firstName,
+      lastName: order.shippingAddress.lastName,
+      address: order.shippingAddress.street,
+      city: order.shippingAddress.cityName || order.shippingAddress.city,
+      state: order.shippingAddress.stateName || order.shippingAddress.state,
+      country: order.shippingAddress.country,
+      phone: order.shippingAddress.phone
+    } : null,
+    shippingStatus: order.status
+  };
+}
 
   async create(userId: string | undefined, data: CreateOrderDto) {
     const { items, shippingAddressId: providedShippingAddressId, billingAddressId: providedBillingAddressId, paymentMethod, notes, addressDetails } = data;

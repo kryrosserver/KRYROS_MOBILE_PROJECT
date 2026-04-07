@@ -15,7 +15,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "KRYROS Admin Panel",
-  description: "KRYROS Mobile Tech - Admin Control Panel",
+  description: "KRYROS Global Tech - Admin Control Panel",
 };
 
 export default function RootLayout({

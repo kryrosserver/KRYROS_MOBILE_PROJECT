@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { ordersApi } from "@/lib/api"
-import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle } from "lucide-react"
+import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useCurrency } from "@/providers/CurrencyProvider"
 
 export default function TrackOrderPage() {
+  const { formatLocal, convertPrice, selectedCountry } = useCurrency()
   const [orderNumber, setOrderNumber] = useState("")
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
@@ -40,6 +42,11 @@ export default function TrackOrderPage() {
     return steps.indexOf(status.toUpperCase())
   }
 
+  const displayPrice = (amount: number) => {
+    const converted = convertPrice(amount)
+    return formatLocal(converted.amount)
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 py-12 md:py-24">
       <div className="container-custom">
@@ -55,7 +62,7 @@ export default function TrackOrderPage() {
               <div className="space-y-2 md:col-span-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Order Number</label>
                 <Input 
-                  placeholder="e.g. KRY-12345" 
+                  placeholder="e.g. 0F51K9I" 
                   value={orderNumber}
                   onChange={(e) => setOrderNumber(e.target.value)}
                   required
@@ -104,7 +111,7 @@ export default function TrackOrderPage() {
                   <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-100 -translate-y-1/2 rounded-full" />
                   <div 
                     className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-1000" 
-                    style={{ width: `${(getStatusStep(order.status) / 3) * 100}%` }}
+                    style={{ width: `${Math.max(0, (getStatusStep(order.status) / 3) * 100)}%` }}
                   />
                   
                   <div className="relative flex justify-between">
@@ -125,25 +132,114 @@ export default function TrackOrderPage() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8 pt-8 border-t border-slate-50">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <MapPin className="h-5 w-5 text-slate-400" />
-                      <h3 className="font-bold text-slate-900">Delivery Address</h3>
+                <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-50">
+                  <div className="space-y-8">
+                    {/* Customer & Date */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          <User className="h-3 w-3" />
+                          Customer
+                        </div>
+                        <p className="text-sm font-bold text-slate-900">
+                          {order.customer?.firstName} {order.customer?.lastName}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          <Calendar className="h-3 w-3" />
+                          Date
+                        </div>
+                        <p className="text-sm font-bold text-slate-900">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed ml-8">
-                      {order.shippingAddress.address}<br />
-                      {order.shippingAddress.city}, {order.shippingAddress.state}
-                    </p>
+
+                    {/* Delivery Address */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <MapPin className="h-3 w-3" />
+                        Delivery Address
+                      </div>
+                      <div className="text-sm text-slate-500 font-medium leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        {order.shippingAddress?.address}<br />
+                        {order.shippingAddress?.city}, {order.shippingAddress?.state}<br />
+                        {order.shippingAddress?.country}<br />
+                        <span className="text-slate-400 mt-2 block">{order.shippingAddress?.phone}</span>
+                      </div>
+                    </div>
+
+                    {/* Payment Info */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <CreditCard className="h-3 w-3" />
+                        Payment Method
+                      </div>
+                      <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p className="text-sm font-bold text-slate-900 uppercase tracking-tight">{order.paymentMethod?.replace(/_/g, ' ')}</p>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${
+                          order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                        }`}>
+                          {order.paymentStatus}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Package className="h-5 w-5 text-slate-400" />
-                      <h3 className="font-bold text-slate-900">Order Summary</h3>
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <Package className="h-3 w-3" />
+                      Order Items
                     </div>
-                    <p className="text-sm text-slate-500 font-medium ml-8">
-                      {order.items.length} items • Total: K{order.total.toLocaleString()}
-                    </p>
+                    
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
+                      {order.items.map((item: any, idx: number) => (
+                        <div key={idx} className="flex gap-4 p-3 rounded-2xl border border-slate-50 hover:border-slate-100 transition-colors">
+                          <div className="h-16 w-16 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100">
+                            {item.image ? (
+                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-200"><Package className="h-6 w-6" /></div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-slate-900 truncate">{item.name}</p>
+                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{item.variant || "Standard"}</p>
+                            <div className="flex justify-between items-end mt-1">
+                              <p className="text-xs text-slate-500 font-medium">{item.quantity}x {displayPrice(item.price)}</p>
+                              <p className="text-sm font-black text-primary">{displayPrice(item.total)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-3">
+                      <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <span>Subtotal</span>
+                        <span className="text-slate-900">{displayPrice(order.subtotal)}</span>
+                      </div>
+                      {order.discount > 0 && (
+                        <div className="flex justify-between text-[10px] font-black text-green-500 uppercase tracking-widest">
+                          <span>Discount</span>
+                          <span>-{displayPrice(order.discount)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <span>Shipping</span>
+                        <span className="text-slate-900">{displayPrice(order.shipping)}</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <span>Tax (VAT)</span>
+                        <span className="text-slate-900">{displayPrice(order.tax)}</span>
+                      </div>
+                      <div className="h-px bg-slate-200 my-2" />
+                      <div className="flex justify-between text-xl font-black text-slate-900">
+                        <span>Total</span>
+                        <span className="text-primary">{displayPrice(order.total)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -154,3 +250,4 @@ export default function TrackOrderPage() {
     </main>
   )
 }
+

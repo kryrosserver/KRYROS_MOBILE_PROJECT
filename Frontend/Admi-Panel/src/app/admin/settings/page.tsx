@@ -168,7 +168,7 @@ export default function SettingsPage() {
   const companySettings = {
     email: "kryrosmobile@gmail.com",
     phone: "+260966423719",
-    address: " Lusaka, Zambia",
+    address: "Across the Globe",
     website: "https://kryrosmobile.com",
     timezone: "Africa/Lusaka",
     currency: "USD",
@@ -178,7 +178,7 @@ export default function SettingsPage() {
   const paymentSettings = {
     paystackKey: "pk_test_****",
     flutterwaveKey: "flw_test_****",
-    bankName: "Stanbic Bank Zambia",
+    bankName: "Stanbic Bank Global",
     accountNumber: "********1234",
     accountName: "KRYROS MOBILE TECH LIMITED"
   };
@@ -314,7 +314,7 @@ export default function SettingsPage() {
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none bg-white"
                 >
                   <option value="USD">USD - US Dollar</option>
-                  <option value="ZMW">ZMW - Zambian Kwacha</option>
+                  <option value="ZMW">ZMW - Global Currency</option>
                   <option value="EUR">EUR - Euro</option>
                   <option value="GBP">GBP - British Pound</option>
                 </select>

@@ -35,6 +35,7 @@ export class ProductsService {
     if (allowCredit === true) {
       where.allowCredit = true;
       where.isWholesaleOnly = false;
+      where.creditMinimum = { not: null }; // Ensure it's a real credit product
     } else if (isWholesaleOnly === true) {
       where.isWholesaleOnly = true;
       where.allowCredit = false;

@@ -47,7 +47,7 @@ export function Footer() {
               <Logo />
             </Link>
             <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-xs">
-              Zambia's premium destination for mobile technology, accessories, and flexible financing solutions.
+              Your premium destination for global technology, accessories, and flexible financing solutions across the globe.
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition-all">
@@ -84,7 +84,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-            © {currentYear} Kryros Mobile Tech Limited. All rights reserved.
+            © {currentYear} Kryros Global Tech Limited. All rights reserved.
           </p>
           <div className="flex items-center gap-8">
             <Link href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900">Privacy Policy</Link>

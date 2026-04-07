@@ -69,7 +69,12 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const convertPrice = useCallback((usdPrice: number) => {
     if (!selectedCountry) return { amount: usdPrice, formatted: `$${usdPrice}`, isZambia: false };
 
-    let localAmount = usdPrice * Number(selectedCountry.exchangeRate);
+    // Ensure exchangeRate is a valid number and not zero
+    const rate = typeof selectedCountry.exchangeRate === 'string' 
+      ? parseFloat(selectedCountry.exchangeRate) 
+      : (Number(selectedCountry.exchangeRate) || 1);
+    
+    let localAmount = usdPrice * (rate || 1);
     const isZambia = selectedCountry.code === "ZM" || selectedCountry.currencyCode === "ZMW";
 
     // Zambia Special Rule: No decimals, round to nearest 10
@@ -79,7 +84,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
     const formatted = formatLocal(localAmount);
     return { amount: localAmount, formatted, isZambia };
-  }, [selectedCountry]);
+  }, [selectedCountry, formatLocal]);
 
   const formatLocal = useCallback((amount: number) => {
     if (!selectedCountry) return `$${amount}`;

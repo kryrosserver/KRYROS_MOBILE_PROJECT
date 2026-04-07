@@ -51,7 +51,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Visit Us</p>
-                    <p className="text-lg font-bold text-slate-900">Lusaka, Zambia</p>
+                    <p className="text-lg font-bold text-slate-900">Across the Globe</p>
                     <p className="text-sm text-slate-500 font-medium">Central Business District</p>
                   </div>
                 </div>

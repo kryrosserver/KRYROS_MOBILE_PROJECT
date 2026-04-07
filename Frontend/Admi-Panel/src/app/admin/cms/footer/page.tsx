@@ -330,10 +330,10 @@ export default function FooterManagementPage() {
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({
-          description: "Your trusted source for quality mobile technology and accessories in Zambia. We provide flexible payment plans and wholesale opportunities.",
+          description: "Your trusted source for quality global technology and accessories across the globe. We provide flexible payment plans and wholesale opportunities.",
           contactPhone: "+260 971 234 567",
           contactEmail: "info@kryros.com",
-          contactAddress: "Lusaka, Zambia",
+          contactAddress: "Across the Globe",
           newsletterTitle: "Stay Updated",
           newsletterSubtitle: "Subscribe to get the latest tech deals and news.",
           copyrightText: "© {year} KRYROS MOBILE TECH LIMITED. All rights reserved.",

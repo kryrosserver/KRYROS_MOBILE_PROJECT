@@ -150,15 +150,15 @@ export class CountriesService implements OnModuleInit {
         throw new BadRequestException(`Country with name "${countryData.name}" or code "${countryData.code}" already exists`);
       }
 
-      // If autoRate is enabled, fetch the initial rate from the API immediately
+      // If autoRate is enabled, or rate is 1.0, fetch the initial rate from the API immediately
       let initialRate = countryData.exchangeRate || 1.0;
-      if (countryData.autoRate) {
+      if (countryData.autoRate || initialRate === 1.0) {
         try {
           const response = await axios.get(this.PRIMARY_EXCHANGE_API);
           const rate = response.data.rates[countryData.currencyCode];
           if (rate) {
             initialRate = parseFloat(rate.toFixed(4));
-            this.logger.log(`Fetched initial auto-rate for ${countryData.currencyCode}: ${initialRate}`);
+            this.logger.log(`Fetched initial rate for ${countryData.currencyCode}: ${initialRate}`);
           }
         } catch (apiError) {
           this.logger.warn(`Failed to fetch initial rate for ${countryData.currencyCode}, using provided/default rate.`, apiError.message);

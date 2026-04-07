@@ -18,7 +18,7 @@ export default function SoftwarePage() {
     },
     {
       title: "POS Systems",
-      description: "Modern point-of-sale software optimized for Zambian retail environments.",
+      description: "Modern point-of-sale software optimized for retail environments across the globe.",
       icon: <Laptop className="h-6 w-6 text-primary" />
     },
     {
@@ -42,7 +42,7 @@ export default function SoftwarePage() {
               </h1>
               <p className="text-xl text-slate-500 font-medium leading-relaxed">
                 At Kryros, we don't just provide hardware. We build the software that 
-                drives modern Zambian enterprises forward.
+                drives modern enterprises forward across the globe.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/contact">

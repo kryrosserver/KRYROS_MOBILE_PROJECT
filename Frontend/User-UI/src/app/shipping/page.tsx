@@ -22,7 +22,7 @@ export default function ShippingPage() {
     },
     {
       title: "Countrywide Shipping",
-      description: "3-5 business days for deliveries to other provinces in Zambia.",
+      description: "3-5 business days for deliveries to other provinces across the globe.",
       time: "3-5 Days",
       price: "K150.00",
       icon: <MapPin className="h-6 w-6 text-primary" />
@@ -38,7 +38,7 @@ export default function ShippingPage() {
               Fast & Reliable <span className="text-primary">Shipping</span>
             </h1>
             <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-              We deliver your premium tech safely across Zambia. Track your order 
+              We deliver your premium tech safely across the globe. Track your order 
               from our warehouse to your doorstep.
             </p>
           </div>
