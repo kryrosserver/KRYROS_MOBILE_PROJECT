@@ -80,7 +80,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
   const priceInfo = convertPrice(basePrice);
   const originalPriceInfo = originalPrice ? convertPrice(originalPrice) : null;
-  const isUSD = !selectedCountry || selectedCountry.code === "US";
+  // REMOVED: const isUSD = !selectedCountry || selectedCountry.code === "US";
+  
+  // ALWAYS use priceInfo.formatted to ensure consistency across all currencies (including USD)
+  const displayBasePrice = priceInfo.formatted;
+  const displayOriginalPrice = originalPriceInfo?.formatted;
 
   // Extract key specs (RAM, Storage, etc.)
   let specs: any[] = [];
@@ -214,7 +218,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 <>
                   <div className="flex items-center gap-2">
                     <span className="text-xl font-bold text-slate-900">
-                      {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
+                      {displayBasePrice}
                     </span>
                     {isWholesale && unitsPerPack > 1 && (
                       <div className="flex items-center gap-2">
@@ -228,18 +232,18 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                         )}
                       </div>
                     )}
-                    {originalPrice && (
+                    {displayOriginalPrice && (
                       <span className="text-sm text-slate-500 line-through">
-                        {isUSD ? formatPrice(originalPrice) : originalPriceInfo?.formatted}
+                        {displayOriginalPrice}
                       </span>
                     )}
                   </div>
                   {isWholesale && unitsPerPack > 1 && (
                     <span className="text-[10px] text-slate-500 font-medium">
-                      {isUSD ? formatPrice(unitPrice) : unitPriceInfo.formatted} per unit
+                      {convertPrice(unitPrice).formatted} per unit
                     </span>
                   )}
-                  {!isUSD && (
+                  {!(!selectedCountry || selectedCountry.code === "US") && (
                     <span className="text-[10px] text-slate-400 font-medium italic">
                       ≈ {formatPrice(basePrice)} USD
                     </span>
@@ -362,13 +366,13 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
         {/* Price Section */}
         <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-2 md:mb-4">
-          {originalPrice && (
+          {displayOriginalPrice && (
             <span className="text-[11px] md:text-sm text-slate-400 line-through font-medium">
-              {isUSD ? formatPrice(originalPrice) : originalPriceInfo?.formatted}
+              {displayOriginalPrice}
             </span>
           )}
           <span className="text-sm md:text-xl font-black text-[#d11c1c] tracking-tight">
-            {isUSD ? formatPrice(basePrice) : priceInfo.formatted}
+            {displayBasePrice}
           </span>
         </div>
 
