@@ -9,6 +9,7 @@ import { Header } from '@/components/layout/Header'
 import { Toaster } from '@/components/ui/toaster'
 import { WhatsAppWidget } from '@/components/whatsapp/WhatsAppWidget'
 import MobileBottomNav from '@/components/layout/MobileNav/MobileBottomNav'
+import { PWAInstallPrompt } from '@/components/common/PWAInstallPrompt'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,6 +25,14 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: 'KRYROS | Premium Global Tech',
   description: 'Your trusted source for premium technology and accessories across the globe.',
+  manifest: '/manifest.json',
+  themeColor: '#1FA89A',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  appleWebApp: {
+    capable: true,
+    title: 'Kryros',
+    statusBarStyle: 'default',
+  },
 }
 
 export default function RootLayout({
@@ -45,6 +54,7 @@ export default function RootLayout({
                   </main>
                   <MobileBottomNav />
                 </div>
+                <PWAInstallPrompt />
                 <Toaster />
               </CartProvider>
             </CurrencyProvider>

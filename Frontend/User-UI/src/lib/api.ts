@@ -48,18 +48,18 @@ async function fetchApi<T>(
 
 // Auth API
 export const authApi = {
-  login: (email: string, password: string) =>
+  login: (identifier: string, password: string) =>
     fetchApi<{ user: any; accessToken: string; refreshToken: string }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
     }),
 
   register: (userData: {
-    email: string;
+    email?: string;
+    phone?: string;
     password: string;
     firstName: string;
     lastName: string;
-    phone?: string;
   }) =>
     fetchApi<{ user: any; accessToken: string; refreshToken: string }>('/auth/register', {
       method: 'POST',

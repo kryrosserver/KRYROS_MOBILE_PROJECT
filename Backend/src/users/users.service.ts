@@ -49,6 +49,24 @@ export class UsersService {
     });
   }
 
+  async findByPhone(phone: string) {
+    return this.prisma.user.findUnique({
+      where: { phone },
+    });
+  }
+
+  async findByIdentifier(identifier: string) {
+    // Check if identifier is email or phone
+    return this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { phone: identifier }
+        ]
+      }
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findById(id);
     

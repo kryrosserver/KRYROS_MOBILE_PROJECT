@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const result = await login(email, password)
+      const result = await login(identifier, password)
       if (result.success) {
         router.push("/dashboard")
       } else {
@@ -40,13 +40,13 @@ export default function LoginPage() {
         <h1 className="text-2xl font-black uppercase tracking-tight mb-6">Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Email</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Email or Phone Number</label>
             <Input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              type="text" 
+              value={identifier} 
+              onChange={(e) => setIdentifier(e.target.value)} 
               required 
-              placeholder="your@email.com"
+              placeholder="your@email.com or +260..."
             />
           </div>
           <div>

@@ -5,22 +5,24 @@ import { formatPrice, generateWhatsAppMessage } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { 
-  ShieldCheck, 
-  Truck, 
-  CreditCard, 
-  ChevronRight, 
-  ChevronLeft, 
-  MapPin, 
-  User, 
-  Phone, 
+import {
+  ShieldCheck,
+  Truck,
+  CreditCard,
+  ChevronRight,
+  ChevronLeft,
+  MapPin,
+  User,
+  Phone,
   Mail,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Download
 } from "lucide-react"
 import Link from "next/link"
 import { locationsApi, settingsApi, ordersApi } from "@/lib/api"
 import { useRouter } from "next/navigation"
+import { generateOrderPDF } from "@/lib/pdf-utils"
 
 type CheckoutStep = "INFORMATION" | "SHIPPING" | "PAYMENT" | "COMPLETE"
 
@@ -30,6 +32,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<CheckoutStep>("INFORMATION")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastCreatedOrder, setLastCreatedOrder] = useState<any | null>(null)
   
   // Locations Data
   const [countries, setCountries] = useState<any[]>([])
@@ -183,6 +186,7 @@ export default function CheckoutPage() {
       
       if (res.data) {
         const order = res.data
+        setLastCreatedOrder(order)
         
         if (formData.paymentMethod === "WHATSAPP") {
           const message = generateWhatsAppMessage({
@@ -523,7 +527,25 @@ export default function CheckoutPage() {
                       {formData.paymentMethod === "WHATSAPP" && " Please complete your payment via WhatsApp."}
                     </p>
                   </div>
-                  <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+                  <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <Button 
+                      variant="outline" 
+                      className="h-14 px-8 font-black uppercase tracking-widest rounded-2xl border-slate-200 w-full sm:w-auto gap-2"
+                      onClick={() => {
+                        if (lastCreatedOrder) {
+                          generateOrderPDF({
+                            ...lastCreatedOrder,
+                            currency: {
+                              code: selectedCountry?.currencyCode || 'USD',
+                              symbol: selectedCountry?.currencySymbol || '$'
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <Download className="h-5 w-5" />
+                      Download Summary
+                    </Button>
                     <Link href="/dashboard/orders">
                       <Button variant="outline" className="h-14 px-8 font-black uppercase tracking-widest rounded-2xl border-slate-200 w-full sm:w-auto">
                         View My Orders

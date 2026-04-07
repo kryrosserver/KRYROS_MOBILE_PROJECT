@@ -12,6 +12,7 @@ export default function RegisterPage() {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     password: "",
   })
   const [loading, setLoading] = useState(false)
@@ -21,11 +22,22 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!formData.email && !formData.phone) {
+      setError("Please provide either an email or a phone number.")
+      return
+    }
+
     setLoading(true)
     setError(null)
 
     try {
-      const result = await register(formData)
+      // Clean empty fields
+      const submitData = { ...formData }
+      if (!submitData.email) delete (submitData as any).email
+      if (!submitData.phone) delete (submitData as any).phone
+
+      const result = await register(submitData)
       if (result.success) {
         router.push("/dashboard")
       } else {
@@ -66,13 +78,21 @@ export default function RegisterPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Email</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Email (Optional)</label>
             <Input 
               type="email" 
               value={formData.email} 
               onChange={(e) => setFormData({...formData, email: e.target.value})} 
-              required 
               placeholder="your@email.com"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Phone Number (Optional)</label>
+            <Input 
+              type="text" 
+              value={formData.phone} 
+              onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+              placeholder="+260..."
             />
           </div>
           <div>

@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import { ordersApi } from "@/lib/api"
-import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard } from "lucide-react"
+import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useCurrency } from "@/providers/CurrencyProvider"
+import { generateOrderPDF } from "@/lib/pdf-utils"
 
 export default function TrackOrderPage() {
   const { formatLocal, convertPrice, selectedCountry } = useCurrency()
@@ -100,9 +101,24 @@ export default function TrackOrderPage() {
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</p>
                     <h2 className="text-2xl font-black text-primary uppercase tracking-tight mt-1">{order.status || order.shippingStatus}</h2>
                   </div>
-                  <div className="text-left md:text-right">
+                  <div className="text-left md:text-right flex flex-col items-start md:items-end gap-2">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Number</p>
                     <p className="font-bold text-slate-900 mt-1">#{order.orderNumber}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2 h-8 text-[10px] font-black uppercase tracking-widest gap-2"
+                      onClick={() => generateOrderPDF({
+                        ...order,
+                        currency: {
+                          code: selectedCountry?.currencyCode || 'USD',
+                          symbol: selectedCountry?.currencySymbol || '$'
+                        }
+                      })}
+                    >
+                      <Download className="h-3 w-3" />
+                      Download Summary
+                    </Button>
                   </div>
                 </div>
 

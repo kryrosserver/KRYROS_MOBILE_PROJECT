@@ -5,7 +5,8 @@ import { authApi } from '@/lib/api';
 
 interface User {
   id: string;
-  email: string;
+  email?: string;
+  phone?: string;
   firstName: string;
   lastName: string;
   role: string;
@@ -16,8 +17,8 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (data: { email: string; password: string; firstName: string; lastName: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  login: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (data: { email?: string; password: string; firstName: string; lastName: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -51,9 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     bootstrap();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     setIsLoading(true);
-    const response = await authApi.login(email, password);
+    const response = await authApi.login(identifier, password);
     setIsLoading(false);
 
     if (response.error) {

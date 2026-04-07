@@ -12,8 +12,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(identifier: string, password: string): Promise<any> {
+    const user = await this.usersService.findByIdentifier(identifier);
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...result } = user;
       return result;
@@ -22,7 +22,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByIdentifier(loginDto.identifier);
     
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -38,12 +38,13 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, phone: user.phone, sub: user.id, role: user.role };
     
     return {
       user: {
         id: user.id,
         email: user.email,
+        phone: user.phone,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
@@ -55,10 +56,22 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserDto) {
-    const existingUser = await this.usersService.findByEmail(createUserDto.email);
-    
-    if (existingUser) {
-      throw new ConflictException('Email already registered');
+    if (!createUserDto.email && !createUserDto.phone) {
+      throw new ConflictException('Either email or phone is required');
+    }
+
+    if (createUserDto.email) {
+      const existingEmail = await this.usersService.findByEmail(createUserDto.email);
+      if (existingEmail) {
+        throw new ConflictException('Email already registered');
+      }
+    }
+
+    if (createUserDto.phone) {
+      const existingPhone = await this.usersService.findByPhone(createUserDto.phone);
+      if (existingPhone) {
+        throw new ConflictException('Phone number already registered');
+      }
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -70,7 +83,7 @@ export class AuthService {
 
     const { password, ...result } = user;
     
-    const payload = { email: result.email, sub: result.id, role: result.role };
+    const payload = { email: result.email, phone: result.phone, sub: result.id, role: result.role };
     
     return {
       user: result,
@@ -86,7 +99,7 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, phone: user.phone, sub: user.id, role: user.role };
     
     return {
       accessToken: this.jwtService.sign(payload),
