@@ -6,11 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number, currency = 'USD'): string {
+  // If the currency is not USD, we should NOT use 'USD' style formatting
+  // because that will force the $ symbol and American rules.
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    currency: currency || 'USD',
+    minimumFractionDigits: (currency === 'ZMW' || currency === 'USD') ? 0 : 2,
+    maximumFractionDigits: (currency === 'ZMW' || currency === 'USD') ? 0 : 2,
   }).format(price)
 }
 

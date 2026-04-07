@@ -70,16 +70,16 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const formatLocal = useCallback((amount: number) => {
     if (!selectedCountry) return `$${amount}`;
 
-    const isZambia = selectedCountry.code === "ZM" || selectedCountry.currencyCode === "ZMW";
-    const formattedAmount = isZambia 
-      ? amount.toLocaleString('en-US') // No decimals for ZMW
-      : amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const currency = selectedCountry.currencyCode || 'USD';
+    const isZMW = currency === "ZMW";
 
-    if (selectedCountry.symbolPosition === "BEFORE") {
-      return `${selectedCountry.currencySymbol} ${formattedAmount}`;
-    } else {
-      return `${formattedAmount} ${selectedCountry.currencySymbol}`;
-    }
+    // Use a localized formatter that respects the selected currency
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: isZMW ? 0 : 2,
+      maximumFractionDigits: isZMW ? 0 : 2,
+    }).format(amount);
   }, [selectedCountry]);
 
   const convertPrice = useCallback((usdPrice: number) => {
