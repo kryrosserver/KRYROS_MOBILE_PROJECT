@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: false, error: 'Login failed' };
   };
 
-  const register = async (data: { email: string; password: string; firstName: string; lastName: string; phone?: string }) => {
+  const register = async (data: { email?: string; password: string; firstName: string; lastName: string; phone?: string }) => {
     setIsLoading(true);
     const response = await authApi.register(data);
     setIsLoading(false);
