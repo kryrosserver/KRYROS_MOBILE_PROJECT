@@ -66,6 +66,21 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const formatLocal = useCallback((amount: number) => {
+    if (!selectedCountry) return `$${amount}`;
+
+    const isZambia = selectedCountry.code === "ZM" || selectedCountry.currencyCode === "ZMW";
+    const formattedAmount = isZambia 
+      ? amount.toLocaleString('en-US') // No decimals for ZMW
+      : amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    if (selectedCountry.symbolPosition === "BEFORE") {
+      return `${selectedCountry.currencySymbol} ${formattedAmount}`;
+    } else {
+      return `${formattedAmount} ${selectedCountry.currencySymbol}`;
+    }
+  }, [selectedCountry]);
+
   const convertPrice = useCallback((usdPrice: number) => {
     if (!selectedCountry) return { amount: usdPrice, formatted: `$${usdPrice}`, isZambia: false };
 
@@ -85,21 +100,6 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const formatted = formatLocal(localAmount);
     return { amount: localAmount, formatted, isZambia };
   }, [selectedCountry, formatLocal]);
-
-  const formatLocal = useCallback((amount: number) => {
-    if (!selectedCountry) return `$${amount}`;
-
-    const isZambia = selectedCountry.code === "ZM" || selectedCountry.currencyCode === "ZMW";
-    const formattedAmount = isZambia 
-      ? amount.toLocaleString('en-US') // No decimals for ZMW
-      : amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    if (selectedCountry.symbolPosition === "BEFORE") {
-      return `${selectedCountry.currencySymbol} ${formattedAmount}`;
-    } else {
-      return `${formattedAmount} ${selectedCountry.currencySymbol}`;
-    }
-  }, [selectedCountry]);
 
   return (
     <CurrencyContext.Provider value={{ 
