@@ -80,9 +80,8 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
   const priceInfo = convertPrice(basePrice);
   const originalPriceInfo = originalPrice ? convertPrice(originalPrice) : null;
-  // REMOVED: const isUSD = !selectedCountry || selectedCountry.code === "US";
   
-  // ALWAYS use priceInfo.formatted to ensure consistency across all currencies (including USD)
+  // ALWAYS use priceInfo.formatted to ensure consistency across all currencies
   const displayBasePrice = priceInfo.formatted;
   const displayOriginalPrice = originalPriceInfo?.formatted;
 

@@ -85,21 +85,25 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const convertPrice = useCallback((usdPrice: number) => {
     if (!selectedCountry) return { amount: usdPrice, formatted: `$${usdPrice}`, isZambia: false };
 
-    // Ensure exchangeRate is a valid number and not zero
+    // DEBUG: Log the values to see why it's not multiplying
     const rate = typeof selectedCountry.exchangeRate === 'string' 
       ? parseFloat(selectedCountry.exchangeRate) 
       : (Number(selectedCountry.exchangeRate) || 1);
     
-    let localAmount = usdPrice * (rate || 1);
-    const isZambia = selectedCountry.code === "ZM" || selectedCountry.currencyCode === "ZMW";
+    // FORCE RATE TO 1.0 IF IT IS NOT ZAMBIA - THIS WAS THE HIDDEN BUG IN PREVIOUS LOGIC
+    // We need to ensure we are actually using the rate from the database
+    const actualRate = (selectedCountry.currencyCode === 'USD') ? 1 : rate;
+    
+    let localAmount = usdPrice * actualRate;
+    const isZMW = selectedCountry.currencyCode === "ZMW";
 
     // Zambia Special Rule: No decimals, round to nearest 10
-    if (isZambia) {
+    if (isZMW) {
       localAmount = Math.ceil(localAmount / 10) * 10;
     }
 
     const formatted = formatLocal(localAmount);
-    return { amount: localAmount, formatted, isZambia };
+    return { amount: localAmount, formatted, isZambia: isZMW };
   }, [selectedCountry, formatLocal]);
 
   return (
