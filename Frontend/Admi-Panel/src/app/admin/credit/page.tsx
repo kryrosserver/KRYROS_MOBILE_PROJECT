@@ -418,7 +418,7 @@ export default function CreditPage() {
                   
                   {/* Guarantee & Details Section */}
                   <div className="bg-white p-4 rounded-lg border border-slate-200 space-y-3">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Guarantee & Details</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Guarantee & Details (FIXED)</p>
                     <div className="space-y-3">
                       <div className="flex flex-col gap-1.5">
                         <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
