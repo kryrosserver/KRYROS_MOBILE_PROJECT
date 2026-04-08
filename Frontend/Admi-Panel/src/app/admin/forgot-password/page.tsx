@@ -19,7 +19,7 @@ export default function AdminForgotPasswordPage() {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, isAdmin: true }),
+        body: JSON.stringify({ identifier: email, isAdmin: true }),
       });
       
       // Even if the email doesn't exist, we show success for security
