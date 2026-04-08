@@ -18,7 +18,12 @@ import {
   Plus,
   Trash2,
   Edit2,
-  X
+  X,
+  Lock,
+  ShieldCheck,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 
@@ -37,7 +42,13 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
+  // Security State
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   // Shipping Methods State
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -143,6 +154,38 @@ export default function SettingsPage() {
       if (res.ok) loadShippingMethods();
     } catch (e) {
       console.error("Failed to delete shipping method", e);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage(null);
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: 'error', text: "Passwords do not match" });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const res = await fetch("/api/admin/profile/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Failed to update password");
+      
+      setPasswordMessage({ type: 'success', text: "Password updated successfully!" });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      setPasswordMessage({ type: 'error', text: err.message || "Something went wrong" });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -518,9 +561,87 @@ export default function SettingsPage() {
         )}
 
         {activeTab === "security" && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Authentication</h3>
+          <div className="space-y-8">
+            {/* Change Password Section */}
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Change Password</h3>
+                  <p className="text-sm text-slate-500">Ensure your account is using a secure password</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                {passwordMessage && (
+                  <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
+                    passwordMessage.type === 'success' ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
+                  }`}>
+                    {passwordMessage.type === 'success' ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
+                    <p className="text-sm font-medium">{passwordMessage.text}</p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Current Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Enter current password"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">New Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="New password"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Confirm New Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="btn-primary min-h-[44px] px-8 flex items-center gap-2"
+                  >
+                    {isSaving ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      "Update Password"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="pt-8 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Authentication Settings</h3>
               <div className="space-y-4">
                 <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
                   <div>
@@ -532,7 +653,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-slate-200">
+            <div className="pt-8 border-t border-slate-200">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Session Settings</h3>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Session Timeout (minutes)</label>
@@ -542,19 +663,6 @@ export default function SettingsPage() {
                   className="w-full max-w-xs px-4 py-2.5 border border-slate-300 rounded-lg"
                 />
                 <p className="text-sm text-slate-500">Admin will be logged out after this period of inactivity</p>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">IP Security</h3>
-              <div className="space-y-4">
-                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-lg cursor-pointer">
-                  <div>
-                    <span className="font-medium text-slate-900">IP Whitelist</span>
-                    <p className="text-sm text-slate-500">Restrict admin access to specific IPs</p>
-                  </div>
-                  <input type="checkbox" defaultChecked={securitySettings.ipWhitelist} className="h-5 w-5 rounded text-green-500" />
-                </label>
               </div>
             </div>
           </div>
