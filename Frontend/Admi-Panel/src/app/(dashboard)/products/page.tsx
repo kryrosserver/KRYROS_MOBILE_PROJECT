@@ -210,6 +210,20 @@ export default function ProductsPage() {
             <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Refresh</span>
           </button>
+          <button 
+            onClick={() => {
+              setForm({
+                ...form,
+                isFeatured: tab === "featured",
+                isFlashSale: tab === "flash" as any,
+              });
+              setShowCreate(true);
+            }} 
+            className="btn-primary min-h-[40px] md:min-h-[44px] px-4 py-2 flex items-center justify-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add {tab === "featured" ? "Featured" : tab === "flash" ? "Flash Sale" : "Product"}</span>
+          </button>
         </div>
       </div>
 
@@ -553,6 +567,349 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+
+      </div>
+    )}
+
+    {/* Create Product Modal */}
+    {showCreate && (
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between p-4 md:p-6 border-b shrink-0">
+            <h3 className="text-lg md:text-xl font-bold text-slate-900">Add New Product</h3>
+            <button onClick={() => setShowCreate(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100">
+              <X className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              {/* Left Column: Basic Information */}
+              <div className="space-y-4 md:space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Product Name</label>
+                  <input
+                    placeholder="Product name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="admin-input w-full min-h-[44px]"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Retail Price (USD)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Retail Price"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
+                      className="admin-input w-full min-h-[44px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Brand</label>
+                    <select
+                      value={form.brandId}
+                      onChange={(e) => setForm({ ...form, brandId: e.target.value })}
+                      className="admin-input w-full min-h-[44px]"
+                    >
+                      <option value="">Select Brand</option>
+                      {brands.map(b => (
+                        <option key={b.id} value={b.id}>{b.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Category</label>
+                  <select
+                    value={form.categorySlug}
+                    onChange={(e) => setForm({ ...form, categorySlug: e.target.value })}
+                    className="admin-input w-full min-h-[44px]"
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.slug}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
+                  <textarea
+                    placeholder="Description"
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="admin-input w-full h-24 resize-none"
+                  />
+                </div>
+
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                  <p className="text-sm font-bold text-slate-800 border-b pb-2">Product Status</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.isActive}
+                        onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                        className="w-5 h-5 text-green-500 rounded"
+                      />
+                      Active
+                    </label>
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.isFeatured}
+                        onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
+                        className="w-5 h-5 text-green-500 rounded"
+                      />
+                      Featured
+                    </label>
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(form as any).isFlashSale}
+                        onChange={(e) => setForm({ ...form, isFlashSale: e.target.checked as any })}
+                        className="w-5 h-5 text-green-500 rounded"
+                      />
+                      Flash Sale
+                    </label>
+                  </div>
+                  
+                  {((form as any).isFlashSale) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Flash Sale Price</label>
+                        <input
+                          type="number"
+                          placeholder="Flash Price"
+                          value={form.flashSalePrice}
+                          onChange={(e) => setForm({ ...form, flashSalePrice: e.target.value })}
+                          className="admin-input w-full min-h-[44px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ends At</label>
+                        <input
+                          type="datetime-local"
+                          value={form.flashSaleEnd}
+                          onChange={(e) => setForm({ ...form, flashSaleEnd: e.target.value })}
+                          className="admin-input w-full min-h-[44px]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Total Stock</label>
+                      <input
+                        type="number"
+                        placeholder="Total"
+                        value={form.stockTotal}
+                        onChange={(e) => setForm({ ...form, stockTotal: e.target.value })}
+                        className="admin-input w-full min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Current Stock</label>
+                      <input
+                        type="number"
+                        placeholder="Current"
+                        value={form.stockCurrent}
+                        onChange={(e) => setForm({ ...form, stockCurrent: e.target.value })}
+                        className="admin-input w-full min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Media & Specifications */}
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Product Images</label>
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 md:p-6 bg-slate-50 text-center relative">
+                    <input
+                      type="file"
+                      id="create-images"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const newFiles = Array.from(e.target.files || []);
+                        const previews = await Promise.all(newFiles.map((f) => compressImage(f, 1800, 0.9)));
+                        setForm((prev) => ({ ...prev, images: [...prev.images, ...previews] }));
+                        setFiles((prev) => [...prev, ...newFiles]);
+                      }}
+                    />
+                    <label htmlFor="create-images" className="cursor-pointer">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm mb-2 text-slate-400">
+                        <Package className="h-6 w-6" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-600">Click to upload images</p>
+                      <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG</p>
+                    </label>
+
+                    {form.images.length > 0 && (
+                      <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {form.images.map((src, i) => (
+                          <div key={i} className="group relative aspect-square rounded-lg overflow-hidden border bg-white shadow-sm">
+                            <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => {
+                                setForm(prev => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
+                                setFiles(prev => prev.filter((_, idx) => idx !== i));
+                              }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] font-bold text-center py-0.5">
+                              {i === 0 ? 'PRIMARY' : `IMAGE ${i + 1}`}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-semibold text-slate-700">Specifications</label>
+                    <button
+                      onClick={() => setForm({ ...form, specifications: [...form.specifications, { key: "", value: "" }] })}
+                      className="text-xs bg-green-500 text-white px-3 py-2 rounded-lg font-bold hover:bg-green-600 transition-colors min-h-[44px]"
+                    >
+                      + Add Spec
+                    </button>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+                    {form.specifications.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4 italic">No specifications.</p>
+                    ) : (
+                      form.specifications.map((spec, idx) => (
+                        <div key={idx} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center animate-in fade-in slide-in-from-top-1">
+                          <input
+                            placeholder="Key (e.g. RAM)"
+                            value={spec.key}
+                            onChange={(e) => {
+                              const newSpecs = [...form.specifications];
+                              newSpecs[idx].key = e.target.value;
+                              setForm({ ...form, specifications: newSpecs });
+                            }}
+                            className="admin-input flex-1 text-sm min-h-[44px]"
+                          />
+                          <input
+                            placeholder="Value (e.g. 8GB)"
+                            value={spec.value}
+                            onChange={(e) => {
+                              const newSpecs = [...form.specifications];
+                              newSpecs[idx].value = e.target.value;
+                              setForm({ ...form, specifications: newSpecs });
+                            }}
+                            className="admin-input flex-1 text-sm min-h-[44px]"
+                          />
+                          <button
+                            onClick={() => setForm({ ...form, specifications: form.specifications.filter((_, i) => i !== idx) })}
+                            className="text-slate-400 hover:text-red-500 p-2 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-red-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 md:p-6 border-t bg-slate-50 flex flex-col sm:flex-row justify-end items-center gap-3 shrink-0 rounded-b-xl">
+            <button onClick={() => setShowCreate(false)} className="w-full sm:w-auto px-6 py-3 min-h-[44px] text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">
+              Cancel
+            </button>
+            <button
+              disabled={creating}
+              onClick={async () => {
+                if (creating) return;
+                setCreating(true);
+                try {
+                  const formData = new FormData();
+                  Object.keys(form).forEach(key => {
+                    if (key === 'images') return;
+                    if (key === 'specifications') {
+                      formData.append(key, JSON.stringify(form.specifications));
+                      return;
+                    }
+                    formData.append(key, (form as any)[key]);
+                  });
+                  
+                  // Retail focus
+                  formData.append("isWholesaleOnly", "false");
+                  formData.append("allowCredit", "false");
+
+                  for (const f of files) {
+                    const recompressed = await compressImage(f, 2000, 0.9);
+                    const resp = await fetch(recompressed);
+                    const blob = await resp.blob();
+                    formData.append("images", new File([blob], f.name, { type: "image/jpeg" }));
+                  }
+
+                  const res = await fetch("/api/admin/products", { method: "POST", body: formData });
+                  const body = await res.json().catch(() => ({}));
+                  if (!res.ok) throw new Error(body?.error || "Failed to create product");
+                  
+                  setShowCreate(false);
+                  setFiles([]);
+                  setForm({
+                    name: "",
+                    sku: "",
+                    price: "",
+                    description: "",
+                    shortDescription: "",
+                    categorySlug: "",
+                    brandId: "" as string | number,
+                    isFeatured: false,
+                    isNew: true,
+                    discountPercentage: "",
+                    stockTotal: "50",
+                    stockCurrent: "42",
+                    hasFiveYearGuarantee: true,
+                    fiveYearGuaranteeText: "5 Year Guarantee",
+                    hasFreeReturns: true,
+                    freeReturnsText: "Free Returns",
+                    hasInstallmentOptions: true,
+                    installmentOptionsText: "Installment Options",
+                    upsellProductId: "",
+                    isActive: true,
+                    deliveryInfo: "",
+                    warrantyInfo: "",
+                    flashSalePrice: "",
+                    flashSaleEnd: "",
+                    images: [] as string[],
+                    specifications: [] as { key: string; value: string }[],
+                  });
+                  await load();
+                } catch (e: any) {
+                  alert(e.message || "Failed to create product");
+                } finally {
+                  setCreating(false);
+                }
+              }}
+              className="w-full sm:w-auto bg-green-500 text-white px-8 py-3 min-h-[44px] rounded-lg font-bold hover:bg-green-600 shadow-lg shadow-green-500/20 transition-all"
+            >
+              {creating ? "Adding..." : "Add Product"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* Edit Product Modal - Responsive */}
     {editItem && (

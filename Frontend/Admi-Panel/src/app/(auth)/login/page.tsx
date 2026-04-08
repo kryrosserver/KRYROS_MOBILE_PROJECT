@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
                 <input type="checkbox" className="rounded border-slate-300" />
                 Remember me
               </label>
-              <Link href="/forgot-password" className="text-sm font-medium text-green-600 hover:underline">
+              <Link href="/admin/forgot-password" data-testid="forgot-password-link" className="text-sm font-medium text-green-600 hover:underline">
                 Forgot password?
               </Link>
             </div>
