@@ -1,7 +1,8 @@
 "use client"
 
 import { useCart } from "@/providers/CartProvider"
-import { formatPrice, generateWhatsAppMessage } from "@/lib/utils"
+import { useCurrency } from "@/providers/CurrencyProvider"
+import { cn, resolveImageUrl, generateWhatsAppMessage } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,7 +29,8 @@ type CheckoutStep = "INFORMATION" | "SHIPPING" | "PAYMENT" | "COMPLETE"
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, getSubtotal, getTotal, clearCart } = useCart()
+  const { items, getSubtotal, clearCart } = useCart()
+  const { convertPrice, selectedCountry: currencyCountry } = useCurrency()
   const [step, setStep] = useState<CheckoutStep>("INFORMATION")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +41,7 @@ export default function CheckoutPage() {
   const [states, setStates] = useState<any[]>([])
   const [cities, setCities] = useState<any[]>([])
   const [shippingMethods, setShippingMethods] = useState<any[]>([])
-  const selectedCountry = countries.find(c => c.id === formData.countryId)
+  const selectedLocationCountry = countries.find(c => c.id === formData.countryId)
 
   const [formData, setFormData] = useState({
     email: "",
@@ -156,6 +158,10 @@ export default function CheckoutPage() {
     setLoading(true)
     setError(null)
     try {
+      const subtotal = getSubtotal()
+      const shippingFee = parseFloat((getSelectedShipping()?.price || 0).toString())
+      const total = subtotal + shippingFee
+
       const orderData = {
         items: items.map(item => ({
           productId: item.product.id,
@@ -178,9 +184,9 @@ export default function CheckoutPage() {
         },
         paymentMethod: formData.paymentMethod,
         shippingMethodId: formData.shippingMethodId,
-        subtotal: getSubtotal(),
-        shippingFee: getSelectedShipping()?.price || 0,
-        total: calculateTotal(),
+        subtotal: subtotal,
+        shippingFee: shippingFee,
+        total: total,
       }
 
       const res = await ordersApi.create(orderData)
@@ -208,13 +214,16 @@ export default function CheckoutPage() {
             items: items.map(item => ({
               name: item.product.name,
               quantity: item.quantity,
-              price: parseFloat(item.product.price.toString()),
+              price: convertPrice(parseFloat(item.product.price.toString())).amount,
               variant: item.variant?.name,
             })),
-            subtotal: getSubtotal(),
-            shipping: parseFloat((getSelectedShipping()?.price || 0).toString()),
-            total: calculateTotal(),
-            currency: { code: "ZMW", symbol: "ZMW" },
+            subtotal: convertPrice(subtotal).amount,
+            shipping: convertPrice(shippingFee).amount,
+            total: convertPrice(total).amount,
+            currency: { 
+              code: currencyCountry?.currencyCode || "ZMW", 
+              symbol: currencyCountry?.currencySymbol || "ZK" 
+            },
           })
           
           const whatsappNumber = "+260971234567" // This should ideally come from settings
@@ -413,7 +422,9 @@ export default function CheckoutPage() {
                                 <p className="text-[10px] md:text-xs text-slate-500 font-medium">Delivery: {method.estimatedDays || "2-5 days"}</p>
                               </div>
                             </div>
-                            <span className="text-sm md:text-base font-black text-primary">{formatPrice(method.price || method.fee)}</span>
+                            <span className="text-sm md:text-base font-black text-primary">
+                              {convertPrice(method.price || method.fee).formatted}
+                            </span>
                           </div>
                         ))
                       ) : (
@@ -537,8 +548,8 @@ export default function CheckoutPage() {
                           generateOrderPDF({
                             ...lastCreatedOrder,
                             currency: {
-                              code: selectedCountry?.currencyCode || 'USD',
-                              symbol: selectedCountry?.currencySymbol || '$'
+                              code: currencyCountry?.currencyCode || 'USD',
+                              symbol: currencyCountry?.currencySymbol || '$'
                             }
                           });
                         }
@@ -584,7 +595,9 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-slate-900 truncate">{item.product.name}</p>
                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{item.variant?.name || "Standard"}</p>
-                      <p className="text-sm font-black text-primary mt-1">{formatPrice(item.product.price)}</p>
+                      <p className="text-sm font-black text-primary mt-1">
+                        {convertPrice(item.variant?.price || item.product.salePrice || item.product.price).formatted}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -595,17 +608,17 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <span>Subtotal</span>
-                  <span className="text-slate-900">{formatPrice(getSubtotal())}</span>
+                  <span className="text-slate-900">{convertPrice(getSubtotal()).formatted}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <span>Shipping</span>
                   <span className="text-slate-900">
-                    {step === "INFORMATION" ? "Calculated at next step" : formatPrice(getSelectedShipping()?.price || 0)}
+                    {step === "INFORMATION" ? "Calculated at next step" : convertPrice(getSelectedShipping()?.price || 0).formatted}
                   </span>
                 </div>
                 <div className="flex justify-between text-xl font-black text-slate-900 pt-4 border-t border-slate-50">
                   <span>Total</span>
-                  <span className="text-primary">{formatPrice(calculateTotal())}</span>
+                  <span className="text-primary">{convertPrice(calculateTotal()).formatted}</span>
                 </div>
               </div>
 

@@ -32,7 +32,7 @@ import { Logo } from "@/components/layout/Logo"
 import { AuthButtons } from "@/components/layout/AuthButtons"
 import { AnnouncementBar } from "./AnnouncementBar"
 import { TopBar } from "./TopBar"
-import { formatPrice } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -60,7 +60,7 @@ export function Header() {
   const accountRef = useRef<HTMLDivElement>(null)
   const categoryPickerRef = useRef<HTMLDivElement>(null)
   const { items, getItemCount, getSubtotal, removeItem, addItem } = useCart()
-  const { countries, selectedCountry, setCountry } = useCurrency()
+  const { countries, selectedCountry, setCountry, convertPrice } = useCurrency()
 
   useEffect(() => {
     // Fetch categories with their brands for the dynamic Mega Menu
@@ -298,10 +298,10 @@ export function Header() {
                                 <div className="flex-1 min-w-0">
                                   <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-primary transition-colors">{product.name}</h4>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
+                                    <span className="text-sm font-black text-red-600">{convertPrice(product.price).formatted}</span>
                                     {product.discountPercentage && product.discountPercentage > 0 && (
                                       <span className="text-xs text-slate-400 line-through font-medium">
-                                        {formatPrice(product.price / (1 - product.discountPercentage / 100))}
+                                        {convertPrice(product.price / (1 - product.discountPercentage / 100)).formatted}
                                       </span>
                                     )}
                                   </div>
@@ -436,7 +436,7 @@ export function Header() {
                             Buy Now, Pay Later
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Flexible installment plans on all products over {formatPrice(100)}
+                            Flexible installment plans on all products over {convertPrice(100).formatted}
                           </p>
                         </div>
                       </div>
@@ -526,10 +526,10 @@ export function Header() {
                                 <div className="flex-1 min-w-0">
                                   <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-primary transition-colors">{product.name}</h4>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-sm font-black text-red-600">{formatPrice(product.price)}</span>
+                                    <span className="text-sm font-black text-red-600">{convertPrice(product.price).formatted}</span>
                                     {product.discountPercentage && product.discountPercentage > 0 && (
                                       <span className="text-xs text-slate-400 line-through font-medium">
-                                        {formatPrice(product.price / (1 - product.discountPercentage / 100))}
+                                        {convertPrice(product.price / (1 - product.discountPercentage / 100)).formatted}
                                       </span>
                                     )}
                                   </div>
@@ -643,7 +643,7 @@ export function Header() {
                                   {item.variant?.value ? `${item.variant.value}` : ""}
                                 </p>
                                 <p className="text-xs font-black text-red-600 mt-1">
-                                  {formatPrice(item.variant?.price || item.product.price)} <span className="text-slate-400 font-bold">x {item.quantity}</span>
+                                  {convertPrice(item.variant?.price || item.product.price).formatted} <span className="text-slate-400 font-bold">x {item.quantity}</span>
                                 </p>
                               </div>
                               <button 
@@ -659,11 +659,11 @@ export function Header() {
                         <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
                           <div className="flex items-center justify-between text-sm">
                             <span className="font-bold text-slate-500 uppercase tracking-widest text-[10px]">Subtotal:</span>
-                            <span className="font-black text-red-600">{formatPrice(getSubtotal())}</span>
+                            <span className="font-black text-red-600">{convertPrice(getSubtotal()).formatted}</span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="font-bold text-slate-900 uppercase tracking-widest text-[10px]">Total:</span>
-                            <span className="font-black text-red-600 text-base">{formatPrice(getSubtotal())}</span>
+                            <span className="font-black text-red-600 text-base">{convertPrice(getSubtotal()).formatted}</span>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-2 mt-4">
@@ -714,7 +714,7 @@ export function Header() {
         <div className="hidden border-t border-border lg:block">
           <div className="mx-auto flex max-w-7xl items-center justify-center gap-8 px-4 py-2">
             {[
-              { icon: Truck, text: `Free Shipping Over ${formatPrice(shippingConfig.threshold)}` },
+              { icon: Truck, text: `Free Shipping Over ${convertPrice(shippingConfig.threshold).formatted}` },
               { icon: CreditCard, text: "Flexible Credit Plans" },
               { icon: Headset, text: "24/7 Support" },
             ].map(({ icon: Icon, text }) => (

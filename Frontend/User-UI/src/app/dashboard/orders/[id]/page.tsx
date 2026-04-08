@@ -5,12 +5,13 @@
  import { useRouter } from "next/navigation"
  import { Button } from "@/components/ui/button"
  import { ordersApi } from "@/lib/api"
- import { formatPrice } from "@/lib/utils"
- import { useAuth } from "@/providers/AuthProvider"
- 
- export default function OrderDetailPage({ params }: { params: { id: string } }) {
-   const { isAuthenticated, isLoading } = useAuth()
-   const router = useRouter()
+import { useCurrency } from "@/providers/CurrencyProvider"
+import { useAuth } from "@/providers/AuthProvider"
+
+export default function OrderDetailPage({ params }: { params: { id: string } }) {
+  const { isAuthenticated, isLoading } = useAuth()
+  const { convertPrice } = useCurrency()
+  const router = useRouter()
    const [mounted, setMounted] = useState(false)
    const [order, setOrder] = useState<any | null>(null)
    const [loading, setLoading] = useState(true)
@@ -90,7 +91,7 @@
                    <p className="text-sm text-slate-500">Qty: {item.quantity}</p>
                  </div>
                 <div className="text-sm font-medium text-slate-900">
-                  {formatPrice(Number(item.total || item.price || 0))}
+                  {convertPrice(Number(item.total || item.price || 0)).formatted}
                 </div>
                </div>
              ))}
@@ -102,20 +103,20 @@
            <div className="space-y-2 text-sm">
              <div className="flex justify-between">
                <span className="text-slate-600">Subtotal</span>
-              <span className="font-medium text-slate-900">{formatPrice(Number(order.subtotal || 0))}</span>
+              <span className="font-medium text-slate-900">{convertPrice(Number(order.subtotal || 0)).formatted}</span>
              </div>
              <div className="flex justify-between">
                <span className="text-slate-600">Shipping</span>
-              <span className="font-medium text-slate-900">{formatPrice(Number(order.shipping || 0))}</span>
+              <span className="font-medium text-slate-900">{convertPrice(Number(order.shipping || 0)).formatted}</span>
              </div>
              <div className="flex justify-between">
                <span className="text-slate-600">Tax</span>
-              <span className="font-medium text-slate-900">{formatPrice(Number(order.tax || 0))}</span>
+              <span className="font-medium text-slate-900">{convertPrice(Number(order.tax || 0)).formatted}</span>
              </div>
              <hr className="my-2 border-slate-200" />
              <div className="flex justify-between text-base">
                <span className="text-slate-600">Total</span>
-              <span className="font-bold text-slate-900">{formatPrice(Number(order.total || 0))}</span>
+              <span className="font-bold text-slate-900">{convertPrice(Number(order.total || 0)).formatted}</span>
              </div>
            </div>
            <div className="mt-4 text-sm">

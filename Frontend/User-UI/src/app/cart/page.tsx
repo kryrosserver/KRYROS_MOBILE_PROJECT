@@ -1,12 +1,13 @@
 "use client"
 
 import { useCart } from "@/providers/CartProvider"
-import { formatPrice } from "@/lib/utils"
+import { useCurrency } from "@/providers/CurrencyProvider"
 import Link from "next/link"
 import { Trash2, Minus, Plus, ShoppingCart, ArrowRight } from "lucide-react"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotal, getSubtotal } = useCart()
+  const { convertPrice } = useCurrency()
 
   if (items.length === 0) {
     return (
@@ -46,7 +47,9 @@ export default function CartPage() {
                   {item.variant && (
                     <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5 md:mt-1">{item.variant.name}</p>
                   )}
-                  <p className="text-primary font-black mt-0.5 md:mt-1 text-sm md:text-base">{formatPrice(item.product.price)}</p>
+                  <p className="text-primary font-black mt-0.5 md:mt-1 text-sm md:text-base">
+                    {convertPrice(item.variant?.price || item.product.salePrice || item.product.price).formatted}
+                  </p>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 shrink-0">
                   <div className="flex items-center gap-1.5 md:gap-2 bg-slate-50 p-1 rounded-lg border border-slate-100">
@@ -82,7 +85,7 @@ export default function CartPage() {
               <div className="space-y-4">
                 <div className="flex justify-between text-slate-500 font-bold text-xs md:text-sm uppercase tracking-widest">
                   <span>Subtotal</span>
-                  <span>{formatPrice(getSubtotal())}</span>
+                  <span>{convertPrice(getSubtotal()).formatted}</span>
                 </div>
                 <div className="flex justify-between text-slate-500 font-bold text-xs md:text-sm uppercase tracking-widest">
                   <span>Shipping</span>
@@ -91,7 +94,7 @@ export default function CartPage() {
                 <div className="h-px bg-slate-100" />
                 <div className="flex justify-between text-base md:text-lg font-black text-slate-900">
                   <span>Total</span>
-                  <span>{formatPrice(getTotal())}</span>
+                  <span>{convertPrice(getTotal()).formatted}</span>
                 </div>
               </div>
               <Link 
@@ -104,7 +107,7 @@ export default function CartPage() {
 
             <div className="bg-primary/5 p-4 md:p-6 rounded-xl md:rounded-2xl border border-primary/10">
               <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest text-center">
-                Free delivery on orders over $500
+                Free delivery on orders over {convertPrice(500).formatted}
               </p>
             </div>
           </div>

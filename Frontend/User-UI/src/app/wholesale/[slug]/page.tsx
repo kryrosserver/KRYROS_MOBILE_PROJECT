@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { formatPrice } from '@/lib/utils'
 import { useCart } from '@/providers/CartProvider'
 import { useCurrency } from '@/providers/CurrencyProvider'
 import { useAuth } from '@/providers/AuthProvider'
@@ -35,10 +34,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   // Helper to format price in current currency
   const displayPrice = (amount: number) => {
-    if (selectedCountry?.code === "US" || !selectedCountry) {
-      return formatPrice(amount);
-    }
-    return formatLocal(convertPrice(amount).amount);
+    return convertPrice(amount).formatted;
   };
 
   useEffect(() => {
