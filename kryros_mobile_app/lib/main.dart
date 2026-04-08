@@ -202,54 +202,92 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
             
             // Error view with retry button
             if (hasError && !isLoading)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 80,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'UNABLE TO LOAD KRYROS',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Please check your internet connection and try again.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 40),
-                      ElevatedButton(
-                        onPressed: _retryWithFallback,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B00),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 48,
-                            vertical: 18,
+              Container(
+                color: Colors.white,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1FA89A).withOpacity(0.1),
+                            shape: BoxShape.circle,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                          child: const Icon(
+                            Icons.wifi_off_rounded,
+                            size: 60,
+                            color: Color(0xFF1FA89A),
                           ),
                         ),
-                        child: const Text(
-                          'RETRY CONNECTION',
-                          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
+                        const SizedBox(height: 32),
+                        const Text(
+                          'CONNECTION FAILED',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF1B2533),
+                            letterSpacing: 1.0,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        const Text(
+                          'We couldn\'t reach our servers. Please check your internet connection and try again.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 15,
+                            height: 1.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _retryWithFallback,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1FA89A),
+                              foregroundColor: Colors.white,
+                              elevation: 8,
+                              shadowColor: const Color(0xFF1FA89A).withOpacity(0.4),
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: const Text(
+                              'RETRY CONNECTION',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.2,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () {
+                            // Reset to primary URL and try again
+                            _initWebViewController(primaryUrl);
+                          },
+                          child: const Text(
+                            'REFRESH PAGE',
+                            style: TextStyle(
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

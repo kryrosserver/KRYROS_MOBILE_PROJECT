@@ -6,6 +6,7 @@ import { ArrowRight, ShoppingCart, Heart, Eye } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { resolveImageUrl } from "@/lib/utils"
+import { useCurrency } from "@/providers/CurrencyProvider"
 
 interface ProductGridSectionProps {
   section: any
@@ -15,6 +16,7 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const config = section.config || {}
+  const { convertPrice } = useCurrency()
 
   useEffect(() => {
     setLoading(true)
@@ -83,7 +85,9 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
                   </Link>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-black text-primary">ZK {parseFloat(product.price).toLocaleString()}</span>
+                  <span className="text-lg font-black text-primary">
+                    {convertPrice(parseFloat(product.price)).formatted}
+                  </span>
                   <Button size="icon" className="h-10 w-10 rounded-xl bg-slate-900 hover:bg-primary transition-colors">
                     <ShoppingCart className="h-4 w-4" />
                   </Button>

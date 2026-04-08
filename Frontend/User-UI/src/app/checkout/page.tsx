@@ -214,7 +214,7 @@ export default function CheckoutPage() {
             subtotal: getSubtotal(),
             shipping: parseFloat((getSelectedShipping()?.price || 0).toString()),
             total: calculateTotal(),
-            currency: { code: "ZMW", symbol: "ZK" },
+            currency: { code: "ZMW", symbol: "ZMW" },
           })
           
           const whatsappNumber = "+260971234567" // This should ideally come from settings
