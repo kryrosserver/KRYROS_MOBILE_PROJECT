@@ -704,66 +704,65 @@ export default function ProductsPage() {
                       </div>
                     </div>
                   )}
-                </div>
 
-                <div className="space-y-4 pt-2 border-t border-slate-200">
-                  <p className="text-sm font-bold text-slate-800">Guarantee & Details (FIXED)</p>
-                  <div className="space-y-3">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <div className="space-y-4 pt-2 border-t border-slate-200">
+                    <p className="text-sm font-bold text-slate-800">Guarantee & Details</p>
+                    <div className="space-y-3">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.hasFiveYearGuarantee}
+                            onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Show Guarantee
+                        </label>
                         <input
-                          type="checkbox"
-                          checked={form.hasFiveYearGuarantee}
-                          onChange={(e) => setForm({ ...form, hasFiveYearGuarantee: e.target.checked })}
-                          className="w-4 h-4 text-green-500 rounded"
+                          placeholder="Guarantee Text (e.g. 5 YEARS GUARANTEE)"
+                          value={form.fiveYearGuaranteeText}
+                          onChange={(e) => setForm({ ...form, fiveYearGuaranteeText: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
                         />
-                        Show Guarantee
-                      </label>
-                      <input
-                        placeholder="Guarantee Text (e.g. 5 YEARS GUARANTEE)"
-                        value={form.fiveYearGuaranteeText}
-                        onChange={(e) => setForm({ ...form, fiveYearGuaranteeText: e.target.value })}
-                        className="admin-input w-full text-xs min-h-[36px]"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.hasFreeReturns}
+                            onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Show Free Returns
+                        </label>
                         <input
-                          type="checkbox"
-                          checked={form.hasFreeReturns}
-                          onChange={(e) => setForm({ ...form, hasFreeReturns: e.target.checked })}
-                          className="w-4 h-4 text-green-500 rounded"
+                          placeholder="Returns Text (e.g. FREE RETURNS)"
+                          value={form.freeReturnsText}
+                          onChange={(e) => setForm({ ...form, freeReturnsText: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
                         />
-                        Show Free Returns
-                      </label>
-                      <input
-                        placeholder="Returns Text (e.g. FREE RETURNS)"
-                        value={form.freeReturnsText}
-                        onChange={(e) => setForm({ ...form, freeReturnsText: e.target.value })}
-                        className="admin-input w-full text-xs min-h-[36px]"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={form.hasInstallmentOptions}
+                            onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Show Installment Options
+                        </label>
                         <input
-                          type="checkbox"
-                          checked={form.hasInstallmentOptions}
-                          onChange={(e) => setForm({ ...form, hasInstallmentOptions: e.target.checked })}
-                          className="w-4 h-4 text-green-500 rounded"
+                          placeholder="Installment Text (e.g. INSTALLMENT OPTIONS)"
+                          value={form.installmentOptionsText}
+                          onChange={(e) => setForm({ ...form, installmentOptionsText: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
                         />
-                        Show Installment Options
-                      </label>
-                      <input
-                        placeholder="Installment Text (e.g. INSTALLMENT OPTIONS)"
-                        value={form.installmentOptionsText}
-                        onChange={(e) => setForm({ ...form, installmentOptionsText: e.target.value })}
-                        className="admin-input w-full text-xs min-h-[36px]"
-                      />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-1.5">Total Stock</label>
                       <input
