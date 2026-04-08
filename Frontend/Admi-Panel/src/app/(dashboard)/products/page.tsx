@@ -69,6 +69,7 @@ export default function ProductsPage() {
     categorySlug: "",
     brandId: "" as string | number,
     isFeatured: false,
+    isFlashSale: false,
     isNew: true,
     discountPercentage: "",
     stockTotal: "50",
@@ -100,6 +101,7 @@ export default function ProductsPage() {
     brandId: "" as string | number,
     isActive: true,
     isFeatured: false,
+    isFlashSale: false,
     isNew: true,
     discountPercentage: "",
     stockTotal: "",
@@ -215,7 +217,7 @@ export default function ProductsPage() {
               setForm({
                 ...form,
                 isFeatured: tab === "featured",
-                isFlashSale: tab === "flash" as any,
+                isFlashSale: tab === "flash",
               });
               setShowCreate(true);
             }} 
@@ -304,6 +306,7 @@ export default function ProductsPage() {
                       brandId: p.brand?.id || "",
                       isActive: p.isActive !== false,
                       isFeatured: !!p.isFeatured,
+                      isFlashSale: !!(p as any).isFlashSale,
                       isNew: !!p.isNew,
                       discountPercentage: String(p.discountPercentage ?? ""),
                       stockTotal: String(p.stockTotal ?? ""),
@@ -478,6 +481,7 @@ export default function ProductsPage() {
                               brandId: p.brand?.id || "",
                               isActive: p.isActive !== false,
                               isFeatured: !!p.isFeatured,
+                              isFlashSale: !!(p as any).isFlashSale,
                               isNew: !!p.isNew,
                               discountPercentage: String(p.discountPercentage ?? ""),
                               stockTotal: String(p.stockTotal ?? ""),
@@ -669,15 +673,15 @@ export default function ProductsPage() {
                     <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={(form as any).isFlashSale}
-                        onChange={(e) => setForm({ ...form, isFlashSale: e.target.checked as any })}
+                        checked={form.isFlashSale}
+                        onChange={(e) => setForm({ ...form, isFlashSale: e.target.checked })}
                         className="w-5 h-5 text-green-500 rounded"
                       />
                       Flash Sale
                     </label>
                   </div>
                   
-                  {((form as any).isFlashSale) && (
+                  {(form.isFlashSale) && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Flash Sale Price</label>
@@ -1006,7 +1010,41 @@ export default function ProductsPage() {
                       />
                       Featured
                     </label>
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editForm.isFlashSale}
+                        onChange={(e) => setEditForm({ ...editForm, isFlashSale: e.target.checked })}
+                        className="w-5 h-5 text-green-500 rounded"
+                      />
+                      Flash Sale
+                    </label>
                   </div>
+                  
+                  {editForm.isFlashSale && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Flash Sale Price</label>
+                        <input
+                          type="number"
+                          placeholder="Flash Price"
+                          value={editForm.flashSalePrice}
+                          onChange={(e) => setEditForm({ ...editForm, flashSalePrice: e.target.value })}
+                          className="admin-input w-full min-h-[44px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ends At</label>
+                        <input
+                          type="datetime-local"
+                          value={editForm.flashSaleEnd}
+                          onChange={(e) => setEditForm({ ...editForm, flashSaleEnd: e.target.value })}
+                          className="admin-input w-full min-h-[44px]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-4 pt-2 border-t border-slate-200">
                     <p className="text-sm font-bold text-slate-800">Guarantee & Details</p>
                     <div className="space-y-3">
@@ -1208,6 +1246,7 @@ export default function ProductsPage() {
                   if (editForm.brandId) formData.append("brandId", String(editForm.brandId));
                   formData.append("isActive", String(editForm.isActive));
                   formData.append("isFeatured", String(editForm.isFeatured));
+                  formData.append("isFlashSale", String(editForm.isFlashSale));
 
                   // STRICT RETAIL FLAGS - Dedicated Page Upload
                   formData.append("isWholesaleOnly", "false");
@@ -1217,6 +1256,8 @@ export default function ProductsPage() {
                   if (editForm.discountPercentage) formData.append("discountPercentage", String(Number(editForm.discountPercentage)));
                   if (editForm.stockTotal) formData.append("stockTotal", String(Number(editForm.stockTotal)));
                   if (editForm.stockCurrent) formData.append("stockCurrent", String(Number(editForm.stockCurrent)));
+                  if (editForm.flashSalePrice) formData.append("flashSalePrice", String(Number(editForm.flashSalePrice)));
+                  if (editForm.flashSaleEnd) formData.append("flashSaleEnd", editForm.flashSaleEnd);
                   formData.append("hasFiveYearGuarantee", String(editForm.hasFiveYearGuarantee));
                   if (editForm.fiveYearGuaranteeText) formData.append("fiveYearGuaranteeText", editForm.fiveYearGuaranteeText);
                   formData.append("hasFreeReturns", String(editForm.hasFreeReturns));
