@@ -568,9 +568,6 @@ export default function ProductsPage() {
       </div>
     </div>
 
-      </div>
-    )}
-
     {/* Create Product Modal */}
     {showCreate && (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
