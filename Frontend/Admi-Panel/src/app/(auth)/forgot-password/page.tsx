@@ -46,7 +46,7 @@ export default function AdminForgotPasswordPage() {
         </p>
         <div className="mt-8">
           <Link 
-            href="/admin/login" 
+            href="/login" 
             className="btn-primary w-full flex items-center justify-center gap-2"
           >
             Back to login
@@ -60,7 +60,7 @@ export default function AdminForgotPasswordPage() {
     <div className="mx-auto max-w-md">
       <div className="mb-8">
         <Link 
-          href="/admin/login" 
+          href="/login" 
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-green-600 transition-colors mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
