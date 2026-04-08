@@ -218,7 +218,7 @@ export default function ProductsPage() {
                 ...form,
                 isFeatured: tab === "featured",
                 isFlashSale: tab === "flash",
-              });
+              } as any);
               setShowCreate(true);
             }} 
             className="btn-primary min-h-[40px] md:min-h-[44px] px-4 py-2 flex items-center justify-center gap-2"
@@ -324,7 +324,7 @@ export default function ProductsPage() {
                       flashSaleEnd: p.flashSaleEnd ? new Date(p.flashSaleEnd).toISOString().slice(0,16) : "",
                       specifications: typeof (p as any).specifications === 'string' ? JSON.parse((p as any).specifications) : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
                       images: Array.isArray(p.images) ? p.images.map((img: any) => img.url) : [],
-                    });
+                    } as any);
                     setEditFiles([]);
                   }}
                   className="flex-1 px-4 py-2.5 min-h-[44px] bg-slate-900 text-white text-sm rounded-lg font-medium hover:bg-slate-800 transition-colors"
@@ -499,7 +499,7 @@ export default function ProductsPage() {
                               flashSaleEnd: p.flashSaleEnd ? new Date(p.flashSaleEnd).toISOString().slice(0,16) : "",
                               specifications: typeof (p as any).specifications === 'string' ? JSON.parse((p as any).specifications) : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
                               images: Array.isArray(p.images) ? p.images.map((img: any) => img.url) : [],
-                            });
+                            } as any);
                             setEditFiles([]);
                           }}
                           className="btn-secondary px-4 py-2.5 min-h-[44px]"
@@ -877,6 +877,7 @@ export default function ProductsPage() {
                     categorySlug: "",
                     brandId: "" as string | number,
                     isFeatured: false,
+                    isFlashSale: false,
                     isNew: true,
                     discountPercentage: "",
                     stockTotal: "50",
@@ -895,7 +896,7 @@ export default function ProductsPage() {
                     flashSaleEnd: "",
                     images: [] as string[],
                     specifications: [] as { key: string; value: string }[],
-                  });
+                  } as any);
                   await load();
                 } catch (e: any) {
                   alert(e.message || "Failed to create product");
