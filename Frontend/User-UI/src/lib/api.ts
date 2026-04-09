@@ -145,6 +145,8 @@ export const ordersApi = {
 
   getById: (id: string) => fetchApi<any>(`/orders/${id}`),
 
+  getStatus: (id: string) => fetchApi<any>(`/payments/status/${id}`),
+
   trackOrder: (orderNumber: string, email: string) =>
     fetchApi<any>(`/orders/track?orderNumber=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`),
 };

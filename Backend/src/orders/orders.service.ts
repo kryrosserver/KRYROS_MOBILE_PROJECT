@@ -4,6 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { SettingsService } from '../settings/settings.service';
 import { ShippingZonesService } from '../shipping-zones/shipping-zones.service';
 import { Prisma, PaymentMethod } from '@prisma/client';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class OrdersService {
@@ -11,6 +12,7 @@ export class OrdersService {
     private prisma: PrismaService,
     private settingsService: SettingsService,
     private shippingZonesService: ShippingZonesService,
+    private paymentsService: PaymentsService,
   ) {}
 
   private convertToPaymentMethod(method: string): PaymentMethod {
@@ -333,7 +335,7 @@ export class OrdersService {
     const orderNumber = Math.random().toString(36).substr(2, 7).toUpperCase();
 
     // 4. Prisma Transaction
-    return this.prisma.$transaction(async (tx) => {
+    const order = await this.prisma.$transaction(async (tx) => {
       let finalShippingAddressId = providedShippingAddressId;
       let finalBillingAddressId = providedBillingAddressId;
 
@@ -370,13 +372,15 @@ export class OrdersService {
       }
 
       // Create Order
-      const order = await tx.order.create({
+      const createdOrder = await tx.order.create({
         data: {
           orderNumber,
           userId: userId || null,
           status: 'PENDING',
           paymentStatus: 'PENDING',
           paymentMethod: paymentMethodEnum,
+          paymentPhone: data.paymentPhone,
+          totalZMW: data.totalZMW ? new Prisma.Decimal(data.totalZMW) : null,
           subtotal: new Prisma.Decimal(subtotal),
           tax: new Prisma.Decimal(tax),
           shipping: new Prisma.Decimal(shipping),
@@ -425,15 +429,31 @@ export class OrdersService {
               inventoryId: inventory.id,
               type: 'STOCK_OUT',
               quantity: update.quantity,
-              reference: order.orderNumber,
-              notes: `Order placement ${order.orderNumber}${inventory.stock - update.quantity < 0 ? ' (Backorder)' : ''}`,
+              reference: createdOrder.orderNumber,
+              notes: `Order placement ${createdOrder.orderNumber}${inventory.stock - update.quantity < 0 ? ' (Backorder)' : ''}`,
             },
           });
         }
       }
 
-      return order;
+      return createdOrder;
     });
+
+    // If payment method is MOBILE_MONEY, initiate payment push
+    if (paymentMethodEnum === PaymentMethod.MOBILE_MONEY && data.paymentPhone && data.totalZMW) {
+      try {
+        await this.paymentsService.process543Payment(
+          order.id,
+          data.paymentPhone,
+          data.totalZMW,
+        );
+      } catch (error) {
+        // Log error but order is already created
+        console.error('Failed to initiate 543 payment:', error);
+      }
+    }
+
+    return order;
   }
 
   async updateStatus(id: string, status: string, paymentStatus?: string) {

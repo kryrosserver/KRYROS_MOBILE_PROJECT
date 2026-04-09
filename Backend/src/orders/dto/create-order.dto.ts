@@ -96,6 +96,13 @@ export class CreateOrderDto {
 
   @IsString()
   @IsOptional()
+  paymentPhone?: string;
+
+  @IsOptional()
+  totalZMW?: number;
+
+  @IsString()
+  @IsOptional()
   notes?: string;
 
   @IsOptional()

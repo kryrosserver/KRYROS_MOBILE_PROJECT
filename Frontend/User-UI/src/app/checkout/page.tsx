@@ -57,10 +57,36 @@ export default function CheckoutPage() {
     cityName: "",
     shippingMethodId: "",
     paymentMethod: "WHATSAPP", // Default to WhatsApp
+    paymentPhone: "",
   })
 
-  // Load Initial Data
+  // Polling for payment status
+  const [pollingStatus, setPollingStatus] = useState<string | null>(null)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+
   useEffect(() => {
+    let interval: any
+    if (showConfirmation && lastCreatedOrder?.id && formData.paymentMethod === "MOBILE_MONEY") {
+      interval = setInterval(async () => {
+        try {
+          const res = await ordersApi.getStatus(lastCreatedOrder.id)
+          if (res.data?.status === "PAID") {
+            setPollingStatus("SUCCESS")
+            setStep("COMPLETE")
+            clearInterval(interval)
+          } else if (res.data?.status === "FAILED") {
+            setPollingStatus("FAILED")
+            setError("Payment failed. Please try again.")
+            setShowConfirmation(false)
+            clearInterval(interval)
+          }
+        } catch (err) {
+          console.error("Status check error:", err)
+        }
+      }, 5000)
+    }
+    return () => clearInterval(interval)
+  }, [showConfirmation, lastCreatedOrder, formData.paymentMethod])
     locationsApi.getCountries().then(res => {
       if (res.data) setCountries(res.data)
     })
@@ -161,6 +187,10 @@ export default function CheckoutPage() {
       const subtotal = getSubtotal()
       const shippingFee = parseFloat((getSelectedShipping()?.price || 0).toString())
       const total = subtotal + shippingFee
+      
+      // Calculate ZMW total if needed (using exchange rate from currency provider)
+      const zmwPrice = convertPrice(total)
+      const totalZMW = zmwPrice.amount
 
       const orderData = {
         items: items.map(item => ({
@@ -183,6 +213,8 @@ export default function CheckoutPage() {
           cityName: formData.cityName,
         },
         paymentMethod: formData.paymentMethod,
+        paymentPhone: formData.paymentPhone,
+        totalZMW: totalZMW,
         shippingMethodId: formData.shippingMethodId,
         subtotal: subtotal,
         shippingFee: shippingFee,
@@ -195,6 +227,14 @@ export default function CheckoutPage() {
         const order = res.data
         setLastCreatedOrder(order)
         
+        if (formData.paymentMethod === "MOBILE_MONEY") {
+          setShowConfirmation(true)
+          // Keep cart until payment is confirmed? 
+          // Or clear it and let them wait on this page.
+          // Based on requirements, we wait for confirmation.
+          return;
+        }
+
         if (formData.paymentMethod === "WHATSAPP") {
           const message = generateWhatsAppMessage({
             orderNumber: order.orderNumber,
@@ -486,6 +526,46 @@ export default function CheckoutPage() {
                     </div>
 
                     <div 
+                      onClick={() => setFormData({...formData, paymentMethod: "MOBILE_MONEY"})}
+                      className={`p-4 md:p-6 border-2 rounded-2xl md:rounded-[2rem] cursor-pointer transition-all flex flex-col gap-4 ${
+                        formData.paymentMethod === "MOBILE_MONEY" 
+                          ? "border-primary bg-primary/5" 
+                          : "border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3 md:gap-4">
+                          <div className={`h-5 w-5 md:h-6 md:w-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            formData.paymentMethod === "MOBILE_MONEY" ? "border-primary" : "border-slate-200"
+                          }`}>
+                            {formData.paymentMethod === "MOBILE_MONEY" && <div className="h-2.5 w-2.5 md:h-3 md:w-3 rounded-full bg-primary" />}
+                          </div>
+                          <div className="space-y-0.5 md:space-y-1">
+                            <p className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">Mobile Money</p>
+                            <p className="text-[10px] md:text-xs text-slate-500 font-medium">Airtel, MTN, or Zamtel</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                           <img src="https://airtel.co.zm/favicon.ico" className="h-4 w-4 rounded-full" alt="Airtel" />
+                           <img src="https://www.mtn.zm/wp-content/themes/mtn-zm/assets/images/favicon.ico" className="h-4 w-4 rounded-full" alt="MTN" />
+                        </div>
+                      </div>
+                      
+                      {formData.paymentMethod === "MOBILE_MONEY" && (
+                        <div className="space-y-2 pt-2 animate-in slide-in-from-top-2">
+                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Enter Mobile Money Number</label>
+                          <Input 
+                            placeholder="+260..." 
+                            value={formData.paymentPhone}
+                            onChange={(e) => setFormData({...formData, paymentPhone: e.target.value})}
+                            className="h-10 rounded-xl text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div 
                       onClick={() => setFormData({...formData, paymentMethod: "BANK_TRANSFER"})}
                       className={`p-4 md:p-6 border-2 rounded-2xl md:rounded-[2rem] cursor-pointer transition-all flex items-center justify-between gap-4 ${
                         formData.paymentMethod === "BANK_TRANSFER" 
@@ -500,28 +580,39 @@ export default function CheckoutPage() {
                           {formData.paymentMethod === "BANK_TRANSFER" && <div className="h-2.5 w-2.5 md:h-3 md:w-3 rounded-full bg-primary" />}
                         </div>
                         <div className="space-y-0.5 md:space-y-1">
-                          <p className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">Bank / Mobile Money</p>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Direct Transfer or Mobile Money</p>
+                          <p className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">Bank Transfer</p>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Direct Bank Transfer</p>
                         </div>
                       </div>
                       <CreditCard className="h-5 w-5 md:h-6 md:w-6 text-slate-400" />
                     </div>
                   </div>
 
+                  {showConfirmation && (
+                    <div className="p-6 bg-kryros-dark/5 border-2 border-primary/20 rounded-3xl space-y-4 text-center animate-in zoom-in">
+                       <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                       <h4 className="font-black uppercase tracking-tight text-slate-900">Waiting for confirmation...</h4>
+                       <p className="text-xs text-slate-500 font-medium">Check your phone and enter your PIN to complete payment</p>
+                    </div>
+                  )}
+
                   <div className="pt-4 flex flex-col md:flex-row gap-3">
                     <Button 
                       variant="outline"
                       onClick={handleBack}
+                      disabled={showConfirmation}
                       className="h-12 md:h-14 px-8 font-black uppercase tracking-widest rounded-xl md:rounded-2xl border-slate-200 text-xs"
                     >
                       <ChevronLeft className="h-4 w-4 mr-2" /> Back
                     </Button>
                     <Button 
                       onClick={handlePlaceOrder}
-                      disabled={loading}
-                      className="flex-1 h-12 md:h-14 font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 bg-green-600 hover:bg-green-700 text-xs md:text-sm"
+                      disabled={loading || showConfirmation || (formData.paymentMethod === "MOBILE_MONEY" && !formData.paymentPhone)}
+                      className={`flex-1 h-12 md:h-14 font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/20 text-xs md:text-sm ${
+                        formData.paymentMethod === "MOBILE_MONEY" ? "bg-primary" : "bg-green-600 hover:bg-green-700"
+                      }`}
                     >
-                      {loading ? "Processing..." : "Place Order via WhatsApp"}
+                      {loading ? "Processing..." : formData.paymentMethod === "MOBILE_MONEY" ? "Pay Now" : "Place Order via WhatsApp"}
                     </Button>
                   </div>
                 </div>

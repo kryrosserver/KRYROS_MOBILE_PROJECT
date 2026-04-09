@@ -399,11 +399,13 @@ model Order {
   paymentStatus     PaymentStatus @default(PENDING)
   paymentMethod     PaymentMethod?
   paymentReference  String?
+  paymentPhone      String?
   subtotal          Decimal       @db.Decimal(10, 2)
   discount          Decimal       @default(0) @db.Decimal(10, 2)
   tax               Decimal       @default(0) @db.Decimal(10, 2)
   shipping          Decimal       @default(0) @db.Decimal(10, 2)
   total             Decimal       @db.Decimal(10, 2)
+  totalZMW          Decimal?      @db.Decimal(10, 2)
   notes             String?
   trackingNumber   String?
   shippedAt         DateTime?
