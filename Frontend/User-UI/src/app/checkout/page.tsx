@@ -390,36 +390,75 @@ export default function CheckoutPage() {
                         <select 
                           className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
                           value={formData.countryId}
-                          onChange={(e) => setFormData({...formData, countryId: e.target.value})}
+                          onChange={(e) => setFormData({...formData, countryId: e.target.value, manualLocation: false, stateId: "", cityId: "", stateName: "", cityName: ""})}
                         >
                           <option value="">Select Country</option>
                           {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">State / Province</label>
-                        <select 
-                          className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
-                          value={formData.stateId}
-                          onChange={(e) => setFormData({...formData, stateId: e.target.value})}
-                          disabled={!formData.countryId}
-                        >
-                          <option value="">Select State</option>
-                          {states.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">City / Town</label>
-                        <select 
-                          className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
-                          value={formData.cityId}
-                          onChange={(e) => setFormData({...formData, cityId: e.target.value})}
-                          disabled={!formData.stateId}
-                        >
-                          <option value="">Select City</option>
-                          {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                      </div>
+
+                      {!formData.manualLocation ? (
+                        <>
+                          <div className="space-y-2">
+                            <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">State / Province</label>
+                            <select 
+                              className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
+                              value={formData.stateId}
+                              onChange={(e) => setFormData({...formData, stateId: e.target.value, cityId: ""})}
+                              disabled={!formData.countryId}
+                            >
+                              <option value="">Select State</option>
+                              {states.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">City / Town</label>
+                            <select 
+                              className="w-full h-11 md:h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
+                              value={formData.cityId}
+                              onChange={(e) => setFormData({...formData, cityId: e.target.value})}
+                              disabled={!formData.stateId}
+                            >
+                              <option value="">Select City</option>
+                              {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="space-y-2">
+                            <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">State Name</label>
+                            <Input 
+                              placeholder="Enter state" 
+                              value={formData.stateName}
+                              onChange={(e) => setFormData({...formData, stateName: e.target.value})}
+                              className="h-11 md:h-12 rounded-xl text-sm"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">City Name</label>
+                            <Input 
+                              placeholder="Enter city" 
+                              value={formData.cityName}
+                              onChange={(e) => setFormData({...formData, cityName: e.target.value})}
+                              className="h-11 md:h-12 rounded-xl text-sm"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <input 
+                        type="checkbox" 
+                        id="manualLocation" 
+                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                        checked={formData.manualLocation}
+                        onChange={(e) => setFormData({...formData, manualLocation: e.target.checked, stateId: "", cityId: "", stateName: "", cityName: ""})}
+                      />
+                      <label htmlFor="manualLocation" className="text-[10px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer">
+                        Can't find your location? Enter manually
+                      </label>
                     </div>
                   </div>
                   
