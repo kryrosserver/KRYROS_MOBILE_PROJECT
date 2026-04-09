@@ -257,7 +257,7 @@ export default function CheckoutPage() {
             items: items.map(item => ({
               name: item.product.name,
               quantity: item.quantity,
-              price: convertPrice(parseFloat(item.product.price.toString())).amount,
+              price: convertPrice(parseFloat((item.variant?.price || item.product.salePrice || item.product.price).toString())).amount,
               variant: item.variant?.name,
             })),
             subtotal: convertPrice(subtotal).amount,
