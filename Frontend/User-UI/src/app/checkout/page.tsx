@@ -91,18 +91,18 @@ export default function CheckoutPage() {
   // Load Initial Data
   useEffect(() => {
     locationsApi.getCountries().then(res => {
-      if (res.data) setCountries(res.data)
-    })
+      if (res?.data) setCountries(res.data)
+    }).catch(err => console.error("Countries load error:", err))
   }, [])
 
   // Load States when Country changes
   useEffect(() => {
     if (formData.countryId) {
       locationsApi.getStates(formData.countryId).then(res => {
-        if (res.data) setStates(res.data)
+        if (res?.data) setStates(res.data)
         setCities([])
         setFormData(prev => ({ ...prev, stateId: "", cityId: "" }))
-      })
+      }).catch(err => console.error("States load error:", err))
     }
   }, [formData.countryId])
 
@@ -110,9 +110,9 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (formData.stateId) {
       locationsApi.getCities(formData.stateId).then(res => {
-        if (res.data) setCities(res.data)
+        if (res?.data) setCities(res.data)
         setFormData(prev => ({ ...prev, cityId: "" }))
-      })
+      }).catch(err => console.error("Cities load error:", err))
     }
   }, [formData.stateId])
 
@@ -128,14 +128,17 @@ export default function CheckoutPage() {
         formData.stateName,
         formData.cityName
       ).then(res => {
-        if (res.data && res.data.length > 0) {
+        if (res?.data && res.data.length > 0) {
           const methods = res.data;
           const firstId = methods[0].id;
           setShippingMethods(methods);
           setFormData(prev => ({ ...prev, shippingMethodId: firstId }));
         }
         setLoading(false)
-      }).catch(() => setLoading(false))
+      }).catch((err) => {
+        console.error("Shipping methods load error:", err)
+        setLoading(false)
+      })
     }
   }, [step, formData.countryId, formData.stateId, formData.cityId, formData.manualLocation, formData.stateName, formData.cityName])
 
@@ -174,33 +177,33 @@ export default function CheckoutPage() {
   }
 
   const getSelectedShipping = () => {
-    return shippingMethods.find(m => m.id === formData.shippingMethodId)
+    return shippingMethods?.find(m => m.id === formData.shippingMethodId)
   }
 
   const calculateTotal = () => {
-    const subtotal = getSubtotal()
+    const subtotal = getSubtotal() || 0
     const shipping = getSelectedShipping()?.price || 0
-    return subtotal + parseFloat(shipping.toString())
+    return Number(subtotal) + Number(shipping)
   }
 
   const handlePlaceOrder = async () => {
     setLoading(true)
     setError(null)
     try {
-      const subtotal = getSubtotal()
-      const shippingFee = parseFloat((getSelectedShipping()?.price || 0).toString())
-      const total = subtotal + shippingFee
+      const subtotal = getSubtotal() || 0
+      const shippingFee = Number(getSelectedShipping()?.price || 0)
+      const total = Number(subtotal) + shippingFee
       
       // Calculate ZMW total if needed (using exchange rate from currency provider)
       const zmwPrice = convertPrice(total)
-      const totalZMW = zmwPrice.amount
+      const totalZMW = zmwPrice?.amount || total
 
       const orderData = {
         items: items.map(item => ({
           productId: item.product.id,
           variantId: item.variant?.id,
           quantity: item.quantity,
-          price: item.product.price,
+          price: Number(item.product.price),
         })),
         addressDetails: {
           firstName: formData.firstName,
@@ -219,22 +222,19 @@ export default function CheckoutPage() {
         paymentPhone: formData.paymentPhone,
         totalZMW: totalZMW,
         shippingMethodId: formData.shippingMethodId,
-        subtotal: subtotal,
+        subtotal: Number(subtotal),
         shippingFee: shippingFee,
         total: total,
       }
 
       const res = await ordersApi.create(orderData)
       
-      if (res.data) {
+      if (res?.data) {
         const order = res.data
         setLastCreatedOrder(order)
         
         if (formData.paymentMethod === "MOBILE_MONEY") {
           setShowConfirmation(true)
-          // Keep cart until payment is confirmed? 
-          // Or clear it and let them wait on this page.
-          // Based on requirements, we wait for confirmation.
           return;
         }
 
@@ -250,19 +250,22 @@ export default function CheckoutPage() {
             },
             address: {
               street: formData.street,
-              city: cities.find(c => c.id === formData.cityId)?.name || formData.cityName,
-              state: states.find(s => s.id === formData.stateId)?.name || formData.stateName,
-              country: countries.find(c => c.id === formData.countryId)?.name || "Global",
+              city: cities?.find(c => c.id === formData.cityId)?.name || formData.cityName,
+              state: states?.find(s => s.id === formData.stateId)?.name || formData.stateName,
+              country: countries?.find(c => c.id === formData.countryId)?.name || "Global",
             },
-            items: items.map(item => ({
-              name: item.product.name,
-              quantity: item.quantity,
-              price: convertPrice(parseFloat((item.variant?.price || item.product.salePrice || item.product.price).toString())).amount,
-              variant: item.variant?.name,
-            })),
-            subtotal: convertPrice(subtotal).amount,
-            shipping: convertPrice(shippingFee).amount,
-            total: convertPrice(total).amount,
+            items: items.map(item => {
+              const itemPrice = Number(item.variant?.price || item.product.salePrice || item.product.price);
+              return {
+                name: item.product.name,
+                quantity: item.quantity,
+                price: convertPrice(itemPrice)?.amount || itemPrice,
+                variant: item.variant?.name,
+              };
+            }),
+            subtotal: convertPrice(Number(subtotal))?.amount || Number(subtotal),
+            shipping: convertPrice(shippingFee)?.amount || shippingFee,
+            total: convertPrice(total)?.amount || total,
             currency: { 
               code: currencyCountry?.currencyCode || "ZMW", 
               symbol: currencyCountry?.currencySymbol || "ZK" 
@@ -276,9 +279,10 @@ export default function CheckoutPage() {
         clearCart()
         setStep("COMPLETE")
       } else {
-        setError(res.error || "Failed to place order")
+        setError(res?.error || "Failed to place order")
       }
     } catch (err) {
+      console.error("Place order error:", err)
       setError("An unexpected error occurred")
     } finally {
       setLoading(false)
@@ -690,7 +694,7 @@ export default function CheckoutPage() {
                       <p className="text-sm font-bold text-slate-900 truncate">{item.product.name}</p>
                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{item.variant?.name || "Standard"}</p>
                       <p className="text-sm font-black text-primary mt-1">
-                        {convertPrice(item.variant?.price || item.product.salePrice || item.product.price).formatted}
+                        {convertPrice(Number(item.variant?.price || item.product.salePrice || item.product.price))?.formatted || "..."}
                       </p>
                     </div>
                   </div>
@@ -702,17 +706,17 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <span>Subtotal</span>
-                  <span className="text-slate-900">{convertPrice(getSubtotal()).formatted}</span>
+                  <span className="text-slate-900">{convertPrice(Number(getSubtotal() || 0))?.formatted || "..."}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <span>Shipping</span>
                   <span className="text-slate-900">
-                    {step === "INFORMATION" ? "Calculated at next step" : convertPrice(getSelectedShipping()?.price || 0).formatted}
+                    {step === "INFORMATION" ? "Calculated at next step" : (convertPrice(Number(getSelectedShipping()?.price || 0))?.formatted || "...")}
                   </span>
                 </div>
                 <div className="flex justify-between text-xl font-black text-slate-900 pt-4 border-t border-slate-50">
                   <span>Total</span>
-                  <span className="text-primary">{convertPrice(calculateTotal()).formatted}</span>
+                  <span className="text-primary">{convertPrice(Number(calculateTotal()))?.formatted || "..."}</span>
                 </div>
               </div>
 
