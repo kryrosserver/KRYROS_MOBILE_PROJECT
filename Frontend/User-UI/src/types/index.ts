@@ -35,6 +35,7 @@ export interface Product {
   flashSaleEnd?: string
   discountPercentage?: number
   stock: number
+  stockCurrent?: number
   allowCredit: boolean
   creditMinimum?: number
   rating: number
