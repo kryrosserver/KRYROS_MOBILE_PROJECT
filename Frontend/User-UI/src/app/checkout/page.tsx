@@ -87,6 +87,9 @@ export default function CheckoutPage() {
     }
     return () => clearInterval(interval)
   }, [showConfirmation, lastCreatedOrder, formData.paymentMethod])
+
+  // Load Initial Data
+  useEffect(() => {
     locationsApi.getCountries().then(res => {
       if (res.data) setCountries(res.data)
     })
