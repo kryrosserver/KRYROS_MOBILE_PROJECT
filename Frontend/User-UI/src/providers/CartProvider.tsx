@@ -133,7 +133,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getSubtotal = useCallback(() => {
     return items.reduce((total, item) => {
-      const price = item.variant?.price || item.product.salePrice || item.product.price
+      const price = Number(item.variant?.price || item.product.salePrice || item.product.price) || 0
       return total + price * item.quantity
     }, 0)
   }, [items])

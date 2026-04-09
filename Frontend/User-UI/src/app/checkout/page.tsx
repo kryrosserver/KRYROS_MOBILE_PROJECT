@@ -41,7 +41,6 @@ export default function CheckoutPage() {
   const [states, setStates] = useState<any[]>([])
   const [cities, setCities] = useState<any[]>([])
   const [shippingMethods, setShippingMethods] = useState<any[]>([])
-  const selectedLocationCountry = countries.find(c => c.id === formData.countryId)
 
   const [formData, setFormData] = useState({
     email: "",
@@ -59,6 +58,8 @@ export default function CheckoutPage() {
     paymentMethod: "WHATSAPP", // Default to WhatsApp
     paymentPhone: "",
   })
+
+  const selectedLocationCountry = countries.find(c => c.id === formData.countryId)
 
   // Polling for payment status
   const [pollingStatus, setPollingStatus] = useState<string | null>(null)
