@@ -637,15 +637,24 @@ export function Header() {
                                   className="object-contain p-1"
                                 />
                               </div>
-                              <div className="flex-1 min-w-0 pr-6">
-                                <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight">{item.product.name}</h4>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
-                                  {item.variant?.value ? `${item.variant.value}` : ""}
-                                </p>
-                                <p className="text-xs font-black text-red-600 mt-1">
-                                  {convertPrice(item.variant?.price || item.product.price).formatted} <span className="text-slate-400 font-bold">x {item.quantity}</span>
-                                </p>
-                              </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-primary transition-colors">{item.product.name}</h4>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-sm font-black text-red-600">
+                                      {convertPrice(Number(item.variant?.price || item.product.salePrice || item.product.price)).formatted}
+                                    </span>
+                                    {item.product.discountPercentage && item.product.discountPercentage > 0 && !item.variant?.price && (
+                                      <span className="text-xs text-slate-400 line-through font-medium">
+                                        {convertPrice(Number(item.product.price)).formatted}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col gap-0.5 mt-1">
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${item.product.stockCurrent > 0 ? "text-green-600" : "text-red-600"}`}>
+                                      QTY: {item.quantity}
+                                    </span>
+                                  </div>
+                                </div>
                               <button 
                                 onClick={() => removeItem(item.product.id, item.variant?.id)}
                                 className="absolute top-0 right-0 p-1 text-slate-300 hover:text-red-500 transition-colors"

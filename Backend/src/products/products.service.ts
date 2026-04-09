@@ -67,6 +67,7 @@ export class ProductsService {
             brand: true,
             images: { orderBy: { sortOrder: 'asc' }, take: 1 },
             inventory: true,
+            variants: true,
             productRelations: {
               include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
           },
@@ -74,7 +75,21 @@ export class ProductsService {
         }),
         this.prisma.product.count({ where }),
       ]);
-      return { data: products, meta: { total, skip, take } };
+
+      // Convert Decimal prices to numbers for frontend compatibility
+      const sanitizedProducts = products.map(p => ({
+        ...p,
+        price: Number(p.price),
+        salePrice: p.salePrice ? Number(p.salePrice) : null,
+        flashSalePrice: p.flashSalePrice ? Number(p.flashSalePrice) : null,
+        wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
+        variants: p.variants.map(v => ({
+          ...v,
+          price: v.price ? Number(v.price) : null,
+        })),
+      }));
+
+      return { data: sanitizedProducts, meta: { total, skip, take } };
     } catch (e) {
       console.error('Failed to load products due to DB corruption:', e.message);
       // Fallback: load products without including corrupted Brand data

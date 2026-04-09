@@ -48,7 +48,7 @@ export default function CartPage() {
                     <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5 md:mt-1">{item.variant.name}</p>
                   )}
                   <p className="text-primary font-black mt-0.5 md:mt-1 text-sm md:text-base">
-                    {convertPrice(item.variant?.price || item.product.salePrice || item.product.price).formatted}
+                    {convertPrice(Number(item.variant?.price || item.product.salePrice || item.product.price)).formatted}
                   </p>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 shrink-0">
