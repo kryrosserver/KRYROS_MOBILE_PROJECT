@@ -83,7 +83,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }, [selectedCountry]);
 
   const convertPrice = useCallback((usdPrice: number) => {
-    if (!selectedCountry) return { amount: usdPrice, formatted: `$${usdPrice}`, isZambia: false };
+    // Handle invalid price values gracefully to prevent crashes
+    const validUsdPrice = typeof usdPrice === 'number' && !isNaN(usdPrice) ? usdPrice : 0;
+
+    if (!selectedCountry) return { amount: validUsdPrice, formatted: `$${validUsdPrice}`, isZambia: false };
 
     // DEBUG: Log the values to see why it's not multiplying
     const rate = typeof selectedCountry.exchangeRate === 'string' 
@@ -94,7 +97,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     // We need to ensure we are actually using the rate from the database
     const actualRate = (selectedCountry.currencyCode === 'USD') ? 1 : rate;
     
-    let localAmount = usdPrice * actualRate;
+    let localAmount = validUsdPrice * actualRate;
     const isZMW = selectedCountry.currencyCode === "ZMW";
 
     // Zambia Special Rule: No decimals, round to nearest 10

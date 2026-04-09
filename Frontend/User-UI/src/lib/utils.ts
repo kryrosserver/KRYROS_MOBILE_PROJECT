@@ -6,14 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number, currency = 'USD'): string {
-  // If the currency is not USD, we should NOT use 'USD' style formatting
-  // because that will force the $ symbol and American rules.
+  // Handle invalid price values gracefully to prevent crashes
+  const validPrice = typeof price === 'number' && !isNaN(price) ? price : 0;
+  
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency || 'USD',
     minimumFractionDigits: (currency === 'ZMW' || currency === 'USD') ? 0 : 2,
     maximumFractionDigits: (currency === 'ZMW' || currency === 'USD') ? 0 : 2,
-  }).format(price)
+  }).format(validPrice)
 }
 
 export function resolveImageUrl(url?: string): string {
