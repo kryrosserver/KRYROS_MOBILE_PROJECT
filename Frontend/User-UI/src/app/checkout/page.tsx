@@ -118,7 +118,7 @@ export default function CheckoutPage() {
 
   // Load Shipping Methods when Step changes to SHIPPING
   useEffect(() => {
-    if (step === "SHIPPING") {
+    if (step === "SHIPPING" && formData.countryId) {
       setLoading(true)
       locationsApi.getMatchingShipping(
         formData.countryId,
@@ -137,7 +137,7 @@ export default function CheckoutPage() {
         setLoading(false)
       }).catch(() => setLoading(false))
     }
-  }, [step, formData.countryId, formData.stateId, formData.cityId])
+  }, [step, formData.countryId, formData.stateId, formData.cityId, formData.manualLocation, formData.stateName, formData.cityName])
 
   if (items.length === 0 && step !== "COMPLETE") {
     return (
