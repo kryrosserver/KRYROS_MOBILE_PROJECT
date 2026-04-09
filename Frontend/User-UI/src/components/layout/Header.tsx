@@ -650,7 +650,7 @@ export function Header() {
                                     )}
                                   </div>
                                   <div className="flex flex-col gap-0.5 mt-1">
-                                    <span className={`text-[9px] font-black uppercase tracking-widest ${item.product.stockCurrent > 0 ? "text-green-600" : "text-red-600"}`}>
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${(item.product.stockCurrent ?? 0) > 0 ? "text-green-600" : "text-red-600"}`}>
                                       QTY: {item.quantity}
                                     </span>
                                   </div>
