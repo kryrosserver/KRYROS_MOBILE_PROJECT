@@ -23,14 +23,14 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'KRYROS Worldwide | Simple. Reliable. Global.',
+  title: 'KRYROS World | Simple. Reliable. Global.',
   description: 'Shopping made easy with delivery everywhere.',
   manifest: '/manifest.json',
   themeColor: '#1FA89A',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   appleWebApp: {
     capable: true,
-    title: 'Kryros',
+    title: 'KRYROS',
     statusBarStyle: 'default',
   },
 }
