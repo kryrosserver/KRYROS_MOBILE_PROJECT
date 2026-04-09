@@ -33,6 +33,7 @@ export interface Product {
   isFlashSale: boolean
   flashSalePrice?: number
   flashSaleEnd?: string
+  discountPercentage?: number
   stock: number
   allowCredit: boolean
   creditMinimum?: number
