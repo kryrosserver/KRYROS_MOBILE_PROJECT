@@ -533,10 +533,20 @@ export default function LocationsShippingPage() {
                 <div className="space-y-1.5">
                   <label className="text-sm font-bold">Price ($)</label>
                   <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.price} onChange={e => setMethodForm({...methodForm, price: e.target.value})} />
+                  {activeZone?.country?.exchangeRate && (
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      ≈ {(parseFloat(methodForm.price || "0") * parseFloat(activeZone.country.exchangeRate)).toFixed(2)} {activeZone.country.currencyCode}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-bold">Free Threshold ($)</label>
                   <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.freeShippingThreshold} onChange={e => setMethodForm({...methodForm, freeShippingThreshold: e.target.value})} />
+                  {activeZone?.country?.exchangeRate && (
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      ≈ {(parseFloat(methodForm.freeShippingThreshold || "0") * parseFloat(activeZone.country.exchangeRate)).toFixed(2)} {activeZone.country.currencyCode}
+                    </p>
+                  )}
                 </div>
               </div>
 

@@ -3,8 +3,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { SettingsService } from '../settings/settings.service';
 import { ShippingZonesService } from '../shipping-zones/shipping-zones.service';
-import { Prisma, PaymentMethod } from '@prisma/client';
+import { Prisma, PaymentMethod, OrderStatus } from '@prisma/client';
 import { PaymentsService } from '../payments/payments.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -13,6 +14,7 @@ export class OrdersService {
     private settingsService: SettingsService,
     private shippingZonesService: ShippingZonesService,
     private paymentsService: PaymentsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   private convertToPaymentMethod(method: string): PaymentMethod {
@@ -316,12 +318,18 @@ export class OrdersService {
     let shipping = 0;
     const isNewShippingEnabled = await this.shippingZonesService.isEnabled();
 
+    // The subtotal here is always in USD (base currency)
+    // We compare it against the threshold which should also be defined in USD
     if (isNewShippingEnabled && data.shippingMethodId) {
       const method = await this.prisma.locationShippingMethod.findUnique({
         where: { id: data.shippingMethodId }
       });
       if (method) {
-        shipping = subtotal >= Number(method.freeShippingThreshold || 0) ? 0 : Number(method.price);
+        const threshold = Number(method.freeShippingThreshold || 0);
+        const methodPrice = Number(method.price || 0);
+        
+        // Both subtotal and threshold are in USD (base currency)
+        shipping = (threshold > 0 && subtotal >= threshold) ? 0 : methodPrice;
       }
     } else {
       const shippingConfig = await this.settingsService.getShippingConfig();
@@ -439,6 +447,16 @@ export class OrdersService {
       return createdOrder;
     });
 
+    // Send "Order Placed" Notification
+    if (userId) {
+      this.notificationsService.sendToUser(
+        userId,
+        'Order Placed!',
+        `Your order #${order.orderNumber} has been received and is pending confirmation.`,
+        { orderId: order.id, type: 'ORDER_STATUS' }
+      );
+    }
+
     // If payment method is MOBILE_MONEY, initiate payment push
     if (paymentMethodEnum === PaymentMethod.MOBILE_MONEY && data.paymentPhone && data.totalZMW) {
       try {
@@ -457,14 +475,14 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, status: string, paymentStatus?: string) {
-    await this.findById(id);
-    return this.prisma.$transaction(async (tx) => {
+    const existingOrder = await this.findById(id);
+    const order = await this.prisma.$transaction(async (tx) => {
       const data: any = { status: status as any };
       if (paymentStatus) {
         data.paymentStatus = paymentStatus as any;
       }
 
-      const order = await tx.order.update({
+      const updatedOrder = await tx.order.update({
         where: { id },
         data,
       });
@@ -477,7 +495,44 @@ export class OrdersService {
         },
       });
 
-      return order;
+      return updatedOrder;
     });
+
+    // Send Status Update Notification
+    if (order.userId) {
+      let title = 'Order Update';
+      let body = `Your order #${order.orderNumber} status is now: ${status}`;
+
+      switch (status) {
+        case OrderStatus.CONFIRMED:
+          title = 'Order Confirmed!';
+          body = `Great news! Your order #${order.orderNumber} has been confirmed.`;
+          break;
+        case OrderStatus.PROCESSING:
+          title = 'Processing your Order';
+          body = `We have started packing your order #${order.orderNumber}.`;
+          break;
+        case OrderStatus.SHIPPED:
+          title = 'Order Shipped!';
+          body = `Your order #${order.orderNumber} is on its way to you!`;
+          break;
+        case OrderStatus.DELIVERED:
+          title = 'Order Delivered';
+          body = `Your order #${order.orderNumber} has been delivered. Enjoy!`;
+          break;
+        case OrderStatus.CANCELLED:
+          title = 'Order Cancelled';
+          body = `Your order #${order.orderNumber} has been cancelled.`;
+          break;
+      }
+
+      this.notificationsService.sendToUser(order.userId, title, body, {
+        orderId: order.id,
+        status: status,
+        type: 'ORDER_STATUS',
+      });
+    }
+
+    return order;
   }
 }

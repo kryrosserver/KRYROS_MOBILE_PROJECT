@@ -32,7 +32,14 @@ android {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"]?.toString()
             keyPassword = keystoreProperties["keyPassword"]?.toString()
-            storeFile = keystoreProperties["storeFile"]?.let { file(it.toString()) }
+            storeFile = keystoreProperties["storeFile"]?.toString()?.let {
+                val storePath = it
+                if (java.io.File(storePath).isAbsolute) {
+                    file(storePath)
+                } else {
+                    rootProject.file(storePath)
+                }
+            }
             storePassword = keystoreProperties["storePassword"]?.toString()
         }
     }

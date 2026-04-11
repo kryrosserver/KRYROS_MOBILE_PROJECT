@@ -52,6 +52,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     bootstrap();
   }, []);
 
+  // Sync FCM token when user logs in or token is received
+  useEffect(() => {
+    const syncFCM = (fcmToken: string) => {
+      if (token) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ token: fcmToken }),
+        }).catch(err => console.error('Error registering FCM token:', err));
+      }
+    };
+
+    // Handle FCM Token from Mobile App
+    (window as any).setFCMToken = (fcmToken: string) => {
+      localStorage.setItem('fcm_token', fcmToken);
+      syncFCM(fcmToken);
+    };
+
+    // Check if we have a token waiting to be synced
+    const existingFCM = localStorage.getItem('fcm_token');
+    if (existingFCM && token) {
+      syncFCM(existingFCM);
+    }
+  }, [token]);
+
   const login = async (identifier: string, password: string) => {
     setIsLoading(true);
     const response = await authApi.login(identifier, password);

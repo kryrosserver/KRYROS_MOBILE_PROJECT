@@ -3,9 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    await Firebase.initializeApp();
+    // Handle background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+  }
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.white,
     statusBarIconBrightness: Brightness.dark,
@@ -13,6 +24,12 @@ void main() {
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
   runApp(const KryrosMobileApp());
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint("Handling a background message: ${message.messageId}");
 }
 
 class KryrosMobileApp extends StatelessWidget {
@@ -62,6 +79,65 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _initWebViewController(primaryUrl);
+    _setupNotifications();
+  }
+
+  Future<void> _setupNotifications() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // Request permissions
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      // Get token
+      String? token = await messaging.getToken();
+      if (token != null) {
+        debugPrint("FCM Token: $token");
+        _sendTokenToWebView(token);
+      }
+    }
+
+    // Handle notification clicks when app is in background/terminated
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (message.data.containsKey('url')) {
+        String url = message.data['url'];
+        if (!url.startsWith('http')) {
+          url = primaryUrl + (url.startsWith('/') ? url.substring(1) : url);
+        }
+        controller.loadRequest(Uri.parse(url));
+      }
+    });
+
+    // Handle notification clicks when app is in foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // For now, we'll just show a snackbar if the app is open
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message.notification?.body ?? "New notification received"),
+            action: SnackBarAction(
+              label: "VIEW",
+              onPressed: () {
+                if (message.data.containsKey('url')) {
+                  controller.loadRequest(Uri.parse(message.data['url']));
+                }
+              },
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  void _sendTokenToWebView(String token) {
+    // We'll try to inject this multiple times to ensure the page is loaded
+    Future.delayed(const Duration(seconds: 2), () {
+      controller.runJavaScript('if(window.setFCMToken) { window.setFCMToken("$token"); } else { localStorage.setItem("fcm_token", "$token"); }');
+    });
   }
 
   @override

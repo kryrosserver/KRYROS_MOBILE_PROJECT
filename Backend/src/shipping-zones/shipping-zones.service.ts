@@ -168,20 +168,38 @@ export class ShippingZonesService implements OnModuleInit {
       if (cityId) {
         const zone = await this.prisma.shippingZone.findFirst({
           where: { cityId, isActive: true },
-          include: { shippingMethods: { where: { status: true } } },
+          include: { 
+            shippingMethods: { where: { status: true } },
+            country: true
+          },
           orderBy: { priority: 'desc' },
         });
-        if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+        if (zone && zone.shippingMethods.length > 0) {
+          return zone.shippingMethods.map(m => ({
+            ...m,
+            currencyCode: zone.country?.currencyCode || 'USD',
+            exchangeRate: Number(zone.country?.exchangeRate || 1)
+          }));
+        }
       }
 
       // 2. Try matching by state_id
       if (stateId) {
         const zone = await this.prisma.shippingZone.findFirst({
           where: { stateId, isActive: true },
-          include: { shippingMethods: { where: { status: true } } },
+          include: { 
+            shippingMethods: { where: { status: true } },
+            country: true
+          },
           orderBy: { priority: 'desc' },
         });
-        if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+        if (zone && zone.shippingMethods.length > 0) {
+          return zone.shippingMethods.map(m => ({
+            ...m,
+            currencyCode: zone.country?.currencyCode || 'USD',
+            exchangeRate: Number(zone.country?.exchangeRate || 1)
+          }));
+        }
       }
     } else {
       // If MANUAL, try matching by state name (if it exists as a structured state in the DB)
@@ -196,10 +214,19 @@ export class ShippingZonesService implements OnModuleInit {
         if (state) {
           const zone = await this.prisma.shippingZone.findFirst({
             where: { stateId: state.id, isActive: true },
-            include: { shippingMethods: { where: { status: true } } },
+            include: { 
+              shippingMethods: { where: { status: true } },
+              country: true
+            },
             orderBy: { priority: 'desc' },
           });
-          if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+          if (zone && zone.shippingMethods.length > 0) {
+            return zone.shippingMethods.map(m => ({
+              ...m,
+              currencyCode: zone.country?.currencyCode || 'USD',
+              exchangeRate: Number(zone.country?.exchangeRate || 1)
+            }));
+          }
         }
       }
     }
@@ -208,10 +235,20 @@ export class ShippingZonesService implements OnModuleInit {
     if (countryId) {
       const zone = await this.prisma.shippingZone.findFirst({
         where: { countryId, isActive: true },
-        include: { shippingMethods: { where: { status: true } } },
+        include: { 
+          shippingMethods: { where: { status: true } },
+          country: true
+        },
         orderBy: { priority: 'desc' },
       });
-      if (zone && zone.shippingMethods.length > 0) return zone.shippingMethods;
+      if (zone && zone.shippingMethods.length > 0) {
+        // Add country info to each method for frontend currency handling
+        return zone.shippingMethods.map(m => ({
+          ...m,
+          currencyCode: zone.country?.currencyCode || 'USD',
+          exchangeRate: Number(zone.country?.exchangeRate || 1)
+        }));
+      }
     }
 
     // 4. Fallback to GLOBAL zone
@@ -222,9 +259,20 @@ export class ShippingZonesService implements OnModuleInit {
         cityId: null, 
         isActive: true 
       },
-      include: { shippingMethods: { where: { status: true } } },
+      include: { 
+        shippingMethods: { where: { status: true } },
+        country: true
+      },
     });
 
-    return globalZone ? globalZone.shippingMethods : [];
+    if (globalZone) {
+      return globalZone.shippingMethods.map(m => ({
+        ...m,
+        currencyCode: globalZone.country?.currencyCode || 'USD',
+        exchangeRate: Number(globalZone.country?.exchangeRate || 1)
+      }));
+    }
+
+    return [];
   }
 }

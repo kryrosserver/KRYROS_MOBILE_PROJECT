@@ -182,22 +182,37 @@ export default function CheckoutPage() {
   }
 
   const calculateTotal = () => {
-    const subtotal = getSubtotal() || 0
-    const shipping = getSelectedShipping()?.price || 0
-    return Number(subtotal) + Number(shipping)
+    const subtotalUSD = getSubtotal() || 0
+    return Number(subtotalUSD) + getShippingFeeUSD()
+  }
+
+  const getShippingFeeUSD = () => {
+    const subtotalUSD = getSubtotal() || 0
+    const selectedMethod = getSelectedShipping()
+    
+    if (!selectedMethod) return 0
+
+    const shippingPriceUSD = Number(selectedMethod.price || 0)
+    const thresholdUSD = Number(selectedMethod.freeShippingThreshold || 0)
+
+    if (thresholdUSD > 0 && subtotalUSD >= thresholdUSD) {
+      return 0
+    }
+    
+    return shippingPriceUSD
   }
 
   const handlePlaceOrder = async () => {
     setLoading(true)
     setError(null)
     try {
-      const subtotal = getSubtotal() || 0
-      const shippingFee = Number(getSelectedShipping()?.price || 0)
-      const total = Number(subtotal) + shippingFee
+      const subtotalUSD = getSubtotal() || 0
+      const shippingFeeUSD = getShippingFeeUSD()
+      const totalUSD = subtotalUSD + shippingFeeUSD
       
       // Calculate ZMW total if needed (using exchange rate from currency provider)
-      const zmwPrice = convertPrice(total)
-      const totalZMW = zmwPrice?.amount || total
+      const zmwPrice = convertPrice(totalUSD)
+      const totalZMW = zmwPrice?.amount || totalUSD
 
       const orderData = {
         items: items.map(item => ({
@@ -223,9 +238,9 @@ export default function CheckoutPage() {
         paymentPhone: formData.paymentPhone,
         totalZMW: totalZMW,
         shippingMethodId: formData.shippingMethodId,
-        subtotal: Number(subtotal),
-        shippingFee: shippingFee,
-        total: total,
+        subtotal: Number(subtotalUSD),
+        shippingFee: shippingFeeUSD,
+        total: totalUSD,
       }
 
       const res = await ordersApi.create(orderData)
@@ -751,7 +766,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <span>Shipping</span>
                   <span className="text-slate-900">
-                    {step === "INFORMATION" ? "Calculated at next step" : (convertPrice(Number(getSelectedShipping()?.price || 0))?.formatted || "...")}
+                    {step === "INFORMATION" ? "Calculated at next step" : (convertPrice(getShippingFeeUSD())?.formatted || "...")}
                   </span>
                 </div>
                 <div className="flex justify-between text-xl font-black text-slate-900 pt-4 border-t border-slate-50">
