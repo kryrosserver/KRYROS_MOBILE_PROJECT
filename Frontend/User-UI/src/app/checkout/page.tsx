@@ -279,9 +279,9 @@ export default function CheckoutPage() {
                 variant: item.variant?.name,
               };
             }),
-            subtotal: convertPrice(Number(subtotal))?.amount || Number(subtotal),
-            shipping: convertPrice(shippingFee)?.amount || shippingFee,
-            total: convertPrice(total)?.amount || total,
+            subtotal: convertPrice(Number(subtotalUSD))?.amount || Number(subtotalUSD),
+            shipping: convertPrice(shippingFeeUSD)?.amount || shippingFeeUSD,
+            total: convertPrice(totalUSD)?.amount || totalUSD,
             currency: { 
               code: currencyCountry?.currencyCode || "ZMW", 
               symbol: currencyCountry?.currencySymbol || "ZK" 

@@ -1,15 +1,11 @@
 "use client";
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Send, Info } from "lucide-react";
-import { toast } from "sonner";
+import { Bell, Send, Info, Loader2 } from "lucide-react";
 
 export default function NotificationsPage() {
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     body: "",
@@ -19,11 +15,12 @@ export default function NotificationsPage() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.body) {
-      toast.error("Please fill in both title and message");
+      setMessage({ type: 'error', text: "Please fill in both title and message" });
       return;
     }
 
     setLoading(true);
+    setMessage(null);
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/broadcast`, {
@@ -42,13 +39,14 @@ export default function NotificationsPage() {
       });
 
       if (res.ok) {
-        toast.success("Notification sent successfully to all users!");
+        setMessage({ type: 'success', text: "Notification sent successfully to all users!" });
         setFormData({ title: "", body: "", url: "" });
       } else {
-        toast.error("Failed to send notification");
+        const data = await res.json().catch(() => ({}));
+        setMessage({ type: 'error', text: data.message || "Failed to send notification" });
       }
     } catch (error) {
-      toast.error("An error occurred while sending");
+      setMessage({ type: 'error', text: "An error occurred while sending" });
     } finally {
       setLoading(false);
     }
@@ -57,8 +55,8 @@ export default function NotificationsPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <div className="p-3 bg-primary/10 rounded-2xl">
-          <Bell className="h-6 w-6 text-primary" />
+        <div className="p-3 bg-[#1FA89A]/10 rounded-2xl">
+          <Bell className="h-6 w-6 text-[#1FA89A]" />
         </div>
         <div>
           <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Push Notifications</h1>
@@ -66,81 +64,87 @@ export default function NotificationsPage() {
         </div>
       </div>
 
+      {message && (
+        <div className={`p-4 rounded-xl border-2 ${
+          message.type === 'success' 
+            ? 'bg-green-50 border-green-100 text-green-700' 
+            : 'bg-red-50 border-red-100 text-red-700'
+        } flex items-center gap-3 animate-in fade-in slide-in-from-top-2`}>
+          <Info className="h-5 w-5 shrink-0" />
+          <p className="text-sm font-bold">{message.text}</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <Card className="border-2 border-slate-100 shadow-sm rounded-[2rem] overflow-hidden">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <div className="bg-white border-2 border-slate-100 shadow-sm rounded-[2rem] overflow-hidden">
+            <div className="p-6 bg-slate-50/50 border-b border-slate-100">
+              <h2 className="text-lg font-bold flex items-center gap-2">
                 <Send className="h-5 w-5" /> New Broadcast
-              </CardTitle>
-              <CardDescription>This will be sent to every user who has the KRYROS app installed.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
+              </h2>
+              <p className="text-sm text-slate-500">This will be sent to every user who has the KRYROS app installed.</p>
+            </div>
+            <div className="p-6">
               <form onSubmit={handleSend} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Notification Title</label>
-                  <Input 
+                  <input 
                     placeholder="e.g. Flash Sale: 50% Off!" 
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="h-12 rounded-xl"
+                    className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all"
                   />
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Message Body</label>
-                  <Textarea 
+                  <textarea 
                     placeholder="Enter the message you want users to see on their phone..." 
                     rows={4}
                     value={formData.body}
                     onChange={(e) => setFormData({...formData, body: e.target.value})}
-                    className="rounded-xl resize-none"
+                    className="w-full p-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all resize-none"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Redirect Link (Optional)</label>
-                  <Input 
-                    placeholder="e.g. /shop/iphones" 
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Redirect URL (Optional)</label>
+                  <input 
+                    placeholder="e.g. /shop or /product/slug" 
                     value={formData.url}
                     onChange={(e) => setFormData({...formData, url: e.target.value})}
-                    className="h-12 rounded-xl"
+                    className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all"
                   />
-                  <p className="text-[10px] text-slate-400 font-medium">Users will be taken to this page when they click the notification.</p>
                 </div>
 
-                <Button 
+                <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full h-14 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-primary/20"
+                  className="w-full h-14 bg-[#1FA89A] hover:bg-[#168a7e] disabled:bg-slate-200 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-[#1FA89A]/20 transition-all flex items-center justify-center gap-2"
                 >
-                  {loading ? "Sending..." : "Send Notification Now"}
-                </Button>
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                  {loading ? "Sending..." : "Send Notification"}
+                </button>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6">
-          <Card className="border-2 border-primary/10 bg-primary/5 rounded-[2rem]">
-            <CardHeader>
-              <CardTitle className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
-                <Info className="h-4 w-4 text-primary" /> Pro Tips
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs space-y-3 font-medium text-slate-600">
-              <p>• Keep titles short and exciting to get more clicks.</p>
-              <p>• Use "Redirect Link" to send users directly to a specific product.</p>
-              <p>• Notifications are sent via Firebase Cloud Messaging (FCM) and are completely free.</p>
-            </CardContent>
-          </Card>
-
-          <div className="p-6 bg-slate-900 rounded-[2rem] text-white space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-widest text-primary">Preview</h4>
-            <div className="bg-white/10 p-4 rounded-2xl space-y-1">
-              <p className="text-sm font-bold truncate">{formData.title || "Your Title Here"}</p>
-              <p className="text-[11px] text-white/60 line-clamp-2">{formData.body || "Your message will appear here on the user's phone menu."}</p>
-            </div>
+          <div className="bg-white p-6 rounded-[2rem] border-2 border-slate-100">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Info className="h-4 w-4 text-[#1FA89A]" /> Tips
+            </h3>
+            <ul className="space-y-3">
+              <li className="text-xs text-slate-500 leading-relaxed">
+                <span className="font-bold text-slate-700 block mb-1">Short & Sweet</span>
+                Keep titles under 50 characters for the best display on mobile screens.
+              </li>
+              <li className="text-xs text-slate-500 leading-relaxed">
+                <span className="font-bold text-slate-700 block mb-1">Action Oriented</span>
+                Use a clear URL to redirect users directly to a product or category.
+              </li>
+            </ul>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.File
 
 plugins {
     id("com.android.application")
@@ -19,7 +20,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     val keystoreProperties = Properties()
@@ -34,7 +35,7 @@ android {
             keyPassword = keystoreProperties["keyPassword"]?.toString()
             storeFile = keystoreProperties["storeFile"]?.toString()?.let {
                 val storePath = it
-                if (java.io.File(storePath).isAbsolute) {
+                if (File(storePath).isAbsolute) {
                     file(storePath)
                 } else {
                     rootProject.file(storePath)
