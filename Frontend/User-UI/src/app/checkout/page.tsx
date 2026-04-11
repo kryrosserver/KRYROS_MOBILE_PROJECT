@@ -525,7 +525,16 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                             <span className="text-sm md:text-base font-black text-primary">
-                              {convertPrice(method.price || method.fee).formatted}
+                              {(() => {
+                                const subtotalUSD = getSubtotal() || 0
+                                const priceUSD = Number(method.price || 0)
+                                const thresholdUSD = Number(method.freeShippingThreshold || 0)
+                                
+                                if (thresholdUSD > 0 && subtotalUSD >= thresholdUSD) {
+                                  return "FREE"
+                                }
+                                return convertPrice(priceUSD).formatted
+                              })()}
                             </span>
                           </div>
                         ))
