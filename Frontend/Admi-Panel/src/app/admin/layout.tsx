@@ -43,6 +43,7 @@ const menuItems = [
   { icon: Wrench, label: "Services", href: "/admin/services" },
   { icon: FileText, label: "Invoicing", href: "/admin/invoice" },
   { icon: FileText, label: "CMS & Pages", href: "/admin/cms" },
+  { icon: Bell, label: "Notifications", href: "/admin/notifications" },
   { icon: BarChart3, label: "Reports", href: "/admin/reports" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];

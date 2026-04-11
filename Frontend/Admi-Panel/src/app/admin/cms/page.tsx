@@ -199,6 +199,7 @@ export default function CMSPage() {
 
   const tabs = [
     { id: "banners", label: "Hero Banners", icon: ImageIcon, count: banners.length },
+    { id: "homepage", label: "Home Sections", icon: Layout, count: 0 },
     { id: "shop_filters", label: "Shop Fast Filters", icon: Filter, count: sections.filter((s:any) => s.type === "fast_filters" && s.isActive).length },
     { id: "announcement", label: "Announcement Bar", icon: Megaphone, count: footerConfig?.announcementBarEnabled ? 1 : 0 },
     { id: "newsletter", label: "Newsletter Popup", icon: Sparkles, count: footerConfig?.newsletterPopupEnabled ? 1 : 0 },
@@ -1443,6 +1444,25 @@ export default function CMSPage() {
             <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 mx-auto">
               <Settings className="h-5 w-5" />
               Open Footer Designer
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Homepage Sections Management */}
+      {activeTab === "homepage" && (
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+          <div className="mx-auto w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6">
+            <Layout className="h-10 w-10 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Homepage Structure</h2>
+          <p className="text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
+            Manage the sections on your store homepage, including sliders, categories, and featured products.
+          </p>
+          <Link href="/admin/cms/homepage">
+            <button className="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 mx-auto">
+              <Settings className="h-5 w-5" />
+              Open Homepage Designer
             </button>
           </Link>
         </div>

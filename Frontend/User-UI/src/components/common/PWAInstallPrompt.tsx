@@ -58,7 +58,7 @@ export function PWAInstallPrompt() {
         <div className="flex justify-between items-start">
           <div className="flex gap-4 items-center">
             <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <img src="/logo.svg" alt="Kryros" className="h-8 w-8" />
+              <img src="/logo-pwa.png" alt="Kryros" className="h-8 w-8 object-contain" />
             </div>
             <div>
               <h3 className="font-black text-slate-900 uppercase tracking-tight text-sm">Install Kryros App</h3>
