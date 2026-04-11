@@ -14,14 +14,16 @@ export function PWAInstallPrompt() {
       e.preventDefault()
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e)
-      // Check if user already dismissed it in this session
-      const dismissed = sessionStorage.getItem("pwa_dismissed")
-      if (!dismissed) {
-        setShowPrompt(true)
-      }
+      // For debugging/forcing it to show during development/testing
+      setShowPrompt(true)
     }
 
     window.addEventListener("beforeinstallprompt", handler)
+
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowPrompt(false)
+    }
 
     return () => window.removeEventListener("beforeinstallprompt", handler)
   }, [])
