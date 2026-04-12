@@ -66,6 +66,7 @@ enum UserRole {
   WHOLESALER
   ADMIN
   SUPER_ADMIN
+  MANAGER
 }
 
 model Role {

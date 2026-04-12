@@ -151,44 +151,55 @@ export default function HomePageCMS() {
   };
 
   const moveOrder = async (index: number, direction: 'up' | 'down') => {
+    if (saving) return; // Prevent multiple clicks
+    
     const newSections = [...sections];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= sections.length) return;
 
-    // Swap the orders
+    // Get the sections to swap
     const currentSection = newSections[index];
     const targetSection = newSections[targetIndex];
 
-    // Optimistically update UI
-    const updatedSections = [...sections];
-    const tempOrder = updatedSections[index].order;
-    updatedSections[index].order = updatedSections[targetIndex].order;
-    updatedSections[targetIndex].order = tempOrder;
+    // Optimistically update UI state
+    const optimisticSections = [...sections];
+    const tempOrder = optimisticSections[index].order;
+    optimisticSections[index].order = optimisticSections[targetIndex].order;
+    optimisticSections[targetIndex].order = tempOrder;
     
-    // Sort them by order for immediate visual feedback
-    updatedSections.sort((a, b) => a.order - b.order);
-    setSections(updatedSections);
+    // Re-sort for visual feedback
+    optimisticSections.sort((a, b) => a.order - b.order);
+    setSections(optimisticSections);
+    setSaving(true); // Reuse saving state to block reordering
 
     try {
-      // Update both sections in backend
-      await Promise.all([
-        fetch(`/internal/admin/cms/homepage-sections/${currentSection.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ order: targetSection.order }),
-          credentials: "same-origin"
-        }),
-        fetch(`/internal/admin/cms/homepage-sections/${targetSection.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ order: currentSection.order }),
-          credentials: "same-origin"
-        })
-      ]);
-      loadSections();
+      // 1. Update current section order
+      const res1 = await fetch(`/internal/admin/cms/homepage-sections/${currentSection.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: targetSection.order }),
+        credentials: "same-origin"
+      });
+      if (!res1.ok) throw new Error("Failed to update first section");
+
+      // 2. Update target section order
+      const res2 = await fetch(`/internal/admin/cms/homepage-sections/${targetSection.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: currentSection.order }),
+        credentials: "same-origin"
+      });
+      if (!res2.ok) throw new Error("Failed to update second section");
+
+      // Success - small delay to ensure DB consistency before reload
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await loadSections();
     } catch (error) {
       console.error("Failed to move section", error);
-      loadSections(); // Revert on error
+      alert("Error moving section. Reverting...");
+      loadSections(); // Revert to server state
+    } finally {
+      setSaving(false);
     }
   };
 
