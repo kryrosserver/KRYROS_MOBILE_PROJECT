@@ -15,18 +15,27 @@ export class NotificationsService implements OnModuleInit {
 
   onModuleInit() {
     const serviceAccountPath = this.configService.get('FIREBASE_SERVICE_ACCOUNT_PATH');
+    const serviceAccountJson = this.configService.get('FIREBASE_SERVICE_ACCOUNT_JSON');
     
-    if (serviceAccountPath) {
-      try {
+    try {
+      if (serviceAccountJson) {
+        // Use raw JSON string from environment variable (Best for Render)
+        const config = JSON.parse(serviceAccountJson);
+        admin.initializeApp({
+          credential: admin.credential.cert(config),
+        });
+        this.logger.log('Firebase Admin initialized via JSON string');
+      } else if (serviceAccountPath) {
+        // Use path to JSON file
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccountPath),
         });
-        this.logger.log('Firebase Admin initialized successfully');
-      } catch (error) {
-        this.logger.error('Failed to initialize Firebase Admin', error.stack);
+        this.logger.log('Firebase Admin initialized via file path');
+      } else {
+        this.logger.warn('Neither FIREBASE_SERVICE_ACCOUNT_JSON nor FIREBASE_SERVICE_ACCOUNT_PATH found. Push notifications will be disabled.');
       }
-    } else {
-      this.logger.warn('FIREBASE_SERVICE_ACCOUNT_PATH not found. Push notifications will be disabled.');
+    } catch (error) {
+      this.logger.error('Failed to initialize Firebase Admin', error.stack);
     }
   }
 
