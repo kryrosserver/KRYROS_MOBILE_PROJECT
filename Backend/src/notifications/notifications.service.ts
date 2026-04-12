@@ -144,8 +144,12 @@ export class NotificationsService implements OnModuleInit {
     orderIds?: string[];
     orderStatus?: string;
     data?: any;
-    scheduledAt: string;
+    scheduledAt?: string;
   }) {
+    if (!params.scheduledAt) {
+      throw new Error('scheduledAt is required for scheduled notifications');
+    }
+    
     return this.prisma.notification.create({
       data: {
         userId: params.userId,
