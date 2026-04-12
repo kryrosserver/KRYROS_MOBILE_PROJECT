@@ -12,7 +12,8 @@ import {
   CheckCircle,
   AlertCircle,
   Package,
-  ChevronDown
+  ChevronDown,
+  X
 } from "lucide-react";
 import Link from "next/link";
 

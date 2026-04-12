@@ -436,7 +436,6 @@ model Order {
   billingAddress    Address?      @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
   items             OrderItem[]
   logs              OrderLog[]
-  notifications     Notification[]
 
   @@map("orders")
 }

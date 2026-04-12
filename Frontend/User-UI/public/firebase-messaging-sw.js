@@ -3,12 +3,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 
 // REAL CONFIGURATION - These values must match your Firebase Project settings
 const firebaseConfig = {
-  apiKey: "AIzaSy...", // Replace with your real API Key
-  authDomain: "kryros-mobile.firebaseapp.com",
-  projectId: "kryros-mobile",
-  storageBucket: "kryros-mobile.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyBKUn9HpB-0e5Mfgm6kMcwWd5whwg7Zf9I",
+  authDomain: "notification-237bf.firebaseapp.com",
+  projectId: "notification-237bf",
+  storageBucket: "notification-237bf.firebasestorage.app",
+  messagingSenderId: "788124682568",
+  appId: "1:788124682568:web:ab9e203b2bc65aaee50b7d"
 };
 
 firebase.initializeApp(firebaseConfig);
