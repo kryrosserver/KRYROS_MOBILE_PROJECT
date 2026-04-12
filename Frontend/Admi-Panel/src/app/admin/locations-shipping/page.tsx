@@ -32,11 +32,26 @@ export default function ShippingDashboardPage() {
           fetch("/api/admin/shipping-zones/status")
         ]);
 
-        if (cRes.ok) setCounts(prev => ({ ...prev, countries: (await cRes.json()).length }));
-        if (sRes.ok) setCounts(prev => ({ ...prev, states: (await sRes.json()).length }));
-        if (ctRes.ok) setCounts(prev => ({ ...prev, cities: (await ctRes.json()).length }));
-        if (zRes.ok) setCounts(prev => ({ ...prev, zones: (await zRes.json()).length }));
-        if (stRes.ok) setIsEnabled(await stRes.json());
+        if (cRes.ok) {
+          const data = await cRes.json();
+          setCounts(prev => ({ ...prev, countries: data.length }));
+        }
+        if (sRes.ok) {
+          const data = await sRes.json();
+          setCounts(prev => ({ ...prev, states: data.length }));
+        }
+        if (ctRes.ok) {
+          const data = await ctRes.json();
+          setCounts(prev => ({ ...prev, cities: data.length }));
+        }
+        if (zRes.ok) {
+          const data = await zRes.json();
+          setCounts(prev => ({ ...prev, zones: data.length }));
+        }
+        if (stRes.ok) {
+          const data = await stRes.json();
+          setIsEnabled(data);
+        }
       } catch (err) {
         console.error("Error loading shipping counts:", err);
       }
