@@ -1,572 +1,144 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { 
-  Plus, Edit, Trash2, Search, RefreshCcw, Globe, 
-  MapPin, Building2, Truck, ChevronRight, Settings2, 
-  CheckCircle2, XCircle, X, Map as MapIcon, PlusCircle,
-  AlertCircle
+  Globe, 
+  Map as MapIcon, 
+  Building2, 
+  Truck, 
+  Settings2,
+  MapPin
 } from "lucide-react";
 
-type Tab = "countries" | "states" | "cities" | "zones" | "global";
-
-export default function LocationsShippingPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("countries");
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any[]>([]);
-  const [countries, setCountries] = useState<any[]>([]);
-  const [states, setStates] = useState<any[]>([]);
-  const [isNewShippingEnabled, setIsNewShippingEnabled] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [showMethodModal, setShowMethodModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
-  const [editingMethod, setEditingMethod] = useState<any>(null);
-  const [activeZone, setActiveZone] = useState<any>(null);
-  const [saving, setSaving] = useState(false);
-
-  // Form states
-  const [countryForm, setCountryForm] = useState({ name: "", code: "", currencyCode: "", currencySymbol: "", symbolPosition: "BEFORE", exchangeRate: 1, autoRate: true, flag: "", status: true, isDefault: false });
-  const [stateForm, setStateForm] = useState({ countryId: "", name: "", code: "", isActive: true });
-  const [cityForm, setCityForm] = useState({ stateId: "", name: "", isActive: true });
-  const [zoneForm, setZoneForm] = useState({ name: "", countryId: "", stateId: "", cityId: "", priority: 0, isActive: true });
-  const [methodForm, setMethodForm] = useState({ zoneId: "", name: "", price: "0", freeShippingThreshold: "0", estimatedDays: "", status: true });
-  const [globalMethodForm, setGlobalMethodForm] = useState({ name: "", description: "", fee: "0", minThreshold: "0", estimatedDays: "", isActive: true });
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const statusRes = await fetch("/api/admin/shipping-zones/status");
-      const isEnabled = await statusRes.json();
-      setIsNewShippingEnabled(!!isEnabled);
-
-      let url = `/api/admin/${activeTab}`;
-      if (activeTab === "zones") url = `/api/admin/shipping-zones`;
-      if (activeTab === "global") url = `/api/admin/shipping`;
-      
-      const res = await fetch(url);
-      const json = await res.json();
-      
-      // Handle both array and wrapped object responses
-      let items = [];
-      if (Array.isArray(json)) {
-        items = json;
-      } else if (json && Array.isArray(json.data)) {
-        items = json.data;
-      } else if (json && Array.isArray(json.methods)) {
-        items = json.methods;
-      }
-      
-      setData(items);
-
-      // Load dependencies
-      if (activeTab === "states" || activeTab === "zones") {
-        const cRes = await fetch("/api/admin/countries");
-        const cJson = await cRes.json();
-        setCountries(Array.isArray(cJson) ? cJson : []);
-      }
-      if (activeTab === "cities" || activeTab === "zones") {
-        const sRes = await fetch("/api/admin/states");
-        const sJson = await sRes.json();
-        setStates(Array.isArray(sJson) ? sJson : []);
-      }
-    } catch (e) {
-      console.error("Error loading shipping data:", e);
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab]);
-
-  const toggleFeature = async (enabled: boolean) => {
-    try {
-      await fetch("/api/admin/shipping-zones/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled }),
-      });
-      setIsNewShippingEnabled(enabled);
-    } catch (e) {
-      alert("Error toggling feature");
-    }
-  };
+export default function ShippingDashboardPage() {
+  const [counts, setCounts] = useState({
+    countries: 0,
+    states: 0,
+    cities: 0,
+    zones: 0,
+    methods: 0
+  });
+  const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    const loadCounts = async () => {
+      try {
+        const [cRes, sRes, ctRes, zRes, stRes] = await Promise.all([
+          fetch("/api/admin/countries"),
+          fetch("/api/admin/states"),
+          fetch("/api/admin/cities"),
+          fetch("/api/admin/shipping-zones"),
+          fetch("/api/admin/shipping-zones/status")
+        ]);
 
-  const handleOpenModal = (item?: any) => {
-    setEditingItem(item || null);
-    if (activeTab === "countries") {
-      setCountryForm(item ? { ...item, exchangeRate: Number(item.exchangeRate) } : { name: "", code: "", currencyCode: "", currencySymbol: "", symbolPosition: "BEFORE", exchangeRate: 1, autoRate: true, flag: "", status: true, isDefault: false });
-    } else if (activeTab === "states") {
-      setStateForm(item ? { ...item } : { countryId: "", name: "", code: "", isActive: true });
-    } else if (activeTab === "cities") {
-      setCityForm(item ? { ...item } : { stateId: "", name: "", isActive: true });
-    } else if (activeTab === "zones") {
-      setZoneForm(item ? { ...item } : { name: "", countryId: "", stateId: "", cityId: "", priority: 0, isActive: true });
-    } else if (activeTab === "global") {
-      setGlobalMethodForm(item ? { 
-        ...item, 
-        fee: String(item.fee), 
-        minThreshold: String(item.minThreshold) 
-      } : { name: "", description: "", fee: "0", minThreshold: "0", estimatedDays: "", isActive: true });
-    }
-    setShowModal(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : (activeTab === "global" ? "shipping" : activeTab)}`;
-      if (editingItem) url += `/${editingItem.id}`;
-      
-      let body: any;
-      if (activeTab === "countries") body = countryForm;
-      else if (activeTab === "states") body = stateForm;
-      else if (activeTab === "cities") body = cityForm;
-      else if (activeTab === "zones") body = zoneForm;
-      else {
-        // Global Method - ensure numbers are sent correctly
-        body = {
-          ...globalMethodForm,
-          fee: parseFloat(globalMethodForm.fee) || 0,
-          minThreshold: parseFloat(globalMethodForm.minThreshold) || 0
-        };
+        if (cRes.ok) setCounts(prev => ({ ...prev, countries: (await cRes.json()).length }));
+        if (sRes.ok) setCounts(prev => ({ ...prev, states: (await sRes.json()).length }));
+        if (ctRes.ok) setCounts(prev => ({ ...prev, cities: (await ctRes.json()).length }));
+        if (zRes.ok) setCounts(prev => ({ ...prev, zones: (await zRes.json()).length }));
+        if (stRes.ok) setIsEnabled(await stRes.json());
+      } catch (err) {
+        console.error("Error loading shipping counts:", err);
       }
+    };
+    loadCounts();
+  }, []);
 
-      const res = await fetch(url, {
-        method: editingItem ? (activeTab === "global" ? "PUT" : "PATCH") : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (res.ok) {
-        setShowModal(false);
-        loadData();
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error || err.message || "Failed to save"}`);
-      }
-    } catch (e) {
-      alert("Error saving");
-    } finally {
-      setSaving(false);
+  const sections = [
+    {
+      id: "countries",
+      label: "Countries",
+      icon: Globe,
+      count: counts.countries,
+      href: "/admin/locations-shipping/countries",
+      description: "Manage supported nations and their currencies."
+    },
+    {
+      id: "states",
+      label: "States / Provinces",
+      icon: MapIcon,
+      count: counts.states,
+      href: "/admin/locations-shipping/states",
+      description: "Define administrative regions for specific countries."
+    },
+    {
+      id: "cities",
+      label: "Cities",
+      icon: Building2,
+      count: counts.cities,
+      href: "/admin/locations-shipping/cities",
+      description: "Specific city-level data for precise shipping."
+    },
+    {
+      id: "zones",
+      label: "Shipping Zones",
+      icon: Truck,
+      count: counts.zones,
+      href: "/admin/locations-shipping/zones",
+      description: "Group locations into zones with custom rates."
+    },
+    {
+      id: "global",
+      label: "Global Methods",
+      icon: Settings2,
+      count: 0,
+      href: "/admin/locations-shipping/global",
+      description: "Default shipping rules for the entire storefront."
     }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this item?")) return;
-    try {
-      let url = `/api/admin/${activeTab === "zones" ? "shipping-zones" : (activeTab === "global" ? "shipping" : activeTab)}/${id}`;
-      const res = await fetch(url, { method: "DELETE" });
-      if (res.ok) loadData();
-    } catch (e) {
-      alert("Error deleting");
-    }
-  };
-
-  const handleOpenMethodModal = (zone: any, method?: any) => {
-    setActiveZone(zone);
-    setEditingMethod(method || null);
-    setMethodForm({
-      zoneId: zone.id,
-      name: method?.name || "",
-      price: String(method?.price || 0),
-      freeShippingThreshold: String(method?.freeShippingThreshold || 0),
-      estimatedDays: method?.estimatedDays || "",
-      status: method ? method.status : true,
-    });
-    setShowMethodModal(true);
-  };
-
-  const handleMethodSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const url = editingMethod 
-        ? `/api/admin/shipping-zones/methods/${editingMethod.id}` 
-        : `/api/admin/shipping-zones/methods`;
-      
-      const body = {
-        ...methodForm,
-        price: parseFloat(methodForm.price) || 0,
-        freeShippingThreshold: parseFloat(methodForm.freeShippingThreshold) || 0
-      };
-
-      const res = await fetch(url, {
-        method: editingMethod ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (res.ok) {
-        setShowMethodModal(false);
-        loadData();
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error || err.message || "Failed to save method"}`);
-      }
-    } catch (e) {
-      alert("Error saving method");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleMethodDelete = async (id: string) => {
-    if (!confirm("Delete this shipping method?")) return;
-    try {
-      const res = await fetch(`/api/admin/shipping-zones/methods/${id}`, { method: "DELETE" });
-      if (res.ok) loadData();
-    } catch (e) {
-      alert("Error deleting method");
-    }
-  };
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-xl ${isNewShippingEnabled ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-400"}`}>
-            <Truck className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Locations & Shipping System</h1>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
-              Status: {isNewShippingEnabled ? "🟢 Active (Location Based)" : "⚪ Offline (Global Only)"}
-            </p>
-          </div>
+    <div className="space-y-8 pb-20">
+      <div className="flex items-center justify-between">
+        <div className="text-left">
+          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
+            <MapPin className="h-8 w-8 text-green-600" />
+            Locations & Shipping
+          </h1>
+          <p className="text-slate-500 font-medium">Configure where you ship and how much it costs</p>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Enable Location Shipping</span>
-            <button 
-              onClick={() => toggleFeature(!isNewShippingEnabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${isNewShippingEnabled ? "bg-green-500" : "bg-slate-300"}`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isNewShippingEnabled ? "translate-x-6" : "translate-x-1"}`} />
-            </button>
-          </div>
-          <button 
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-500/20"
-          >
-            <Plus className="h-5 w-5" />
-            Add {activeTab.slice(0, -1)}
-          </button>
+        <div className={`px-4 py-2 rounded-2xl border-2 flex items-center gap-3 ${isEnabled ? "bg-green-50 border-green-100 text-green-700" : "bg-slate-50 border-slate-100 text-slate-400"}`}>
+          <div className={`h-2.5 w-2.5 rounded-full ${isEnabled ? "bg-green-500 animate-pulse" : "bg-slate-300"}`} />
+          <span className="text-[10px] font-black uppercase tracking-widest">
+            System: {isEnabled ? "Location Based" : "Global Only"}
+          </span>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-slate-200 gap-8">
-        {[
-          { id: "countries", label: "Countries", icon: Globe },
-          { id: "states", label: "States / Provinces", icon: MapIcon },
-          { id: "cities", label: "Cities", icon: Building2 },
-          { id: "zones", label: "Shipping Zones", icon: Truck },
-          { id: "global", label: "Global Methods", icon: Settings2 },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as Tab)}
-            className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium transition-all ${
-              activeTab === tab.id 
-                ? "border-green-500 text-green-600" 
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sections.map((section) => (
+          <Link
+            key={section.id}
+            href={section.href}
+            className="group relative flex flex-col p-6 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-green-500/30 hover:shadow-xl transition-all duration-300 text-left overflow-hidden shadow-sm"
           >
-            <tab.icon className="h-4 w-4" />
-            {tab.label}
-          </button>
+            <div className="mb-4 p-4 rounded-2xl w-fit bg-slate-50 text-slate-400 group-hover:bg-green-600 group-hover:text-white transition-colors">
+              <section.icon className="h-6 w-6" />
+            </div>
+            
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-black uppercase tracking-tight text-lg text-slate-900 group-hover:text-green-600 transition-colors">
+                {section.label}
+              </h3>
+              <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest group-hover:bg-green-50 group-hover:text-green-600 transition-colors">
+                {section.count} Items
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6">
+              {section.description}
+            </p>
+
+            <div className="mt-auto flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                Configure Section
+              </span>
+              <div className="h-2 w-2 rounded-full bg-slate-100 group-hover:bg-green-600 transition-colors" />
+            </div>
+          </Link>
         ))}
       </div>
-
-      {/* Content Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder={`Search ${activeTab}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20"
-            />
-          </div>
-          <button onClick={loadData} className="p-2 text-slate-500 hover:text-green-600"><RefreshCcw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} /></button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
-              <tr>
-                <th className="px-6 py-4">Name / Info</th>
-                {activeTab === "countries" && <th className="px-6 py-4">Currency</th>}
-                {activeTab === "states" && <th className="px-6 py-4">Country</th>}
-                {activeTab === "cities" && <th className="px-6 py-4">State</th>}
-                {activeTab === "zones" && <th className="px-6 py-4">Target Location</th>}
-                {activeTab === "global" && (
-                  <>
-                    <th className="px-6 py-4">Price</th>
-                    <th className="px-6 py-4">Free Over</th>
-                    <th className="px-6 py-4">Delivery</th>
-                  </>
-                )}
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">Loading...</td></tr>
-              ) : data.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">No items found</td></tr>
-              ) : data.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      {activeTab === "countries" && <span className="text-xl">{item.flag || "🏳️"}</span>}
-                      <div>
-                        <p className="font-semibold text-slate-900">{item.name}</p>
-                        {(item.code || item.description) && (
-                          <p className="text-xs text-slate-500">{item.code || item.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  {activeTab === "countries" && <td className="px-6 py-4 text-sm font-medium">{item.currencyCode} ({item.currencySymbol})</td>}
-                  {activeTab === "states" && <td className="px-6 py-4 text-sm">{item.country?.name}</td>}
-                  {activeTab === "cities" && <td className="px-6 py-4 text-sm">{item.state?.name}</td>}
-                  {activeTab === "zones" && (
-                    <td className="px-6 py-4">
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap gap-1">
-                          {item.city ? <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded uppercase font-bold tracking-tight">City: {item.city.name}</span> :
-                           item.state ? <span className="bg-orange-100 text-orange-700 text-[10px] px-2 py-0.5 rounded uppercase font-bold tracking-tight">State: {item.state.name}</span> :
-                           item.country ? <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded uppercase font-bold tracking-tight">Country: {item.country.name}</span> :
-                           <span className="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded uppercase font-bold italic tracking-tight">Global Default</span>}
-                        </div>
-                        <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-2 mt-2">
-                          {item.shippingMethods?.map((m: any) => (
-                            <div key={m.id} className="flex items-center justify-between text-[11px] bg-slate-50 p-2 rounded group/method">
-                              <div className="flex flex-col">
-                                <span className="font-bold text-slate-700">{m.name}</span>
-                                <span className="text-slate-500">${Number(m.price).toFixed(2)} {m.freeShippingThreshold > 0 && `(Free > $${m.freeShippingThreshold})`}</span>
-                              </div>
-                              <div className="flex gap-1 opacity-0 group-hover/method:opacity-100 transition-all">
-                                <button onClick={() => handleOpenMethodModal(item, m)} className="p-1 text-blue-500 hover:bg-blue-100 rounded"><Edit className="h-3 w-3" /></button>
-                                <button onClick={() => handleMethodDelete(m.id)} className="p-1 text-red-500 hover:bg-red-100 rounded"><Trash2 className="h-3 w-3" /></button>
-                              </div>
-                            </div>
-                          ))}
-                          <button 
-                            onClick={() => handleOpenMethodModal(item)}
-                            className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 hover:text-green-700 uppercase tracking-widest mt-1"
-                          >
-                            <PlusCircle className="h-3 w-3" />
-                            Add Method
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  )}
-                  {activeTab === "global" && (
-                    <>
-                      <td className="px-6 py-4 text-sm font-bold text-slate-900">${Number(item.fee).toFixed(2)}</td>
-                      <td className="px-6 py-4 text-sm text-green-600 font-medium">{Number(item.minThreshold) > 0 ? `$${Number(item.minThreshold).toFixed(2)}` : "Always Free"}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{item.estimatedDays || "—"}</td>
-                    </>
-                  )}
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${item.status || item.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-400"}`}>
-                      {item.status || item.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => handleOpenModal(item)} className="p-2 text-slate-400 hover:text-blue-500"><Edit className="h-4 w-4" /></button>
-                      <button onClick={() => handleDelete(item.id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
-                {editingItem ? `Edit ${activeTab.slice(0, -1)}` : `Add ${activeTab.slice(0, -1)}`}
-              </h2>
-              <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:text-slate-600"><X className="h-5 w-5" /></button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {activeTab === "countries" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2"><label className="text-sm font-bold">Name</label><input required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={countryForm.name} onChange={e => setCountryForm({...countryForm, name: e.target.value})} /></div>
-                  <div><label className="text-sm font-bold">Code (ZM)</label><input required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={countryForm.code} onChange={e => setCountryForm({...countryForm, code: e.target.value})} /></div>
-                  <div><label className="text-sm font-bold">Flag Emoji</label><input className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={countryForm.flag} onChange={e => setCountryForm({...countryForm, flag: e.target.value})} /></div>
-                </div>
-              )}
-
-              {activeTab === "states" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-bold">Select Country</label>
-                    <select required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={stateForm.countryId} onChange={e => setStateForm({...stateForm, countryId: e.target.value})}>
-                      <option value="">Select a country</option>
-                      {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div><label className="text-sm font-bold">State Name</label><input required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={stateForm.name} onChange={e => setStateForm({...stateForm, name: e.target.value})} /></div>
-                </div>
-              )}
-
-              {activeTab === "cities" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-bold">Select State</label>
-                    <select required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={cityForm.stateId} onChange={e => setCityForm({...cityForm, stateId: e.target.value})}>
-                      <option value="">Select a state</option>
-                      {states.map(s => <option key={s.id} value={s.id}>{s.name} ({s.country?.name})</option>)}
-                    </select>
-                  </div>
-                  <div><label className="text-sm font-bold">City Name</label><input required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={cityForm.name} onChange={e => setCityForm({...cityForm, name: e.target.value})} /></div>
-                </div>
-              )}
-
-              {activeTab === "zones" && (
-                <div className="space-y-4">
-                  <div><label className="text-sm font-bold">Zone Name</label><input required className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={zoneForm.name} onChange={e => setZoneForm({...zoneForm, name: e.target.value})} /></div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold">Priority (High first)</label>
-                      <input type="number" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={zoneForm.priority} onChange={e => setZoneForm({...zoneForm, priority: parseInt(e.target.value)})} />
-                    </div>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-100 space-y-3">
-                    <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Scope Selection (Leave empty for Global)</p>
-                    <select className="w-full p-2 bg-white border rounded-lg text-sm" value={zoneForm.countryId} onChange={e => setZoneForm({...zoneForm, countryId: e.target.value, stateId: "", cityId: ""})}>
-                      <option value="">Any Country (Global)</option>
-                      {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                    {zoneForm.countryId && (
-                      <select className="w-full p-2 bg-white border rounded-lg text-sm" value={zoneForm.stateId} onChange={e => setZoneForm({...zoneForm, stateId: e.target.value, cityId: ""})}>
-                        <option value="">Any State in this Country</option>
-                        {states.filter(s => s.countryId === zoneForm.countryId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                      </select>
-                    )}
-                    {zoneForm.stateId && (
-                      <select className="w-full p-2 bg-white border rounded-lg text-sm" value={zoneForm.cityId} onChange={e => setZoneForm({...zoneForm, cityId: e.target.value})}>
-                        <option value="">Any City in this State</option>
-                        {states.find(s => s.id === zoneForm.stateId)?.cities?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "global" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-bold">Method Name</label>
-                    <input required placeholder="e.g. Standard Shipping" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.name} onChange={e => setGlobalMethodForm({...globalMethodForm, name: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-bold">Description</label>
-                    <input placeholder="e.g. Delivery within 3-5 days" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.description} onChange={e => setGlobalMethodForm({...globalMethodForm, description: e.target.value})} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold">Shipping Fee ($)</label>
-                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.fee} onChange={e => setGlobalMethodForm({...globalMethodForm, fee: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold">Free Over ($)</label>
-                      <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.minThreshold} onChange={e => setGlobalMethodForm({...globalMethodForm, minThreshold: e.target.value})} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-bold">Estimated Days</label>
-                    <input placeholder="e.g. 3-5 days" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={globalMethodForm.estimatedDays} onChange={e => setGlobalMethodForm({...globalMethodForm, estimatedDays: e.target.value})} />
-                  </div>
-                </div>
-              )}
-
-              <button disabled={saving} className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-lg shadow-green-500/20 disabled:opacity-50 transition-all">
-                {saving ? "Saving..." : "Confirm & Save"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Shipping Method Modal */}
-      {showMethodModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">{editingMethod ? "Edit Method" : "Add Method"}</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Zone: {activeZone?.name}</p>
-              </div>
-              <button onClick={() => setShowMethodModal(false)} className="p-2 text-slate-400 hover:text-slate-600"><X className="h-5 w-5" /></button>
-            </div>
-            
-            <form onSubmit={handleMethodSubmit} className="p-6 space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold">Method Name</label>
-                <input required placeholder="e.g. Express Shipping" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.name} onChange={e => setMethodForm({...methodForm, name: e.target.value})} />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-bold">Price ($)</label>
-                  <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.price} onChange={e => setMethodForm({...methodForm, price: e.target.value})} />
-                  {activeZone?.country?.exchangeRate && (
-                    <p className="text-[10px] text-slate-500 font-medium">
-                      ≈ {(parseFloat(methodForm.price || "0") * parseFloat(activeZone.country.exchangeRate)).toFixed(2)} {activeZone.country.currencyCode}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-bold">Free Threshold ($)</label>
-                  <input type="number" step="0.01" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.freeShippingThreshold} onChange={e => setMethodForm({...methodForm, freeShippingThreshold: e.target.value})} />
-                  {activeZone?.country?.exchangeRate && (
-                    <p className="text-[10px] text-slate-500 font-medium">
-                      ≈ {(parseFloat(methodForm.freeShippingThreshold || "0") * parseFloat(activeZone.country.exchangeRate)).toFixed(2)} {activeZone.country.currencyCode}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold">Estimated Days</label>
-                <input placeholder="e.g. 3-5 days" className="w-full p-2 bg-slate-50 border rounded-lg mt-1" value={methodForm.estimatedDays} onChange={e => setMethodForm({...methodForm, estimatedDays: e.target.value})} />
-              </div>
-
-              <div className="flex items-center gap-2 pt-2">
-                <input type="checkbox" checked={methodForm.status} onChange={e => setMethodForm({...methodForm, status: e.target.checked})} />
-                <span className="text-sm font-medium">Method Active</span>
-              </div>
-
-              <button disabled={saving} className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-lg shadow-green-500/20 disabled:opacity-50 transition-all">
-                {saving ? "Saving..." : "Confirm Method"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
