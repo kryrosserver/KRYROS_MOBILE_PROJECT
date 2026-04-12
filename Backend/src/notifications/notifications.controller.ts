@@ -23,7 +23,7 @@ export class NotificationsController {
 
   @Post('broadcast')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send broadcast notification (Admin only)' })
   async broadcast(@Body() body: { title: string; body: string; data?: any }) {
@@ -32,7 +32,7 @@ export class NotificationsController {
 
   @Post('send')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send targeted notification (Admin only)' })
   async sendTargeted(@Body() body: SendNotificationDto) {
