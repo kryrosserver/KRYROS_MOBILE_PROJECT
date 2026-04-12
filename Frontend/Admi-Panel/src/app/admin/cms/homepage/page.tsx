@@ -155,26 +155,41 @@ export default function HomePageCMS() {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= sections.length) return;
 
-    const temp = newSections[index].order;
-    newSections[index].order = newSections[targetIndex].order;
-    newSections[targetIndex].order = temp;
+    // Swap the orders
+    const currentSection = newSections[index];
+    const targetSection = newSections[targetIndex];
 
-    // Update both sections in backend
-    await Promise.all([
-      fetch(`/internal/admin/cms/homepage-sections/${newSections[index].id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: newSections[index].order }),
-        credentials: "same-origin"
-      }),
-      fetch(`/internal/admin/cms/homepage-sections/${newSections[targetIndex].id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: newSections[targetIndex].order }),
-        credentials: "same-origin"
-      })
-    ]);
-    loadSections();
+    // Optimistically update UI
+    const updatedSections = [...sections];
+    const tempOrder = updatedSections[index].order;
+    updatedSections[index].order = updatedSections[targetIndex].order;
+    updatedSections[targetIndex].order = tempOrder;
+    
+    // Sort them by order for immediate visual feedback
+    updatedSections.sort((a, b) => a.order - b.order);
+    setSections(updatedSections);
+
+    try {
+      // Update both sections in backend
+      await Promise.all([
+        fetch(`/internal/admin/cms/homepage-sections/${currentSection.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: targetSection.order }),
+          credentials: "same-origin"
+        }),
+        fetch(`/internal/admin/cms/homepage-sections/${targetSection.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: currentSection.order }),
+          credentials: "same-origin"
+        })
+      ]);
+      loadSections();
+    } catch (error) {
+      console.error("Failed to move section", error);
+      loadSections(); // Revert on error
+    }
   };
 
   return (
