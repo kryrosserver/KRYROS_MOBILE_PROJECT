@@ -566,8 +566,9 @@ export default function HomePageCMS() {
                       />
                     </div>
                   </div>
-                  <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-[10px] text-blue-700 font-bold uppercase tracking-tight">
-                    This section automatically displays products marked as "isFlashSale" in the product manager.
+                  <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-[10px] text-blue-700 font-bold uppercase tracking-tight space-y-2">
+                    <p>This section automatically displays products marked as "isFlashSale" in the product manager.</p>
+                    <p className="text-blue-900 underline font-black">Make sure to set a Flash Sale Price and End Date for each product!</p>
                   </div>
                 </div>
               )}
@@ -578,6 +579,11 @@ export default function HomePageCMS() {
                   className="p-6 rounded-lg border shadow-sm flex flex-col items-center justify-center text-center gap-2 min-h-[150px]"
                   style={{ backgroundColor: form.backgroundColor, color: form.textColor }}
                 >
+                  {form.type === 'FlashSale' && (
+                    <div className="mb-2 flex items-center gap-1 bg-slate-900 text-white px-3 py-1.5 rounded-full text-[8px] font-black uppercase">
+                      <PlayCircle className="h-3 w-3 text-green-500" /> 00 : 00 : 00
+                    </div>
+                  )}
                   <h4 className="font-black uppercase tracking-tight">{form.title || 'Section Title'}</h4>
                   <p className="text-xs opacity-80">{form.subtitle || 'Optional subtitle goes here'}</p>
                   {form.link && (

@@ -70,7 +70,18 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
     )
   }
 
-  if (products.length === 0) return null
+  if (products.length === 0) {
+    // If we are in admin mode or just want to show something instead of empty
+    return (
+      <section className="py-12 bg-slate-50/50 border-y border-slate-100">
+        <div className="container-custom text-center py-12">
+          <Timer className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-slate-400 uppercase tracking-widest">{section.title || "Flash Sale"}</h2>
+          <p className="text-slate-400 text-sm mt-2">No active flash sale products found. Mark products as "isFlashSale" in the admin panel to show them here.</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="py-12 md:py-24 overflow-hidden">
@@ -93,26 +104,32 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-slate-900 text-white px-6 py-4 rounded-3xl shadow-xl">
-              <Timer className="h-5 w-5 text-primary" />
-              <div className="flex items-center gap-3 font-mono text-xl md:text-2xl font-black">
-                <div className="flex flex-col items-center">
-                  <span>{timeLeft.hours.toString().padStart(2, '0')}</span>
-                  <span className="text-[8px] uppercase tracking-widest opacity-50 -mt-1">Hrs</span>
-                </div>
-                <span className="text-primary animate-pulse">:</span>
-                <div className="flex flex-col items-center">
-                  <span>{timeLeft.minutes.toString().padStart(2, '0')}</span>
-                  <span className="text-[8px] uppercase tracking-widest opacity-50 -mt-1">Min</span>
-                </div>
-                <span className="text-primary animate-pulse">:</span>
-                <div className="flex flex-col items-center">
-                  <span>{timeLeft.seconds.toString().padStart(2, '0')}</span>
-                  <span className="text-[8px] uppercase tracking-widest opacity-50 -mt-1">Sec</span>
+            {timeLeft.hours + timeLeft.minutes + timeLeft.seconds > 0 ? (
+              <div className="flex items-center gap-2 bg-slate-900 text-white px-6 py-4 rounded-3xl shadow-xl">
+                <Timer className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 font-mono text-xl md:text-2xl font-black">
+                  <div className="flex flex-col items-center">
+                    <span>{timeLeft.hours.toString().padStart(2, '0')}</span>
+                    <span className="text-[8px] uppercase tracking-widest opacity-50 -mt-1">Hrs</span>
+                  </div>
+                  <span className="text-primary animate-pulse">:</span>
+                  <div className="flex flex-col items-center">
+                    <span>{timeLeft.minutes.toString().padStart(2, '0')}</span>
+                    <span className="text-[8px] uppercase tracking-widest opacity-50 -mt-1">Min</span>
+                  </div>
+                  <span className="text-primary animate-pulse">:</span>
+                  <div className="flex flex-col items-center">
+                    <span>{timeLeft.seconds.toString().padStart(2, '0')}</span>
+                    <span className="text-[8px] uppercase tracking-widest opacity-50 -mt-1">Sec</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <Link href="/flash-sales" className="hidden md:flex h-14 w-14 items-center justify-center rounded-full border-2 border-slate-100 hover:border-primary hover:text-primary transition-all group">
+            ) : (
+              <div className="bg-red-600 text-white px-6 py-4 rounded-3xl shadow-xl font-black uppercase tracking-widest text-sm">
+                Sale Ended
+              </div>
+            )}
+            <Link href={section.link || "/flash-sales"} className="hidden md:flex h-14 w-14 items-center justify-center rounded-full border-2 border-slate-100 hover:border-primary hover:text-primary transition-all group">
               <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -124,8 +141,10 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
               ? Math.round((1 - (parseFloat(product.salePrice) / parseFloat(product.price))) * 100)
               : Math.round((1 - (parseFloat(product.flashSalePrice || product.price) / parseFloat(product.price))) * 100);
 
+            const isEnded = timeLeft.hours + timeLeft.minutes + timeLeft.seconds <= 0;
+
             return (
-              <div key={product.id} className="group relative bg-white rounded-[2.5rem] border-2 border-slate-50 overflow-hidden hover:border-primary/20 hover:shadow-2xl transition-all duration-500">
+              <div key={product.id} className={`group relative bg-white rounded-[2.5rem] border-2 border-slate-50 overflow-hidden hover:border-primary/20 hover:shadow-2xl transition-all duration-500 ${isEnded ? 'opacity-75 grayscale-[0.5]' : ''}`}>
                 <div className="aspect-square relative overflow-hidden bg-slate-50/50">
                   <img 
                     src={resolveImageUrl(product.images?.[0]?.url)} 
@@ -147,6 +166,12 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
                       <Eye className="h-5 w-5" />
                     </button>
                   </div>
+
+                  {isEnded && (
+                    <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-20">
+                      <span className="bg-slate-900 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Ended</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="p-6 space-y-4">
@@ -166,7 +191,11 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
                         {convertPrice(parseFloat(product.flashSalePrice || product.salePrice || product.price)).formatted}
                       </span>
                     </div>
-                    <Button size="icon" className="h-12 w-12 rounded-2xl bg-slate-900 hover:bg-primary shadow-lg shadow-slate-900/10 transition-all hover:-translate-y-1">
+                    <Button 
+                      disabled={isEnded}
+                      size="icon" 
+                      className={`h-12 w-12 rounded-2xl ${isEnded ? 'bg-slate-300' : 'bg-slate-900 hover:bg-primary shadow-lg shadow-slate-900/10'} transition-all hover:-translate-y-1`}
+                    >
                       <ShoppingCart className="h-5 w-5 text-white" />
                     </Button>
                   </div>
@@ -179,7 +208,7 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
                     </div>
                     <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-red-500 rounded-full" 
+                        className={`h-full ${isEnded ? 'bg-slate-300' : 'bg-red-500'} rounded-full`}
                         style={{ width: `${((product.stockCurrent || 10) / (product.stockTotal || 50)) * 100}%` }}
                       />
                     </div>
@@ -191,8 +220,8 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
         </div>
         
         <div className="mt-12 md:hidden">
-          <Link href="/flash-sales" className="flex items-center justify-center gap-2 w-full py-4 bg-slate-100 rounded-2xl text-slate-900 font-black uppercase tracking-widest text-xs">
-            View All Offers <ArrowRight className="h-4 w-4" />
+          <Link href={section.link || "/flash-sales"} className="flex items-center justify-center gap-2 w-full py-4 bg-slate-100 rounded-2xl text-slate-900 font-black uppercase tracking-widest text-xs">
+            {section.linkText || "View All Offers"} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
