@@ -31,8 +31,56 @@
 
   <title>kryros_mobile</title>
   <link rel="manifest" href="manifest.json">
+  <script src="firebase-config.js" defer></script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Register Firebase service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Firebase Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.error('Firebase Service Worker registration failed:', error);
+        });
+    }
+
+    // Initialize Firebase when page loads
+    window.addEventListener('load', async () => {
+      try {
+        // Import Firebase config
+        const { requestPermission, onMessageListener } = await import('./firebase-config.js');
+
+        // Request notification permission and get token
+        const token = await requestPermission();
+        if (token) {
+          console.log('FCM Token:', token);
+          // Send token to Flutter app or backend
+          if (window.setFCMToken) {
+            window.setFCMToken(token);
+          } else {
+            localStorage.setItem('fcm_token', token);
+          }
+        }
+
+        // Listen for foreground messages
+        onMessageListener().then((payload) => {
+          console.log('Foreground message received:', payload);
+          // Show notification or update UI
+          if (Notification.permission === 'granted') {
+            new Notification(payload.notification?.title || 'KRYROS', {
+              body: payload.notification?.body,
+              icon: '/icons/Icon-192.png',
+              data: payload.data
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+      }
+    });
+  </script>
 </body>
 </html>

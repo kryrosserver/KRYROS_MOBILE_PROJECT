@@ -25,13 +25,13 @@ model User {
   isActive          Boolean   @default(true)
   emailVerifiedAt   DateTime?
   lastLoginAt       DateTime?
-  fcmToken          String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
   // Relations
   orders            Order[]
   addresses         Address[]
+  devices           UserDevice[]
   creditProfile     CreditProfile?
   creditAccounts    CreditAccount[]
   wallet            Wallet?
@@ -44,6 +44,21 @@ model User {
   roleAssignments   UserRoleAssignment[]
 
   @@map("users")
+}
+
+model UserDevice {
+  id        String   @id @default(uuid())
+  userId    String
+  fcmToken  String   @unique
+  platform  String   // "android", "ios", "web"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_devices")
+  @@index([userId, platform])
+  @@index([createdAt])
 }
 
 enum UserRole {
@@ -421,6 +436,7 @@ model Order {
   billingAddress    Address?      @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
   items             OrderItem[]
   logs              OrderLog[]
+  notifications     Notification[]
 
   @@map("orders")
 }
@@ -866,26 +882,22 @@ model FooterConfig {
 // ==================== NOTIFICATIONS ====================
 
 model Notification {
-  id        String           @id @default(uuid())
-  userId    String
-  type      NotificationType
-  title     String
-  message   String
-  data      Json?
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
+  id          String           @id @default(uuid())
+  userId      String?          // If null, it's a broadcast
+  orderIds    String[]         // Target specific order(s)
+  title       String
+  message     String
+  data        Json?
+  targetType  String           @default("SINGLE") // "SINGLE", "BULK", "STATUS_BASED"
+  isRead      Boolean          @default(false)
+  sent        Boolean          @default(false)
+  scheduledAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
-}
-
-enum NotificationType {
-  ORDER
-  PAYMENT
-  CREDIT
-  SYSTEM
-  PROMOTION
 }
 
 // ==================== SUPPORT ====================

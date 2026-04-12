@@ -23,13 +23,14 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
     productsApi.getAll({
       take: config.limit || 8,
       featured: config.filter === 'featured' ? true : undefined,
+      categorySlug: section.type === 'FeaturedCategory' ? config.categorySlug : undefined,
     }).then(res => {
       if (res.data?.data) {
         setProducts(res.data.data)
       }
       setLoading(false)
     })
-  }, [config.limit, config.filter])
+  }, [config.limit, config.filter, config.categorySlug, section.type])
 
   if (loading) {
     return (

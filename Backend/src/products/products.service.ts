@@ -12,13 +12,15 @@ export class ProductsService {
     skip?: number;
     take?: number;
     categoryId?: string;
+    categorySlug?: string;
     search?: string;
     isFeatured?: boolean;
     allowCredit?: boolean;
     isWholesaleOnly?: boolean;
+    isFlashSale?: boolean;
     showInactive?: boolean;
   }) {
-    const { skip = 0, take = 20, categoryId, search, isFeatured, allowCredit, isWholesaleOnly, showInactive } = params;
+    const { skip = 0, take = 20, categoryId, categorySlug, search, isFeatured, allowCredit, isWholesaleOnly, isFlashSale, showInactive } = params;
     
     const where: any = {};
     if (!showInactive) {
@@ -26,7 +28,14 @@ export class ProductsService {
     }
     
     if (categoryId) where.categoryId = categoryId;
+    if (categorySlug) {
+      where.category = { slug: categorySlug };
+    }
     if (isFeatured) where.isFeatured = true;
+    if (isFlashSale) {
+      where.isFlashSale = true;
+      where.flashSaleEnd = { gt: new Date() };
+    }
 
     // Strict separation:
     // 1. If allowCredit is true, show ONLY credit products.

@@ -39,6 +39,13 @@ export class CategoriesService {
     });
   }
 
+  async findBySlug(slug: string) {
+    return this.prisma.category.findUnique({
+      where: { slug },
+      include: { children: true, products: { take: 10 } },
+    });
+  }
+
   async create(data: any) {
     return this.prisma.category.create({
       data: {

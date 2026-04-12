@@ -500,37 +500,7 @@ export class OrdersService {
 
     // Send Status Update Notification
     if (order.userId) {
-      let title = 'Order Update';
-      let body = `Your order #${order.orderNumber} status is now: ${status}`;
-
-      switch (status) {
-        case OrderStatus.CONFIRMED:
-          title = 'Order Confirmed!';
-          body = `Great news! Your order #${order.orderNumber} has been confirmed.`;
-          break;
-        case OrderStatus.PROCESSING:
-          title = 'Processing your Order';
-          body = `We have started packing your order #${order.orderNumber}.`;
-          break;
-        case OrderStatus.SHIPPED:
-          title = 'Order Shipped!';
-          body = `Your order #${order.orderNumber} is on its way to you!`;
-          break;
-        case OrderStatus.DELIVERED:
-          title = 'Order Delivered';
-          body = `Your order #${order.orderNumber} has been delivered. Enjoy!`;
-          break;
-        case OrderStatus.CANCELLED:
-          title = 'Order Cancelled';
-          body = `Your order #${order.orderNumber} has been cancelled.`;
-          break;
-      }
-
-      this.notificationsService.sendToUser(order.userId, title, body, {
-        orderId: order.id,
-        status: status,
-        type: 'ORDER_STATUS',
-      });
+      await this.notificationsService.sendOrderStatusNotification(order.id, status);
     }
 
     return order;

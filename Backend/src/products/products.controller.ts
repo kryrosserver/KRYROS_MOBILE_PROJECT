@@ -21,20 +21,24 @@ export class ProductsController {
     @Query('skip') skip?: number,
     @Query('take') take?: number,
     @Query('categoryId') categoryId?: string,
+    @Query('categorySlug') categorySlug?: string,
     @Query('search') search?: string,
     @Query('featured') featured?: string,
     @Query('allowCredit') allowCredit?: string,
     @Query('isWholesaleOnly') isWholesaleOnly?: string,
+    @Query('isFlashSale') isFlashSale?: string,
     @Query('showInactive') showInactive?: string,
   ) {
     return this.productsService.findAll({
       skip: skip ? Number(skip) : undefined,
       take: take ? Number(take) : undefined,
       categoryId,
+      categorySlug,
       search,
       isFeatured: featured === 'true' ? true : (featured === 'false' ? false : undefined),
       allowCredit: allowCredit === 'true' ? true : (allowCredit === 'false' ? false : undefined),
       isWholesaleOnly: isWholesaleOnly === 'true' ? true : (isWholesaleOnly === 'false' ? false : undefined),
+      isFlashSale: isFlashSale === 'true' ? true : (isFlashSale === 'false' ? false : undefined),
       showInactive: showInactive === 'true' ? true : (showInactive === 'false' ? false : undefined),
     });
   }

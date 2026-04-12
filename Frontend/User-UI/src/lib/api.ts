@@ -78,24 +78,28 @@ export const authApi = {
 export const productsApi = {
   getAll: (params?: { 
     categoryId?: string; 
+    categorySlug?: string;
     search?: string; 
     skip?: number; 
     take?: number;
     featured?: boolean;
     allowCredit?: boolean;
     isWholesaleOnly?: boolean;
+    isFlashSale?: boolean;
     showInactive?: boolean;
   }) => {
     // Build query string with correct parameter names
     const queryParams = new URLSearchParams();
     
     if (params?.categoryId) queryParams.append('categoryId', params.categoryId);
+    if (params?.categorySlug) queryParams.append('categorySlug', params.categorySlug);
     if (params?.search) queryParams.append('search', params.search);
     if (params?.skip !== undefined) queryParams.append('skip', String(params.skip));
     if (params?.take !== undefined) queryParams.append('take', String(params.take));
     if (params?.featured !== undefined) queryParams.append('featured', String(params.featured));
     if (params?.allowCredit !== undefined) queryParams.append('allowCredit', String(params.allowCredit));
     if (params?.isWholesaleOnly !== undefined) queryParams.append('isWholesaleOnly', String(params.isWholesaleOnly));
+    if (params?.isFlashSale !== undefined) queryParams.append('isFlashSale', String(params.isFlashSale));
     if (params?.showInactive !== undefined) queryParams.append('showInactive', String(params.showInactive));
     
     const query = queryParams.toString();

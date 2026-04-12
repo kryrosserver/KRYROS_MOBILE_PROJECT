@@ -90,42 +90,56 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
       alert: true,
       badge: true,
       sound: true,
+      provisional: false,
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      // Get token
+      // Get token and sync
       String? token = await messaging.getToken();
       if (token != null) {
         debugPrint("FCM Token: $token");
         _sendTokenToWebView(token);
       }
+
+      // Listen for token refresh
+      messaging.onTokenRefresh.listen((newToken) {
+        debugPrint("FCM Token Refreshed: $newToken");
+        _sendTokenToWebView(newToken);
+      });
     }
 
     // Handle notification clicks when app is in background/terminated
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (message.data.containsKey('url')) {
-        String url = message.data['url'];
-        if (!url.startsWith('http')) {
-          url = primaryUrl + (url.startsWith('/') ? url.substring(1) : url);
-        }
-        controller.loadRequest(Uri.parse(url));
-      }
-    });
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationClick);
+
+    // Check if app was opened from a terminated state via a notification
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      _handleNotificationClick(initialMessage);
+    }
 
     // Handle notification clicks when app is in foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // For now, we'll just show a snackbar if the app is open
+      debugPrint("Foreground message: ${message.notification?.title}");
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(message.notification?.body ?? "New notification received"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message.notification?.title ?? "New Notification",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(message.notification?.body ?? "Tap to view"),
+              ],
+            ),
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: "VIEW",
-              onPressed: () {
-                if (message.data.containsKey('url')) {
-                  controller.loadRequest(Uri.parse(message.data['url']));
-                }
-              },
+              onPressed: () => _handleNotificationClick(message),
             ),
           ),
         );
@@ -133,10 +147,30 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
     });
   }
 
+  void _handleNotificationClick(RemoteMessage message) {
+    if (message.data.containsKey('url')) {
+      String url = message.data['url'];
+      if (!url.startsWith('http')) {
+        // If it's a relative path, append it to the primary URL
+        url = primaryUrl + (url.startsWith('/') ? url.substring(1) : url);
+      }
+      debugPrint("Navigating to URL from notification: $url");
+      controller.loadRequest(Uri.parse(url));
+    }
+  }
+
   void _sendTokenToWebView(String token) {
     // We'll try to inject this multiple times to ensure the page is loaded
-    Future.delayed(const Duration(seconds: 2), () {
-      controller.runJavaScript('if(window.setFCMToken) { window.setFCMToken("$token"); } else { localStorage.setItem("fcm_token", "$token"); }');
+    // and also store it in local storage for when the page loads
+    const script = 'if(window.setFCMToken) { window.setFCMToken("%TOKEN%"); } else { localStorage.setItem("fcm_token", "%TOKEN%"); localStorage.setItem("fcm_platform", "android"); }';
+    final formattedScript = script.replaceAll('%TOKEN%', token);
+    
+    // Inject immediately
+    controller.runJavaScript(formattedScript);
+    
+    // Inject again after a delay to ensure the page has loaded if it was in transition
+    Future.delayed(const Duration(seconds: 3), () {
+      controller.runJavaScript(formattedScript);
     });
   }
 

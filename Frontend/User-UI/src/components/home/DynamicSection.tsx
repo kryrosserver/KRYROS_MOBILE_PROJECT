@@ -6,7 +6,9 @@ import { HeroSlider } from "./HeroSlider"
 import { TrustBadges } from "./TrustBadges"
 import { CategoriesGrid } from "./CategoriesGrid"
 import { ProductGridSection } from "./ProductGridSection"
+import { FlashSaleSection } from "./FlashSaleSection"
 import { CreditSection } from "./CreditSection"
+import { BannerGrid } from "./BannerGrid"
 
 interface SectionProps {
   section: any
@@ -50,7 +52,12 @@ export function DynamicSection({ section, banners }: SectionProps) {
       case 'CategoriesGrid':
         return <CategoriesGrid section={section} />
       case 'ProductGrid':
+      case 'FeaturedCategory':
         return <ProductGridSection section={section} />
+      case 'FlashSale':
+        return <FlashSaleSection section={section} />
+      case 'BannerGrid':
+        return <BannerGrid section={section} />
       case 'CreditSection':
         return <CreditSection section={section} />
       case 'TextBlock':

@@ -36,8 +36,11 @@ interface SectionType {
 const SECTION_TYPES: SectionType[] = [
   { id: "HeroSlider", label: "Hero Slider", icon: Layers, description: "Main promotional slider using banners" },
   { id: "TrustBadges", label: "Trust Badges", icon: ShieldCheck, description: "Display features like Fast Delivery, Secure Payment" },
-  { id: "ProductGrid", label: "Product Grid", icon: Grid, description: "Display a grid of products from a category" },
+  { id: "FlashSale", label: "Flash Sale", icon: PlayCircle, description: "Display active flash sales with countdown" },
   { id: "CategoriesGrid", label: "Categories", icon: List, description: "Grid of featured categories" },
+  { id: "ProductGrid", label: "Product Grid", icon: Grid, description: "Display a grid of products from a category" },
+  { id: "BannerGrid", label: "Banner Grid", icon: Layout, description: "Display 2 or 3 promotional banners in a row" },
+  { id: "FeaturedCategory", label: "Category Focus", icon: Grid, description: "Products from a specific category" },
   { id: "CreditSection", label: "Credit Info", icon: CreditCard, description: "Information about credit plans" },
   { id: "TextBlock", label: "Text Block", icon: Type, description: "Custom text or HTML content" },
 ];
@@ -410,9 +413,110 @@ export default function HomePageCMS() {
                 </div>
               )}
 
+              {form.type === 'FeaturedCategory' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Category Focus Config</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Category Slug</label>
+                      <input 
+                        value={form.config?.categorySlug || ''}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, config: { ...(form.config || {}), categorySlug: e.target.value } })}
+                        className="admin-input py-1 text-xs"
+                        placeholder="e.g. smartphones"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Limit</label>
+                      <input 
+                        type="number"
+                        value={form.config?.limit || 4}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, config: { ...(form.config || {}), limit: parseInt(e.target.value) } })}
+                        className="admin-input py-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'BannerGrid' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Banner Grid Config</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Layout</label>
+                        <select 
+                          value={form.config?.layout || '2-cols'}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({ ...form, config: { ...(form.config || {}), layout: e.target.value } })}
+                          className="admin-input py-1 text-xs"
+                        >
+                          <option value="2-cols">2 Columns</option>
+                          <option value="3-cols">3 Columns</option>
+                          <option value="1-2-split">1 Large, 2 Small</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Gap</label>
+                        <select 
+                          value={form.config?.gap || '4'}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({ ...form, config: { ...(form.config || {}), gap: e.target.value } })}
+                          className="admin-input py-1 text-xs"
+                        >
+                          <option value="2">Small</option>
+                          <option value="4">Medium</option>
+                          <option value="8">Large</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {(form.config?.items || []).map((item: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-bold text-slate-400">Banner {idx + 1}</span>
+                          <button onClick={() => {
+                            const newItems = (form.config?.items || []).filter((_: any, i: number) => i !== idx);
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                        <input 
+                          value={item.imageUrl}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].imageUrl = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Image URL"
+                        />
+                        <input 
+                          value={item.link}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].link = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Link (e.g. /shop)"
+                        />
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newItems = [...(form.config?.items || []), { imageUrl: '', link: '' }];
+                        setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                      }}
+                      className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Banner
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {form.type === 'ProductGrid' && (
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Product Config</h3>
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Product Grid Config</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-bold uppercase text-slate-400">Limit</label>
@@ -435,6 +539,35 @@ export default function HomePageCMS() {
                         <option value="new">Newest First</option>
                       </select>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'FlashSale' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Flash Sale Config</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">End Date & Time</label>
+                      <input 
+                        type="datetime-local"
+                        value={form.config?.endTime || ''}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, config: { ...(form.config || {}), endTime: e.target.value } })}
+                        className="admin-input py-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Product Limit</label>
+                      <input 
+                        type="number"
+                        value={form.config?.limit || 4}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, config: { ...(form.config || {}), limit: parseInt(e.target.value) } })}
+                        className="admin-input py-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-[10px] text-blue-700 font-bold uppercase tracking-tight">
+                    This section automatically displays products marked as "isFlashSale" in the product manager.
                   </div>
                 </div>
               )}

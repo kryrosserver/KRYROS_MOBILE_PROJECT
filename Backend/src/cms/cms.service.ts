@@ -85,8 +85,21 @@ export class CMSService {
         }
       },
       {
-        type: 'CategoriesGrid',
+        type: 'FlashSale',
         order: 3,
+        isActive: true,
+        title: 'Flash Sale',
+        subtitle: 'Limited time offers',
+        backgroundColor: '#f8fafc',
+        animation: 'zoomIn',
+        config: {
+          limit: 4,
+          endTime: new Date(Date.now() + 86400000).toISOString() // Tomorrow
+        }
+      },
+      {
+        type: 'CategoriesGrid',
+        order: 4,
         isActive: true,
         title: 'Shop by Category',
         subtitle: 'Browse our collections',
@@ -94,7 +107,7 @@ export class CMSService {
       },
       {
         type: 'ProductGrid',
-        order: 4,
+        order: 5,
         isActive: true,
         title: 'Featured Products',
         config: { limit: 8, filter: 'featured' },
@@ -102,7 +115,7 @@ export class CMSService {
       },
       {
         type: 'CreditSection',
-        order: 5,
+        order: 6,
         isActive: true,
         title: 'KRYROS Credit',
         subtitle: 'Buy now, pay later',

@@ -22,6 +22,7 @@ import { CountriesModule } from './countries/countries.module';
 import { StatesModule } from './states/states.module';
 import { CitiesModule } from './cities/cities.module';
 import { ShippingZonesModule } from './shipping-zones/shipping-zones.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ScheduleModule.forRoot(),
     CacheModule.register({
       isGlobal: true,
       ttl: 60, // default TTL in seconds
