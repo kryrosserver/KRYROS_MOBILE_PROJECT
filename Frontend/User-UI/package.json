@@ -36,7 +36,8 @@
     "@hookform/resolvers": "^3.9.0",
     "recharts": "^2.12.7",
     "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2"
+    "jspdf-autotable": "^3.8.2",
+    "firebase": "^10.12.0"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
