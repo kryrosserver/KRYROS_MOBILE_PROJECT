@@ -12,7 +12,7 @@ plugins {
 
 android {
     namespace = "com.kryros.kryros_mobile"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34 // Manually set to avoid NullPointerException during sync
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -51,8 +51,8 @@ android {
         applicationId = "com.kryros.kryros_mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = flutter.minSdkVersion // Fallback value
+        targetSdk = 34 // Fallback value
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

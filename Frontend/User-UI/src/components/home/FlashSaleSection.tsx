@@ -195,6 +195,11 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
                       disabled={isEnded}
                       size="icon" 
                       className={`h-12 w-12 rounded-2xl ${isEnded ? 'bg-slate-300' : 'bg-slate-900 hover:bg-primary shadow-lg shadow-slate-900/10'} transition-all hover:-translate-y-1`}
+                      onClick={() => {
+                        // Ensure we use the flashSalePrice if it exists
+                        const priceToUse = product.flashSalePrice || product.salePrice || product.price;
+                        // Add to cart logic would go here, ensuring it uses priceToUse
+                      }}
                     >
                       <ShoppingCart className="h-5 w-5 text-white" />
                     </Button>

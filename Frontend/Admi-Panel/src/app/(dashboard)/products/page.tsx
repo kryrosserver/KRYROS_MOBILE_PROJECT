@@ -84,6 +84,8 @@ export default function ProductsPage() {
     isActive: true,
     deliveryInfo: "",
     warrantyInfo: "",
+    fullyTested: true,
+    fullyTestedText: "Fully Tested",
     flashSalePrice: "",
     flashSaleEnd: "",
     images: [] as string[],
@@ -115,6 +117,8 @@ export default function ProductsPage() {
     upsellProductId: "",
     deliveryInfo: "",
     warrantyInfo: "",
+    fullyTested: true,
+    fullyTestedText: "",
     flashSalePrice: "",
     flashSaleEnd: "",
     images: [] as string[],
@@ -320,6 +324,8 @@ export default function ProductsPage() {
                       upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
                       deliveryInfo: p.deliveryInfo || "",
                       warrantyInfo: p.warrantyInfo || "",
+                      fullyTested: !!(p as any).fullyTested,
+                      fullyTestedText: (p as any).fullyTestedText || "Fully Tested",
                       flashSalePrice: String((p as any).flashSalePrice ?? ""),
                       flashSaleEnd: p.flashSaleEnd ? new Date(p.flashSaleEnd).toISOString().slice(0,16) : "",
                       specifications: typeof (p as any).specifications === 'string' ? JSON.parse((p as any).specifications) : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
@@ -493,9 +499,11 @@ export default function ProductsPage() {
                               hasInstallmentOptions: !!p.hasInstallmentOptions,
                               installmentOptionsText: p.installmentOptionsText || "Installment Options",
                               upsellProductId: String(p.productRelations?.[0]?.relatedId ?? ""),
-                              deliveryInfo: p.deliveryInfo || "",
-                              warrantyInfo: p.warrantyInfo || "",
-                              flashSalePrice: String((p as any).flashSalePrice ?? ""),
+                                deliveryInfo: p.deliveryInfo || "",
+                                warrantyInfo: p.warrantyInfo || "",
+                                fullyTested: !!(p as any).fullyTested,
+                                fullyTestedText: (p as any).fullyTestedText || "Fully Tested",
+                                flashSalePrice: String((p as any).flashSalePrice ?? ""),
                               flashSaleEnd: p.flashSaleEnd ? new Date(p.flashSaleEnd).toISOString().slice(0,16) : "",
                               specifications: typeof (p as any).specifications === 'string' ? JSON.parse((p as any).specifications) : (Array.isArray((p as any).specifications) ? (p as any).specifications : []),
                               images: Array.isArray(p.images) ? p.images.map((img: any) => img.url) : [],
@@ -709,6 +717,24 @@ export default function ProductsPage() {
                     <p className="text-sm font-bold text-slate-800">Guarantee & Details</p>
                     <div className="space-y-3">
                       <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Delivery Info</label>
+                        <input
+                          placeholder="e.g. SHIPPING ACROSS ZAMBIA"
+                          value={form.deliveryInfo}
+                          onChange={(e) => setForm({ ...form, deliveryInfo: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Warranty Info</label>
+                        <input
+                          placeholder="e.g. FACTORY DEFECTS ONLY"
+                          value={form.warrantyInfo}
+                          onChange={(e) => setForm({ ...form, warrantyInfo: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
                         <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                           <input
                             type="checkbox"
@@ -756,6 +782,23 @@ export default function ProductsPage() {
                           placeholder="Installment Text (e.g. INSTALLMENT OPTIONS)"
                           value={form.installmentOptionsText}
                           onChange={(e) => setForm({ ...form, installmentOptionsText: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(form as any).fullyTested}
+                            onChange={(e) => setForm({ ...form, fullyTested: e.target.checked } as any)}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Show Fully Tested
+                        </label>
+                        <input
+                          placeholder="Tested Text (e.g. FULLY TESTED)"
+                          value={(form as any).fullyTestedText}
+                          onChange={(e) => setForm({ ...form, fullyTestedText: e.target.value } as any)}
                           className="admin-input w-full text-xs min-h-[36px]"
                         />
                       </div>
@@ -1107,6 +1150,24 @@ export default function ProductsPage() {
                     <p className="text-sm font-bold text-slate-800">Guarantee & Details</p>
                     <div className="space-y-3">
                       <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Delivery Info</label>
+                        <input
+                          placeholder="e.g. SHIPPING ACROSS ZAMBIA"
+                          value={editForm.deliveryInfo}
+                          onChange={(e) => setEditForm({ ...editForm, deliveryInfo: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Warranty Info</label>
+                        <input
+                          placeholder="e.g. FACTORY DEFECTS ONLY"
+                          value={editForm.warrantyInfo}
+                          onChange={(e) => setEditForm({ ...editForm, warrantyInfo: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
                         <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                           <input
                             type="checkbox"
@@ -1154,6 +1215,23 @@ export default function ProductsPage() {
                           placeholder="Installment Text (e.g. INSTALLMENT OPTIONS)"
                           value={editForm.installmentOptionsText}
                           onChange={(e) => setEditForm({ ...editForm, installmentOptionsText: e.target.value })}
+                          className="admin-input w-full text-xs min-h-[36px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(editForm as any).fullyTested}
+                            onChange={(e) => setEditForm({ ...editForm, fullyTested: e.target.checked } as any)}
+                            className="w-4 h-4 text-green-500 rounded"
+                          />
+                          Show Fully Tested
+                        </label>
+                        <input
+                          placeholder="Tested Text (e.g. FULLY TESTED)"
+                          value={(editForm as any).fullyTestedText}
+                          onChange={(e) => setEditForm({ ...editForm, fullyTestedText: e.target.value } as any)}
                           className="admin-input w-full text-xs min-h-[36px]"
                         />
                       </div>
@@ -1325,6 +1403,8 @@ export default function ProductsPage() {
                   if (editForm.upsellProductId) formData.append("upsellProductId", String(editForm.upsellProductId));
                   if (editForm.deliveryInfo) formData.append("deliveryInfo", editForm.deliveryInfo);
                   if (editForm.warrantyInfo) formData.append("warrantyInfo", editForm.warrantyInfo);
+                  formData.append("fullyTested", String((editForm as any).fullyTested));
+                  if ((editForm as any).fullyTestedText) formData.append("fullyTestedText", (editForm as any).fullyTestedText);
                   if (editForm.specifications.length > 0) formData.append("specifications", JSON.stringify(editForm.specifications));
 
                   if (editFiles.length > 0) {
