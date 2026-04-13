@@ -28,9 +28,6 @@ export default function NotificationsPage() {
     setLoading(true);
     setMessage(null);
     try {
-      // Get the correct admin token from localStorage
-      const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
-      
       const payload: any = {
         title: formData.title,
         body: formData.body,
@@ -43,13 +40,12 @@ export default function NotificationsPage() {
       if (targetType === 'BULK') payload.orderIds = formData.orderIds.split(',').map(id => id.trim());
       if (targetType === 'STATUS_BASED') payload.orderStatus = formData.orderStatus;
 
-      const endpoint = targetType === 'BROADCAST' ? '/notifications/broadcast' : '/notifications/send';
-      
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
+      // Call our local proxy API instead of the backend directly
+      const type = targetType === 'BROADCAST' ? 'broadcast' : 'send';
+      const res = await fetch(`/api/admin/notifications?type=${type}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });

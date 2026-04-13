@@ -53,6 +53,7 @@ export default function HomePageCMS() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingSection, setEditingSection] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   
   const [form, setForm] = useState({
     type: "HeroSlider",
@@ -150,54 +151,40 @@ export default function HomePageCMS() {
     if (res.ok) loadSections();
   };
 
-  const moveOrder = async (index: number, direction: 'up' | 'down') => {
-    if (saving) return; // Prevent multiple clicks
-    
+  const moveOrder = (index: number, direction: 'up' | 'down') => {
     const newSections = [...sections];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= sections.length) return;
 
-    // Get the sections to swap
-    const currentSection = newSections[index];
-    const targetSection = newSections[targetIndex];
+    // Swap positions in the local array
+    const temp = newSections[index];
+    newSections[index] = newSections[targetIndex];
+    newSections[targetIndex] = temp;
 
-    // Optimistically update UI state
-    const optimisticSections = [...sections];
-    const tempOrder = optimisticSections[index].order;
-    optimisticSections[index].order = optimisticSections[targetIndex].order;
-    optimisticSections[targetIndex].order = tempOrder;
-    
-    // Re-sort for visual feedback
-    optimisticSections.sort((a, b) => a.order - b.order);
-    setSections(optimisticSections);
-    setSaving(true); // Reuse saving state to block reordering
+    // Re-assign orders based on index
+    const updated = newSections.map((s, idx) => ({ ...s, order: idx + 1 }));
+    setSections(updated);
+    setHasChanges(true);
+  };
 
+  const saveLayout = async () => {
+    setSaving(true);
     try {
-      // 1. Update current section order
-      const res1 = await fetch(`/internal/admin/cms/homepage-sections/${currentSection.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: targetSection.order }),
-        credentials: "same-origin"
-      });
-      if (!res1.ok) throw new Error("Failed to update first section");
-
-      // 2. Update target section order
-      const res2 = await fetch(`/internal/admin/cms/homepage-sections/${targetSection.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: currentSection.order }),
-        credentials: "same-origin"
-      });
-      if (!res2.ok) throw new Error("Failed to update second section");
-
-      // Success - small delay to ensure DB consistency before reload
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Update all sections sequentially to ensure DB consistency
+      for (const section of sections) {
+        await fetch(`/internal/admin/cms/homepage-sections/${section.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: section.order }),
+          credentials: "same-origin"
+        });
+      }
+      setHasChanges(false);
       await loadSections();
+      alert("Layout saved permanently!");
     } catch (error) {
-      console.error("Failed to move section", error);
-      alert("Error moving section. Reverting...");
-      loadSections(); // Revert to server state
+      console.error("Failed to save layout", error);
+      alert("Failed to save layout. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -643,7 +630,18 @@ export default function HomePageCMS() {
       {/* Sections List */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Active Layout</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Active Layout</h2>
+            {hasChanges && (
+              <button 
+                onClick={saveLayout}
+                disabled={saving}
+                className="px-4 py-1.5 bg-primary text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 animate-bounce"
+              >
+                {saving ? 'Saving...' : 'Save Permanent Layout'}
+              </button>
+            )}
+          </div>
           <button onClick={loadSections} className="p-2 hover:bg-white rounded-full transition-colors">
             <RefreshCw className={`h-4 w-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
           </button>
