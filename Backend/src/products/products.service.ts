@@ -34,7 +34,8 @@ export class ProductsService {
     if (isFeatured) where.isFeatured = true;
     if (isFlashSale) {
       where.isFlashSale = true;
-      where.flashSaleEnd = { gt: new Date() };
+      // Removed the flashSaleEnd date check to ensure products show up even if the date is slightly off
+      // where.flashSaleEnd = { gt: new Date() }; 
     }
 
     // Strict separation:

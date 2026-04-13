@@ -236,6 +236,8 @@ model Product {
   creditMessage     String?   @db.Text
   deliveryInfo      String?   @db.Text
   warrantyInfo      String?   @db.Text
+  fullyTested       Boolean   @default(true)
+  fullyTestedText   String?   @db.Text
   metaTitle         String?
   metaDescription   String?
   metaKeywords      String?
