@@ -28,7 +28,9 @@ export default function NotificationsPage() {
     setLoading(true);
     setMessage(null);
     try {
-      const token = localStorage.getItem('token');
+      // Get the correct admin token from localStorage
+      const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+      
       const payload: any = {
         title: formData.title,
         body: formData.body,

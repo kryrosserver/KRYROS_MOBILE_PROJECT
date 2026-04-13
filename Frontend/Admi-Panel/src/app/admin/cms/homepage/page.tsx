@@ -654,18 +654,20 @@ export default function HomePageCMS() {
             <div key={section.id} className="p-4 flex items-center gap-4 hover:bg-slate-50/50 transition-colors group">
               <div className="flex flex-col gap-1">
                 <button 
-                  disabled={index === 0}
+                  disabled={index === 0 || saving}
                   onClick={() => moveOrder(index, 'up')}
-                  className="p-1 hover:bg-white rounded disabled:opacity-30"
+                  className="p-1.5 bg-white border border-slate-200 rounded-lg hover:border-primary hover:text-primary disabled:opacity-30 shadow-sm transition-all active:scale-90"
+                  title="Move Up"
                 >
-                  <ChevronUp className="h-4 w-4 text-slate-400" />
+                  <ChevronUp className="h-4 w-4" />
                 </button>
                 <button 
-                  disabled={index === sections.length - 1}
+                  disabled={index === sections.length - 1 || saving}
                   onClick={() => moveOrder(index, 'down')}
-                  className="p-1 hover:bg-white rounded disabled:opacity-30"
+                  className="p-1.5 bg-white border border-slate-200 rounded-lg hover:border-primary hover:text-primary disabled:opacity-30 shadow-sm transition-all active:scale-90"
+                  title="Move Down"
                 >
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                  <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
 
