@@ -39,6 +39,8 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
 
     return () => clearInterval(interval);
   }, [products.length]);
+
+  useEffect(() => {
     setLoading(true)
     // Fetch products marked as flash sale
     productsApi.getAll({

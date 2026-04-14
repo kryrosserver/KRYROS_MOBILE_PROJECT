@@ -38,6 +38,8 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
 
     return () => clearInterval(interval);
   }, [products.length]);
+
+  useEffect(() => {
     setLoading(true)
     productsApi.getAll({
       take: config.limit || 8,
