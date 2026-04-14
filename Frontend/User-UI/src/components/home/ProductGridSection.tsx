@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { productsApi } from "@/lib/api"
 import { ArrowRight, ShoppingCart, Heart, Eye } from "lucide-react"
 import Link from "next/link"
@@ -17,8 +17,27 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
   const [loading, setLoading] = useState(true)
   const config = section.config || {}
   const { convertPrice } = useCurrency()
+  const scrollRef = useRef<HTMLDivElement>(null)
 
+  // Auto-slide effect for mobile
   useEffect(() => {
+    if (products.length <= 1) return;
+
+    const interval = setInterval(() => {
+      if (scrollRef.current && window.innerWidth < 768) {
+        const container = scrollRef.current;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        
+        if (container.scrollLeft >= maxScroll - 10) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+      }
+    }, 5000); // 5 seconds for featured products
+
+    return () => clearInterval(interval);
+  }, [products.length]);
     setLoading(true)
     productsApi.getAll({
       take: config.limit || 8,
@@ -60,7 +79,10 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
           </Link>
         </div>
 
-        <div className="flex md:grid md:grid-cols-4 gap-4 md:gap-8 overflow-x-auto md:overflow-x-visible -mx-5 px-5 pb-6 md:mx-0 md:px-0 scroll-smooth snap-x snap-mandatory scrollbar-hide">
+        <div 
+          ref={scrollRef}
+          className="flex md:grid md:grid-cols-4 gap-4 md:gap-8 overflow-x-auto md:overflow-x-visible -mx-5 px-5 pb-6 md:mx-0 md:px-0 scroll-smooth snap-x snap-mandatory scrollbar-hide"
+        >
           {products.map((product) => (
             <div key={product.id} className="group relative min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-500">
               <div className="aspect-square relative overflow-hidden bg-slate-50">
