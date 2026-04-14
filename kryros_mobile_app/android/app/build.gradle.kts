@@ -12,7 +12,7 @@ plugins {
 
 android {
     namespace = "com.kryros.kryros_mobile"
-    compileSdk = 34 // Manually set to avoid NullPointerException during sync
+    compileSdk = 36 // Updated to 36 to fix url_launcher_android warning
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -52,7 +52,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion // Fallback value
-        targetSdk = 34 // Fallback value
+        targetSdk = 36 // Fallback value updated to 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -73,9 +73,6 @@ android {
 dependencies {
     // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
-    
-    // Firebase Core (required)
-    implementation("com.google.firebase:firebase-core")
     
     // Firebase Cloud Messaging for Push Notifications
     implementation("com.google.firebase:firebase-messaging")
