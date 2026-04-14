@@ -156,7 +156,7 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
 
         <div 
           ref={scrollRef}
-          className="flex md:grid md:grid-cols-4 gap-4 md:gap-8 overflow-x-auto md:overflow-x-visible -mx-5 px-5 pb-6 md:mx-0 md:px-0 scroll-smooth snap-x snap-mandatory scrollbar-hide"
+          className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible -mx-5 px-5 pb-8 md:mx-0 md:px-0 scroll-smooth snap-x snap-mandatory scrollbar-hide items-stretch"
         >
           {products.map((product) => {
             const discount = product.salePrice 
@@ -166,26 +166,26 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
             const isEnded = timeLeft.hours + timeLeft.minutes + timeLeft.seconds <= 0;
 
             return (
-              <div key={product.id} className={`group relative min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white rounded-[2.5rem] border-2 border-slate-50 overflow-hidden hover:border-primary/20 hover:shadow-2xl transition-all duration-500 ${isEnded ? 'opacity-75 grayscale-[0.5]' : ''}`}>
-                <div className="aspect-square relative overflow-hidden bg-slate-50/50">
+              <div key={product.id} className={`group relative w-[75vw] max-w-[300px] md:w-auto md:max-w-none flex-shrink-0 snap-start bg-white rounded-3xl border border-slate-100 overflow-hidden hover:border-primary/20 hover:shadow-xl transition-all duration-500 flex flex-col ${isEnded ? 'opacity-75 grayscale-[0.5]' : ''}`}>
+                <div className="aspect-square relative overflow-hidden bg-slate-50/30">
                   <img 
                     src={resolveImageUrl(product.images?.[0]?.url)} 
                     alt={product.name}
-                    className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-full object-contain p-4 md:p-8 group-hover:scale-110 transition-transform duration-700"
                   />
                   
                   {discount > 0 && (
-                    <div className="absolute top-6 left-6 bg-red-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg z-10">
+                    <div className="absolute top-4 left-4 bg-red-600 text-white text-[9px] md:text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg z-10 uppercase">
                       -{discount}% OFF
                     </div>
                   )}
 
-                  <div className="absolute top-6 right-6 flex flex-col gap-2 translate-x-16 group-hover:translate-x-0 transition-transform duration-500 z-10">
-                    <button className="h-10 w-10 rounded-full bg-white shadow-xl flex items-center justify-center text-slate-400 hover:text-red-500 hover:scale-110 transition-all">
-                      <Heart className="h-5 w-5" />
+                  <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-500 z-10">
+                    <button className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-white shadow-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:scale-110 transition-all">
+                      <Heart className="h-4 w-4 md:h-5 md:w-5" />
                     </button>
-                    <button className="h-10 w-10 rounded-full bg-white shadow-xl flex items-center justify-center text-slate-400 hover:text-primary hover:scale-110 transition-all">
-                      <Eye className="h-5 w-5" />
+                    <button className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-white shadow-lg flex items-center justify-center text-slate-400 hover:text-primary hover:scale-110 transition-all">
+                      <Eye className="h-4 w-4 md:h-5 md:w-5" />
                     </button>
                   </div>
 
@@ -196,40 +196,38 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
                   )}
                 </div>
                 
-                <div className="p-6 space-y-4">
+                <div className="p-4 md:p-6 space-y-3 md:space-y-4 flex-1 flex flex-col">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-primary uppercase tracking-widest">{product.category?.name}</p>
+                    <p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-widest">{product.category?.name}</p>
                     <Link href={`/product/${product.slug}`} className="block">
-                      <h3 className="font-bold text-slate-900 text-sm md:text-base line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                      <h3 className="font-bold text-slate-900 text-sm md:text-base line-clamp-2 group-hover:text-primary transition-colors leading-tight h-10 md:h-12">{product.name}</h3>
                     </Link>
                   </div>
 
-                  <div className="flex items-end justify-between gap-2">
+                  <div className="flex items-end justify-between gap-2 mt-auto">
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-slate-400 line-through font-bold">
+                      <span className="text-[10px] md:text-[11px] text-slate-400 line-through font-bold">
                         {convertPrice(parseFloat(product.price)).formatted}
                       </span>
-                      <span className="text-xl font-black text-slate-900">
+                      <span className="text-lg md:text-2xl font-black text-slate-900">
                         {convertPrice(parseFloat(product.flashSalePrice || product.salePrice || product.price)).formatted}
                       </span>
                     </div>
                     <Button 
                       disabled={isEnded}
                       size="icon" 
-                      className={`h-12 w-12 rounded-2xl ${isEnded ? 'bg-slate-300' : 'bg-slate-900 hover:bg-primary shadow-lg shadow-slate-900/10'} transition-all hover:-translate-y-1`}
+                      className={`h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl ${isEnded ? 'bg-slate-300' : 'bg-slate-900 hover:bg-primary shadow-lg shadow-slate-900/10'} transition-all hover:-translate-y-1`}
                       onClick={() => {
-                        // Ensure we use the flashSalePrice if it exists
                         const priceToUse = product.flashSalePrice || product.salePrice || product.price;
-                        // Add to cart logic would go here, ensuring it uses priceToUse
                       }}
                     >
-                      <ShoppingCart className="h-5 w-5 text-white" />
+                      <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </Button>
                   </div>
 
                   {/* Stock progress bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-tight">
+                  <div className="space-y-1.5 md:space-y-2 pt-2 border-t border-slate-50">
+                    <div className="flex justify-between text-[9px] md:text-[10px] font-black uppercase tracking-tight">
                       <span className="text-slate-400">Available: {product.stockCurrent || 10}</span>
                       <span className="text-red-500">Limited Stock</span>
                     </div>
