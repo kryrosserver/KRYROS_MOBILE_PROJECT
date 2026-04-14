@@ -61,9 +61,9 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
     return (
       <div className="container-custom py-12 md:py-24">
         <div className="h-10 w-48 bg-slate-100 animate-pulse rounded-lg mb-8" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="flex md:grid md:grid-cols-4 gap-6 overflow-hidden">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="aspect-[3/4] bg-slate-100 animate-pulse rounded-3xl" />
+            <div key={i} className="min-w-[280px] md:min-w-0 flex-shrink-0 aspect-[3/4] bg-slate-100 animate-pulse rounded-3xl" />
           ))}
         </div>
       </div>
@@ -135,7 +135,7 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        <div className="flex md:grid md:grid-cols-4 gap-4 md:gap-8 overflow-x-auto md:overflow-x-visible -mx-5 px-5 pb-6 md:mx-0 md:px-0 scroll-smooth snap-x snap-mandatory scrollbar-hide">
           {products.map((product) => {
             const discount = product.salePrice 
               ? Math.round((1 - (parseFloat(product.salePrice) / parseFloat(product.price))) * 100)
@@ -144,7 +144,7 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
             const isEnded = timeLeft.hours + timeLeft.minutes + timeLeft.seconds <= 0;
 
             return (
-              <div key={product.id} className={`group relative bg-white rounded-[2.5rem] border-2 border-slate-50 overflow-hidden hover:border-primary/20 hover:shadow-2xl transition-all duration-500 ${isEnded ? 'opacity-75 grayscale-[0.5]' : ''}`}>
+              <div key={product.id} className={`group relative min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white rounded-[2.5rem] border-2 border-slate-50 overflow-hidden hover:border-primary/20 hover:shadow-2xl transition-all duration-500 ${isEnded ? 'opacity-75 grayscale-[0.5]' : ''}`}>
                 <div className="aspect-square relative overflow-hidden bg-slate-50/50">
                   <img 
                     src={resolveImageUrl(product.images?.[0]?.url)} 

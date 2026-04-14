@@ -36,9 +36,9 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
     return (
       <div className="container-custom py-12 md:py-24">
         <div className="h-10 w-48 bg-slate-100 animate-pulse rounded-lg mb-8" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="flex md:grid md:grid-cols-4 gap-6 overflow-hidden">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="aspect-[3/4] bg-slate-100 animate-pulse rounded-3xl" />
+            <div key={i} className="min-w-[280px] md:min-w-0 flex-shrink-0 aspect-[3/4] bg-slate-100 animate-pulse rounded-3xl" />
           ))}
         </div>
       </div>
@@ -60,9 +60,9 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        <div className="flex md:grid md:grid-cols-4 gap-4 md:gap-8 overflow-x-auto md:overflow-x-visible -mx-5 px-5 pb-6 md:mx-0 md:px-0 scroll-smooth snap-x snap-mandatory scrollbar-hide">
           {products.map((product) => (
-            <div key={product.id} className="group relative bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-500">
+            <div key={product.id} className="group relative min-w-[280px] md:min-w-0 flex-shrink-0 snap-start bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-500">
               <div className="aspect-square relative overflow-hidden bg-slate-50">
                 <img 
                   src={resolveImageUrl(product.images?.[0]?.url)} 
