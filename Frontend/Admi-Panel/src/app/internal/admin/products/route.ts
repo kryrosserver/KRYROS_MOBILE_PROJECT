@@ -6,7 +6,8 @@ import { cookies } from "next/headers";
 
 export async function GET() {
   const url = new URL(`${API_BASE}/products`);
-  url.searchParams.set("take", "50");
+  url.searchParams.set("take", "20");
+  url.searchParams.set("showInactive", "true");
   const res = await fetch(url.toString(), { cache: "no-store" });
   const text = await res.text();
   if (!res.ok) {

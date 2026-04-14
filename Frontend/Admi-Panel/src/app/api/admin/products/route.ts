@@ -8,12 +8,12 @@ export async function GET(req: NextRequest) {
   const token = (await cookies()).get("admin_token")?.value || "";
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
-  const take = searchParams.get("take") || "50";
+  const take = searchParams.get("take") || "20";
   const skip = searchParams.get("skip") || "0";
   const categoryId = searchParams.get("categoryId") || "";
   const featured = searchParams.get("featured") || "";
   const allowCredit = searchParams.get("allowCredit") || "";
-  const showInactive = searchParams.get("showInactive") || "";
+  const showInactive = searchParams.get("showInactive") || "true";
 
   const url = new URL(`${API_BASE}/products`);
   if (search) url.searchParams.set("search", search);
