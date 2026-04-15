@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/providers/AuthProvider'
@@ -26,13 +26,18 @@ export const metadata: Metadata = {
   title: 'KRYROS World | Simple. Reliable. Global.',
   description: 'Shopping made easy with delivery everywhere.',
   manifest: '/manifest.json',
-  themeColor: '#1FA89A',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   appleWebApp: {
     capable: true,
     title: 'KRYROS',
     statusBarStyle: 'default',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1FA89A',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 }
 
 export default function RootLayout({
