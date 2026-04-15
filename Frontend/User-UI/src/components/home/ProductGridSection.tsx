@@ -76,7 +76,10 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
             </h2>
             {section.subtitle && <p className="text-slate-500 mt-2">{section.subtitle}</p>}
           </div>
-          <Link href="/shop" className="text-primary font-black uppercase tracking-widest text-[10px] md:text-sm flex items-center gap-2 group">
+          <Link 
+            href={config.filter === 'featured' ? '/featured' : section.link || '/shop'} 
+            className="text-primary font-black uppercase tracking-widest text-[10px] md:text-sm flex items-center gap-2 group"
+          >
             View All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

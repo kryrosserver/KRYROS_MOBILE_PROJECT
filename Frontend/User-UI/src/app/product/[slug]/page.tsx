@@ -8,7 +8,7 @@ import { wholesaleApi } from '@/lib/api'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info, MessageSquare, Whatsapp } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'
 
@@ -450,7 +450,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <MessageCircle className="h-6 w-6" />
+                    <Whatsapp className="h-6 w-6" />
                     REQUEST INFORMATION
                   </a>
                 </Button>
