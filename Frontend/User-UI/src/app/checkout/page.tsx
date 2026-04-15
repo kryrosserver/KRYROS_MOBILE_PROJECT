@@ -288,7 +288,7 @@ export default function CheckoutPage() {
             },
           })
           
-          const whatsappNumber = "+260971234567" // This should ideally come from settings
+          const whatsappNumber = "+260966423719"
           window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank')
         }
 

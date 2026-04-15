@@ -29,7 +29,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Call Us</p>
-                    <p className="text-lg font-bold text-slate-900">+260 971 234 567</p>
+                    <p className="text-lg font-bold text-slate-900">+260 966 423 719</p>
                     <p className="text-sm text-slate-500 font-medium">Mon-Fri, 08:00 - 17:00</p>
                   </div>
                 </div>

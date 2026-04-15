@@ -9,6 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info, MessageSquare } from 'lucide-react'
+import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'
 
@@ -446,11 +447,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold h-14 uppercase tracking-widest text-sm shadow-xl flex items-center justify-center gap-3 active:scale-95"
                 >
                   <a 
-                    href={`https://wa.me/?text=${encodeURIComponent(`Hello, I would like to know more about the product: ${p.name || 'this product'}. (SKU: ${p.sku || 'N/A'})`)}`}
+                    href={`https://wa.me/+260966423719?text=${encodeURIComponent(`Hello, I would like to know more about the product: ${p.name || 'this product'}. (SKU: ${p.sku || 'N/A'})`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <MessageCircle className="h-6 w-6" />
+                    <WhatsAppIcon className="h-6 w-6" />
                     REQUEST INFORMATION
                   </a>
                 </Button>
