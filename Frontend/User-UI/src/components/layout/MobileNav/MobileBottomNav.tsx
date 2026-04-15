@@ -52,7 +52,7 @@ export default function MobileBottomNav() {
 
   return (
     <div 
-      className={`fixed bottom-0 left-0 right-0 z-[100] h-16 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] md:hidden flex items-center justify-around px-2 transition-transform duration-300 ease-in-out ${
+      className={`fixed bottom-0 left-0 right-0 z-[100] h-16 bg-[#2A3A4A] border-t border-[#3A4A5A] shadow-[0_-4px_20px_rgba(42,58,74,0.3)] md:hidden flex items-center justify-around px-2 transition-transform duration-300 ease-in-out ${
         isVisible ? "translate-y-0" : "translate-y-full"
       }`}
     >
@@ -66,18 +66,18 @@ export default function MobileBottomNav() {
             key={item.label}
             href={item.href}
             className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all ${
-              isActive ? "text-primary" : "text-slate-400"
+              isActive ? "text-[#1FA89A]" : "text-slate-300"
             }`}
           >
             <div className="relative p-1">
               <Icon className={`h-6 w-6 ${isActive ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
               {badge > 0 && (
-                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white border-2 border-white">
+                <span className="absolute top-0 right-0 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-[#1FA89A] text-[9px] font-bold text-white border-2 border-[#2A3A4A]">
                   {badge}
                 </span>
               )}
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? "opacity-100" : "opacity-60"}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? "opacity-100" : "opacity-70"}`}>
               {item.label}
             </span>
           </Link>

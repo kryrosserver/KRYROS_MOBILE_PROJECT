@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { ordersApi } from "@/lib/api"
 import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,11 +11,43 @@ import { generateOrderPDF } from "@/lib/pdf-utils"
 
 export default function TrackOrderPage() {
   const { formatLocal, convertPrice, selectedCountry } = useCurrency()
+  const searchParams = useSearchParams()
   const [orderNumber, setOrderNumber] = useState("")
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [order, setOrder] = useState<any | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const id = searchParams.get("id")
+    const emailParam = searchParams.get("email")
+    if (id) setOrderNumber(id)
+    if (emailParam) setEmail(emailParam)
+
+    if (id && emailParam) {
+      handleTrackAuto(id, emailParam)
+    }
+  }, [searchParams])
+
+  const handleTrackAuto = async (id: string, emailStr: string) => {
+    setLoading(true)
+    setError(null)
+    setOrder(null)
+
+    try {
+      const cleanOrderNumber = id.replace(/#/g, "").trim()
+      const res = await ordersApi.trackOrder(cleanOrderNumber, emailStr.trim())
+      if (res.data) {
+        setOrder(res.data)
+      } else {
+        setError(res.error || "Order not found. Please check your details.")
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault()

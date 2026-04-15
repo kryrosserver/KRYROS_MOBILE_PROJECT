@@ -147,7 +147,7 @@ export function generateWhatsAppMessage(data: {
   message += `*💰 Total: ${format(data.total)}*\n`
   if (data.notes) message += `*📝 Note:* ${data.notes}\n`
   
-  message += `\n*🚚 Track:* https://kryros.com/track\n`
+  message += `\n*🚚 Track your order here:* https://kryros.com/track?id=${data.orderNumber}&email=${encodeURIComponent(data.customer.email)}\n`
   message += `*Order Number:* ${data.orderNumber}\n`
   message += `*Email Address:* ${data.customer.email}\n\n`
   
