@@ -135,23 +135,23 @@ export function generateWhatsAppMessage(data: {
 
   let message = `*KRYROS ORDER: #${data.orderNumber}*\n\n`
   
-  message += `*👤 Customer:* ${data.customer.firstName} ${data.customer.lastName}\n`
-  message += `*📍 Delivery:* ${data.address.street}, ${data.address.city}\n\n`
+  message += `*Customer:* ${data.customer.firstName} ${data.customer.lastName}\n`
+  message += `*Delivery:* ${data.address.street}, ${data.address.city}\n\n`
 
-  message += `*📦 Items:*\n`
+  message += `*Items:*\n`
   data.items.forEach((item) => {
     message += `- ${item.quantity}x ${item.name}${item.variant ? ` (${item.variant})` : ''}\n`
   })
   message += `\n`
 
-  message += `*💰 Total: ${format(data.total)}*\n`
-  if (data.notes) message += `*📝 Note:* ${data.notes}\n`
+  message += `*Total: ${format(data.total)}*\n`
+  if (data.notes) message += `*Note:* ${data.notes}\n`
   
-  message += `\n*🚚 Track your order here:* https://kryros.com/track?id=${data.orderNumber}&email=${encodeURIComponent(data.customer.email)}\n`
+  message += `\n*Track your order here:* https://kryros.com/track?id=${data.orderNumber}&email=${encodeURIComponent(data.customer.email)}\n`
   message += `*Order Number:* ${data.orderNumber}\n`
   message += `*Email Address:* ${data.customer.email}\n\n`
   
-  message += `_Please send payment details to complete this order. Thanks!_`
+  message += `Please send payment details to complete this order. Thanks!`
 
   return message
 }
