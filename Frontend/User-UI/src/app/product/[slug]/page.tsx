@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info, MessageSquare } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon'
+import { FreeShippingProgress } from '@/components/ui/FreeShippingProgress'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'
 
@@ -324,6 +325,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     style={{ width: `${scarcityPercentage}%` }} 
                   />
                 </div>
+              </div>
+
+              <div className="mt-8">
+                <FreeShippingProgress />
               </div>
 
               <div className="mt-8 border border-slate-100 rounded-md p-4 bg-slate-50/30">

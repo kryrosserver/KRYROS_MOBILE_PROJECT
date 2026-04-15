@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { ordersApi } from "@/lib/api"
 import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard, Download } from "lucide-react"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { useCurrency } from "@/providers/CurrencyProvider"
 import { generateOrderPDF } from "@/lib/pdf-utils"
 
-export default function TrackOrderPage() {
+function TrackOrderContent() {
   const { formatLocal, convertPrice, selectedCountry } = useCurrency()
   const searchParams = useSearchParams()
   const [orderNumber, setOrderNumber] = useState("")
@@ -297,6 +297,14 @@ export default function TrackOrderPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <TrackOrderContent />
+    </Suspense>
   )
 }
 

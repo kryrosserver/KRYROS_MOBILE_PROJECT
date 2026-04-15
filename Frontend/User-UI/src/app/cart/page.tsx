@@ -2,12 +2,27 @@
 
 import { useCart } from "@/providers/CartProvider"
 import { useCurrency } from "@/providers/CurrencyProvider"
+import { useState, useEffect } from "react"
+import { settingsApi } from "@/lib/api"
 import Link from "next/link"
-import { Trash2, Minus, Plus, ShoppingCart, ArrowRight } from "lucide-react"
+import { Trash2, Minus, Plus, ShoppingCart, ArrowRight, Truck } from "lucide-react"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotal, getSubtotal } = useCart()
   const { convertPrice } = useCurrency()
+  const [shippingConfig, setShippingConfig] = useState({ fee: 50, threshold: 5000 })
+  
+  const subtotal = getSubtotal()
+  const shippingThreshold = shippingConfig.threshold
+  const progress = Math.min(100, (subtotal / shippingThreshold) * 100)
+  const remaining = Math.max(0, shippingThreshold - subtotal)
+  const freeShippingEligible = subtotal >= shippingThreshold
+
+  useEffect(() => {
+    settingsApi.getShippingConfig().then(res => {
+      if (res.data) setShippingConfig(res.data)
+    })
+  }, [])
 
   if (items.length === 0) {
     return (
@@ -105,10 +120,34 @@ export default function CartPage() {
               </Link>
             </div>
 
-            <div className="bg-primary/5 p-4 md:p-6 rounded-xl md:rounded-2xl border border-primary/10">
-              <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest text-center">
-                Free delivery on orders over {convertPrice(500).formatted}
-              </p>
+            {/* Free Shipping Progress */}
+            <div className={`p-4 md:p-6 rounded-xl md:rounded-2xl border ${freeShippingEligible ? 'bg-green-50 border-green-200' : 'bg-primary/5 border-primary/10'} space-y-3`}>
+              <div className="flex items-center gap-2">
+                <Truck className={`h-4 w-4 ${freeShippingEligible ? 'text-green-600' : 'text-primary'}`} />
+                <h3 className={`text-[10px] md:text-xs font-black uppercase tracking-widest ${freeShippingEligible ? 'text-green-700' : 'text-primary'}`}>
+                  {freeShippingEligible ? 'FREE SHIPPING UNLOCKED!' : 'FREE SHIPPING PROGRESS'}
+                </h3>
+              </div>
+              
+              {!freeShippingEligible && (
+                <>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-[#1FA89A] rounded-full transition-all duration-500" 
+                      style={{ width: `${progress}%` }} 
+                    />
+                  </div>
+                  <p className="text-[9px] md:text-[10px] font-bold text-slate-600">
+                    Add {convertPrice(remaining).formatted} more to get free shipping!
+                  </p>
+                </>
+              )}
+              
+              {freeShippingEligible && (
+                <p className="text-[9px] md:text-[10px] font-bold text-green-700">
+                  Your order qualifies for free shipping!
+                </p>
+              )}
             </div>
           </div>
         </div>
