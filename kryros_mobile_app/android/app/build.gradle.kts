@@ -18,6 +18,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -51,10 +52,13 @@ android {
         applicationId = "com.kryros.kryros_mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion // Fallback value
+        minSdk = flutter.minSdkVersion // Set minSdk to 21 for desugaring
         targetSdk = 36 // Fallback value updated to 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Enable multiDex for older devices
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -66,6 +70,11 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // Disable debug symbol stripping to avoid errors
+            ndk.debugSymbolLevel = "none"
+        }
+        debug {
+            // Debug config can also use desugaring
         }
     }
 }
@@ -76,6 +85,9 @@ dependencies {
     
     // Firebase Cloud Messaging for Push Notifications
     implementation("com.google.firebase:firebase-messaging")
+    
+    // Core library desugaring
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
 }
 
 flutter {
