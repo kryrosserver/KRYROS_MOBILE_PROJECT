@@ -37,15 +37,23 @@ const SECTION_TYPES: SectionType[] = [
   { id: "HeroSlider", label: "Hero Slider", icon: Layers, description: "Main promotional slider using banners" },
   { id: "TrustBadges", label: "Trust Badges", icon: ShieldCheck, description: "Display features like Fast Delivery, Secure Payment" },
   { id: "FlashSale", label: "Flash Sale", icon: PlayCircle, description: "Display active flash sales with countdown" },
+  { id: "PromoBanner", label: "Promo Banner", icon: ImageIcon, description: "Big full-width promotional banner" },
+  { id: "ProductPromoList", label: "Product Promos", icon: List, description: "Vertical list of product promotions" },
   { id: "CategoriesGrid", label: "Categories", icon: List, description: "Grid of featured categories" },
+  { id: "PopularTagsProducts", label: "Popular Tags", icon: Palette, description: "Products filtered by popular tags" },
   { id: "ProductGrid", label: "Product Grid", icon: Grid, description: "Display a grid of products from a category" },
+  { id: "DualBannerSection", label: "Dual Banners", icon: Layout, description: "Two side-by-side promotional banners" },
+  { id: "PopularFiltersProducts", label: "Popular Filters", icon: Settings, description: "Products filtered by popular options" },
+  { id: "TrendProductsBanner", label: "Trend Products", icon: PlayCircle, description: "Trending products promotion banner" },
+  { id: "ProductReviews", label: "Reviews", icon: Palette, description: "Customer product reviews" },
+  { id: "DiscountBanner", label: "Discount Banner", icon: ImageIcon, description: "Special discount promotion banner" },
   { id: "BannerGrid", label: "Banner Grid", icon: Layout, description: "Display 2 or 3 promotional banners in a row" },
   { id: "FeaturedCategory", label: "Category Focus", icon: Grid, description: "Products from a specific category" },
   { id: "CreditSection", label: "Credit Info", icon: CreditCard, description: "Information about credit plans" },
   { id: "TextBlock", label: "Text Block", icon: Type, description: "Custom text or HTML content" },
 ];
 
-const ANIMATIONS = ["none", "fadeIn", "slideUp", "slideInLeft", "zoomIn", "bounceIn"];
+const ANIMATIONS = ["none", "fadeIn", "slideUp", "slideIn", "slideInLeft", "zoomIn", "bounceIn"];
 
 export default function HomePageCMS() {
   const [sections, setSections] = useState<any[]>([]);

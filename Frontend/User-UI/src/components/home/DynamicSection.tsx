@@ -9,6 +9,14 @@ import { ProductGridSection } from "./ProductGridSection"
 import { FlashSaleSection } from "./FlashSaleSection"
 import { CreditSection } from "./CreditSection"
 import { BannerGrid } from "./BannerGrid"
+import { PromoBanner } from "./PromoBanner"
+import { ProductPromoList } from "./ProductPromoList"
+import { ProductReviews } from "./ProductReviews"
+import { DiscountBanner } from "./DiscountBanner"
+import { DualBannerSection } from "./DualBannerSection"
+import { TrendProductsBanner } from "./TrendProductsBanner"
+import { PopularTagsProducts } from "./PopularTagsProducts"
+import { PopularFiltersProducts } from "./PopularFiltersProducts"
 
 interface SectionProps {
   section: any
@@ -35,6 +43,11 @@ const animations: Record<string, any> = {
     initial: { opacity: 0, x: -50 },
     whileInView: { opacity: 1, x: 0 },
     transition: { duration: 0.6 }
+  },
+  slideIn: {
+    initial: { opacity: 0, y: 30 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 }
   }
 }
 
@@ -60,6 +73,22 @@ export function DynamicSection({ section, banners }: SectionProps) {
         return <BannerGrid section={section} />
       case 'CreditSection':
         return <CreditSection section={section} />
+      case 'PromoBanner':
+        return <PromoBanner section={section} />
+      case 'ProductPromoList':
+        return <ProductPromoList section={section} />
+      case 'ProductReviews':
+        return <ProductReviews section={section} />
+      case 'DiscountBanner':
+        return <DiscountBanner section={section} />
+      case 'DualBannerSection':
+        return <DualBannerSection section={section} />
+      case 'TrendProductsBanner':
+        return <TrendProductsBanner section={section} />
+      case 'PopularTagsProducts':
+        return <PopularTagsProducts section={section} />
+      case 'PopularFiltersProducts':
+        return <PopularFiltersProducts section={section} />
       case 'TextBlock':
         return (
           <div className="container-custom py-12 md:py-24 text-center">
