@@ -7,8 +7,8 @@ import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private readonly testUrl = 'http://test.543.cgrate.co.zm:55555/Konik/KonikWs';
-  private readonly prodUrl = 'https://543.cgrate.co.zm:8443/Konik/KonikWs';
+  private readonly testUrl = 'https://test.543.cgrate.co.zm:8443/Konik/KonikWs';
+  private readonly prodUrl = 'https://543.cgrate.co.zm/Konik/KonikWs';
 
   constructor(
     private prisma: PrismaService,
