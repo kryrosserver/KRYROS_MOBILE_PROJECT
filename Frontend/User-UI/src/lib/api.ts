@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-y1c1.onrender.com/api';
 
 interface ApiResponse<T> {
   data?: T;
