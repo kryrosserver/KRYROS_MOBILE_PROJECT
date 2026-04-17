@@ -26,7 +26,7 @@ interface CurrencyContextType {
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://kryrosbackend-hxfp.onrender.com/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-y1c1.onrender.com/api";
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [countries, setCountries] = useState<Country[]>([]);
