@@ -51,12 +51,6 @@ export class CMSService {
   }
 
   async seedHomePageSections() {
-    // Check if we already have these specific sections to avoid duplicates
-    const count = await this.prisma.homePageSection.count();
-    if (count > 0) {
-      return { success: true, message: `HomePage already has ${count} sections. Delete them first if you want to re-seed.` };
-    }
-
     const defaultSections = [
       {
         type: 'HeroSlider',
@@ -338,11 +332,21 @@ export class CMSService {
       }
     ];
 
-    for (const section of defaultSections) {
+    const existingSections = await this.prisma.homePageSection.findMany();
+    const existingTypes = new Set(existingSections.map(s => s.type));
+    const missingSections = defaultSections.filter(s => !existingTypes.has(s.type));
+    let addedCount = 0;
+
+    for (const section of missingSections) {
       await this.prisma.homePageSection.create({ data: section as any });
+      addedCount++;
     }
 
-    return { success: true, message: 'HomePage sections seeded successfully' };
+    if (addedCount > 0) {
+      return { success: true, message: `Added ${addedCount} new homepage sections successfully!` };
+    } else {
+      return { success: true, message: `All homepage sections are already present.` };
+    }
   }
 
   async getBanners() {
