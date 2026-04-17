@@ -16,13 +16,30 @@ export class PaymentsService {
   ) {}
 
   private get apiUrl() {
-    return this.configService.get('NODE_ENV') === 'production' ? this.prodUrl : this.testUrl;
+    const env = this.configService.get('NODE_ENV');
+    const url = env === 'production' ? this.prodUrl : this.testUrl;
+    this.logger.log(`Using 543 API URL: ${url} (env: ${env})`);
+    return url;
   }
 
   async process543Payment(orderId: string, phone: string, amountZMW: number) {
     const username = this.configService.get('CGRATE_USERNAME');
     const password = this.configService.get('CGRATE_PASSWORD');
     const transactionId = `KRYROS_${Date.now()}`;
+
+    this.logger.log('=== Starting 543 Payment Process ===');
+    this.logger.log(`Order ID: ${orderId}`);
+    this.logger.log(`Phone (raw): ${phone}`);
+    this.logger.log(`Amount (ZMW): ${amountZMW}`);
+    this.logger.log(`Transaction ID: ${transactionId}`);
+    this.logger.log(`Username configured: ${username ? 'Yes' : 'NO!'}`);
+    this.logger.log(`Password configured: ${password ? 'Yes' : 'NO!'}`);
+
+    if (!username || !password) {
+      const errorMsg = 'CGRATE_USERNAME or CGRATE_PASSWORD not configured in environment variables!';
+      this.logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
 
     // Ensure phone format: +260XXXXXXXXX
     let formattedPhone = phone.replace(/\D/g, '');
@@ -34,6 +51,8 @@ export class PaymentsService {
       }
     }
     formattedPhone = '+' + formattedPhone;
+
+    this.logger.log(`Formatted Phone: ${formattedPhone}`);
 
     const soapRequest = `
       <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com">
@@ -53,15 +72,24 @@ export class PaymentsService {
       </soapenv:Envelope>
     `;
 
+    this.logger.log('SOAP Request being sent:');
+    this.logger.log(soapRequest);
+
     try {
-      this.logger.log(`Initiating 543 payment for Order: ${orderId}, Amount: ${amountZMW} ZMW`);
+      this.logger.log(`Sending POST request to: ${this.apiUrl}`);
       
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
           'Content-Type': 'text/xml;charset=UTF-8',
           'SOAPAction': '',
         },
+        timeout: 30000, // 30 second timeout
       });
+
+      this.logger.log('=== 543 API Response Received ===');
+      this.logger.log(`Response Status: ${response.status}`);
+      this.logger.log(`Response Headers: ${JSON.stringify(response.headers)}`);
+      this.logger.log(`Response Data (raw): ${response.data}`);
 
       const parser = new XMLParser({
         ignoreAttributes: true,
@@ -69,14 +97,25 @@ export class PaymentsService {
       });
       const result = parser.parse(response.data);
       
+      this.logger.log(`Parsed XML Result: ${JSON.stringify(result, null, 2)}`);
+      
       const txResponse = result.Envelope?.Body?.processTransactionResponse?.transactionResponse;
 
       if (!txResponse) {
-        throw new Error('Invalid SOAP response structure');
+        const errorMsg = 'Invalid SOAP response structure - transactionResponse not found!';
+        this.logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
+
+      this.logger.log(`Transaction Response: ${JSON.stringify(txResponse, null, 2)}`);
 
       const status = txResponse.status; // SUCCESS, FAILED, PENDING
       const reference = txResponse.reference || transactionId;
+      const message = txResponse.message || 'No message provided';
+
+      this.logger.log(`Payment Status: ${status}`);
+      this.logger.log(`Payment Reference: ${reference}`);
+      this.logger.log(`Payment Message: ${message}`);
 
       // Update order status in DB
       await this.prisma.order.update({
@@ -88,19 +127,41 @@ export class PaymentsService {
         },
       });
 
+      this.logger.log('Order updated in database');
+
       return {
         success: status === 'SUCCESS',
         status: status,
         reference: reference,
-        message: txResponse.message || 'Payment initiated',
+        message: message,
       };
     } catch (error) {
-      this.logger.error(`543 Payment Error: ${error.message}`);
+      this.logger.error('=== 543 Payment ERROR ===');
+      if (axios.isAxiosError(error)) {
+        this.logger.error(`Axios Error Message: ${error.message}`);
+        this.logger.error(`Axios Error Code: ${error.code}`);
+        if (error.response) {
+          this.logger.error(`Error Response Status: ${error.response.status}`);
+          this.logger.error(`Error Response Headers: ${JSON.stringify(error.response.headers)}`);
+          this.logger.error(`Error Response Data: ${error.response.data}`);
+        }
+        if (error.request) {
+          this.logger.error(`Error Request was sent but no response received`);
+        }
+      } else {
+        this.logger.error(`Generic Error: ${error.message}`);
+        this.logger.error(`Error Stack: ${error.stack}`);
+      }
       
-      await this.prisma.order.update({
-        where: { id: orderId },
-        data: { paymentStatus: 'FAILED' },
-      });
+      try {
+        await this.prisma.order.update({
+          where: { id: orderId },
+          data: { paymentStatus: 'FAILED' },
+        });
+        this.logger.log('Order marked as FAILED in database');
+      } catch (dbError) {
+        this.logger.error(`Failed to update order status to FAILED: ${dbError.message}`);
+      }
 
       throw error;
     }
