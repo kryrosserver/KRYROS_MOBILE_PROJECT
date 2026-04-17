@@ -98,24 +98,239 @@ export class CMSService {
         }
       },
       {
-        type: 'CategoriesGrid',
+        type: 'PromoBanner',
         order: 4,
+        isActive: true,
+        title: 'DISCOUNT UP TO 50%',
+        subtitle: 'EARPHONE BLUETOOTH',
+        description: 'Get amazing deals on our latest Bluetooth earphones',
+        imageUrl: '',
+        link: '/shop',
+        linkText: 'Shop Now',
+        backgroundColor: '#1B2533',
+        textColor: '#ffffff',
+        animation: 'fadeIn'
+      },
+      {
+        type: 'ProductPromoList',
+        order: 5,
+        isActive: true,
+        title: 'Featured Deals',
+        animation: 'slideUp',
+        config: {
+          items: [
+            {
+              title: 'Apple Ipad New Generation',
+              subtitle: 'Up to 20% off Apple Devices',
+              linkText: 'Buy Product',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#EEF2FF',
+              textColor: '#4F46E5'
+            },
+            {
+              title: 'Smart Headphone',
+              subtitle: 'Up to 40% off new order',
+              linkText: 'Buy Product',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#EEF2FF',
+              textColor: '#4F46E5'
+            },
+            {
+              title: 'Samsung Oled Smart TV',
+              subtitle: 'Up to 20% off Apple Devices',
+              linkText: 'Buy Product',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#ECFDF5',
+              textColor: '#16A34A'
+            },
+            {
+              title: 'Iphone 15 Promax',
+              subtitle: 'Save 20% Today, Limited',
+              linkText: 'See More Products',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#EEF2FF',
+              textColor: '#4F46E5'
+            },
+            {
+              title: 'Iphone 15 Promax',
+              subtitle: 'Free Shipping On Over $50',
+              linkText: 'See More Products',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#FFF7ED',
+              textColor: '#92400E'
+            }
+          ]
+        }
+      },
+      {
+        type: 'CategoriesGrid',
+        order: 6,
         isActive: true,
         title: 'Shop by Category',
         subtitle: 'Browse our collections',
         animation: 'zoomIn'
       },
       {
+        type: 'PopularTagsProducts',
+        order: 7,
+        isActive: true,
+        title: 'Popular Tags',
+        subtitle: 'Shop popular products',
+        animation: 'fadeIn',
+        config: {
+          tags: [
+            { label: 'BESTSELLER', isActive: true },
+            { label: 'HOT', isActive: true },
+            { label: 'NEW', isActive: true },
+            { label: 'SALE', isActive: true }
+          ],
+          filter: 'popular',
+          limit: 10
+        }
+      },
+      {
         type: 'ProductGrid',
-        order: 5,
+        order: 8,
         isActive: true,
         title: 'Featured Products',
         config: { limit: 8, filter: 'featured' },
         animation: 'slideUp',
       },
       {
+        type: 'DualBannerSection',
+        order: 9,
+        isActive: true,
+        title: 'Featured Deals',
+        animation: 'fadeIn',
+        config: {
+          banners: [
+            {
+              badge: 'TREND PRODUCT',
+              badgeColor: '#991B1B',
+              title: 'DJI GimbalX10',
+              subtitle: 'Up to 22% off Gimbals',
+              linkText: 'Check Details',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#FFF1F2',
+              textColor: '#991B1B'
+            },
+            {
+              badge: 'NEW PRODUCT',
+              badgeColor: '#6D28D9',
+              title: 'AMD Ryzen 210B',
+              subtitle: 'Up to 40% off Kitchen',
+              linkText: 'Check Details',
+              imageUrl: '',
+              link: '/shop',
+              backgroundColor: '#EDE9FE',
+              textColor: '#6D28D9'
+            }
+          ]
+        }
+      },
+      {
+        type: 'PopularFiltersProducts',
+        order: 10,
+        isActive: true,
+        title: 'Popular Filters',
+        animation: 'slideUp',
+        config: {
+          filters: [
+            { label: 'All Categories', isActive: true },
+            { label: 'BESTSELLER', isActive: true },
+            { label: 'HOT', isActive: true },
+            { label: 'NEW', isActive: true },
+            { label: 'TREND PRODUCTS', isActive: true },
+            { label: 'PROMOTION PRICES', isActive: true }
+          ],
+          limit: 8
+        }
+      },
+      {
+        type: 'TrendProductsBanner',
+        order: 11,
+        isActive: true,
+        animation: 'fadeIn',
+        config: {
+          badges: [
+            { label: 'TREND PRODUCTS', color: '#991B1B', backgroundColor: '#FEE2E2' },
+            { label: 'PROMOTION PRICES', color: '#78350F', backgroundColor: '#FEF3C7' }
+          ],
+          title: 'New generation M1 Processor - limited stocks!',
+          featuredProducts: [
+            'IPHONE 14 PRO MAX',
+            'IPHONE 13 PRO MAX',
+            'SAMSUNG ULTRA 22 PRO'
+          ],
+          buttonText: 'Check Products',
+          buttonLink: '/shop',
+          imageUrl: '',
+          backgroundColor: '#FFF7ED',
+          textColor: '#78350F'
+        }
+      },
+      {
+        type: 'ProductReviews',
+        order: 12,
+        isActive: true,
+        title: 'Product Reviews',
+        subtitle: 'Our references are very valuable, the result of a great effort',
+        animation: 'slideIn',
+        config: {
+          reviews: [
+            {
+              customerName: 'John Doe',
+              customerImage: '',
+              role: 'REVIEWER',
+              rating: 5,
+              reviewText: 'Electronic products are developing a little more every day to make our lives easier. They adapt to the developing digital world.',
+              date: '3 YEARS AGO',
+              purchasedProduct: 'Samsung Powerbank',
+              purchasedProductImage: '',
+              purchasedProductLink: '/shop'
+            },
+            {
+              customerName: 'Jane Smith',
+              customerImage: '',
+              role: 'VIEWER',
+              rating: 4,
+              reviewText: 'Great quality products and fast shipping! Highly recommend.',
+              date: '2 YEARS AGO',
+              purchasedProduct: 'Apple Airpods Headphones',
+              purchasedProductImage: '',
+              purchasedProductLink: '/shop'
+            }
+          ]
+        }
+      },
+      {
+        type: 'DiscountBanner',
+        order: 13,
+        isActive: true,
+        animation: 'fadeIn',
+        config: {
+          discountText: '40 % OFF',
+          discountTextColor: '#991B1B',
+          title: 'Discount valid on all phone accessories for November!',
+          titleColor: '#991B1B',
+          buttonText: 'Check Products',
+          buttonLink: '/shop',
+          buttonColor: '#991B1B',
+          buttonTextColor: '#FFFFFF',
+          backgroundImageUrl: '',
+          backgroundColor: '#FFF1F2',
+          overlayColor: 'rgba(255, 241, 242, 0.9)'
+        }
+      },
+      {
         type: 'CreditSection',
-        order: 6,
+        order: 14,
         isActive: true,
         title: 'KRYROS Credit',
         subtitle: 'Buy now, pay later',
