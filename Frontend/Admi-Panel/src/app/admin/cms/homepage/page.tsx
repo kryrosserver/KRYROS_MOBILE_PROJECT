@@ -23,7 +23,8 @@ import {
   ShieldCheck,
   CreditCard,
   Layers,
-  LucideIcon
+  LucideIcon,
+  Package
 } from "lucide-react";
 
 interface SectionType {
@@ -79,6 +80,51 @@ export default function HomePageCMS() {
     animation: "none",
     config: {} as any
   });
+
+  async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
+    const blobURL = URL.createObjectURL(file);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = blobURL;
+    });
+    const scale = Math.min(1, maxWidth / img.width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(blobURL);
+    const isPng = file.type.includes("png");
+    const type = isPng ? "image/png" : "image/jpeg";
+    return canvas.toDataURL(type, quality);
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setForm(prev => ({ ...prev, imageUrl: data.url }));
+      } else {
+        alert("Failed to upload image");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload image");
+    }
+  };
 
   const loadSections = async () => {
     setLoading(true);
@@ -327,13 +373,34 @@ export default function HomePageCMS() {
             {/* Right Column: Media & Links */}
             <div className="space-y-6">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Image URL</label>
-                <input 
-                  value={form.imageUrl} 
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, imageUrl: e.target.value})}
-                  className="admin-input" 
-                  placeholder="https://images.unsplash.com/..."
-                />
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Image</label>
+                <div className="flex gap-2">
+                  <input 
+                    value={form.imageUrl} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, imageUrl: e.target.value})}
+                    className="admin-input flex-1" 
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                  <input
+                    type="file"
+                    id="section-image-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                  <label htmlFor="section-image-upload" className="btn-secondary px-4 py-2 cursor-pointer flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" /> Upload
+                  </label>
+                </div>
+                {form.imageUrl && (
+                  <div className="mt-3">
+                    <img 
+                      src={form.imageUrl} 
+                      alt="Preview" 
+                      className="w-full h-40 object-cover rounded-lg border border-slate-200"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
