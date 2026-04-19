@@ -116,7 +116,15 @@ export default function HomePageCMS() {
 
       if (res.ok) {
         const data = await res.json();
-        setForm(prev => ({ ...prev, imageUrl: data.url }));
+        setForm(prev => ({ 
+          ...prev, 
+          imageUrl: data.url,
+          config: {
+            ...prev.config,
+            backgroundImageUrl: data.url,
+            imageUrl: data.url
+          }
+        }));
       } else {
         alert("Failed to upload image");
       }
@@ -169,10 +177,26 @@ export default function HomePageCMS() {
         ? `/internal/admin/cms/homepage-sections/${editingSection.id}` 
         : "/internal/admin/cms/homepage-sections";
       
+      const config = { ...form.config };
+      
+      if (form.imageUrl) {
+        config.backgroundImageUrl = form.imageUrl;
+        config.imageUrl = form.imageUrl;
+      }
+      
+      if (form.link) {
+        config.buttonLink = form.link;
+      }
+      
+      const dataToSend = {
+        ...form,
+        config
+      };
+      
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(dataToSend),
         credentials: "same-origin"
       });
 
@@ -773,7 +797,12 @@ export default function HomePageCMS() {
                 <button 
                   onClick={() => {
                     setEditingSection(section);
-                    setForm({ ...section });
+                    const config = section.config || {};
+                    setForm({ 
+                      ...section,
+                      imageUrl: section.imageUrl || config.backgroundImageUrl || config.imageUrl || '',
+                      link: section.link || config.buttonLink || '',
+                    });
                     setShowAdd(true);
                   }}
                   className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
