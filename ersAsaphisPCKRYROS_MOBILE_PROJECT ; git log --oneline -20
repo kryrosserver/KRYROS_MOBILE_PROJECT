@@ -1,0 +1,251 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { 
+  Plus, 
+  GripVertical, 
+  Trash2, 
+  Edit, 
+  Eye, 
+  EyeOff, 
+  ChevronUp, 
+  ChevronDown,
+  Layout,
+  Image as ImageIcon,
+  Grid,
+  List,
+  Type,
+  Settings,
+  RefreshCw,
+  X,
+  Palette,
+  PlayCircle,
+  ShieldCheck,
+  CreditCard,
+  Layers,
+  LucideIcon,
+  Package
+} from "lucide-react";
+
+interface SectionType {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  description: string;
+}
+
+const SECTION_TYPES: SectionType[] = [
+  { id: "HeroSlider", label: "Hero Slider", icon: Layers, description: "Main promotional slider using banners" },
+  { id: "TrustBadges", label: "Trust Badges", icon: ShieldCheck, description: "Display features like Fast Delivery, Secure Payment" },
+  { id: "FlashSale", label: "Flash Sale", icon: PlayCircle, description: "Display active flash sales with countdown" },
+  { id: "PromoBanner", label: "Promo Banner", icon: ImageIcon, description: "Big full-width promotional banner" },
+  { id: "ProductPromoList", label: "Product Promos", icon: List, description: "Vertical list of product promotions" },
+  { id: "CategoriesGrid", label: "Categories", icon: List, description: "Grid of featured categories" },
+  { id: "PopularTagsProducts", label: "Popular Tags", icon: Palette, description: "Products filtered by popular tags" },
+  { id: "ProductGrid", label: "Product Grid", icon: Grid, description: "Display a grid of products from a category" },
+  { id: "DualBannerSection", label: "Dual Banners", icon: Layout, description: "Two side-by-side promotional banners" },
+  { id: "PopularFiltersProducts", label: "Popular Filters", icon: Settings, description: "Products filtered by popular options" },
+  { id: "TrendProductsBanner", label: "Trend Products", icon: PlayCircle, description: "Trending products promotion banner" },
+  { id: "ProductReviews", label: "Reviews", icon: Palette, description: "Customer product reviews" },
+  { id: "DiscountBanner", label: "Discount Banner", icon: ImageIcon, description: "Special discount promotion banner" },
+  { id: "BannerGrid", label: "Banner Grid", icon: Layout, description: "Display 2 or 3 promotional banners in a row" },
+  { id: "FeaturedCategory", label: "Category Focus", icon: Grid, description: "Products from a specific category" },
+  { id: "CreditSection", label: "Credit Info", icon: CreditCard, description: "Information about credit plans" },
+  { id: "TextBlock", label: "Text Block", icon: Type, description: "Custom text or HTML content" },
+];
+
+const ANIMATIONS = ["none", "fadeIn", "slideUp", "slideIn", "slideInLeft", "zoomIn", "bounceIn"];
+
+export default function HomePageCMS() {
+  const [sections, setSections] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editingSection, setEditingSection] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  
+  const [form, setForm] = useState({
+    type: "HeroSlider",
+    title: "",
+    subtitle: "",
+    description: "",
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    imageUrl: "",
+    videoUrl: "",
+    link: "",
+    linkText: "Learn More",
+    order: 0,
+    isActive: true,
+    animation: "none",
+    config: {} as any
+  });
+
+  async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
+    const blobURL = URL.createObjectURL(file);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = blobURL;
+    });
+    const scale = Math.min(1, maxWidth / img.width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(blobURL);
+    const isPng = file.type.includes("png");
+    const type = isPng ? "image/png" : "image/jpeg";
+    return canvas.toDataURL(type, quality);
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setForm(prev => ({ 
+          ...prev, 
+          imageUrl: data.url,
+          config: {
+            ...prev.config,
+            backgroundImageUrl: data.url,
+            imageUrl: data.url
+          }
+        }));
+      } else {
+        alert("Failed to upload image");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload image");
+    }
+  };
+
+  const loadSections = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/internal/admin/cms/homepage-sections/manage", { credentials: "same-origin" });
+      if (res.ok) {
+        const data = await res.json();
+        setSections(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error("Failed to load sections", err);
+      setSections([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const seedSections = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/internal/admin/cms/homepage-sections/seed", { 
+        method: "POST",
+        credentials: "same-origin"
+      });
+      const data = await res.json();
+      alert(data.message || "Seeding operation finished");
+      loadSections();
+    } catch (err) {
+      alert("Failed to seed sections. Check server logs.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadSections(); }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const method = editingSection ? "PUT" : "POST";
+      const url = editingSection 
+        ? `/internal/admin/cms/homepage-sections/${editingSection.id}` 
+        : "/internal/admin/cms/homepage-sections";
+      
+      const config = { ...form.config };
+      
+      if (form.imageUrl) {
+        config.backgroundImageUrl = form.imageUrl;
+        config.imageUrl = form.imageUrl;
+      }
+      
+      if (form.link) {
+        config.buttonLink = form.link;
+      }
+      
+      const dataToSend = {
+        ...form,
+        config
+      };
+      
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+        credentials: "same-origin"
+      });
+
+      if (res.ok) {
+        setShowAdd(false);
+        setEditingSection(null);
+        loadSections();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this section?")) return;
+    const res = await fetch(`/internal/admin/cms/homepage-sections/${id}`, { 
+      method: "DELETE",
+      credentials: "same-origin"
+    });
+    if (res.ok) loadSections();
+  };
+
+  const toggleActive = async (section: any) => {
+    const res = await fetch(`/internal/admin/cms/homepage-sections/${section.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: !section.isActive }),
+      credentials: "same-origin"
+    });
+    if (res.ok) loadSections();
+  };
+
+  const moveOrder = (index: number, direction: 'up' | 'down') => {
+    const newSections = [...sections];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= sections.length) return;
+
+    // Swap positions in the local array
+    const temp = newSections[index];
+    newSections[index] = newSections[targetIndex];
+    newSections[targetIndex] = temp;
+
+    // Re-assign orders based on index
+    const updated = newSections.map((s, idx) => ({ ...s, order: idx + 1 }));
+    setSections(updated);
+    setHasChanges(true);
+  };
+
+  const saveLayout = async () => {
+    setSaving(true);
+    try {
+      // Update all sections sequenti
