@@ -301,7 +301,7 @@ export default function HomePageCMS() {
             </button>
           </div>
           
-          <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="p-6 space-y-8">
             {/* Form Fields */}
             <div className="space-y-6">
               <div>
@@ -392,10 +392,7 @@ export default function HomePageCMS() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Column: Media & Links */}
-            <div className="space-y-6">
               <div>
                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Image</label>
                 <div className="flex gap-2">
