@@ -685,6 +685,820 @@ export default function HomePageCMS() {
                 </div>
               )}
 
+              {form.type === 'CategoriesGrid' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Categories Grid Config</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Limit</label>
+                      <input 
+                        type="number"
+                        value={form.config?.limit || 6}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), limit: parseInt(e.target.value) } })}
+                        className="admin-input py-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'PopularTagsProducts' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Popular Tags Config</h3>
+                  {(form.config?.tags || []).map((tag: any, idx: number) => (
+                    <div key={idx} className="flex gap-2 items-end">
+                      <div className="flex-1 space-y-2">
+                        <input 
+                          value={tag.label}
+                          onChange={(e) => {
+                            const newTags = [...(form.config?.tags || [])];
+                            newTags[idx].label = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), tags: newTags } });
+                          }}
+                          className="admin-input py-1 text-xs" 
+                          placeholder="Tag Label"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <label className="text-[8px] font-bold uppercase text-slate-400">Active</label>
+                        <input 
+                          type="checkbox"
+                          checked={tag.isActive}
+                          onChange={(e) => {
+                            const newTags = [...(form.config?.tags || [])];
+                            newTags[idx].isActive = e.target.checked;
+                            setForm({ ...form, config: { ...(form.config || {}), tags: newTags } });
+                          }}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const newTags = (form.config?.tags || []).filter((_: any, i: number) => i !== idx);
+                          setForm({ ...form, config: { ...(form.config || {}), tags: newTags } });
+                        }}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const newTags = [...(form.config?.tags || []), { label: 'New Tag', isActive: false }];
+                      setForm({ ...form, config: { ...(form.config || {}), tags: newTags } });
+                    }}
+                    className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add Tag
+                  </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Product Limit</label>
+                      <input 
+                        type="number"
+                        value={form.config?.limit || 10}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), limit: parseInt(e.target.value) } })}
+                        className="admin-input py-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'PopularFiltersProducts' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Popular Filters Config</h3>
+                  {(form.config?.filters || []).map((filter: any, idx: number) => (
+                    <div key={idx} className="flex gap-2 items-end">
+                      <div className="flex-1 space-y-2">
+                        <input 
+                          value={filter.label}
+                          onChange={(e) => {
+                            const newFilters = [...(form.config?.filters || [])];
+                            newFilters[idx].label = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), filters: newFilters } });
+                          }}
+                          className="admin-input py-1 text-xs" 
+                          placeholder="Filter Label"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <label className="text-[8px] font-bold uppercase text-slate-400">Active</label>
+                        <input 
+                          type="checkbox"
+                          checked={filter.isActive}
+                          onChange={(e) => {
+                            const newFilters = [...(form.config?.filters || [])];
+                            newFilters[idx].isActive = e.target.checked;
+                            setForm({ ...form, config: { ...(form.config || {}), filters: newFilters } });
+                          }}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const newFilters = (form.config?.filters || []).filter((_: any, i: number) => i !== idx);
+                          setForm({ ...form, config: { ...(form.config || {}), filters: newFilters } });
+                        }}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const newFilters = [...(form.config?.filters || []), { label: 'New Filter', isActive: false }];
+                      setForm({ ...form, config: { ...(form.config || {}), filters: newFilters } });
+                    }}
+                    className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add Filter
+                  </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Product Limit</label>
+                      <input 
+                        type="number"
+                        value={form.config?.limit || 8}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), limit: parseInt(e.target.value) } })}
+                        className="admin-input py-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'ProductReviews' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Product Reviews Config</h3>
+                  {(form.config?.reviews || []).map((review: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-400">Review {idx + 1}</span>
+                        <button onClick={() => {
+                          const newReviews = (form.config?.reviews || []).filter((_: any, i: number) => i !== idx);
+                          setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                        }} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          value={review.customerName}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].customerName = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Customer Name"
+                        />
+                        <input 
+                          value={review.role}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].role = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Role (e.g., Verified Buyer)"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input 
+                          type="number" min="1" max="5"
+                          value={review.rating}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].rating = parseInt(e.target.value);
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Rating (1-5)"
+                        />
+                        <input 
+                          value={review.date}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].date = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Date"
+                        />
+                        <input 
+                          value={review.customerImage}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].customerImage = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Customer Image URL"
+                        />
+                      </div>
+                      <textarea 
+                        value={review.reviewText}
+                        onChange={(e) => {
+                          const newReviews = [...(form.config?.reviews || [])];
+                          newReviews[idx].reviewText = e.target.value;
+                          setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                        }}
+                        className="admin-input py-1 text-xs h-16 resize-none" placeholder="Review Text"
+                      />
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input 
+                          value={review.purchasedProduct}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].purchasedProduct = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Purchased Product"
+                        />
+                        <input 
+                          value={review.purchasedProductImage}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].purchasedProductImage = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Product Image URL"
+                        />
+                        <input 
+                          value={review.purchasedProductLink}
+                          onChange={(e) => {
+                            const newReviews = [...(form.config?.reviews || [])];
+                            newReviews[idx].purchasedProductLink = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Product Link"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const newReviews = [...(form.config?.reviews || []), { 
+                        customerName: 'Customer Name', 
+                        role: 'Verified Buyer', 
+                        rating: 5, 
+                        date: 'Jan 2026',
+                        customerImage: '',
+                        reviewText: 'Great product!',
+                        purchasedProduct: 'Product Name',
+                        purchasedProductImage: '',
+                        purchasedProductLink: '/shop'
+                      }];
+                      setForm({ ...form, config: { ...(form.config || {}), reviews: newReviews } });
+                    }}
+                    className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add Review
+                  </button>
+                </div>
+              )}
+
+              {form.type === 'DualBannerSection' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Dual Banners Config</h3>
+                  {(form.config?.banners || []).map((banner: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-400">Banner {idx + 1}</span>
+                        <button onClick={() => {
+                          const newBanners = (form.config?.banners || []).filter((_: any, i: number) => i !== idx);
+                          setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                        }} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          value={banner.title}
+                          onChange={(e) => {
+                            const newBanners = [...(form.config?.banners || [])];
+                            newBanners[idx].title = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Title"
+                        />
+                        <input 
+                          value={banner.subtitle}
+                          onChange={(e) => {
+                            const newBanners = [...(form.config?.banners || [])];
+                            newBanners[idx].subtitle = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Subtitle"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          value={banner.link}
+                          onChange={(e) => {
+                            const newBanners = [...(form.config?.banners || [])];
+                            newBanners[idx].link = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Link"
+                        />
+                        <input 
+                          value={banner.linkText}
+                          onChange={(e) => {
+                            const newBanners = [...(form.config?.banners || [])];
+                            newBanners[idx].linkText = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Link Text"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div className="flex gap-2">
+                          <input 
+                            type="color"
+                            value={banner.backgroundColor}
+                            onChange={(e) => {
+                              const newBanners = [...(form.config?.banners || [])];
+                              newBanners[idx].backgroundColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                            }}
+                            className="h-8 w-10 rounded border p-0.5"
+                          />
+                          <input 
+                            value={banner.backgroundColor}
+                            onChange={(e) => {
+                              const newBanners = [...(form.config?.banners || [])];
+                              newBanners[idx].backgroundColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                            }}
+                            className="admin-input py-1 text-xs flex-1 font-mono" placeholder="BG Color"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <input 
+                            type="color"
+                            value={banner.textColor}
+                            onChange={(e) => {
+                              const newBanners = [...(form.config?.banners || [])];
+                              newBanners[idx].textColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                            }}
+                            className="h-8 w-10 rounded border p-0.5"
+                          />
+                          <input 
+                            value={banner.textColor}
+                            onChange={(e) => {
+                              const newBanners = [...(form.config?.banners || [])];
+                              newBanners[idx].textColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                            }}
+                            className="admin-input py-1 text-xs flex-1 font-mono" placeholder="Text Color"
+                          />
+                        </div>
+                        <input 
+                          value={banner.imageUrl}
+                          onChange={(e) => {
+                            const newBanners = [...(form.config?.banners || [])];
+                            newBanners[idx].imageUrl = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Image URL"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          value={banner.badge}
+                          onChange={(e) => {
+                            const newBanners = [...(form.config?.banners || [])];
+                            newBanners[idx].badge = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Badge (optional)"
+                        />
+                        <div className="flex gap-2">
+                          <input 
+                            type="color"
+                            value={banner.badgeColor}
+                            onChange={(e) => {
+                              const newBanners = [...(form.config?.banners || [])];
+                              newBanners[idx].badgeColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                            }}
+                            className="h-8 w-10 rounded border p-0.5"
+                          />
+                          <input 
+                            value={banner.badgeColor}
+                            onChange={(e) => {
+                              const newBanners = [...(form.config?.banners || [])];
+                              newBanners[idx].badgeColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                            }}
+                            className="admin-input py-1 text-xs flex-1 font-mono" placeholder="Badge Color"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const newBanners = [...(form.config?.banners || []), { 
+                        title: 'Banner Title', 
+                        subtitle: 'Banner Subtitle',
+                        link: '/shop',
+                        linkText: 'Shop Now',
+                        backgroundColor: '#FFF1F2',
+                        textColor: '#000000',
+                        imageUrl: '',
+                        badge: '',
+                        badgeColor: '#EF4444'
+                      }];
+                      setForm({ ...form, config: { ...(form.config || {}), banners: newBanners } });
+                    }}
+                    className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add Banner
+                  </button>
+                </div>
+              )}
+
+              {form.type === 'ProductPromoList' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Product Promos Config</h3>
+                  {(form.config?.items || []).map((item: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-400">Promo {idx + 1}</span>
+                        <button onClick={() => {
+                          const newItems = (form.config?.items || []).filter((_: any, i: number) => i !== idx);
+                          setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                        }} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          value={item.title}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].title = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Title"
+                        />
+                        <input 
+                          value={item.subtitle}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].subtitle = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Subtitle"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          value={item.link}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].link = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Link"
+                        />
+                        <input 
+                          value={item.linkText}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].linkText = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Link Text"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div className="flex gap-2">
+                          <input 
+                            type="color"
+                            value={item.backgroundColor}
+                            onChange={(e) => {
+                              const newItems = [...(form.config?.items || [])];
+                              newItems[idx].backgroundColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                            }}
+                            className="h-8 w-10 rounded border p-0.5"
+                          />
+                          <input 
+                            value={item.backgroundColor}
+                            onChange={(e) => {
+                              const newItems = [...(form.config?.items || [])];
+                              newItems[idx].backgroundColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                            }}
+                            className="admin-input py-1 text-xs flex-1 font-mono" placeholder="BG Color"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <input 
+                            type="color"
+                            value={item.textColor}
+                            onChange={(e) => {
+                              const newItems = [...(form.config?.items || [])];
+                              newItems[idx].textColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                            }}
+                            className="h-8 w-10 rounded border p-0.5"
+                          />
+                          <input 
+                            value={item.textColor}
+                            onChange={(e) => {
+                              const newItems = [...(form.config?.items || [])];
+                              newItems[idx].textColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                            }}
+                            className="admin-input py-1 text-xs flex-1 font-mono" placeholder="Text Color"
+                          />
+                        </div>
+                        <input 
+                          value={item.imageUrl}
+                          onChange={(e) => {
+                            const newItems = [...(form.config?.items || [])];
+                            newItems[idx].imageUrl = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                          }}
+                          className="admin-input py-1 text-xs" placeholder="Image URL"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => {
+                      const newItems = [...(form.config?.items || []), { 
+                        title: 'Promo Title', 
+                        subtitle: 'Promo Subtitle',
+                        link: '/shop',
+                        linkText: 'Shop Now',
+                        backgroundColor: '#EEF2FF',
+                        textColor: '#4F46E5',
+                        imageUrl: ''
+                      }];
+                      setForm({ ...form, config: { ...(form.config || {}), items: newItems } });
+                    }}
+                    className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add Promo
+                  </button>
+                </div>
+              )}
+
+              {form.type === 'TrendProductsBanner' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Trend Products Config</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Title</label>
+                      <input 
+                        value={form.config?.title || ''}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), title: e.target.value } })}
+                        className="admin-input py-1 text-xs"
+                        placeholder="Trending Products"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Button Text</label>
+                      <input 
+                        value={form.config?.buttonText || ''}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), buttonText: e.target.value } })}
+                        className="admin-input py-1 text-xs"
+                        placeholder="Shop Now"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Button Link</label>
+                      <input 
+                        value={form.config?.buttonLink || ''}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), buttonLink: e.target.value } })}
+                        className="admin-input py-1 text-xs"
+                        placeholder="/shop"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="flex gap-2">
+                      <input 
+                        type="color"
+                        value={form.config?.backgroundColor || '#FFF7ED'}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), backgroundColor: e.target.value } })}
+                        className="h-10 w-12 rounded border p-1"
+                      />
+                      <div className="flex-1">
+                        <label className="text-[10px] font-bold uppercase text-slate-400">BG Color</label>
+                        <input 
+                          value={form.config?.backgroundColor || '#FFF7ED'}
+                          onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), backgroundColor: e.target.value } })}
+                          className="admin-input py-1 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <input 
+                        type="color"
+                        value={form.config?.textColor || '#78350F'}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), textColor: e.target.value } })}
+                        className="h-10 w-12 rounded border p-1"
+                      />
+                      <div className="flex-1">
+                        <label className="text-[10px] font-bold uppercase text-slate-400">Text Color</label>
+                        <input 
+                          value={form.config?.textColor || '#78350F'}
+                          onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), textColor: e.target.value } })}
+                          className="admin-input py-1 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-slate-400">Image URL</label>
+                      <input 
+                        value={form.config?.imageUrl || ''}
+                        onChange={(e) => setForm({ ...form, config: { ...(form.config || {}), imageUrl: e.target.value } })}
+                        className="admin-input py-1 text-xs"
+                        placeholder="Image URL"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-[10px] font-bold uppercase text-slate-400">Badges</h4>
+                    {(form.config?.badges || []).map((badge: any, idx: number) => (
+                      <div key={idx} className="flex gap-2 items-end">
+                        <input 
+                          value={badge.label}
+                          onChange={(e) => {
+                            const newBadges = [...(form.config?.badges || [])];
+                            newBadges[idx].label = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), badges: newBadges } });
+                          }}
+                          className="admin-input py-1 text-xs flex-1" 
+                          placeholder="Badge Label"
+                        />
+                        <div className="flex gap-1">
+                          <input 
+                            type="color"
+                            value={badge.backgroundColor}
+                            onChange={(e) => {
+                              const newBadges = [...(form.config?.badges || [])];
+                              newBadges[idx].backgroundColor = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), badges: newBadges } });
+                            }}
+                            className="h-8 w-8 rounded border p-0.5"
+                          />
+                          <input 
+                            type="color"
+                            value={badge.color}
+                            onChange={(e) => {
+                              const newBadges = [...(form.config?.badges || [])];
+                              newBadges[idx].color = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), badges: newBadges } });
+                            }}
+                            className="h-8 w-8 rounded border p-0.5"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            const newBadges = (form.config?.badges || []).filter((_: any, i: number) => i !== idx);
+                            setForm({ ...form, config: { ...(form.config || {}), badges: newBadges } });
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newBadges = [...(form.config?.badges || []), { label: 'New Badge', backgroundColor: '#FEE2E2', color: '#991B1B' }];
+                        setForm({ ...form, config: { ...(form.config || {}), badges: newBadges } });
+                      }}
+                      className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Badge
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-[10px] font-bold uppercase text-slate-400">Featured Products</h4>
+                    {(form.config?.featuredProducts || []).map((product: string, idx: number) => (
+                      <div key={idx} className="flex gap-2 items-end">
+                        <input 
+                          value={product}
+                          onChange={(e) => {
+                            const newProducts = [...(form.config?.featuredProducts || [])];
+                            newProducts[idx] = e.target.value;
+                            setForm({ ...form, config: { ...(form.config || {}), featuredProducts: newProducts } });
+                          }}
+                          className="admin-input py-1 text-xs flex-1" 
+                          placeholder="Product Name"
+                        />
+                        <button 
+                          onClick={() => {
+                            const newProducts = (form.config?.featuredProducts || []).filter((_: any, i: number) => i !== idx);
+                            setForm({ ...form, config: { ...(form.config || {}), featuredProducts: newProducts } });
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newProducts = [...(form.config?.featuredProducts || []), 'Product Name'];
+                        setForm({ ...form, config: { ...(form.config || {}), featuredProducts: newProducts } });
+                      }}
+                      className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Product
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'CreditSection' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Credit Section Config</h3>
+                  <div className="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400">Benefits</span>
+                    {(form.config?.benefits || []).map((benefit: any, idx: number) => (
+                      <div key={idx} className="flex gap-2 items-end">
+                        <div className="flex-1 space-y-2">
+                          <input 
+                            value={benefit.title}
+                            onChange={(e) => {
+                              const newBenefits = [...(form.config?.benefits || [])];
+                              newBenefits[idx].title = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), benefits: newBenefits } });
+                            }}
+                            className="admin-input py-1 text-xs" 
+                            placeholder="Benefit Title"
+                          />
+                          <input 
+                            value={benefit.desc}
+                            onChange={(e) => {
+                              const newBenefits = [...(form.config?.benefits || [])];
+                              newBenefits[idx].desc = e.target.value;
+                              setForm({ ...form, config: { ...(form.config || {}), benefits: newBenefits } });
+                            }}
+                            className="admin-input py-1 text-xs" 
+                            placeholder="Description"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            const newBenefits = (form.config?.benefits || []).filter((_: any, i: number) => i !== idx);
+                            setForm({ ...form, config: { ...(form.config || {}), benefits: newBenefits } });
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newBenefits = [...(form.config?.benefits || []), { title: 'New Benefit', desc: 'Description', icon: 'Clock' }];
+                        setForm({ ...form, config: { ...(form.config || {}), benefits: newBenefits } });
+                      }}
+                      className="text-[10px] font-black uppercase text-primary flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Benefit
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {form.type === 'TextBlock' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Text Block Config</h3>
+                  <p className="text-xs text-slate-500">Text Block uses the main Title, Subtitle, and Description fields above. No additional configuration needed.</p>
+                </div>
+              )}
+
+              {form.type === 'PromoBanner' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Promo Banner Config</h3>
+                  <p className="text-xs text-slate-500">Promo Banner uses the main Image and Button Link fields above. No additional configuration needed.</p>
+                </div>
+              )}
+
+              {form.type === 'DiscountBanner' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Discount Banner Config</h3>
+                  <p className="text-xs text-slate-500">Discount Banner uses the main Image and Button Link fields above. No additional configuration needed.</p>
+                </div>
+              )}
+
+              {form.type === 'HeroSlider' && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Hero Slider Config</h3>
+                  <p className="text-xs text-slate-500">Hero Slider uses the Banners module. No additional configuration needed here.</p>
+                </div>
+              )}
+
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Live Preview Hint</h3>
                 <div 
