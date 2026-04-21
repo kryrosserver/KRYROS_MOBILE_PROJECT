@@ -71,8 +71,8 @@ export function Header() {
       if (res.data) {
         if (Array.isArray(res.data)) {
           categoriesData = res.data;
-        } else if (res.data.data && Array.isArray(res.data.data)) {
-          categoriesData = res.data.data;
+        } else if ((res.data as any).data && Array.isArray((res.data as any).data)) {
+          categoriesData = (res.data as any).data;
         }
       }
       // If we have categories, set them, otherwise leave empty
