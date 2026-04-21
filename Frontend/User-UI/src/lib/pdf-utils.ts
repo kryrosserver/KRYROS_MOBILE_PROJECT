@@ -37,9 +37,7 @@ export const generateOrderPDF = (order: any) => {
   // Divider line
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
-  doc.setLineDash([3, 3], 0);
   doc.line(20, 148, pageWidth - 20, 148);
-  doc.setLineDash([], 0);
 
   // Customer Info
   doc.setTextColor(0, 0, 0);
@@ -82,9 +80,7 @@ export const generateOrderPDF = (order: any) => {
   }
 
   // Divider line
-  doc.setLineDash([3, 3], 0);
   doc.line(20, yPosition + 5, pageWidth - 20, yPosition + 5);
-  doc.setLineDash([], 0);
   yPosition += 20;
 
   // Price Details
@@ -102,9 +98,7 @@ export const generateOrderPDF = (order: any) => {
 
   yPosition += 20;
   // Final Divider
-  doc.setLineDash([3, 3], 0);
   doc.line(pageWidth - 100, yPosition, pageWidth - 20, yPosition);
-  doc.setLineDash([], 0);
   yPosition += 15;
 
   // Total
