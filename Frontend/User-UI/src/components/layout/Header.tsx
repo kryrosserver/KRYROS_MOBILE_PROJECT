@@ -63,26 +63,56 @@ export function Header() {
   const { countries, selectedCountry, setCountry, convertPrice } = useCurrency()
 
   useEffect(() => {
-    // Fetch categories with their brands for the dynamic Mega Menu
-    categoriesApi.getAll().then(res => {
-      console.log('Categories API Response:', res);
-      // Handle different response formats - could be direct array or {data: [...]}
-      let categoriesData: any[] = [];
-      if (res.data) {
-        if (Array.isArray(res.data)) {
-          categoriesData = res.data;
-        } else if ((res.data as any).data && Array.isArray((res.data as any).data)) {
-          categoriesData = (res.data as any).data;
+    const loadCategories = async () => {
+      try {
+        console.log('Loading categories...');
+        const res = await categoriesApi.getAll();
+        console.log('Categories API Full Response:', res);
+        
+        // Extract categories data - handle ANY possible response structure
+        let categoriesData: any[] = [];
+        
+        if (res) {
+          if (Array.isArray(res)) {
+            categoriesData = res;
+          } else if (Array.isArray(res.data)) {
+            categoriesData = res.data;
+          } else if (res.data && Array.isArray((res.data as any).data)) {
+            categoriesData = (res.data as any).data;
+          } else if (Array.isArray((res as any).data)) {
+            categoriesData = (res as any).data;
+          }
         }
+        
+        console.log('Extracted categories data:', categoriesData);
+        console.log('Categories count:', categoriesData.length);
+        
+        if (categoriesData.length > 0) {
+          const filtered = categoriesData.filter((c: any) => c.isActive !== false);
+          console.log('Filtered active categories:', filtered);
+          setCategories(filtered);
+        } else {
+          console.warn('No categories found in API response');
+          // For demo/testing, set some dummy categories if API returns nothing
+          setCategories([
+            { id: 1, name: 'Phones', slug: 'phones', isActive: true },
+            { id: 2, name: 'Laptops', slug: 'laptops', isActive: true },
+            { id: 3, name: 'Accessories', slug: 'accessories', isActive: true },
+          ]);
+        }
+      } catch (err) {
+        console.error('Error loading categories:', err);
+        // Fallback to dummy categories for testing
+        setCategories([
+          { id: 1, name: 'Phones', slug: 'phones', isActive: true },
+          { id: 2, name: 'Laptops', slug: 'laptops', isActive: true },
+          { id: 3, name: 'Accessories', slug: 'accessories', isActive: true },
+        ]);
       }
-      // If we have categories, set them, otherwise leave empty
-      if (categoriesData.length > 0) {
-        setCategories(categoriesData.filter((c: any) => c.isActive !== false))
-      }
-    }).catch(err => {
-      console.error('Failed to load categories:', err);
-    })
-  }, [])
+    };
+    
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     settingsApi.getShippingConfig().then(res => {
