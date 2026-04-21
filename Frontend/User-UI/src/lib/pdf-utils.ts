@@ -66,15 +66,10 @@ export const generateOrderPDF = (order: any) => {
   doc.text('Shipping:', totalX - 40, finalY + 6);
   doc.text(`${order.currency?.symbol || ''}${order.shipping?.toLocaleString()}`, totalX, finalY + 6, { align: 'right' });
 
-  if (order.tax) {
-    doc.text('Tax:', totalX - 40, finalY + 12);
-    doc.text(`${order.currency?.symbol || ''}${order.tax?.toLocaleString()}`, totalX, finalY + 12, { align: 'right' });
-  }
-
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('Total:', totalX - 40, finalY + 20);
-  doc.text(`${order.currency?.symbol || ''}${order.total?.toLocaleString()}`, totalX, finalY + 20, { align: 'right' });
+  doc.text('Total:', totalX - 40, finalY + 14);
+  doc.text(`${order.currency?.symbol || ''}${order.total?.toLocaleString()}`, totalX, finalY + 14, { align: 'right' });
 
   // Footer
   doc.setFontSize(8);

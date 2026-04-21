@@ -271,19 +271,9 @@ function TrackOrderContent() {
                         <span>Subtotal</span>
                         <span className="text-white">{displayPrice(order.subtotal)}</span>
                       </div>
-                      {order.discount > 0 && (
-                        <div className="flex justify-between text-[10px] font-black text-green-400 uppercase tracking-widest">
-                          <span>Discount</span>
-                          <span>-{displayPrice(order.discount)}</span>
-                        </div>
-                      )}
                       <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         <span>Shipping</span>
                         <span className="text-white">{displayPrice(order.shipping)}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <span>Tax (VAT)</span>
-                        <span className="text-white">{displayPrice(order.tax)}</span>
                       </div>
                       <div className="h-px bg-slate-700 my-2" />
                       <div className="flex justify-between text-xl font-black text-white">

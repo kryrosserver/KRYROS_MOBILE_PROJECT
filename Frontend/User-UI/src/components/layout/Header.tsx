@@ -65,10 +65,22 @@ export function Header() {
   useEffect(() => {
     // Fetch categories with their brands for the dynamic Mega Menu
     categoriesApi.getAll().then(res => {
+      console.log('Categories API Response:', res);
+      // Handle different response formats - could be direct array or {data: [...]}
+      let categoriesData: any[] = [];
       if (res.data) {
-        // We need to ensure the backend returns brands linked to categories
-        setCategories(res.data.filter((c: any) => c.isActive !== false))
+        if (Array.isArray(res.data)) {
+          categoriesData = res.data;
+        } else if (res.data.data && Array.isArray(res.data.data)) {
+          categoriesData = res.data.data;
+        }
       }
+      // If we have categories, set them, otherwise leave empty
+      if (categoriesData.length > 0) {
+        setCategories(categoriesData.filter((c: any) => c.isActive !== false))
+      }
+    }).catch(err => {
+      console.error('Failed to load categories:', err);
     })
   }, [])
 
