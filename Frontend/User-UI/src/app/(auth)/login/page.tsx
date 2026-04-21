@@ -35,8 +35,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container-custom py-20 flex justify-center" style={{ backgroundColor: '#2A3A4A' }}>
-      <div className="w-full max-w-md bg-[#2A3A4A] p-8 rounded-2xl shadow-sm border border-slate-600">
+    <div className="container-custom py-20 flex justify-center" style={{ backgroundColor: '#0A1121' }}>
+      <div className="w-full max-w-md bg-[#0A1121] p-8 rounded-2xl shadow-sm border border-slate-600">
         <h1 className="text-2xl font-black uppercase tracking-tight mb-6 text-white">Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -82,7 +82,7 @@ function TrackOrderContent() {
   }
 
   return (
-    <main className="min-h-screen py-12 md:py-24" style={{ backgroundColor: '#2A3A4A' }}>
+    <main className="min-h-screen py-12 md:py-24" style={{ backgroundColor: '#0A1121' }}>
       <div className="container-custom">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
@@ -91,7 +91,7 @@ function TrackOrderContent() {
           </div>
 
           {/* Tracking Form */}
-          <div className="bg-[#2A3A4A] p-8 md:p-12 rounded-[2.5rem] border border-slate-600 shadow-sm">
+          <div className="bg-[#0A1121] p-8 md:p-12 rounded-[2.5rem] border border-slate-600 shadow-sm">
             <form onSubmit={handleTrack} className="grid md:grid-cols-3 gap-6 items-end">
               <div className="space-y-2 md:col-span-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 ml-1">Order Number</label>
@@ -130,7 +130,7 @@ function TrackOrderContent() {
           {/* Tracking Results */}
           {order && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-[#2A3A4A] p-8 md:p-12 rounded-[2.5rem] border border-slate-600 shadow-sm space-y-12">
+              <div className="bg-[#0A1121] p-8 md:p-12 rounded-[2.5rem] border border-slate-600 shadow-sm space-y-12">
                 <div className="flex flex-col md:flex-row justify-between gap-6 border-b border-slate-700 pb-8">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</p>
