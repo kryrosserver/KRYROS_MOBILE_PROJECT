@@ -4,78 +4,166 @@ import 'jspdf-autotable';
 export const generateOrderPDF = (order: any) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const centerX = pageWidth / 2;
 
-  // Header
-  doc.setFillColor(31, 168, 154); // Primary color #1FA89A
-  doc.rect(0, 0, pageWidth, 40, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
+  // Company Header (Simple & Clean)
+  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(30);
   doc.setFont('helvetica', 'bold');
-  doc.text('KRYROS GLOBAL TECH', 15, 25);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('ORDER SUMMARY', pageWidth - 15, 25, { align: 'right' });
+  doc.text('KRYROS', centerX, 40, { align: 'center' });
 
-  // Order Info
-  doc.setTextColor(51, 65, 85); // Slate 700
-  doc.setFontSize(10);
-  doc.text(`Order Number: #${order.orderNumber}`, 15, 50);
-  doc.text(`Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString()}`, 15, 56);
-  doc.text(`Status: ${order.status || 'Pending'}`, 15, 62);
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(20);
+  doc.text('KRYROS MOBILE TECH LIMITED', centerX, 60, { align: 'center' });
+
+  // Add Company Info
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('TPIN: 2003951496', centerX, 75, { align: 'center' });
+
+  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'normal');
+  doc.text('PLOT NO. 139 ROYAL', centerX, 92, { align: 'center' });
+  doc.text('ZAMBIA', centerX, 108, { align: 'center' });
+
+  doc.setFontSize(14);
+  doc.text('+260966423719 | +260966629719', centerX, 123, { align: 'center' });
+
+  doc.setTextColor(31, 168, 154);
+  doc.text('info@kryros.com', centerX, 138, { align: 'center' });
+
+  // Divider line
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.setLineDash([3, 3], 0);
+  doc.line(20, 148, pageWidth - 20, 148);
+  doc.setLineDash([], 0);
 
   // Customer Info
-  doc.setFont('helvetica', 'bold');
-  doc.text('BILLING & SHIPPING', 15, 75);
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'normal');
   const customer = order.customer || {};
-  const address = order.shippingAddress || {};
-  doc.text(`${customer.firstName || ''} ${customer.lastName || ''}`, 15, 81);
-  doc.text(`${address.address || address.street || ''}`, 15, 87);
-  doc.text(`${address.city || ''}, ${address.state || ''}`, 15, 93);
-  doc.text(`${address.country || ''}`, 15, 99);
-  doc.text(`${address.phone || customer.phone || ''}`, 15, 105);
-
-  // Table
-  const tableData = order.items.map((item: any) => [
-    item.name,
-    item.variant || 'Standard',
-    item.quantity.toString(),
-    `${order.currency?.symbol || ''}${item.price.toLocaleString()}`,
-    `${order.currency?.symbol || ''}${(item.price * item.quantity).toLocaleString()}`
-  ]);
-
-  (doc as any).autoTable({
-    startY: 115,
-    head: [['Product', 'Variant', 'Qty', 'Price', 'Total']],
-    body: tableData,
-    headStyles: { fillColor: [31, 168, 154], textColor: [255, 255, 255] },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    margin: { left: 15, right: 15 },
-  });
-
-  // Totals
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  const totalX = pageWidth - 15;
-
-  doc.setFont('helvetica', 'normal');
-  doc.text('Subtotal:', totalX - 40, finalY);
-  doc.text(`${order.currency?.symbol || ''}${order.subtotal?.toLocaleString()}`, totalX, finalY, { align: 'right' });
-
-  doc.text('Shipping:', totalX - 40, finalY + 6);
-  doc.text(`${order.currency?.symbol || ''}${order.shipping?.toLocaleString()}`, totalX, finalY + 6, { align: 'right' });
-
+  doc.text(`Customer:`, 20, 165);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('Total:', totalX - 40, finalY + 14);
-  doc.text(`${order.currency?.symbol || ''}${order.total?.toLocaleString()}`, totalX, finalY + 14, { align: 'right' });
+  doc.text(`${customer.firstName || ''} ${customer.lastName || ''}`, pageWidth - 20, 165, { align: 'right' });
+
+  // Description (First product or all items)
+  doc.setFont('helvetica', 'normal');
+  let yPosition = 180;
+  
+  if (order.items && order.items.length > 0) {
+    if (order.items.length === 1) {
+      doc.text(`Description:`, 20, yPosition);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${order.items[0].name}`, pageWidth - 20, yPosition, { align: 'right' });
+      yPosition += 15;
+    } else {
+      // Multiple items - list them
+      doc.text(`Description:`, 20, yPosition);
+      yPosition += 15;
+      
+      order.items.forEach((item: any, index: number) => {
+        if (yPosition > pageHeight - 60) {
+          doc.addPage();
+          yPosition = 30;
+        }
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${item.quantity}x ${item.name}`, 25, yPosition);
+        doc.setFont('helvetica', 'bold');
+        const itemTotal = item.price * item.quantity;
+        doc.text(`${order.currency?.symbol || ''}${itemTotal.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
+        yPosition += 12;
+      });
+    }
+  }
+
+  // Divider line
+  doc.setLineDash([3, 3], 0);
+  doc.line(20, yPosition + 5, pageWidth - 20, yPosition + 5);
+  doc.setLineDash([], 0);
+  yPosition += 20;
+
+  // Price Details
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Price', 20, yPosition);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${order.currency?.symbol || ''}${order.subtotal?.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
+  
+  yPosition += 15;
+  doc.setFont('helvetica', 'normal');
+  doc.text('Shipping', 20, yPosition);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${order.currency?.symbol || ''}${order.shipping?.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
+
+  yPosition += 20;
+  // Final Divider
+  doc.setLineDash([3, 3], 0);
+  doc.line(pageWidth - 100, yPosition, pageWidth - 20, yPosition);
+  doc.setLineDash([], 0);
+  yPosition += 15;
+
+  // Total
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Total:', 20, yPosition);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(24);
+  doc.text(`${order.currency?.symbol || ''}${order.total?.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
+
+  // Receipt Label
+  doc.setFontSize(30);
+  doc.setFont('helvetica', 'bold');
+  doc.text('RECEIPT', centerX, yPosition, { align: 'center' });
+
+  yPosition += 25;
+
+  // Date
+  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`DATE: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, centerX, yPosition, { align: 'center' });
+
+  yPosition += 20;
+
+  // Phone if available
+  const address = order.shippingAddress || {};
+  if (address.phone || customer.phone) {
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(18);
+    doc.text(`${address.phone || customer.phone || ''}`, centerX, yPosition, { align: 'center' });
+    yPosition += 20;
+  }
+
+  // Thank you message
+  doc.setFontSize(16);
+  doc.text('Thank you for choosing us!', centerX, yPosition, { align: 'center' });
+
+  yPosition += 25;
+
+  // Barcode placeholder (simple lines for barcode look)
+  const barcodeX = centerX - 40;
+  const barcodeY = yPosition;
+  const barcodeHeight = 40;
+  
+  doc.setLineWidth(1);
+  doc.setDrawColor(0, 0, 0);
+  
+  // Draw simple barcode pattern
+  for (let i = 0; i < 40; i++) {
+    const lineWidth = i % 3 === 0 ? 2 : (i % 2 === 0 ? 1.5 : 1);
+    doc.setLineWidth(lineWidth);
+    doc.line(barcodeX + i * 2, barcodeY, barcodeX + i * 2, barcodeY + barcodeHeight);
+  }
 
   // Footer
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(148, 163, 184); // Slate 400
-  doc.text('Thank you for shopping with Kryros Global Tech!', pageWidth / 2, pageWidth > 200 ? 285 : 280, { align: 'center' });
+  doc.setTextColor(148, 163, 184); 
+  doc.text(`Order #${order.orderNumber}`, centerX, pageHeight - 20, { align: 'center' });
 
   doc.save(`Kryros-Order-${order.orderNumber}.pdf`);
 };
