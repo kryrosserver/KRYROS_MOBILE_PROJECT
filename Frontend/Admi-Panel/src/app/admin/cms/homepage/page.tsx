@@ -54,6 +54,26 @@ const SECTION_TYPES: SectionType[] = [
   { id: "TextBlock", label: "Text Block", icon: Type, description: "Custom text or HTML content" },
 ];
 
+const SECTION_FIELDS: Record<string, string[]> = {
+  HeroSlider: ['animation'],
+  TrustBadges: ['animation'],
+  CategoriesGrid: ['title', 'subtitle', 'animation'],
+  ProductGrid: ['title', 'subtitle', 'link', 'animation'],
+  FeaturedCategory: ['title', 'subtitle', 'link', 'animation'],
+  FlashSale: ['title', 'subtitle', 'link', 'animation'],
+  BannerGrid: ['title', 'subtitle', 'animation'],
+  CreditSection: ['title', 'subtitle', 'backgroundColor', 'animation'],
+  PromoBanner: ['title', 'imageUrl', 'link', 'animation'],
+  ProductPromoList: ['title', 'animation'],
+  ProductReviews: ['title', 'subtitle', 'animation'],
+  DiscountBanner: ['imageUrl', 'link', 'animation'],
+  DualBannerSection: ['animation'],
+  TrendProductsBanner: ['animation'],
+  PopularTagsProducts: ['title', 'subtitle', 'link', 'animation'],
+  PopularFiltersProducts: ['title', 'subtitle', 'link', 'animation'],
+  TextBlock: ['title', 'subtitle', 'description', 'animation'],
+};
+
 const ANIMATIONS = ["none", "fadeIn", "slideUp", "slideIn", "slideInLeft", "zoomIn", "bounceIn"];
 
 export default function HomePageCMS() {
@@ -327,136 +347,177 @@ export default function HomePageCMS() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Section Title</label>
-                  <input 
-                    value={form.title} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, title: e.target.value})}
-                    className="admin-input" 
-                    placeholder="Main Title"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Subtitle</label>
-                  <input 
-                    value={form.subtitle} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, subtitle: e.target.value})}
-                    className="admin-input" 
-                    placeholder="Small Subtitle"
-                  />
+              {/* Section Hint */}
+              <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+                <div className="flex gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg h-fit">
+                    <Layers className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-blue-900 uppercase tracking-widest mb-1">
+                      {SECTION_TYPES.find(t => t.id === form.type)?.label}
+                    </h4>
+                    <p className="text-xs text-blue-700 font-medium leading-relaxed">
+                      {SECTION_TYPES.find(t => t.id === form.type)?.description}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Description</label>
-                <textarea 
-                  value={form.description} 
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm({...form, description: e.target.value})}
-                  className="admin-input h-24 resize-none" 
-                  placeholder="Detailed description..."
-                />
-              </div>
+              {(SECTION_FIELDS[form.type]?.includes('title') || SECTION_FIELDS[form.type]?.includes('subtitle')) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {SECTION_FIELDS[form.type]?.includes('title') && (
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Section Title</label>
+                      <input 
+                        value={form.title} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, title: e.target.value})}
+                        className="admin-input" 
+                        placeholder="Main Title"
+                      />
+                    </div>
+                  )}
+                  {SECTION_FIELDS[form.type]?.includes('subtitle') && (
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Subtitle</label>
+                      <input 
+                        value={form.subtitle} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, subtitle: e.target.value})}
+                        className="admin-input" 
+                        placeholder="Small Subtitle"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {SECTION_FIELDS[form.type]?.includes('description') && (
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Background Color</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Description</label>
+                  <textarea 
+                    value={form.description} 
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm({...form, description: e.target.value})}
+                    className="admin-input h-24 resize-none" 
+                    placeholder="Detailed description..."
+                  />
+                </div>
+              )}
+
+              {(SECTION_FIELDS[form.type]?.includes('backgroundColor') || SECTION_FIELDS[form.type]?.includes('textColor')) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {SECTION_FIELDS[form.type]?.includes('backgroundColor') && (
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Background Color</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="color"
+                          value={form.backgroundColor} 
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, backgroundColor: e.target.value})}
+                          className="h-10 w-12 rounded border p-1"
+                        />
+                        <input 
+                          value={form.backgroundColor} 
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, backgroundColor: e.target.value})}
+                          className="admin-input flex-1 font-mono uppercase"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {SECTION_FIELDS[form.type]?.includes('textColor') && (
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Text Color</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="color"
+                          value={form.textColor} 
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, textColor: e.target.value})}
+                          className="h-10 w-12 rounded border p-1"
+                        />
+                        <input 
+                          value={form.textColor} 
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, textColor: e.target.value})}
+                          className="admin-input flex-1 font-mono uppercase"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {SECTION_FIELDS[form.type]?.includes('imageUrl') && (
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Image</label>
                   <div className="flex gap-2">
                     <input 
-                      type="color"
-                      value={form.backgroundColor} 
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, backgroundColor: e.target.value})}
-                      className="h-10 w-12 rounded border p-1"
+                      value={form.imageUrl} 
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, imageUrl: e.target.value})}
+                      className="admin-input flex-1" 
+                      placeholder="https://images.unsplash.com/..."
                     />
-                    <input 
-                      value={form.backgroundColor} 
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, backgroundColor: e.target.value})}
-                      className="admin-input flex-1 font-mono uppercase"
+                    <input
+                      type="file"
+                      id="section-image-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
                     />
+                    <label htmlFor="section-image-upload" className="btn-secondary px-4 py-2 cursor-pointer flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" /> Upload
+                    </label>
                   </div>
+                  {form.imageUrl && (
+                    <div className="mt-3">
+                      <img 
+                        src={form.imageUrl} 
+                        alt="Preview" 
+                        className="w-full h-40 object-cover rounded-lg border border-slate-200"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Text Color</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="color"
-                      value={form.textColor} 
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, textColor: e.target.value})}
-                      className="h-10 w-12 rounded border p-1"
-                    />
-                    <input 
-                      value={form.textColor} 
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, textColor: e.target.value})}
-                      className="admin-input flex-1 font-mono uppercase"
-                    />
-                  </div>
-                </div>
-              </div>
+              )}
 
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Image</label>
-                <div className="flex gap-2">
-                  <input 
-                    value={form.imageUrl} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, imageUrl: e.target.value})}
-                    className="admin-input flex-1" 
-                    placeholder="https://images.unsplash.com/..."
-                  />
-                  <input
-                    type="file"
-                    id="section-image-upload"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                  <label htmlFor="section-image-upload" className="btn-secondary px-4 py-2 cursor-pointer flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" /> Upload
-                  </label>
+              {(SECTION_FIELDS[form.type]?.includes('link') || SECTION_FIELDS[form.type]?.includes('linkText')) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {SECTION_FIELDS[form.type]?.includes('link') && (
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Button Link</label>
+                      <input 
+                        value={form.link} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, link: e.target.value})}
+                        className="admin-input" 
+                        placeholder="/shop or https://..."
+                      />
+                    </div>
+                  )}
+                  {SECTION_FIELDS[form.type]?.includes('linkText') && (
+                    <div>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Button Text</label>
+                      <input 
+                        value={form.linkText} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, linkText: e.target.value})}
+                        className="admin-input" 
+                        placeholder="Shop Now"
+                      />
+                    </div>
+                  )}
                 </div>
-                {form.imageUrl && (
-                  <div className="mt-3">
-                    <img 
-                      src={form.imageUrl} 
-                      alt="Preview" 
-                      className="w-full h-40 object-cover rounded-lg border border-slate-200"
-                    />
-                  </div>
-                )}
-              </div>
+              )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {SECTION_FIELDS[form.type]?.includes('animation') && (
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Button Link</label>
-                  <input 
-                    value={form.link} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, link: e.target.value})}
-                    className="admin-input" 
-                    placeholder="/shop or https://..."
-                  />
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Entrance Animation</label>
+                  <select 
+                    value={form.animation}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({...form, animation: e.target.value})}
+                    className="admin-input"
+                  >
+                    {ANIMATIONS.map(anim => (
+                      <option key={anim} value={anim}>{anim}</option>
+                    ))}
+                  </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Button Text</label>
-                  <input 
-                    value={form.linkText} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, linkText: e.target.value})}
-                    className="admin-input" 
-                    placeholder="Shop Now"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Entrance Animation</label>
-                <select 
-                  value={form.animation}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({...form, animation: e.target.value})}
-                  className="admin-input"
-                >
-                  {ANIMATIONS.map(anim => (
-                    <option key={anim} value={anim}>{anim}</option>
-                  ))}
-                </select>
-              </div>
+              )}
 
               {form.type === 'TrustBadges' && (
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">

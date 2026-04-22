@@ -324,7 +324,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
                           width: 120,
                           height: 120,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1FA89A).withOpacity(0.1),
+                            color: const Color(0xFF1FA89A).withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -364,7 +364,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
                               backgroundColor: const Color(0xFF1FA89A),
                               foregroundColor: Colors.white,
                               elevation: 8,
-                              shadowColor: const Color(0xFF1FA89A).withOpacity(0.4),
+                              shadowColor: const Color(0xFF1FA89A).withValues(alpha: 0.4),
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
