@@ -54,6 +54,7 @@ export default function CheckoutPage() {
     manualLocation: false,
     stateName: "",
     cityName: "",
+    notes: "",
     shippingMethodId: "",
     paymentMethod: "WHATSAPP", // Default to WhatsApp
     paymentPhone: "",
@@ -237,7 +238,8 @@ export default function CheckoutPage() {
         paymentMethod: formData.paymentMethod,
         paymentPhone: formData.paymentPhone,
         totalZMW: totalZMW,
-        shippingMethodId: formData.shippingMethodId,
+          notes: formData.notes,
+          shippingMethodId: formData.shippingMethodId,
         subtotal: Number(subtotalUSD),
         shippingFee: shippingFeeUSD,
         total: totalUSD,
@@ -475,6 +477,16 @@ export default function CheckoutPage() {
                         Can't find your location? Enter manually
                       </label>
                     </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Order Notes (Optional)</label>
+                      <textarea 
+                        placeholder="Additional details or instructions for your order..." 
+                        value={formData.notes}
+                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        className="w-full h-24 md:h-32 rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white resize-none"
+                      />
+                    </div>
                   </div>
                   
                   <div className="pt-4">
@@ -707,13 +719,21 @@ export default function CheckoutPage() {
                       className="h-14 px-8 font-black uppercase tracking-widest rounded-2xl border-slate-200 w-full sm:w-auto gap-2"
                       onClick={() => {
                         if (lastCreatedOrder) {
-                          generateOrderPDF({
+                          // Enrich order with current cart item details for the PDF
+                          const enrichedOrder = {
                             ...lastCreatedOrder,
+                            items: items.map(item => ({
+                              name: item.product.name,
+                              variantName: item.variant?.name || 'Standard',
+                              quantity: item.quantity,
+                              price: Number(item.variant?.price || item.product.salePrice || item.product.price),
+                            })),
                             currency: {
-                              code: currencyCountry?.currencyCode || 'USD',
-                              symbol: currencyCountry?.currencySymbol || '$'
+                              code: currencyCountry?.currencyCode || 'ZMW',
+                              symbol: currencyCountry?.currencySymbol || 'ZK'
                             }
-                          });
+                          };
+                          generateOrderPDF(enrichedOrder);
                         }
                       }}
                     >

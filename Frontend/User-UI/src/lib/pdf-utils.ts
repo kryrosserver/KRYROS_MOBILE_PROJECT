@@ -7,157 +7,179 @@ export const generateOrderPDF = (order: any) => {
   const pageHeight = doc.internal.pageSize.getHeight();
   const centerX = pageWidth / 2;
 
-  // Company Header (Simple & Clean)
-  doc.setTextColor(100, 100, 100);
-  doc.setFontSize(30);
+  // --- Header Section ---
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('KRYROS', centerX, 40, { align: 'center' });
+  doc.text('KRYROS', centerX, 30, { align: 'center' });
 
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(20);
-  doc.text('KRYROS MOBILE TECH LIMITED', centerX, 60, { align: 'center' });
-
-  // Add Company Info
   doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('TPIN: 2003951496', centerX, 75, { align: 'center' });
+  doc.text('KRYROS MOBILE TECH LIMITED', centerX, 42, { align: 'center' });
 
-  doc.setTextColor(100, 100, 100);
-  doc.setFontSize(16);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('TPIN: 2003951496', centerX, 50, { align: 'center' });
+
   doc.setFont('helvetica', 'normal');
-  doc.text('PLOT NO. 139 ROYAL', centerX, 92, { align: 'center' });
-  doc.text('ZAMBIA', centerX, 108, { align: 'center' });
-
-  doc.setFontSize(14);
-  doc.text('+260966423719 | +260966629719', centerX, 123, { align: 'center' });
-
+  doc.setTextColor(100, 100, 100);
+  doc.text('PLOT NO. 139 ROYAL, LUSAKA, ZAMBIA', centerX, 58, { align: 'center' });
+  doc.text('+260966423719 | +260966629719', centerX, 64, { align: 'center' });
   doc.setTextColor(31, 168, 154);
-  doc.text('info@kryros.com', centerX, 138, { align: 'center' });
+  doc.text('info@kryros.com', centerX, 70, { align: 'center' });
 
   // Divider line
-  doc.setDrawColor(0, 0, 0);
+  doc.setDrawColor(220, 220, 220);
   doc.setLineWidth(0.5);
-  doc.line(20, 148, pageWidth - 20, 148);
+  doc.line(20, 78, pageWidth - 20, 78);
 
-  // Customer Info
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'normal');
-  const customer = order.customer || {};
-  doc.text(`Customer:`, 20, 165);
+  // --- Order Info Section ---
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(`${customer.firstName || ''} ${customer.lastName || ''}`, pageWidth - 20, 165, { align: 'right' });
-
-  // Description (First product or all items)
+  doc.text(`Order Number:`, 20, 90);
   doc.setFont('helvetica', 'normal');
-  let yPosition = 180;
+  doc.text(`#${order.orderNumber}`, 55, 90);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Date:`, 20, 98);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${new Date(order.createdAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' })}`, 55, 98);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Status:`, 20, 106);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${(order.status || 'PENDING').toUpperCase()}`, 55, 106);
+
+  // --- Billing & Shipping Section ---
+  doc.setFont('helvetica', 'bold');
+  doc.text('BILLING & SHIPPING', 20, 120);
   
-  if (order.items && order.items.length > 0) {
-    if (order.items.length === 1) {
-      doc.text(`Description:`, 20, yPosition);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${order.items[0].name}`, pageWidth - 20, yPosition, { align: 'right' });
-      yPosition += 15;
-    } else {
-      // Multiple items - list them
-      doc.text(`Description:`, 20, yPosition);
-      yPosition += 15;
-      
-      order.items.forEach((item: any, index: number) => {
-        if (yPosition > pageHeight - 60) {
-          doc.addPage();
-          yPosition = 30;
-        }
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${item.quantity}x ${item.name}`, 25, yPosition);
-        doc.setFont('helvetica', 'bold');
-        const itemTotal = item.price * item.quantity;
-        doc.text(`${order.currency?.symbol || ''}${itemTotal.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
-        yPosition += 12;
-      });
+  doc.setFont('helvetica', 'normal');
+  const customer = order.addressDetails || order.customer || {};
+  const firstName = customer.firstName || '';
+  const lastName = customer.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Valued Customer';
+  
+  let addressY = 128;
+  doc.text(fullName, 20, addressY);
+  addressY += 6;
+  
+  if (customer.address) {
+    doc.text(customer.address, 20, addressY);
+    addressY += 6;
+  }
+  
+  const locationParts = [];
+  if (customer.cityName || customer.city) locationParts.push(customer.cityName || customer.city);
+  if (customer.stateName || customer.state) locationParts.push(customer.stateName || customer.state);
+  if (locationParts.length > 0) {
+    doc.text(locationParts.join(', '), 20, addressY);
+    addressY += 6;
+  }
+  
+  if (customer.countryName || customer.country) {
+    doc.text(customer.countryName || customer.country, 20, addressY);
+    addressY += 6;
+  }
+  
+  if (customer.phone) {
+    doc.text(customer.phone, 20, addressY);
+    addressY += 6;
+  }
+
+  // --- Order Notes Section ---
+  if (order.notes) {
+    addressY += 4;
+    doc.setFont('helvetica', 'bold');
+    doc.text('ORDER NOTES:', 20, addressY);
+    addressY += 6;
+    doc.setFont('helvetica', 'normal');
+    const splitNotes = doc.splitTextToSize(order.notes, pageWidth - 40);
+    doc.text(splitNotes, 20, addressY);
+    addressY += (splitNotes.length * 6) + 4;
+  }
+
+  // --- Items Table Section ---
+  const currencySymbol = order.currency?.symbol || 'ZMW';
+  
+  const tableRows = (order.items || []).map((item: any) => [
+    item.name || item.product?.name || 'Product',
+    item.variantName || item.variant?.name || 'Standard',
+    item.quantity.toString(),
+    `${currencySymbol}${Number(item.price).toLocaleString()}`,
+    `${currencySymbol}${(Number(item.price) * item.quantity).toLocaleString()}`
+  ]);
+
+  (doc as any).autoTable({
+    startY: addressY > 150 ? addressY : 150,
+    head: [['Product', 'Variant', 'Qty', 'Price', 'Total']],
+    body: tableRows,
+    theme: 'grid',
+    headStyles: { fillColor: [31, 168, 154], textColor: 255, fontStyle: 'bold' },
+    styles: { fontSize: 9, cellPadding: 3 },
+    columnStyles: {
+      0: { cellWidth: 'auto' },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 15, halign: 'center' },
+      3: { cellWidth: 30, halign: 'right' },
+      4: { cellWidth: 30, halign: 'right' }
     }
+  });
+
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+
+  // --- Summary Section ---
+  const summaryX = pageWidth - 60;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  
+  doc.text('Subtotal:', summaryX, finalY);
+  doc.text(`${currencySymbol}${Number(order.subtotal || 0).toLocaleString()}`, pageWidth - 20, finalY, { align: 'right' });
+
+  doc.text('Shipping:', summaryX, finalY + 8);
+  doc.text(`${currencySymbol}${Number(order.shippingFee || order.shipping || 0).toLocaleString()}`, pageWidth - 20, finalY + 8, { align: 'right' });
+
+  // Calculate Tax (Zambia VAT is usually 16%)
+  const tax = order.tax || (Number(order.subtotal || 0) * 0.16);
+  doc.text('Tax (16%):', summaryX, finalY + 16);
+  doc.text(`${currencySymbol}${Number(tax).toLocaleString()}`, pageWidth - 20, finalY + 16, { align: 'right' });
+
+  doc.setLineWidth(0.5);
+  doc.line(summaryX, finalY + 20, pageWidth - 20, finalY + 20);
+
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Total:', summaryX, finalY + 30);
+  doc.text(`${currencySymbol}${Number(order.total || 0).toLocaleString()}`, pageWidth - 20, finalY + 30, { align: 'right' });
+
+  // --- Payment Method Info ---
+  let paymentY = finalY + 45;
+  if (order.paymentMethod === 'BANK_TRANSFER') {
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BANK TRANSFER DETAILS:', 20, paymentY);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Bank: KRYROS BANK', 20, paymentY + 6);
+    doc.text('Acc Name: KRYROS MOBILE TECH LTD', 20, paymentY + 12);
+    doc.text('Acc No: 1234567890123', 20, paymentY + 18);
+    paymentY += 25;
   }
 
-  // Divider line
-  doc.line(20, yPosition + 5, pageWidth - 20, yPosition + 5);
-  yPosition += 20;
-
-  // Price Details
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Price', 20, yPosition);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`${order.currency?.symbol || ''}${order.subtotal?.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
-  
-  yPosition += 15;
-  doc.setFont('helvetica', 'normal');
-  doc.text('Shipping', 20, yPosition);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`${order.currency?.symbol || ''}${order.shipping?.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
-
-  yPosition += 20;
-  // Final Divider
-  doc.line(pageWidth - 100, yPosition, pageWidth - 20, yPosition);
-  yPosition += 15;
-
-  // Total
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Total:', 20, yPosition);
-  doc.setFont('helvetica', 'bold');
+  // --- Receipt Title (Centered) ---
   doc.setFontSize(24);
-  doc.text(`${order.currency?.symbol || ''}${order.total?.toLocaleString()}`, pageWidth - 20, yPosition, { align: 'right' });
-
-  // Receipt Label
-  doc.setFontSize(30);
   doc.setFont('helvetica', 'bold');
-  doc.text('RECEIPT', centerX, yPosition, { align: 'center' });
+  doc.text('RECEIPT', centerX, paymentY + 15, { align: 'center' });
 
-  yPosition += 25;
-
-  // Date
-  doc.setTextColor(100, 100, 100);
-  doc.setFontSize(20);
+  // --- Footer Section ---
+  const footerY = pageHeight - 30;
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`DATE: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, centerX, yPosition, { align: 'center' });
-
-  yPosition += 20;
-
-  // Phone if available
-  const address = order.shippingAddress || {};
-  if (address.phone || customer.phone) {
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(18);
-    doc.text(`${address.phone || customer.phone || ''}`, centerX, yPosition, { align: 'center' });
-    yPosition += 20;
-  }
-
-  // Thank you message
-  doc.setFontSize(16);
-  doc.text('Thank you for choosing us!', centerX, yPosition, { align: 'center' });
-
-  yPosition += 25;
-
-  // Barcode placeholder (simple lines for barcode look)
-  const barcodeX = centerX - 40;
-  const barcodeY = yPosition;
-  const barcodeHeight = 40;
+  doc.setTextColor(100, 100, 100);
+  doc.text('Thank you for choosing Kryros!', centerX, footerY, { align: 'center' });
   
-  doc.setLineWidth(1);
-  doc.setDrawColor(0, 0, 0);
-  
-  // Draw simple barcode pattern
-  for (let i = 0; i < 40; i++) {
-    const lineWidth = i % 3 === 0 ? 2 : (i % 2 === 0 ? 1.5 : 1);
-    doc.setLineWidth(lineWidth);
-    doc.line(barcodeX + i * 2, barcodeY, barcodeX + i * 2, barcodeY + barcodeHeight);
-  }
-
-  // Footer
   doc.setFontSize(8);
-  doc.setTextColor(148, 163, 184); 
-  doc.text(`Order #${order.orderNumber}`, centerX, pageHeight - 20, { align: 'center' });
+  doc.text(`Generated on ${new Date().toLocaleString()}`, centerX, footerY + 8, { align: 'center' });
+  doc.text(`Order Reference: #${order.orderNumber}`, centerX, footerY + 14, { align: 'center' });
 
   doc.save(`Kryros-Order-${order.orderNumber}.pdf`);
 };

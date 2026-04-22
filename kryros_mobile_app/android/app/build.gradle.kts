@@ -12,7 +12,7 @@ plugins {
 
 android {
     namespace = "com.kryros.kryros_mobile"
-    compileSdk = 36 // Updated to 36 to fix url_launcher_android warning
+    compileSdk = 35 // Lowered from 36 to 35 for better stability
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -53,7 +53,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion // Set minSdk to 21 for desugaring
-        targetSdk = 36 // Fallback value updated to 36
+        targetSdk = 35 // Lowered from 36 to 35 for better stability
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         
