@@ -53,26 +53,25 @@ export class PaymentsService {
 
     this.logger.log(`Formatted Phone: ${formattedPhone}`);
 
-    // Ensure amount is formatted as decimal string (e.g., 40.00)
-    const formattedAmount = Number(amountZMW).toFixed(2);
+    // Ensure amount is formatted as a clean string (No decimals for round numbers, but support decimals if they exist)
+    const formattedAmount = Number(amountZMW).toString();
 
-    const soapRequest = `
-      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com">
-         <soapenv:Header/>
-         <soapenv:Body>
-            <kon:processTransaction>
-               <transactionRequest>
-                  <username>${username}</username>
-                  <password>${password}</password>
-                  <msisdn>${formattedPhone}</msisdn>
-                  <amount>${formattedAmount}</amount>
-                  <transactionId>${transactionId}</transactionId>
-                  <action>MOBILE_MONEY_PUSH</action>
-               </transactionRequest>
-            </kon:processTransaction>
-         </soapenv:Body>
-      </soapenv:Envelope>
-    `;
+    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <kon:processTransaction>
+         <transactionRequest>
+            <username>${username}</username>
+            <password>${password}</password>
+            <msisdn>${formattedPhone}</msisdn>
+            <amount>${formattedAmount}</amount>
+            <transactionId>${transactionId}</transactionId>
+            <action>MOBILE_MONEY_PUSH</action>
+         </transactionRequest>
+      </kon:processTransaction>
+   </soapenv:Body>
+</soapenv:Envelope>`;
 
     this.logger.log('SOAP Request being sent:');
     this.logger.log(soapRequest);
@@ -83,7 +82,7 @@ export class PaymentsService {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
           'Content-Type': 'text/xml;charset=UTF-8',
-          'SOAPAction': 'processTransaction',
+          'SOAPAction': '""',
           'Accept': 'text/xml',
         },
         timeout: 60000, // Increased to 60 seconds
@@ -204,7 +203,7 @@ export class PaymentsService {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
           'Content-Type': 'text/xml;charset=UTF-8',
-          'SOAPAction': 'queryTransaction',
+          'SOAPAction': '""',
           'Accept': 'text/xml',
         },
       });
