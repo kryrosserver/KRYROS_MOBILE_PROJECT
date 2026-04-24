@@ -184,20 +184,19 @@ export class PaymentsService {
     const username = this.configService.get('CGRATE_USERNAME');
     const password = this.configService.get('CGRATE_PASSWORD');
 
-    const soapRequest = `
-      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com">
-         <soapenv:Header/>
-         <soapenv:Body>
-            <kon:queryTransaction>
-               <queryRequest>
-                  <username>${username}</username>
-                  <password>${password}</password>
-                  <transactionId>${order.paymentReference}</transactionId>
-               </queryRequest>
-            </kon:queryTransaction>
-         </soapenv:Body>
-      </soapenv:Envelope>
-    `;
+    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <kon:queryTransaction>
+         <transactionRequest>
+            <username>${username}</username>
+            <password>${password}</password>
+            <transactionId>${transactionId}</transactionId>
+         </transactionRequest>
+      </kon:queryTransaction>
+   </soapenv:Body>
+</soapenv:Envelope>`;
 
     try {
       const response = await axios.post(this.apiUrl, soapRequest, {
