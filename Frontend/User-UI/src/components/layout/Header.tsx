@@ -494,6 +494,14 @@ export function Header() {
                 Shop
               </Link>
               <Link
+                href="/pay"
+                prefetch={true}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-black text-primary transition-colors hover:bg-primary/10 uppercase tracking-widest"
+              >
+                <CreditCard className="h-4 w-4" />
+                Pay
+              </Link>
+              <Link
                 href="/credit"
                 prefetch={true}
                 className="rounded-md px-3 py-2 text-sm font-medium text-kryros-green transition-colors hover:bg-kryros-green/10"

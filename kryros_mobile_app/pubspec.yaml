@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # WebView for loading your website
-  webview_flutter: ^4.10.0
+  webview_flutter: ^4.11.0
   
   # For SVG support
   flutter_svg: ^2.0.10+1
@@ -45,9 +45,9 @@ dependencies:
   url_launcher: ^6.3.1
 
   # Firebase for Push Notifications
-  firebase_core: ^3.1.1
-  firebase_messaging: ^15.0.3
-  flutter_local_notifications: ^17.2.2
+  firebase_core: ^3.10.1
+  firebase_messaging: ^15.2.0
+  flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
   flutter_test:

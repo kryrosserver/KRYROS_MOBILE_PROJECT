@@ -35,6 +35,7 @@ const menuItems = [
   { icon: LayoutGrid, label: "Categories", href: "/admin/categories" },
   { icon: Tag, label: "Brands", href: "/admin/brands" },
   { icon: Package, label: "Products", href: "/admin/products" },
+  { icon: CreditCard, label: "Payment Links", href: "/admin/payment-links" },
   { icon: Store, label: "Wholesale", href: "/admin/wholesale" },
   { icon: CreditCard, label: "Credit System", href: "/admin/credit" },
   { icon: Wallet, label: "Wallet & Payments", href: "/admin/wallet" },

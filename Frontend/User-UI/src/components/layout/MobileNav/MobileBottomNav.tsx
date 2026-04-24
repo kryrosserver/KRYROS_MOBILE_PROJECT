@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Store, ShoppingBag, User, MapPin } from "lucide-react"
+import { Home, Store, ShoppingBag, User, MapPin, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCart } from "@/providers/CartProvider"
@@ -45,9 +45,9 @@ export default function MobileBottomNav() {
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
     { label: "Shop", icon: Store, href: "/shop" },
+    { label: "Pay", icon: CreditCard, href: "/pay" },
     { label: "Cart", icon: ShoppingBag, href: "/cart", badge: cartCount },
     { label: "Account", icon: User, href: "/dashboard" },
-    { label: "Track", icon: MapPin, href: "/track" },
   ] as const;
 
   return (
