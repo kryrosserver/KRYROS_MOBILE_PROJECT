@@ -308,7 +308,8 @@ export default function HomePageCMS() {
               type: "HeroSlider", title: "", subtitle: "", description: "",
               backgroundColor: "#ffffff", textColor: "#000000", imageUrl: "",
               videoUrl: "", link: "", linkText: "Learn More",
-              order: (sections?.length || 0) + 1, isActive: true, animation: "none", config: {}
+              order: (sections?.length || 0) + 1, isActive: true, animation: "none", 
+              config: {}, items: []
             });
             setShowAdd(true);
           }}
