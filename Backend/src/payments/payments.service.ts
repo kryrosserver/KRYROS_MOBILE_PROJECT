@@ -56,7 +56,7 @@ export class PaymentsService {
     // Ensure amount is formatted as a clean string (No decimals for round numbers, but support decimals if they exist)
     const formattedAmount = Number(amountZMW).toString();
 
-    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header/><soapenv:Body><kon:processTransaction><kon:transactionRequest><kon:username>${username}</kon:username><kon:password>${password}</kon:password><kon:msisdn>${formattedPhone}</kon:msisdn><kon:amount>${formattedAmount}</kon:amount><kon:transactionId>${transactionId}</kon:transactionId><kon:action>MOBILE_MONEY_PUSH</kon:action></kon:transactionRequest></kon:processTransaction></soapenv:Body></soapenv:Envelope>`;
+    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header/><soapenv:Body><kon:processTransaction><transactionRequest><username>${username}</username><password>${password}</password><msisdn>${formattedPhone}</msisdn><amount>${formattedAmount}</amount><transactionId>${transactionId}</transactionId><action>MOBILE_MONEY_PUSH</action></transactionRequest></kon:processTransaction></soapenv:Body></soapenv:Envelope>`;
 
     this.logger.log('SOAP Request being sent:');
     this.logger.log(soapRequest);
@@ -169,7 +169,7 @@ export class PaymentsService {
     const username = this.configService.get('CGRATE_USERNAME');
     const password = this.configService.get('CGRATE_PASSWORD');
 
-    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header/><soapenv:Body><kon:queryTransaction><kon:transactionRequest><kon:username>${username}</kon:username><kon:password>${password}</kon:password><kon:transactionId>${order.paymentReference}</kon:transactionId></kon:transactionRequest></kon:queryTransaction></soapenv:Body></soapenv:Envelope>`;
+    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header/><soapenv:Body><kon:queryTransaction><transactionRequest><username>${username}</username><password>${password}</password><transactionId>${order.paymentReference}</transactionId></transactionRequest></kon:queryTransaction></soapenv:Body></soapenv:Envelope>`;
 
     try {
       const response = await axios.post(this.apiUrl, soapRequest, {
