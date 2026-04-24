@@ -63,7 +63,7 @@ const SECTION_FIELDS: Record<string, string[]> = {
   FlashSale: ['title', 'subtitle', 'link', 'animation'],
   BannerGrid: ['title', 'subtitle', 'animation'],
   CreditSection: ['title', 'subtitle', 'backgroundColor', 'animation'],
-  PromoBanner: ['title', 'imageUrl', 'link', 'animation'],
+  PromoBanner: ['title', 'imageUrl', 'link', 'animation', 'items'],
   ProductPromoList: ['title', 'animation'],
   ProductReviews: ['title', 'subtitle', 'animation'],
   DiscountBanner: ['imageUrl', 'link', 'animation'],
@@ -98,7 +98,8 @@ export default function HomePageCMS() {
     order: 0,
     isActive: true,
     animation: "none",
-    config: {} as any
+    config: {} as any,
+    items: [] as any[]
   });
 
   async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
@@ -198,6 +199,10 @@ export default function HomePageCMS() {
         : "/internal/admin/cms/homepage-sections";
       
       const config = { ...form.config };
+      
+      if (form.items && form.items.length > 0) {
+        config.items = form.items;
+      }
       
       if (form.imageUrl) {
         config.backgroundImageUrl = form.imageUrl;
@@ -516,6 +521,132 @@ export default function HomePageCMS() {
                       <option key={anim} value={anim}>{anim}</option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {/* Removed redundant items section */}
+                    <button 
+                      onClick={() => setForm({
+                        ...form, 
+                        items: [...(form.items || []), { imageUrl: "", link: "", title: "", linkText: "Shop Now" }]
+                      })}
+                      className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Item
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {(form.items || []).map((item, idx) => (
+                      <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 relative group/item">
+                        <button 
+                          onClick={() => {
+                            const newItems = [...form.items];
+                            newItems.splice(idx, 1);
+                            setForm({ ...form, items: newItems });
+                          }}
+                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity shadow-lg"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Image URL</label>
+                            <div className="flex gap-2">
+                              <input 
+                                value={item.imageUrl}
+                                onChange={(e) => {
+                                  const newItems = [...form.items];
+                                  newItems[idx].imageUrl = e.target.value;
+                                  setForm({ ...form, items: newItems });
+                                }}
+                                className="admin-input text-xs"
+                                placeholder="https://..."
+                              />
+                              <input
+                                type="file"
+                                id={`item-upload-${idx}`}
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const formData = new FormData();
+                                  formData.append("file", file);
+                                  const res = await fetch("/api/upload", { method: "POST", body: formData });
+                                  if (res.ok) {
+                                    const data = await res.json();
+                                    const newItems = [...form.items];
+                                    newItems[idx].imageUrl = data.url;
+                                    setForm({ ...form, items: newItems });
+                                  }
+                                }}
+                              />
+                              <label htmlFor={`item-upload-${idx}`} className="p-2 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                                <ImageIcon className="h-4 w-4 text-slate-400" />
+                              </label>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Title Overlay</label>
+                            <input 
+                              value={item.title}
+                              onChange={(e) => {
+                                const newItems = [...form.items];
+                                newItems[idx].title = e.target.value;
+                                setForm({ ...form, items: newItems });
+                              }}
+                              className="admin-input text-xs"
+                              placeholder="e.g. DISCOUNT UP TO 50%"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Link URL</label>
+                            <input 
+                              value={item.link}
+                              onChange={(e) => {
+                                const newItems = [...form.items];
+                                newItems[idx].link = e.target.value;
+                                setForm({ ...form, items: newItems });
+                              }}
+                              className="admin-input text-xs"
+                              placeholder="/shop or /product/..."
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Button Text</label>
+                            <input 
+                              value={item.linkText}
+                              onChange={(e) => {
+                                const newItems = [...form.items];
+                                newItems[idx].linkText = e.target.value;
+                                setForm({ ...form, items: newItems });
+                              }}
+                              className="admin-input text-xs"
+                              placeholder="Shop Now"
+                            />
+                          </div>
+                        </div>
+                        
+                        {item.imageUrl && (
+                          <div className="mt-3 h-20 w-full rounded-lg overflow-hidden border border-slate-200 bg-white">
+                            <img src={resolveImageUrl(item.imageUrl)} className="w-full h-full object-cover" alt="" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {form.items?.length === 0 && (
+                      <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-2xl">
+                        <ImageIcon className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">No slider items added yet</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1538,8 +1669,130 @@ export default function HomePageCMS() {
 
               {form.type === 'PromoBanner' && (
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Promo Banner Config</h3>
-                  <p className="text-xs text-slate-500">Promo Banner uses the main Image and Button Link fields above. No additional configuration needed.</p>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Promo Banner Config (Multiple Images)</h3>
+                    <button 
+                      onClick={() => setForm({
+                        ...form, 
+                        items: [...(form.items || []), { imageUrl: "", link: "", title: "", linkText: "Shop Now" }]
+                      })}
+                      className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Slide
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {(form.items || []).map((item, idx) => (
+                      <div key={idx} className="p-4 bg-white rounded-xl border border-slate-200 relative group/item">
+                        <button 
+                          onClick={() => {
+                            const newItems = [...form.items];
+                            newItems.splice(idx, 1);
+                            setForm({ ...form, items: newItems });
+                          }}
+                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity shadow-lg"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Image URL</label>
+                            <div className="flex gap-2">
+                              <input 
+                                value={item.imageUrl}
+                                onChange={(e) => {
+                                  const newItems = [...form.items];
+                                  newItems[idx].imageUrl = e.target.value;
+                                  setForm({ ...form, items: newItems });
+                                }}
+                                className="admin-input text-xs"
+                                placeholder="https://..."
+                              />
+                              <input
+                                type="file"
+                                id={`item-upload-${idx}`}
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const formData = new FormData();
+                                  formData.append("file", file);
+                                  const res = await fetch("/api/upload", { method: "POST", body: formData });
+                                  if (res.ok) {
+                                    const data = await res.json();
+                                    const newItems = [...form.items];
+                                    newItems[idx].imageUrl = data.url;
+                                    setForm({ ...form, items: newItems });
+                                  }
+                                }}
+                              />
+                              <label htmlFor={`item-upload-${idx}`} className="p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white">
+                                <ImageIcon className="h-4 w-4 text-slate-400" />
+                              </label>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Title Overlay</label>
+                            <input 
+                              value={item.title}
+                              onChange={(e) => {
+                                  const newItems = [...form.items];
+                                  newItems[idx].title = e.target.value;
+                                  setForm({ ...form, items: newItems });
+                                }}
+                              className="admin-input text-xs"
+                              placeholder="e.g. DISCOUNT UP TO 50%"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Link URL</label>
+                            <input 
+                              value={item.link}
+                              onChange={(e) => {
+                                  const newItems = [...form.items];
+                                  newItems[idx].link = e.target.value;
+                                  setForm({ ...form, items: newItems });
+                                }}
+                              className="admin-input text-xs"
+                              placeholder="/shop or /product/..."
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Button Text</label>
+                            <input 
+                              value={item.linkText}
+                              onChange={(e) => {
+                                  const newItems = [...form.items];
+                                  newItems[idx].linkText = e.target.value;
+                                  setForm({ ...form, items: newItems });
+                                }}
+                              className="admin-input text-xs"
+                              placeholder="Shop Now"
+                            />
+                          </div>
+                        </div>
+                        
+                        {item.imageUrl && (
+                          <div className="mt-3 h-20 w-full rounded-lg overflow-hidden border border-slate-200">
+                            <img src={resolveImageUrl(item.imageUrl)} className="w-full h-full object-cover" alt="" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {(!form.items || form.items.length === 0) && (
+                      <div className="text-center py-8 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
+                        <ImageIcon className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">No slider items added yet. Click "Add Slide" above.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

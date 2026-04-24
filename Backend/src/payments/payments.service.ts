@@ -16,9 +16,9 @@ export class PaymentsService {
   ) {}
 
   private get apiUrl() {
-    const env = this.configService.get('NODE_ENV');
+    const env = this.configService.get('CGRATE_ENV') || this.configService.get('NODE_ENV');
     const url = env === 'production' ? this.prodUrl : this.testUrl;
-    this.logger.log(`Using 543 API URL: ${url} (env: ${env})`);
+    this.logger.log(`Using 543 API URL: ${url} (mode: ${env})`);
     return url;
   }
 
@@ -83,7 +83,7 @@ export class PaymentsService {
           'Content-Type': 'text/xml;charset=UTF-8',
           'SOAPAction': '',
         },
-        timeout: 30000, // 30 second timeout
+        timeout: 60000, // Increased to 60 seconds
       });
 
       this.logger.log('=== 543 API Response Received ===');

@@ -21,6 +21,15 @@ export class NotificationsService implements OnModuleInit {
       if (serviceAccountJson) {
         // Use raw JSON string from environment variable (Best for Render)
         const config = JSON.parse(serviceAccountJson);
+        
+        if (!config.project_id || !config.private_key || !config.client_email) {
+          const missing = [];
+          if (!config.project_id) missing.push('project_id');
+          if (!config.private_key) missing.push('private_key');
+          if (!config.client_email) missing.push('client_email');
+          throw new Error(`Firebase JSON is missing required fields: ${missing.join(', ')}`);
+        }
+
         admin.initializeApp({
           credential: admin.credential.cert(config),
         });
