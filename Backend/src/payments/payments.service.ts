@@ -192,7 +192,7 @@ export class PaymentsService {
          <transactionRequest>
             <username>${username}</username>
             <password>${password}</password>
-            <transactionId>${transactionId}</transactionId>
+            <transactionId>${order.paymentReference}</transactionId>
          </transactionRequest>
       </kon:queryTransaction>
    </soapenv:Body>
