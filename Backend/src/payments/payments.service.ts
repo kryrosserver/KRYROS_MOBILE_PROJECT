@@ -41,7 +41,7 @@ export class PaymentsService {
       throw new Error(errorMsg);
     }
 
-    // Ensure phone format: +260XXXXXXXXX
+    // Ensure phone format: 260XXXXXXXXX (Removing the '+' as production often rejects it)
     let formattedPhone = phone.replace(/\D/g, '');
     if (!formattedPhone.startsWith('260')) {
       if (formattedPhone.startsWith('0')) {
@@ -50,9 +50,11 @@ export class PaymentsService {
         formattedPhone = '260' + formattedPhone;
       }
     }
-    formattedPhone = '+' + formattedPhone;
 
     this.logger.log(`Formatted Phone: ${formattedPhone}`);
+
+    // Ensure amount is formatted as decimal string (e.g., 40.00)
+    const formattedAmount = Number(amountZMW).toFixed(2);
 
     const soapRequest = `
       <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com">
@@ -63,7 +65,7 @@ export class PaymentsService {
                   <username>${username}</username>
                   <password>${password}</password>
                   <msisdn>${formattedPhone}</msisdn>
-                  <amount>${amountZMW}</amount>
+                  <amount>${formattedAmount}</amount>
                   <transactionId>${transactionId}</transactionId>
                   <action>MOBILE_MONEY_PUSH</action>
                </transactionRequest>
@@ -81,7 +83,8 @@ export class PaymentsService {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
           'Content-Type': 'text/xml;charset=UTF-8',
-          'SOAPAction': '',
+          'SOAPAction': 'processTransaction',
+          'Accept': 'text/xml',
         },
         timeout: 60000, // Increased to 60 seconds
       });
@@ -201,7 +204,8 @@ export class PaymentsService {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
           'Content-Type': 'text/xml;charset=UTF-8',
-          'SOAPAction': '',
+          'SOAPAction': 'queryTransaction',
+          'Accept': 'text/xml',
         },
       });
 
