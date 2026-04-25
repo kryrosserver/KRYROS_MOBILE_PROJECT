@@ -301,126 +301,106 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   // Grid view
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-lg bg-white border border-slate-100 transition-all duration-300 hover:shadow-lg"
+      className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-slate-100 transition-all duration-300 hover:shadow-lg h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Section */}
-      <div className="relative aspect-square overflow-hidden bg-white">
-        <Link href={productHref}>
+      <div className="relative aspect-square overflow-hidden bg-white p-2 md:p-4">
+        <Link href={productHref} className="block w-full h-full">
           <Image
             src={resolveImageUrl(displayImage)}
             alt={product?.name || 'Product'}
             fill
-            className="object-contain p-1 md:p-4 transition-transform duration-500 group-hover:scale-105"
+            className="object-contain transition-transform duration-500 group-hover:scale-105"
             unoptimized={displayImage.startsWith('data:')}
           />
         </Link>
         
         {/* Badges - Top Left */}
         <div className="absolute left-2 top-2 flex flex-col gap-1 z-10">
-          {product?.isNew && (
-            <span className="rounded bg-[#0052FF] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
-              NEW
-            </span>
-          )}
-          {product?.isBestseller && (
-            <span className="rounded bg-[#0052FF] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
-              BESTSELLER
-            </span>
-          )}
-          {isWholesale && (
-            <span className="rounded bg-[#2A3A4A] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
-              WHOLESALE
-            </span>
-          )}
-          {isCredit && (
-            <span className="rounded bg-[#1FA89A] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
-              CREDIT
+          {(product?.isBestseller || product?.isNew) && (
+            <span className="rounded bg-[#0052FF] px-2 py-0.5 text-[8px] md:text-[9px] font-black text-white uppercase tracking-wider shadow-sm">
+              {product?.isBestseller ? 'TRENDING' : 'NEW'}
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded bg-[#0052FF] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
-              SALE {discount}%
+            <span className="rounded bg-[#ffeff2] px-2 py-0.5 text-[8px] md:text-[9px] font-black text-[#ff4b7d] uppercase tracking-wider shadow-sm border border-[#ff4b7d]/10">
+              {discount}%
             </span>
           )}
         </div>
+
+        {/* Action Icons Overlay - Bottom Right on Hover, or visible on Mobile */}
+        <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 md:flex hidden">
+          <button className="h-8 w-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
+            <Heart className="h-4 w-4" />
+          </button>
+          <button className="h-8 w-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          <button className="h-8 w-8 rounded-full bg-white shadow-md flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Action Bar (Icons) - Reference Style */}
+      <div className="flex items-center justify-around py-2 border-y border-slate-50">
+        <button className="p-2 text-slate-400 hover:text-primary transition-colors">
+          <Heart className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+        </button>
+        <div className="w-px h-4 bg-slate-100" />
+        <button className="p-2 text-slate-400 hover:text-primary transition-colors">
+          <RefreshCw className="h-4 w-4" />
+        </button>
+        <div className="w-px h-4 bg-slate-100" />
+        <button className="p-2 text-slate-400 hover:text-primary transition-colors">
+          <Eye className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Content Area */}
-      <div className="p-3 md:p-5 flex flex-col flex-1">
+      <div className="p-3 md:p-4 flex flex-col flex-1 gap-2">
         <Link href={productHref}>
-          <h3 className="text-[13px] md:text-base font-bold text-slate-800 line-clamp-2 transition-colors hover:text-primary h-10 md:h-12 mb-2 leading-tight md:leading-normal">
+          <h3 className="text-[12px] md:text-sm font-bold text-slate-800 line-clamp-2 transition-colors hover:text-primary leading-tight h-8 md:h-10">
             {product?.name}
           </h3>
         </Link>
 
-        {/* Storage Info */}
-        <div className="mb-3">
-          {specs.find((s: any) => s.key?.toLowerCase().includes('storage')) ? (
-            <span className="text-[11px] md:text-sm font-bold text-slate-500 uppercase tracking-tight">
-              {specs.find((s: any) => s.key?.toLowerCase().includes('storage')).value}
-            </span>
-          ) : (
-            <span className="text-[11px] md:text-sm font-bold text-slate-300 uppercase tracking-tight italic">
-              Standard Edition
-            </span>
-          )}
-        </div>
-
         {/* Price Section */}
-        <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-2 md:mb-4">
+        <div className="flex items-center flex-wrap gap-2">
           {displayOriginalPrice && (
-            <span className="text-[11px] md:text-sm text-slate-400 line-through font-medium">
+            <span className="text-[10px] md:text-xs text-slate-400 line-through font-medium">
               {displayOriginalPrice}
             </span>
           )}
-          <span className="text-sm md:text-xl font-black text-[#d11c1c] tracking-tight">
+          <span className="text-xs md:text-base font-black text-[#d11c1c] tracking-tight">
             {displayBasePrice}
           </span>
         </div>
 
-        {/* Stock Status */}
-        <div className="flex flex-col gap-2 mb-3 md:mb-4">
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] md:text-xs font-black text-[#1FA89A] uppercase tracking-wider">
-              IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}
-            </span>
+        {/* Stock & Rating Row */}
+        <div className="flex items-center justify-between gap-2 mt-auto">
+          <span className="text-[9px] md:text-[10px] font-black text-[#1FA89A] uppercase tracking-wider whitespace-nowrap">
+            IN STOCK: {product?.stockCurrent ?? product?.inventory?.stock ?? 0}
+          </span>
+          <div className="flex items-center gap-0.5">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-2.5 w-2.5 md:h-3 md:w-3 ${
+                  i < Math.floor(product?.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-slate-200"
+                }`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Product Details / Guarantees */}
-        <div className="mb-4 space-y-1.5 border-t border-slate-50 pt-3">
-          {product?.hasFiveYearGuarantee && (
-            <div className="flex items-center gap-2">
-              <Check className="h-3 w-3 text-[#1FA89A]" />
-              <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
-                {product.fiveYearGuaranteeText || '5 YEARS GUARANTEE'}
-              </span>
-            </div>
-          )}
-          {product?.hasFreeReturns && (
-            <div className="flex items-center gap-2">
-              <Check className="h-3 w-3 text-[#1FA89A]" />
-              <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
-                {product.freeReturnsText || 'FREE RETURNS'}
-              </span>
-            </div>
-          )}
-          {product?.hasInstallmentOptions && (
-            <div className="flex items-center gap-2">
-              <Check className="h-3 w-3 text-[#1FA89A]" />
-              <span className="text-[10px] md:text-[11px] font-bold text-slate-600 uppercase tracking-tight">
-                {product.installmentOptionsText || 'INSTALLMENT OPTIONS'}
-              </span>
-            </div>
-          )}
-        </div>
-
         {/* CTA Section */}
-        <div className="mt-auto">
+        <div className="mt-2">
           <Button 
-            className="w-full h-11 md:h-12 bg-[#1FA89A] hover:bg-[#1FA89A]/90 text-white font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl shadow-xl shadow-[#1FA89A]/20 flex items-center justify-center gap-2 group/btn transition-all active:scale-95"
+            className="w-full h-9 md:h-10 bg-[#0052FF] hover:bg-[#0052FF]/90 text-white font-black uppercase tracking-widest text-[9px] md:text-[10px] rounded-xl transition-all active:scale-95 shadow-sm"
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
               addItem(product);
