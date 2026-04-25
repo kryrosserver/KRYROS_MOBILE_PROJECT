@@ -64,10 +64,11 @@ export class PaymentsService {
       
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
-          'Content-Type': 'application/soap+xml;charset=UTF-8',
+          'Content-Type': 'text/xml;charset=UTF-8',
           'Accept': 'text/xml',
+          'SOAPAction': '',
         },
-        timeout: 60000, // Increased to 60 seconds
+        timeout: 60000,
       });
 
       this.logger.log('=== 543 API Response Received ===');
@@ -173,8 +174,9 @@ export class PaymentsService {
     try {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
-          'Content-Type': 'application/soap+xml;charset=UTF-8',
+          'Content-Type': 'text/xml;charset=UTF-8',
           'Accept': 'text/xml',
+          'SOAPAction': '',
         },
       });
 
