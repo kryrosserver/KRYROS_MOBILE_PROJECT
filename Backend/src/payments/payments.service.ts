@@ -195,7 +195,7 @@ export class PaymentsService {
             data: { paymentStatus: newStatus },
           });
         }
-        return { status: newStatus, raw: txResponse.status };
+        return { status: newStatus, raw: txReturn.status };
       }
     } catch (error) {
       this.logger.error(`Status Check Error: ${error.message}`);
