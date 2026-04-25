@@ -55,13 +55,13 @@ export function PromoBanner({ section }: PromoBannerProps) {
           spaceBetween={16}
           breakpoints={{
             640: { slidesPerView: 1.5, spaceBetween: 20 },
-            1024: { slidesPerView: 2.2, spaceBetween: 30 }
+            1024: { slidesPerView: 2.5, spaceBetween: 30 }
           }}
           className="promo-swiper !overflow-visible"
         >
           {displayItems.map((item: any, index: number) => (
             <SwiperSlide key={index} className="transition-all duration-500 opacity-40 [&.swiper-slide-active]:opacity-100 [&.swiper-slide-active]:scale-105 py-8">
-              <div className="relative aspect-[4/5] md:aspect-[16/10] w-full rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-slate-100 group">
+              <div className="relative aspect-[2/3] md:aspect-[3/4] w-full rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-slate-100 group">
                 <img
                   src={resolveImageUrl(item.imageUrl)}
                   alt={item.title || "Promo"}
@@ -69,23 +69,26 @@ export function PromoBanner({ section }: PromoBannerProps) {
                 />
                 
                 {/* Reference-Style Text and Button Overlay */}
-                <div className="absolute inset-0 flex flex-col justify-between p-10 md:p-16 bg-gradient-to-t from-black/60 via-transparent to-black/20">
+                <div className="absolute inset-0 flex flex-col justify-between p-8 md:p-12 bg-gradient-to-t from-black/40 via-transparent to-black/10">
                   {/* Top content */}
-                  <div className="space-y-2">
+                  <div className="text-center md:text-left">
+                    {item.subtitle && (
+                      <p className="text-[10px] md:text-xs font-black text-white/90 uppercase tracking-[0.3em] mb-2 drop-shadow-lg">
+                        {item.subtitle}
+                      </p>
+                    )}
                     {item.title && (
-                      <h2 className="text-3xl md:text-6xl font-black text-white uppercase tracking-tighter leading-[0.9] drop-shadow-2xl">
-                        {item.title.split(' ').map((word: string, i: number) => (
-                          <span key={i} className="block">{word}</span>
-                        ))}
+                      <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-[0.9] drop-shadow-2xl">
+                        {item.title}
                       </h2>
                     )}
                   </div>
 
                   {/* Bottom content */}
-                  <div className="flex flex-col items-center md:items-start gap-6">
+                  <div className="flex justify-center md:justify-start">
                     {item.link && (
-                      <Link href={item.link} className="inline-block">
-                        <button className="bg-white hover:bg-blue-600 hover:text-white text-slate-900 font-black uppercase tracking-[0.25em] text-[10px] md:text-xs px-12 py-5 rounded-full transition-all duration-300 shadow-xl active:scale-95">
+                      <Link href={item.link} className="w-full max-w-[200px]">
+                        <button className="w-full bg-white hover:bg-blue-600 hover:text-white text-slate-900 font-black uppercase tracking-[0.2em] text-[10px] md:text-xs py-4 md:py-5 rounded-full transition-all duration-300 shadow-xl active:scale-95">
                           {item.linkText || "SHOP NOW"}
                         </button>
                       </Link>
@@ -99,12 +102,12 @@ export function PromoBanner({ section }: PromoBannerProps) {
 
         {/* Reference-Style Blue Square Navigation Arrows */}
         {displayItems.length > 1 && (
-          <div className="absolute inset-x-[2%] md:inset-x-[5%] top-1/2 -translate-y-1/2 z-20 flex justify-between pointer-events-none">
-            <button className="promo-prev pointer-events-auto w-12 h-12 md:w-16 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-2xl active:scale-90 border-4 border-white/10">
-              <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
+          <div className="absolute inset-x-[1%] md:inset-x-[-2%] top-1/2 -translate-y-1/2 z-20 flex justify-between pointer-events-none">
+            <button className="promo-prev pointer-events-auto w-10 h-10 md:w-14 md:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center transition-all shadow-2xl active:scale-90">
+              <ChevronLeft className="w-6 h-6 md:w-8 h-8" />
             </button>
-            <button className="promo-next pointer-events-auto w-12 h-12 md:w-16 md:h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-2xl active:scale-90 border-4 border-white/10">
-              <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+            <button className="promo-next pointer-events-auto w-10 h-10 md:w-14 md:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center transition-all shadow-2xl active:scale-90">
+              <ChevronRight className="w-6 h-6 md:w-8 h-8" />
             </button>
           </div>
         )}
