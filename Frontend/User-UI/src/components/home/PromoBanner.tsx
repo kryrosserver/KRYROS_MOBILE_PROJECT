@@ -1,21 +1,5 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import { resolveImageUrl } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-interface PromoBannerProps {
-  section: any;
-}
-
-"use client";
-
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';

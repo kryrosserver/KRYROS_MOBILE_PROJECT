@@ -19,8 +19,9 @@ export class ProductsService {
     isWholesaleOnly?: boolean;
     isFlashSale?: boolean;
     showInactive?: boolean;
+    popularity?: string;
   }) {
-    const { skip = 0, take = 20, categoryId, categorySlug, search, isFeatured, allowCredit, isWholesaleOnly, isFlashSale, showInactive } = params;
+    const { skip = 0, take = 20, categoryId, categorySlug, search, isFeatured, allowCredit, isWholesaleOnly, isFlashSale, showInactive, popularity } = params;
     
     const where: any = {};
     if (!showInactive) {
@@ -36,6 +37,13 @@ export class ProductsService {
       where.isFlashSale = true;
       // Removed the flashSaleEnd date check to ensure products show up even if the date is slightly off
       // where.flashSaleEnd = { gt: new Date() }; 
+    }
+
+    if (popularity === 'sale') {
+      where.OR = [
+        { salePrice: { not: null, gt: 0 } },
+        { isFlashSale: true }
+      ];
     }
 
     // Strict separation:
@@ -66,6 +74,15 @@ export class ProductsService {
       ];
     }
 
+    let orderBy: any = { createdAt: 'desc' };
+    if (popularity === 'bestseller') {
+      orderBy = { orderItems: { _count: 'desc' } };
+    } else if (popularity === 'hot') {
+      orderBy = { wishlists: { _count: 'desc' } };
+    } else if (popularity === 'new') {
+      orderBy = { createdAt: 'desc' };
+    }
+
     try {
       const [products, total] = await Promise.all([
         this.prisma.product.findMany({
@@ -78,26 +95,37 @@ export class ProductsService {
             images: { orderBy: { sortOrder: 'asc' }, take: 1 },
             inventory: true,
             variants: true,
+            _count: {
+              select: { orderItems: true, wishlists: true }
+            },
             productRelations: {
               include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy,
         }),
         this.prisma.product.count({ where }),
       ]);
 
       // Convert Decimal prices to numbers for frontend compatibility
-      const sanitizedProducts = products.map(p => ({
-        ...p,
-        price: Number(p.price),
-        salePrice: p.salePrice ? Number(p.salePrice) : null,
-        flashSalePrice: p.flashSalePrice ? Number(p.flashSalePrice) : null,
-        wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
-        variants: p.variants.map(v => ({
-          ...v,
-          price: v.price ? Number(v.price) : null,
-        })),
-      }));
+      const sanitizedProducts = products.map(p => {
+        // Calculate virtual flags
+        const isBestseller = (p as any)._count?.orderItems > 5; // Example threshold
+        const isHot = (p as any)._count?.wishlists > 5; // Example threshold
+
+        return {
+          ...p,
+          price: Number(p.price),
+          salePrice: p.salePrice ? Number(p.salePrice) : null,
+          flashSalePrice: p.flashSalePrice ? Number(p.flashSalePrice) : null,
+          wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
+          isBestseller,
+          isHot,
+          variants: p.variants.map(v => ({
+            ...v,
+            price: v.price ? Number(v.price) : null,
+          })),
+        };
+      });
 
       return { data: sanitizedProducts, meta: { total, skip, take } };
     } catch (e) {
@@ -112,6 +140,9 @@ export class ProductsService {
             category: true,
             images: { orderBy: { sortOrder: 'asc' }, take: 1 },
             inventory: true,
+            _count: {
+              select: { orderItems: true, wishlists: true }
+            },
             productRelations: {
               include: { related: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } } } },
           },
@@ -119,7 +150,22 @@ export class ProductsService {
         }),
         this.prisma.product.count({ where }),
       ]);
-      return { data: products, meta: { total, skip, take } };
+
+      const sanitizedProducts = products.map(p => {
+        const isBestseller = (p as any)._count?.orderItems > 5;
+        const isHot = (p as any)._count?.wishlists > 5;
+        return {
+          ...p,
+          price: Number(p.price),
+          salePrice: p.salePrice ? Number(p.salePrice) : null,
+          flashSalePrice: p.flashSalePrice ? Number(p.flashSalePrice) : null,
+          wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
+          isBestseller,
+          isHot,
+        };
+      });
+
+      return { data: sanitizedProducts, meta: { total, skip, take } };
     }
   }
 

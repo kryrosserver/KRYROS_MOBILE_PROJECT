@@ -320,8 +320,13 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         {/* Badges - Top Left */}
         <div className="absolute left-2 top-2 flex flex-col gap-1 z-10">
           {product?.isNew && (
-            <span className="rounded bg-[#1FA89A] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+            <span className="rounded bg-[#0052FF] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
               NEW
+            </span>
+          )}
+          {product?.isBestseller && (
+            <span className="rounded bg-[#0052FF] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+              BESTSELLER
             </span>
           )}
           {isWholesale && (
@@ -335,8 +340,8 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded bg-[#ffeff2] px-2 py-1 text-[9px] md:text-[10px] font-black text-[#ff4b7d] uppercase tracking-widest shadow-sm border border-[#ff4b7d]/10">
-              {discount}%
+            <span className="rounded bg-[#0052FF] px-2 py-1 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+              SALE {discount}%
             </span>
           )}
         </div>

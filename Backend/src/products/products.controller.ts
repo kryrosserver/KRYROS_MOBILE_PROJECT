@@ -28,6 +28,7 @@ export class ProductsController {
     @Query('isWholesaleOnly') isWholesaleOnly?: string,
     @Query('isFlashSale') isFlashSale?: string,
     @Query('showInactive') showInactive?: string,
+    @Query('popularity') popularity?: string,
   ) {
     return this.productsService.findAll({
       skip: skip ? Number(skip) : undefined,
@@ -40,6 +41,7 @@ export class ProductsController {
       isWholesaleOnly: isWholesaleOnly === 'true' ? true : (isWholesaleOnly === 'false' ? false : undefined),
       isFlashSale: isFlashSale === 'true' ? true : (isFlashSale === 'false' ? false : undefined),
       showInactive: showInactive === 'true' ? true : (showInactive === 'false' ? false : undefined),
+      popularity,
     });
   }
 

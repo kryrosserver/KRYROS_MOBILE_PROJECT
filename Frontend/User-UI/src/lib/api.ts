@@ -87,6 +87,7 @@ export const productsApi = {
     isWholesaleOnly?: boolean;
     isFlashSale?: boolean;
     showInactive?: boolean;
+    popularity?: string;
   }) => {
     // Build query string with correct parameter names
     const queryParams = new URLSearchParams();
@@ -101,6 +102,7 @@ export const productsApi = {
     if (params?.isWholesaleOnly !== undefined) queryParams.append('isWholesaleOnly', String(params.isWholesaleOnly));
     if (params?.isFlashSale !== undefined) queryParams.append('isFlashSale', String(params.isFlashSale));
     if (params?.showInactive !== undefined) queryParams.append('showInactive', String(params.showInactive));
+    if (params?.popularity) queryParams.append('popularity', params.popularity);
     
     const query = queryParams.toString();
     return fetchApi<{ data: any[]; meta: { total: number; skip: number; take: number } }>(`/products${query ? '?' + query : ''}`);
