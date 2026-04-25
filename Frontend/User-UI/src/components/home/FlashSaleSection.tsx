@@ -145,14 +145,3 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
     </section>
   )
 }
-        </div>
-        
-        <div className="mt-12 md:hidden">
-          <Link href={section.link || "/flash-sales"} className="flex items-center justify-center gap-2 w-full py-4 bg-slate-100 rounded-2xl text-slate-900 font-black uppercase tracking-widest text-xs">
-            {section.linkText || "View All Offers"} <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  )
-}
