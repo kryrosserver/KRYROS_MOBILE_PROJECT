@@ -41,14 +41,12 @@ export class PaymentsService {
       throw new Error(errorMsg);
     }
 
-    // Ensure phone format: 260XXXXXXXXX (Removing the '+' as production often rejects it)
+    // Ensure phone format: 09XXXXXXXX or 07XXXXXXXX (Postman collection uses 0... format)
     let formattedPhone = phone.replace(/\D/g, '');
-    if (!formattedPhone.startsWith('260')) {
-      if (formattedPhone.startsWith('0')) {
-        formattedPhone = '260' + formattedPhone.substring(1);
-      } else {
-        formattedPhone = '260' + formattedPhone;
-      }
+    if (formattedPhone.startsWith('260')) {
+      formattedPhone = '0' + formattedPhone.substring(3);
+    } else if (!formattedPhone.startsWith('0')) {
+      formattedPhone = '0' + formattedPhone;
     }
 
     this.logger.log(`Formatted Phone: ${formattedPhone}`);
@@ -56,7 +54,7 @@ export class PaymentsService {
     // Ensure amount is formatted as a clean string (No decimals for round numbers, but support decimals if they exist)
     const formattedAmount = Number(amountZMW).toString();
 
-    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header/><soapenv:Body><kon:processTransaction><kon:transactionRequest><kon:username>${username}</kon:username><kon:password>${password}</kon:password><kon:msisdn>${formattedPhone}</kon:msisdn><kon:amount>${formattedAmount}</kon:amount><kon:transactionId>${transactionId}</kon:transactionId><kon:action>MOBILE_MONEY_PUSH</kon:action></kon:transactionRequest></kon:processTransaction></soapenv:Body></soapenv:Envelope>`;
+    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header><wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" soapenv:mustUnderstand="1"><wsse:UsernameToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="${username}"><wsse:Username>${username}</wsse:Username><wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">${password}</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><kon:processCustomerPayment><transactionAmount>${formattedAmount}</transactionAmount><customerMobile>${formattedPhone}</customerMobile><paymentReference>${transactionId}</paymentReference></kon:processCustomerPayment></soapenv:Body></soapenv:Envelope>`;
 
     this.logger.log('SOAP Request being sent:');
     this.logger.log(soapRequest);
@@ -66,8 +64,7 @@ export class PaymentsService {
       
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
-          'Content-Type': 'text/xml;charset=UTF-8',
-          'SOAPAction': '""',
+          'Content-Type': 'application/soap+xml;charset=UTF-8',
           'Accept': 'text/xml',
         },
         timeout: 60000, // Increased to 60 seconds
@@ -86,21 +83,23 @@ export class PaymentsService {
       
       this.logger.log(`Parsed XML Result: ${JSON.stringify(result, null, 2)}`);
       
-      const txResponse = result.Envelope?.Body?.processTransactionResponse?.transactionResponse;
+      const txReturn = result.Envelope?.Body?.processCustomerPaymentResponse?.return;
 
-      if (!txResponse) {
-        const errorMsg = 'Invalid SOAP response structure - transactionResponse not found!';
+      if (!txReturn) {
+        const errorMsg = 'Invalid SOAP response structure - return block not found!';
         this.logger.error(errorMsg);
         throw new Error(errorMsg);
       }
 
-      this.logger.log(`Transaction Response: ${JSON.stringify(txResponse, null, 2)}`);
+      this.logger.log(`Transaction Return: ${JSON.stringify(txReturn, null, 2)}`);
 
-      const status = txResponse.status; // SUCCESS, FAILED, PENDING
-      const reference = txResponse.reference || transactionId;
-      const message = txResponse.message || 'No message provided';
+      // responseCode 0 is success, anything else is failure
+      const isSuccess = txReturn.responseCode === 0 || txReturn.responseCode === '0';
+      const status = isSuccess ? 'SUCCESS' : 'FAILED';
+      const reference = txReturn.paymentID || transactionId;
+      const message = txReturn.responseMessage || 'No message provided';
 
-      this.logger.log(`Payment Status: ${status}`);
+      this.logger.log(`Payment Success: ${isSuccess} (Code: ${txReturn.responseCode})`);
       this.logger.log(`Payment Reference: ${reference}`);
       this.logger.log(`Payment Message: ${message}`);
 
@@ -169,13 +168,12 @@ export class PaymentsService {
     const username = this.configService.get('CGRATE_USERNAME');
     const password = this.configService.get('CGRATE_PASSWORD');
 
-    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header/><soapenv:Body><kon:queryTransaction><kon:transactionRequest><kon:username>${username}</kon:username><kon:password>${password}</kon:password><kon:transactionId>${order.paymentReference}</kon:transactionId></kon:transactionRequest></kon:queryTransaction></soapenv:Body></soapenv:Envelope>`;
+    const soapRequest = `<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:kon="http://konik.cgrate.com"><soapenv:Header><wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" soapenv:mustUnderstand="1"><wsse:UsernameToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="${username}"><wsse:Username>${username}</wsse:Username><wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">${password}</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><kon:queryCustomerPayment><paymentReference>${order.paymentReference}</paymentReference></kon:queryCustomerPayment></soapenv:Body></soapenv:Envelope>`;
 
     try {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
-          'Content-Type': 'text/xml;charset=UTF-8',
-          'SOAPAction': '""',
+          'Content-Type': 'application/soap+xml;charset=UTF-8',
           'Accept': 'text/xml',
         },
       });
@@ -185,10 +183,12 @@ export class PaymentsService {
         removeNSPrefix: true,
       });
       const result = parser.parse(response.data);
-      const txResponse = result.Envelope?.Body?.queryTransactionResponse?.queryResponse;
+      const txReturn = result.Envelope?.Body?.queryCustomerPaymentResponse?.return;
 
-      if (txResponse) {
-        const newStatus = this.mapStatus(txResponse.status);
+      if (txReturn) {
+        // Map responseCode 0 to SUCCESS if status field is missing, or use status if provided
+        const rawStatus = txReturn.status || (txReturn.responseCode === 0 || txReturn.responseCode === '0' ? 'SUCCESS' : 'FAILED');
+        const newStatus = this.mapStatus(rawStatus);
         if (newStatus !== order.paymentStatus) {
           await this.prisma.order.update({
             where: { id: orderId },

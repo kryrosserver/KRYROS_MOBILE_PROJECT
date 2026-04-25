@@ -1805,6 +1805,7 @@ export default function HomePageCMS() {
                       ...section,
                       imageUrl: section.imageUrl || config.backgroundImageUrl || config.imageUrl || '',
                       link: section.link || config.buttonLink || '',
+                      items: config.items || section.items || [],
                     });
                     setShowAdd(true);
                   }}
