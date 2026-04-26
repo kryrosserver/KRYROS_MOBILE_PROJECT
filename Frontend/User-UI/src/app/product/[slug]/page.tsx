@@ -87,8 +87,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               reviewsApi.getAll({ productId: data.id, isApproved: true, take: 5 }),
               reviewsApi.getRating(data.id)
             ])
-            if (reviewsRes.data) setReviews(reviewsRes.data)
-            if (ratingRes) setRatingStats(ratingRes)
+            if (reviewsRes.data) setReviews(reviewsRes.data.data)
+            if (ratingRes.data) setRatingStats(ratingRes.data)
           } catch (err) {
             console.error("Reviews fetch error:", err)
           } finally {

@@ -19,7 +19,7 @@ export function ProductReviews({ section }: ProductReviewsProps) {
         const res = await reviewsApi.getAll({ isFeatured: true, take: 10 })
         if (res.data) {
           // Map backend reviews to UI format
-          const formattedReviews = res.data.map(r => ({
+          const formattedReviews = res.data.data.map(r => ({
             customerName: `${r.user?.firstName} ${r.user?.lastName?.charAt(0)}.`,
             customerImage: r.user?.avatar || r.imageUrl,
             role: "VERIFIED BUYER",
