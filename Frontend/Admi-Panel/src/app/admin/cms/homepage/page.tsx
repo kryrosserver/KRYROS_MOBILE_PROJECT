@@ -77,6 +77,26 @@ const SECTION_FIELDS: Record<string, string[]> = {
 
 const ANIMATIONS = ["none", "fadeIn", "slideUp", "slideIn", "slideInLeft", "zoomIn", "bounceIn"];
 
+async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
+  const blobURL = URL.createObjectURL(file);
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = blobURL;
+  });
+  const scale = Math.min(1, maxWidth / img.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  URL.revokeObjectURL(blobURL);
+  const isPng = file.type.includes("png");
+  const type = isPng ? "image/png" : "image/jpeg";
+  return canvas.toDataURL(type, quality);
+}
+
 export default function HomePageCMS() {
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,26 +188,6 @@ export default function HomePageCMS() {
   useEffect(() => {
     loadBanners();
   }, []);
-
-  async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
-    const blobURL = URL.createObjectURL(file);
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const i = new Image();
-      i.onload = () => resolve(i);
-      i.onerror = reject;
-      i.src = blobURL;
-    });
-    const scale = Math.min(1, maxWidth / img.width);
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    URL.revokeObjectURL(blobURL);
-    const isPng = file.type.includes("png");
-    const type = isPng ? "image/png" : "image/jpeg";
-    return canvas.toDataURL(type, quality);
-  }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -352,7 +352,8 @@ export default function HomePageCMS() {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Homepage CMS</h1>
@@ -1821,8 +1822,6 @@ export default function HomePageCMS() {
                   )}
                 </div>
               )}
-                </div>
-              )}
 
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Live Preview Hint</h3>
@@ -2108,5 +2107,6 @@ export default function HomePageCMS() {
         </div>
       )}
     </div>
+    </>
   );
 }
