@@ -12,13 +12,13 @@ type Review = {
   isVerified: boolean
   isApproved: boolean
   isFeatured: boolean
-  createdAt: string
-  user: {
-    firstName: string
-    lastName: string
-    imageUrl?: string
-  }
-  product: {
+    createdAt: string
+    user: {
+      firstName: string
+      lastName: string
+      avatar?: string
+    }
+    product: {
     name: string
     images: { url: string }[]
   }
@@ -133,8 +133,8 @@ export default function ReviewsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-sm border-2 border-white shadow-sm overflow-hidden">
-                      {review.user?.imageUrl ? (
-                        <img src={review.user.imageUrl} alt="User" className="h-full w-full object-cover" />
+                      {review.user?.avatar ? (
+                        <img src={review.user.avatar} alt="User" className="h-full w-full object-cover" />
                       ) : (
                         review.user?.firstName?.charAt(0)
                       )}

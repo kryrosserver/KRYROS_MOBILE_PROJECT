@@ -633,8 +633,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden">
-                                {review.user?.imageUrl ? (
-                                  <img src={review.user.imageUrl} alt="User" className="h-full w-full object-cover" />
+                                {review.user?.avatar ? (
+                                  <img src={review.user.avatar} alt="User" className="h-full w-full object-cover" />
                                 ) : (
                                   <User className="h-5 w-5" />
                                 )}

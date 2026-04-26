@@ -21,7 +21,7 @@ export function ProductReviews({ section }: ProductReviewsProps) {
           // Map backend reviews to UI format
           const formattedReviews = res.data.map(r => ({
             customerName: `${r.user?.firstName} ${r.user?.lastName?.charAt(0)}.`,
-            customerImage: r.user?.imageUrl || r.imageUrl,
+            customerImage: r.user?.avatar || r.imageUrl,
             role: "VERIFIED BUYER",
             rating: r.rating,
             reviewText: r.comment,

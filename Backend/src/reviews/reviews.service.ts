@@ -60,7 +60,7 @@ export class ReviewsService {
             select: {
               firstName: true,
               lastName: true,
-              imageUrl: true,
+              avatar: true,
             },
           },
           product: {
