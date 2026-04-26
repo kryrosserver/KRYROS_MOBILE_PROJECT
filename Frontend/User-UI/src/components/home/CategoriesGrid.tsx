@@ -45,22 +45,29 @@ export function CategoriesGrid({ section }: { section?: any }) {
             <Link 
               key={category.id}
               href={`/category/${category.slug}`}
-              className="min-w-[130px] w-[130px] md:min-w-[200px] md:w-[200px] snap-start group relative aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-slate-50 border border-slate-100 flex flex-col p-4 md:p-6 transition-all duration-500 hover:shadow-xl hover:border-primary/20"
+              className="min-w-[140px] w-[140px] md:min-w-[220px] md:w-[220px] snap-start group relative aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-slate-900 flex flex-col transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]"
             >
-              <div className="relative flex-1 mb-4">
+              {/* Background Image */}
+              <div className="absolute inset-0">
                 <img 
                   src={resolveImageUrl(category.imageUrl)} 
                   alt={category.name}
-                  className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-80"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
               </div>
-              <div className="mt-auto">
-                <h3 className="font-black text-[11px] md:text-sm text-slate-900 uppercase tracking-tight leading-tight group-hover:text-primary transition-colors">
+
+              {/* Content Overlay */}
+              <div className="relative mt-auto p-4 md:p-6 z-10">
+                <h3 className="font-black text-xs md:text-base text-white uppercase tracking-tight leading-tight group-hover:text-primary transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-[9px] md:text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">
-                  {category._count?.products || 0} Products
-                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="h-0.5 w-4 bg-primary rounded-full" />
+                  <p className="text-[8px] md:text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+                    {category._count?.products || 0} Items
+                  </p>
+                </div>
               </div>
             </Link>
           ))}

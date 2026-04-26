@@ -54,68 +54,68 @@ export function ProductReviews({ section }: ProductReviewsProps) {
 
       <div className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
         {reviews.map((review: any, index: number) => (
-          <div key={index} className="min-w-[280px] md:min-w-[320px] snap-start bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg transition-all duration-500">
-            <div className="p-6 md:p-8 flex flex-col items-center text-center flex-1">
+          <div key={index} className="min-w-[240px] md:min-w-[280px] snap-start bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg transition-all duration-500">
+            <div className="p-4 md:p-6 flex flex-col items-center text-center flex-1">
               {/* Reviewer Header */}
-              <div className="flex flex-col items-center gap-3 mb-4">
+              <div className="flex flex-col items-center gap-2 mb-3">
                 {review.customerImage ? (
                   <img
                     src={review.customerImage}
                     alt={review.customerName}
-                    className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-slate-50"
+                    className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-slate-50"
                   />
                 ) : (
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-slate-50 flex items-center justify-center text-2xl font-black text-slate-300">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-slate-50 flex items-center justify-center text-lg font-black text-slate-300">
                     {review.customerName?.charAt(0) || '?'}
                   </div>
                 )}
                 <div>
-                  <h4 className="font-black text-lg md:text-xl text-slate-900 mb-1">
+                  <h4 className="font-black text-sm md:text-base text-slate-900 mb-0.5">
                     {review.customerName}
                   </h4>
-                  <span className="inline-block text-[9px] font-black uppercase tracking-[0.2em] text-blue-600 border border-blue-600/20 rounded-full px-3 py-1 bg-blue-50/30">
+                  <span className="inline-block text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] text-blue-600 border border-blue-600/20 rounded-full px-2 py-0.5 bg-blue-50/30">
                     {review.role || "REVIEWER"}
                   </span>
                 </div>
               </div>
 
               {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-1.5 mb-3">
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 md:w-5 md:h-5 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`}
+                      className={`w-3 h-3 md:w-4 md:h-4 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`}
                     />
                   ))}
                 </div>
-                <span className="text-[9px] md:text-[10px] font-black text-white bg-[#1FA89A] px-2 py-1 rounded-full leading-none">
+                <span className="text-[7px] md:text-[8px] font-black text-white bg-[#1FA89A] px-1.5 py-0.5 rounded-full leading-none">
                   {review.rating}/5
                 </span>
               </div>
 
               {/* Review Text */}
-              <p className="text-slate-500 text-xs md:text-sm font-medium leading-relaxed mb-4 line-clamp-3">
+              <p className="text-slate-500 text-[10px] md:text-xs font-medium leading-relaxed mb-3 line-clamp-4">
                 {review.reviewText}
               </p>
 
               {/* Date */}
-              <p className="mt-auto text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-black text-slate-300">
+              <p className="mt-auto text-[7px] md:text-[8px] uppercase tracking-[0.15em] font-black text-slate-300">
                 {review.date}
               </p>
             </div>
 
             {/* Product Tag */}
-            <div className="border-t border-slate-50 p-4 md:p-6 bg-slate-50/30">
-              <Link href={review.purchasedProductLink || '/shop'} className="flex items-center gap-3 group">
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl p-1.5 flex items-center justify-center shadow-sm border border-slate-100 group-hover:scale-105 transition-transform">
+            <div className="border-t border-slate-50 p-3 md:p-4 bg-slate-50/30">
+              <Link href={review.purchasedProductLink || '/shop'} className="flex items-center gap-2 group">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg p-1 flex items-center justify-center shadow-sm border border-slate-100 group-hover:scale-105 transition-transform">
                   <img
                     src={review.purchasedProductImage || '/placeholder.jpg'}
                     alt={review.purchasedProduct}
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className="font-black text-[10px] md:text-xs text-slate-900 uppercase tracking-tight leading-tight group-hover:text-primary transition-colors flex-1">
+                <span className="font-black text-[9px] md:text-[10px] text-slate-900 uppercase tracking-tight leading-tight group-hover:text-primary transition-colors flex-1">
                   {review.purchasedProduct}
                 </span>
               </Link>
