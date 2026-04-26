@@ -58,9 +58,9 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
     return (
       <div className="container-custom py-4 md:py-8">
         <div className="h-8 w-48 bg-slate-100 animate-pulse rounded-lg mb-4" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="aspect-[3/4] bg-slate-100 animate-pulse rounded-2xl" />
+            <div key={i} className="min-w-[160px] md:min-w-[280px] aspect-[3/4] bg-slate-100 animate-pulse rounded-2xl" />
           ))}
         </div>
       </div>
@@ -133,10 +133,10 @@ export function FlashSaleSection({ section }: FlashSaleSectionProps) {
 
         <div 
           ref={scrollRef}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="flex overflow-x-auto pb-6 gap-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
         >
           {products.map((product) => (
-            <div key={product.id} className="flex flex-col h-full">
+            <div key={product.id} className="min-w-[160px] w-[160px] md:min-w-[280px] md:w-[280px] snap-start flex flex-col h-full">
               <ProductCard product={product} />
             </div>
           ))}

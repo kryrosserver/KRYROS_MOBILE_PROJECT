@@ -40,12 +40,12 @@ export function CategoriesGrid({ section }: { section?: any }) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-6">
+        <div className="flex overflow-x-auto pb-6 gap-3 md:gap-6 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
           {categories.map((category) => (
             <Link 
               key={category.id}
               href={`/category/${category.slug}`}
-              className="group relative aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-slate-50 border border-slate-100 flex flex-col p-4 md:p-6 transition-all duration-500 hover:shadow-xl hover:border-primary/20"
+              className="min-w-[130px] w-[130px] md:min-w-[200px] md:w-[200px] snap-start group relative aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-slate-50 border border-slate-100 flex flex-col p-4 md:p-6 transition-all duration-500 hover:shadow-xl hover:border-primary/20"
             >
               <div className="relative flex-1 mb-4">
                 <img 

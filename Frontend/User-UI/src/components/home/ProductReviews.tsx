@@ -52,9 +52,9 @@ export function ProductReviews({ section }: ProductReviewsProps) {
         </Link>
       </div>
 
-      <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
         {reviews.map((review: any, index: number) => (
-          <div key={index} className="min-w-[260px] md:min-w-0 bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg transition-all duration-500">
+          <div key={index} className="min-w-[280px] md:min-w-[320px] snap-start bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg transition-all duration-500">
             <div className="p-6 md:p-8 flex flex-col items-center text-center flex-1">
               {/* Reviewer Header */}
               <div className="flex flex-col items-center gap-3 mb-4">

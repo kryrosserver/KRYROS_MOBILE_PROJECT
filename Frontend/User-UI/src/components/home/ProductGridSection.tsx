@@ -35,9 +35,9 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
     return (
       <div className="container-custom py-4 md:py-8">
         <div className="h-8 w-48 bg-slate-100 animate-pulse rounded-lg mb-4" />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="aspect-[3/4] bg-slate-100 animate-pulse rounded-2xl" />
+        <div className="flex gap-4 overflow-hidden">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="min-w-[150px] md:min-w-[240px] aspect-[3/4] bg-slate-100 animate-pulse rounded-2xl" />
           ))}
         </div>
       </div>
@@ -69,10 +69,10 @@ export function ProductGridSection({ section }: ProductGridSectionProps) {
 
         <div 
           ref={scrollRef}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6"
+          className="flex overflow-x-auto pb-6 gap-3 md:gap-6 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
         >
           {products.map((product) => (
-            <div key={product.id} className="flex flex-col h-full">
+            <div key={product.id} className="min-w-[150px] w-[150px] md:min-w-[240px] md:w-[240px] snap-start flex flex-col h-full">
               <ProductCard product={product} />
             </div>
           ))}

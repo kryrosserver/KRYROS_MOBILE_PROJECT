@@ -329,7 +329,7 @@ export class OrdersService {
       if (method) {
         const threshold = Number(method.freeShippingThreshold || 0);
         const methodPrice = Number(method.price || 0);
-        estimatedDays = Number(method.estimatedDays) || 3;
+        estimatedDays = method.estimatedDays ? parseInt(method.estimatedDays, 10) : 3;
         
         // Both subtotal and threshold are in USD (base currency)
         shipping = (threshold > 0 && subtotal >= threshold) ? 0 : methodPrice;
