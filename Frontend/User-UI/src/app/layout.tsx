@@ -59,6 +59,7 @@ export default function RootLayout({
                   </main>
                   <MobileBottomNav />
                 </div>
+                <WhatsAppWidget />
                 <PWAInstallPrompt />
                 <Toaster />
               </CartProvider>

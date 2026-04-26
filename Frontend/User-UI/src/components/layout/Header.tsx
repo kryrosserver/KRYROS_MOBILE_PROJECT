@@ -1062,16 +1062,8 @@ export function Header() {
                         Email
                       </a>
                     </div>
-                    {/* WhatsApp Support Button */}
-                    <a
-                      href="https://wa.me/260966423719"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#25D366] text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-green-100"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      WhatsApp Support
-                    </a>
+                    {/* WhatsApp Support Placeholder - Keeping the space as requested */}
+                    <div className="h-11 w-full" />
                   </div>
                 </div>
               </motion.div>
