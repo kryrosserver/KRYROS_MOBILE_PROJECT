@@ -43,7 +43,7 @@ export function PopularFiltersProducts({ section }: PopularFiltersProductsProps)
             className={`px-4 md:px-6 py-2 md:py-3 rounded-lg font-black text-[9px] md:text-[11px] uppercase tracking-[0.15em] transition-all border-2 ${
               activeTag === tag.label
                 ? 'bg-primary border-primary text-white shadow-lg shadow-primary/10 scale-105'
-                : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 hover:text-slate-600'
+                : 'bg-white border-slate-100 text-[#2A3A4A] hover:border-slate-200 hover:text-slate-900'
             }`}
           >
             {tag.label}

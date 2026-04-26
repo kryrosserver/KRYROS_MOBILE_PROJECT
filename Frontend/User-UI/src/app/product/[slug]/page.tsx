@@ -492,6 +492,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Delivery Info</div>
                     <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.deliveryInfo}</div>
                   </div>
+                  <Check className="h-4 w-4 text-green-500 ml-auto" />
                 </div>
               )}
               {p.warrantyInfo && (
@@ -501,77 +502,82 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Warranty</div>
                     <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.warrantyInfo}</div>
                   </div>
+                  <Check className="h-4 w-4 text-green-500 ml-auto" />
                 </div>
               )}
-              {!p.deliveryInfo && p.hasFreeReturns && (
+              {p.hasFreeReturns && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
-                  <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center text-green-600"><Truck className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                    ✓ {p.freeReturnsText || "FREE RETURNS"}
+                  <div className="h-10 w-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600"><RefreshCw className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Returns Policy</div>
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.freeReturnsText || "FREE RETURNS"}</div>
                   </div>
+                  <Check className="h-4 w-4 text-green-500 ml-auto" />
                 </div>
               )}
-              {!p.warrantyInfo && p.hasFiveYearGuarantee && (
+              {p.hasFiveYearGuarantee && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
                   <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Shield className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                    ✓ {p.fiveYearGuaranteeText || "5 YEARS GUARANTEE"}
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Guarantee</div>
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.fiveYearGuaranteeText || "5 YEARS GUARANTEE"}</div>
                   </div>
+                  <Check className="h-4 w-4 text-green-500 ml-auto" />
                 </div>
               )}
               {p.hasInstallmentOptions && (
                 <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
                   <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><CreditCard className="h-5 w-5" /></div>
-                  <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                    ✓ {p.installmentOptionsText || "INSTALLMENT OPTIONS"}
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Payment</div>
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.installmentOptionsText || "INSTALLMENT OPTIONS"}</div>
                   </div>
+                  <Check className="h-4 w-4 text-green-500 ml-auto" />
+                </div>
+              )}
+              {p.fullyTested && (
+                <div className="bg-white p-4 border border-slate-100 rounded-lg flex items-center gap-4 shadow-sm">
+                  <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-600"><Package className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quality Control</div>
+                    <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">{p.fullyTestedText || "FULLY TESTED"}</div>
+                  </div>
+                  <Check className="h-4 w-4 text-green-500 ml-auto" />
                 </div>
               )}
             </div>
 
-            {p.wholesalePrice && (
+            {p.wholesalePrice && wholesaleAccount?.status === "APPROVED" && (
               <div className="space-y-3">
-                {wholesaleAccount?.status === "APPROVED" ? (
-                  <div className="bg-slate-900 p-6 rounded-xl shadow-lg border border-slate-800">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Check className="h-5 w-5 text-green-400" />
-                        <span className="text-sm font-black text-white uppercase tracking-widest">Wholesale Tiers</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-2 py-1 rounded">Approved Partner</span>
+                <div className="bg-slate-900 p-6 rounded-xl shadow-lg border border-slate-800">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-5 w-5 text-green-400" />
+                      <span className="text-sm font-black text-white uppercase tracking-widest">Wholesale Tiers</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-2 py-1 rounded">Approved Partner</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {/* Base Tier (Quantity 1) */}
+                    <div className="flex justify-between items-center py-2 border-b border-slate-800">
+                      <span className="text-xs text-slate-400 font-medium">1+ units</span>
+                      <span className="text-sm font-bold text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
                     </div>
                     
-                    <div className="space-y-2">
-                      {/* Base Tier (Quantity 1) */}
-                      <div className="flex justify-between items-center py-2 border-b border-slate-800">
-                        <span className="text-xs text-slate-400 font-medium">1+ units</span>
-                        <span className="text-sm font-bold text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
+                    {/* Custom Tiers */}
+                    {wholesaleTiers.map((tier, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-800 last:border-0">
+                        <span className="text-xs text-slate-400 font-medium">{tier.minQuantity}+ units</span>
+                        <span className="text-sm font-bold text-green-400">{displayPrice(Number(tier.price))}</span>
                       </div>
-                      
-                      {/* Custom Tiers */}
-                      {wholesaleTiers.map((tier, idx) => (
-                        <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-800 last:border-0">
-                          <span className="text-xs text-slate-400 font-medium">{tier.minQuantity}+ units</span>
-                          <span className="text-sm font-bold text-green-400">{displayPrice(Number(tier.price))}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <p className="mt-4 text-[10px] text-slate-500 italic leading-relaxed">
-                      Wholesale prices are applied automatically in your cart based on the total quantity.
-                    </p>
+                    ))}
                   </div>
-                ) : (
-                  <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between shadow-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center text-green-400">
-                        <Check className="h-4 w-4" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Wholesale Available</span>
-                    </div>
-                    <span className="text-sm font-black text-green-400">{displayPrice(Number(p.wholesalePrice))}</span>
-                  </div>
-                )}
+                  
+                  <p className="mt-4 text-[10px] text-slate-500 italic leading-relaxed">
+                    Wholesale prices are applied automatically in your cart based on the total quantity.
+                  </p>
+                </div>
               </div>
             )}
 
