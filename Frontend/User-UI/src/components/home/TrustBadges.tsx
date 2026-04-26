@@ -18,25 +18,28 @@ export function TrustBadges({ section }: TrustBadgesProps) {
   const items = section.config?.items || []
 
   return (
-    <section className="py-4 md:py-10">
+    <section className="py-6 md:py-10 bg-slate-50/50">
       <div className="container-custom">
-        <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] p-6 md:p-12 border border-slate-100 shadow-xl shadow-slate-100/50">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4">
-            {items.map((item: any, idx: number) => {
-              const Icon = ICON_MAP[item.icon] || ArrowRight
-              return (
-                <div key={idx} className="flex flex-row items-center gap-3 md:gap-4 text-left">
-                  <div className="h-10 w-10 md:h-14 md:w-14 shrink-0 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100">
-                    <Icon className="h-5 w-5 md:h-6 md:w-6" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="block text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-900 leading-tight">{item.title}</span>
-                    <p className="hidden md:block text-[10px] text-slate-500 font-medium uppercase tracking-tight">{item.subtitle}</p>
-                  </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+          {items.map((item: any, idx: number) => {
+            const Icon = ICON_MAP[item.icon] || ArrowRight
+            return (
+              <div 
+                key={idx}
+                className="flex flex-col items-center text-center p-4 md:p-6 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md"
+              >
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary mb-3">
+                  <Icon className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
-              )
-            })}
-          </div>
+                <h3 className="font-black text-[11px] md:text-sm text-slate-900 uppercase tracking-tight mb-1">
+                  {item.title}
+                </h3>
+                <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  {item.subtitle}
+                </p>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>

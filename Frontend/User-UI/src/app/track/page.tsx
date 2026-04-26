@@ -132,29 +132,42 @@ function TrackOrderContent() {
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="bg-[#0A1121] p-8 md:p-12 rounded-[2.5rem] border border-slate-600 shadow-sm space-y-12">
                 <div className="flex flex-col md:flex-row justify-between gap-6 border-b border-slate-700 pb-8">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</p>
-                    <h2 className="text-2xl font-black text-[#1FA89A] uppercase tracking-tight mt-1">{order.status || order.shippingStatus}</h2>
+                  <div className="flex flex-wrap gap-8">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Number</p>
+                      <h2 className="text-2xl font-black text-white uppercase tracking-tight mt-1">#{order.orderNumber}</h2>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</p>
+                      <h2 className="text-2xl font-black text-[#1FA89A] uppercase tracking-tight mt-1">{order.status || order.shippingStatus}</h2>
+                    </div>
                   </div>
                   <div className="text-left md:text-right flex flex-col items-start md:items-end gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Number</p>
-                    <p className="font-bold text-white mt-1">#{order.orderNumber}</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2 h-8 text-[10px] font-black uppercase tracking-widest gap-2 bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                      onClick={() => generateOrderPDF({
-                        ...order,
-                        currency: {
-                          code: selectedCountry?.currencyCode || 'USD',
-                          symbol: selectedCountry?.currencySymbol || '$'
-                        }
-                      })}
-                    >
-                      <Download className="h-3 w-3" />
-                      Download Summary
-                    </Button>
-                  </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Estimated Delivery</p>
+                    <h2 className="text-2xl font-black text-[#1FA89A] uppercase tracking-tight mt-1">
+                      {(() => {
+                        const date = new Date(order.createdAt);
+                        date.setDate(date.getDate() + (order.estimatedDays || 3));
+                        return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                      })()}
+                    </h2>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Ordered on: {new Date(order.createdAt).toLocaleDateString()}</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2 h-8 text-[10px] font-black uppercase tracking-widest gap-2 bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                        onClick={() => generateOrderPDF({
+                          ...order,
+                          currency: {
+                            code: selectedCountry?.currencyCode || 'USD',
+                            symbol: selectedCountry?.currencySymbol || '$'
+                          }
+                        })}
+                      >
+                        <Download className="h-3 w-3" />
+                        Download Summary
+                      </Button>
+                    </div>
                 </div>
 
                 {/* Progress Bar */}

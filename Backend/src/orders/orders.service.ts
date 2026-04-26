@@ -146,6 +146,7 @@ export class OrdersService {
     paymentStatus: order.paymentStatus,
     paymentMethod: order.paymentMethod,
     createdAt: order.createdAt,
+    estimatedDays: order.estimatedDays,
     items: order.items.map(item => ({
       name: item.product.name,
       quantity: item.quantity,
@@ -316,6 +317,7 @@ export class OrdersService {
 
     // Tax and Shipping
     let shipping = 0;
+    let estimatedDays = 3; // Default
     const isNewShippingEnabled = await this.shippingZonesService.isEnabled();
 
     // The subtotal here is always in USD (base currency)
@@ -327,6 +329,7 @@ export class OrdersService {
       if (method) {
         const threshold = Number(method.freeShippingThreshold || 0);
         const methodPrice = Number(method.price || 0);
+        estimatedDays = method.estimatedDays || 3;
         
         // Both subtotal and threshold are in USD (base currency)
         shipping = (threshold > 0 && subtotal >= threshold) ? 0 : methodPrice;
@@ -395,6 +398,7 @@ export class OrdersService {
           discount: new Prisma.Decimal(totalDiscount),
           total: new Prisma.Decimal(total),
           notes,
+          estimatedDays,
           shippingAddressId: finalShippingAddressId,
           billingAddressId: finalBillingAddressId,
           items: {

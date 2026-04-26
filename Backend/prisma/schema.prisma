@@ -427,6 +427,7 @@ model Order {
   totalZMW          Decimal?      @db.Decimal(10, 2)
   notes             String?
   trackingNumber   String?
+  estimatedDays     Int?          @default(3)
   shippedAt         DateTime?
   deliveredAt       DateTime?
   createdAt         DateTime      @default(now())

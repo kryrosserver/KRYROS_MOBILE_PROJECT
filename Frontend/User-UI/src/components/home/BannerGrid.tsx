@@ -33,11 +33,11 @@ export function BannerGrid({ section }: BannerGridProps) {
   }
 
   return (
-    <div className="container-custom py-12">
+    <div className="container-custom py-6 md:py-10">
       {(section.title || section.subtitle) && (
-        <div className="mb-8 text-center">
-          {section.title && <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight mb-2">{section.title}</h2>}
-          {section.subtitle && <p className="text-slate-500 font-medium">{section.subtitle}</p>}
+        <div className="mb-6 text-center">
+          {section.title && <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight mb-1">{section.title}</h2>}
+          {section.subtitle && <p className="text-sm md:text-base text-slate-500 font-medium">{section.subtitle}</p>}
         </div>
       )}
       

@@ -25,7 +25,7 @@ export function CreditSection({ section }: { section?: any }) {
 
   return (
     <section 
-      className="py-12 md:py-24 text-white overflow-hidden relative"
+      className="py-6 md:py-12 text-white overflow-hidden relative"
       style={{ backgroundColor: section?.backgroundColor || '#0a1121' }}
     >
       <div className="container-custom relative z-10">

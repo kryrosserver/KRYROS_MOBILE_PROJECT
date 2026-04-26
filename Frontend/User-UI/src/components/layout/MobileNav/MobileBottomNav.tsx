@@ -47,7 +47,7 @@ export default function MobileBottomNav() {
     { label: "Shop", icon: Store, href: "/shop" },
     { label: "Pay", icon: CreditCard, href: "/pay" },
     { label: "Cart", icon: ShoppingBag, href: "/cart", badge: cartCount },
-    { label: "Tracking", icon: Package, href: "/tracking" },
+    { label: "Tracking", icon: Package, href: "/track" },
   ] as const;
 
   return (

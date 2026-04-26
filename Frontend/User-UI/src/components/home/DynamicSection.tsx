@@ -91,10 +91,10 @@ export function DynamicSection({ section, banners }: SectionProps) {
         return <PopularFiltersProducts section={section} />
       case 'TextBlock':
         return (
-          <div className="container-custom py-12 md:py-24 text-center">
-            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-4">{section.title}</h2>
-            <p className="text-lg opacity-80 max-w-2xl mx-auto">{section.subtitle}</p>
-            {section.description && <div className="mt-8 prose prose-lg max-w-none mx-auto" dangerouslySetInnerHTML={{ __html: section.description }} />}
+          <div className="container-custom py-6 md:py-12 text-center">
+            <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight mb-2">{section.title}</h2>
+            <p className="text-sm md:text-lg opacity-80 max-w-2xl mx-auto">{section.subtitle}</p>
+            {section.description && <div className="mt-4 prose prose-sm md:prose-lg max-w-none mx-auto" dangerouslySetInnerHTML={{ __html: section.description }} />}
           </div>
         )
       default:
