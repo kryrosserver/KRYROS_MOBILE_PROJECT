@@ -132,21 +132,28 @@ export default function ReviewsPage() {
               <div className="p-6 flex-1 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-sm border-2 border-white shadow-sm overflow-hidden">
+                    <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-black text-sm border-2 border-white shadow-sm overflow-hidden">
                       {review.user?.avatar ? (
                         <img src={review.user.avatar} alt="User" className="h-full w-full object-cover" />
                       ) : (
-                        review.user ? review.user.firstName?.charAt(0) : 'G'
+                        review.user ? review.user.firstName?.charAt(0) : <User className="h-5 w-5" />
                       )}
                     </div>
                     <div>
                       <p className="text-sm font-bold text-slate-900">
                         {review.user ? `${review.user.firstName} ${review.user.lastName}` : 'Guest User'}
                       </p>
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`} />
-                        ))}
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`h-2.5 w-2.5 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`} />
+                          ))}
+                        </div>
+                        {review.isVerified && (
+                          <span className="flex items-center gap-0.5 text-[8px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                            <CheckCircle className="h-2 w-2" /> Verified
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

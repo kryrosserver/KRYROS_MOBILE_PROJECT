@@ -28,6 +28,7 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState("")
   const { toast } = useToast()
 
   async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
@@ -52,7 +53,11 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Show preview immediately
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
     setUploading(true);
+    
     try {
       const compressed = await compressImage(file);
       const res = await fetch(compressed);
@@ -72,10 +77,12 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
         toast({ title: "Photo uploaded!" });
       } else {
         toast({ title: "Upload failed", variant: "destructive" });
+        setPreviewUrl(""); // Clear preview on failure
       }
     } catch (err) {
       console.error("Upload error:", err);
       toast({ title: "Upload failed", variant: "destructive" });
+      setPreviewUrl("");
     } finally {
       setUploading(false);
     }
@@ -111,14 +118,15 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
       } else {
         setIsSuccess(true)
         if (onSuccess) onSuccess()
-        setTimeout(() => {
-          onClose()
-          setIsSuccess(false)
-          setRating(0)
-          setComment("")
-          setImageUrl("")
-          setOrderNumber("")
-        }, 2000)
+          setTimeout(() => {
+            onClose()
+            setIsSuccess(false)
+            setRating(0)
+            setComment("")
+            setImageUrl("")
+            setPreviewUrl("")
+            setOrderNumber("")
+          }, 2000)
       }
     } catch (err) {
       toast({
@@ -147,7 +155,7 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden"
           >
             {isSuccess ? (
               <div className="p-12 text-center flex flex-col items-center gap-4">
@@ -159,14 +167,27 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
               </div>
             ) : (
               <>
-                <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                <div className="p-6 border-b border-slate-50 flex items-center justify-between shrink-0">
                   <h3 className="text-lg font-black uppercase tracking-tight text-slate-900">Rate Product</h3>
                   <button onClick={onClose} className="h-10 w-10 rounded-full hover:bg-slate-50 flex items-center justify-center transition-colors">
                     <X className="h-5 w-5 text-slate-400" />
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto custom-scrollbar">
+                  {/* Info for Guest Users */}
+                  {!user && (
+                    <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex gap-3">
+                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <ShoppingBag className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <p className="text-[10px] font-medium text-blue-700 leading-relaxed">
+                        <span className="font-black uppercase tracking-widest block mb-0.5">Guest Review Enabled</span>
+                        You can now leave reviews as a guest! Provide your order number below to get a <span className="font-black">Verified Buyer</span> badge.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Product Info */}
                   <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="h-16 w-16 bg-white rounded-xl overflow-hidden border border-slate-200 shrink-0">
@@ -238,16 +259,30 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
                   <div className="space-y-2">
                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Add a photo (Optional)</p>
                     <div className="relative">
-                      {imageUrl ? (
+                      {previewUrl || imageUrl ? (
                         <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 group">
-                          <img src={imageUrl} alt="Review preview" className="w-full h-full object-cover" />
-                          <button 
-                            type="button"
-                            onClick={() => setImageUrl("")}
-                            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
+                          <img src={previewUrl || imageUrl} alt="Review preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            {uploading ? (
+                              <Loader2 className="h-6 w-6 text-white animate-spin" />
+                            ) : (
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  setImageUrl("");
+                                  setPreviewUrl("");
+                                }}
+                                className="h-10 w-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+                              >
+                                <X className="h-5 w-5" />
+                              </button>
+                            )}
+                          </div>
+                          {uploading && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <Loader2 className="h-8 w-8 text-white animate-spin" />
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <label className="flex flex-col items-center justify-center w-full h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-100 transition-colors">
@@ -257,14 +292,8 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
                             onChange={handleImageUpload}
                             className="hidden" 
                           />
-                          {uploading ? (
-                            <Loader2 className="h-6 w-6 text-slate-400 animate-spin" />
-                          ) : (
-                            <>
-                              <Camera className="h-6 w-6 text-slate-300 mb-2" />
-                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Upload Photo</p>
-                            </>
-                          )}
+                          <Camera className="h-6 w-6 text-slate-300 mb-2" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Upload Photo</p>
                         </label>
                       )}
                     </div>

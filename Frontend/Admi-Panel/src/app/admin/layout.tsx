@@ -34,6 +34,7 @@ const menuItems = [
   { icon: ShoppingBag, label: "Orders", href: "/admin/orders" },
   { icon: LayoutGrid, label: "Categories", href: "/admin/categories" },
   { icon: Tag, label: "Brands", href: "/admin/brands" },
+  { icon: MessageSquare, label: "Reviews", href: "/admin/reviews" },
   { icon: Package, label: "Products", href: "/admin/products" },
   { icon: CreditCard, label: "Payment Links", href: "/admin/payment-links" },
   { icon: Store, label: "Wholesale", href: "/admin/wholesale" },

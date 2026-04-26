@@ -100,16 +100,28 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const importantKeys = ['ram', 'storage', 'memory', 'cpu', 'processor', 'display', 'screen', 'size', 'capacity'];
   let displaySpecs = specs.filter((s: any) => 
     s.key && importantKeys.some(k => s.key.toLowerCase().includes(k))
-  ).map((s: any) => ({
-    ...s,
-    value: s.value.length > 20 ? s.value.split(',')[0].slice(0, 20) + '...' : s.value
-  })).slice(0, 2);
+  ).map((s: any) => {
+    const key = s.key.toLowerCase();
+    let value = s.value;
+    // Enhance display for common tech specs
+    if (key.includes('ram') && !value.toLowerCase().includes('ram')) value = `${value} RAM`;
+    if ((key.includes('storage') || key.includes('memory')) && 
+        !value.toLowerCase().includes('gb') && 
+        !value.toLowerCase().includes('tb')) {
+      value = `${value} Storage`;
+    }
+    
+    return {
+      ...s,
+      displayValue: value.length > 20 ? value.split(',')[0].slice(0, 20).trim() + '...' : value
+    };
+  }).slice(0, 2);
 
   // If no "important" specs found, just take the first two available
   if (displaySpecs.length === 0 && specs.length > 0) {
     displaySpecs = specs.map((s: any) => ({
       ...s,
-      value: s.value.length > 20 ? s.value.slice(0, 20) + '...' : s.value
+      displayValue: s.value.length > 20 ? s.value.slice(0, 20).trim() + '...' : s.value
     })).slice(0, 2);
   }
   
@@ -178,7 +190,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               <div className="mt-1.5 flex flex-wrap gap-2 min-h-[28px]">
                 {displaySpecs.map((spec: any, idx: number) => (
                   <span key={idx} className="inline-flex items-center rounded-md bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-600 border border-slate-200">
-                    {spec.value}
+                    {spec.displayValue}
                   </span>
                 ))}
               </div>
@@ -367,6 +379,17 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             {product?.name}
           </h3>
         </Link>
+
+        {/* Quick Specs (RAM, Storage, etc.) */}
+        {displaySpecs.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-0.5 min-h-[18px]">
+            {displaySpecs.map((spec: any, idx: number) => (
+              <span key={idx} className="inline-flex items-center rounded-md bg-[#F8FAFC] px-1.5 py-0.5 text-[8px] md:text-[9px] font-black text-[#64748B] border border-slate-100 uppercase tracking-tight">
+                {spec.displayValue}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Price Section */}
         <div className="flex items-center flex-wrap gap-2">
