@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Re
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto, UpdateReviewStatusDto } from './dto/review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
@@ -10,9 +11,11 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   create(@Req() req, @Body() createReviewDto: CreateReviewDto) {
-    return this.reviewsService.create(req.user.id, createReviewDto);
+    // If user is logged in (has a token), pass their ID. If not, pass null (Guest).
+    const userId = req.user?.id || null;
+    return this.reviewsService.create(userId, createReviewDto);
   }
 
   @Get()

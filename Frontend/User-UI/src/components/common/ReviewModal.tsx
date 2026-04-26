@@ -2,9 +2,10 @@
 
 import React, { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Star, X, Camera, Loader2, CheckCircle2 } from "lucide-react"
+import { Star, X, Camera, Loader2, CheckCircle2, ShoppingBag } from "lucide-react"
 import { reviewsApi } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/providers/AuthProvider"
 
 interface ReviewModalProps {
   isOpen: boolean
@@ -18,13 +19,67 @@ interface ReviewModalProps {
 }
 
 export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModalProps) {
+  const { user } = useAuth()
   const [rating, setRating] = useState(0)
   const [hover, setHover] = useState(0)
   const [comment, setComment] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [orderNumber, setOrderNumber] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const { toast } = useToast()
+
+  async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
+    const blobURL = URL.createObjectURL(file);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = blobURL;
+    });
+    const scale = Math.min(1, maxWidth / img.width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(blobURL);
+    return canvas.toDataURL("image/jpeg", quality);
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      const res = await fetch(compressed);
+      const blob = await res.blob();
+      
+      const formData = new FormData();
+      formData.append("file", new File([blob], file.name, { type: "image/jpeg" }));
+
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      if (uploadRes.ok) {
+        const data = await uploadRes.json();
+        setImageUrl(data.url);
+        toast({ title: "Photo uploaded!" });
+      } else {
+        toast({ title: "Upload failed", variant: "destructive" });
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast({ title: "Upload failed", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +98,8 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
         productId: product.id,
         rating,
         comment,
-        imageUrl
+        imageUrl,
+        orderNumber: !user ? orderNumber : undefined
       })
 
       if (res.error) {
@@ -61,6 +117,7 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
           setRating(0)
           setComment("")
           setImageUrl("")
+          setOrderNumber("")
         }, 2000)
       }
     } catch (err) {
@@ -116,10 +173,32 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
                       <img src={product.image || "/placeholder.jpg"} alt={product.name} className="h-full w-full object-contain p-1" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-slate-900 line-clamp-1">{product.name}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Verified Purchase</p>
+                      <h4 className="text-sm font-black text-slate-900 line-clamp-1 uppercase">{product.name}</h4>
+                      <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">
+                        {user ? "Verified Purchase" : "Share your experience"}
+                      </p>
                     </div>
                   </div>
+
+                  {/* Order Number (Only for Guest) */}
+                  {!user && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-black uppercase tracking-widest text-slate-400">Order Number (Optional)</p>
+                      <div className="relative">
+                        <ShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <input
+                          type="text"
+                          value={orderNumber}
+                          onChange={(e) => setOrderNumber(e.target.value)}
+                          placeholder="e.g. ORD-12345"
+                          className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed px-1">
+                        Provide your order number to get a <span className="text-emerald-600 font-bold">Verified User</span> badge on your review.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Rating */}
                   <div className="text-center space-y-2">
@@ -155,18 +234,39 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
                     />
                   </div>
 
-                  {/* Image URL (Simplified for now, can be replaced with real upload) */}
+                  {/* Image Upload */}
                   <div className="space-y-2">
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Add a photo URL (Optional)</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Add a photo (Optional)</p>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://example.com/photo.jpg"
-                        className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                      />
-                      <Camera className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                      {imageUrl ? (
+                        <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 group">
+                          <img src={imageUrl} alt="Review preview" className="w-full h-full object-cover" />
+                          <button 
+                            type="button"
+                            onClick={() => setImageUrl("")}
+                            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center w-full h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-100 transition-colors">
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleImageUpload}
+                            className="hidden" 
+                          />
+                          {uploading ? (
+                            <Loader2 className="h-6 w-6 text-slate-400 animate-spin" />
+                          ) : (
+                            <>
+                              <Camera className="h-6 w-6 text-slate-300 mb-2" />
+                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Upload Photo</p>
+                            </>
+                          )}
+                        </label>
+                      )}
                     </div>
                   </div>
 

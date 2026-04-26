@@ -641,7 +641,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                               </div>
                               <div>
                                 <h4 className="text-sm font-bold text-slate-900">
-                                  {review.user?.firstName} {review.user?.lastName?.charAt(0)}.
+                                  {review.user ? `${review.user.firstName} ${review.user.lastName?.charAt(0)}.` : 'Guest User'}
                                 </h4>
                                 <div className="flex items-center gap-2">
                                   <div className="flex text-yellow-400">
@@ -649,8 +649,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                                       <Star key={i} className={`h-2.5 w-2.5 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`} />
                                     ))}
                                   </div>
-                                  {review.isVerified && (
-                                    <span className="text-[8px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-1.5 py-0.5 rounded">Verified Purchase</span>
+                                  {review.userId ? (
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">Verified User</span>
+                                  ) : (
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Guest User</span>
                                   )}
                                 </div>
                               </div>

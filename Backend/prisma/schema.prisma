@@ -303,7 +303,7 @@ model StockMovement {
 model Review {
   id         String   @id @default(uuid())
   productId  String
-  userId     String
+  userId     String?
   rating     Int
   title      String?
   comment    String?  @db.Text
@@ -314,7 +314,7 @@ model Review {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id])
 
   @@map("reviews")
 }

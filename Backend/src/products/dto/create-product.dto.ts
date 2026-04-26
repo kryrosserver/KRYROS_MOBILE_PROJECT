@@ -101,6 +101,20 @@ export class CreateProductDto {
   @IsBoolean()
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
+  isFlashSale?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  flashSalePrice?: number;
+
+  @IsString()
+  @IsOptional()
+  flashSaleEnd?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   hasFreeReturns?: boolean;
 
   @IsString()

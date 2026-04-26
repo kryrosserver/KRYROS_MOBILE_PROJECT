@@ -46,7 +46,6 @@ export default function CMSPage() {
   }, []);
 
   const tabs = [
-    { id: "banners", label: "Hero Banners", icon: ImageIcon, count: bannersCount, href: "/admin/cms/banners" },
     { id: "homepage", label: "Home Sections", icon: Layout, count: 0, href: "/admin/cms/homepage" },
     { id: "shop_filters", label: "Shop Fast Filters", icon: Filter, count: sections.filter((s:any) => s.type === "fast_filters" && s.isActive).length, href: "/admin/cms/shop-filters" },
     { id: "announcement", label: "Announcement Bar", icon: Megaphone, count: footerConfig?.announcementBarEnabled ? 1 : 0, href: "/admin/cms/announcement" },

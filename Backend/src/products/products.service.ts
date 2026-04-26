@@ -346,7 +346,9 @@ export class ProductsService {
       create: { name: categorySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), slug: categorySlug, isActive: true },
     });
 
-    let brandId: number | undefined = data.brandId;
+    let brandId: number | undefined = data.brandId ? Number(data.brandId) : undefined;
+    if (isNaN(brandId as number)) brandId = undefined;
+
     if (!brandId && brandSlug) {
       const brand = await this.prisma.brand.upsert({
         where: { slug: brandSlug },
@@ -362,7 +364,7 @@ export class ProductsService {
         slug,
         description: data.description,
         shortDescription: data.shortDescription ?? data.description,
-        price: data.price,
+        price: Number(data.price),
         sku: data.sku,
         categoryId: category.id,
         brandId,
@@ -371,29 +373,29 @@ export class ProductsService {
         // Ensure mutual exclusivity
         allowCredit: data.allowCredit === true && data.isWholesaleOnly !== true,
         isWholesaleOnly: data.isWholesaleOnly === true,
-        creditMinimum: data.creditMinimum ?? null,
+        creditMinimum: data.creditMinimum ? Number(data.creditMinimum) : null,
         creditMessage: data.creditMessage ?? null,
         deliveryInfo: data.deliveryInfo ?? null,
         warrantyInfo: data.warrantyInfo ?? null,
         isNew: data.isNew ?? true,
-        discountPercentage: data.discountPercentage ?? null,
-        stockTotal: data.stockTotal ?? 0,
-        stockCurrent: data.stockCurrent ?? 0,
+        discountPercentage: data.discountPercentage ? Number(data.discountPercentage) : null,
+        stockTotal: data.stockTotal ? Number(data.stockTotal) : 0,
+        stockCurrent: data.stockCurrent ? Number(data.stockCurrent) : 0,
         hasFiveYearGuarantee: data.hasFiveYearGuarantee ?? false,
         fiveYearGuaranteeText: data.fiveYearGuaranteeText ?? null,
         hasFreeReturns: data.hasFreeReturns ?? false,
         freeReturnsText: data.freeReturnsText ?? null,
         hasInstallmentOptions: data.hasInstallmentOptions ?? false,
         installmentOptionsText: data.installmentOptionsText ?? null,
-        rating: data.rating ?? 0,
-        reviewCount: data.reviewCount ?? 0,
-        wholesalePrice: data.wholesalePrice ?? null,
-        unitsPerPack: data.unitsPerPack ?? 1,
-        wholesaleMoq: data.wholesaleMoq ?? 1,
+        rating: data.rating ? Number(data.rating) : 0,
+        reviewCount: data.reviewCount ? Number(data.reviewCount) : 0,
+        wholesalePrice: data.wholesalePrice ? Number(data.wholesalePrice) : null,
+        unitsPerPack: data.unitsPerPack ? Number(data.unitsPerPack) : 1,
+        wholesaleMoq: data.wholesaleMoq ? Number(data.wholesaleMoq) : 1,
         specifications: data.specifications ? JSON.stringify(data.specifications) : null,
-        isFlashSale: (data as any).isFlashSale ?? false,
-        flashSalePrice: (data as any).flashSalePrice ?? null,
-        flashSaleEnd: (data as any).flashSaleEnd ? new Date((data as any).flashSaleEnd) : null,
+        isFlashSale: data.isFlashSale ?? false,
+        flashSalePrice: data.flashSalePrice ? Number(data.flashSalePrice) : null,
+        flashSaleEnd: (data.flashSaleEnd && data.flashSaleEnd.trim()) ? new Date(data.flashSaleEnd) : null,
       },
     });
 
@@ -451,7 +453,9 @@ export class ProductsService {
       create: { name: categorySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), slug: categorySlug, isActive: true },
     });
 
-    let brandId: number | undefined = data.brandId;
+    let brandId: number | undefined = data.brandId ? Number(data.brandId) : undefined;
+    if (isNaN(brandId as number)) brandId = undefined;
+
     if (!brandId && brandSlug) {
       const brand = await this.prisma.brand.upsert({
         where: { slug: brandSlug },
@@ -467,32 +471,37 @@ export class ProductsService {
         slug,
         description: data.description,
         shortDescription: data.shortDescription ?? data.description,
-        price: data.price,
+        price: Number(data.price),
         sku: data.sku,
         categoryId: category.id,
         brandId,
         isActive: data.isActive ?? true,
         isFeatured: data.isFeatured ?? false,
+        isFlashSale: data.isFlashSale ?? false,
+        flashSalePrice: data.flashSalePrice ? Number(data.flashSalePrice) : null,
+        flashSaleEnd: (data.flashSaleEnd && data.flashSaleEnd.trim()) ? new Date(data.flashSaleEnd) : null,
         // Ensure mutual exclusivity
         allowCredit: data.allowCredit === true && data.isWholesaleOnly !== true,
         isWholesaleOnly: data.isWholesaleOnly === true,
-        creditMinimum: data.creditMinimum ?? null,
+        creditMinimum: data.creditMinimum ? Number(data.creditMinimum) : null,
         creditMessage: data.creditMessage ?? null,
         deliveryInfo: data.deliveryInfo ?? null,
         warrantyInfo: data.warrantyInfo ?? null,
         isNew: data.isNew ?? true,
-        discountPercentage: data.discountPercentage ?? null,
-        stockTotal: data.stockTotal ?? 0,
-        stockCurrent: data.stockCurrent ?? 0,
+        discountPercentage: data.discountPercentage ? Number(data.discountPercentage) : null,
+        stockTotal: data.stockTotal ? Number(data.stockTotal) : 0,
+        stockCurrent: data.stockCurrent ? Number(data.stockCurrent) : 0,
         hasFiveYearGuarantee: data.hasFiveYearGuarantee ?? false,
         fiveYearGuaranteeText: data.fiveYearGuaranteeText ?? null,
         hasFreeReturns: data.hasFreeReturns ?? false,
         freeReturnsText: data.freeReturnsText ?? null,
         hasInstallmentOptions: data.hasInstallmentOptions ?? false,
         installmentOptionsText: data.installmentOptionsText ?? null,
-        rating: data.rating ?? 0,
-        reviewCount: data.reviewCount ?? 0,
-        wholesalePrice: data.wholesalePrice ?? null,
+        rating: data.rating ? Number(data.rating) : 0,
+        reviewCount: data.reviewCount ? Number(data.reviewCount) : 0,
+        wholesalePrice: data.wholesalePrice ? Number(data.wholesalePrice) : null,
+        unitsPerPack: data.unitsPerPack ? Number(data.unitsPerPack) : 1,
+        wholesaleMoq: data.wholesaleMoq ? Number(data.wholesaleMoq) : 1,
         specifications: data.specifications ? JSON.stringify(data.specifications) : null,
       },
     });
@@ -570,7 +579,9 @@ export class ProductsService {
       });
       categoryId = cat.id;
     }
-    let brandId: number | null | undefined = data.brandId;
+    let brandId: number | null | undefined = data.brandId ? Number(data.brandId) : undefined;
+    if (brandId !== undefined && isNaN(brandId as number)) brandId = undefined;
+
     if (brandId === undefined && data.brandSlug !== undefined) {
       const bslug = (data.brandSlug || '').trim().toLowerCase();
       if (bslug) {
@@ -592,31 +603,34 @@ export class ProductsService {
         slug: slug ?? undefined,
         description: data.description ?? undefined,
         shortDescription: data.shortDescription ?? undefined,
-        price: data.price ?? undefined,
+        price: data.price !== undefined ? Number(data.price) : undefined,
         isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
         isFeatured: typeof data.isFeatured === 'boolean' ? data.isFeatured : undefined,
+        isFlashSale: typeof data.isFlashSale === 'boolean' ? data.isFlashSale : undefined,
+        flashSalePrice: data.flashSalePrice !== undefined ? Number(data.flashSalePrice) : undefined,
+        flashSaleEnd: (data.flashSaleEnd && data.flashSaleEnd.trim()) ? new Date(data.flashSaleEnd) : undefined,
         // Mutual exclusivity logic for updates
         allowCredit: data.allowCredit === true ? true : (data.isWholesaleOnly === true ? false : (typeof data.allowCredit === 'boolean' ? data.allowCredit : undefined)),
         isWholesaleOnly: data.isWholesaleOnly === true ? true : (data.allowCredit === true ? false : (typeof data.isWholesaleOnly === 'boolean' ? data.isWholesaleOnly : undefined)),
-        creditMinimum: typeof data.creditMinimum === 'number' ? data.creditMinimum : undefined,
+        creditMinimum: data.creditMinimum !== undefined ? Number(data.creditMinimum) : undefined,
         creditMessage: data.creditMessage !== undefined ? data.creditMessage : undefined,
         deliveryInfo: data.deliveryInfo !== undefined ? data.deliveryInfo : undefined,
         warrantyInfo: data.warrantyInfo !== undefined ? data.warrantyInfo : undefined,
         isNew: typeof data.isNew === 'boolean' ? data.isNew : undefined,
-        discountPercentage: typeof data.discountPercentage === 'number' ? data.discountPercentage : undefined,
-        stockTotal: typeof data.stockTotal === 'number' ? data.stockTotal : undefined,
-        stockCurrent: typeof data.stockCurrent === 'number' ? data.stockCurrent : undefined,
+        discountPercentage: data.discountPercentage !== undefined ? Number(data.discountPercentage) : undefined,
+        stockTotal: data.stockTotal !== undefined ? Number(data.stockTotal) : undefined,
+        stockCurrent: data.stockCurrent !== undefined ? Number(data.stockCurrent) : undefined,
         hasFiveYearGuarantee: typeof data.hasFiveYearGuarantee === 'boolean' ? data.hasFiveYearGuarantee : undefined,
         fiveYearGuaranteeText: data.fiveYearGuaranteeText !== undefined ? data.fiveYearGuaranteeText : undefined,
         hasFreeReturns: typeof data.hasFreeReturns === 'boolean' ? data.hasFreeReturns : undefined,
         freeReturnsText: data.freeReturnsText !== undefined ? data.freeReturnsText : undefined,
         hasInstallmentOptions: typeof data.hasInstallmentOptions === 'boolean' ? data.hasInstallmentOptions : undefined,
         installmentOptionsText: data.installmentOptionsText !== undefined ? data.installmentOptionsText : undefined,
-        rating: typeof data.rating === 'number' ? data.rating : undefined,
-        reviewCount: typeof data.reviewCount === 'number' ? data.reviewCount : undefined,
-        wholesalePrice: typeof data.wholesalePrice === 'number' ? data.wholesalePrice : undefined,
-        unitsPerPack: typeof data.unitsPerPack === 'number' ? data.unitsPerPack : undefined,
-        wholesaleMoq: typeof data.wholesaleMoq === 'number' ? data.wholesaleMoq : undefined,
+        rating: data.rating !== undefined ? Number(data.rating) : undefined,
+        reviewCount: data.reviewCount !== undefined ? Number(data.reviewCount) : undefined,
+        wholesalePrice: data.wholesalePrice !== undefined ? Number(data.wholesalePrice) : undefined,
+        unitsPerPack: data.unitsPerPack !== undefined ? Number(data.unitsPerPack) : undefined,
+        wholesaleMoq: data.wholesaleMoq !== undefined ? Number(data.wholesaleMoq) : undefined,
         categoryId: categoryId ?? undefined,
         brandId: brandId,
         specifications: data.specifications ? JSON.stringify(data.specifications) : undefined,

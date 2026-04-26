@@ -11,6 +11,7 @@ import {
   Wallet,
   Wrench,
   FileText,
+  Image,
   Settings,
   BarChart3,
   Bell,

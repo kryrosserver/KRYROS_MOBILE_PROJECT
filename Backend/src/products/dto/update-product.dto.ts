@@ -105,6 +105,20 @@ export class UpdateProductDto {
   @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
+  isFlashSale?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  flashSalePrice?: number;
+
+  @IsOptional()
+  @IsString()
+  flashSaleEnd?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   hasFreeReturns?: boolean;
 
   @IsOptional()

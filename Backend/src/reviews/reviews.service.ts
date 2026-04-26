@@ -6,32 +6,53 @@ import { CreateReviewDto, UpdateReviewStatusDto } from './dto/review.dto';
 export class ReviewsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(userId: string, data: CreateReviewDto) {
-    // 1. Verify if user actually purchased the product
-    const orderItem = await this.prisma.orderItem.findFirst({
-      where: {
-        productId: data.productId,
-        order: {
-          userId,
-          status: 'DELIVERED',
-        },
-      },
-    });
+  async create(userId: string | null, data: CreateReviewDto) {
+    let isVerified = false;
 
-    if (!orderItem) {
-      throw new BadRequestException('You can only review products you have purchased and received.');
+    // 1. If it's a registered user, verify purchase
+    if (userId) {
+      const orderItem = await this.prisma.orderItem.findFirst({
+        where: {
+          productId: data.productId,
+          order: {
+            userId,
+            status: 'DELIVERED',
+          },
+        },
+      });
+
+      if (!orderItem) {
+        throw new BadRequestException('You can only review products you have purchased and received.');
+      }
+      isVerified = true;
+    } 
+    // 2. If it's a guest with an order number, verify that order contains the product
+    else if (data.orderNumber) {
+      const orderItem = await this.prisma.orderItem.findFirst({
+        where: {
+          productId: data.productId,
+          order: {
+            orderNumber: data.orderNumber,
+            status: 'DELIVERED',
+          },
+        },
+      });
+
+      if (orderItem) {
+        isVerified = true;
+      }
     }
 
-    // 2. Create the review
+    // 3. Create the review (Allowing Guest Reviews)
     return this.prisma.review.create({
       data: {
         productId: data.productId,
-        userId,
+        userId: userId || undefined,
         rating: data.rating,
         comment: data.comment,
         imageUrl: data.imageUrl,
-        isVerified: true,
-        isApproved: true, // Default to approved for now, can be changed to false if moderation is needed
+        isVerified: isVerified,
+        isApproved: true,
       },
     });
   }

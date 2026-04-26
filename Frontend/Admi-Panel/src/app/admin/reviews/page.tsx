@@ -136,11 +136,13 @@ export default function ReviewsPage() {
                       {review.user?.avatar ? (
                         <img src={review.user.avatar} alt="User" className="h-full w-full object-cover" />
                       ) : (
-                        review.user?.firstName?.charAt(0)
+                        review.user ? review.user.firstName?.charAt(0) : 'G'
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900">{review.user?.firstName} {review.user?.lastName}</p>
+                      <p className="text-sm font-bold text-slate-900">
+                        {review.user ? `${review.user.firstName} ${review.user.lastName}` : 'Guest User'}
+                      </p>
                       <div className="flex text-yellow-400">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`} />

@@ -19,17 +19,23 @@ export function ProductReviews({ section }: ProductReviewsProps) {
         const res = await reviewsApi.getAll({ isFeatured: true, take: 10 })
         if (res.data) {
           // Map backend reviews to UI format
-          const formattedReviews = res.data.data.map(r => ({
-            customerName: `${r.user?.firstName} ${r.user?.lastName?.charAt(0)}.`,
-            customerImage: r.user?.avatar || r.imageUrl,
-            role: "VERIFIED BUYER",
-            rating: r.rating,
-            reviewText: r.comment,
-            date: new Date(r.createdAt).toLocaleDateString(),
-            purchasedProduct: r.product?.name,
-            purchasedProductImage: r.product?.images?.[0]?.url || "/placeholder.jpg",
-            purchasedProductLink: `/product/${r.product?.id}`
-          }))
+          const formattedReviews = res.data.data.map(r => {
+            const firstName = r.user?.firstName || "Guest";
+            const lastName = r.user?.lastName ? `${r.user.lastName.charAt(0)}.` : "User";
+            
+            return {
+              customerName: r.user ? `${firstName} ${lastName}` : "Guest User",
+              customerImage: r.user?.avatar || r.imageUrl,
+              role: r.isVerified ? "VERIFIED BUYER" : "GUEST REVIEWER",
+              isVerified: r.isVerified,
+              rating: r.rating,
+              reviewText: r.comment,
+              date: new Date(r.createdAt).toLocaleDateString(),
+              purchasedProduct: r.product?.name,
+              purchasedProductImage: r.product?.images?.[0]?.url || "/placeholder.jpg",
+              purchasedProductLink: `/product/${r.product?.id}`
+            };
+          })
           setReviews(formattedReviews)
         }
       } catch (err) {
@@ -94,7 +100,11 @@ export function ProductReviews({ section }: ProductReviewsProps) {
                   <h4 className="font-black text-sm md:text-base text-slate-900 mb-0.5">
                     {review.customerName}
                   </h4>
-                  <span className="inline-block text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] text-blue-600 border border-blue-600/20 rounded-full px-2 py-0.5 bg-blue-50/30">
+                  <span className={`inline-block text-[7px] md:text-[8px] font-black uppercase tracking-[0.1em] border rounded-full px-2 py-0.5 ${
+                    review.isVerified 
+                      ? "text-blue-600 border-blue-600/20 bg-blue-50/30" 
+                      : "text-slate-500 border-slate-200 bg-slate-50/50"
+                  }`}>
                     {review.role || "REVIEWER"}
                   </span>
                 </div>

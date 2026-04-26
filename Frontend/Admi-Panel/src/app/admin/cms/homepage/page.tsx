@@ -85,6 +85,23 @@ export default function HomePageCMS() {
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   
+  // Hero Slide Management
+  const [banners, setBanners] = useState<any[]>([]);
+  const [loadingBanners, setLoadingBanners] = useState(false);
+  const [showSlideManager, setShowSlideManager] = useState(false);
+  const [editingSlide, setEditingSlide] = useState<any>(null);
+  const [slideForm, setSlideSlideForm] = useState({
+    title: "",
+    subtitle: "",
+    mediaType: "image",
+    image: "",
+    videoUrl: "",
+    link: "",
+    linkText: "Shop Now",
+    position: 0,
+    isActive: true,
+  });
+
   const [form, setForm] = useState({
     type: "HeroSlider",
     title: "",
@@ -102,6 +119,51 @@ export default function HomePageCMS() {
     config: {} as any,
     items: [] as any[]
   });
+
+  const loadBanners = async () => {
+    setLoadingBanners(true);
+    try {
+      const res = await fetch("/internal/cms/banners/manage", { cache: "no-store", credentials: "same-origin" });
+      if (res.ok) {
+        const data = await res.json();
+        setBanners(Array.isArray(data) ? data : data?.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to load banners", err);
+    } finally {
+      setLoadingBanners(false);
+    }
+  };
+
+  const handleSlideSave = async () => {
+    setSaving(true);
+    try {
+      const method = editingSlide ? "PUT" : "POST";
+      const url = editingSlide ? `/internal/cms/banners/${editingSlide.id}` : "/internal/cms/banners";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(slideForm),
+        credentials: "same-origin"
+      });
+      if (res.ok) {
+        setEditingSlide(null);
+        loadBanners();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteSlide = async (id: string) => {
+    if (!confirm("Delete this slide?")) return;
+    const res = await fetch(`/internal/cms/banners/${id}`, { method: "DELETE", credentials: "same-origin" });
+    if (res.ok) loadBanners();
+  };
+
+  useEffect(() => {
+    loadBanners();
+  }, []);
 
   async function compressImage(file: File, maxWidth = 1500, quality = 0.8): Promise<string> {
     const blobURL = URL.createObjectURL(file);
@@ -1683,8 +1745,87 @@ export default function HomePageCMS() {
 
               {form.type === 'HeroSlider' && (
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Hero Slider Config</h3>
-                  <p className="text-xs text-slate-500">Hero Slider uses the Banners module. No additional configuration needed here.</p>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Slider Banners</h3>
+                    <button 
+                      onClick={() => {
+                        setEditingSlide(null);
+                        setSlideSlideForm({
+                          title: "",
+                          subtitle: "",
+                          mediaType: "image",
+                          image: "",
+                          videoUrl: "",
+                          link: "",
+                          linkText: "Shop Now",
+                          position: banners.length,
+                          isActive: true,
+                        });
+                        setShowSlideManager(true);
+                      }}
+                      className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add Slide
+                    </button>
+                  </div>
+                  
+                  {loadingBanners ? (
+                    <div className="flex justify-center py-4"><RefreshCw className="h-5 w-5 animate-spin text-slate-300" /></div>
+                  ) : (
+                    <div className="space-y-2">
+                      {banners.map((slide, idx) => (
+                        <div key={slide.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 group">
+                          <div className="h-10 w-16 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-100">
+                            {slide.mediaType === 'video' ? (
+                              <div className="w-full h-full flex items-center justify-center bg-slate-900"><PlayCircle className="h-4 w-4 text-white" /></div>
+                            ) : (
+                              <img src={resolveImageUrl(slide.image)} className="w-full h-full object-cover" alt="" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-[10px] font-black text-slate-900 uppercase truncate">{slide.title || 'Untitled Slide'}</h4>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate">{slide.subtitle || 'No subtitle'}</p>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => {
+                                setEditingSlide(slide);
+                                setSlideSlideForm({
+                                  title: slide.title || "",
+                                  subtitle: slide.subtitle || "",
+                                  mediaType: slide.mediaType || "image",
+                                  image: slide.image || "",
+                                  videoUrl: slide.videoUrl || "",
+                                  link: slide.link || "",
+                                  linkText: slide.linkText || "Shop Now",
+                                  position: slide.position || 0,
+                                  isActive: slide.isActive ?? true,
+                                });
+                                setShowSlideManager(true);
+                              }}
+                              className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-blue-600 rounded-lg"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => deleteSlide(slide.id)}
+                              className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      {banners.length === 0 && (
+                        <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-xl bg-white/50">
+                          <ImageIcon className="h-6 w-6 text-slate-200 mx-auto mb-1" />
+                          <p className="text-[8px] font-bold text-slate-400 uppercase">No slides found</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
                 </div>
               )}
 
@@ -1838,6 +1979,137 @@ export default function HomePageCMS() {
           )}
         </div>
       </div>
+
+      {/* Hero Slide Manager Modal */}
+      {showSlideManager && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
+                {editingSlide ? 'Edit Slide' : 'Add New Slide'}
+              </h3>
+              <button onClick={() => setShowSlideManager(false)} className="p-2 hover:bg-slate-50 rounded-full">
+                <X className="h-4 w-4 text-slate-400" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Title</label>
+                  <input 
+                    value={slideForm.title}
+                    onChange={(e) => setSlideSlideForm({...slideForm, title: e.target.value})}
+                    className="admin-input" placeholder="e.g. New Summer Collection"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Subtitle</label>
+                  <input 
+                    value={slideForm.subtitle}
+                    onChange={(e) => setSlideSlideForm({...slideForm, subtitle: e.target.value})}
+                    className="admin-input" placeholder="e.g. Up to 50% Off"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Media Type</label>
+                  <select 
+                    value={slideForm.mediaType}
+                    onChange={(e) => setSlideSlideForm({...slideForm, mediaType: e.target.value})}
+                    className="admin-input"
+                  >
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Position</label>
+                  <input 
+                    type="number"
+                    value={slideForm.position}
+                    onChange={(e) => setSlideSlideForm({...slideForm, position: parseInt(e.target.value)})}
+                    className="admin-input"
+                  />
+                </div>
+              </div>
+
+              {slideForm.mediaType === 'image' ? (
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Image</label>
+                  <div className="flex gap-2">
+                    <input 
+                      value={slideForm.image}
+                      onChange={(e) => setSlideSlideForm({...slideForm, image: e.target.value})}
+                      className="admin-input flex-1" placeholder="Image URL"
+                    />
+                    <input 
+                      type="file" id="slide-img" className="hidden" 
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        const res = await fetch("/api/upload", { method: "POST", body: formData });
+                        if (res.ok) {
+                          const data = await res.json();
+                          setSlideSlideForm({...slideForm, image: data.url});
+                        }
+                      }}
+                    />
+                    <label htmlFor="slide-img" className="p-2 bg-slate-50 border rounded-lg cursor-pointer hover:bg-white">
+                      <ImageIcon className="h-5 w-5 text-slate-400" />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Video URL</label>
+                  <input 
+                    value={slideForm.videoUrl}
+                    onChange={(e) => setSlideSlideForm({...slideForm, videoUrl: e.target.value})}
+                    className="admin-input" placeholder="MP4 or YouTube URL"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Button Link</label>
+                  <input 
+                    value={slideForm.link}
+                    onChange={(e) => setSlideSlideForm({...slideForm, link: e.target.value})}
+                    className="admin-input" placeholder="/shop"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Button Text</label>
+                  <input 
+                    value={slideForm.linkText}
+                    onChange={(e) => setSlideSlideForm({...slideForm, linkText: e.target.value})}
+                    className="admin-input" placeholder="Shop Now"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 flex gap-3">
+              <button 
+                onClick={handleSlideSave}
+                disabled={saving}
+                className="btn-primary flex-1 font-black uppercase tracking-widest py-3"
+              >
+                {saving ? 'Saving...' : 'Save Slide'}
+              </button>
+              <button 
+                onClick={() => setShowSlideManager(false)}
+                className="btn-secondary px-6 font-black uppercase tracking-widest"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

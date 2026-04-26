@@ -218,7 +218,7 @@ export const wholesaleApi = {
 
 // Reviews API
 export const reviewsApi = {
-  create: (reviewData: { productId: string; rating: number; comment?: string; imageUrl?: string }) =>
+  create: (reviewData: { productId: string; rating: number; comment?: string; imageUrl?: string; orderNumber?: string }) =>
     fetchApi<any>('/reviews', {
       method: 'POST',
       body: JSON.stringify(reviewData),

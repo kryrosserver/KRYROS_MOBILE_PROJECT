@@ -18,6 +18,10 @@ export class CreateReviewDto {
   @IsString()
   @IsOptional()
   imageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  orderNumber?: string;
 }
 
 export class UpdateReviewStatusDto {
