@@ -8,9 +8,10 @@ import { wholesaleApi } from '@/lib/api'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info, MessageSquare } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, Clock, CreditCard, ChevronLeft, ChevronRight, RefreshCw, Eye, MessageCircle, Minus, Plus, Check, Info, MessageSquare, Star, Package } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon'
 import { FreeShippingProgress } from '@/components/ui/FreeShippingProgress'
+import { reviewsApi } from '@/lib/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-hxfp.onrender.com/api'
 
@@ -24,6 +25,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const [quantity, setQuantity] = useState(1)
   const [includeAccessory, setIncludeAccessory] = useState(false)
   const [mounted, setMounted] = useState(false)
+  
+  // Reviews State
+  const [reviews, setReviews] = useState<any[]>([])
+  const [ratingStats, setRatingStats] = useState({ averageRating: 0, totalReviews: 0 })
+  const [reviewsLoading, setReviewsLoading] = useState(false)
   
   useEffect(() => {
     if (product) {
@@ -72,6 +78,21 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
           const tiersRes = await fetch(`${API_URL}/wholesale/prices/${data.id}`)
           if (tiersRes.ok) {
             setWholesaleTiers(await tiersRes.json())
+          }
+
+          // Fetch reviews and stats
+          setReviewsLoading(true)
+          try {
+            const [reviewsRes, ratingRes] = await Promise.all([
+              reviewsApi.getAll({ productId: data.id, isApproved: true, take: 5 }),
+              reviewsApi.getRating(data.id)
+            ])
+            if (reviewsRes.data) setReviews(reviewsRes.data)
+            if (ratingRes) setRatingStats(ratingRes)
+          } catch (err) {
+            console.error("Reviews fetch error:", err)
+          } finally {
+            setReviewsLoading(false)
           }
         }
       } catch (err) {
@@ -579,6 +600,90 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 </h3>
                 <div className="text-sm leading-relaxed text-slate-600 font-medium whitespace-pre-line">
                   {p.description || "No description available."}
+                </div>
+              </div>
+
+              {/* Reviews Section */}
+              <div className="bg-white p-6 md:p-8 border border-slate-100 shadow-sm rounded-lg">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-8 h-1 bg-blue-600 rounded-full"></span>
+                    Customer Reviews
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <div className="flex text-yellow-400">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`h-4 w-4 ${i < Math.round(ratingStats.averageRating) ? 'fill-current' : 'text-slate-200'}`} />
+                      ))}
+                    </div>
+                    <span className="text-sm font-black text-slate-900">{ratingStats.averageRating.toFixed(1)}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">({ratingStats.totalReviews})</span>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {reviewsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : reviews.length > 0 ? (
+                    <>
+                      {reviews.map((review, idx) => (
+                        <div key={idx} className="pb-6 border-b border-slate-50 last:border-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden">
+                                {review.user?.imageUrl ? (
+                                  <img src={review.user.imageUrl} alt="User" className="h-full w-full object-cover" />
+                                ) : (
+                                  <User className="h-5 w-5" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-bold text-slate-900">
+                                  {review.user?.firstName} {review.user?.lastName?.charAt(0)}.
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex text-yellow-400">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star key={i} className={`h-2.5 w-2.5 ${i < review.rating ? 'fill-current' : 'text-slate-200'}`} />
+                                    ))}
+                                  </div>
+                                  {review.isVerified && (
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-1.5 py-0.5 rounded">Verified Purchase</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-600 leading-relaxed font-medium pl-13">
+                            {review.comment}
+                          </p>
+                          {review.imageUrl && (
+                            <div className="mt-3 pl-13">
+                              <div className="h-20 w-20 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+                                <img src={review.imageUrl} alt="Review" className="h-full w-full object-cover" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {ratingStats.totalReviews > 5 && (
+                        <button className="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 border border-blue-50 rounded-xl hover:bg-blue-50 transition-colors">
+                          View All {ratingStats.totalReviews} Reviews
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-12 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
+                      <MessageSquare className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No reviews yet</p>
+                      <p className="text-[10px] text-slate-400 mt-1">Be the first to share your thoughts!</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

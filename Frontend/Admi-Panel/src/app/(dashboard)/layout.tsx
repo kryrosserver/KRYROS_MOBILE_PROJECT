@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   LogOut,
   Menu,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
 import { useState } from "react";
 import { MobilePreviewToggle } from "@/components/MobilePreviewToggle";
@@ -27,6 +28,7 @@ const menuItems = [
   { icon: Users, label: "Users & Roles", href: "/admin/users" },
   { icon: ShoppingBag, label: "Orders", href: "/admin/orders" },
   { icon: Package, label: "Products", href: "/admin/products" },
+  { icon: MessageSquare, label: "Reviews", href: "/admin/reviews" },
   { icon: Users, label: "Wholesale", href: "/admin/wholesale" },
   { icon: CreditCard, label: "Credit System", href: "/admin/credit" },
   { icon: Wallet, label: "Wallet & Payments", href: "/admin/wallet" },

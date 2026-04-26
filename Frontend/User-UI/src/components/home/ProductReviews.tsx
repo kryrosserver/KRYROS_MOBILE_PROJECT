@@ -1,35 +1,56 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Star } from "lucide-react"
+import { ArrowRight, Star, Loader2 } from "lucide-react"
+import { reviewsApi } from "@/lib/api"
 
 interface ProductReviewsProps {
   section: any
 }
 
 export function ProductReviews({ section }: ProductReviewsProps) {
-  const reviews = section.config?.reviews || [
-    {
-      customerName: "John Doe",
-      role: "REVIEWER",
-      rating: 5,
-      reviewText: "Electronic products are developing a little more every day to make our lives easier. They adapt to the developing digital world.",
-      date: "3 YEARS AGO",
-      purchasedProduct: "13-inch MacBook Air",
-      purchasedProductImage: "/mock/laptop.png",
-      purchasedProductLink: "/product/macbook-air"
-    },
-    {
-      customerName: "John Doe",
-      role: "REVIEWER",
-      rating: 5,
-      reviewText: "Electronic products are developing a little more every day to make our lives easier. They adapt to the developing digital world.",
-      date: "3 YEARS AGO",
-      purchasedProduct: "65\" Customisable Frame",
-      purchasedProductImage: "/mock/tv.png",
-      purchasedProductLink: "/product/frame-tv"
+  const [reviews, setReviews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchFeaturedReviews = async () => {
+      try {
+        const res = await reviewsApi.getAll({ isFeatured: true, take: 10 })
+        if (res.data) {
+          // Map backend reviews to UI format
+          const formattedReviews = res.data.map(r => ({
+            customerName: `${r.user?.firstName} ${r.user?.lastName?.charAt(0)}.`,
+            customerImage: r.user?.imageUrl || r.imageUrl,
+            role: "VERIFIED BUYER",
+            rating: r.rating,
+            reviewText: r.comment,
+            date: new Date(r.createdAt).toLocaleDateString(),
+            purchasedProduct: r.product?.name,
+            purchasedProductImage: r.product?.images?.[0]?.url || "/placeholder.jpg",
+            purchasedProductLink: `/product/${r.product?.id}`
+          }))
+          setReviews(formattedReviews)
+        }
+      } catch (err) {
+        console.error("Failed to fetch featured reviews:", err)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    fetchFeaturedReviews()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="container-custom py-12 flex justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-200" />
+      </div>
+    )
+  }
+
+  if (reviews.length === 0) return null
 
   return (
     <div className="container-custom py-6 md:py-12 bg-white">

@@ -3,11 +3,12 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { ordersApi } from "@/lib/api"
-import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard, Download } from "lucide-react"
+import { Search, Package, Truck, CheckCircle2, MapPin, AlertCircle, Calendar, User, CreditCard, Download, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useCurrency } from "@/providers/CurrencyProvider"
 import { generateOrderPDF } from "@/lib/pdf-utils"
+import { ReviewModal } from "@/components/common/ReviewModal"
 
 function TrackOrderContent() {
   const { formatLocal, convertPrice, selectedCountry } = useCurrency()
@@ -17,6 +18,10 @@ function TrackOrderContent() {
   const [loading, setLoading] = useState(false)
   const [order, setOrder] = useState<any | null>(null)
   const [error, setError] = useState<string | null>(null)
+  
+  // Review Modal State
+  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
 
   useEffect(() => {
     const id = searchParams.get("id")
@@ -272,7 +277,25 @@ function TrackOrderContent() {
                             <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{item.variant || "Standard"}</p>
                             <div className="flex justify-between items-end mt-1">
                               <p className="text-xs text-slate-400 font-medium">{item.quantity}x {displayPrice(item.price)}</p>
-                              <p className="text-sm font-black text-[#1FA89A]">{displayPrice(item.total)}</p>
+                              <div className="flex flex-col items-end gap-2">
+                                <p className="text-sm font-black text-[#1FA89A]">{displayPrice(item.total)}</p>
+                                {order.status === 'DELIVERED' && (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedProduct({
+                                        id: item.productId,
+                                        name: item.name,
+                                        image: item.image
+                                      })
+                                      setReviewModalOpen(true)
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1FA89A]/10 border border-[#1FA89A]/20 text-[#1FA89A] text-[9px] font-black uppercase tracking-widest hover:bg-[#1FA89A] hover:text-white transition-all"
+                                  >
+                                    <Star className="h-2.5 w-2.5 fill-current" />
+                                    Review
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -301,6 +324,17 @@ function TrackOrderContent() {
           )}
         </div>
       </div>
+
+      {selectedProduct && (
+        <ReviewModal
+          isOpen={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false)
+            setSelectedProduct(null)
+          }}
+          product={selectedProduct}
+        />
+      )}
     </main>
   )
 }

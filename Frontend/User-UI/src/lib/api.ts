@@ -216,6 +216,40 @@ export const wholesaleApi = {
     }),
 };
 
+// Reviews API
+export const reviewsApi = {
+  create: (reviewData: { productId: string; rating: number; comment?: string; imageUrl?: string }) =>
+    fetchApi<any>('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    }),
+
+  getAll: (params?: { productId?: string; isFeatured?: boolean; isApproved?: boolean; skip?: number; take?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.productId) queryParams.append('productId', params.productId);
+    if (params?.isFeatured !== undefined) queryParams.append('isFeatured', String(params.isFeatured));
+    if (params?.isApproved !== undefined) queryParams.append('isApproved', String(params.isApproved));
+    if (params?.skip !== undefined) queryParams.append('skip', String(params.skip));
+    if (params?.take !== undefined) queryParams.append('take', String(params.take));
+    
+    const query = queryParams.toString();
+    return fetchApi<{ data: any[]; meta: { total: number; skip: number; take: number } }>(`/reviews${query ? '?' + query : ''}`);
+  },
+
+  getRating: (productId: string) => fetchApi<{ averageRating: number; totalReviews: number }>(`/reviews/product/${productId}/rating`),
+  
+  updateStatus: (id: string, data: { isApproved?: boolean; isFeatured?: boolean }) =>
+    fetchApi<any>(`/reviews/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    fetchApi<any>(`/reviews/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
 // Locations & Shipping API
 export const locationsApi = {
   getCountries: () => fetchApi<any[]>('/countries'),
