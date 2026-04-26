@@ -387,6 +387,8 @@ export class ProductsService {
         freeReturnsText: data.freeReturnsText ?? null,
         hasInstallmentOptions: data.hasInstallmentOptions ?? false,
         installmentOptionsText: data.installmentOptionsText ?? null,
+        fullyTested: data.fullyTested ?? true,
+        fullyTestedText: data.fullyTestedText ?? null,
         rating: data.rating ? Number(data.rating) : 0,
         reviewCount: data.reviewCount ? Number(data.reviewCount) : 0,
         wholesalePrice: data.wholesalePrice ? Number(data.wholesalePrice) : null,
@@ -399,7 +401,8 @@ export class ProductsService {
       },
     });
 
-    if (data.upsellProductId) {
+    // Handle upsell product relation
+    if (data.upsellProductId && data.upsellProductId.trim()) {
       await this.prisma.productRelation.create({
         data: {
           productId: product.id,
@@ -497,6 +500,8 @@ export class ProductsService {
         freeReturnsText: data.freeReturnsText ?? null,
         hasInstallmentOptions: data.hasInstallmentOptions ?? false,
         installmentOptionsText: data.installmentOptionsText ?? null,
+        fullyTested: data.fullyTested ?? true,
+        fullyTestedText: data.fullyTestedText ?? null,
         rating: data.rating ? Number(data.rating) : 0,
         reviewCount: data.reviewCount ? Number(data.reviewCount) : 0,
         wholesalePrice: data.wholesalePrice ? Number(data.wholesalePrice) : null,
@@ -506,7 +511,8 @@ export class ProductsService {
       },
     });
 
-    if (data.upsellProductId) {
+    // Handle upsell product relation
+    if (data.upsellProductId && data.upsellProductId.trim()) {
       await this.prisma.productRelation.create({
         data: {
           productId: product.id,
@@ -626,6 +632,8 @@ export class ProductsService {
         freeReturnsText: data.freeReturnsText !== undefined ? data.freeReturnsText : undefined,
         hasInstallmentOptions: typeof data.hasInstallmentOptions === 'boolean' ? data.hasInstallmentOptions : undefined,
         installmentOptionsText: data.installmentOptionsText !== undefined ? data.installmentOptionsText : undefined,
+        fullyTested: typeof data.fullyTested === 'boolean' ? data.fullyTested : undefined,
+        fullyTestedText: data.fullyTestedText !== undefined ? data.fullyTestedText : undefined,
         rating: data.rating !== undefined ? Number(data.rating) : undefined,
         reviewCount: data.reviewCount !== undefined ? Number(data.reviewCount) : undefined,
         wholesalePrice: data.wholesalePrice !== undefined ? Number(data.wholesalePrice) : undefined,
@@ -637,18 +645,22 @@ export class ProductsService {
       },
     });
 
-    if (data.upsellProductId) {
-      // Clear existing upsells and add new one (simple implementation for now)
+    if (data.upsellProductId !== undefined) {
+      // Clear existing upsells
       await this.prisma.productRelation.deleteMany({
         where: { productId: id, relationType: 'upsell' },
       });
-      await this.prisma.productRelation.create({
-        data: {
-          productId: id,
-          relatedId: String(data.upsellProductId),
-          relationType: 'upsell',
-        },
-      });
+
+      // Add new one if it's not an empty string
+      if (data.upsellProductId && data.upsellProductId.trim()) {
+        await this.prisma.productRelation.create({
+          data: {
+            productId: id,
+            relatedId: String(data.upsellProductId),
+            relationType: 'upsell',
+          },
+        });
+      }
     }
 
     if (Array.isArray(data.imageDataUrls)) {

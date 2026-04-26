@@ -135,6 +135,15 @@ export class UpdateProductDto {
   installmentOptionsText?: string;
 
   @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  fullyTested?: boolean;
+
+  @IsOptional()
+  @IsString()
+  fullyTestedText?: string;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)

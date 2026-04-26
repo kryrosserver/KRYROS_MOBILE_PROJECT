@@ -148,6 +148,7 @@ export default function HomePageCMS() {
       });
       if (res.ok) {
         setEditingSlide(null);
+        setShowSlideManager(false);
         loadBanners();
       }
     } finally {
@@ -158,7 +159,10 @@ export default function HomePageCMS() {
   const deleteSlide = async (id: string) => {
     if (!confirm("Delete this slide?")) return;
     const res = await fetch(`/internal/cms/banners/${id}`, { method: "DELETE", credentials: "same-origin" });
-    if (res.ok) loadBanners();
+    if (res.ok) {
+      loadBanners();
+      setShowSlideManager(false);
+    }
   };
 
   useEffect(() => {
@@ -189,32 +193,23 @@ export default function HomePageCMS() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setForm(prev => ({ 
-          ...prev, 
-          imageUrl: data.url,
-          config: {
-            ...prev.config,
-            backgroundImageUrl: data.url,
-            imageUrl: data.url
-          }
-        }));
-      } else {
-        alert("Failed to upload image");
-      }
+      const base64 = await compressImage(file);
+      setForm(prev => ({ 
+        ...prev, 
+        imageUrl: base64,
+        config: {
+          ...prev.config,
+          backgroundImageUrl: base64,
+          imageUrl: base64
+        }
+      }));
     } catch (err) {
-      console.error("Upload error:", err);
-      alert("Failed to upload image");
+      console.error("Image upload/compression failed:", err);
+      alert("Failed to process image");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -2047,12 +2042,14 @@ export default function HomePageCMS() {
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        const formData = new FormData();
-                        formData.append("file", file);
-                        const res = await fetch("/api/upload", { method: "POST", body: formData });
-                        if (res.ok) {
-                          const data = await res.json();
-                          setSlideSlideForm({...slideForm, image: data.url});
+                        setSaving(true);
+                        try {
+                          const base64 = await compressImage(file);
+                          setSlideSlideForm({...slideForm, image: base64});
+                        } catch (err) {
+                          console.error("Image compression failed", err);
+                        } finally {
+                          setSaving(false);
                         }
                       }}
                     />
