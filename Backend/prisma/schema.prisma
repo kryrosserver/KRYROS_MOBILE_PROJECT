@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,38 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==================== USER & AUTHENTICATION ====================
-
 model User {
-  id                String    @id @default(uuid())
-  email             String?   @unique
-  password          String
-  firstName         String
-  lastName          String
-  phone             String?   @unique
-  avatar            String?
-  role              UserRole  @default(CUSTOMER)
-  isVerified        Boolean   @default(false)
-  isActive          Boolean   @default(true)
-  emailVerifiedAt   DateTime?
-  lastLoginAt       DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relations
-  orders            Order[]
-  addresses         Address[]
-  devices           UserDevice[]
-  creditProfile     CreditProfile?
-  creditAccounts    CreditAccount[]
-  wallet            Wallet?
-  wholesaleAccount  WholesaleAccount?
-  serviceBookings   ServiceBooking[]
-  reviews           Review[]
-  wishlists         WishlistItem[]
-  notifications     Notification[]
-  supportTickets    SupportTicket[]
-  roleAssignments   UserRoleAssignment[]
+  id               String               @id @default(uuid())
+  email            String?              @unique
+  password         String
+  firstName        String
+  lastName         String
+  phone            String?              @unique
+  avatar           String?
+  role             UserRole             @default(CUSTOMER)
+  isVerified       Boolean              @default(false)
+  isActive         Boolean              @default(true)
+  emailVerifiedAt  DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  addresses        Address[]
+  creditAccounts   CreditAccount[]
+  creditProfile    CreditProfile?
+  notifications    Notification[]
+  orders           Order[]
+  reviews          Review[]
+  serviceBookings  ServiceBooking[]
+  supportTickets   SupportTicket[]
+  devices          UserDevice[]
+  roleAssignments  UserRoleAssignment[]
+  wallet           Wallet?
+  wholesaleAccount WholesaleAccount?
+  wishlists        WishlistItem[]
 
   @@map("users")
 }
@@ -50,32 +43,23 @@ model UserDevice {
   id        String   @id @default(uuid())
   userId    String
   fcmToken  String   @unique
-  platform  String   // "android", "ios", "web"
+  platform  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("user_devices")
   @@index([userId, platform])
   @@index([createdAt])
-}
-
-enum UserRole {
-  CUSTOMER
-  WHOLESALER
-  ADMIN
-  SUPER_ADMIN
-  MANAGER
+  @@map("user_devices")
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  name        String       @unique
-  description String?
-  permissions Permission[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id              String               @id @default(uuid())
+  name            String               @unique
+  description     String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  permissions     Permission[]
   userAssignments UserRoleAssignment[]
 
   @@map("roles")
@@ -86,8 +70,8 @@ model Permission {
   name     String @unique
   resource String
   action   String
-  role     Role   @relation(fields: [roleId], references: [id])
   roleId   String
+  role     Role   @relation(fields: [roleId], references: [id])
 
   @@map("permissions")
 }
@@ -96,175 +80,143 @@ model UserRoleAssignment {
   id     String @id @default(uuid())
   userId String
   roleId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@map("user_roles")
 }
 
-// ==================== ADDRESS ====================
-
 model Address {
-  id          String   @id @default(uuid())
-  userId      String?
-  type        AddressType @default(SHIPPING)
-  firstName   String
-  lastName    String
-  email       String?
-  company     String?
-  street      String
-  city        String?
-  state       String?
-  country     String   @default("Zambia")
-  zipCode     String?
-  phone       String
-  isDefault   Boolean  @default(false)
-  
-  // New structured location fields
-  countryId   String?
-  stateId     String?
-  cityId      String?
-  manual      Boolean  @default(false)
-  stateName   String?
-  cityName    String?
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shippingOrders Order[] @relation("OrderShippingAddress")
-  billingOrders  Order[] @relation("OrderBillingAddress")
+  id             String      @id @default(uuid())
+  userId         String?
+  type           AddressType @default(SHIPPING)
+  firstName      String
+  lastName       String
+  company        String?
+  street         String
+  city           String?
+  state          String?
+  country        String      @default("Zambia")
+  zipCode        String?
+  phone          String
+  isDefault      Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  cityId         String?
+  cityName       String?
+  countryId      String?
+  manual         Boolean     @default(false)
+  stateId        String?
+  stateName      String?
+  email          String?
+  user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingOrders  Order[]     @relation("OrderBillingAddress")
+  shippingOrders Order[]     @relation("OrderShippingAddress")
 
   @@map("addresses")
 }
 
-enum AddressType {
-  SHIPPING
-  BILLING
-}
-
-// ==================== CATEGORIES & BRANDS ====================
-
 model Category {
-  id          String     @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
-  slug        String     @unique
+  slug        String       @unique
   description String?
   image       String?
   icon        String?
   parentId    String?
-  sortOrder   Int        @default(0)
-  isActive    Boolean    @default(true)
-  showOnHome  Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children    Category[] @relation("CategoryHierarchy")
-  products    Product[]
+  sortOrder   Int          @default(0)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  showOnHome  Boolean      @default(false)
   brands      Brand[]
+  parent      Category?    @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[]   @relation("CategoryHierarchy")
   creditPlans CreditPlan[]
+  products    Product[]
 
   @@map("categories")
 }
 
 model Brand {
-  id          Int       @id @default(autoincrement())
   name        String
-  slug        String    @unique
+  slug        String       @unique
   logo        String?
   description String?
   website     String?
-  isActive    Boolean   @default(true)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  id          Int          @id @default(autoincrement())
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  products    Product[]
+  category    Category?    @relation(fields: [categoryId], references: [id])
   creditPlans CreditPlan[]
+  products    Product[]
 
   @@map("brands")
 }
 
-// ==================== PRODUCTS ====================
-
 model Product {
-  id                String    @id @default(uuid())
-  name              String
-  slug              String    @unique
-  description       String    @db.Text
-  shortDescription  String?
-  price             Decimal   @db.Decimal(10, 2)
-  salePrice         Decimal?  @db.Decimal(10, 2)
-  // Wholesale Logic
-  isWholesaleOnly   Boolean   @default(false)
-  unitsPerPack      Int       @default(1)
-  wholesaleMoq      Int       @default(1)
-  wholesalePrice    Decimal?  @db.Decimal(10, 2)
-  sku               String    @unique
-  barcode           String?
-  weight            Decimal?  @db.Decimal(10, 3)
-  
-  // Badges & Flags
-  isFeatured        Boolean   @default(false)
-  isFlashSale       Boolean   @default(false)
-  isNew             Boolean   @default(true)
-  discountPercentage Int?      // Manual discount override if needed
-  
-  // Stock Scarcity Logic
-  stockTotal        Int       @default(50)  // Capacity
-  stockCurrent      Int       @default(42)  // Available
-  
-  // Guarantees
-  hasFiveYearGuarantee Boolean @default(true)
-  hasFreeReturns      Boolean @default(true)
-  hasInstallmentOptions      Boolean @default(true)
-  fiveYearGuaranteeText String? @db.Text
-  freeReturnsText      String? @db.Text
-  installmentOptionsText String? @db.Text
-
-  // Ratings
-  rating            Float?    @default(0)
-  reviewCount       Int?      @default(0)
-
-  flashSalePrice    Decimal?  @db.Decimal(10, 2)
-  flashSaleEnd      DateTime?
-  allowCredit       Boolean   @default(false)
-  creditMinimum     Decimal?  @db.Decimal(10, 2)
-  creditMessage     String?   @db.Text
-  deliveryInfo      String?   @db.Text
-  warrantyInfo      String?   @db.Text
-  fullyTested       Boolean   @default(true)
-  fullyTestedText   String?   @db.Text
-  metaTitle         String?
-  metaDescription   String?
-  metaKeywords      String?
-  isActive          Boolean   @default(true)
-  specifications    String?   @db.Text
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relations
-  categoryId        String
-  category          Category  @relation(fields: [categoryId], references: [id])
-  brandId           Int?
-  brand             Brand?    @relation(fields: [brandId], references: [id])
-  
-  images            ProductImage[]
-  variants          ProductVariant[]
-  inventory         Inventory?
-  tags              ProductTag[]
-  reviews            Review[]
-  orderItems        OrderItem[]
-  wholesalePrices   WholesalePrice[]
-  creditAccounts    CreditAccount[]
-  wishlists         WishlistItem[]
-  
-  // Bundle / Upsell logic
-  productRelations ProductRelation[] @relation("ProductRelation")
-  relatedTo        ProductRelation[] @relation("RelatedTo")
+  id                     String            @id @default(uuid())
+  name                   String
+  slug                   String            @unique
+  description            String
+  shortDescription       String?
+  price                  Decimal           @db.Decimal(10, 2)
+  salePrice              Decimal?          @db.Decimal(10, 2)
+  sku                    String            @unique
+  barcode                String?
+  weight                 Decimal?          @db.Decimal(10, 3)
+  isFeatured             Boolean           @default(false)
+  isFlashSale            Boolean           @default(false)
+  flashSalePrice         Decimal?          @db.Decimal(10, 2)
+  flashSaleEnd           DateTime?
+  allowCredit            Boolean           @default(false)
+  creditMinimum          Decimal?          @db.Decimal(10, 2)
+  metaTitle              String?
+  metaDescription        String?
+  metaKeywords           String?
+  isActive               Boolean           @default(true)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  categoryId             String
+  brandId                Int?
+  specifications         String?
+  creditMessage          String?
+  deliveryInfo           String?
+  warrantyInfo           String?
+  discountPercentage     Int?
+  hasFiveYearGuarantee   Boolean           @default(true)
+  hasFreeReturns         Boolean           @default(true)
+  hasInstallmentOptions  Boolean           @default(true)
+  isNew                  Boolean           @default(true)
+  rating                 Float?            @default(0)
+  reviewCount            Int?              @default(0)
+  stockCurrent           Int               @default(42)
+  stockTotal             Int               @default(50)
+  wholesalePrice         Decimal?          @db.Decimal(10, 2)
+  fiveYearGuaranteeText  String?
+  freeReturnsText        String?
+  installmentOptionsText String?
+  isWholesaleOnly        Boolean           @default(false)
+  unitsPerPack           Int               @default(1)
+  wholesaleMoq           Int               @default(1)
+  fullyTested            Boolean           @default(true)
+  fullyTestedText        String?
+  creditAccounts         CreditAccount[]
+  inventory              Inventory?
+  orderItems             OrderItem[]
+  images                 ProductImage[]
+  productRelations       ProductRelation[] @relation("ProductRelation")
+  relatedTo              ProductRelation[] @relation("RelatedTo")
+  tags                   ProductTag[]
+  variants               ProductVariant[]
+  brand                  Brand?            @relation(fields: [brandId], references: [id])
+  category               Category          @relation(fields: [categoryId], references: [id])
+  reviews                Review[]
+  wholesalePrices        WholesalePrice[]
+  wishlists              WishlistItem[]
 
   @@map("products")
 }
@@ -276,27 +228,663 @@ model ProductImage {
   alt       String?
   isPrimary Boolean @default(false)
   sortOrder Int     @default(0)
-
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_images")
 }
 
 model ProductVariant {
-  id          String   @id @default(uuid())
-  productId   String
-  name        String
-  type        VariantType
-  value       String
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
-  sku         String   @unique
-  isActive    Boolean  @default(true)
-
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems  OrderItem[]
+  id         String      @id @default(uuid())
+  productId  String
+  name       String
+  type       VariantType
+  value      String
+  price      Decimal     @db.Decimal(10, 2)
+  stock      Int         @default(0)
+  sku        String      @unique
+  isActive   Boolean     @default(true)
+  orderItems OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_variants")
+}
+
+model ProductTag {
+  id        String  @id @default(uuid())
+  productId String
+  tag       String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tag])
+  @@map("product_tags")
+}
+
+model ProductRelation {
+  id           String  @id @default(uuid())
+  productId    String
+  relatedId    String
+  relationType String  @default("related")
+  product      Product @relation("ProductRelation", fields: [productId], references: [id], onDelete: Cascade)
+  related      Product @relation("RelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, relatedId, relationType])
+  @@map("product_relations")
+}
+
+model Inventory {
+  id             String          @id @default(uuid())
+  productId      String          @unique
+  stock          Int             @default(0)
+  reservedStock  Int             @default(0)
+  reorderLevel   Int             @default(10)
+  isTrackStock   Boolean         @default(true)
+  allowBackorder Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  movements      StockMovement[]
+
+  @@map("inventory")
+}
+
+model StockMovement {
+  id          String            @id @default(uuid())
+  inventoryId String
+  type        StockMovementType
+  quantity    Int
+  reference   String?
+  notes       String?
+  createdAt   DateTime          @default(now())
+  inventory   Inventory         @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@map("stock_movements")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  productId  String
+  userId     String
+  rating     Int
+  title      String?
+  comment    String?
+  isVerified Boolean  @default(false)
+  isApproved Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+model Order {
+  id                String         @id @default(uuid())
+  orderNumber       String         @unique
+  userId            String?
+  status            OrderStatus    @default(PENDING)
+  paymentStatus     PaymentStatus  @default(PENDING)
+  paymentMethod     PaymentMethod?
+  paymentReference  String?
+  subtotal          Decimal        @db.Decimal(10, 2)
+  discount          Decimal        @default(0) @db.Decimal(10, 2)
+  tax               Decimal        @default(0) @db.Decimal(10, 2)
+  shipping          Decimal        @default(0) @db.Decimal(10, 2)
+  total             Decimal        @db.Decimal(10, 2)
+  notes             String?
+  trackingNumber    String?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  shippingAddressId String?
+  billingAddressId  String?
+  paymentPhone      String?
+  totalZMW          Decimal?       @db.Decimal(10, 2)
+  items             OrderItem[]
+  logs              OrderLog[]
+  billingAddress    Address?       @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
+  shippingAddress   Address?       @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
+  user              User?          @relation(fields: [userId], references: [id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String          @id @default(uuid())
+  orderId   String
+  productId String
+  variantId String?
+  quantity  Int
+  price     Decimal         @db.Decimal(10, 2)
+  total     Decimal         @db.Decimal(10, 2)
+  createdAt DateTime        @default(now())
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderLog {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  notes     String?
+  createdAt DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_logs")
+}
+
+model WholesaleAccount {
+  id            String           @id @default(uuid())
+  userId        String           @unique
+  companyName   String
+  taxId         String?
+  address       String?
+  contactPerson String?
+  discountTier  Int              @default(1)
+  status        WholesaleStatus  @default(PENDING)
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prices        WholesalePrice[]
+
+  @@map("wholesale_accounts")
+}
+
+model WholesalePrice {
+  id          String            @id @default(uuid())
+  productId   String
+  accountId   String?
+  minQuantity Int
+  price       Decimal           @db.Decimal(10, 2)
+  account     WholesaleAccount? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, accountId, minQuantity])
+  @@map("wholesale_prices")
+}
+
+model CreditProfile {
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  creditLimit     Decimal         @default(0) @db.Decimal(10, 2)
+  availableCredit Decimal         @default(0) @db.Decimal(10, 2)
+  usedCredit      Decimal         @default(0) @db.Decimal(10, 2)
+  creditScore     Int             @default(500)
+  status          CreditStatus    @default(ACTIVE)
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  accounts        CreditAccount[]
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credit_profiles")
+}
+
+model CreditAccount {
+  id              String              @id @default(uuid())
+  userId          String
+  creditProfileId String?
+  productId       String
+  creditPlanId    String
+  amount          Decimal             @db.Decimal(10, 2)
+  totalPayable    Decimal             @db.Decimal(10, 2)
+  monthlyPayment  Decimal             @db.Decimal(10, 2)
+  paidAmount      Decimal             @default(0) @db.Decimal(10, 2)
+  remainingAmount Decimal             @db.Decimal(10, 2)
+  nextPaymentDate DateTime
+  status          CreditAccountStatus @default(ACTIVE)
+  startDate       DateTime            @default(now())
+  endDate         DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  creditPlan      CreditPlan          @relation(fields: [creditPlanId], references: [id])
+  creditProfile   CreditProfile?      @relation(fields: [creditProfileId], references: [id], onDelete: Cascade)
+  product         Product             @relation(fields: [productId], references: [id])
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments        CreditPayment[]
+
+  @@map("credit_accounts")
+}
+
+model CreditPlan {
+  id               String          @id @default(uuid())
+  name             String
+  duration         Int
+  interestRate     Decimal         @db.Decimal(5, 2)
+  minimumAmount    Decimal         @db.Decimal(10, 2)
+  maximumAmount    Decimal         @db.Decimal(10, 2)
+  description      String?
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  targetBrandId    Int?
+  targetCategoryId String?
+  accounts         CreditAccount[]
+  brand            Brand?          @relation(fields: [targetBrandId], references: [id])
+  category         Category?       @relation(fields: [targetCategoryId], references: [id])
+
+  @@map("credit_plans")
+}
+
+model CreditPayment {
+  id        String              @id @default(uuid())
+  accountId String
+  amount    Decimal             @db.Decimal(10, 2)
+  dueDate   DateTime
+  paidDate  DateTime?
+  status    CreditPaymentStatus @default(PENDING)
+  penalty   Decimal?            @db.Decimal(10, 2)
+  reference String?
+  notes     String?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  account   CreditAccount       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("credit_payments")
+}
+
+model Wallet {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  balance        Decimal       @default(0) @db.Decimal(10, 2)
+  pendingBalance Decimal       @default(0) @db.Decimal(10, 2)
+  currency       String        @default("ZMW")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  transactions   Transaction[]
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  walletId    String
+  type        TransactionType
+  amount      Decimal           @db.Decimal(10, 2)
+  description String?
+  reference   String            @unique
+  status      TransactionStatus @default(PENDING)
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  wallet      Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model Service {
+  id          String           @id @default(uuid())
+  name        String
+  slug        String           @unique
+  description String?
+  price       Decimal          @db.Decimal(10, 2)
+  category    String
+  duration    String
+  image       String?
+  features    String[]
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  bookings    ServiceBooking[]
+
+  @@map("services")
+}
+
+model ServiceBooking {
+  id            String        @id @default(uuid())
+  userId        String
+  serviceId     String
+  scheduledDate DateTime
+  scheduledTime String
+  status        BookingStatus @default(PENDING)
+  notes         String?
+  completedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  service       Service       @relation(fields: [serviceId], references: [id])
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("service_bookings")
+}
+
+model CMSPage {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  content         String?
+  metaTitle       String?
+  metaDescription String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("cms_pages")
+}
+
+model CMSBanner {
+  id          String    @id @default(uuid())
+  title       String
+  subtitle    String?
+  image       String?
+  link        String?
+  linkText    String?
+  isActive    Boolean   @default(true)
+  position    Int       @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  mediaType   String    @default("image")
+  videoUrl    String?
+  duration    Int?
+  displayDays Int?
+
+  @@map("cms_banners")
+}
+
+model CMSSection {
+  id        String   @id @default(uuid())
+  type      String
+  title     String?
+  subtitle  String?
+  config    Json?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("cms_sections")
+}
+
+model HomePageSection {
+  id              String   @id @default(uuid())
+  type            String
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+  title           String?
+  subtitle        String?
+  description     String?
+  backgroundColor String?
+  textColor       String?
+  imageUrl        String?
+  videoUrl        String?
+  link            String?
+  linkText        String?
+  config          Json?
+  animation       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("homepage_sections")
+}
+
+model FooterSection {
+  id        String       @id @default(uuid())
+  title     String
+  order     Int          @default(0)
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  links     FooterLink[]
+
+  @@map("footer_sections")
+}
+
+model FooterLink {
+  id        String        @id @default(uuid())
+  sectionId String
+  label     String
+  href      String
+  order     Int           @default(0)
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  section   FooterSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@map("footer_links")
+}
+
+model FooterConfig {
+  id                       String   @id @default(uuid())
+  logo                     String?
+  description              String?
+  contactPhone             String?
+  contactEmail             String?
+  contactAddress           String?
+  newsletterTitle          String?  @default("Subscribe to our Newsletter")
+  newsletterSubtitle       String?
+  copyrightText            String?
+  socialLinks              Json?
+  paymentMethods           Json?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  announcementBarBgColor   String?  @default("bg-kryros-dark")
+  announcementBarEnabled   Boolean  @default(true)
+  announcementBarLink      String?
+  announcementBarText      String?  @default("30% discount on all products special for November!")
+  announcementBarTextColor String?  @default("text-kryros-green")
+  newsletterPopupDelay     Int?     @default(3000)
+  newsletterPopupEnabled   Boolean  @default(true)
+  newsletterPopupImage     String?
+  newsletterPopupSubtitle  String?
+  newsletterPopupTitle     String?  @default("Unlock Premium Deals")
+
+  @@map("footer_config")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  userId      String?
+  title       String
+  message     String
+  data        Json?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  orderIds    String[]
+  scheduledAt DateTime?
+  sent        Boolean   @default(false)
+  targetType  String    @default("SINGLE")
+  updatedAt   DateTime  @updatedAt
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model SupportTicket {
+  id          String          @id @default(uuid())
+  userId      String
+  subject     String
+  description String
+  status      TicketStatus    @default(OPEN)
+  priority    TicketPriority  @default(MEDIUM)
+  assignedTo  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    TicketMessage[]
+
+  @@map("support_tickets")
+}
+
+model TicketMessage {
+  id         String        @id @default(uuid())
+  ticketId   String
+  userId     String
+  message    String
+  isInternal Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_messages")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  changes    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model Country {
+  id             String                 @id @default(uuid())
+  name           String                 @unique
+  code           String                 @unique
+  currencyCode   String
+  currencySymbol String
+  symbolPosition SymbolPosition         @default(BEFORE)
+  exchangeRate   Decimal                @default(1.0) @db.Decimal(18, 6)
+  autoRate       Boolean                @default(true)
+  lastRateUpdate DateTime?
+  flag           String?
+  status         Boolean                @default(true)
+  isDefault      Boolean                @default(false)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  paymentMethods CountryPaymentMethod[]
+  shippingZones  ShippingZone[]
+  states         State[]
+
+  @@map("countries")
+}
+
+model State {
+  id            String         @id @default(uuid())
+  countryId     String
+  name          String
+  code          String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  cities        City[]
+  shippingZones ShippingZone[]
+  country       Country        @relation(fields: [countryId], references: [id], onDelete: Cascade)
+
+  @@unique([countryId, name])
+  @@map("states")
+}
+
+model City {
+  id            String         @id @default(uuid())
+  stateId       String
+  name          String
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  state         State          @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  shippingZones ShippingZone[]
+
+  @@unique([stateId, name])
+  @@map("cities")
+}
+
+model ShippingZone {
+  id              String                   @id @default(uuid())
+  name            String                   @unique
+  countryId       String?
+  stateId         String?
+  cityId          String?
+  priority        Int                      @default(0)
+  isActive        Boolean                  @default(true)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  shippingMethods LocationShippingMethod[]
+  city            City?                    @relation(fields: [cityId], references: [id])
+  country         Country?                 @relation(fields: [countryId], references: [id])
+  state           State?                   @relation(fields: [stateId], references: [id])
+
+  @@map("shipping_zones")
+}
+
+model LocationShippingMethod {
+  id                    String       @id @default(uuid())
+  zoneId                String
+  name                  String
+  price                 Decimal      @db.Decimal(10, 2)
+  freeShippingThreshold Decimal?     @db.Decimal(10, 2)
+  estimatedDays         String?
+  status                Boolean      @default(true)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  zone                  ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@map("location_shipping_methods")
+}
+
+model CountryPaymentMethod {
+  id          String   @id @default(uuid())
+  countryId   String
+  name        String
+  description String?
+  logo        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+
+  @@map("country_payment_methods")
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string")
+  category  String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model ShippingMethod {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  fee           Decimal  @db.Decimal(10, 2)
+  minThreshold  Decimal  @default(0) @db.Decimal(10, 2)
+  estimatedDays String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("shipping_methods")
+}
+
+enum UserRole {
+  CUSTOMER
+  WHOLESALER
+  ADMIN
+  SUPER_ADMIN
+  MANAGER
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
 }
 
 enum VariantType {
@@ -307,63 +895,6 @@ enum VariantType {
   OTHER
 }
 
-model ProductTag {
-  id        String  @id @default(uuid())
-  productId String
-  tag       String
-
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, tag])
-  @@map("product_tags")
-}
-
-model ProductRelation {
-  id            String  @id @default(uuid())
-  productId     String
-  relatedId     String
-  relationType  String  @default("related") // "related", "upsell"
-
-  product       Product @relation("ProductRelation", fields: [productId], references: [id], onDelete: Cascade)
-  related       Product @relation("RelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, relatedId, relationType])
-  @@map("product_relations")
-}
-
-// ==================== INVENTORY ====================
-
-model Inventory {
-  id          String    @id @default(uuid())
-  productId   String    @unique
-  stock       Int       @default(0)
-  reservedStock Int     @default(0)
-  reorderLevel Int      @default(10)
-  isTrackStock Boolean  @default(true)
-  allowBackorder Boolean @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  movements   StockMovement[]
-
-  @@map("inventory")
-}
-
-model StockMovement {
-  id            String        @id @default(uuid())
-  inventoryId   String
-  type          StockMovementType
-  quantity      Int
-  reference     String?
-  notes         String?
-  createdAt     DateTime      @default(now())
-
-  inventory     Inventory     @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
-
-  @@map("stock_movements")
-}
-
 enum StockMovementType {
   STOCK_IN
   STOCK_OUT
@@ -371,108 +902,6 @@ enum StockMovementType {
   RELEASED
   ADJUSTMENT
   RETURN
-}
-
-// ==================== REVIEWS ====================
-
-model Review {
-  id          String    @id @default(uuid())
-  productId    String
-  userId      String
-  rating      Int
-  title       String?
-  comment     String?  @db.Text
-  imageUrl    String?
-  isVerified  Boolean   @default(false)
-  isApproved  Boolean   @default(true)
-  isFeatured  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user        User      @relation(fields: [userId], references: [id])
-
-  @@map("reviews")
-}
-
-// ==================== WISHLIST ====================
-
-model WishlistItem {
-  id        String   @id @default(uuid())
-  userId    String
-  productId String
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, productId])
-  @@map("wishlist_items")
-}
-
-// ==================== ORDERS ====================
-
-model Order {
-  id                String        @id @default(uuid())
-  orderNumber       String        @unique
-  userId            String?
-  status            OrderStatus   @default(PENDING)
-  paymentStatus     PaymentStatus @default(PENDING)
-  paymentMethod     PaymentMethod?
-  paymentReference  String?
-  paymentPhone      String?
-  subtotal          Decimal       @db.Decimal(10, 2)
-  discount          Decimal       @default(0) @db.Decimal(10, 2)
-  tax               Decimal       @default(0) @db.Decimal(10, 2)
-  shipping          Decimal       @default(0) @db.Decimal(10, 2)
-  total             Decimal       @db.Decimal(10, 2)
-  totalZMW          Decimal?      @db.Decimal(10, 2)
-  notes             String?
-  trackingNumber   String?
-  estimatedDays     Int?          @default(3)
-  shippedAt         DateTime?
-  deliveredAt       DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-
-  user              User?          @relation(fields: [userId], references: [id])
-  shippingAddressId String?
-  shippingAddress   Address?      @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
-  billingAddressId String?
-  billingAddress    Address?      @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
-  items             OrderItem[]
-  logs              OrderLog[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id          String   @id @default(uuid())
-  orderId     String
-  productId   String
-  variantId   String?
-  quantity    Int
-  price       Decimal  @db.Decimal(10, 2)
-  total       Decimal  @db.Decimal(10, 2)
-  createdAt   DateTime @default(now())
-
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product     Product  @relation(fields: [productId], references: [id])
-  variant     ProductVariant? @relation(fields: [variantId], references: [id])
-
-  @@map("order_items")
-}
-
-model OrderLog {
-  id        String   @id @default(uuid())
-  orderId   String
-  status    OrderStatus
-  notes     String?
-  createdAt DateTime @default(now())
-
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@map("order_logs")
 }
 
 enum OrderStatus {
@@ -503,27 +932,6 @@ enum PaymentMethod {
   WHATSAPP
 }
 
-// ==================== WHOLESALE ====================
-
-model WholesaleAccount {
-  id            String             @id @default(uuid())
-  userId        String             @unique
-  companyName   String
-  taxId         String?
-  address       String?
-  contactPerson String?
-  discountTier  Int                @default(1)
-  status        WholesaleStatus    @default(PENDING)
-  notes         String?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-
-  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prices        WholesalePrice[]
-
-  @@map("wholesale_accounts")
-}
-
 enum WholesaleStatus {
   PENDING
   APPROVED
@@ -531,71 +939,10 @@ enum WholesaleStatus {
   REJECTED
 }
 
-model WholesalePrice {
-  id          String            @id @default(uuid())
-  productId   String
-  accountId   String?
-  minQuantity Int
-  price       Decimal           @db.Decimal(10, 2)
-
-  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
-  account     WholesaleAccount? @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, accountId, minQuantity])
-  @@map("wholesale_prices")
-}
-
-// ==================== CREDIT / INSTALLMENTS ====================
-
-model CreditProfile {
-  id            String        @id @default(uuid())
-  userId        String        @unique
-  creditLimit   Decimal       @default(0) @db.Decimal(10, 2)
-  availableCredit Decimal     @default(0) @db.Decimal(10, 2)
-  usedCredit    Decimal       @default(0) @db.Decimal(10, 2)
-  creditScore   Int           @default(500)
-  status        CreditStatus  @default(ACTIVE)
-  notes         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accounts      CreditAccount[]
-
-  @@map("credit_profiles")
-}
-
 enum CreditStatus {
   ACTIVE
   SUSPENDED
   BLACKLISTED
-}
-
-model CreditAccount {
-  id              String           @id @default(uuid())
-  userId          String
-  creditProfileId String?
-  productId       String
-  creditPlanId    String
-  amount          Decimal          @db.Decimal(10, 2)
-  totalPayable    Decimal          @db.Decimal(10, 2)
-  monthlyPayment  Decimal          @db.Decimal(10, 2)
-  paidAmount      Decimal          @default(0) @db.Decimal(10, 2)
-  remainingAmount Decimal          @db.Decimal(10, 2)
-  nextPaymentDate DateTime
-  status          CreditAccountStatus @default(ACTIVE)
-  startDate       DateTime         @default(now())
-  endDate         DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  creditProfile   CreditProfile?   @relation(fields: [creditProfileId], references: [id], onDelete: Cascade)
-  product         Product          @relation(fields: [productId], references: [id])
-  creditPlan      CreditPlan       @relation(fields: [creditPlanId], references: [id])
-  payments        CreditPayment[]
-
-  @@map("credit_accounts")
 }
 
 enum CreditAccountStatus {
@@ -605,87 +952,11 @@ enum CreditAccountStatus {
   CANCELLED
 }
 
-model CreditPlan {
-  id            String   @id @default(uuid())
-  name          String
-  duration      Int      // months
-  interestRate  Decimal  @db.Decimal(5, 2)
-  minimumAmount Decimal  @db.Decimal(10, 2)
-  maximumAmount Decimal  @db.Decimal(10, 2)
-  description   String?
-  isActive      Boolean  @default(true)
-  
-  // Rules for eligibility
-  targetBrandId    Int?
-  targetCategoryId String?
-  
-  brand            Brand?    @relation(fields: [targetBrandId], references: [id])
-  category         Category? @relation(fields: [targetCategoryId], references: [id])
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  accounts      CreditAccount[]
-
-  @@map("credit_plans")
-}
-
-model CreditPayment {
-  id            String           @id @default(uuid())
-  accountId     String
-  amount        Decimal          @db.Decimal(10, 2)
-  dueDate       DateTime
-  paidDate      DateTime?
-  status        CreditPaymentStatus @default(PENDING)
-  penalty       Decimal?         @db.Decimal(10, 2)
-  reference     String?
-  notes         String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  account       CreditAccount    @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@map("credit_payments")
-}
-
 enum CreditPaymentStatus {
   PENDING
   PAID
   LATE
   MISSED
-}
-
-// ==================== WALLET ====================
-
-model Wallet {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  balance       Decimal   @default(0) @db.Decimal(10, 2)
-  pendingBalance Decimal  @default(0) @db.Decimal(10, 2)
-  currency      String    @default("ZMW")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions  Transaction[]
-
-  @@map("wallets")
-}
-
-model Transaction {
-  id          String           @id @default(uuid())
-  walletId    String
-  type        TransactionType
-  amount      Decimal          @db.Decimal(10, 2)
-  description String?
-  reference   String           @unique
-  status      TransactionStatus @default(PENDING)
-  metadata    Json?
-  createdAt   DateTime         @default(now())
-
-  wallet      Wallet           @relation(fields: [walletId], references: [id], onDelete: Cascade)
-
-  @@map("transactions")
 }
 
 enum TransactionType {
@@ -701,241 +972,12 @@ enum TransactionStatus {
   FAILED
 }
 
-// ==================== SERVICES ====================
-
-model Service {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?  @db.Text
-  price       Decimal  @db.Decimal(10, 2)
-  category    String
-  duration    String
-  image       String?
-  features    String[]
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  bookings    ServiceBooking[]
-
-  @@map("services")
-}
-
-model ServiceBooking {
-  id              String             @id @default(uuid())
-  userId          String
-  serviceId       String
-  scheduledDate   DateTime
-  scheduledTime   String
-  status          BookingStatus       @default(PENDING)
-  notes           String?
-  completedAt     DateTime?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  service         Service            @relation(fields: [serviceId], references: [id])
-
-  @@map("service_bookings")
-}
-
 enum BookingStatus {
   PENDING
   CONFIRMED
   IN_PROGRESS
   COMPLETED
   CANCELLED
-}
-
-// ==================== CMS ====================
-
-model CMSPage {
-  id          String   @id @default(uuid())
-  title       String
-  slug        String   @unique
-  content     String?  @db.Text
-  metaTitle   String?
-  metaDescription String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("cms_pages")
-}
-
-model CMSBanner {
-  id          String   @id @default(uuid())
-  title       String
-  subtitle    String?
-  mediaType   String   @default("image") // "image" or "video"
-  image       String?  // For image URL or uploaded image
-  videoUrl    String?  // For video URL
-  link        String?
-  linkText    String?
-  isActive    Boolean  @default(true)
-  position    Int      @default(0)
-  duration    Int?      // Duration in seconds for video banners (carousel timing)
-  displayDays Int?      // How many days to display this banner (auto-hides after this many days)
-  startDate   DateTime?
-  endDate     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("cms_banners")
-}
-
-model CMSSection {
-  id        String   @id @default(uuid())
-  type      String
-  title     String?
-  subtitle  String?
-  config    Json?
-  isActive  Boolean  @default(true)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("cms_sections")
-}
-
-model HomePageSection {
-  id                String    @id @default(uuid())
-  type              String    // e.g., "HeroBanner", "ProductGrid", "CategoryList", "TextBlock"
-  order             Int       @default(0)
-  isActive          Boolean   @default(true)
-  title             String?
-  subtitle          String?
-  description       String?   @db.Text
-  backgroundColor   String?
-  textColor         String?
-  imageUrl          String?
-  videoUrl          String?
-  link              String?
-  linkText          String?
-  config            Json?     // Flexible JSON for specific settings (e.g., categorySlug, productLimit)
-  animation         String?   // e.g., "fadeIn", "slideInLeft", "zoomIn"
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  @@map("homepage_sections")
-}
-
-// ==================== FOOTER MANAGEMENT ====================
-
-model FooterSection {
-  id        String       @id @default(uuid())
-  title     String       // e.g., "Shop", "Services", "Support", "Company"
-  order     Int          @default(0)
-  isActive  Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  
-  links     FooterLink[]
-
-  @@map("footer_sections")
-}
-
-model FooterLink {
-  id          String       @id @default(uuid())
-  sectionId   String
-  label       String
-  href        String
-  order       Int          @default(0)
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  
-  section     FooterSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-
-  @@map("footer_links")
-}
-
-model FooterConfig {
-  id                String   @id @default(uuid())
-  logo              String?
-  description       String?  @db.Text
-  contactPhone      String?
-  contactEmail      String?
-  contactAddress    String?
-  newsletterTitle   String? @default("Subscribe to our Newsletter")
-  newsletterSubtitle String? @db.Text
-  copyrightText     String?
-  socialLinks       Json?    // Array of { platform: string, url: string }
-  paymentMethods    Json?    // Array of { name: string }
-  
-  // Newsletter Popup Config
-  newsletterPopupEnabled  Boolean @default(true)
-  newsletterPopupTitle    String? @default("Unlock Premium Deals")
-  newsletterPopupSubtitle String? @db.Text
-  newsletterPopupImage    String? // Image for the popup
-  newsletterPopupDelay    Int?    @default(3000) // Delay in ms
-
-  // Announcement Bar Config
-  announcementBarEnabled  Boolean @default(true)
-  announcementBarText     String? @default("30% discount on all products special for November!")
-  announcementBarLink     String?
-  announcementBarBgColor  String? @default("bg-kryros-dark")
-  announcementBarTextColor String? @default("text-kryros-green")
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@map("footer_config")
-}
-
-// ==================== NOTIFICATIONS ====================
-
-model Notification {
-  id          String           @id @default(uuid())
-  userId      String?          // If null, it's a broadcast
-  orderIds    String[]         // Target specific order(s)
-  title       String
-  message     String
-  data        Json?
-  targetType  String           @default("SINGLE") // "SINGLE", "BULK", "STATUS_BASED"
-  isRead      Boolean          @default(false)
-  sent        Boolean          @default(false)
-  scheduledAt DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-// ==================== SUPPORT ====================
-
-model SupportTicket {
-  id          String           @id @default(uuid())
-  userId      String
-  subject     String
-  description String           @db.Text
-  status      TicketStatus     @default(OPEN)
-  priority    TicketPriority   @default(MEDIUM)
-  assignedTo  String?
-  resolvedAt  DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages    TicketMessage[]
-
-  @@map("support_tickets")
-}
-
-model TicketMessage {
-  id          String   @id @default(uuid())
-  ticketId    String
-  userId      String
-  message     String   @db.Text
-  isInternal  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
-  @@map("ticket_messages")
 }
 
 enum TicketStatus {
@@ -953,158 +995,7 @@ enum TicketPriority {
   URGENT
 }
 
-// ==================== AUDIT LOG ====================
-
-model AuditLog {
-  id          String   @id @default(uuid())
-  userId      String?
-  action      String
-  resource    String
-  resourceId  String?
-  changes     Json?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-
-  @@map("audit_logs")
-}
-
-// ==================== COUNTRIES & CURRENCIES ====================
-
-model Country {
-  id                String           @id @default(uuid())
-  name              String           @unique
-  code              String           @unique // ISO 3166-1 alpha-2 (e.g. ZM)
-  currencyCode      String           // e.g. ZMW
-  currencySymbol    String           // e.g. ZK or ZMW
-  symbolPosition    SymbolPosition   @default(BEFORE)
-  exchangeRate      Decimal          @default(1.0) @db.Decimal(18, 6)
-  autoRate          Boolean          @default(true)
-  lastRateUpdate    DateTime?
-  flag              String?          // Emoji or URL
-  status            Boolean          @default(true)
-  isDefault         Boolean          @default(false)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-
-  paymentMethods    CountryPaymentMethod[]
-  states            State[]
-  shippingZones     ShippingZone[]
-
-  @@map("countries")
-}
-
-model State {
-  id        String   @id @default(uuid())
-  countryId String
-  name      String
-  code      String?  // e.g. LUS for Lusaka
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  country       Country        @relation(fields: [countryId], references: [id], onDelete: Cascade)
-  cities        City[]
-  shippingZones ShippingZone[]
-
-  @@unique([countryId, name])
-  @@map("states")
-}
-
-model City {
-  id        String   @id @default(uuid())
-  stateId   String
-  name      String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  state         State          @relation(fields: [stateId], references: [id], onDelete: Cascade)
-  shippingZones ShippingZone[]
-
-  @@unique([stateId, name])
-  @@map("cities")
-}
-
-model ShippingZone {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  countryId String?
-  stateId   String?
-  cityId    String?
-  priority  Int      @default(0) // Higher number = higher priority
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  country         Country?                 @relation(fields: [countryId], references: [id])
-  state           State?                   @relation(fields: [stateId], references: [id])
-  city            City?                    @relation(fields: [cityId], references: [id])
-  shippingMethods LocationShippingMethod[]
-
-  @@map("shipping_zones")
-}
-
-model LocationShippingMethod {
-  id                    String   @id @default(uuid())
-  zoneId                String
-  name                  String
-  price                 Decimal  @db.Decimal(10, 2)
-  freeShippingThreshold Decimal? @db.Decimal(10, 2)
-  estimatedDays         String?
-  status                Boolean  @default(true)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  zone ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-
-  @@map("location_shipping_methods")
-}
-
 enum SymbolPosition {
   BEFORE
   AFTER
-}
-
-model CountryPaymentMethod {
-  id          String   @id @default(uuid())
-  countryId   String
-  name        String   // e.g. MTN Mobile Money
-  description String?
-  logo        String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
-
-  @@map("country_payment_methods")
-}
-
-// ==================== SETTINGS ====================
-
-model Setting {
-  id        String   @id @default(uuid())
-  key       String   @unique
-  value     String   @db.Text
-  type      String   @default("string")
-  category  String   @default("general")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("settings")
-}
-
-model ShippingMethod {
-  id               String   @id @default(uuid())
-  name             String
-  description      String?
-  fee              Decimal  @db.Decimal(10, 2)
-  minThreshold     Decimal  @default(0) @db.Decimal(10, 2)
-  estimatedDays    String?
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  @@map("shipping_methods")
 }
