@@ -148,6 +148,7 @@ export class OrdersService {
     createdAt: order.createdAt,
     estimatedDays: order.estimatedDays,
     items: order.items.map(item => ({
+      productId: item.productId,
       name: item.product.name,
       quantity: item.quantity,
       price: Number(item.price),
