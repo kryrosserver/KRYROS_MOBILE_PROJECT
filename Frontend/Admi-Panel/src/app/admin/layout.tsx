@@ -22,7 +22,8 @@ import {
   X,
   Globe,
   Map as MapIcon,
-  Store
+  Store,
+  MessageSquare
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AdminSettingsProvider, useAdminSettings } from "@/providers/AdminSettingsProvider";
