@@ -60,6 +60,11 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
     
     try {
       const compressed = await compressImage(file);
+      // Immediately set the base64 as the imageUrl to ensure it's not lost
+      setImageUrl(compressed);
+      setPreviewUrl(compressed);
+      
+      setUploading(true);
       const res = await fetch(compressed);
       const blob = await res.blob();
       
@@ -73,16 +78,17 @@ export function ReviewModal({ isOpen, onClose, product, onSuccess }: ReviewModal
 
       if (uploadRes.ok) {
         const data = await uploadRes.json();
+        // Update with the final server URL, but keep the preview
         setImageUrl(data.url);
+        setPreviewUrl(data.url);
         toast({ title: "Photo uploaded!" });
       } else {
-        toast({ title: "Upload failed", variant: "destructive" });
-        setPreviewUrl(""); // Clear preview on failure
+        // Don't clear if it failed, keep the base64 as fallback or let user try again
+        toast({ title: "Upload failed, using local preview", variant: "default" });
       }
     } catch (err) {
       console.error("Upload error:", err);
-      toast({ title: "Upload failed", variant: "destructive" });
-      setPreviewUrl("");
+      toast({ title: "Upload error", variant: "destructive" });
     } finally {
       setUploading(false);
     }

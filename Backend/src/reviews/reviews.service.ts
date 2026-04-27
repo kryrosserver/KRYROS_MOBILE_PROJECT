@@ -9,7 +9,7 @@ export class ReviewsService {
   async create(userId: string | null, data: CreateReviewDto) {
     let isVerified = false;
 
-    // 1. If it's a registered user, verify purchase
+    // 1. If it's a registered user, check if they have a delivered order for this product
     if (userId) {
       const orderItem = await this.prisma.orderItem.findFirst({
         where: {
@@ -21,12 +21,12 @@ export class ReviewsService {
         },
       });
 
-      if (!orderItem) {
-        throw new BadRequestException('You can only review products you have purchased and received.');
+      // If they have a delivered order, mark as verified buyer
+      if (orderItem) {
+        isVerified = true;
       }
-      isVerified = true;
     } 
-    // 2. If it's a guest with an order number, verify that order contains the product
+    // 2. If it's a guest with an order number, check for delivered order
     else if (data.orderNumber) {
       const orderItem = await this.prisma.orderItem.findFirst({
         where: {
@@ -43,7 +43,7 @@ export class ReviewsService {
       }
     }
 
-    // 3. Create the review (Allowing Guest Reviews)
+    // 3. Create the review (Allowing all users to leave reviews)
     return this.prisma.review.create({
       data: {
         productId: data.productId,
