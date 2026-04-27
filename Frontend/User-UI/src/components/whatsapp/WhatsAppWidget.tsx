@@ -1,109 +1,111 @@
 "use client"
 
-import { MessageCircle, X } from "lucide-react"
+import { MessageCircle, X, Send } from "lucide-react"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false)
-  const [showNotification, setShowNotification] = useState(false)
   const [userMessage, setUserMessage] = useState("")
+  const [isPumping, setIsPumping] = useState(false)
+
+  const primaryColor = "#1FA89A"
+  const whatsappNumber = "260966423719" // Support number
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowNotification(true)
-    }, 5000)
-    return () => clearTimeout(timer)
+    // Check if we already showed the auto-popup
+    const hasSeenPopup = localStorage.getItem("kryros_wa_popup_seen")
+    
+    if (!hasSeenPopup) {
+      // Start pumping animation
+      setIsPumping(true)
+      
+      // Stop pumping after 3 pumps (approx 3 seconds) and open chat
+      const timer = setTimeout(() => {
+        setIsPumping(false)
+        setIsOpen(true)
+        localStorage.setItem("kryros_wa_popup_seen", "true")
+      }, 3000)
+      
+      return () => clearTimeout(timer)
+    }
   }, [])
 
-  const whatsappNumber = "260966423719" // Support number
-  const defaultMessage = "Hello Kryros, I'm interested in learning more about your products and credit plans."
-
-  const handleChat = () => {
-    const finalMessage = userMessage.trim() || defaultMessage
+  const handleChat = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const finalMessage = userMessage.trim() || "Hi! Can I help you find the right solution?"
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(finalMessage)}`, '_blank')
     setIsOpen(false)
     setUserMessage("")
   }
 
   return (
-    <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end gap-4 md:bottom-8 md:right-8">
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-6 w-[320px] mb-2 overflow-hidden"
-          >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="h-12 w-12 rounded-2xl bg-green-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-green-100">
-                <MessageCircle className="h-6 w-6" />
-              </div>
-              <div>
-                <h4 className="text-sm font-black uppercase tracking-tight text-slate-900">Kryros Support</h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Online Now</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-600 font-bold leading-relaxed">
-                  How can we help you with today? 👋
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes wa-pump {
+          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 168, 154, 0.7); }
+          50% { transform: scale(1.15); box-shadow: 0 0 0 20px rgba(31, 168, 154, 0); }
+          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 168, 154, 0); }
+        }
+        .animate-wa-pump {
+          animation: wa-pump 1s ease-in-out 3;
+        }
+      `}} />
+      
+      <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end gap-4 md:bottom-8 md:right-8">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20, originX: 1, originY: 1 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 w-[320px] sm:w-[360px] mb-2 relative"
+            >
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Close chat"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              
+              <div className="mb-5 pr-8">
+                <p className="text-slate-700 text-[17px] font-medium leading-snug">
+                  Hi! Can I help you find the right solution?
                 </p>
               </div>
-
-              <div className="relative">
-                <textarea
+              
+              <form onSubmit={handleChat} className="flex items-center gap-3">
+                <input
+                  type="text"
                   value={userMessage}
                   onChange={(e) => setUserMessage(e.target.value)}
-                  placeholder="Type your message here..."
-                  className="w-full min-h-[100px] p-4 bg-white border border-slate-200 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all resize-none"
+                  placeholder="Type a message..."
+                  className="flex-1 h-12 px-4 border border-slate-600/30 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#1FA89A] focus:ring-1 focus:ring-[#1FA89A] transition-all"
+                  autoFocus
                 />
-              </div>
-
-              <button 
-                onClick={handleChat}
-                className="w-full h-14 bg-green-500 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl flex items-center justify-center gap-3 hover:bg-green-600 transition-all shadow-xl shadow-green-100 active:scale-95"
-              >
-                Send to WhatsApp
-                <MessageCircle className="h-4 w-4" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="relative">
-        <AnimatePresence>
-          {showNotification && !isOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-100 whitespace-nowrap"
-            >
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-900">Chat with us!</p>
-              </div>
-              <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-t border-slate-100 rotate-45" />
+                <button
+                  type="submit"
+                  className="h-12 w-12 shrink-0 rounded-full flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95 shadow-md"
+                  style={{ backgroundColor: primaryColor }}
+                  aria-label="Send message"
+                >
+                  <Send className="h-[18px] w-[18px] ml-0.5" />
+                </button>
+              </form>
             </motion.div>
           )}
         </AnimatePresence>
 
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`h-16 w-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 active:scale-90 ${
-            isOpen ? 'bg-slate-900 text-white rotate-90' : 'bg-green-500 text-white shadow-green-100'
-          }`}
+          className={`h-16 w-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-90 text-white ${isPumping && !isOpen ? 'animate-wa-pump' : ''}`}
+          style={{ backgroundColor: isOpen ? '#0f172a' : primaryColor }}
+          aria-label={isOpen ? "Close chat widget" : "Open chat widget"}
         >
           {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-8 w-8" />}
         </button>
       </div>
-    </div>
+    </>
   )
 }
