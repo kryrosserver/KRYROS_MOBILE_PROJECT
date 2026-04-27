@@ -28,8 +28,8 @@ export class ReviewsController {
   ) {
     return this.reviewsService.findAll({
       productId,
-      isFeatured: isFeatured === 'true',
-      isApproved: isApproved === 'true',
+      isFeatured: isFeatured !== undefined ? isFeatured === 'true' : undefined,
+      isApproved: isApproved !== undefined ? isApproved === 'true' : undefined,
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
     });
