@@ -1,0 +1,12 @@
+kind = "web"
+previewPath = "/admin-panel"
+title = "Admin Panel"
+version = "1.0.0"
+
+[[services]]
+localPort = 3001
+name = "Admin Panel"
+paths = ["/admin-panel"]
+
+[services.development]
+run = "cd KRYROS_MOBILE_PROJECT/Frontend/Admi-Panel && npx next dev -p 3001 -H 0.0.0.0"

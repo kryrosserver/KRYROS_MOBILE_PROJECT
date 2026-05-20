@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: kryros-backend
+    env: node
+    region: oregon
+    rootDir: Backend
+    buildCommand: npm install && npm install @nestjs/cli && npx prisma generate && npx nest build
+    startCommand: npx prisma db push --accept-data-loss && node dist/main.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_SEED_EMAIL
+        sync: false
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
+      - key: CORS_ORIGINS
+        value: https://kryros.com,https://www.kryros.com,https://kryrosweb-dr6p.onrender.com,https://kryrosadmin.onrender.com
+      - key: FRONTEND_URL
+        value: https://kryros.com
+
+  - type: web
+    name: kryros-user-ui
+    env: node
+    region: oregon
+    rootDir: Frontend/User-UI
+    buildCommand: npx --yes pnpm@10 install --no-frozen-lockfile && npx pnpm@10 --filter @workspace/kryros run build
+    startCommand: npx pnpm@10 --filter @workspace/kryros run serve
+    envVars:
+      - key: PORT
+        value: "5000"
+      - key: BASE_PATH
+        value: "/"
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
+
+  - type: web
+    name: kryros-admin
+    env: node
+    region: oregon
+    rootDir: Frontend/Admi-Panel
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://kryrosbackend-hxfp.onrender.com/api
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
