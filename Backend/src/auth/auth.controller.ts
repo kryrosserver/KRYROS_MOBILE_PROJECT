@@ -46,7 +46,7 @@ export class AuthController {
           'Authorization required to create privileged accounts',
         );
       }
-      const token = authHeader.split(' ')[1];
+      const token = (Array.isArray(authHeader) ? authHeader[0] : authHeader).split(' ')[1];
       const payload = await this.authService.validateToken(token);
       if (!payload || payload.role !== UserRole.SUPER_ADMIN) {
         throw new ForbiddenException('Only Super Admins can create privileged accounts');
