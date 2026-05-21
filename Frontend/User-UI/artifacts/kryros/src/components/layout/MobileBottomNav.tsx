@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function MobileBottomNav() {
   const [location] = useLocation();
-  const cartCount = useCartStore((s) => s.items.reduce((acc, i) => acc + i.quantity, 0));
+  const cartCount = useCartStore((s) => s.items.reduce((acc, i) => acc + i.qty, 0));
   const sidebarOpen = useSidebarStore((s) => s.open);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);

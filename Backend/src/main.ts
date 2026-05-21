@@ -53,8 +53,32 @@ async function bootstrap() {
   // Required so rate limiting and IP logging use the real client IP, not the proxy IP.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
-  // Security headers
-  app.use((helmet as any).default());
+  // Security headers — CSP, HSTS, XSS protection, clickjacking prevention
+  app.use(
+    (helmet as any).default({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'", 'https:'],
+          objectSrc: ["'none'"],
+          frameSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // Body size limits — kept generous for base64 image uploads
   app.use(json({ limit: '10mb' }));
