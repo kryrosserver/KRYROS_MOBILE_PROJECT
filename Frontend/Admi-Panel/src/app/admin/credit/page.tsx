@@ -157,7 +157,6 @@ export default function CreditPage() {
       const allProds = Array.isArray(productsRes?.products) ? productsRes.products : productsRes?.data || [];
       setProducts(allProds.filter((p: any) => !!p.allowCredit));
     } catch (e) {
-      console.error("Failed to load credit data", e);
     } finally {
       setLoading(false);
     }
@@ -229,7 +228,6 @@ export default function CreditPage() {
         setAccounts(prev => prev.map(acc => acc.id === id ? { ...acc, status: newStatus } : acc));
       }
     } catch (e) {
-      console.error("Failed to update status", e);
     }
   };
 
