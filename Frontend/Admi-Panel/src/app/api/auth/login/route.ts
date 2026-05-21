@@ -18,10 +18,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = await res.json();
+    const data = (await res.json()) as { accessToken: string; refreshToken: string; user: Record<string, unknown> };
     const response = NextResponse.json({ success: true, user: data.user });
 
     response.cookies.set("admin_token", data.accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 15,
+    });
+
+    response.cookies.set("admin_refresh_token", data.refreshToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
