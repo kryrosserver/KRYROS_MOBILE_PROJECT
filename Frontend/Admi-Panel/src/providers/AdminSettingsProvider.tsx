@@ -126,24 +126,28 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
     setScheduledClosures(init.scheduledClosures || []);
 
     // Sync with backend
-    fetch("/api/admin/settings").then(res => res.json()).then(data => {
-      if (Array.isArray(data)) {
-        const opening = data.find((s: any) => s.key === "opening_time")?.value;
-        const closing = data.find((s: any) => s.key === "closing_time")?.value;
-        const manual = data.find((s: any) => s.key === "is_store_closed_manual")?.value === "true";
-        const message = data.find((s: any) => s.key === "store_closed_message")?.value;
-        const scheduled = data.find((s: any) => s.key === "scheduled_closures")?.value;
+    fetch("/api/admin/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const opening = data.find((s: any) => s.key === "opening_time")?.value;
+          const closing = data.find((s: any) => s.key === "closing_time")?.value;
+          const manual = data.find((s: any) => s.key === "is_store_closed_manual")?.value === "true";
+          const message = data.find((s: any) => s.key === "store_closed_message")?.value;
+          const scheduled = data.find((s: any) => s.key === "scheduled_closures")?.value;
 
-        if (opening) setOpeningTime(opening);
-        if (closing) setClosingTime(closing);
-        if (manual !== undefined) setIsStoreClosedManual(manual);
-        if (message) setClosedMessage(message);
-        if (scheduled) {
-          try {
-            setScheduledClosures(JSON.parse(scheduled));
-          } catch {}
+          if (opening) setOpeningTime(opening);
+          if (closing) setClosingTime(closing);
+          if (manual !== undefined) setIsStoreClosedManual(manual);
+          if (message) setClosedMessage(message);
+          if (scheduled) {
+            try {
+              setScheduledClosures(JSON.parse(scheduled));
+            } catch {}
+          }
         }
-      }
+      })
+      .catch(() => {});
 
     const initNotifs = readLS<NotificationItem[]>(LS_NOTIFS, []);
     setNotifications(initNotifs);

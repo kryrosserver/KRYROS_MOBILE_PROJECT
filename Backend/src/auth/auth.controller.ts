@@ -22,9 +22,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { UserRole } from '@prisma/client';
 
-interface AuthenticatedRequest extends Request {
+interface AuthenticatedRequest {
   user: Pick<JwtPayload, 'sub' | 'email' | 'role'> & { id: string };
-  headers: Record<string, string>;
+  headers: Record<string, string | string[] | undefined>;
 }
 
 @ApiTags('Authentication')
