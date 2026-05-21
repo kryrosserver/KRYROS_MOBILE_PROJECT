@@ -34,7 +34,6 @@ export default function CountriesPage() {
       const json = await res.json();
       setData(Array.isArray(json) ? json : json.data || []);
     } catch (e) {
-      console.error("Error loading countries:", e);
       setData([]);
     } finally {
       setLoading(false);
