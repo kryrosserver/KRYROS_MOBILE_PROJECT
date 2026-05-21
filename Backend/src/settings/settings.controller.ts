@@ -4,6 +4,7 @@ import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -23,11 +24,11 @@ export class SettingsController {
   }
 
   @Put(':key')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a setting (Admin only)' })
   update(@Param('key') key: string, @Body('value') value: string) {
-    // In a real app, you would add an AdminGuard here
     return this.settingsService.update(key, value);
   }
 }
