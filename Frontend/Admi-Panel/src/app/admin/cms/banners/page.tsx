@@ -224,7 +224,6 @@ export default function BannersPage() {
                     loadBanners();
                   }
                 } catch (e) {
-                  console.error(e);
                 } finally {
                   setSaving(false);
                 }
