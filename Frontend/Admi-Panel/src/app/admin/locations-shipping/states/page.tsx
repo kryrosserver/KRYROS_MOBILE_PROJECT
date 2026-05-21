@@ -29,7 +29,6 @@ export default function StatesPage() {
       setData(Array.isArray(sJson) ? sJson : sJson.data || []);
       setCountries(Array.isArray(cJson) ? cJson : cJson.data || []);
     } catch (e) {
-      console.error("Error loading states:", e);
       setData([]);
     } finally {
       setLoading(false);
