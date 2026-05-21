@@ -49,7 +49,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
   } catch (error: any) {
-    console.error("Bridge Error:", error);
     return NextResponse.json({ message: `Connection Error: ${error.message}` }, { status: 500 });
   }
 }
