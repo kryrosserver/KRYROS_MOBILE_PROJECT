@@ -144,9 +144,8 @@ export class ProductsService {
       });
 
       return { data: sanitizedProducts, meta: { total, skip, take } };
-    } catch (e) {
-      console.error('Failed to load products:', e.message);
-      return { data: [], meta: { total: 0, skip, take }, error: e.message };
+    } catch {
+      return { data: [], meta: { total: 0, skip, take } };
     }
   }
 
@@ -415,8 +414,8 @@ export class ProductsService {
               },
             });
           }
-        } catch (e) {
-          console.warn('Failed to create upsell relation:', e.message);
+        } catch {
+          // Upsell relation failure is non-fatal
         }
       }
 
@@ -424,7 +423,7 @@ export class ProductsService {
       for (let idx = 0; idx < imgs.length; idx++) {
         const rawUrl = imgs[idx];
         if (typeof rawUrl !== 'string' || !rawUrl.startsWith('data:image')) continue;
-        
+
         const url = await compressImage(rawUrl);
         await this.prisma.productImage.create({
           data: {
@@ -434,7 +433,7 @@ export class ProductsService {
             isPrimary: idx === 0,
             sortOrder: idx,
           },
-        }).catch(e => console.error('Failed to save image:', e.message));
+        }).catch(() => null);
       }
 
       await this.prisma.inventory.create({
@@ -443,11 +442,10 @@ export class ProductsService {
           stock: isNaN(Number(dto.stockCurrent)) ? 0 : Number(dto.stockCurrent),
           reservedStock: 0,
         },
-      }).catch(e => console.error('Failed to create inventory:', e.message));
+      }).catch(() => null);
 
       return this.findById(product.id);
     } catch (error) {
-      console.error('Error creating product:', error);
       throw error;
     }
   }
@@ -561,8 +559,8 @@ export class ProductsService {
               },
             });
           }
-        } catch (e) {
-          console.warn('Failed to create upsell relation:', e.message);
+        } catch {
+          // Upsell relation failure is non-fatal
         }
       }
 
@@ -570,7 +568,7 @@ export class ProductsService {
         try {
           const f = files[idx];
           if (!f || !f.buffer || !f.mimetype) continue;
-          
+
           const { dataUrl } = await compressBuffer(f.buffer);
           await this.prisma.productImage.create({
             data: {
@@ -581,8 +579,8 @@ export class ProductsService {
               sortOrder: idx,
             },
           });
-        } catch (e) {
-          console.error(`Failed to save file image ${idx}:`, e.message);
+        } catch {
+          // Image save failure is non-fatal
         }
       }
 
@@ -592,11 +590,10 @@ export class ProductsService {
           stock: isNaN(Number(dto.stockCurrent)) ? 0 : Number(dto.stockCurrent),
           reservedStock: 0,
         },
-      }).catch(e => console.error('Failed to create inventory:', e.message));
+      }).catch(() => null);
 
       return this.findById(product.id);
     } catch (error) {
-      console.error('Error creating product with files:', error);
       throw error;
     }
   }
@@ -732,8 +729,8 @@ export class ProductsService {
             });
           }
         }
-      } catch (e) {
-        console.warn('Failed to update upsell relation:', e.message);
+      } catch {
+        // Upsell relation failure is non-fatal
       }
     }
 
@@ -745,7 +742,7 @@ export class ProductsService {
         for (let idx = 0; idx < dto.imageDataUrls.length; idx++) {
           const rawUrl = dto.imageDataUrls[idx];
           if (typeof rawUrl !== 'string' || !rawUrl.startsWith('data:image')) continue;
-          
+
           const url = await compressImage(rawUrl);
           await this.prisma.productImage.create({
             data: {
@@ -757,8 +754,8 @@ export class ProductsService {
             },
           });
         }
-      } catch (e) {
-        console.error('Failed to update image data URLs:', e.message);
+      } catch {
+        // Image update failure is non-fatal
       }
     }
 
@@ -789,8 +786,8 @@ export class ProductsService {
               sortOrder: idx,
             },
           });
-        } catch (e) {
-          console.error(`Failed to save file image ${idx}:`, e.message);
+        } catch {
+          // Image save failure is non-fatal
         }
       }
     }
