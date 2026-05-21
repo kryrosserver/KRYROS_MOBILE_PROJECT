@@ -1,9 +1,10 @@
-import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 import { Request } from 'express';
 
 @ApiTags('Wallet')
@@ -14,21 +15,19 @@ export class WalletController {
   constructor(private walletService: WalletService) {}
 
   @Get('manage')
-  @ApiOperation({ summary: 'Admin: List wallets' })
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Admin: List all wallets' })
   getWallets() {
     return this.walletService.listWallets();
   }
 
   @Get('manage/transactions')
-  @ApiOperation({ summary: 'Admin: List recent transactions' })
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Admin: List all recent transactions' })
   getAllTransactions() {
     return this.walletService.listTransactions();
-  }
-
-  @Get(':userId')
-  @ApiOperation({ summary: 'Get user wallet' })
-  getWallet(@Param('userId') userId: string) {
-    return this.walletService.getWallet(userId);
   }
 
   @Get('balance')
@@ -46,8 +45,21 @@ export class WalletController {
     return this.walletService.getTransactions(wallet.id);
   }
 
+  @Get(':userId')
+  @ApiOperation({ summary: 'Get user wallet (owner or admin)' })
+  async getWallet(@Param('userId') userId: string, @Req() req: Request) {
+    const user = (req as any).user;
+    const isAdmin = [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(user.role);
+    if (!isAdmin && user.id !== userId) {
+      throw new ForbiddenException('You do not have access to this wallet');
+    }
+    return this.walletService.getWallet(userId);
+  }
+
   @Get(':walletId/transactions')
-  @ApiOperation({ summary: 'Get wallet transactions' })
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get wallet transactions by wallet ID (Admin only)' })
   getTransactions(@Param('walletId') walletId: string) {
     return this.walletService.getTransactions(walletId);
   }
