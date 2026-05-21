@@ -270,11 +270,13 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 import { InvoiceStoreProvider } from "@/providers/InvoiceStore";
+import TokenRefresher from "@/components/TokenRefresher";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminSettingsProvider>
       <InvoiceStoreProvider>
+        <TokenRefresher />
         <Shell>{children}</Shell>
       </InvoiceStoreProvider>
     </AdminSettingsProvider>
