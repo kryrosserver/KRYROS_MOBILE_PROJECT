@@ -1,9 +1,16 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class AuthService {
@@ -12,24 +19,31 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(identifier: string, password: string): Promise<any> {
-    const user = await this.usersService.findByIdentifier(identifier);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
+  private buildPayload(user: {
+    id: string;
+    email: string | null;
+    phone: string | null;
+    role: string;
+  }): Omit<JwtPayload, 'iat' | 'exp' | 'type'> {
+    return { sub: user.id, email: user.email, phone: user.phone, role: user.role };
+  }
+
+  private signTokens(payload: Omit<JwtPayload, 'iat' | 'exp' | 'type'>) {
+    return {
+      accessToken: this.jwtService.sign({ ...payload, type: 'access' }, { expiresIn: '15m' }),
+      refreshToken: this.jwtService.sign({ ...payload, type: 'refresh' }, { expiresIn: '7d' }),
+    };
   }
 
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByIdentifier(loginDto.identifier);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
-    
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -38,8 +52,6 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
-    const payload = { email: user.email, phone: user.phone, sub: user.id, role: user.role };
-    
     return {
       user: {
         id: user.id,
@@ -50,8 +62,7 @@ export class AuthService {
         role: user.role,
         avatar: user.avatar,
       },
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      ...this.signTokens(this.buildPayload(user)),
     };
   }
 
@@ -74,42 +85,51 @@ export class AuthService {
       }
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    
+    const hashedPassword = await bcrypt.hash(createUserDto.password, BCRYPT_ROUNDS);
+
     const user = await this.usersService.create({
       ...createUserDto,
       password: hashedPassword,
     });
 
-    const { password, ...result } = user;
-    
-    const payload = { email: result.email, phone: result.phone, sub: result.id, role: result.role };
-    
+    const { password: _pw, ...result } = user;
+
     return {
       user: result,
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      ...this.signTokens(this.buildPayload(result)),
     };
   }
 
-  async refreshToken(userId: string) {
-    const user = await this.usersService.findById(userId);
-    
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+  async refreshToken(token: string): Promise<{ accessToken: string }> {
+    let payload: JwtPayload;
+
+    try {
+      payload = this.jwtService.verify<JwtPayload>(token);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    const payload = { email: user.email, phone: user.phone, sub: user.id, role: user.role };
-    
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Invalid token type');
+    }
+
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Account not found or deactivated');
+    }
+
     return {
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      accessToken: this.jwtService.sign(
+        { ...this.buildPayload(user), type: 'access' },
+        { expiresIn: '15m' },
+      ),
     };
   }
 
-  async validateToken(token: string) {
+  async validateToken(token: string): Promise<JwtPayload> {
     try {
-      return this.jwtService.verify(token);
+      return this.jwtService.verify<JwtPayload>(token);
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
