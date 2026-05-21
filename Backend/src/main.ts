@@ -49,6 +49,10 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { logger: isProd ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug'] });
 
+  // Trust the first hop from the reverse proxy (Render, Nginx, etc.)
+  // Required so rate limiting and IP logging use the real client IP, not the proxy IP.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   // Security headers
   app.use((helmet as any).default());
 
