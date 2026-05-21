@@ -40,7 +40,6 @@ export default function UsersPage() {
         setCurrentUser(data);
       }
     } catch (e) {
-      console.error("Failed to fetch current user", e);
     }
   };
 
