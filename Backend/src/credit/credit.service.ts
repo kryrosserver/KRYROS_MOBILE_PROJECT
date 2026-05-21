@@ -48,15 +48,32 @@ export class CreditService {
     });
   }
 
-  async createPlan(data: any) {
+  async createPlan(data: {
+    name: string;
+    duration: number;
+    interestRate: number;
+    minimumAmount: number;
+    maximumAmount: number;
+    description?: string;
+    isActive?: boolean;
+    targetBrandId?: number;
+    targetCategoryId?: string;
+  }) {
     return this.prisma.creditPlan.create({ data });
   }
 
-  async updatePlan(id: string, data: any) {
-    return this.prisma.creditPlan.update({
-      where: { id },
-      data
-    });
+  async updatePlan(id: string, data: {
+    name?: string;
+    duration?: number;
+    interestRate?: number;
+    minimumAmount?: number;
+    maximumAmount?: number;
+    description?: string;
+    isActive?: boolean;
+    targetBrandId?: number | null;
+    targetCategoryId?: string | null;
+  }) {
+    return this.prisma.creditPlan.update({ where: { id }, data });
   }
 
   async deletePlan(id: string) {

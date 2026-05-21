@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
+import { InitializePaymentDto } from './dto/initialize-payment.dto';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -14,20 +15,28 @@ export class PaymentsController {
   constructor(private paymentsService: PaymentsService) {}
 
   @Post('initialize')
-  @ApiOperation({ summary: 'Initialize a payment' })
-  initialize(@Body() body: any) {
-    return { status: 'initialized', ...body };
+  @ApiOperation({ summary: 'Send a 543/cGrate payment prompt to the customer mobile number' })
+  initialize(@Body() body: InitializePaymentDto) {
+    return this.paymentsService.process543Payment(body.orderId, body.phone, body.amount);
   }
 
   @Post('verify')
-  @ApiOperation({ summary: 'Verify a payment' })
-  verify(@Body('reference') reference: string) {
-    return { status: 'verified', reference };
+  @ApiOperation({ summary: 'Check and sync payment status for an order' })
+  verify(@Body('orderId') orderId: string) {
+    return this.paymentsService.checkStatus(orderId);
   }
 
   @Get('status/:orderId')
-  @ApiOperation({ summary: 'Check payment status' })
+  @ApiOperation({ summary: 'Get current payment status for an order' })
   getStatus(@Param('orderId') orderId: string) {
     return this.paymentsService.checkStatus(orderId);
+  }
+
+  @Get('all')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'List all payments (Admin only)' })
+  findAll() {
+    return this.paymentsService.findAll();
   }
 }

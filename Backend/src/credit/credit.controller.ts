@@ -6,6 +6,8 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { Request } from 'express';
+import { CreateCreditPlanDto } from './dto/create-credit-plan.dto';
+import { UpdateCreditPlanDto } from './dto/update-credit-plan.dto';
 
 @ApiTags('Credit')
 @Controller('credit')
@@ -32,7 +34,7 @@ export class CreditController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new credit plan (Admin only)' })
-  createPlan(@Body() body: any) {
+  createPlan(@Body() body: CreateCreditPlanDto) {
     return this.creditService.createPlan(body);
   }
 
@@ -41,7 +43,7 @@ export class CreditController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a credit plan (Admin only)' })
-  updatePlan(@Param('id') id: string, @Body() body: any) {
+  updatePlan(@Param('id') id: string, @Body() body: UpdateCreditPlanDto) {
     return this.creditService.updatePlan(id, body);
   }
 

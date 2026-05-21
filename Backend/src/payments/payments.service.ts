@@ -169,6 +169,24 @@ export class PaymentsService {
     }
   }
 
+  async findAll() {
+    return this.prisma.order.findMany({
+      where: { paymentStatus: { not: 'PENDING' } },
+      select: {
+        id: true,
+        orderNumber: true,
+        paymentStatus: true,
+        paymentReference: true,
+        paymentPhone: true,
+        total: true,
+        createdAt: true,
+        user: { select: { firstName: true, lastName: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
   private mapStatus(status: string): any {
     switch (status) {
       case 'SUCCESS': return 'PAID';

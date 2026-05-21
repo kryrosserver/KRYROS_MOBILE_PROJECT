@@ -6,6 +6,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { Request } from 'express';
+import { ApplyWholesaleDto } from './dto/apply-wholesale.dto';
 
 @ApiTags('Wholesale')
 @Controller('wholesale')
@@ -56,8 +57,8 @@ export class WholesaleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Apply for a wholesale account' })
-  apply(@Req() req: Request, @Body() data: any) {
-    return this.wholesaleService.apply({ ...data, userId: (req as any).user.id });
+  apply(@Req() req: Request, @Body() body: ApplyWholesaleDto) {
+    return this.wholesaleService.apply({ ...body, userId: (req as any).user.id });
   }
 
   @Post('prices/:productId')
@@ -65,7 +66,10 @@ export class WholesaleController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Set tiered wholesale prices for a product (Admin only)' })
-  setPrices(@Param('productId') productId: string, @Body() prices: any[]) {
+  setPrices(
+    @Param('productId') productId: string,
+    @Body() prices: { minQuantity: number; price: number; accountId?: string }[],
+  ) {
     return this.wholesaleService.setProductWholesalePrices(productId, prices);
   }
 

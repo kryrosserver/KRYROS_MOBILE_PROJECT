@@ -31,12 +31,24 @@ export class WholesaleService {
     });
   }
 
-  async apply(data: any) {
-    return this.prisma.wholesaleAccount.create({ 
+  async apply(data: {
+    userId: string;
+    companyName: string;
+    taxId?: string;
+    address?: string;
+    contactPerson?: string;
+    discountTier?: number;
+  }) {
+    return this.prisma.wholesaleAccount.create({
       data: {
-        ...data,
-        status: 'PENDING'
-      } 
+        userId: data.userId,
+        companyName: data.companyName,
+        taxId: data.taxId,
+        address: data.address,
+        contactPerson: data.contactPerson,
+        discountTier: data.discountTier ?? 1,
+        status: 'PENDING',
+      },
     });
   }
 
