@@ -3,34 +3,35 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-
+import * as helmet from 'helmet';
+import { json, urlencoded } from 'express';
 import { execSync } from 'child_process';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { json, urlencoded } from 'express';
 
 async function bootstrap() {
-  const isProd = (process.env.NODE_ENV || 'development') === 'production';
-  try {
-    if (!isProd) {
+  const isProd = process.env.NODE_ENV === 'production';
+
+  if (!isProd) {
+    try {
       execSync('npx prisma db push', { stdio: 'inherit' });
+    } catch {
+      // DB push is optional in development — continue startup
     }
-  } catch (e) {
-    console.log('Prisma db push failed or was skipped');
   }
 
-  // Seed default SUPER_ADMIN if env vars are provided
-  try {
-    const ADMIN_EMAIL = process.env.ADMIN_SEED_EMAIL;
-    const ADMIN_PASSWORD = process.env.ADMIN_SEED_PASSWORD;
-    if (ADMIN_EMAIL && ADMIN_PASSWORD) {
-      const prisma = new PrismaClient();
-      const existing = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
+  // Seed a SUPER_ADMIN account if env vars are provided and account does not exist
+  const adminEmail = process.env.ADMIN_SEED_EMAIL;
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD;
+  if (adminEmail && adminPassword) {
+    const prisma = new PrismaClient();
+    try {
+      const existing = await prisma.user.findUnique({ where: { email: adminEmail } });
       if (!existing) {
-        const hashed = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        const hashed = await bcrypt.hash(adminPassword, 12);
         await prisma.user.create({
           data: {
-            email: ADMIN_EMAIL,
+            email: adminEmail,
             password: hashed,
             firstName: 'Admin',
             lastName: 'User',
@@ -39,48 +40,47 @@ async function bootstrap() {
             isActive: true,
           },
         });
-        console.log('✅ Seeded SUPER_ADMIN account:', ADMIN_EMAIL);
-      } else {
-        console.log('ℹ️ SUPER_ADMIN already exists:', ADMIN_EMAIL);
       }
+    } finally {
       await prisma.$disconnect();
-    } else {
-      console.log('ℹ️ Skipping admin seed (ADMIN_SEED_EMAIL/ADMIN_SEED_PASSWORD not set)');
     }
-  } catch (e) {
-    console.log('Admin seed step failed:', e);
   }
-  const app = await NestFactory.create(AppModule);
-  
-  // Increase request body size limits to allow image uploads via base64 (data URLs)
+
+  const app = await NestFactory.create(AppModule, { logger: isProd ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug'] });
+
+  // Security headers
+  app.use((helmet as any).default());
+
+  // Body size limits — kept generous for base64 image uploads
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
 
-  // Enable CORS for multiple origins
-  const corsList = (process.env.CORS_ORIGINS ||
-    process.env.FRONTEND_URL ||
-    'https://kryros.com, https://www.kryros.com, https://admin.kryros.com, https://www.admin.kryros.com, https://kryrosweb-dr6p.onrender.com, https://kryrosadmin.onrender.com, https://kryros-interface.onrender.com, http://localhost:3000, http://localhost:3001, http://localhost:5000')
+  // CORS — explicit allowlist, no localhost fallback in production
+  const rawOrigins = process.env.CORS_ORIGINS || (isProd ? '' : 'http://localhost:3000,http://localhost:3001,http://localhost:5000');
+  const corsList = rawOrigins
     .split(',')
-    .map((s) => s.trim());
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: corsList,
+    origin: corsList.length > 0 ? corsList : false,
     credentials: true,
   });
 
-  // Global validation pipe
+  // Global validation — reject unknown fields and transform types
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
-      // forbidNonWhitelisted: true, // Commented out to prevent strict rejection of unexpected fields
     }),
   );
 
-  // Swagger documentation (disabled in production to reduce memory usage)
+  // Swagger — development only
   if (!isProd) {
     const config = new DocumentBuilder()
       .setTitle('KRYROS API')
-      .setDescription('KRYROS Mobile Tech - Enterprise Commerce Platform API')
+      .setDescription('KRYROS Mobile Tech — Enterprise Commerce Platform')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
@@ -88,16 +88,10 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  // API prefix
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  
-  console.log(`🚀 KRYROS API is running on: http://localhost:${port}`);
-  if (!isProd) {
-    console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
-  }
 }
 
 bootstrap();
