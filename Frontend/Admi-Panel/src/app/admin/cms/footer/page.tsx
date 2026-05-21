@@ -120,7 +120,6 @@ export default function FooterManagementPage() {
         setConfigForm(data || { socialLinks: [], paymentMethods: [] });
       }
     } catch (err) {
-      console.error("Failed to load footer config:", err);
     }
   };
 
