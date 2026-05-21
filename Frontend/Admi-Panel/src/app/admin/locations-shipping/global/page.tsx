@@ -31,7 +31,6 @@ export default function GlobalMethodsPage() {
       const json = await res.json();
       setData(Array.isArray(json) ? json : json.methods || []);
     } catch (e) {
-      console.error("Error loading global methods:", e);
       setData([]);
     } finally {
       setLoading(false);
