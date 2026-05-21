@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+function extractRoleFromToken(token: string): string | null {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("admin_token")?.value;
-  const role = request.cookies.get("admin_role")?.value;
   const { pathname } = request.nextUrl;
-  const isAdmin = !!token && (role === "ADMIN" || role === "SUPER_ADMIN");
+
+  const role = token ? extractRoleFromToken(token) : null;
+  const isAdmin = !!token && (role === "ADMIN" || role === "SUPER_ADMIN" || role === "MANAGER");
 
   if (pathname === "/") {
     const url = request.nextUrl.clone();
