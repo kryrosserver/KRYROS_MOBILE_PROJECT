@@ -55,6 +55,45 @@ export interface ApiBanner {
   position?: number;
 }
 
+export interface ApiOrder {
+  id: string;
+  orderNumber?: string;
+  status: string;
+  createdAt: string;
+  estimatedDelivery?: string;
+  total?: number;
+  items?: {
+    product?: {
+      name?: string;
+      specs?: string;
+      images?: { url: string; isPrimary?: boolean }[] | string[];
+    };
+    quantity?: number;
+  }[];
+}
+
+export interface ApiShippingZone {
+  id: string;
+  name: string;
+  type?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  operatingHours?: string;
+  isActive?: boolean;
+  image?: string;
+  isRecommended?: boolean;
+}
+
+export interface ApiHomepageSection {
+  id: string;
+  type: string;
+  title?: string;
+  isActive: boolean;
+  config?: Record<string, unknown>;
+  order?: number;
+}
+
 function normalizeProduct(p: any): Product {
   const basePrice = Number(p.price || 0);
   const salePrice = p.salePrice ? Number(p.salePrice) : 0;
@@ -97,12 +136,12 @@ function normalizeProduct(p: any): Product {
   };
 }
 
-async function apiFetch<T>(path: string): Promise<T | null> {
+async function apiFetch<T>(path: string, token?: string): Promise<T | null> {
   try {
     const url = `${API_BASE}${path}`;
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(url, { headers });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -178,4 +217,25 @@ export async function fetchBanners(): Promise<ApiBanner[]> {
   const result = await apiFetch<ApiBanner[]>("/api/cms/banners");
   if (!Array.isArray(result)) return [];
   return result.filter((b) => b.isActive);
+}
+
+export async function fetchOrders(token: string): Promise<ApiOrder[]> {
+  const result = await apiFetch<any>("/api/orders/my-orders", token);
+  if (!result) return [];
+  const list = Array.isArray(result) ? result : result.data ?? result.orders ?? [];
+  return list as ApiOrder[];
+}
+
+export async function fetchShippingZones(type?: string): Promise<ApiShippingZone[]> {
+  const qs = type ? `?type=${type}` : "";
+  const result = await apiFetch<any[]>(`/api/shipping-zones${qs}`);
+  if (!Array.isArray(result)) return [];
+  return result;
+}
+
+export async function fetchHomepageSections(type?: string): Promise<ApiHomepageSection[]> {
+  const qs = type ? `?type=${type}` : "";
+  const result = await apiFetch<any[]>(`/api/cms/homepage-sections${qs}`);
+  if (!Array.isArray(result)) return [];
+  return result.filter((s) => s.isActive !== false);
 }

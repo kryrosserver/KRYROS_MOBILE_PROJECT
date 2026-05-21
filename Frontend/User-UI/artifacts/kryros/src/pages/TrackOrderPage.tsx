@@ -1,44 +1,125 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Search, ChevronLeft, ChevronRight, Headphones, CheckCircle, Truck, MapPin } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Headphones, CheckCircle, Truck, MapPin, Loader2, Package } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuthStore } from "@/store/authStore";
+import { fetchOrders, type ApiOrder } from "@/lib/api";
 
 const statusColors: Record<string, string> = {
   "In Transit": "bg-primary/10 text-primary border-primary/20",
+  "IN_TRANSIT": "bg-primary/10 text-primary border-primary/20",
   "Out for Delivery": "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  "OUT_FOR_DELIVERY": "bg-orange-500/10 text-orange-600 border-orange-500/20",
   "Delivered": "bg-green-500/10 text-green-600 border-green-500/20",
+  "DELIVERED": "bg-green-500/10 text-green-600 border-green-500/20",
   "Cancelled": "bg-red-500/10 text-red-600 border-red-500/20",
+  "CANCELLED": "bg-red-500/10 text-red-600 border-red-500/20",
+  "Pending": "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  "PENDING": "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  "Processing": "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  "PROCESSING": "bg-blue-500/10 text-blue-600 border-blue-500/20",
 };
 
 const filterTabs = ["All Orders", "In Transit", "Out for Delivery", "Delivered", "Cancelled"];
 
-const recentOrder = {
-  name: "iPhone 15 Pro Max", specs: "256GB | Titanium",
-  orderId: "#KRY12345678", placedOn: "May 12, 2024",
-  status: "In Transit", estDelivery: "May 20, 2024",
-  image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=200&q=80",
-  timeline: [
-    { label: "Order Confirmed", date: "May 12, 2024", done: true, active: false },
-    { label: "Shipped", date: "May 14, 2024", done: true, active: false },
-    { label: "In Transit", date: "May 16, 2024", done: true, active: true },
-    { label: "Out for Delivery", date: "Pending", done: false, active: false },
-  ],
+const STATUS_MAP: Record<string, string> = {
+  PENDING: "Pending",
+  PROCESSING: "Processing",
+  SHIPPED: "In Transit",
+  IN_TRANSIT: "In Transit",
+  OUT_FOR_DELIVERY: "Out for Delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
 };
 
-const allOrders = [
-  { id: "o2", name: "Sony WH-1000XM5", specs: "Wireless Headphones", orderId: "#KRY87654321", placedOn: "May 10, 2024", status: "Out for Delivery", estDelivery: "May 18, 2024", image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=200&q=80" },
-  { id: "o3", name: "MacBook Air M2", specs: "13-inch | 512GB", orderId: "#KRY11223344", placedOn: "May 08, 2024", status: "Delivered", estDelivery: "May 15, 2024", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&q=80" },
-  { id: "o4", name: "Nike Air Max 270", specs: "Men's Shoes", orderId: "#KRY55667788", placedOn: "May 05, 2024", status: "In Transit", estDelivery: "May 19, 2024", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80" },
-  { id: "o5", name: "Samsung Galaxy S24 Ultra", specs: "512GB | Titanium Black", orderId: "#KRY99887766", placedOn: "May 02, 2024", status: "Cancelled", estDelivery: "May 03, 2024", image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=200&q=80" },
-];
+function normalizeStatus(s: string): string {
+  return STATUS_MAP[s?.toUpperCase?.()] ?? s ?? "Pending";
+}
+
+function getTimeline(status: string) {
+  const norm = normalizeStatus(status);
+  const steps = [
+    { label: "Order Confirmed", threshold: ["Pending", "Processing", "In Transit", "Out for Delivery", "Delivered"] },
+    { label: "Shipped", threshold: ["In Transit", "Out for Delivery", "Delivered"] },
+    { label: "In Transit", threshold: ["In Transit", "Out for Delivery", "Delivered"] },
+    { label: "Delivered", threshold: ["Delivered"] },
+  ];
+  const activeIdx =
+    norm === "Delivered" ? 3 :
+    norm === "Out for Delivery" ? 3 :
+    norm === "In Transit" ? 2 :
+    norm === "Processing" ? 1 :
+    0;
+  return steps.map((step, i) => ({
+    label: step.label,
+    done: step.threshold.includes(norm),
+    active: i === activeIdx && norm !== "Delivered",
+  }));
+}
+
+interface OrderRow {
+  id: string;
+  name: string;
+  specs: string;
+  orderId: string;
+  placedOn: string;
+  status: string;
+  estDelivery: string;
+  image: string;
+  timeline: { label: string; done: boolean; active: boolean }[];
+}
+
+function normalizeOrder(o: ApiOrder): OrderRow {
+  const item = o.items?.[0];
+  const imgRaw = item?.product?.images?.[0];
+  const image = typeof imgRaw === "string" ? imgRaw : (imgRaw as any)?.url ?? "";
+  const status = normalizeStatus(o.status);
+  return {
+    id: String(o.id),
+    name: item?.product?.name ?? "Order",
+    specs: item?.product?.specs ?? "",
+    orderId: `#${o.orderNumber ?? o.id}`,
+    placedOn: o.createdAt
+      ? new Date(o.createdAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })
+      : "",
+    status,
+    estDelivery: o.estimatedDelivery
+      ? new Date(o.estimatedDelivery).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })
+      : "—",
+    image: image || "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=200&q=80",
+    timeline: getTimeline(o.status),
+  };
+}
+
+const STATUS_FILTER_MAP: Record<string, string[]> = {
+  "In Transit": ["In Transit"],
+  "Out for Delivery": ["Out for Delivery"],
+  "Delivered": ["Delivered"],
+  "Cancelled": ["Cancelled"],
+};
 
 export default function TrackOrderPage() {
+  const { token } = useAuthStore();
   const [searchQ, setSearchQ] = useState("");
   const [activeFilter, setActiveFilter] = useState("All Orders");
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const filtered = allOrders.filter((o) => {
-    if (activeFilter !== "All Orders" && o.status !== activeFilter) return false;
-    if (searchQ && !o.orderId.includes(searchQ) && !o.name.toLowerCase().includes(searchQ.toLowerCase())) return false;
+  useEffect(() => {
+    if (!token) return;
+    setLoading(true);
+    fetchOrders(token)
+      .then((data) => setOrders(data.map(normalizeOrder)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  const recentOrder = orders[0] ?? null;
+
+  const filtered = orders.filter((o) => {
+    const allowed = STATUS_FILTER_MAP[activeFilter];
+    if (allowed && !allowed.includes(o.status)) return false;
+    if (searchQ && !o.orderId.toLowerCase().includes(searchQ.toLowerCase()) && !o.name.toLowerCase().includes(searchQ.toLowerCase())) return false;
     return true;
   });
 
@@ -56,132 +137,159 @@ export default function TrackOrderPage() {
           <span className="text-xs text-primary font-semibold hover:underline">Home</span>
         </Link>
       </div>
-    <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
-      <h1 className="text-2xl font-black text-foreground mb-0.5">Track Order</h1>
-      <p className="text-muted-foreground text-xs mb-5">Stay updated with your order status in real time</p>
 
-      {/* Search */}
-      <div className="flex gap-2 mb-5">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Enter Order ID or Tracking Number"
-            value={searchQ}
-            onChange={(e) => setSearchQ(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/30"
-          />
-        </div>
-        <button className="px-4 py-3 bg-foreground text-background rounded-xl font-bold text-xs hover:opacity-90 transition-opacity flex-shrink-0">
-          Track Order
-        </button>
-      </div>
+      <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
+        <h1 className="text-2xl font-black text-foreground mb-0.5">Track Order</h1>
+        <p className="text-muted-foreground text-xs mb-5">Stay updated with your order status in real time</p>
 
-      {/* Recent Orders */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-foreground">Recent Orders</h2>
-          <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="flex items-start gap-3 mb-4">
-            <img src={recentOrder.image} alt={recentOrder.name} className="w-14 h-14 object-cover rounded-xl bg-muted flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-foreground text-sm">{recentOrder.name}</p>
-              <p className="text-[10px] text-muted-foreground">{recentOrder.specs}</p>
-              <p className="text-[10px] text-muted-foreground">Order ID: {recentOrder.orderId}</p>
-              <p className="text-[10px] text-muted-foreground">Placed on: {recentOrder.placedOn}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <span className={`text-[9px] font-bold px-2 py-1 rounded-full border ${statusColors[recentOrder.status]}`}>
-                {recentOrder.status}
-              </span>
-              <p className="text-[9px] text-muted-foreground mt-1.5">Est. Delivery</p>
-              <p className="text-[10px] font-bold text-primary">{recentOrder.estDelivery}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 self-center ml-1" />
+        {/* Search */}
+        <div className="flex gap-2 mb-5">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Enter Order ID or Tracking Number"
+              value={searchQ}
+              onChange={(e) => setSearchQ(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/30"
+            />
           </div>
+          <button className="px-4 py-3 bg-foreground text-background rounded-xl font-bold text-xs hover:opacity-90 transition-opacity flex-shrink-0">
+            Track Order
+          </button>
+        </div>
 
-          {/* Timeline */}
-          <div className="flex items-start">
-            {recentOrder.timeline.map((step, i) => (
-              <div key={step.label} className="flex items-center flex-1 min-w-0">
-                <div className="flex flex-col items-center flex-1 min-w-0">
-                  <div className="relative flex items-center w-full mb-1.5">
-                    {i > 0 && <div className={`flex-1 h-0.5 ${step.done ? "bg-primary" : "bg-border"}`} />}
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center z-10 flex-shrink-0 shadow-sm ${step.active ? "bg-primary ring-4 ring-primary/20" : step.done ? "bg-primary" : "bg-muted border-2 border-border"}`}>
-                      {step.done && !step.active && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                      {step.active && <Truck className="w-3.5 h-3.5 text-white" />}
-                      {!step.done && <MapPin className="w-3 h-3 text-muted-foreground" />}
+        {loading ? (
+          <div className="flex flex-col items-center py-12 gap-3">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-xs text-muted-foreground">Loading your orders...</p>
+          </div>
+        ) : (
+          <>
+            {/* Recent Order */}
+            {recentOrder && (
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-bold text-foreground">Recent Order</h2>
+                  <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
+                </div>
+                <div className="bg-card border border-border rounded-2xl p-4">
+                  <div className="flex items-start gap-3 mb-4">
+                    <img src={recentOrder.image} alt={recentOrder.name} className="w-14 h-14 object-cover rounded-xl bg-muted flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground text-sm">{recentOrder.name}</p>
+                      {recentOrder.specs && <p className="text-[10px] text-muted-foreground">{recentOrder.specs}</p>}
+                      <p className="text-[10px] text-muted-foreground">Order ID: {recentOrder.orderId}</p>
+                      <p className="text-[10px] text-muted-foreground">Placed on: {recentOrder.placedOn}</p>
                     </div>
-                    {i < recentOrder.timeline.length - 1 && <div className={`flex-1 h-0.5 ${step.done && !step.active ? "bg-primary" : "bg-border"}`} />}
+                    <div className="text-right flex-shrink-0">
+                      <span className={`text-[9px] font-bold px-2 py-1 rounded-full border ${statusColors[recentOrder.status] ?? "bg-muted text-foreground border-border"}`}>
+                        {recentOrder.status}
+                      </span>
+                      <p className="text-[9px] text-muted-foreground mt-1.5">Est. Delivery</p>
+                      <p className="text-[10px] font-bold text-primary">{recentOrder.estDelivery}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 self-center ml-1" />
                   </div>
-                  <p className={`text-[9px] text-center font-medium leading-tight ${step.active ? "text-primary" : step.done ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</p>
-                  <p className="text-[8px] text-muted-foreground text-center">{step.date}</p>
+                  {/* Timeline */}
+                  <div className="flex items-start">
+                    {recentOrder.timeline.map((step, i) => (
+                      <div key={step.label} className="flex items-center flex-1 min-w-0">
+                        <div className="flex flex-col items-center flex-1 min-w-0">
+                          <div className="relative flex items-center w-full mb-1.5">
+                            {i > 0 && <div className={`flex-1 h-0.5 ${recentOrder.timeline[i - 1].done ? "bg-primary" : "bg-border"}`} />}
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center z-10 flex-shrink-0 shadow-sm ${step.active ? "bg-primary ring-4 ring-primary/20" : step.done ? "bg-primary" : "bg-muted border-2 border-border"}`}>
+                              {step.done && !step.active && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                              {step.active && <Truck className="w-3.5 h-3.5 text-white" />}
+                              {!step.done && !step.active && <MapPin className="w-3 h-3 text-muted-foreground" />}
+                            </div>
+                            {i < recentOrder.timeline.length - 1 && <div className={`flex-1 h-0.5 ${step.done && !step.active ? "bg-primary" : "bg-border"}`} />}
+                          </div>
+                          <p className={`text-[9px] text-center font-medium leading-tight ${step.active ? "text-primary" : step.done ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* All Orders */}
+            <h2 className="text-sm font-bold text-foreground mb-3">All Orders</h2>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-4">
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveFilter(tab)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeFilter === tab ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {!token ? (
+              <div className="flex flex-col items-center py-10 text-center">
+                <Package className="w-10 h-10 text-muted-foreground/30 mb-2" />
+                <p className="text-sm font-bold text-foreground">Sign in to view your orders</p>
+                <Link href="/login">
+                  <button className="mt-4 px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold">Sign In</button>
+                </Link>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center py-10 text-center">
+                <Package className="w-10 h-10 text-muted-foreground/30 mb-2" />
+                <p className="text-sm font-bold text-foreground">No orders found</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {orders.length === 0 ? "You haven't placed any orders yet" : "No orders match this filter"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 mb-5">
+                {filtered.map((order, i) => (
+                  <motion.div
+                    key={order.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all"
+                  >
+                    <img src={order.image} alt={order.name} className="w-14 h-14 object-cover rounded-xl bg-muted flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground text-sm truncate">{order.name}</p>
+                      {order.specs && <p className="text-[10px] text-muted-foreground">{order.specs}</p>}
+                      <p className="text-[10px] text-muted-foreground">Order ID: {order.orderId}</p>
+                      <p className="text-[10px] text-muted-foreground">Placed on: {order.placedOn}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <span className={`text-[9px] font-bold px-2 py-1 rounded-full border ${statusColors[order.status] ?? "bg-muted text-foreground border-border"}`}>{order.status}</span>
+                      <p className="text-[9px] text-muted-foreground mt-1.5">
+                        {order.status === "Delivered" ? "Delivered on" : order.status === "Cancelled" ? "Cancelled" : "Est. Delivery"}
+                      </p>
+                      <p className={`text-[10px] font-bold ${order.status === "Cancelled" ? "text-red-500" : "text-primary"}`}>{order.estDelivery}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Need Help */}
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 mt-4">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Headphones className="w-5 h-5 text-primary" />
           </div>
-        </div>
-      </div>
-
-      {/* All Orders */}
-      <h2 className="text-sm font-bold text-foreground mb-3">All Orders</h2>
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-4">
-        {filterTabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveFilter(tab)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeFilter === tab ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:text-foreground"}`}
-          >
-            {tab}
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">Need Help?</p>
+            <p className="text-xs text-muted-foreground">Our support team is here to help you with your order.</p>
+          </div>
+          <button className="px-3 py-2 border border-primary/40 text-primary rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex-shrink-0">
+            Contact Support
           </button>
-        ))}
-      </div>
-
-      <div className="space-y-3 mb-5">
-        {filtered.map((order, i) => (
-          <motion.div
-            key={order.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all"
-          >
-            <img src={order.image} alt={order.name} className="w-14 h-14 object-cover rounded-xl bg-muted flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-foreground text-sm truncate">{order.name}</p>
-              <p className="text-[10px] text-muted-foreground">{order.specs}</p>
-              <p className="text-[10px] text-muted-foreground">Order ID: {order.orderId}</p>
-              <p className="text-[10px] text-muted-foreground">Placed on: {order.placedOn}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <span className={`text-[9px] font-bold px-2 py-1 rounded-full border ${statusColors[order.status]}`}>{order.status}</span>
-              <p className="text-[9px] text-muted-foreground mt-1.5">
-                {order.status === "Delivered" ? "Delivered on" : order.status === "Cancelled" ? "Cancelled on" : "Est. Delivery"}
-              </p>
-              <p className={`text-[10px] font-bold ${order.status === "Cancelled" ? "text-red-500" : "text-primary"}`}>{order.estDelivery}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Need Help */}
-      <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Headphones className="w-5 h-5 text-primary" />
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-bold text-foreground">Need Help?</p>
-          <p className="text-xs text-muted-foreground">Our support team is here to help you with your order.</p>
-        </div>
-        <button className="px-3 py-2 border border-primary/40 text-primary rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex-shrink-0">
-          Contact Support
-        </button>
       </div>
-    </div>
     </div>
   );
 }

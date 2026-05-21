@@ -17,12 +17,32 @@ const footerLinks = [
   { label: "Refund Policy", href: "/refund" },
 ];
 
-const trackingTimeline = [
-  { label: "Order Confirmed", date: "May 12", done: true, active: false },
-  { label: "Shipped", date: "May 14", done: true, active: false },
-  { label: "In Transit", date: "May 16", done: true, active: true },
-  { label: "Out for Delivery", date: "May 20", done: false, active: false },
-];
+function getOrderTimeline(status: string) {
+  const norm = ({
+    PENDING: "Pending", PROCESSING: "Processing", SHIPPED: "In Transit",
+    IN_TRANSIT: "In Transit", OUT_FOR_DELIVERY: "Out for Delivery",
+    DELIVERED: "Delivered", CANCELLED: "Cancelled",
+  } as Record<string, string>)[status?.toUpperCase?.()] ?? status ?? "Pending";
+
+  const steps = ["Order Confirmed", "Shipped", "In Transit", "Delivered"];
+  const activeIdx =
+    norm === "Delivered" ? 3 :
+    norm === "Out for Delivery" ? 3 :
+    norm === "In Transit" ? 2 :
+    norm === "Processing" ? 1 : 0;
+  const doneSet = new Set(
+    norm === "Delivered" ? [0,1,2,3] :
+    norm === "Out for Delivery" ? [0,1,2] :
+    norm === "In Transit" ? [0,1] :
+    norm === "Processing" ? [0] : []
+  );
+  return steps.map((label, i) => ({
+    label,
+    done: doneSet.has(i),
+    active: i === activeIdx && norm !== "Delivered" && norm !== "Cancelled",
+    date: "",
+  }));
+}
 
 const statusColors: Record<string, string> = {
   "In Transit": "bg-primary/10 text-primary",
@@ -93,6 +113,7 @@ export default function DashboardPage() {
 
   const [recentOrders, setRecentOrders] = useState<OrderItem[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const liveTimeline = getOrderTimeline(recentOrders[0]?.status ?? "Pending");
 
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -787,11 +808,11 @@ export default function DashboardPage() {
                   )}
 
                   <div className="flex items-start mb-5 px-1">
-                    {trackingTimeline.map((step, i) => (
+                    {liveTimeline.map((step, i) => (
                       <div key={step.label} className="flex items-start flex-1">
                         <div className="flex flex-col items-center flex-1">
                           <div className="flex items-center w-full">
-                            {i > 0 && <div className={`flex-1 h-0.5 ${trackingTimeline[i - 1].done ? "bg-primary" : "bg-border"}`} />}
+                            {i > 0 && <div className={`flex-1 h-0.5 ${liveTimeline[i - 1].done ? "bg-primary" : "bg-border"}`} />}
                             <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 z-10 border-2
                               ${step.active ? "bg-primary border-primary ring-4 ring-primary/20"
                                 : step.done ? "bg-primary border-primary"
@@ -800,7 +821,7 @@ export default function DashboardPage() {
                               {step.done && !step.active && <Check className="w-3.5 h-3.5 text-white" />}
                               {!step.done && !step.active && <MapPin className="w-3 h-3 text-muted-foreground" />}
                             </div>
-                            {i < trackingTimeline.length - 1 && <div className={`flex-1 h-0.5 ${step.done && !step.active ? "bg-primary" : "bg-border"}`} />}
+                            {i < liveTimeline.length - 1 && <div className={`flex-1 h-0.5 ${step.done && !step.active ? "bg-primary" : "bg-border"}`} />}
                           </div>
                           <p className={`text-[9px] text-center mt-1.5 font-semibold leading-tight px-0.5
                             ${step.active ? "text-primary" : step.done ? "text-foreground" : "text-muted-foreground"}`}>

@@ -1,13 +1,17 @@
-import { useState } from "react";
-import { Search, MapPin, Clock, Navigation, Package, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, MapPin, Clock, Navigation, Package, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { fetchShippingZones, type ApiShippingZone } from "@/lib/api";
 
-const stations = [
-  { id: "s1", name: "KRYROS Main Hub", address: "123 Business Avenue, Downtown\nNew York, NY 10001", hours: "Open · Closes 8:00 PM", distance: "0.8 km", recommended: true, image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&q=80" },
-  { id: "s2", name: "KRYROS Westside Point", address: "456 West 34th Street, Midtown West\nNew York, NY 10018", hours: "Open · Closes 9:00 PM", distance: "1.6 km", recommended: false, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&q=80" },
-  { id: "s3", name: "KRYROS Brooklyn Center", address: "789 Atlantic Avenue, Brooklyn\nNew York, NY 11217", hours: "Open · Closes 7:00 PM", distance: "3.2 km", recommended: false, image: "https://images.unsplash.com/photo-1567521464027-f127ff144326?w=200&q=80" },
-  { id: "s4", name: "KRYROS Queens Point", address: "321 Queens Boulevard, Queens\nNew York, NY 11377", hours: "Open · Closes 6:30 PM", distance: "4.5 km", recommended: false, image: "https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=200&q=80" },
-];
+interface Station {
+  id: string;
+  name: string;
+  address: string;
+  hours: string;
+  distance: string;
+  recommended: boolean;
+  image: string;
+}
 
 const benefits = [
   { icon: Clock, title: "Save Time", desc: "Skip delivery wait and pick up when it suits you." },
@@ -16,11 +20,46 @@ const benefits = [
   { icon: Clock, title: "Flexible Hours", desc: "Extended hours to fit your busy schedule." },
 ];
 
+function normalizeZone(z: ApiShippingZone, i: number): Station {
+  const addressParts = [z.address, z.city, z.country].filter(Boolean);
+  return {
+    id: z.id,
+    name: z.name,
+    address: addressParts.join(", ") || "Zambia",
+    hours: z.operatingHours || "Open · Mon–Sat 8:00 AM – 8:00 PM",
+    distance: "",
+    recommended: z.isRecommended ?? i === 0,
+    image: z.image || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&q=80",
+  };
+}
+
 export default function PickupStationsPage() {
   const [searchQ, setSearchQ] = useState("");
+  const [stations, setStations] = useState<Station[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        let data = await fetchShippingZones("PICKUP");
+        if (data.length === 0) data = await fetchShippingZones();
+        if (!cancelled) {
+          setStations(data.filter((z) => z.isActive !== false).map(normalizeZone));
+        }
+      } catch {
+        // leave stations as empty
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const filtered = stations.filter((s) =>
-    !searchQ || s.name.toLowerCase().includes(searchQ.toLowerCase()) || s.address.toLowerCase().includes(searchQ.toLowerCase())
+    !searchQ ||
+    s.name.toLowerCase().includes(searchQ.toLowerCase()) ||
+    s.address.toLowerCase().includes(searchQ.toLowerCase())
   );
 
   return (
@@ -58,21 +97,18 @@ export default function PickupStationsPage() {
         </button>
       </div>
 
-      {/* Map */}
+      {/* Map placeholder */}
       <div className="relative rounded-2xl overflow-hidden mb-5" style={{ height: 200, background: "linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #e8f5e9 100%)" }}>
-        {/* Grid lines */}
         <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
           <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#4CAF50" strokeWidth="0.5"/></pattern></defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
-        {/* Road lines */}
         <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <line x1="0" y1="100" x2="100%" y2="100" stroke="white" strokeWidth="8" opacity="0.7" />
           <line x1="0" y1="140" x2="100%" y2="140" stroke="white" strokeWidth="4" opacity="0.5" />
           <line x1="200" y1="0" x2="200" y2="100%" stroke="white" strokeWidth="6" opacity="0.6" />
           <line x1="320" y1="0" x2="320" y2="100%" stroke="white" strokeWidth="4" opacity="0.5" />
         </svg>
-        {/* Map pins */}
         {[{ x: "28%", y: "35%", primary: false }, { x: "50%", y: "28%", primary: false }, { x: "66%", y: "55%", primary: true }, { x: "78%", y: "32%", primary: false }].map((pin, i) => (
           <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: pin.x, top: pin.y }}>
             <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg ${pin.primary ? "bg-primary" : "bg-foreground"}`}>
@@ -80,14 +116,12 @@ export default function PickupStationsPage() {
             </div>
           </div>
         ))}
-        {/* Center dot (user location) */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="relative">
             <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-md z-10 relative" />
             <div className="absolute inset-0 w-4 h-4 rounded-full bg-blue-400/40 animate-ping" />
           </div>
         </div>
-        {/* Use My Location */}
         <button className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-xl text-xs font-bold shadow-lg hover:opacity-90 transition-opacity whitespace-nowrap">
           <Navigation className="w-3.5 h-3.5" />
           Use My Location
@@ -100,46 +134,62 @@ export default function PickupStationsPage() {
         <span className="text-xs text-muted-foreground cursor-pointer flex items-center gap-0.5">Sort by: Nearest <span className="text-[10px]">▼</span></span>
       </div>
 
-      <div className="space-y-3 mb-5">
-        {filtered.map((station, i) => (
-          <motion.div
-            key={station.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07 }}
-            className="bg-card border border-border rounded-2xl p-3 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all"
-          >
-            <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
-              <img src={station.image} alt={station.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <p className="font-bold text-foreground text-xs truncate">{station.name}</p>
-                {station.recommended && (
-                  <span className="text-[8px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-full flex-shrink-0">Recommended</span>
+      {loading ? (
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="w-6 h-6 text-primary animate-spin" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center py-10 text-center">
+          <MapPin className="w-10 h-10 text-muted-foreground/30 mb-2" />
+          <p className="text-sm font-bold text-foreground">No pickup stations found</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {searchQ ? "No stations match your search" : "No pickup stations are available yet"}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3 mb-5">
+          {filtered.map((station, i) => (
+            <motion.div
+              key={station.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className="bg-card border border-border rounded-2xl p-3 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all"
+            >
+              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
+                <img src={station.image} alt={station.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <p className="font-bold text-foreground text-xs truncate">{station.name}</p>
+                  {station.recommended && (
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-full flex-shrink-0">Recommended</span>
+                  )}
+                </div>
+                <div className="flex items-start gap-1 mb-0.5">
+                  <MapPin className="w-2.5 h-2.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <p className="text-[9px] text-muted-foreground leading-snug">{station.address}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5 text-green-500 flex-shrink-0" />
+                  <p className="text-[9px] text-green-600">{station.hours}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                {station.distance && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-bold text-muted-foreground">{station.distance}</span>
+                    <Navigation className="w-3 h-3 text-muted-foreground" />
+                  </div>
                 )}
+                <button className="px-2.5 py-1 bg-green-500/10 text-green-600 border border-green-500/20 rounded-lg text-[9px] font-bold">
+                  Open Now
+                </button>
               </div>
-              <div className="flex items-start gap-1 mb-0.5">
-                <MapPin className="w-2.5 h-2.5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <p className="text-[9px] text-muted-foreground leading-snug">{station.address.replace("\n", ", ")}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-2.5 h-2.5 text-green-500 flex-shrink-0" />
-                <p className="text-[9px] text-green-600">{station.hours}</p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2 flex-shrink-0">
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-muted-foreground">{station.distance}</span>
-                <Navigation className="w-3 h-3 text-muted-foreground" />
-              </div>
-              <button className="px-2.5 py-1 bg-green-500/10 text-green-600 border border-green-500/20 rounded-lg text-[9px] font-bold">
-                Open Now
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* How pickup works */}
       <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 mb-5 cursor-pointer hover:border-primary/40 transition-colors">
