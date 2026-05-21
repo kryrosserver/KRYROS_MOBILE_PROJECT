@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { compressImage } from '../common/utils/image.util';
+
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
@@ -108,14 +111,21 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findById(id);
-    
-    if (updateUserDto.avatar) {
-      updateUserDto.avatar = await compressImage(updateUserDto.avatar, 200, 200, 50);
+
+    const data: Record<string, unknown> = { ...updateUserDto };
+
+    // SECURITY: never store a plaintext password — hash it before writing
+    if (data.password && typeof data.password === 'string') {
+      data.password = await bcrypt.hash(data.password as string, BCRYPT_ROUNDS);
+    }
+
+    if (data.avatar && typeof data.avatar === 'string') {
+      data.avatar = await compressImage(data.avatar as string, 200, 200, 50);
     }
 
     return this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data,
       select: {
         id: true,
         email: true,

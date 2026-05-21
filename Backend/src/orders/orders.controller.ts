@@ -1,14 +1,18 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole, OrderStatus, PaymentStatus } from '@prisma/client';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
+
+const VALID_ORDER_STATUSES = Object.values(OrderStatus);
+const VALID_PAYMENT_STATUSES = Object.values(PaymentStatus);
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -38,6 +42,7 @@ export class OrdersController {
   }
 
   @Get('track')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @ApiOperation({ summary: 'Track order by number and email (Public)' })
   async trackOrder(@Query('orderNumber') orderNumber: string, @Query('email') email: string) {
     if (!orderNumber || !email) {
@@ -81,6 +86,16 @@ export class OrdersController {
     @Body('status') status: string,
     @Body('paymentStatus') paymentStatus?: string,
   ) {
+    if (status && !VALID_ORDER_STATUSES.includes(status as OrderStatus)) {
+      throw new BadRequestException(
+        `Invalid status. Must be one of: ${VALID_ORDER_STATUSES.join(', ')}`,
+      );
+    }
+    if (paymentStatus && !VALID_PAYMENT_STATUSES.includes(paymentStatus as PaymentStatus)) {
+      throw new BadRequestException(
+        `Invalid paymentStatus. Must be one of: ${VALID_PAYMENT_STATUSES.join(', ')}`,
+      );
+    }
     return this.ordersService.updateStatus(id, status, paymentStatus);
   }
 }

@@ -119,6 +119,16 @@ export class CreditController {
   @ApiOperation({ summary: 'Apply for credit' })
   apply(@Req() req: Request, @Body() body: { productId: string; planId: string; amount: number }) {
     const userId = (req as any).user.id;
-    return this.creditService.applyForCredit(userId, body);
+    const amount = Number(body.amount);
+    if (!body.productId || typeof body.productId !== 'string' || body.productId.trim() === '') {
+      throw new BadRequestException('productId is required');
+    }
+    if (!body.planId || typeof body.planId !== 'string' || body.planId.trim() === '') {
+      throw new BadRequestException('planId is required');
+    }
+    if (!isFinite(amount) || amount <= 0 || amount > 10_000_000) {
+      throw new BadRequestException('amount must be a positive number not exceeding 10,000,000');
+    }
+    return this.creditService.applyForCredit(userId, { ...body, amount });
   }
 }

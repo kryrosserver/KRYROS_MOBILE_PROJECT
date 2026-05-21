@@ -3,12 +3,25 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
+
+async function verifyAdminToken(token: string): Promise<boolean> {
+  try {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return false;
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    const role = payload.role as string | undefined;
+    return role === "ADMIN" || role === "SUPER_ADMIN" || role === "MANAGER";
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
-  // Require valid admin session — no unauthenticated uploads
+  // Require valid, unexpired admin JWT — not just cookie presence
   const cookieStore = await cookies();
   const token = cookieStore.get("admin_token")?.value;
-  if (!token) {
+  if (!token || !(await verifyAdminToken(token))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

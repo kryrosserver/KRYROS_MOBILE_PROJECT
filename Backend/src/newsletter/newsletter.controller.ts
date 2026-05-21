@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards, BadRequestException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { NewsletterService } from './newsletter.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -12,6 +13,7 @@ export class NewsletterController {
   constructor(private readonly newsletterService: NewsletterService) {}
 
   @Post('subscribe')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   async subscribe(@Body('email') email: string) {
     if (!email || !EMAIL_REGEX.test(email) || email.length > 254) {
       throw new BadRequestException('A valid email address is required');
@@ -20,6 +22,7 @@ export class NewsletterController {
   }
 
   @Post('unsubscribe')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   async unsubscribe(@Body('email') email: string) {
     if (!email || !EMAIL_REGEX.test(email) || email.length > 254) {
       throw new BadRequestException('A valid email address is required');
