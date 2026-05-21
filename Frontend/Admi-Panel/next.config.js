@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const backendOrigin = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kryrosbackend-y1c1.onrender.com";
+const backendOrigin = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kryrosbackend-rwb2.onrender.com";
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },

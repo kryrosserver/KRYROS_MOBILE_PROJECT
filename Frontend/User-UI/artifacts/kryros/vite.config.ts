@@ -55,7 +55,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "https://kryrosbackend-y1c1.onrender.com",
+        target: "https://kryrosbackend-rwb2.onrender.com",
         changeOrigin: true,
         secure: true,
       },
