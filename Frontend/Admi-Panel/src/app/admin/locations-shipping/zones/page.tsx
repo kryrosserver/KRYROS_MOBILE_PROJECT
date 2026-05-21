@@ -38,7 +38,6 @@ export default function ShippingZonesPage() {
       setCountries(Array.isArray(cJson) ? cJson : cJson.data || []);
       setStates(Array.isArray(sJson) ? sJson : sJson.data || []);
     } catch (e) {
-      console.error("Error loading zones:", e);
       setData([]);
     } finally {
       setLoading(false);
