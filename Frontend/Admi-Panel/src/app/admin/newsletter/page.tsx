@@ -22,7 +22,6 @@ export default function NewsletterPage() {
         setSubscribers(data);
       }
     } catch (error) {
-      console.error("Failed to fetch subscribers", error);
     } finally {
       setLoading(false);
     }
