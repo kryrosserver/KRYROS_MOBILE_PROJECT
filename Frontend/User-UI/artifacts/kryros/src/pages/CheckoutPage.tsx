@@ -1,18 +1,13 @@
-import { useState, useRef } from "react";
-import { Link } from "wouter";
+import { useState, useRef, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 import {
   Check, CreditCard, Smartphone, Building2,
   Lock, ChevronLeft, ChevronRight, Truck, Zap, Clock, Download,
   User, Mail, Phone, MapPin, Home, Globe, X, Upload, ChevronDown,
 } from "lucide-react";
 
-const ORDER_ITEMS = [
-  { id: "i1", name: "iPhone 15 Pro Max 256GB", variant: "Natural Titanium", qty: 1, price: 1199.00, image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&q=80" },
-  { id: "i2", name: "AirPods Pro 2 (USB-C)", variant: "White", qty: 1, price: 249.00, image: "https://images.unsplash.com/photo-1606741965234-b2b9b2b1c0b5?w=100&q=80" },
-];
-const SUBTOTAL = ORDER_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
-const DISCOUNT = 100;
-const TAX = 80.88;
 
 const SHIPPING_OPTIONS = [
   { id: "standard", label: "Standard Delivery", detail: "5–10 business days", price: 0, icon: Truck },
@@ -104,15 +99,24 @@ const STEPS = [
 ];
 
 export default function CheckoutPage() {
+  const [, navigate] = useLocation();
+  const cartItems = useCartStore((s) => s.items);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const authUser = useAuthStore((s) => s.user);
+  const authToken = useAuthStore((s) => s.token);
+
   const [step, setStep] = useState(1);
   const [ordered, setOrdered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const [placedOrderNumber, setPlacedOrderNumber] = useState<string>("");
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [firstName, setFirstName] = useState(authUser?.firstName ?? "");
+  const [lastName, setLastName] = useState(authUser?.lastName ?? "");
+  const [email, setEmail] = useState(authUser?.email ?? "");
+  const [phone, setPhone] = useState(authUser?.phone ?? "");
 
-  const [country, setCountry] = useState("Ghana");
+  const [country, setCountry] = useState("Zambia");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [addressLine, setAddressLine] = useState("");
@@ -120,6 +124,10 @@ export default function CheckoutPage() {
 
   const [shippingId, setShippingId] = useState("standard");
   const shippingPrice = SHIPPING_OPTIONS.find((s) => s.id === shippingId)?.price ?? 0;
+
+  const SUBTOTAL = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const DISCOUNT = 0;
+  const TAX = 0;
   const total = SUBTOTAL - DISCOUNT + TAX + shippingPrice;
 
   const [openMethod, setOpenMethod] = useState<string | null>(null);
@@ -133,7 +141,65 @@ export default function CheckoutPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [proofFile, setProofFile] = useState<string | null>(null);
 
-  const handlePlaceOrder = () => setOrdered(true);
+  useEffect(() => {
+    if (cartItems.length === 0 && !ordered) {
+      navigate("/cart");
+    }
+  }, [cartItems.length, ordered, navigate]);
+
+  const handlePlaceOrder = async () => {
+    if (isSubmitting || cartItems.length === 0) return;
+    setIsSubmitting(true);
+    setOrderError(null);
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          items: cartItems.map((item) => ({
+            productId: item.id,
+            quantity: item.qty,
+          })),
+          paymentMethod: openMethod ?? "card",
+          ...(openMethod === "mobile" && mmPhone ? { paymentPhone: mmPhone } : {}),
+          addressDetails: {
+            email,
+            firstName,
+            lastName,
+            phone,
+            address: addressLine || `${city}, ${state}, ${country}`,
+            zipCode: zipCode || undefined,
+            countryName: country,
+            stateName: state || undefined,
+            cityName: city || undefined,
+            manual: true,
+          },
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg =
+          Array.isArray(data.message)
+            ? data.message.join(", ")
+            : data.message || "Failed to place order. Please try again.";
+        setOrderError(msg);
+        setIsSubmitting(false);
+        return;
+      }
+
+      setPlacedOrderNumber(data.orderNumber ?? data.id ?? "");
+      clearCart();
+      setOrdered(true);
+    } catch {
+      setOrderError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (ordered) {
     const methodLabel = CHECKOUT_METHODS.find((m) => m.id === openMethod)?.label ?? "Card";
@@ -160,7 +226,7 @@ export default function CheckoutPage() {
               )}
               <div className="bg-white/10 rounded-2xl p-4 text-left space-y-2.5 mb-6">
                 {[
-                  ["Order ID", "KRY-2024-00012345"],
+                  ["Order ID", placedOrderNumber || "—"],
                   ["Total", `$${total.toFixed(2)}`],
                   ["Payment", methodLabel],
                   ["Status", isManual ? "⏳ Pending Confirmation" : "✅ Confirmed"],
@@ -350,18 +416,22 @@ export default function CheckoutPage() {
       {step === 3 && (
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-2xl p-4">
-            <h2 className="text-sm font-bold text-foreground mb-3">Your Items ({ORDER_ITEMS.length})</h2>
+            <h2 className="text-sm font-bold text-foreground mb-3">Your Items ({cartItems.length})</h2>
             <div className="space-y-3">
-              {ORDER_ITEMS.map((item) => (
+              {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-xs">?</div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-foreground">{item.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.variant} · Qty: {item.qty}</p>
+                    <p className="text-xs font-bold text-foreground truncate">{item.name}</p>
+                    <p className="text-[10px] text-muted-foreground">Qty: {item.qty}</p>
                   </div>
-                  <span className="text-xs font-bold text-foreground">${item.price.toLocaleString("en", { minimumFractionDigits: 2 })}</span>
+                  <span className="text-xs font-bold text-foreground">${(item.price * item.qty).toLocaleString("en", { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
             </div>
@@ -400,12 +470,10 @@ export default function CheckoutPage() {
               {[
                 ["Subtotal", `$${SUBTOTAL.toLocaleString("en", { minimumFractionDigits: 2 })}`],
                 ["Shipping", shippingPrice === 0 ? "Free" : `$${shippingPrice.toFixed(2)}`],
-                ["Discount", `-$${DISCOUNT.toFixed(2)}`],
-                ["Tax", `$${TAX.toFixed(2)}`],
               ].map(([l, v]) => (
                 <div key={l} className="flex justify-between">
                   <span className="text-muted-foreground">{l}</span>
-                  <span className={`font-semibold ${l === "Discount" ? "text-red-500" : "text-foreground"}`}>{v}</span>
+                  <span className="font-semibold text-foreground">{v}</span>
                 </div>
               ))}
               <div className="flex justify-between pt-2 border-t border-primary/20">
@@ -436,12 +504,12 @@ export default function CheckoutPage() {
             <p className="text-3xl font-black text-foreground">USD {total.toFixed(2)}</p>
             <div className="space-y-1 pt-1">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Order Total</span>
-                <span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span>
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Tax</span>
-                <span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span>
+                <span className="text-muted-foreground">Shipping</span>
+                <span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span>
               </div>
             </div>
           </div>
@@ -549,13 +617,15 @@ export default function CheckoutPage() {
                     <p className="text-[11px] text-muted-foreground">A payment prompt will be sent to your mobile phone. Please approve it to complete the payment.</p>
                   </div>
                   <div className="border-t border-border pt-4 space-y-1.5">
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">You are sending</span><span className="font-semibold text-foreground">USD {total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Order Total</span><span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Tax</span><span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Shipping</span><span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">USD {total.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handlePlaceOrder}
-                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all">
-                    <Smartphone className="w-4 h-4" /> Pay USD {total.toFixed(2)}
+                  {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
+                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSubmitting ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Smartphone className="w-4 h-4" />}
+                    {isSubmitting ? "Placing Order…" : `Pay USD ${total.toFixed(2)}`}
                   </button>
                   <SecureFooter />
                 </div>
@@ -597,13 +667,15 @@ export default function CheckoutPage() {
                     </button>
                   </div>
                   <div className="border-t border-border pt-4 space-y-1.5">
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">You are sending</span><span className="font-semibold text-foreground">USD {total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Order Total</span><span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Tax</span><span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Shipping</span><span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">USD {total.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handlePlaceOrder}
-                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all">
-                    <Lock className="w-4 h-4" /> Pay USD {total.toFixed(2)}
+                  {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
+                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSubmitting ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Lock className="w-4 h-4" />}
+                    {isSubmitting ? "Placing Order…" : `Pay USD ${total.toFixed(2)}`}
                   </button>
                   <p className="text-[10px] text-center text-muted-foreground">
                     By placing your order, you agree to our <Link href="/terms"><span className="text-primary underline cursor-pointer">Terms</span></Link>
@@ -647,13 +719,15 @@ export default function CheckoutPage() {
                     </label>
                   </div>
                   <div className="border-t border-border pt-4 space-y-1.5">
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">You are sending</span><span className="font-semibold text-foreground">USD {total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Order Total</span><span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Tax</span><span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Shipping</span><span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">USD {total.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handlePlaceOrder}
-                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all">
-                    <Check className="w-4 h-4" /> I Have Made the Transfer
+                  {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
+                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSubmitting ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Check className="w-4 h-4" />}
+                    {isSubmitting ? "Placing Order…" : "I Have Made the Transfer"}
                   </button>
                   <SecureFooter />
                 </div>
@@ -671,16 +745,21 @@ export default function CheckoutPage() {
                     <p className="text-sm text-center text-muted-foreground px-4">You will be redirected to WhatsApp to complete your payment securely.</p>
                   </div>
                   <div className="border-t border-border pt-4 space-y-1.5">
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">You are sending</span><span className="font-semibold text-foreground">USD {total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Order Total</span><span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Tax</span><span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Shipping</span><span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">USD {total.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handlePlaceOrder}
-                    className="w-full py-4 bg-[#25D366] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#1ebe5d] active:scale-95 transition-all">
-                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                    Continue on WhatsApp
+                  {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
+                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                    className="w-full py-4 bg-[#25D366] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#1ebe5d] active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSubmitting ? (
+                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                    )}
+                    {isSubmitting ? "Placing Order…" : "Continue on WhatsApp"}
                   </button>
                   <SecureFooter />
                 </div>
@@ -691,14 +770,16 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   <p className="text-xs text-center text-muted-foreground">Authenticate with Face ID or Touch ID to complete payment.</p>
                   <div className="border-t border-border pt-4 space-y-1.5">
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">You are sending</span><span className="font-semibold text-foreground">USD {total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Order Total</span><span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Tax</span><span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Shipping</span><span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">USD {total.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handlePlaceOrder}
-                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
+                  {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
+                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: "#000", color: "#fff" }}>
-                     Buy with Apple Pay
+                    {isSubmitting ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : " "}
+                    {isSubmitting ? "Placing Order…" : "Buy with Apple Pay"}
                   </button>
                   <SecureFooter />
                 </div>
@@ -709,19 +790,24 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   <p className="text-xs text-center text-muted-foreground">You'll be redirected to Google Pay to complete your payment.</p>
                   <div className="border-t border-border pt-4 space-y-1.5">
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">You are sending</span><span className="font-semibold text-foreground">USD {total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Order Total</span><span className="font-semibold text-foreground">USD {(total - TAX).toFixed(2)}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Tax</span><span className="font-semibold text-foreground">USD {TAX.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Subtotal</span><span className="font-semibold text-foreground">USD {SUBTOTAL.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Shipping</span><span className="font-semibold text-foreground">{shippingPrice === 0 ? "Free" : `USD ${shippingPrice.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">USD {total.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handlePlaceOrder}
-                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all border border-border"
+                  {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
+                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all border border-border disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: "#fff", color: "#000" }}>
-                    <span className="font-black text-lg">
-                      <span className="text-blue-500">G</span><span className="text-red-500">o</span>
-                      <span className="text-yellow-500">o</span><span className="text-blue-500">g</span>
-                      <span className="text-green-500">l</span><span className="text-red-500">e</span>
-                    </span>
-                    &nbsp;Pay
+                    {isSubmitting ? (
+                      <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    ) : (
+                      <span className="font-black text-lg">
+                        <span className="text-blue-500">G</span><span className="text-red-500">o</span>
+                        <span className="text-yellow-500">o</span><span className="text-blue-500">g</span>
+                        <span className="text-green-500">l</span><span className="text-red-500">e</span>
+                      </span>
+                    )}
+                    {isSubmitting ? "Placing Order…" : "\u00a0Pay"}
                   </button>
                   <SecureFooter />
                 </div>
