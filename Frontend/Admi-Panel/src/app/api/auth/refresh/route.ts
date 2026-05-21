@@ -24,7 +24,7 @@ export async function POST() {
     return response;
   }
 
-  const data = (await res.json()) as { accessToken: string };
+  const data = (await res.json()) as { accessToken: string; refreshToken?: string };
 
   const response = NextResponse.json({ success: true });
   response.cookies.set("admin_token", data.accessToken, {
@@ -34,6 +34,16 @@ export async function POST() {
     path: "/",
     maxAge: 60 * 15,
   });
+
+  if (data.refreshToken) {
+    response.cookies.set("admin_refresh_token", data.refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  }
 
   return response;
 }
