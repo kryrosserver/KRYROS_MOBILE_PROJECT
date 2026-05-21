@@ -168,7 +168,6 @@ export default function ProductsPage() {
       if (!res.ok) throw new Error("Failed to fetch product details");
       return await res.json();
     } catch (e) {
-      console.error(e);
       return null;
     } finally {
       setFetchingEdit(false);
@@ -278,7 +277,6 @@ export default function ProductsPage() {
       if (catRes.ok) setCategories(await catRes.json());
       if (brandRes.ok) setBrands(await brandRes.json());
     } catch (e) {
-      console.error("Failed to load categories/brands", e);
     }
   }, []);
 
