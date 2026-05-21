@@ -15,7 +15,6 @@ export async function GET(req: NextRequest) {
   
   if (!res.ok) {
     const error = await res.text();
-    console.error("Backend Error (/api/shipping):", error);
     return NextResponse.json({ error: error || "Failed to save shipping method" }, { status: res.status });
   }
   
