@@ -29,7 +29,6 @@ export default function CitiesPage() {
       setData(Array.isArray(cJson) ? cJson : cJson.data || []);
       setStates(Array.isArray(sJson) ? sJson : sJson.data || []);
     } catch (e) {
-      console.error("Error loading cities:", e);
       setData([]);
     } finally {
       setLoading(false);
