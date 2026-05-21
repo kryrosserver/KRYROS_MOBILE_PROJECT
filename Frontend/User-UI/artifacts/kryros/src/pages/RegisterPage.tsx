@@ -38,6 +38,10 @@ export default function RegisterPage() {
       setValidationError("Password must be at least 8 characters long.");
       return;
     }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(form.password)) {
+      setValidationError("Password must contain at least one uppercase letter, one lowercase letter, and one number.");
+      return;
+    }
     if (form.password !== confirmPassword) {
       setValidationError("Passwords do not match.");
       return;
@@ -156,7 +160,7 @@ export default function RegisterPage() {
               </div>
               <div className="flex items-center gap-1 mt-1">
                 <ShieldCheck className="w-3 h-3 text-green-500" />
-                <p className="text-[9px] text-muted-foreground">Use 8+ characters with a mix of letters, numbers & symbols</p>
+                <p className="text-[9px] text-muted-foreground">8+ chars · must include uppercase, lowercase &amp; a number</p>
               </div>
             </div>
 
