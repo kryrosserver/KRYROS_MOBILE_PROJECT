@@ -8,35 +8,50 @@ datasource db {
 }
 
 model User {
-  id               String               @id @default(uuid())
-  email            String?              @unique
-  password         String
-  firstName        String
-  lastName         String
-  phone            String?              @unique
-  avatar           String?
-  role             UserRole             @default(CUSTOMER)
-  isVerified       Boolean              @default(false)
-  isActive         Boolean              @default(true)
-  emailVerifiedAt  DateTime?
-  lastLoginAt      DateTime?
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  addresses        Address[]
-  creditAccounts   CreditAccount[]
-  creditProfile    CreditProfile?
-  notifications    Notification[]
-  orders           Order[]
-  reviews          Review[]
-  serviceBookings  ServiceBooking[]
-  supportTickets   SupportTicket[]
-  devices          UserDevice[]
-  roleAssignments  UserRoleAssignment[]
-  wallet           Wallet?
-  wholesaleAccount WholesaleAccount?
-  wishlists        WishlistItem[]
+  id                   String               @id @default(uuid())
+  email                String?              @unique
+  password             String
+  firstName            String
+  lastName             String
+  phone                String?              @unique
+  avatar               String?
+  role                 UserRole             @default(CUSTOMER)
+  isVerified           Boolean              @default(false)
+  isActive             Boolean              @default(true)
+  emailVerifiedAt      DateTime?
+  lastLoginAt          DateTime?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  addresses            Address[]
+  creditAccounts       CreditAccount[]
+  creditProfile        CreditProfile?
+  notifications        Notification[]
+  orders               Order[]
+  refreshTokens        RefreshToken[]
+  reviews              Review[]
+  serviceBookings      ServiceBooking[]
+  supportTickets       SupportTicket[]
+  devices              UserDevice[]
+  roleAssignments      UserRoleAssignment[]
+  wallet               Wallet?
+  wholesaleAccount     WholesaleAccount?
+  wishlists            WishlistItem[]
 
   @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
 }
 
 model UserDevice {
