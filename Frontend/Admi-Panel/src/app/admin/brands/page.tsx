@@ -57,7 +57,6 @@ export default function BrandsPage() {
       const data = await res.json();
       setCategories(data.filter((c: any) => c.isActive !== false));
     } catch (e: any) {
-      console.error("Categories load error:", e.message);
     }
   }, []);
 
