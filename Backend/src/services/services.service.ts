@@ -13,8 +13,22 @@ export class ServicesService {
     return this.prisma.service.findUnique({ where: { id } });
   }
 
-  async book(data: any) {
-    return this.prisma.serviceBooking.create({ data });
+  async book(data: {
+    userId: string;
+    serviceId: string;
+    scheduledDate: string;
+    scheduledTime: string;
+    notes?: string;
+  }) {
+    return this.prisma.serviceBooking.create({
+      data: {
+        userId: data.userId,
+        serviceId: data.serviceId,
+        scheduledDate: new Date(data.scheduledDate),
+        scheduledTime: data.scheduledTime,
+        notes: data.notes,
+      },
+    });
   }
 
   async listAll() {

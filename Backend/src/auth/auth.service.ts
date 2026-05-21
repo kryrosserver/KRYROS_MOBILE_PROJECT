@@ -180,11 +180,12 @@ export class AuthService {
     await this.prisma.refreshToken.deleteMany({ where: { userId } });
   }
 
-  async forgotPassword(identifier: string): Promise<{ resetToken: string }> {
+  async forgotPassword(identifier: string): Promise<void> {
     const user = await this.usersService.findByIdentifier(identifier);
 
     if (!user) {
-      return { resetToken: '' };
+      // Return silently — do not leak whether the account exists
+      return;
     }
 
     const rawToken = generateOpaqueToken();
@@ -199,7 +200,11 @@ export class AuthService {
       },
     });
 
-    return { resetToken: rawToken };
+    // TODO: Deliver rawToken via email/SMS to user.email or user.phone
+    // Do NOT return or log the raw token in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[DEV] Password reset token for ${identifier}: ${rawToken}`);
+    }
   }
 
   async resetPassword(rawToken: string, newPassword: string): Promise<void> {

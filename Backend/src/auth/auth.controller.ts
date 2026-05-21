@@ -91,10 +91,9 @@ export class AuthController {
   @Throttle({ default: { ttl: 60000, limit: 3 } })
   @ApiOperation({ summary: 'Request a password reset token' })
   async forgotPassword(@Body() body: ForgotPasswordDto) {
-    const result = await this.authService.forgotPassword(body.identifier);
+    await this.authService.forgotPassword(body.identifier);
     return {
-      message: 'If an account with that identifier exists, a reset token has been issued.',
-      ...(result.resetToken ? { resetToken: result.resetToken } : {}),
+      message: 'If an account with that identifier exists, a reset token has been sent.',
     };
   }
 

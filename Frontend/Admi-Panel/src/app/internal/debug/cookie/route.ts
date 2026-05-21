@@ -1,13 +1,6 @@
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
+// Debug endpoint removed — leaking token previews is a security risk.
 export async function GET() {
-  const token = (await cookies()).get("admin_token")?.value || "";
-  return NextResponse.json({
-    hasToken: !!token,
-    length: token.length,
-    preview: token ? token.slice(0, 12) + "…" : null,
-  });
+  return NextResponse.json({ error: "Not found" }, { status: 404 });
 }

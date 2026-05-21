@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFiles, BadRequestException } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
@@ -11,6 +11,18 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import type { Express } from 'express';
+
+const imageUploadOptions = {
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req: any, file: Express.Multer.File, cb: (error: Error | null, accept: boolean) => void) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new BadRequestException(`File type '${file.mimetype}' is not allowed. Only JPEG, PNG, WebP, and GIF images are accepted.`), false);
+    }
+  },
+};
 
 @ApiTags('Products')
 @Controller('products')
@@ -116,7 +128,7 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 10 }]))
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 10 }], imageUploadOptions))
   @ApiOperation({ summary: 'Create product with image files (Admin only)' })
   createUpload(@Body() body: CreateProductDto, @UploadedFiles() files: { images?: Express.Multer.File[] }) {
     const imgs = files?.images || [];
@@ -136,7 +148,7 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 10 }]))
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 10 }], imageUploadOptions))
   @ApiOperation({ summary: 'Update product with image files (Admin only)' })
   updateUpload(
     @Param('id') id: string,

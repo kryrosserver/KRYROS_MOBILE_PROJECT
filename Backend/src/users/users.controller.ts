@@ -48,10 +48,23 @@ export class UsersController {
   @Put(':id')
   @ApiOperation({ summary: 'Update user' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req) {
-    // Only user themselves or ADMIN/SUPER_ADMIN can update
-    if (req.user.id !== id && req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.SUPER_ADMIN) {
+    const isAdmin = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPER_ADMIN;
+
+    if (req.user.id !== id && !isAdmin) {
       throw new ForbiddenException('You do not have permission to update this user');
     }
+
+    // Non-admins cannot escalate their own role or verification status
+    if (!isAdmin) {
+      delete updateUserDto.role;
+      delete updateUserDto.isVerified;
+    }
+
+    // Admins cannot set role higher than their own
+    if (req.user.role === UserRole.ADMIN && updateUserDto.role === UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Admins cannot assign Super Admin role');
+    }
+
     return this.usersService.update(id, updateUserDto);
   }
 

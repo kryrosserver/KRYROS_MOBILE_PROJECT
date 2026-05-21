@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/internal")) {
     if (!isAdmin) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -40,6 +40,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/admin/:path*", "/login", "/forgot-password", "/reset-password"],
+  // /internal/* routes must also be gated — they are not public
+  matcher: ["/", "/admin/:path*", "/internal/:path*", "/login", "/forgot-password", "/reset-password"],
   unstable_allowDynamic: ["**/node_modules/**"],
 };

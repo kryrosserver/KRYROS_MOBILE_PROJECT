@@ -7,6 +7,7 @@ import { UpdateBannerDto } from './dto/update-banner.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
 import { CreateFooterSectionDto } from './dto/create-footer-section.dto';
@@ -32,7 +33,8 @@ export class CMSController {
   }
 
   @Get('homepage-sections/manage')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all homepage sections (admin)' })
   listHomePageSections() {
@@ -40,7 +42,8 @@ export class CMSController {
   }
 
   @Post('homepage-sections')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create homepage section' })
   createHomePageSection(@Body() data: CreateHomePageSectionDto) {
@@ -48,7 +51,8 @@ export class CMSController {
   }
 
   @Put('homepage-sections/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update homepage section' })
   updateHomePageSection(@Param('id') id: string, @Body() data: UpdateHomePageSectionDto) {
@@ -56,7 +60,8 @@ export class CMSController {
   }
 
   @Delete('homepage-sections/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete homepage section' })
   deleteHomePageSection(@Param('id') id: string) {
@@ -64,9 +69,10 @@ export class CMSController {
   }
 
   @Post('homepage-sections/seed')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Seed default homepage sections (admin)' })
+  @ApiOperation({ summary: 'Seed default homepage sections (Super Admin only)' })
   seedHomePageSections() {
     return this.cmsService.seedHomePageSections();
   }
@@ -79,7 +85,8 @@ export class CMSController {
   }
 
   @Get('banners/manage')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all banners' })
   listBanners() {
@@ -87,7 +94,8 @@ export class CMSController {
   }
 
   @Post('banners')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create banner' })
   createBanner(@Body() data: CreateBannerDto) {
@@ -95,7 +103,8 @@ export class CMSController {
   }
 
   @Put('banners/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update banner' })
   updateBanner(@Param('id') id: string, @Body() data: UpdateBannerDto) {
@@ -103,7 +112,8 @@ export class CMSController {
   }
 
   @Delete('banners/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete banner' })
   deleteBanner(@Param('id') id: string) {
@@ -117,9 +127,9 @@ export class CMSController {
     return this.cmsService.getSections();
   }
 
-  // Sections management (admin)
   @Get('sections/manage')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all sections' })
   listSections() {
@@ -127,7 +137,8 @@ export class CMSController {
   }
 
   @Post('sections')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create section' })
   createSection(@Body() data: CreateSectionDto) {
@@ -135,7 +146,8 @@ export class CMSController {
   }
 
   @Put('sections/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update section' })
   updateSection(@Param('id') id: string, @Body() data: UpdateSectionDto) {
@@ -143,7 +155,8 @@ export class CMSController {
   }
 
   @Delete('sections/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete section' })
   deleteSection(@Param('id') id: string) {
@@ -151,9 +164,10 @@ export class CMSController {
   }
 
   @Post('sections/seed')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Seed default homepage sections (admin)' })
+  @ApiOperation({ summary: 'Seed default sections (Super Admin only)' })
   seedSections() {
     return this.cmsService.seedSections();
   }
@@ -173,9 +187,9 @@ export class CMSController {
     return this.cmsService.getFooter();
   }
 
-  // Footer Sections
   @Get('footer/sections/manage')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all footer sections' })
   listFooterSections() {
@@ -183,7 +197,8 @@ export class CMSController {
   }
 
   @Post('footer/sections')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create footer section' })
   createFooterSection(@Body() data: CreateFooterSectionDto) {
@@ -191,7 +206,8 @@ export class CMSController {
   }
 
   @Put('footer/sections/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update footer section' })
   updateFooterSection(@Param('id') id: string, @Body() data: UpdateFooterSectionDto) {
@@ -199,16 +215,17 @@ export class CMSController {
   }
 
   @Delete('footer/sections/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete footer section' })
   deleteFooterSection(@Param('id') id: string) {
     return this.cmsService.deleteFooterSection(id);
   }
 
-  // Footer Links
   @Post('footer/links')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create footer link' })
   createFooterLink(@Body() data: CreateFooterLinkDto) {
@@ -216,7 +233,8 @@ export class CMSController {
   }
 
   @Put('footer/links/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update footer link' })
   updateFooterLink(@Param('id') id: string, @Body() data: UpdateFooterLinkDto) {
@@ -224,14 +242,14 @@ export class CMSController {
   }
 
   @Delete('footer/links/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete footer link' })
   deleteFooterLink(@Param('id') id: string) {
     return this.cmsService.deleteFooterLink(id);
   }
 
-  // Footer Config
   @Get('footer-config')
   @ApiOperation({ summary: 'Get footer config' })
   getFooterConfigPublic() {
@@ -251,7 +269,8 @@ export class CMSController {
   }
 
   @Put('footer/config')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update footer config' })
   updateFooterConfig(@Body() data: UpdateFooterConfigDto) {
@@ -259,9 +278,10 @@ export class CMSController {
   }
 
   @Post('footer/seed')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Seed default footer data (admin)' })
+  @ApiOperation({ summary: 'Seed default footer data (Super Admin only)' })
   seedFooter() {
     return this.cmsService.seedFooter();
   }

@@ -5,6 +5,7 @@ import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Brands')
 @Controller('brands')
@@ -12,7 +13,8 @@ export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new brand (Admin only)' })
   create(@Body() dto: CreateBrandDto) {
@@ -32,7 +34,8 @@ export class BrandsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a brand (Admin only)' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBrandDto) {
@@ -40,7 +43,8 @@ export class BrandsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a brand (Admin only)' })
   remove(@Param('id', ParseIntPipe) id: number) {
@@ -48,9 +52,10 @@ export class BrandsController {
   }
 
   @Post('cleanup-corrupted-data')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cleanup corrupted brand data (Admin only)' })
+  @ApiOperation({ summary: 'Cleanup corrupted brand data (Super Admin only)' })
   async cleanup() {
     return this.brandsService.cleanupCorruptedData();
   }

@@ -3,6 +3,7 @@ import { NewsletterService } from './newsletter.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { UserRole } from '@prisma/client';
 
 @Controller('newsletter')
 export class NewsletterController {
@@ -20,14 +21,14 @@ export class NewsletterController {
 
   @Get('list')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async list() {
     return this.newsletterService.findAll();
   }
 
   @Get('active')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async active() {
     return this.newsletterService.findActive();
   }
