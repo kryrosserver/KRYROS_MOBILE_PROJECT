@@ -22,6 +22,8 @@ model User {
   lastLoginAt          DateTime?
   passwordResetToken   String?
   passwordResetExpires DateTime?
+  twoFactorSecret      String?
+  twoFactorEnabled     Boolean              @default(false)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
   addresses            Address[]

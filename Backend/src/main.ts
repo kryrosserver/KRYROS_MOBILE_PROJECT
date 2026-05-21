@@ -1,4 +1,16 @@
 import 'reflect-metadata';
+import * as Sentry from '@sentry/node';
+
+const SENTRY_DSN = process.env.SENTRY_DSN;
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 0.1,
+    sendDefaultPii: false,
+  });
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -50,7 +62,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger: isProd ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug'] });
 
   // Trust the first hop from the reverse proxy (Render, Nginx, etc.)
-  // Required so rate limiting and IP logging use the real client IP, not the proxy IP.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   // Security headers — CSP, HSTS, XSS protection, clickjacking prevention

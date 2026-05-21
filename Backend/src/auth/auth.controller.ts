@@ -13,14 +13,17 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import { TwoFactorService } from './two-factor.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { TwoFactorEnableDto, TwoFactorValidateDto } from './dto/two-factor.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { UserRole } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface AuthenticatedRequest {
   user: Pick<JwtPayload, 'sub' | 'email' | 'role'> & { id: string };
@@ -30,7 +33,11 @@ interface AuthenticatedRequest {
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private twoFactorService: TwoFactorService,
+    private prisma: PrismaService,
+  ) {}
 
   @Post('register')
   @Throttle({ default: { ttl: 60000, limit: 3 } })
@@ -111,5 +118,73 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current authenticated user profile' })
   async me(@Request() req: AuthenticatedRequest) {
     return req.user;
+  }
+
+  // ── 2FA ENDPOINTS ─────────────────────────────────────────────────────────
+
+  @Post('2fa/setup')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @ApiOperation({ summary: 'Generate a 2FA secret and QR code for the current admin user' })
+  async setup2fa(@Request() req: AuthenticatedRequest) {
+    const user = await this.prisma.user.findUnique({ where: { id: req.user.sub } });
+    if (!user) throw new UnauthorizedException('User not found');
+    const email = user.email ?? req.user.sub;
+    return this.twoFactorService.generateSecret(req.user.sub, email);
+  }
+
+  @Post('2fa/enable')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Verify TOTP code and permanently enable 2FA on the account' })
+  async enable2fa(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: TwoFactorEnableDto,
+  ) {
+    await this.twoFactorService.enableTwoFactor(req.user.sub, body.code);
+  }
+
+  @Post('2fa/disable')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Disable 2FA — requires current TOTP code to confirm' })
+  async disable2fa(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: TwoFactorEnableDto,
+  ) {
+    await this.twoFactorService.disableTwoFactor(req.user.sub, body.code);
+  }
+
+  @Post('2fa/validate')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @ApiOperation({ summary: 'Complete 2FA login by submitting the TOTP code and pending token' })
+  async validate2fa(@Body() body: TwoFactorValidateDto) {
+    let payload: JwtPayload;
+    try {
+      payload = await this.authService.validateToken(body.twoFactorToken);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired 2FA session. Please log in again.');
+    }
+
+    if ((payload as any).type !== '2fa-pending') {
+      throw new UnauthorizedException('Invalid token type');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+      throw new UnauthorizedException('2FA is not configured for this account');
+    }
+
+    const isValid = await this.twoFactorService.verifyCode(user.twoFactorSecret, body.code);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid authenticator code');
+    }
+
+    return this.authService.completeTwoFactorLogin(user);
   }
 }

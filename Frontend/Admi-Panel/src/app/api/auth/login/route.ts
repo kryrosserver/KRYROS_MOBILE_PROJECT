@@ -27,10 +27,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = (await res.json()) as { accessToken: string; refreshToken: string; user: Record<string, unknown> };
+    const data = await res.json() as {
+      requiresTwoFactor?: boolean;
+      twoFactorToken?: string;
+      accessToken?: string;
+      refreshToken?: string;
+      user?: Record<string, unknown>;
+    };
+
+    if (data.requiresTwoFactor && data.twoFactorToken) {
+      return NextResponse.json({
+        success: true,
+        requiresTwoFactor: true,
+        twoFactorToken: data.twoFactorToken,
+      });
+    }
+
     const response = NextResponse.json({ success: true, user: data.user });
 
-    response.cookies.set("admin_token", data.accessToken, {
+    response.cookies.set("admin_token", data.accessToken!, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -38,7 +53,7 @@ export async function POST(request: Request) {
       maxAge: 60 * 15,
     });
 
-    response.cookies.set("admin_refresh_token", data.refreshToken, {
+    response.cookies.set("admin_refresh_token", data.refreshToken!, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

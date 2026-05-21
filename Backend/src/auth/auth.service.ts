@@ -89,12 +89,41 @@ export class AuthService {
       throw new UnauthorizedException('Email address is not verified');
     }
 
+    if ((user as any).twoFactorEnabled) {
+      const twoFactorToken = this.jwtService.sign(
+        { sub: user.id, type: '2fa-pending' },
+        { expiresIn: '5m' },
+      );
+      return { requiresTwoFactor: true, twoFactorToken };
+    }
+
     const payload = this.buildPayload(user);
     const [accessToken, refreshToken] = await Promise.all([
       Promise.resolve(this.signAccessToken(payload)),
       this.createRefreshToken(user.id),
     ]);
 
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        avatar: user.avatar,
+      },
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async completeTwoFactorLogin(user: { id: string; email: string | null; phone: string | null; role: string; firstName: string; lastName: string; avatar: string | null }) {
+    const payload = this.buildPayload(user);
+    const [accessToken, refreshToken] = await Promise.all([
+      Promise.resolve(this.signAccessToken(payload)),
+      this.createRefreshToken(user.id),
+    ]);
     return {
       user: {
         id: user.id,

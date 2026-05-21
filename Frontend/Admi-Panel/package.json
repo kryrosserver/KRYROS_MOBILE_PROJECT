@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@imgly/background-removal": "^1.4.5",
+    "@sentry/nextjs": "^10.53.1",
     "clsx": "^2.1.0",
     "jose": "^5.10.0",
     "lucide-react": "^0.312.0",
