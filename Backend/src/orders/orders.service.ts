@@ -476,9 +476,8 @@ export class OrdersService {
           data.paymentPhone,
           Number(order.totalZMW),
         );
-      } catch (error) {
-        // Log error but order is already created
-        console.error('Failed to initiate 543 payment:', error);
+      } catch {
+        // Payment push failed — order is already created, no action needed
       }
     }
 
