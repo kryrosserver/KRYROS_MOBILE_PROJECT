@@ -21,7 +21,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: { sub: string; email: string | null; phone: string | null; role: string; type?: string }) {
+    if (payload.type === 'refresh') {
+      throw new UnauthorizedException('Refresh tokens cannot be used for API access');
+    }
     const user = await this.usersService.findById(payload.sub);
 
     if (!user || !user.isActive) {
