@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
@@ -11,19 +11,15 @@ export class BrandsService {
       .toString()
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')     // Replace spaces with -
-      .replace(/[^\w-]+/g, '')   // Remove all non-word chars
-      .replace(/--+/g, '-');    // Replace multiple - with single -
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-');
   }
 
   async create(dto: CreateBrandDto) {
     const slug = dto.slug || this.slugify(dto.name);
-    
-    // Check for existing slug
-    const existing = await this.prisma.brand.findUnique({
-      where: { slug }
-    });
 
+    const existing = await this.prisma.brand.findUnique({ where: { slug } });
     if (existing) {
       throw new ConflictException(`Brand with slug "${slug}" already exists`);
     }
@@ -40,9 +36,8 @@ export class BrandsService {
           categoryId: dto.categoryId || null,
         },
       });
-    } catch (e) {
-      console.error('Brand creation error:', e);
-      throw new Error(`Database error: ${e.message}`);
+    } catch (e: any) {
+      throw new InternalServerErrorException(`Failed to create brand: ${e.message}`);
     }
   }
 
@@ -51,27 +46,20 @@ export class BrandsService {
       return await this.prisma.brand.findMany({
         include: {
           category: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
+            select: { id: true, name: true, slug: true },
+          },
         },
         orderBy: { name: 'asc' },
       });
-    } catch (e) {
-      console.error('Failed to load brands due to DB corruption:', e.message);
-      return []; // Return empty list instead of crashing
+    } catch {
+      return [];
     }
   }
 
   async findOne(id: number) {
     const brand = await this.prisma.brand.findUnique({
       where: { id },
-      include: {
-        products: true
-      }
+      include: { products: true },
     });
     if (!brand) throw new NotFoundException('Brand not found');
     return brand;
@@ -79,55 +67,41 @@ export class BrandsService {
 
   async update(id: number, dto: UpdateBrandDto) {
     await this.findOne(id);
-    
+
     const data: any = { ...dto };
     if (dto.name && !dto.slug) {
       data.slug = this.slugify(dto.name);
     }
 
-    return this.prisma.brand.update({
-      where: { id },
-      data,
-    });
+    return this.prisma.brand.update({ where: { id }, data });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.brand.delete({
-      where: { id },
-    });
+    return this.prisma.brand.delete({ where: { id } });
   }
 
   async cleanupCorruptedData() {
-    console.log('Running database cleanup and maintenance...');
-    
-    // 1. Reset all products to have NO brandId (fixes the string vs int mismatch)
-    const updatedProducts = await this.prisma.product.updateMany({
-      data: {
-        brandId: null
-      }
-    });
+    const updatedProducts = await this.prisma.product.updateMany({ data: { brandId: null } });
 
-    // 2. Clear out the brands table entirely to fix the ID type issue
     try {
-      // TRUNCATE is safer for resetting autoincrement IDs
       await this.prisma.$executeRawUnsafe('TRUNCATE TABLE "brands" RESTART IDENTITY CASCADE;');
-    } catch (e) {
-      console.warn('Truncate failed, trying deleteMany...', e.message);
+    } catch {
       await this.prisma.brand.deleteMany({});
     }
 
-    // 3. Ensure Category table has showOnHome column if db push failed
     try {
-      await this.prisma.$executeRawUnsafe('ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "showOnHome" BOOLEAN DEFAULT false;');
-    } catch (e) {
-      console.warn('Failed to add column showOnHome via SQL:', e.message);
+      await this.prisma.$executeRawUnsafe(
+        'ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "showOnHome" BOOLEAN DEFAULT false;',
+      );
+    } catch {
+      // Column may already exist — safe to ignore
     }
 
-    return { 
-      message: 'Database cleanup and maintenance complete', 
+    return {
+      message: 'Database cleanup complete',
       productsUpdated: updatedProducts.count,
-      brandsCleared: true
+      brandsCleared: true,
     };
   }
 }
