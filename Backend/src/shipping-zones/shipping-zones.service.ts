@@ -13,8 +13,8 @@ export class ShippingZonesService implements OnModuleInit {
       await this.ensureGlobalDefaultZone();
       await this.syncGlobalMethods();
       await this.ensureFeatureFlag();
-    } catch (error) {
-      console.error('Failed to initialize ShippingZonesService:', error.message);
+    } catch {
+      // Initialization errors are non-fatal — service still usable
     }
   }
 
