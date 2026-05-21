@@ -10,18 +10,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService,
     private usersService: UsersService,
   ) {
+    const secret = configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET environment variable is not set. Server cannot start.');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET') || 'kryros-secret-key',
+      secretOrKey: secret,
     });
   }
 
   async validate(payload: any) {
     const user = await this.usersService.findById(payload.sub);
-    
+
     if (!user || !user.isActive) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Account not found or deactivated');
     }
 
     return {
