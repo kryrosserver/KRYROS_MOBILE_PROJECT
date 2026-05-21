@@ -15,7 +15,7 @@ paths = [ "/" ]
 localPort = 3000
 
 [services.development]
-run = "cd /home/runner/workspace/KRYROS_MOBILE_PROJECT/Frontend/Admi-Panel && node dev-proxy.mjs"
+run = "cd /home/runner/workspace/Frontend/Admi-Panel && node dev-proxy.mjs"
 
 [services.env]
 PORT = "3000"
