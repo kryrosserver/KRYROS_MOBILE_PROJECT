@@ -26,14 +26,6 @@ import {
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
-// Mock data for requests
-const creditRequests = [
-  { id: "CR-1024", user: "John Doe", email: "john@example.com", amount: 1200, item: "iPhone 15 Pro", status: "pending", date: "2024-03-20", score: 720 },
-  { id: "CR-1025", user: "Sarah Smith", email: "sarah@example.com", amount: 850, item: "MacBook Air", status: "approved", date: "2024-03-19", score: 680 },
-  { id: "CR-1026", user: "Mike Johnson", email: "mike@example.com", amount: 2100, item: "Gaming PC", status: "rejected", date: "2024-03-18", score: 450 },
-  { id: "CR-1027", user: "Elena Rodriguez", email: "elena@example.com", amount: 1500, item: "Camera Kit", status: "reviewing", date: "2024-03-17", score: 610 },
-  { id: "CR-1028", user: "David Chen", email: "david@example.com", amount: 500, item: "Samsung Tablet", status: "blacklisted", date: "2024-03-16", score: 300 },
-];
 
 export default function CreditPage() {
   const [activeTab, setActiveTab] = useState<"requests" | "plans" | "products">("requests");

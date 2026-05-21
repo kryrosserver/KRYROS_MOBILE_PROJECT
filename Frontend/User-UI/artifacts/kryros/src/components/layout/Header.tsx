@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown } from "lucide-react";
+import {
+  ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown, LogOut, LayoutDashboard,
+} from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useThemeStore } from "@/store/themeStore";
 import { useSidebarStore } from "@/store/sidebarStore";
+import { useCurrencyStore } from "@/store/currencyStore";
+import { useAuthStore } from "@/store/authStore";
 import Sidebar from "./Sidebar";
 import SearchAutocomplete from "./SearchAutocomplete";
 
@@ -25,12 +30,24 @@ export default function Header() {
   const wishlist = useWishlistStore((s) => s.items);
   const { theme, toggleTheme } = useThemeStore();
 
+  const { currencies, selected, setCurrency } = useCurrencyStore();
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const { user, token, logout } = useAuthStore();
+  const isLoggedIn = !!(token && user);
+
+  const handleLogout = async () => {
+    setUserMenuOpen(false);
+    await logout();
+  };
+
   return (
     <>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
-        {/* Announcement bar — visible on both mobile and desktop */}
+        {/* Announcement bar */}
         <div className="bg-foreground text-background text-[10px] md:text-xs flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
           <span>
             <span className="text-primary font-semibold">Free Delivery</span> on all orders over $100
@@ -78,18 +95,89 @@ export default function Header() {
 
           {/* Desktop: Right icons */}
           <div className="hidden md:flex items-center gap-0.5">
-            <button className="flex items-center gap-1 px-2 py-2 rounded-xl hover:bg-muted transition-colors text-sm text-muted-foreground">
-              <span>USD</span><ChevronDown className="w-3 h-3" />
-            </button>
+            {/* Currency selector */}
+            <div className="relative">
+              <button
+                onClick={() => { setCurrencyOpen(!currencyOpen); setUserMenuOpen(false); }}
+                className="flex items-center gap-1 px-2 py-2 rounded-xl hover:bg-muted transition-colors text-sm text-muted-foreground"
+              >
+                <span>{selected.flag} {selected.code}</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              {currencyOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setCurrencyOpen(false)} />
+                  <div className="absolute right-0 top-10 z-40 w-52 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden max-h-64 overflow-y-auto">
+                    {currencies.map((c) => (
+                      <button
+                        key={c.code}
+                        onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left ${c.code === selected.code ? "bg-primary/10 text-primary font-semibold" : "text-foreground"}`}
+                      >
+                        <span className="text-base">{c.flag}</span>
+                        <span className="font-medium">{c.code}</span>
+                        <span className="text-muted-foreground text-xs ml-auto">{c.symbol}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
             <button className="flex items-center gap-1 px-2 py-2 rounded-xl hover:bg-muted transition-colors text-sm text-muted-foreground">
               <Globe className="w-4 h-4" /><span>EN</span><ChevronDown className="w-3 h-3" />
             </button>
             <button onClick={toggleTheme} className="p-2 rounded-xl hover:bg-muted transition-colors" data-testid="theme-toggle">
               {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <Link href="/login">
-              <button className="p-2 rounded-xl hover:bg-muted transition-colors"><User className="w-5 h-5" /></button>
-            </Link>
+
+            {/* User menu */}
+            <div className="relative">
+              {isLoggedIn ? (
+                <>
+                  <button
+                    onClick={() => { setUserMenuOpen(!userMenuOpen); setCurrencyOpen(false); }}
+                    className="flex items-center gap-1.5 p-2 rounded-xl hover:bg-muted transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-black">
+                      {user.firstName?.[0]?.toUpperCase() ?? "U"}
+                    </div>
+                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                  {userMenuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setUserMenuOpen(false)} />
+                      <div className="absolute right-0 top-11 z-40 w-52 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+                        <div className="px-4 py-3 border-b border-border">
+                          <p className="text-sm font-bold text-foreground">{user.firstName} {user.lastName}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <Link href="/dashboard" onClick={() => setUserMenuOpen(false)}>
+                          <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors cursor-pointer text-foreground">
+                            <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">Dashboard</span>
+                          </div>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500 border-t border-border"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span className="text-sm font-medium">Logout</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <Link href="/login">
+                  <button className="p-2 rounded-xl hover:bg-muted transition-colors">
+                    <User className="w-5 h-5" />
+                  </button>
+                </Link>
+              )}
+            </div>
+
             <Link href="/shop">
               <button className="relative p-2 rounded-xl hover:bg-muted transition-colors">
                 <Heart className="w-5 h-5" />
@@ -114,9 +202,19 @@ export default function Header() {
 
           {/* Mobile: Right icons */}
           <div className="flex md:hidden items-center gap-0.5">
-            <Link href="/login">
-              <button className="p-1.5 rounded-xl hover:bg-muted transition-colors"><User className="w-5 h-5" /></button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <button className="p-1.5 rounded-xl hover:bg-muted transition-colors">
+                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-black">
+                    {user.firstName?.[0]?.toUpperCase() ?? "U"}
+                  </div>
+                </button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <button className="p-1.5 rounded-xl hover:bg-muted transition-colors"><User className="w-5 h-5" /></button>
+              </Link>
+            )}
             <Link href="/shop">
               <button className="relative p-1.5 rounded-xl hover:bg-muted transition-colors">
                 <Heart className="w-5 h-5" />

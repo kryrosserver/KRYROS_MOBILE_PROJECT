@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Home, ShoppingBag, Zap, Package, MapPin, Truck, Info, Phone, Shield, FileText, RefreshCw,
-  ChevronRight, Search, Grid2x2, Globe, Moon, Sun, DollarSign
+  ChevronRight, Search, Grid2x2, Globe, Moon, Sun, DollarSign, ChevronDown, LogOut, User,
 } from "lucide-react";
 import { useThemeStore } from "@/store/themeStore";
+import { useCurrencyStore } from "@/store/currencyStore";
+import { useAuthStore } from "@/store/authStore";
 
 const menuItems = [
   { label: "Home", icon: Home, href: "/" },
@@ -24,17 +26,13 @@ const infoItems = [
   { label: "Refund Policy", icon: RefreshCw, href: "/refund" },
 ];
 
-const sidebarCategories = [
-  { id: "c1", name: "Smartphones", subtitle: "Latest smartphones & accessories", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=60&q=80", href: "/shop?cat=Smartphones" },
-  { id: "c2", name: "Laptops", subtitle: "Powerful laptops for work & play", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=60&q=80", href: "/shop?cat=Laptops" },
-  { id: "c3", name: "Fashion", subtitle: "Trendy clothes & accessories", image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=60&q=80", href: "/shop?cat=Fashion" },
-  { id: "c4", name: "Shoes", subtitle: "Premium shoes collection", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=60&q=80", href: "/shop?cat=Shoes" },
-  { id: "c5", name: "Audio", subtitle: "Top quality sound experience", image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=60&q=80", href: "/shop?cat=Audio" },
-  { id: "c6", name: "Cameras", subtitle: "Capture every moment", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=60&q=80", href: "/shop?cat=Cameras" },
-  { id: "c7", name: "Gaming", subtitle: "Play beyond limits", image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=60&q=80", href: "/shop?cat=Gaming" },
-  { id: "c8", name: "Accessories", subtitle: "Everything you need", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=60&q=80", href: "/shop?cat=Accessories" },
-  { id: "c9", name: "Electronics", subtitle: "Smart tech for everyday life", image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=60&q=80", href: "/shop?cat=Electronics" },
-];
+interface ApiCategory {
+  id: string | number;
+  name: string;
+  slug: string;
+  image?: string;
+  description?: string;
+}
 
 interface SidebarProps {
   open: boolean;
@@ -47,9 +45,39 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [location] = useLocation();
   const { theme, toggleTheme } = useThemeStore();
 
-  const filteredCats = sidebarCategories.filter((c) =>
+  const { currencies, selected, setCurrency, fetchCurrencies } = useCurrencyStore();
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+  const { user, token, logout } = useAuthStore();
+
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [catsLoading, setCatsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    fetchCurrencies();
+    if (categories.length === 0) {
+      setCatsLoading(true);
+      fetch("/api/categories")
+        .then((r) => r.json())
+        .then((data) => {
+          const list: ApiCategory[] = Array.isArray(data)
+            ? data
+            : (data.data ?? []);
+          setCategories(list);
+        })
+        .catch(() => {})
+        .finally(() => setCatsLoading(false));
+    }
+  }, [open]);
+
+  const filteredCats = categories.filter((c) =>
     c.name.toLowerCase().includes(catSearch.toLowerCase())
   );
+
+  const handleLogout = async () => {
+    onClose();
+    await logout();
+  };
 
   return (
     <AnimatePresence>
@@ -84,6 +112,39 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* User strip */}
+            {token && user ? (
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-muted/30">
+                <Link href="/dashboard" onClick={onClose}>
+                  <div className="flex items-center gap-3 cursor-pointer">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-black">
+                      {user.firstName?.[0]?.toUpperCase() ?? "U"}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">{user.firstName} {user.lastName}</p>
+                      <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                </Link>
+                <button onClick={handleLogout} className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500 transition-colors">
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 px-5 py-3 border-b border-border bg-muted/30">
+                <Link href="/login" onClick={onClose} className="flex-1">
+                  <button className="w-full py-2 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">
+                    Login
+                  </button>
+                </Link>
+                <Link href="/register" onClick={onClose} className="flex-1">
+                  <button className="w-full py-2 bg-muted text-foreground rounded-xl text-sm font-semibold hover:bg-muted/80 transition-colors">
+                    Register
+                  </button>
+                </Link>
+              </div>
+            )}
 
             {/* Tabs */}
             <div className="flex border-b border-border">
@@ -141,15 +202,36 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-2 mt-6">Preferences</p>
                   <div className="space-y-0.5">
-                    <div className="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-muted cursor-pointer">
-                      <div className="flex items-center gap-3 text-foreground">
-                        <DollarSign className="w-5 h-5" />
-                        <span className="text-sm font-medium">Currency</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                        <span>USD ($)</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
+                    {/* Currency selector */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setCurrencyOpen(!currencyOpen)}
+                        className="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-muted cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 text-foreground">
+                          <DollarSign className="w-5 h-5" />
+                          <span className="text-sm font-medium">Currency</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                          <span>{selected.flag} {selected.code} ({selected.symbol})</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
+                        </div>
+                      </button>
+                      {currencyOpen && (
+                        <div className="mt-1 mx-2 bg-background border border-border rounded-xl shadow-lg overflow-hidden max-h-44 overflow-y-auto z-10">
+                          {currencies.map((c) => (
+                            <button
+                              key={c.code}
+                              onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left ${c.code === selected.code ? "bg-primary/10 text-primary font-semibold" : "text-foreground"}`}
+                            >
+                              <span>{c.flag}</span>
+                              <span className="font-medium">{c.code}</span>
+                              <span className="text-muted-foreground text-xs ml-auto">{c.symbol}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-muted cursor-pointer">
                       <div className="flex items-center gap-3 text-foreground">
@@ -203,24 +285,44 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                       className="w-full pl-9 pr-4 py-2.5 bg-muted rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 border border-border"
                     />
                   </div>
-                  <div className="space-y-1">
-                    {filteredCats.map((cat) => (
-                      <Link key={cat.id} href={cat.href} onClick={onClose}>
-                        <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-muted cursor-pointer group transition-all">
-                          <img
-                            src={cat.image}
-                            alt={cat.name}
-                            className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground">{cat.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{cat.subtitle}</p>
+                  {catsLoading ? (
+                    <div className="space-y-2">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-3 px-2 py-2.5 rounded-xl animate-pulse">
+                          <div className="w-12 h-12 rounded-xl bg-muted flex-shrink-0" />
+                          <div className="flex-1 space-y-1.5">
+                            <div className="h-3 bg-muted rounded w-2/3" />
+                            <div className="h-2.5 bg-muted rounded w-1/2" />
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground opacity-50 group-hover:opacity-100 flex-shrink-0" />
                         </div>
-                      </Link>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : filteredCats.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-8">No categories found</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {filteredCats.map((cat) => (
+                        <Link key={cat.id} href={`/shop?cat=${encodeURIComponent(cat.slug || cat.name)}`} onClick={onClose}>
+                          <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-muted cursor-pointer group transition-all">
+                            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                              {cat.image ? (
+                                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <ShoppingBag className="w-5 h-5 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-foreground">{cat.name}</p>
+                              {cat.description && (
+                                <p className="text-xs text-muted-foreground truncate">{cat.description}</p>
+                              )}
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-50 group-hover:opacity-100 flex-shrink-0" />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

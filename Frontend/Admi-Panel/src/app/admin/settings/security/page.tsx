@@ -14,6 +14,8 @@ export default function SecuritySettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [twoFaEnabled, setTwoFaEnabled] = useState(false);
+  const [sessionTimeout, setSessionTimeout] = useState(30);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,15 +137,25 @@ export default function SecuritySettingsPage() {
             </h3>
             
             <div className="space-y-4">
-              <label className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100/80 transition-all border-2 border-transparent hover:border-slate-100">
+              <div
+                onClick={() => setTwoFaEnabled(!twoFaEnabled)}
+                className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-slate-100/80 transition-all border-2 border-transparent hover:border-slate-100"
+              >
                 <div className="flex-1">
                   <p className="text-sm font-black text-slate-900 uppercase tracking-tight">Two-Factor Auth</p>
                   <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Require OTP for all admin sessions</p>
                 </div>
-                <div className="ml-4">
-                  <input type="checkbox" className="h-5 w-5 rounded-lg border-2 border-slate-300 text-green-600 focus:ring-green-500 cursor-pointer" />
+                <div className="ml-4 flex items-center gap-2">
+                  {twoFaEnabled && (
+                    <span className="text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-wide">Coming soon</span>
+                  )}
+                  <div
+                    className={`w-11 h-6 rounded-full transition-all duration-300 relative ${twoFaEnabled ? "bg-green-500" : "bg-slate-200"}`}
+                  >
+                    <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${twoFaEnabled ? "left-[22px]" : "left-0.5"}`} />
+                  </div>
                 </div>
-              </label>
+              </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl space-y-4 border-2 border-slate-50">
                 <div className="flex items-center gap-3">
@@ -151,7 +163,14 @@ export default function SecuritySettingsPage() {
                   <div className="flex-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Session Timeout</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <input type="number" defaultValue={30} className="w-20 px-3 py-1 bg-white border-2 border-slate-100 rounded-lg text-sm font-bold" />
+                      <input
+                        type="number"
+                        value={sessionTimeout}
+                        onChange={(e) => setSessionTimeout(Math.max(1, Number(e.target.value)))}
+                        min={1}
+                        max={480}
+                        className="w-20 px-3 py-1 bg-white border-2 border-slate-100 rounded-lg text-sm font-bold focus:border-green-400 outline-none"
+                      />
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Minutes</span>
                     </div>
                   </div>

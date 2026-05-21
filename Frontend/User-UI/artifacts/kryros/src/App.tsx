@@ -1,7 +1,8 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -32,6 +33,9 @@ import SecurityPage from "@/pages/SecurityPage";
 import PayPage from "@/pages/PayPage";
 import NotFound from "@/pages/not-found";
 
+import { useAuthStore } from "@/store/authStore";
+import { useCurrencyStore } from "@/store/currencyStore";
+
 const queryClient = new QueryClient();
 
 const NO_LAYOUT_ROUTES = ["/login", "/register", "/dashboard", "/track", "/cart", "/checkout", "/pay"];
@@ -50,6 +54,30 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
   );
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
+  const [location] = useLocation();
+
+  if (!token || !user) {
+    return <Redirect to={`/login?redirect=${encodeURIComponent(location)}`} />;
+  }
+  return <>{children}</>;
+}
+
+function AppInit() {
+  const getMe = useAuthStore((s) => s.getMe);
+  const token = useAuthStore((s) => s.token);
+  const fetchCurrencies = useCurrencyStore((s) => s.fetchCurrencies);
+
+  useEffect(() => {
+    fetchCurrencies();
+    if (token) getMe();
+  }, []);
+
+  return null;
+}
+
 function Router() {
   return (
     <Switch>
@@ -62,7 +90,15 @@ function Router() {
       <Route path="/track">{() => <Layout path="/track"><TrackOrderPage /></Layout>}</Route>
       <Route path="/pickup-stations">{() => <Layout path="/pickup-stations"><PickupStationsPage /></Layout>}</Route>
       <Route path="/wholesale">{() => <Layout path="/wholesale"><WholesalePage /></Layout>}</Route>
-      <Route path="/dashboard">{() => <Layout path="/dashboard"><DashboardPage /></Layout>}</Route>
+      <Route path="/dashboard">
+        {() => (
+          <Layout path="/dashboard">
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          </Layout>
+        )}
+      </Route>
       <Route path="/login">{() => <Layout path="/login"><LoginPage /></Layout>}</Route>
       <Route path="/register">{() => <Layout path="/register"><RegisterPage /></Layout>}</Route>
       <Route path="/about">{() => <Layout path="/about"><AboutPage /></Layout>}</Route>
@@ -86,6 +122,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AppInit />
           <Router />
         </WouterRouter>
         <Toaster

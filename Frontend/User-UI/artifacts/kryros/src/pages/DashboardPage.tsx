@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Package, Heart, MapPin, CreditCard, Zap,
   MessageCircle, Bell, RefreshCcw, Star, Settings, ChevronRight, Check,
   Truck, MoreVertical, Plus, Globe, Sun, DollarSign, X, Search,
-  ChevronDown, Menu, ShoppingBag, Info, Tag, AlertCircle,
+  ChevronDown, Menu, ShoppingBag, Info, Tag, AlertCircle, LogOut,
 } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", active: true },
@@ -37,12 +38,14 @@ const notifications = [
   { id: "n5", icon: AlertCircle, color: "text-red-500 bg-red-500/10", title: "Return Approved", body: "Your return request #KRY-001 has been approved.", time: "2 days ago" },
 ];
 
-const recentOrders = [
-  { id: "o1", name: "iPhone 15 Pro Max", orderId: "#KRY12345678", date: "May 12, 2024", status: "In Transit", image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&q=80" },
-  { id: "o2", name: "MacBook Air M2", orderId: "#KRY12345677", date: "May 08, 2024", status: "Delivered", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&q=80" },
-  { id: "o3", name: "Sony WH-1000XM5", orderId: "#KRY12345676", date: "May 05, 2024", status: "Out for Delivery", image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&q=80" },
-  { id: "o4", name: "Nike Air Max 270", orderId: "#KRY12345675", date: "May 02, 2024", status: "Delivered", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&q=80" },
-];
+interface OrderItem {
+  id: string;
+  name: string;
+  orderId: string;
+  date: string;
+  status: string;
+  image: string;
+}
 
 const wishlistItems = [
   { id: "w1", name: "iPhone 15 Pro Max", price: "$1,099.00", image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=200&q=80" },
@@ -80,6 +83,47 @@ const quickActions = [
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [, setLocation] = useLocation();
+
+  const { user, token, logout } = useAuthStore();
+  const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
+  const firstName = user?.firstName ?? "there";
+  const initials = user
+    ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
+    : "?";
+
+  const [recentOrders, setRecentOrders] = useState<OrderItem[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    setOrdersLoading(true);
+    fetch("/api/orders/my-orders", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (data.data ?? data.orders ?? []);
+        const mapped: OrderItem[] = list.slice(0, 5).map((o: any) => ({
+          id: String(o.id),
+          name: o.items?.[0]?.product?.name ?? o.productName ?? "Order",
+          orderId: `#${o.orderNumber ?? o.id}`,
+          date: o.createdAt
+            ? new Date(o.createdAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })
+            : "",
+          status: o.status ?? "Pending",
+          image: o.items?.[0]?.product?.images?.[0] ?? o.image ?? "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&q=80",
+        }));
+        setRecentOrders(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setOrdersLoading(false));
+  }, [token]);
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/login");
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-background">
@@ -231,12 +275,20 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Avatar */}
-            <div className="flex items-center gap-1.5 cursor-pointer">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-muted flex-shrink-0 ring-2 ring-primary/30">
-                <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=60&q=80" alt="Alex" className="w-full h-full object-cover" />
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+            {/* Avatar + logout */}
+            <div className="flex items-center gap-1.5">
+              <Link href="/dashboard">
+                <div className="flex items-center gap-1.5 cursor-pointer">
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 ring-2 ring-primary/30 text-white text-xs font-black">
+                    {initials}
+                  </div>
+                  <span className="hidden md:block text-sm font-semibold text-foreground max-w-[100px] truncate">{displayName}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                </div>
+              </Link>
+              <button onClick={handleLogout} className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500 transition-colors" title="Logout">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -246,7 +298,7 @@ export default function DashboardPage() {
           {/* Page header */}
           <div className="mb-6">
             <h1 className="text-2xl font-black text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Welcome back, Alex! 👋</p>
+            <p className="text-sm text-muted-foreground">Welcome back, {firstName}! 👋</p>
           </div>
 
           {/* 4 Stat cards — compact horizontal rectangles */}
@@ -285,22 +337,42 @@ export default function DashboardPage() {
                 </Link>
               </div>
               <div className="space-y-1.5">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center gap-3 rounded-xl p-2 hover:bg-muted/50 transition-all cursor-pointer">
-                    <img src={order.image} alt={order.name} className="w-11 h-11 object-cover rounded-xl bg-muted flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">{order.name}</p>
-                      <p className="text-[10px] text-muted-foreground">Order ID: {order.orderId}</p>
-                      <p className="text-[10px] text-muted-foreground">{order.date}</p>
+                {ordersLoading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 rounded-xl p-2 animate-pulse">
+                      <div className="w-11 h-11 rounded-xl bg-muted flex-shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3 bg-muted rounded w-3/4" />
+                        <div className="h-2.5 bg-muted rounded w-1/2" />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <span className={`text-[9px] font-bold px-2 py-1 rounded-full ${statusColors[order.status] ?? "bg-muted text-muted-foreground"}`}>
-                        {order.status}
-                      </span>
-                      <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                    </div>
+                  ))
+                ) : recentOrders.length === 0 ? (
+                  <div className="flex flex-col items-center py-6 text-center">
+                    <Package className="w-10 h-10 text-muted-foreground/30 mb-2" />
+                    <p className="text-xs text-muted-foreground font-medium">No orders yet</p>
+                    <Link href="/shop">
+                      <span className="text-xs text-primary hover:underline cursor-pointer mt-1">Start shopping →</span>
+                    </Link>
                   </div>
-                ))}
+                ) : (
+                  recentOrders.map((order) => (
+                    <div key={order.id} className="flex items-center gap-3 rounded-xl p-2 hover:bg-muted/50 transition-all cursor-pointer">
+                      <img src={order.image} alt={order.name} className="w-11 h-11 object-cover rounded-xl bg-muted flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-foreground truncate">{order.name}</p>
+                        <p className="text-[10px] text-muted-foreground">Order ID: {order.orderId}</p>
+                        <p className="text-[10px] text-muted-foreground">{order.date}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <span className={`text-[9px] font-bold px-2 py-1 rounded-full ${statusColors[order.status] ?? "bg-muted text-muted-foreground"}`}>
+                          {order.status}
+                        </span>
+                        <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -315,13 +387,25 @@ export default function DashboardPage() {
                 </Link>
               </div>
               <p className="text-[10px] text-muted-foreground mb-2 font-medium">Latest Order</p>
-              <div className="flex items-center gap-3 mb-5 p-2 rounded-xl">
-                <img src={recentOrders[0].image} alt={recentOrders[0].name} className="w-12 h-12 object-cover rounded-xl bg-muted flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-foreground">{recentOrders[0].name}</p>
-                  <p className="text-[10px] text-muted-foreground">Order ID: {recentOrders[0].orderId}</p>
+              {recentOrders.length > 0 ? (
+                <div className="flex items-center gap-3 mb-5 p-2 rounded-xl">
+                  <img src={recentOrders[0].image} alt={recentOrders[0].name} className="w-12 h-12 object-cover rounded-xl bg-muted flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{recentOrders[0].name}</p>
+                    <p className="text-[10px] text-muted-foreground">Order ID: {recentOrders[0].orderId}</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center gap-3 mb-5 p-2 rounded-xl bg-muted/40">
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                    <Package className="w-5 h-5 text-muted-foreground/50" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">No orders yet</p>
+                    <p className="text-[10px] text-muted-foreground">Place an order to track it here</p>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-start mb-5 px-1">
                 {trackingTimeline.map((step, i) => (

@@ -1,25 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck, AlertCircle, Loader2, Phone } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 export default function RegisterPage() {
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [agreed, setAgreed] = useState(true);
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [agreed, setAgreed] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", password: "" });
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [, setLocation] = useLocation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { register, isLoading, error, clearError, token, user } = useAuthStore();
+
+  useEffect(() => {
+    if (token && user) setLocation("/dashboard");
+  }, [token, user]);
+
+  useEffect(() => {
+    return () => clearError();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocation("/dashboard");
+    setValidationError(null);
+
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setValidationError("Please enter your first and last name.");
+      return;
+    }
+    if (!form.email.trim()) {
+      setValidationError("Please enter your email address.");
+      return;
+    }
+    if (form.password.length < 8) {
+      setValidationError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (form.password !== confirmPassword) {
+      setValidationError("Passwords do not match.");
+      return;
+    }
+    if (!agreed) {
+      setValidationError("Please agree to the Terms & Conditions to continue.");
+      return;
+    }
+
+    const result = await register({
+      email: form.email.trim(),
+      password: form.password,
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      ...(form.phone.trim() ? { phone: form.phone.trim() } : {}),
+    });
+
+    if (result.success) {
+      setLocation("/dashboard");
+    }
   };
+
+  const displayError = validationError || error;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-xl">
 
-          {/* Header */}
           <div className="relative bg-card px-6 pt-5 pb-4 overflow-hidden border-b border-border">
             <div className="flex items-center justify-between mb-4">
               <Link href="/login">
@@ -37,7 +84,6 @@ export default function RegisterPage() {
                 <h1 className="text-2xl font-black text-foreground mb-1">Create Account</h1>
                 <p className="text-xs text-muted-foreground leading-snug">Join KRYROS and enjoy premium shopping experience</p>
               </div>
-              {/* Icon block */}
               <div className="w-20 h-20 flex-shrink-0 ml-2 relative">
                 <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
                   <span className="text-2xl font-black text-white">K</span>
@@ -50,13 +96,28 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-3.5 bg-card">
-            <div className="pt-4">
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your full name"
-                  className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
-                  data-testid="input-name" />
+            {displayError && (
+              <div className="mt-4 flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-red-700 dark:text-red-400 font-medium">{displayError}</p>
+              </div>
+            )}
+
+            <div className="pt-4 grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">First Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input type="text" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} placeholder="First name"
+                    required
+                    className="w-full pl-9 pr-3 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Last Name</label>
+                <input type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} placeholder="Last name"
+                  required
+                  className="w-full px-3 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50" />
               </div>
             </div>
 
@@ -65,8 +126,19 @@ export default function RegisterPage() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Enter your email"
+                  required autoComplete="email"
                   className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
                   data-testid="input-email" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5">Phone Number <span className="text-muted-foreground font-normal">(optional)</span></label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+260 977 000 000"
+                  autoComplete="tel"
+                  className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50" />
               </div>
             </div>
 
@@ -75,6 +147,7 @@ export default function RegisterPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input type={showPw ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Create a password"
+                  required minLength={8} maxLength={128} autoComplete="new-password"
                   className="w-full pl-10 pr-10 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
                   data-testid="input-password" />
                 <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -91,7 +164,8 @@ export default function RegisterPage() {
               <label className="block text-xs font-semibold text-foreground mb-1.5">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input type={showConfirm ? "text" : "password"} value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} placeholder="Confirm your password"
+                <input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm your password"
+                  required autoComplete="new-password"
                   className="w-full pl-10 pr-10 py-3 bg-background border border-border rounded-xl text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
                   data-testid="input-confirm-password" />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -112,27 +186,18 @@ export default function RegisterPage() {
               </span>
             </label>
 
-            <button type="submit" data-testid="btn-register"
-              className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm hover:opacity-90 transition-opacity active:scale-95">
-              Create Account
+            <button
+              type="submit"
+              disabled={isLoading || !agreed}
+              data-testid="btn-register"
+              className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Creating Account...</>
+              ) : (
+                "Create Account"
+              )}
             </button>
-
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">or continue with</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {["Google", "Apple", "Facebook"].map((label) => (
-                <button key={label} type="button" className="flex items-center justify-center gap-1 py-2.5 bg-background border border-border rounded-xl text-xs font-semibold text-foreground hover:bg-muted transition-colors">
-                  <span className={`font-black text-sm ${label === "Google" ? "text-red-500" : label === "Facebook" ? "text-blue-500" : "text-foreground"}`}>
-                    {label === "Google" ? "G" : label === "Apple" ? "" : "f"}
-                  </span>
-                  {label}
-                </button>
-              ))}
-            </div>
 
             <p className="text-center text-xs text-muted-foreground pb-1">
               Already have an account?{" "}
