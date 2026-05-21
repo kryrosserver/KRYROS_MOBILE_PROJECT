@@ -127,17 +127,13 @@ export default function CreditPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kryrosbackend-rwb2.onrender.com/api';
-      const token = getAdminToken();
-      const headers = { 'Authorization': `Bearer ${token}` };
-
       const [summaryRes, accountsRes, plansRes, catsRes, brandsRes, productsRes] = await Promise.all([
         fetch("/internal/admin/reports/summary?range=month", { cache: "no-store" }).then(r => r.json()),
-        fetch(`${apiUrl}/credit/all`, { headers }).then(r => r.json()),
-        fetch(`${apiUrl}/credit/plans`).then(r => r.json()),
-        fetch(`${apiUrl}/categories`).then(r => r.json()),
-        fetch(`${apiUrl}/brands`).then(r => r.json()),
-        fetch(`${apiUrl}/admin/products?showInactive=true`).then(r => r.json())
+        fetch("/internal/admin/credit/accounts", { cache: "no-store" }).then(r => r.json()),
+        fetch("/internal/admin/credit/plans", { cache: "no-store" }).then(r => r.json()),
+        fetch("/internal/admin/categories", { cache: "no-store" }).then(r => r.json()),
+        fetch("/internal/admin/brands", { cache: "no-store" }).then(r => r.json()),
+        fetch("/internal/admin/products", { cache: "no-store" }).then(r => r.json())
       ]);
 
       setSummaryData(summaryRes);
@@ -179,16 +175,13 @@ export default function CreditPage() {
 
   const handleSavePlan = async () => {
     try {
-      const url = editingPlan 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/credit/plans/${editingPlan.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/credit/plans`;
-      
+      const url = editingPlan
+        ? `/internal/admin/credit/plans/${editingPlan.id}`
+        : `/internal/admin/credit/plans`;
+
       const res = await fetch(url, {
         method: editingPlan ? "PUT" : "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${getAdminToken()}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...planForm,
           targetBrandId: planForm.targetBrandId ? Number(planForm.targetBrandId) : null,
@@ -208,12 +201,9 @@ export default function CreditPage() {
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/credit/accounts/${id}/status`, {
+      const res = await fetch(`/internal/admin/credit/accounts/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAdminToken()}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {

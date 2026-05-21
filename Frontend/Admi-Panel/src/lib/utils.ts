@@ -36,7 +36,7 @@ export function resolveImageUrl(url?: string): string {
   }
   
   // If it's a relative path (e.g., /uploads/...), prefix it with the backend URL
-  const rawApi = (process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-rwb2.onrender.com").replace(/\/$/, "");
+  const rawApi = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
   // Remove trailing /api if present to get the base server URL
   const baseUrl = rawApi.replace(/\/api$/, "");
   

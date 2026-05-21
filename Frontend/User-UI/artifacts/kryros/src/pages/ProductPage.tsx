@@ -7,12 +7,21 @@ import { useWishlistStore } from "@/store/wishlistStore";
 import { fetchProductById, fetchProducts } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
+interface CreditPlan {
+  id: string;
+  duration: number;
+  interestRate: number;
+  minimumAmount: number;
+  isActive: boolean;
+}
+
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creditPlans, setCreditPlans] = useState<CreditPlan[]>([]);
 
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
@@ -20,6 +29,16 @@ export default function ProductPage() {
 
   const addToCart = useCartStore((s) => s.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+
+  useEffect(() => {
+    fetch("/api/credit/plans")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => {
+        const active: CreditPlan[] = Array.isArray(data) ? data.filter((p: CreditPlan) => p.isActive) : [];
+        setCreditPlans(active);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -54,9 +73,14 @@ export default function ProductPage() {
 
   const wishlisted = isWishlisted(product.id);
   const thumbImages = product.images.length > 0 ? product.images : [product.image, product.image, product.image, product.image].filter(Boolean);
-  const monthly = Math.round(product.price / 20);
+
+  const defaultPlan = creditPlans[0];
+  const planDuration = defaultPlan?.duration ?? 12;
+  const planInterestRate = defaultPlan?.interestRate ?? 0;
+  const totalWithInterest = product.price * (1 + planInterestRate / 100);
+  const monthly = Math.round(totalWithInterest / planDuration);
   const upfront = Math.round(product.price * 0.10);
-  const totalPayable = Math.round(product.price * 0.39);
+  const totalPayable = Math.round(totalWithInterest);
 
   const handleAddToCart = () => {
     addToCart({ id: product.id, name: product.name, price: product.price, qty, image: product.image });

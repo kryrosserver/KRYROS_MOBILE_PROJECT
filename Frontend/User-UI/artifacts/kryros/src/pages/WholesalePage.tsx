@@ -1,22 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Tag, Truck, ShieldCheck, Headphones, ShoppingCart, ChevronRight, Heart, LayoutGrid, Search, ClipboardList, SendHorizonal, CheckCircle2 } from "lucide-react";
-
-const categories = [
-  { id: "smartphones", name: "Smartphones", image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=200&q=80" },
-  { id: "laptops", name: "Laptops", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&q=80" },
-  { id: "electronics", name: "Electronics", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=200&q=80" },
-  { id: "accessories", name: "Accessories", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80" },
-  { id: "audio", name: "Audio", image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=200&q=80" },
-];
-
-const wholesaleProducts = [
-  { id: "p1", name: "iPhone 15 Pro Max", specs: "256GB | Titanium", price: 989.00, save: 10, minOrder: 5, image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&q=80" },
-  { id: "p2", name: "MacBook Air M2", specs: "13-inch | 512GB", price: 1129.00, save: 22, minOrder: 3, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80" },
-  { id: "p3", name: "Sony WH-1000XM5", specs: "Wireless Headphones", price: 289.00, save: 22, minOrder: 10, image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400&q=80" },
-  { id: "p4", name: "Nike Air Max 270", specs: "Men's Shoes", price: 95.00, save: 16, minOrder: 20, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" },
-];
+import { fetchProducts, fetchCategories } from "@/lib/api";
+import type { Product, ApiCategory } from "@/lib/api";
 
 const steps = [
   { icon: Search, title: "Browse Products", desc: "Explore products available for wholesale" },
@@ -34,6 +21,17 @@ const features = [
 
 export default function WholesalePage() {
   const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [wholesaleProducts, setWholesaleProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetchCategories().then((cats) => setCategories(cats.filter((c: any) => c.isActive !== false).slice(0, 5))),
+      fetchProducts({ take: 8 }).then((prods) => setWholesaleProducts(prods.slice(0, 4))),
+    ]).finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
@@ -69,10 +67,18 @@ export default function WholesalePage() {
           </div>
           <div className="relative flex-shrink-0 w-36 h-32">
             <div className="absolute right-0 top-0 w-22 h-22 rounded-xl overflow-hidden shadow-xl" style={{ width: 80, height: 80 }}>
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&q=80" alt="MacBook" className="w-full h-full object-cover" />
+              {wholesaleProducts[0]?.image ? (
+                <img src={wholesaleProducts[0].image} alt={wholesaleProducts[0].name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-white/10" />
+              )}
             </div>
             <div className="absolute left-0 bottom-0 w-16 h-16 rounded-xl overflow-hidden shadow-md">
-              <img src="https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=200&q=80" alt="Sony" className="w-full h-full object-cover" />
+              {wholesaleProducts[1]?.image ? (
+                <img src={wholesaleProducts[1].image} alt={wholesaleProducts[1].name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-white/10" />
+              )}
             </div>
             <div className="absolute right-0 bottom-0 flex flex-col items-center justify-center w-16 h-16 rounded-2xl border-2 border-primary/40 bg-primary/10">
               <span className="text-[8px] text-white/60 font-medium">UP TO</span>
@@ -87,17 +93,30 @@ export default function WholesalePage() {
       <div className="mb-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground">Shop by Category</h2>
-          <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
+          <Link href="/shop">
+            <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
+          </Link>
         </div>
         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
-          {categories.map((cat) => (
-            <div key={cat.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
-              <div className="w-[58px] h-[58px] rounded-2xl overflow-hidden border border-border group-hover:border-primary transition-all">
-                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
-              </div>
-              <span className="text-[9px] font-medium text-muted-foreground group-hover:text-primary transition-colors text-center">{cat.name}</span>
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                  <div className="w-[58px] h-[58px] rounded-2xl bg-muted animate-pulse" />
+                  <div className="w-10 h-2 bg-muted rounded animate-pulse" />
+                </div>
+              ))
+            : categories.map((cat) => (
+                <div key={cat.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+                  <div className="w-[58px] h-[58px] rounded-2xl overflow-hidden border border-border group-hover:border-primary transition-all bg-muted">
+                    {cat.image ? (
+                      <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">{cat.name[0]}</div>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-medium text-muted-foreground group-hover:text-primary transition-colors text-center">{cat.name}</span>
+                </div>
+              ))}
           <div className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
             <div className="w-[58px] h-[58px] rounded-2xl border border-border bg-muted group-hover:border-primary transition-all flex items-center justify-center">
               <LayoutGrid className="w-5 h-5 text-muted-foreground" />
@@ -122,46 +141,73 @@ export default function WholesalePage() {
       <div className="mb-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground">Top Wholesale Deals</h2>
-          <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
+          <Link href="/shop">
+            <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
+          </Link>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          {wholesaleProducts.map((p, i) => (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.07 }}
-            >
-              <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                <div className="relative">
-                  <span className="absolute top-2 left-2 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
-                    Save {p.save}%
-                  </span>
-                  <button
-                    onClick={() => setLiked((l) => ({ ...l, [p.id]: !l[p.id] }))}
-                    className="absolute top-2 right-2 z-10 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm"
-                  >
-                    <Heart className={`w-3 h-3 ${liked[p.id] ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                  </button>
-                  <img src={p.image} alt={p.name} className="w-full aspect-square object-cover bg-muted" />
-                </div>
-                <div className="p-2.5">
-                  <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5 line-clamp-2">{p.name}</p>
-                  <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
-                  <p className="text-sm font-black text-foreground leading-tight">
-                    ${p.price.toFixed(2)}<span className="text-[9px] text-muted-foreground font-normal"> /unit</span>
-                  </p>
-                  <p className="text-[9px] text-muted-foreground mb-2">Min. Order: {p.minOrder} units</p>
-                  <button className="w-full flex items-center justify-center gap-1 py-1.5 border border-border rounded-lg text-[9px] font-bold text-foreground hover:bg-muted transition-all">
-                    <ShoppingCart className="w-3 h-3" />
-                    Add to Quote
-                  </button>
+        {loading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden animate-pulse">
+                <div className="aspect-square bg-muted" />
+                <div className="p-2.5 space-y-2">
+                  <div className="h-3 bg-muted rounded w-3/4" />
+                  <div className="h-2 bg-muted rounded w-1/2" />
+                  <div className="h-4 bg-muted rounded w-1/3" />
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : wholesaleProducts.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No products available yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {wholesaleProducts.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07 }}
+              >
+                <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                  <div className="relative">
+                    {p.discount > 0 && (
+                      <span className="absolute top-2 left-2 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
+                        Save {p.discount}%
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setLiked((l) => ({ ...l, [p.id]: !l[p.id] }))}
+                      className="absolute top-2 right-2 z-10 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm"
+                    >
+                      <Heart className={`w-3 h-3 ${liked[p.id] ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                    </button>
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} className="w-full aspect-square object-cover bg-muted" />
+                    ) : (
+                      <div className="w-full aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">No image</div>
+                    )}
+                  </div>
+                  <div className="p-2.5">
+                    <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5 line-clamp-2">{p.name}</p>
+                    <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
+                    <p className="text-sm font-black text-foreground leading-tight">
+                      ${p.price.toFixed(2)}<span className="text-[9px] text-muted-foreground font-normal"> /unit</span>
+                    </p>
+                    <p className="text-[9px] text-muted-foreground mb-2">Min. Order: 5 units</p>
+                    <Link href={`/product/${p.id}`}>
+                      <button className="w-full flex items-center justify-center gap-1 py-1.5 border border-border rounded-lg text-[9px] font-bold text-foreground hover:bg-muted transition-all">
+                        <ShoppingCart className="w-3 h-3" />
+                        Add to Quote
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Want Better Prices */}
