@@ -21,11 +21,13 @@ export class CreateUserDto {
   @ApiProperty({ example: 'John' })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100, { message: 'First name must not exceed 100 characters' })
   firstName!: string;
 
   @ApiProperty({ example: 'Doe' })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100, { message: 'Last name must not exceed 100 characters' })
   lastName!: string;
 
   @ApiProperty({ example: '+260966423719' })

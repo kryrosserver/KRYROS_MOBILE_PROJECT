@@ -38,7 +38,7 @@ import { NewsletterModule } from './newsletter/newsletter.module';
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
-        name: 'global',
+        name: 'default',
         ttl: 60000,
         limit: 60,
       },
