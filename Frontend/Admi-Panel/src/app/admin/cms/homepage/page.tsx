@@ -158,7 +158,6 @@ export default function HomePageCMS() {
         setBanners(Array.isArray(data) ? data : data?.data || []);
       }
     } catch (err) {
-      console.error("Failed to load banners", err);
     } finally {
       setLoadingBanners(false);
     }
@@ -202,7 +201,6 @@ export default function HomePageCMS() {
         setCategories(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      console.error("Failed to load categories", err);
     }
   };
 
@@ -228,7 +226,6 @@ export default function HomePageCMS() {
         }
       }));
     } catch (err) {
-      console.error("Image upload/compression failed:", err);
       alert("Failed to process image");
     } finally {
       setSaving(false);
@@ -244,7 +241,6 @@ export default function HomePageCMS() {
         setSections(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      console.error("Failed to load sections", err);
       setSections([]);
     } finally {
       setLoading(false);
@@ -366,7 +362,6 @@ export default function HomePageCMS() {
       await loadSections();
       alert("Layout saved permanently!");
     } catch (error) {
-      console.error("Failed to save layout", error);
       alert("Failed to save layout. Please try again.");
     } finally {
       setSaving(false);
@@ -2131,7 +2126,6 @@ export default function HomePageCMS() {
                           const base64 = await compressImage(file);
                           setSlideSlideForm({...slideForm, image: base64});
                         } catch (err) {
-                          console.error("Image compression failed", err);
                         } finally {
                           setSaving(false);
                         }
