@@ -20,27 +20,19 @@ export async function POST(request: Request) {
 
     const data = await res.json();
     const response = NextResponse.json({ success: true, user: data.user });
-    const token = data.accessToken;
-    const role = data.user?.role || "CUSTOMER";
-    // Set httpOnly token cookie and a small role cookie for role gating
-    response.cookies.set("admin_token", token, {
+
+    response.cookies.set("admin_token", data.accessToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
-    response.cookies.set("admin_role", role, {
-      httpOnly: false,
-      sameSite: "lax",
-      secure: true,
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
+
     return response;
-  } catch (e: any) {
+  } catch {
     return NextResponse.json(
-      { success: false, error: e?.message || "Unexpected error" },
+      { success: false, error: "Unexpected error" },
       { status: 500 }
     );
   }
