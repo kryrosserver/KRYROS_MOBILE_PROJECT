@@ -14,12 +14,18 @@ import { UsersModule } from '../users/users.module';
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET') || 'kryros-secret-key',
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRES_IN') || '7d',
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret) {
+          throw new Error('JWT_SECRET environment variable is not set. Server cannot start.');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: '15m',
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
