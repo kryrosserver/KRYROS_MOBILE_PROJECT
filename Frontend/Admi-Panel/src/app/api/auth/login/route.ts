@@ -1,19 +1,28 @@
 import { NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
+import { parseBackendError } from "@/lib/api";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    if (!body.identifier || !body.password) {
+      return NextResponse.json(
+        { success: false, error: "Email and password are required." },
+        { status: 400 }
+      );
+    }
+
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ identifier: body.identifier, password: body.password }),
     });
 
     if (!res.ok) {
-      const text = await res.text();
+      const message = await parseBackendError(res);
       return NextResponse.json(
-        { success: false, error: text || "Login failed" },
+        { success: false, error: message },
         { status: res.status }
       );
     }
