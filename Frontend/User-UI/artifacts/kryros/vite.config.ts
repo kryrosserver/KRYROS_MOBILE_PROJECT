@@ -56,9 +56,9 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "https://kryrosbackend-rwb2.onrender.com",
+        target: "http://localhost:8080",
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
     },
   },

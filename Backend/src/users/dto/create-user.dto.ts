@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsEnum, IsNotEmpty, Matches, MaxLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum, IsNotEmpty, IsBoolean, Matches, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
@@ -50,4 +50,9 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(5_000_000, { message: 'Avatar image is too large' })
   avatar?: string;
+
+  @ApiProperty({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isVerified?: boolean;
 }
