@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, BadRequestException } from '@nestjs/common';
 import { NewsletterService } from './newsletter.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { UserRole } from '@prisma/client';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Controller('newsletter')
 export class NewsletterController {
@@ -11,12 +13,18 @@ export class NewsletterController {
 
   @Post('subscribe')
   async subscribe(@Body('email') email: string) {
-    return this.newsletterService.subscribe(email);
+    if (!email || !EMAIL_REGEX.test(email) || email.length > 254) {
+      throw new BadRequestException('A valid email address is required');
+    }
+    return this.newsletterService.subscribe(email.toLowerCase().trim());
   }
 
   @Post('unsubscribe')
   async unsubscribe(@Body('email') email: string) {
-    return this.newsletterService.unsubscribe(email);
+    if (!email || !EMAIL_REGEX.test(email) || email.length > 254) {
+      throw new BadRequestException('A valid email address is required');
+    }
+    return this.newsletterService.unsubscribe(email.toLowerCase().trim());
   }
 
   @Get('list')

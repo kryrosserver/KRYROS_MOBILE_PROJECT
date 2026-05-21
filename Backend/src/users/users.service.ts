@@ -18,7 +18,8 @@ export class UsersService {
   }
 
   async findAll(params: { skip?: number; take?: number; search?: string } = {}) {
-    const { skip = 0, take = 20, search } = params;
+    const { skip = 0, take: rawTake = 20, search } = params;
+    const take = Math.min(Math.max(1, Number(rawTake) || 20), 100);
     
     const where: any = {};
     if (search) {
@@ -127,6 +128,7 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        // password, passwordResetToken, passwordResetExpires intentionally excluded
       },
     });
   }

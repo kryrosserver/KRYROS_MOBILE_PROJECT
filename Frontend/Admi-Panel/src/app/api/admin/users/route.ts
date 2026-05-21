@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
+import { requireAdminToken } from "@/lib/admin-auth";
 import { cookies } from "next/headers";
 
 export async function GET() {
   const token = (await cookies()).get("admin_token")?.value || "";
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const res = await fetch(`${API_BASE}/users`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,6 +21,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const token = (await cookies()).get("admin_token")?.value || "";
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
   const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
@@ -37,6 +40,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const token = (await cookies()).get("admin_token")?.value || "";
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });

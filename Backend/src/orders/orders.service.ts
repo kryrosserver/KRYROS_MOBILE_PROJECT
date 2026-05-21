@@ -24,7 +24,8 @@ export class OrdersService {
   }
 
   async findAll(userId?: string, params?: { skip?: number; take?: number; status?: string }) {
-    const { skip = 0, take = 20, status } = params || {};
+    const { skip = 0, take: rawTake = 20, status } = params || {};
+    const take = Math.min(Math.max(1, Number(rawTake) || 20), 100);
     const where: any = userId ? { userId } : {};
     if (status) where.status = status;
 

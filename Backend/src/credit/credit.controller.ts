@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CreditService } from './credit.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -103,7 +103,14 @@ export class CreditController {
   @Post('calculate')
   @ApiOperation({ summary: 'Calculate installment (Public)' })
   calculate(@Body() body: { amount: number; planId: string }) {
-    return this.creditService.calculateInstallment(body.amount, body.planId);
+    const amount = Number(body.amount);
+    if (!body.planId || typeof body.planId !== 'string' || body.planId.trim() === '') {
+      throw new BadRequestException('planId is required');
+    }
+    if (!isFinite(amount) || amount <= 0 || amount > 10_000_000) {
+      throw new BadRequestException('amount must be a positive number not exceeding 10,000,000');
+    }
+    return this.creditService.calculateInstallment(amount, body.planId);
   }
 
   @Post('apply')

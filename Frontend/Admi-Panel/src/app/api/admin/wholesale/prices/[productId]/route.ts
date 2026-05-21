@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
+import { requireAdminToken } from "@/lib/admin-auth";
 
 export async function POST(
   req: NextRequest,

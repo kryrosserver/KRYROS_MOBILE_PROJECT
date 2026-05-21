@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
+import { requireAdminToken } from "@/lib/admin-auth";
 
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get("admin_token")?.value;
+  const authResult = requireAdminToken(req);
+  if (authResult instanceof NextResponse) return authResult;
+  const token = authResult.token;
   const res = await fetch(`${API_BASE}/wholesale/accounts`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     cache: "no-store",

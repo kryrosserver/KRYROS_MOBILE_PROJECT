@@ -3,9 +3,11 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { API_BASE } from "@/lib/config";
+import { requireAdminToken } from "@/lib/admin-auth";
 
 export async function POST(request: Request) {
   const token = (await cookies()).get("admin_token")?.value || "";
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json();
   const res = await fetch(`${API_BASE}/cms/footer/links`, {
     method: "POST",

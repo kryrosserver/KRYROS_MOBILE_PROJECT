@@ -24,7 +24,8 @@ export class ProductsService {
     showInactive?: boolean;
     popularity?: string;
   }) {
-    const { skip = 0, take = 20, categoryId, categorySlug, search, isFeatured, allowCredit, isWholesaleOnly, isFlashSale, showInactive, popularity } = params;
+    const { skip = 0, take: rawTake = 20, categoryId, categorySlug, search, isFeatured, allowCredit, isWholesaleOnly, isFlashSale, showInactive, popularity } = params;
+    const take = Math.min(Math.max(1, Number(rawTake) || 20), 100);
     
     const where: any = {};
     if (!showInactive) {

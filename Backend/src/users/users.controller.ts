@@ -54,10 +54,10 @@ export class UsersController {
       throw new ForbiddenException('You do not have permission to update this user');
     }
 
-    // Non-admins cannot escalate their own role or verification status
     if (!isAdmin) {
-      delete updateUserDto.role;
-      delete updateUserDto.isVerified;
+      // Non-admins get a strictly whitelisted set of fields — never role, isVerified, isActive, or password
+      const { firstName, lastName, email, phone, avatar } = updateUserDto;
+      return this.usersService.update(id, { firstName, lastName, email, phone, avatar });
     }
 
     // Admins cannot set role higher than their own

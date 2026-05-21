@@ -4,22 +4,34 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { API_BASE } from "@/lib/config";
 
+const ALLOWED_NOTIFICATION_TYPES = new Set(["send", "broadcast", "sms", "email"]);
+
 export async function POST(request: Request) {
-  // Synchronous cookies() for Next.js 14.1.0
   const cookieStore = cookies();
   const token = cookieStore.get("admin_token")?.value || "";
+
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
-  
-  // Determine if it's a broadcast, targeted send, or SMS
   const url = new URL(request.url);
-  const type = url.searchParams.get("type") || "send"; 
-  
-  // Map our bridge types to the actual backend endpoints
-  let endpoint = `${API_BASE}/notifications/${type}`;
-  if (type === "sms") {
+  const rawType = url.searchParams.get("type") || "send";
+
+  if (!ALLOWED_NOTIFICATION_TYPES.has(rawType)) {
+    return NextResponse.json({ error: "Invalid notification type" }, { status: 400 });
+  }
+
+  const type = rawType;
+  let endpoint: string;
+  if (type === "broadcast") {
+    endpoint = `${API_BASE}/notifications/broadcast`;
+  } else if (type === "sms") {
     endpoint = `${API_BASE}/notifications/sms/send`;
   } else if (type === "email") {
     endpoint = `${API_BASE}/notifications/email/test`;
+  } else {
+    endpoint = `${API_BASE}/notifications/send`;
   }
   
   try {

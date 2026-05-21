@@ -15,7 +15,7 @@ export class WalletController {
   constructor(private walletService: WalletService) {}
 
   @Get('manage')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({ summary: 'Admin: List all wallets' })
   getWallets() {
@@ -23,7 +23,7 @@ export class WalletController {
   }
 
   @Get('manage/transactions')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({ summary: 'Admin: List all recent transactions' })
   getAllTransactions() {

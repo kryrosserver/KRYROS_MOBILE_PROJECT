@@ -2,10 +2,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
+import { requireAdminToken } from "@/lib/admin-auth";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
-  const token = (await cookies()).get("admin_token")?.value || "";
+  const authResult = requireAdminToken(req);
+  if (authResult instanceof NextResponse) return authResult;
+  const token = authResult.token;
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const take = searchParams.get("take") || "20";
@@ -36,7 +39,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const token = (await cookies()).get("admin_token")?.value || "";
+  const authResult = requireAdminToken(req);
+  if (authResult instanceof NextResponse) return authResult;
+  const token = authResult.token;
   
   let formData: FormData;
   try {
