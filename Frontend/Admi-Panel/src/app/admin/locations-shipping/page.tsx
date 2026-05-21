@@ -53,7 +53,6 @@ export default function ShippingDashboardPage() {
           setIsEnabled(data);
         }
       } catch (err) {
-        console.error("Error loading shipping counts:", err);
       }
     };
     loadCounts();
