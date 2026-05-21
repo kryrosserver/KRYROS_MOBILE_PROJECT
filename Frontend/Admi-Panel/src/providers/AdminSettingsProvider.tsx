@@ -144,7 +144,6 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
           } catch {}
         }
       }
-    }).catch(err => console.error("Error syncing settings:", err));
 
     const initNotifs = readLS<NotificationItem[]>(LS_NOTIFS, []);
     setNotifications(initNotifs);
