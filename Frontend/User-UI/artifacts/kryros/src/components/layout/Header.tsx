@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown } from "lucide-react";
+import { ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useThemeStore } from "@/store/themeStore";
 import { useSidebarStore } from "@/store/sidebarStore";
 import Sidebar from "./Sidebar";
+import SearchAutocomplete from "./SearchAutocomplete";
 
 const desktopNav = [
   { label: "Home", href: "/" },
@@ -19,7 +19,6 @@ const desktopNav = [
 
 export default function Header() {
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebarStore();
-  const [searchQuery, setSearchQuery] = useState("");
   const [location] = useLocation();
   const items = useCartStore((s) => s.items);
   const cartCount = items.reduce((t, i) => t + i.qty, 0);
@@ -68,20 +67,10 @@ export default function Header() {
               All Categories
               <ChevronDown className="w-4 h-4" />
             </button>
-            <div className="flex-1 flex items-center bg-muted rounded-xl border border-border overflow-hidden">
-              <Search className="w-4 h-4 ml-3 text-muted-foreground flex-shrink-0" />
-              <input
-                type="search"
-                placeholder="Search for products, brands and more..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-3 py-2.5 bg-transparent text-sm outline-none"
-                data-testid="header-search-input"
-              />
-              <button className="px-4 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors text-sm font-medium">
-                <Search className="w-4 h-4" />
-              </button>
-            </div>
+            <SearchAutocomplete
+              showSearchButton
+              placeholder="Search for products, brands and more..."
+            />
           </div>
 
           {/* Spacer mobile */}
@@ -153,19 +142,14 @@ export default function Header() {
 
         {/* Mobile: Always-visible search bar */}
         <div className="md:hidden px-3 pb-2.5">
-          <div className="flex items-center bg-muted rounded-xl border border-border overflow-hidden">
-            <Search className="w-4 h-4 ml-3 text-muted-foreground flex-shrink-0" />
-            <input
-              type="search"
-              placeholder="Search for products, brands and more..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-3 py-2.5 bg-transparent text-sm outline-none"
-            />
-            <button className="px-3 py-2 text-muted-foreground">
-              <Mic className="w-4 h-4" />
-            </button>
-          </div>
+          <SearchAutocomplete
+            placeholder="Search for products, brands and more..."
+            rightSlot={
+              <button type="button" className="px-3 py-2 text-muted-foreground">
+                <Mic className="w-4 h-4" />
+              </button>
+            }
+          />
         </div>
 
         {/* Desktop: Sub nav */}
