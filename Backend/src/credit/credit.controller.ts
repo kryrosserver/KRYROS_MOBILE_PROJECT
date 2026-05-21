@@ -4,6 +4,7 @@ import { CreditService } from './credit.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 import { Request } from 'express';
 
 @ApiTags('Credit')
@@ -14,34 +15,41 @@ export class CreditController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get user credit profile' })
-  getProfile(@Param('userId') userId: string) {
+  @ApiOperation({ summary: 'Get current user credit profile' })
+  getProfile(@Req() req: Request) {
+    const userId = (req as any).user.id;
     return this.creditService.getProfile(userId);
   }
 
   @Get('plans')
-  @ApiOperation({ summary: 'Get available credit plans' })
+  @ApiOperation({ summary: 'Get available credit plans (Public)' })
   getPlans(@Query('productId') productId?: string) {
     return this.creditService.getPlans({ productId });
   }
 
   @Post('plans')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Create a new credit plan (Admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new credit plan (Admin only)' })
   createPlan(@Body() body: any) {
     return this.creditService.createPlan(body);
   }
 
   @Put('plans/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Update a credit plan (Admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a credit plan (Admin only)' })
   updatePlan(@Param('id') id: string, @Body() body: any) {
     return this.creditService.updatePlan(id, body);
   }
 
   @Delete('plans/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Delete a credit plan (Admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a credit plan (Admin only)' })
   deletePlan(@Param('id') id: string) {
     return this.creditService.deletePlan(id);
   }
@@ -49,21 +57,22 @@ export class CreditController {
   @Get('accounts')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get user credit accounts' })
-  getAccounts(@Param('userId') userId: string) {
+  @ApiOperation({ summary: 'Get current user credit accounts' })
+  getAccounts(@Req() req: Request) {
+    const userId = (req as any).user.id;
     return this.creditService.getAccounts(userId);
   }
 
   @Get('all')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all credit accounts (Admin)' })
+  @ApiOperation({ summary: 'Get all credit accounts (Admin only)' })
   getAll(
     @Query('skip') skip?: number,
     @Query('take') take?: number,
     @Query('status') status?: string,
   ) {
-    // In a real app, you should also have an AdminGuard here
     return this.creditService.getAllAccounts({
       skip: skip ? Number(skip) : undefined,
       take: take ? Number(take) : undefined,
@@ -72,9 +81,10 @@ export class CreditController {
   }
 
   @Put('accounts/:id/status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update credit account status (Admin)' })
+  @ApiOperation({ summary: 'Update credit account status (Admin only)' })
   updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
     return this.creditService.updateAccountStatus(id, body.status);
   }
@@ -89,7 +99,7 @@ export class CreditController {
   }
 
   @Post('calculate')
-  @ApiOperation({ summary: 'Calculate installment' })
+  @ApiOperation({ summary: 'Calculate installment (Public)' })
   calculate(@Body() body: { amount: number; planId: string }) {
     return this.creditService.calculateInstallment(body.amount, body.planId);
   }
