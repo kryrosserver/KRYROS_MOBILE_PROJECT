@@ -91,7 +91,6 @@ export default function CategoriesPage() {
         setCmsSection(catSection);
       }
     } catch (e) {
-      console.error("Failed to load CMS section", e);
     }
   }, []);
 
@@ -113,7 +112,6 @@ export default function CategoriesPage() {
         setCmsSection({ ...cmsSection, [field]: value });
       }
     } catch (e) {
-      console.error("Failed to update CMS section", e);
     } finally {
       setUpdatingCms(false);
     }
@@ -156,7 +154,6 @@ export default function CategoriesPage() {
       });
       if (res.ok) await loadCategories();
     } catch (e) {
-      console.error("Failed to toggle home status", e);
     }
   };
 
