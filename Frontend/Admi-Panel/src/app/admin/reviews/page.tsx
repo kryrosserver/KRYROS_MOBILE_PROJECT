@@ -39,7 +39,6 @@ export default function ReviewsPage() {
         setReviews(data.data)
       }
     } catch (err) {
-      console.error("Failed to fetch reviews:", err)
     } finally {
       setLoading(false)
     }
@@ -61,7 +60,6 @@ export default function ReviewsPage() {
         setReviews(prev => prev.map(r => r.id === id ? { ...r, [field]: !currentVal } : r))
       }
     } catch (err) {
-      console.error("Update failed:", err)
     } finally {
       setUpdatingId(null)
     }
@@ -76,7 +74,6 @@ export default function ReviewsPage() {
         setReviews(prev => prev.filter(r => r.id !== id))
       }
     } catch (err) {
-      console.error("Delete failed:", err)
     } finally {
       setUpdatingId(null)
     }
