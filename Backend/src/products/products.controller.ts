@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFiles, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFiles, BadRequestException, Request } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
@@ -10,6 +10,7 @@ import { UpdateProductFlagsDto } from './dto/update-product-flags.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import type { Express } from 'express';
 
 const imageUploadOptions = {
@@ -30,9 +31,11 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get all products (Public)' })
   findAll(
+    @Request() req,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
     @Query('categoryId') categoryId?: string,
@@ -45,6 +48,17 @@ export class ProductsController {
     @Query('showInactive') showInactive?: string,
     @Query('popularity') popularity?: string,
   ) {
+    const isAdmin = req.user && (
+      req.user.role === UserRole.ADMIN ||
+      req.user.role === UserRole.SUPER_ADMIN ||
+      req.user.role === UserRole.MANAGER
+    );
+
+    // Only admins can request inactive products — strip the flag for everyone else
+    const resolvedShowInactive = isAdmin
+      ? showInactive === 'true'
+      : false;
+
     return this.productsService.findAll({
       skip: skip ? Number(skip) : undefined,
       take: take ? Number(take) : undefined,
@@ -55,7 +69,7 @@ export class ProductsController {
       allowCredit: allowCredit === 'true' ? true : allowCredit === 'false' ? false : undefined,
       isWholesaleOnly: isWholesaleOnly === 'true' ? true : isWholesaleOnly === 'false' ? false : undefined,
       isFlashSale: isFlashSale === 'true' ? true : isFlashSale === 'false' ? false : undefined,
-      showInactive: showInactive === 'true' ? true : showInactive === 'false' ? false : undefined,
+      showInactive: resolvedShowInactive,
       popularity,
     });
   }

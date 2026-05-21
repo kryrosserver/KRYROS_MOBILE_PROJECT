@@ -129,6 +129,7 @@ model Address {
   billingOrders  Order[]     @relation("OrderBillingAddress")
   shippingOrders Order[]     @relation("OrderShippingAddress")
 
+  @@index([userId])
   @@map("addresses")
 }
 

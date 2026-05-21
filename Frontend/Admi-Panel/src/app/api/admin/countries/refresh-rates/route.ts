@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
-
-const BACKEND_URL = "https://kryrosbackend-rwb2.onrender.com/api";
+import { API_BASE } from "@/lib/config";
+import { cookies } from "next/headers";
 
 export async function POST() {
+  const token = (await cookies()).get("admin_token")?.value || "";
   try {
-    const res = await fetch(`${BACKEND_URL}/countries/refresh-rates`, {
+    const res = await fetch(`${API_BASE}/countries/refresh-rates`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to refresh exchange rates" }, { status: 500 });
   }
 }
