@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -22,7 +25,6 @@ import { CountriesModule } from './countries/countries.module';
 import { StatesModule } from './states/states.module';
 import { CitiesModule } from './cities/cities.module';
 import { ShippingZonesModule } from './shipping-zones/shipping-zones.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
@@ -34,10 +36,17 @@ import { NewsletterModule } from './newsletter/newsletter.module';
       envFilePath: '.env',
     }),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([
+      {
+        name: 'global',
+        ttl: 60000,
+        limit: 60,
+      },
+    ]),
     CacheModule.register({
       isGlobal: true,
-      ttl: 60, // default TTL in seconds
-      max: 100, // maximum number of items in cache
+      ttl: 60,
+      max: 100,
     }),
     PrismaModule,
     AuthModule,
@@ -63,6 +72,12 @@ import { NewsletterModule } from './newsletter/newsletter.module';
     NotificationsModule,
     ReviewsModule,
     NewsletterModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
