@@ -90,7 +90,6 @@ export default function CompanySettingsPage() {
           applySettings(data);
         }
       } catch (e) {
-        console.error("Error fetching settings:", e);
       }
     };
 
@@ -109,7 +108,6 @@ export default function CompanySettingsPage() {
         try {
           setScheduledClosures(JSON.parse(scheduled));
         } catch (e) {
-          console.error("Error parsing scheduled closures", e);
         }
       }
     };
@@ -153,7 +151,6 @@ export default function CompanySettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (e: any) {
-      console.error("Error saving settings:", e);
       alert(e.message || "Error saving settings. Please check your connection.");
     } finally {
       setIsSaving(false);
@@ -431,7 +428,6 @@ export default function CompanySettingsPage() {
                       setSaved(true);
                       setTimeout(() => setSaved(false), 2000);
                     } catch (e) {
-                      console.error("Failed to toggle store status", e);
                     }
                   }}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
