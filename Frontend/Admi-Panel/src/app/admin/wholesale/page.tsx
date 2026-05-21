@@ -40,7 +40,6 @@ export default function WholesaleDashboardPage() {
           setCounts(prev => ({ ...prev, products: items.filter((p: any) => !!p.isWholesaleOnly).length }));
         }
       } catch (err) {
-        console.error("Error loading wholesale counts:", err);
       }
     };
     loadCounts();
