@@ -12,7 +12,10 @@ export class SettingsController {
   constructor(private settingsService: SettingsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all system settings' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all system settings (Admin only)' })
   findAll() {
     return this.settingsService.getAll();
   }

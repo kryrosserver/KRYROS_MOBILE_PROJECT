@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdminToken } from "@/lib/admin-auth";
 import { API_BASE } from "@/lib/config";
 
-function getAdminToken(req: NextRequest): string {
-  const token = req.cookies.get("admin_token")?.value;
-  return token || "";
 }
 
 export async function GET(req: NextRequest) {
