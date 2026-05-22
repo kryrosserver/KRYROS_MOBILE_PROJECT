@@ -8,6 +8,7 @@ import {
   UserCircle, Phone, Mail, Edit2, Save, Loader2, Home, Building2,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { API_BASE } from "@/lib/api";
 
 const footerLinks = [
   { label: "About Us", href: "/about" },
@@ -129,7 +130,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!token) return;
     setOrdersLoading(true);
-    fetch("/api/orders/my-orders", {
+    fetch(`${API_BASE}/api/orders/my-orders`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
@@ -157,7 +158,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!token) return;
     setWishlistLoading(true);
-    fetch("/api/wishlist", {
+    fetch(`${API_BASE}/api/wishlist`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
@@ -172,7 +173,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!token) return;
     setProfileLoading(true);
-    fetch("/api/users/profile", {
+    fetch(`${API_BASE}/api/users/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
@@ -198,7 +199,7 @@ export default function DashboardPage() {
     setEditSaving(true);
     setEditError("");
     try {
-      const res = await fetch(`/api/users/${user.id}`, {
+      const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(editForm),

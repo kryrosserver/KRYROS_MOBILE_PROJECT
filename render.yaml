@@ -40,7 +40,7 @@ services:
         value: "/"
       - key: NODE_OPTIONS
         value: --max-old-space-size=384
-      - key: BACKEND_URL
+      - key: VITE_API_URL
         value: https://kryrosbackend-rwb2.onrender.com
 
   - type: web

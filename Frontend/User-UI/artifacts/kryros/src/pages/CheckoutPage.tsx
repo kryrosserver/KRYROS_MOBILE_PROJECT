@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { API_BASE } from "@/lib/api";
 import {
   Check, CreditCard, Smartphone, Building2,
   Lock, ChevronLeft, ChevronRight, Truck, Zap, Clock, Download,
@@ -155,7 +156,7 @@ export default function CheckoutPage() {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
 
-      const res = await fetch("/api/orders", {
+      const res = await fetch(`${API_BASE}/api/orders`, {
         method: "POST",
         headers,
         body: JSON.stringify({

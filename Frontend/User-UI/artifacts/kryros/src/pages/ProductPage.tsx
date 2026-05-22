@@ -4,7 +4,7 @@ import { Heart, ShoppingCart, Star, Truck, Share2, Minus, Plus, ChevronRight, Bo
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
-import { fetchProductById, fetchProducts } from "@/lib/api";
+import { fetchProductById, fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
 interface CreditPlan {
@@ -31,7 +31,7 @@ export default function ProductPage() {
   const { toggleWishlist, isWishlisted } = useWishlistStore();
 
   useEffect(() => {
-    fetch("/api/credit/plans")
+    fetch(`${API_BASE}/api/credit/plans`)
       .then((r) => r.ok ? r.json() : [])
       .then((data) => {
         const active: CreditPlan[] = Array.isArray(data) ? data.filter((p: CreditPlan) => p.isActive) : [];

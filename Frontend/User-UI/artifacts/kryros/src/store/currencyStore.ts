@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { API_BASE } from '@/lib/api';
 
 export interface Currency {
   id: string;
@@ -48,7 +49,7 @@ export const useCurrencyStore = create<CurrencyState>()(
       fetchCurrencies: async () => {
         set({ isLoading: true });
         try {
-          const res = await fetch('/api/countries');
+          const res = await fetch(`${API_BASE}/api/countries`);
           if (!res.ok) throw new Error('fetch failed');
           const raw = await res.json();
           const list: any[] = Array.isArray(raw) ? raw : (raw.data ?? []);

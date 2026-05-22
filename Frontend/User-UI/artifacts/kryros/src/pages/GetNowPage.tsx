@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { ArrowRight, ShieldCheck, Heart, ShoppingBag, CreditCard, FileCheck, Package, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { fetchProducts } from "@/lib/api";
+import { fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
 interface CreditPlan {
@@ -41,7 +41,7 @@ export default function GetNowPage() {
       setLoading(true);
       try {
         const [plansRes, prods] = await Promise.all([
-          fetch("/api/credit/plans").then((r) => r.ok ? r.json() : []),
+          fetch(`${API_BASE}/api/credit/plans`).then((r) => r.ok ? r.json() : []),
           fetchProducts({ take: 8 }),
         ]);
         const activePlans: CreditPlan[] = Array.isArray(plansRes)
@@ -50,7 +50,7 @@ export default function GetNowPage() {
         setPlans(activePlans);
         setProducts(prods.slice(0, 4));
 
-        const creditRes = await fetch("/api/credit/my-account").catch(() => null);
+        const creditRes = await fetch(`${API_BASE}/api/credit/my-account`).catch(() => null);
         if (creditRes?.ok) {
           const data = await creditRes.json();
           setUserCredit(data);

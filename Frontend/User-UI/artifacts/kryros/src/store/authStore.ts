@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { API_BASE } from '@/lib/api';
 
 export interface AuthUser {
   id: string;
@@ -48,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (identifier, password) => {
         set({ isLoading: true, error: null });
         try {
-          const res = await fetch('/api/auth/login', {
+          const res = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ identifier, password }),
@@ -80,7 +81,7 @@ export const useAuthStore = create<AuthState>()(
       register: async (data) => {
         set({ isLoading: true, error: null });
         try {
-          const res = await fetch('/api/auth/register', {
+          const res = await fetch(`${API_BASE}/api/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -123,7 +124,7 @@ export const useAuthStore = create<AuthState>()(
         const { token, refreshToken } = get();
         if (token) {
           try {
-            await fetch('/api/auth/logout', {
+            await fetch(`${API_BASE}/api/auth/logout`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -142,7 +143,7 @@ export const useAuthStore = create<AuthState>()(
         const { token } = get();
         if (!token) return;
         try {
-          const res = await fetch('/api/auth/me', {
+          const res = await fetch(`${API_BASE}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (!res.ok) {

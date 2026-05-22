@@ -8,6 +8,7 @@ import {
 import { useThemeStore } from "@/store/themeStore";
 import { useCurrencyStore } from "@/store/currencyStore";
 import { useAuthStore } from "@/store/authStore";
+import { API_BASE } from "@/lib/api";
 
 const menuItems = [
   { label: "Home", icon: Home, href: "/" },
@@ -57,7 +58,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     fetchCurrencies();
     if (categories.length === 0) {
       setCatsLoading(true);
-      fetch("/api/categories/active")
+      fetch(`${API_BASE}/api/categories/active`)
         .then((r) => {
           if (!r.ok) throw new Error("Failed");
           return r.json();
@@ -70,7 +71,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           setCatsLoading(false);
         })
         .catch(() => {
-          fetch("/api/categories/homepage")
+          fetch(`${API_BASE}/api/categories/homepage`)
             .then((r) => r.json())
             .then((data) => {
               const list: ApiCategory[] = Array.isArray(data)
