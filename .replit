@@ -49,20 +49,20 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Backend && npm run build && PORT=8080 node dist/main.js"
+args = "cd Backend && ./node_modules/.bin/nest build && PORT=8080 node dist/main.js"
 waitForPort = 8080
 
 [[workflows.workflow]]
 name = "Admin Panel"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd Frontend/Admi-Panel && npm run dev"
-waitForPort = 3001
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd Frontend/Admi-Panel && ./node_modules/.bin/next dev -p 3001 -H 0.0.0.0"
+waitForPort = 3001
 
 [agent]
 stack = "BEST_EFFORT_FALLBACK"
@@ -78,10 +78,6 @@ externalPort = 3002
 
 [[ports]]
 localPort = 3001
-externalPort = 5000
-
-[[ports]]
-localPort = 3002
 externalPort = 3001
 
 [[ports]]
