@@ -25,6 +25,12 @@ export class CategoriesController {
     return this.categoriesService.getHomepageCategories();
   }
 
+  @Get('active')
+  @ApiOperation({ summary: 'Get all active categories' })
+  getActive() {
+    return this.categoriesService.findAllActive();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get category by ID' })
   findOne(@Param('id') id: string) {

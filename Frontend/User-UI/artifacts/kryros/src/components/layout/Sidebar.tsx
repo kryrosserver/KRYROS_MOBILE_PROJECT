@@ -57,15 +57,28 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     fetchCurrencies();
     if (categories.length === 0) {
       setCatsLoading(true);
-      fetch("/api/categories")
-        .then((r) => r.json())
+      fetch("/api/categories/active")
+        .then((r) => {
+          if (!r.ok) throw new Error("Failed");
+          return r.json();
+        })
         .then((data) => {
           const list: ApiCategory[] = Array.isArray(data)
             ? data
             : (data.data ?? []);
           setCategories(list);
         })
-        .catch(() => {})
+        .catch(() => {
+          fetch("/api/categories/homepage")
+            .then((r) => r.json())
+            .then((data) => {
+              const list: ApiCategory[] = Array.isArray(data)
+                ? data
+                : (data.data ?? []);
+              setCategories(list);
+            })
+            .catch(() => {});
+        })
         .finally(() => setCatsLoading(false));
     }
   }, [open]);

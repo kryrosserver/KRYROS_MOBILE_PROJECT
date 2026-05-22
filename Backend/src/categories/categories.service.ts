@@ -8,18 +8,28 @@ export class CategoriesService {
 
   async findAll() {
     return this.prisma.category.findMany({
+      where: { isActive: true },
+      include: {
+        _count: {
+          select: { products: { where: { isActive: true } } }
+        }
+      },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async findAllActive() {
+    return this.prisma.category.findMany({
+      where: { isActive: true },
       select: {
         id: true,
         name: true,
         slug: true,
         image: true,
         icon: true,
-        isActive: true,
+        description: true,
         sortOrder: true,
         showOnHome: true,
-        _count: {
-          select: { products: { where: { isActive: true } } }
-        }
       },
       orderBy: { sortOrder: 'asc' },
     });
