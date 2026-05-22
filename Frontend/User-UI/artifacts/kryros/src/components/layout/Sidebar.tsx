@@ -67,6 +67,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             ? data
             : (data.data ?? []);
           setCategories(list);
+          setCatsLoading(false);
         })
         .catch(() => {
           fetch("/api/categories/homepage")
@@ -77,9 +78,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 : (data.data ?? []);
               setCategories(list);
             })
-            .catch(() => {});
-        })
-        .finally(() => setCatsLoading(false));
+            .catch(() => {})
+            .finally(() => setCatsLoading(false));
+        });
     }
   }, [open]);
 

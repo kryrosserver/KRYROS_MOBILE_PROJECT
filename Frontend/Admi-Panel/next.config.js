@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const { withSentryConfig } = require("@sentry/nextjs");
 
-const backendOrigin = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+const backendOrigin = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
@@ -13,12 +13,12 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `connect-src 'self' ${backendOrigin} https://o*.ingest.sentry.io`,
+      `connect-src 'self' ${backendOrigin} https://*.replit.dev https://*.repl.co https://*.replit.app ws://*.replit.dev wss://*.replit.dev https://o*.ingest.sentry.io`,
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com https://shopinverse.com https://*.shopinverse.com https://i.ebayimg.com",
-      "frame-ancestors 'none'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com https://shopinverse.com https://*.shopinverse.com https://i.ebayimg.com https://*.replit.dev https://*.repl.co",
+      "frame-ancestors 'self' https://*.replit.dev https://*.repl.co https://*.replit.app",
     ].join("; "),
   },
 ];
@@ -35,6 +35,8 @@ const nextConfig = {
       { protocol: "https", hostname: "shopinverse.com" },
       { protocol: "https", hostname: "**.shopinverse.com" },
       { protocol: "https", hostname: "i.ebayimg.com" },
+      { protocol: "https", hostname: "**.replit.dev" },
+      { protocol: "https", hostname: "**.repl.co" },
     ],
   },
   generateEtags: true,

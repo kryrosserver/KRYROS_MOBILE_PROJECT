@@ -40,7 +40,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @Throttle({ default: { ttl: 60000, limit: 3 } })
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @ApiOperation({ summary: 'Register a new user' })
   async register(
     @Body() createUserDto: CreateUserDto,
@@ -63,7 +63,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @Throttle({ default: { ttl: 60000, limit: 15 } })
   @ApiOperation({ summary: 'Login with email/phone and password' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
@@ -95,7 +95,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  @Throttle({ default: { ttl: 60000, limit: 3 } })
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @ApiOperation({ summary: 'Request a password reset token' })
   async forgotPassword(@Body() body: ForgotPasswordDto) {
     await this.authService.forgotPassword(body.identifier);

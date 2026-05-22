@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "python-3.11"]
+modules = ["nodejs-24", "python-3.11", "postgresql-16"]
 
 [deployment]
 router = "application"
@@ -24,6 +24,10 @@ args = "Start application"
 task = "workflow.run"
 args = "Backend API"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Admin Panel"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -48,6 +52,18 @@ task = "shell.exec"
 args = "cd Backend && PORT=8080 node dist/main.js"
 waitForPort = 8080
 
+[[workflows.workflow]]
+name = "Admin Panel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd Frontend/Admi-Panel && npm run dev"
+waitForPort = 3001
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [agent]
 stack = "BEST_EFFORT_FALLBACK"
 expertMode = true
@@ -59,6 +75,10 @@ timeoutMs = 120000
 [[ports]]
 localPort = 3000
 externalPort = 3002
+
+[[ports]]
+localPort = 3001
+externalPort = 5000
 
 [[ports]]
 localPort = 3002
@@ -94,7 +114,11 @@ externalPort = 3000
 JWT_SECRET = "0d6ffc740b788b04b359f81196e538bb2afb1c75dfe7ad17d2dec62507e725d6c98903e9e097ba4c29af8c7d2f7ebd5f35614f4f9f422b9f40f342383bf79990"
 JWT_REFRESH_SECRET = "33e5493589f335ee73a0f60f864b2cbc0e0e212471a5028bc003aaf0f7023a85fdfdd415f249b9b03176cfa4134457d0a804dcde4b7eef90988aa6b6550035d0"
 CORS_ORIGINS = "http://localhost:5000,http://localhost:3001,https://*.replit.dev,https://*.repl.co,https://*.replit.app"
+NEXT_PUBLIC_API_URL = "http://localhost:8080"
 
 [userenv.development]
 ADMIN_SEED_EMAIL = "admin@kryros.com"
 ADMIN_SEED_PASSWORD = "Admin@Kryros2024"
+
+[nix]
+channel = "stable-25_05"
