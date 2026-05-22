@@ -26,7 +26,7 @@ export async function POST() {
 
   const data = (await res.json()) as { accessToken: string; refreshToken?: string };
 
-  const response = NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true, accessToken: data.accessToken });
   response.cookies.set("admin_token", data.accessToken, {
     httpOnly: true,
     sameSite: "lax",
