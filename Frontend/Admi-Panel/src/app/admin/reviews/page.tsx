@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { API_BASE } from "@/lib/config"
 import { Star, MessageCircle, CheckCircle, Home, Trash2, Loader2, Search, ExternalLink, User, Package } from "lucide-react"
 
 type Review = {
@@ -33,7 +32,7 @@ export default function ReviewsPage() {
   const fetchReviews = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`${API_BASE}/reviews`)
+      const res = await fetch(`/api/admin/reviews`)
       if (res.ok) {
         const data = await res.json()
         setReviews(data.data)
@@ -51,7 +50,7 @@ export default function ReviewsPage() {
   const handleToggleStatus = async (id: string, field: "isApproved" | "isFeatured", currentVal: boolean) => {
     try {
       setUpdatingId(id)
-      const res = await fetch(`${API_BASE}/reviews/${id}/status`, {
+      const res = await fetch(`/api/admin/reviews/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: !currentVal })
@@ -69,7 +68,7 @@ export default function ReviewsPage() {
     if (!confirm("Are you sure you want to delete this review?")) return
     try {
       setUpdatingId(id)
-      const res = await fetch(`${API_BASE}/reviews/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' })
       if (res.ok) {
         setReviews(prev => prev.filter(r => r.id !== id))
       }
