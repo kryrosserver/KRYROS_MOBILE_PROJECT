@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
 import { parseBackendError } from "@/lib/api";
 
+const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN", "MANAGER"];
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -43,6 +45,14 @@ export async function POST(request: Request) {
       });
     }
 
+    const userRole = data.user?.role as string | undefined;
+    if (!userRole || !ADMIN_ROLES.includes(userRole)) {
+      return NextResponse.json(
+        { success: false, error: "Access denied. This portal is for administrators only." },
+        { status: 403 }
+      );
+    }
+
     const response = NextResponse.json({ success: true, user: data.user });
 
     response.cookies.set("admin_token", data.accessToken!, {
@@ -64,7 +74,7 @@ export async function POST(request: Request) {
     return response;
   } catch {
     return NextResponse.json(
-      { success: false, error: "Unexpected error" },
+      { success: false, error: "Unexpected error. Please try again." },
       { status: 500 }
     );
   }

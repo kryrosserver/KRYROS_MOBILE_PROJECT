@@ -100,6 +100,16 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: false, error: msg });
             return { success: false, error: msg };
           }
+          if (json.accessToken && json.user) {
+            set({
+              token: json.accessToken,
+              refreshToken: json.refreshToken ?? null,
+              user: json.user,
+              isLoading: false,
+              error: null,
+            });
+            return { success: true };
+          }
           set({ isLoading: false, error: null });
           return get().login(data.email, data.password);
         } catch {
