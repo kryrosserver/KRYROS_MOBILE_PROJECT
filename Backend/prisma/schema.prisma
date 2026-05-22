@@ -16,7 +16,7 @@ model User {
   phone                String?              @unique
   avatar               String?
   role                 UserRole             @default(CUSTOMER)
-  isVerified           Boolean              @default(false)
+  isVerified           Boolean              @default(true)
   isActive             Boolean              @default(true)
   emailVerifiedAt      DateTime?
   lastLoginAt          DateTime?

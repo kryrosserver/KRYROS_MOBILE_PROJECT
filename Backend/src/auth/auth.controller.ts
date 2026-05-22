@@ -40,7 +40,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  @Throttle({ default: { ttl: 60000, limit: 20 } })
   @ApiOperation({ summary: 'Register a new user' })
   async register(
     @Body() createUserDto: CreateUserDto,
@@ -63,7 +63,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ default: { ttl: 60000, limit: 15 } })
+  @Throttle({ default: { ttl: 60000, limit: 30 } })
   @ApiOperation({ summary: 'Login with email/phone and password' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

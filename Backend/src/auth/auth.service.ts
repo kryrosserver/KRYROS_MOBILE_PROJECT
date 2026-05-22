@@ -64,7 +64,7 @@ export class AuthService {
     if (!user) return null;
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return null;
-    if (!user.isActive || !user.isVerified) return null;
+    if (!user.isActive) return null;
     const { password: _pw, ...result } = user;
     return result;
   }
@@ -85,8 +85,12 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
+    // Auto-verify users on successful login (no email verification flow exists)
     if (!user.isVerified) {
-      throw new UnauthorizedException('Email address is not verified');
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true },
+      });
     }
 
     if ((user as any).twoFactorEnabled) {
