@@ -8,6 +8,7 @@ import CategoryPromoBanners from "@/components/home/CategoryPromoBanners";
 import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
 import ProductSection from "@/components/home/ProductSection";
 import BrandsSection from "@/components/home/BrandsSection";
+import RecentlyViewedSection from "@/components/home/RecentlyViewedSection";
 
 export default function HomePage() {
   return (
@@ -39,7 +40,10 @@ export default function HomePage() {
       {/* 9. Category promotional banners */}
       <CategoryPromoBanners />
 
-      {/* 10. Recommended For You — horizontal scroll */}
+      {/* 10. Recently Viewed — only shows if user has browsed products */}
+      <RecentlyViewedSection />
+
+      {/* 11. Recommended For You — horizontal scroll */}
       <ProductSection
         title="Recommended For You"
         viewAllHref="/shop"

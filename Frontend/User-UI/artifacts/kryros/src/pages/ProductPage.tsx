@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCurrencyStore } from "@/store/currencyStore";
+import { useRecentlyViewedStore } from "@/store/recentlyViewedStore";
 import { fetchProductById, fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
@@ -31,6 +32,7 @@ export default function ProductPage() {
   const addToCart = useCartStore((s) => s.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const format = useCurrencyStore((s) => s.format);
+  const addToRecentlyViewed = useRecentlyViewedStore((s) => s.addProduct);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/credit/plans`)
@@ -49,6 +51,7 @@ export default function ProductPage() {
       setProduct(p);
       setLoading(false);
       if (p) {
+        addToRecentlyViewed(p);
         fetchProducts({ take: 8 }).then((all) => {
           setRelated(all.filter((r) => r.id !== p.id).slice(0, 4));
         });
