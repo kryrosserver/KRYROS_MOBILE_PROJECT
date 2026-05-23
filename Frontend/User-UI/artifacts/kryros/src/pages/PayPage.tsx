@@ -257,37 +257,43 @@ export default function PayPage() {
               >
                 <span className="text-base leading-none">{currencyObj.flag}</span>
                 <span className="text-xs font-bold text-foreground">{currency}</span>
-                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${showCurrencyDrop ? "rotate-180" : ""}`} />
               </button>
             </div>
-            {showCurrencyDrop && (
-              <div className="mt-2 border border-border rounded-xl bg-card shadow-lg overflow-hidden z-10 relative">
-                {CURRENCIES.map((c) => (
-                  <button
-                    key={c.code}
-                    onClick={() => { setCurrency(c.code); setShowCurrencyDrop(false); }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-muted transition-colors text-sm ${currency === c.code ? "bg-primary/5 font-bold text-primary" : "text-foreground"}`}
-                  >
-                    <span className="text-base">{c.flag}</span>
-                    <span className="font-semibold">{c.code}</span>
-                    <span className="text-muted-foreground text-xs">— {c.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Currency selector row */}
-          <div className="border border-border rounded-2xl px-4 py-3 bg-background">
-            <label className="block text-[10px] font-semibold text-muted-foreground mb-1.5">Select Currency</label>
+          <button
+            onClick={() => setShowCurrencyDrop(!showCurrencyDrop)}
+            className="w-full border border-border rounded-2xl px-4 py-3 bg-background text-left hover:border-primary/50 hover:bg-primary/[0.02] transition-colors"
+          >
+            <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">Select Currency</p>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-lg">{currencyObj.flag}</span>
                 <span className="text-sm font-semibold text-foreground">{currency} — {currencyObj.label}</span>
               </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showCurrencyDrop ? "rotate-180" : ""}`} />
             </div>
-          </div>
+          </button>
+
+          {/* Currency dropdown */}
+          {showCurrencyDrop && (
+            <div className="border border-border rounded-2xl bg-card shadow-lg overflow-hidden">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => { setCurrency(c.code); setShowCurrencyDrop(false); }}
+                  className={`w-full flex items-center gap-2.5 px-4 py-3 text-left hover:bg-muted transition-colors text-sm ${currency === c.code ? "bg-primary/5 font-bold text-primary" : "text-foreground"}`}
+                >
+                  <span className="text-base">{c.flag}</span>
+                  <span className="font-semibold">{c.code}</span>
+                  <span className="text-muted-foreground text-xs">— {c.label}</span>
+                  {currency === c.code && <span className="ml-auto text-primary text-xs">✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Note */}
           <div className="border border-border rounded-2xl px-4 py-3 bg-background focus-within:border-primary/60 transition-colors">

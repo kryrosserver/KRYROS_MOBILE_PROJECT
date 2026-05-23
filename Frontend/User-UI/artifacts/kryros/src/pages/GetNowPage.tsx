@@ -216,7 +216,7 @@ export default function GetNowPage() {
                         <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
                         <p className="text-sm font-black text-foreground leading-tight">{format(p.price)}</p>
                         {activePlan && (
-                          <p className="text-[9px] text-muted-foreground mb-2">or {format(monthly)}/mo for {activePlan.duration} mos</p>
+                          <p className="text-[9px] text-muted-foreground mb-2">or {monthly}/mo for {activePlan.duration} mos</p>
                         )}
                         <Link href={`/product/${p.id}`}>
                           <button className="w-full py-1.5 bg-foreground text-background rounded-lg text-[10px] font-bold hover:opacity-90 transition-all">
