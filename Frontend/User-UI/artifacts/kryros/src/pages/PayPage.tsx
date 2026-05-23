@@ -190,7 +190,7 @@ export default function PayPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [proofFile, setProofFile] = useState<string | null>(null);
 
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260966423719";
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
   const [showProviderDrop, setShowProviderDrop] = useState(false);
 
   const handlePay = () => setSuccess(true);

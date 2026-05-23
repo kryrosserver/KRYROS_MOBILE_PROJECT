@@ -129,7 +129,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [placedOrderNumber, setPlacedOrderNumber] = useState<string>("");
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "";
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
 
   const [firstName, setFirstName] = useState(authUser?.firstName ?? "");
   const [lastName, setLastName] = useState(authUser?.lastName ?? "");
