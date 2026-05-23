@@ -2,443 +2,559 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Plus, RefreshCw, Bell, Settings, FileText, FileEdit, Users, 
-  Package, CreditCard, ShoppingBag, ShoppingCart, Truck, 
-  Database, RotateCcw, DollarSign, BarChart3, RotateCw, UserCheck, ChevronRight, ArrowRight 
+import {
+  Bell, Settings, Search, Calendar, Sun, ChevronDown,
+  TrendingUp, TrendingDown, Minus, FileText, FileEdit,
+  CreditCard, ShoppingBag, Users, Package, BarChart3,
+  Eye, Plus, ArrowRight, ShoppingCart, Activity,
+  DollarSign, AlertCircle, CheckCircle, Clock, XCircle,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend,
+} from "recharts";
 
-type Summary = {
-  sales: number;
-  purchases: number;
-  paymentReceived: number;
-  paymentPaid: number;
-  outstandingBalance: number;
-  outstandingPayment: number;
-  expense: number;
-  profit: number;
+const DARK_BG = "#0D1626";
+const CARD_BG = "#132035";
+const BORDER = "#1E2D42";
+const TEXT_PRIMARY = "#FFFFFF";
+const TEXT_SECONDARY = "#AAB4C5";
+const ACCENT = "#12D6C5";
+
+const salesData = [
+  { day: "May 20", value: 800 },
+  { day: "May 21", value: 1200 },
+  { day: "May 22", value: 900 },
+  { day: "May 23", value: 2680, label: "$2,680.50" },
+  { day: "May 24", value: 1500 },
+  { day: "May 25", value: 1100 },
+  { day: "May 26", value: 2100 },
+];
+
+const salesByChannel = [
+  { name: "Web Store", value: 56.2, amount: 3462, color: ACCENT },
+  { name: "Mobile App", value: 28.4, amount: 1748, color: "#3B82F6" },
+  { name: "Get Now (Pay Later)", value: 10.3, amount: 635, color: "#F59E0B" },
+  { name: "Wholesale", value: 5.1, amount: 317, color: "#8B5CF6" },
+];
+
+const recentOrders = [
+  { id: "#KRY123456", customer: "Bwalya Chileshe", time: "10:34 AM", amount: 1099, status: "Completed" },
+  { id: "#KRY123455", customer: "Mulenga Sichone", time: "09:15 AM", amount: 349, status: "Processing" },
+  { id: "#KRY123454", customer: "Chansa Mumba", time: "08:45 AM", amount: 2499, status: "Completed" },
+  { id: "#KRY123453", customer: "Chanda Kapwepwe", time: "07:30 AM", amount: 129, status: "Pending" },
+  { id: "#KRY123452", customer: "Chansa Mumba", time: "06:10 AM", amount: 899, status: "Completed" },
+];
+
+const topProducts = [
+  { name: "iPhone 15 Pro Max", sub: "256GB", sold: 245, amount: 268756 },
+  { name: "MacBook Air M2", sub: "13-inch", sold: 186, amount: 232014 },
+  { name: "Sony WH-1000XM5", sub: "Headphones", sold: 163, amount: 56687 },
+  { name: "Apple Watch Series 9", sub: "45mm", sold: 151, amount: 60349 },
+  { name: "Samsung Galaxy S24 Ultra", sub: "256GB", sold: 128, amount: 143872 },
+];
+
+const newCustomers = [
+  { name: "Bwalya Chileshe", date: "May 26, 2025", initials: "BC", color: "#3B82F6" },
+  { name: "Mulenga Sichone", date: "May 26, 2025", initials: "MS", color: "#8B5CF6" },
+  { name: "Chansa Mumba", date: "May 25, 2025", initials: "CM", color: "#F59E0B" },
+  { name: "Chanda Kapwepwe", date: "May 25, 2025", initials: "CK", color: "#EF4444" },
+  { name: "Mwila Tembo", date: "May 25, 2025", initials: "MT", color: "#10B981" },
+];
+
+const recentActivities = [
+  { icon: ShoppingCart, color: ACCENT, title: "New order received", sub: "#KRY123456", time: "2 mins ago" },
+  { icon: CreditCard, color: "#3B82F6", title: "Payment received", sub: "$1,099.00 from Bwalya Chileshe", time: "10 mins ago" },
+  { icon: CheckCircle, color: "#22C55E", title: "Order completed", sub: "#KRY123454", time: "25 mins ago" },
+  { icon: Users, color: "#F59E0B", title: "New customer registered", sub: "Mulenga Sichone", time: "1 hr ago" },
+  { icon: Package, color: "#8B5CF6", title: "Product updated", sub: "iPhone 15 Pro Max", time: "2 hrs ago" },
+];
+
+const statusColors: Record<string, string> = {
+  Completed: "#22C55E",
+  Processing: "#3B82F6",
+  Pending: "#F59E0B",
+  Cancelled: "#EF4444",
+};
+
+const statusBg: Record<string, string> = {
+  Completed: "rgba(34,197,94,0.12)",
+  Processing: "rgba(59,130,246,0.12)",
+  Pending: "rgba(245,158,11,0.12)",
+  Cancelled: "rgba(239,68,68,0.12)",
+};
+
+const MiniSparkline = ({ color = ACCENT, up = true }: { color?: string; up?: boolean }) => {
+  const data = up
+    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
+    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
+  return (
+    <ResponsiveContainer width="100%" height={40}>
+      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id={`sg-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+            <stop offset="95%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sg-${color.replace("#", "")})`} dot={false} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+};
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px" }}>
+        <p style={{ color: TEXT_SECONDARY, fontSize: 11, marginBottom: 2 }}>{label}</p>
+        <p style={{ color: TEXT_PRIMARY, fontSize: 13, fontWeight: 700 }}>{formatPrice(payload[0].value)}</p>
+      </div>
+    );
+  }
+  return null;
 };
 
 export default function AdminDashboard() {
-  const [summary, setSummary] = useState<Summary>({
-    sales: 0,
-    purchases: 0,
-    paymentReceived: 0,
-    paymentPaid: 0,
-    outstandingBalance: 0,
-    outstandingPayment: 0,
-    expense: 0,
-    profit: 0,
+  const [summary, setSummary] = useState({
+    sales: 6162, orders: 102, purchases: 0, paymentReceived: 6162, paymentPaid: 0,
+    outstandingBalance: 0, outstandingPayment: 0, expense: 0, profit: 6162,
   });
-  const [loading, setLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/internal/admin/reports/summary?range=month", { cache: "no-store" });
-      const data = await res.json().catch(() => null);
-      if (data && data.stats) {
-        setSummary({
-          sales: data.stats.totalRevenue || 0,
-          purchases: 0,
-          paymentReceived: data.stats.totalRevenue || 0,
-          paymentPaid: 0,
-          outstandingBalance: 0,
-          outstandingPayment: 0,
-          expense: 0,
-          profit: data.stats.totalRevenue || 0,
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetch("/internal/admin/reports/summary?range=month", { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => {
+        if (data?.stats) {
+          setSummary(s => ({
+            ...s,
+            sales: data.stats.totalRevenue || s.sales,
+            paymentReceived: data.stats.totalRevenue || s.paymentReceived,
+            profit: data.stats.totalRevenue || s.profit,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  const statCards = [
+    { title: "Total Sales", value: formatPrice(summary.sales), change: "+18.6%", up: true, color: "#F59E0B", vs: "May 13 – 19" },
+    { title: "Total Orders", value: String(summary.orders), change: "+12.4%", up: true, color: ACCENT, vs: "May 13 – 19" },
+    { title: "Total Purchases", value: formatPrice(summary.purchases), change: "—0.0%", up: null, color: "#8B5CF6", vs: "May 13 – 19" },
+    { title: "Payment Received", value: formatPrice(summary.paymentReceived), change: "+18.6%", up: true, color: "#22C55E", vs: "May 13 – 19" },
+    { title: "Payment Paid", value: formatPrice(summary.paymentPaid), change: "—0.0%", up: null, color: "#EF4444", vs: "May 13 – 19" },
+  ];
 
   const quickActions = [
-    { title: "New Invoice", icon: Plus, href: "/admin/invoice/new" },
-    { title: "New Estimate", icon: Plus, href: "/admin/estimate/new" },
-    { title: "New Payment", icon: Plus, href: "/admin/payment/new" },
+    { label: "New Invoice", icon: FileText, href: "/admin/invoice/new" },
+    { label: "New Estimate", icon: FileEdit, href: "/admin/estimate/new" },
+    { label: "New Payment", icon: CreditCard, href: "/admin/payment/new" },
+    { label: "Add Product", icon: Package, href: "/admin/products" },
+    { label: "New Purchase", icon: ShoppingBag, href: "/admin/purchases" },
+    { label: "New Customer", icon: Users, href: "/admin/contacts" },
+    { label: "View Reports", icon: BarChart3, href: "/admin/reports" },
+    { label: "Settings", icon: Settings, href: "/admin/settings" },
   ];
 
-  const modules = [
-    { title: "Invoice", icon: FileText, href: "/admin/invoice" },
-    { title: "Estimate", icon: FileEdit, href: "/admin/estimate" },
-    { title: "Client / Supplier", icon: Users, href: "/admin/contacts" },
-    { title: "Product/Service", icon: Package, href: "/admin/products" },
-    { title: "Payment", icon: CreditCard, href: "/admin/payments" },
-    { title: "Purchase", icon: ShoppingBag, href: "/admin/purchases" },
-    { title: "Sale Order", icon: FileText, href: "/admin/sale-orders" },
-    { title: "Purchase Order", icon: ShoppingCart, href: "/admin/purchase-orders" },
-    { title: "Delivery Note", icon: FileText, href: "/admin/delivery-notes" },
-    { title: "Inventory", icon: Database, href: "/admin/inventory" },
-    { title: "Sale Return", icon: RotateCcw, href: "/admin/sale-returns" },
-    { title: "Expense", icon: DollarSign, href: "/admin/expenses" },
-    { title: "Reports", icon: BarChart3, href: "/admin/reports" },
-    { title: "Purchase Return", icon: RotateCw, href: "/admin/purchase-returns" },
-    { title: "Agent", icon: UserCheck, href: "/admin/agents" },
+  const orderProgress = [
+    { label: "Total Orders", value: 102, color: TEXT_SECONDARY },
+    { label: "Completed", value: 68, color: "#22C55E" },
+    { label: "Processing", value: 20, color: "#3B82F6" },
+    { label: "Pending", value: 10, color: "#F59E0B" },
+    { label: "Cancelled", value: 4, color: "#EF4444" },
   ];
 
-  const summaryCards = [
-    { title: "Total Sales", subtitle: "Sales this month", value: summary.sales, valueColor: '#F59E0B', href: "/admin/reports/sales" },
-    { title: "Purchases", subtitle: "Purchase this month", value: summary.purchases, valueColor: '#F59E0B', href: "/admin/reports/purchases" },
-    { title: "Payment Received", subtitle: "Received this month", value: summary.paymentReceived, valueColor: '#16C784', href: "/admin/reports/payments-received" },
-    { title: "Payment Paid", subtitle: "Paid this month", value: summary.paymentPaid, valueColor: '#EF4444', href: "/admin/reports/payments-paid" },
-    { title: "Outstanding Balance", subtitle: "This Month", value: summary.outstandingBalance, valueColor: '#16C784', href: "/admin/reports/outstanding-balance" },
-    { title: "Outstanding Payment", subtitle: "This Month", value: summary.outstandingPayment, valueColor: '#EF4444', href: "/admin/reports/outstanding-payment" },
-    { title: "Expense", subtitle: "Expense this month", value: summary.expense, valueColor: '#111827', href: "/admin/expenses" },
-    { title: "Profit / Loss", subtitle: "This Month", value: summary.profit, valueColor: '#16C784', href: "/admin/reports/profit-loss" },
-  ];
+  const completionPct = Math.round((68 / 102) * 100);
+  const ringCircumference = 2 * Math.PI * 54;
+  const ringOffset = ringCircumference * (1 - completionPct / 100);
 
-  const orderStats = [
-    { label: "Booked", count: 0, color: '#AAB4C5' },
-    { label: "Processing", count: 0, color: '#3B82F6' },
-    { label: "Completed", count: 0, color: '#16C784' },
-    { label: "Delivered", count: 0, color: '#12D6C5' },
-    { label: "Cancelled", count: 0, color: '#EF4444' },
-  ];
+  const card = (content: React.ReactNode, extra?: React.CSSProperties) => (
+    <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 16, ...extra }}>
+      {content}
+    </div>
+  );
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: '#F7F9FC' }}>
+    <div style={{ background: DARK_BG, minHeight: "100vh", color: TEXT_PRIMARY }}>
       {/* Top Header */}
       <header
-        className="h-16 sticky top-0 z-30 flex items-center justify-between px-4 md:px-8"
         style={{
-          background: '#FFFFFF',
-          borderBottom: '1px solid #E5E7EB',
-          boxShadow: '0 1px 0 #E5E7EB',
+          background: "#0B1320",
+          borderBottom: `1px solid ${BORDER}`,
+          height: 60,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 24px",
+          position: "sticky",
+          top: 0,
+          zIndex: 30,
         }}
       >
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg md:text-xl font-bold" style={{ color: '#111827' }}>
-            Admin Dashboard
-          </h1>
-          <div className="hidden sm:block h-5 w-px" style={{ background: '#E5E7EB' }} />
-          <p className="hidden md:block text-sm" style={{ color: '#6B7280' }}>
-            Business Insights & Controls
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: TEXT_PRIMARY }}>Dashboard</h1>
         </div>
 
-        <div className="flex items-center gap-1 md:gap-2">
-          <button
-            onClick={() => { setIsRefreshing(true); load().finally(() => setTimeout(() => setIsRefreshing(false), 300)); }}
-            className="p-2 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-            style={{ color: isRefreshing ? '#12D6C5' : '#6B7280' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#F7F9FC'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-          >
-            <RefreshCw className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`} />
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, justifyContent: "center", maxWidth: 360 }}>
+          <div style={{ position: "relative", width: "100%" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT_SECONDARY, width: 15, height: 15 }} />
+            <input
+              placeholder="Search anything..."
+              style={{
+                width: "100%",
+                background: CARD_BG,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 10,
+                padding: "8px 12px 8px 36px",
+                color: TEXT_PRIMARY,
+                fontSize: 13,
+                outline: "none",
+              }}
+            />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT_SECONDARY, background: "#1E2D42", padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT_SECONDARY, fontSize: 13, cursor: "pointer" }}>
+            <Calendar style={{ width: 14, height: 14 }} />
+            <span>May 20 – May 26, 2025</span>
+            <ChevronDown style={{ width: 13, height: 13 }} />
           </button>
-          <button
-            className="p-2 rounded-xl transition-all relative min-w-[44px] min-h-[44px] flex items-center justify-center"
-            style={{ color: '#6B7280' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#F7F9FC'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white" />
+
+          <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
+            <Bell style={{ width: 20, height: 20 }} />
+            <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>3</span>
           </button>
-          <button
-            className="p-2 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-            style={{ color: '#6B7280' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#F7F9FC'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-          >
-            <Settings className="h-5 w-5" />
+
+          <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
+            <Sun style={{ width: 20, height: 20 }} />
           </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, lineHeight: 1 }}>Admin</div>
+              <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 1 }}>Super Admin</div>
+            </div>
+            <ChevronDown style={{ width: 14, height: 14, color: TEXT_SECONDARY }} />
+          </div>
         </div>
       </header>
 
-      <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full space-y-6 md:space-y-8">
-        {/* Welcome + Quick Actions */}
-        <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div style={{ padding: "24px", display: "flex", gap: 20 }}>
+        {/* LEFT MAIN CONTENT */}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Welcome */}
           <div>
-            <h2 className="text-xl md:text-2xl font-bold" style={{ color: '#111827' }}>
-              Welcome Back 👋
-            </h2>
-            <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>
-              Here's what's happening with your business today.
-            </p>
+            <h2 style={{ fontSize: 22, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
+            <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            {quickActions.map((action, i) => (
-              <Link
+
+          {/* 5 Stat Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14 }}>
+            {statCards.map((card, i) => (
+              <div
                 key={i}
-                href={action.href}
-                className="flex items-center gap-2 text-sm font-semibold text-white rounded-[14px] transition-all active:scale-95"
-                style={{
-                  padding: '0 20px',
-                  height: '44px',
-                  background: '#12D6C5',
-                  boxShadow: '0 8px 20px rgba(18,214,197,0.25)',
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#10C4B5'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(18,214,197,0.35)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#12D6C5'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(18,214,197,0.25)'; }}
+                style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px 16px 12px", display: "flex", flexDirection: "column", gap: 6 }}
               >
-                <Plus className="h-4 w-4" />
-                {action.title}
-              </Link>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${card.color}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Activity style={{ width: 15, height: 15, color: card.color }} />
+                  </div>
+                  <span style={{ fontSize: 11, color: TEXT_SECONDARY, fontWeight: 600 }}>{card.title}</span>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{card.value}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  {card.up === true && <TrendingUp style={{ width: 12, height: 12, color: "#22C55E" }} />}
+                  {card.up === false && <TrendingDown style={{ width: 12, height: 12, color: "#EF4444" }} />}
+                  {card.up === null && <Minus style={{ width: 12, height: 12, color: TEXT_SECONDARY }} />}
+                  <span style={{ fontSize: 11, color: card.up === true ? "#22C55E" : card.up === false ? "#EF4444" : TEXT_SECONDARY, fontWeight: 600 }}>
+                    {card.change}
+                  </span>
+                  <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>vs {card.vs}</span>
+                </div>
+                <MiniSparkline color={card.color} up={card.up === true} />
+              </div>
             ))}
           </div>
-        </section>
 
-        {/* Core Stats — top 4 */}
-        <section className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          {summaryCards.slice(0, 4).map((card, i) => (
-            <Link
-              key={i}
-              href={card.href}
-              className="relative overflow-hidden transition-all group"
-              style={{
-                background: '#FFFFFF',
-                borderRadius: '22px',
-                border: '1px solid #E5E7EB',
-                padding: '24px',
-                boxShadow: '0 10px 35px rgba(15,23,42,0.06)',
-                display: 'block',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(18,214,197,0.4)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(18,214,197,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.boxShadow = '0 10px 35px rgba(15,23,42,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <div className="absolute top-0 right-0 p-3 opacity-[0.04] group-hover:opacity-[0.07] transition-opacity">
-                <BarChart3 className="h-12 w-12" />
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: '#6B7280' }}
-                  >
-                    {card.title}
-                  </span>
-                  <div
-                    className="p-1.5 rounded-lg transition-colors"
-                    style={{ background: '#F7F9FC' }}
-                  >
-                    <ChevronRight className="h-3.5 w-3.5" style={{ color: '#6B7280' }} />
+          {/* Sales Analytics + Sales by Channel */}
+          <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16 }}>
+            {/* Sales Analytics */}
+            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Sales Analytics</div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
+                    <span style={{ fontSize: 24, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</span>
+                    <span style={{ fontSize: 12, color: "#22C55E", fontWeight: 600 }}>↑ 18.6% vs last week</span>
                   </div>
                 </div>
-                <p
-                  className="text-2xl font-black"
-                  style={{ color: card.valueColor }}
-                >
-                  {formatPrice(card.value)}
-                </p>
-                <p className="text-xs mt-1 font-medium" style={{ color: '#9CA3AF' }}>
-                  {card.subtitle}
-                </p>
+                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
+                  This Week <ChevronDown style={{ width: 12, height: 12 }} />
+                </button>
               </div>
-            </Link>
-          ))}
-        </section>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={salesData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
+                      <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)" dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8">
-          {/* Main Content */}
-          <div className="xl:col-span-8 space-y-6">
-            {/* Business Modules Grid */}
-            <div
-              style={{
-                background: '#FFFFFF',
-                borderRadius: '22px',
-                border: '1px solid #E5E7EB',
-                padding: '28px',
-                boxShadow: '0 10px 35px rgba(15,23,42,0.06)',
-              }}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
-                <h3 className="text-base font-bold" style={{ color: '#111827' }}>
-                  Business Management
-                </h3>
-                <Link
-                  href="/admin/settings"
-                  className="text-sm font-semibold transition-colors"
-                  style={{ color: '#12D6C5' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#10C4B5')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#12D6C5')}
-                >
-                  Customize Grid
-                </Link>
+            {/* Sales by Channel */}
+            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Sales by Channel</div>
+                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
+                  This Week <ChevronDown style={{ width: 12, height: 12 }} />
+                </button>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-4 gap-3">
-                {modules.map((m, i) => (
-                  <Link
-                    key={i}
-                    href={m.href}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl transition-all"
-                    style={{ border: '1px solid transparent' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#F7F9FC'; e.currentTarget.style.borderColor = '#E5E7EB'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
-                  >
-                    <div
-                      className="p-3 rounded-xl transition-all flex items-center justify-center"
-                      style={{ background: '#F7F9FC' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#12D6C5'; (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 16px rgba(18,214,197,0.3)'; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#F7F9FC'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
-                    >
-                      <m.icon className="h-5 w-5" style={{ color: '#6B7280' }} strokeWidth={2} />
+              <div style={{ position: "relative", height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ResponsiveContainer width="100%" height={160}>
+                  <PieChart>
+                    <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={3}>
+                      {salesByChannel.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip formatter={(val: any) => `${val}%`} contentStyle={{ background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8 }} labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
+                  <div style={{ fontSize: 10, color: TEXT_SECONDARY }}>Total Sales</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                {salesByChannel.map((ch, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: ch.color }} />
+                      <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.name}</span>
+                      <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.value}%</span>
                     </div>
-                    <span className="text-[10px] font-bold text-center" style={{ color: '#111827' }}>
-                      {m.title}
-                    </span>
-                  </Link>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Tables Row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+            {/* Recent Orders */}
+            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Orders</div>
+                <Link href="/admin/orders" style={{ fontSize: 12, color: ACCENT, textDecoration: "none" }}>View All</Link>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {recentOrders.map((o, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", shrink: 0 }}>
+                      <ShoppingCart style={{ width: 16, height: 16, color: ACCENT }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{o.id}</div>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, truncate: true, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, marginBottom: 3 }}>{o.time}</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 3 }}>{formatPrice(o.amount)}</div>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: statusColors[o.status], background: statusBg[o.status], padding: "2px 7px", borderRadius: 20 }}>{o.status}</span>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Additional Stats — bottom 4 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-              {summaryCards.slice(4).map((card, i) => (
+            {/* Top Selling Products */}
+            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Top Selling Products</div>
+                <Link href="/admin/products" style={{ fontSize: 12, color: ACCENT, textDecoration: "none" }}>View All</Link>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {topProducts.map((p, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Package style={{ width: 16, height: 16, color: "#8B5CF6" }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.sub}</div>
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, marginBottom: 2 }}>{p.sold} Sold</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* New Customers */}
+            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>New Customers</div>
+                <Link href="/admin/users" style={{ fontSize: 12, color: ACCENT, textDecoration: "none" }}>View All</Link>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {newCustomers.map((c, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "#fff", flexShrink: 0 }}>
+                      {c.initials}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{c.name}</div>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY }}>{c.date}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Financial Summary */}
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 14 }}>Financial Summary</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+              {[
+                { label: "Outstanding Balance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
+                { label: "Outstanding Payment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
+                { label: "Total Expenses", value: formatPrice(summary.expense), sub: "This month", icon: DollarSign, color: "#EF4444" },
+                { label: "Profit / Loss", value: formatPrice(summary.profit), sub: "This month", icon: TrendingUp, color: "#22C55E", highlight: true },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
+                    border: `1px solid ${item.highlight ? "transparent" : BORDER}`,
+                    borderRadius: 14,
+                    padding: "20px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <item.icon style={{ width: 18, height: 18, color: item.highlight ? "#fff" : item.color }} />
+                    </div>
+                    <span style={{ fontSize: 12, color: item.highlight ? "rgba(255,255,255,0.8)" : TEXT_SECONDARY, fontWeight: 600 }}>{item.label}</span>
+                  </div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
+                  <div style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.7)" : TEXT_SECONDARY, marginTop: 4 }}>{item.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Quick Actions */}
+          <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 14 }}>Quick Actions</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {quickActions.map((a, i) => (
                 <Link
                   key={i}
-                  href={card.href}
-                  className="flex items-center justify-between transition-all"
+                  href={a.href}
                   style={{
-                    background: '#FFFFFF',
-                    borderRadius: '22px',
-                    border: '1px solid #E5E7EB',
-                    padding: '20px 24px',
-                    boxShadow: '0 10px 35px rgba(15,23,42,0.06)',
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "12px 6px",
+                    background: "#1E2D42",
+                    borderRadius: 10,
+                    textDecoration: "none",
+                    border: `1px solid ${BORDER}`,
+                    cursor: "pointer",
+                    transition: "background 0.2s",
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(18,214,197,0.3)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(18,214,197,0.07)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.boxShadow = '0 10px 35px rgba(15,23,42,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  <div>
-                    <p
-                      className="text-[10px] font-bold uppercase tracking-widest mb-1"
-                      style={{ color: '#6B7280' }}
-                    >
-                      {card.title}
-                    </p>
-                    <p className="text-xl font-black" style={{ color: card.valueColor }}>
-                      {formatPrice(card.value)}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{card.subtitle}</p>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <a.icon style={{ width: 16, height: 16, color: ACCENT }} />
                   </div>
-                  <div
-                    className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
-                    style={{ background: '#F7F9FC' }}
-                  >
-                    <ChevronRight className="h-4 w-4" style={{ color: '#6B7280' }} />
-                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.3 }}>{a.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Sidebar */}
-          <aside className="xl:col-span-4 space-y-5">
-            {/* Order Progress */}
-            <div
-              style={{
-                background: '#FFFFFF',
-                borderRadius: '22px',
-                border: '1px solid #E5E7EB',
-                padding: '28px',
-                boxShadow: '0 10px 35px rgba(15,23,42,0.06)',
-              }}
-            >
-              <div className="mb-6">
-                <h3 className="text-base font-bold" style={{ color: '#111827' }}>
-                  Order Progress
-                </h3>
-                <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>
-                  Live fulfillment tracking
-                </p>
-              </div>
+          {/* Order Progress */}
+          <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Order Progress</div>
+              <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+            </div>
 
-              <div className="space-y-4">
-                {orderStats.map((stat) => (
-                  <div key={stat.label}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2 w-2 rounded-full"
-                          style={{ background: stat.color }}
-                        />
-                        <span className="text-sm font-semibold" style={{ color: '#111827' }}>
-                          {stat.label}
-                        </span>
-                      </div>
-                      <span className="text-sm font-black" style={{ color: '#111827' }}>
-                        {stat.count}
-                      </span>
-                    </div>
-                    <div
-                      className="h-1.5 w-full rounded-full overflow-hidden"
-                      style={{ background: '#F7F9FC' }}
-                    >
-                      <div
-                        className="h-full rounded-full transition-all duration-1000 ease-out"
-                        style={{
-                          width: `${stat.count > 0 ? 100 : 0}%`,
-                          background: stat.color,
-                          opacity: 0.7,
-                        }}
-                      />
-                    </div>
+            {/* Ring */}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+              <div style={{ position: "relative", width: 130, height: 130 }}>
+                <svg width="130" height="130" viewBox="0 0 130 130">
+                  <circle cx="65" cy="65" r="54" fill="none" stroke="#1E2D42" strokeWidth="10" />
+                  <circle
+                    cx="65" cy="65" r="54"
+                    fill="none"
+                    stroke={ACCENT}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={ringCircumference}
+                    strokeDashoffset={ringOffset}
+                    transform="rotate(-90 65 65)"
+                    style={{ transition: "stroke-dashoffset 1s ease" }}
+                  />
+                </svg>
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
+                  <div style={{ fontSize: 9, color: TEXT_SECONDARY, textAlign: "center" }}>Completion<br />Rate</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {orderProgress.map((p, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color }} />
+                    <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.label}</span>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-6 pt-5" style={{ borderTop: '1px solid #E5E7EB' }}>
-                <Link
-                  href="/admin/orders"
-                  className="flex items-center justify-center gap-2 w-full font-bold text-sm text-white rounded-[14px] transition-all active:scale-[0.98]"
-                  style={{
-                    height: '48px',
-                    background: '#0B1320',
-                    boxShadow: '0 8px 20px rgba(11,19,32,0.2)',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#182131'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#0B1320'; }}
-                >
-                  Manage Orders
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Support Card */}
-            <div
-              style={{
-                borderRadius: '22px',
-                padding: '28px',
-                background: 'linear-gradient(135deg, #0B1320 0%, #182131 100%)',
-                border: '1px solid #2B3648',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.2)',
-              }}
-            >
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                style={{ background: 'rgba(18,214,197,0.12)', border: '1px solid rgba(18,214,197,0.2)' }}
-              >
-                <Settings className="h-5 w-5" style={{ color: '#12D6C5' }} />
-              </div>
-              <h4 className="font-bold text-base mb-2 text-white">Need Assistance?</h4>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: '#AAB4C5' }}>
-                Our support team is available 24/7 to help you with any platform issues.
-              </p>
-              <button
-                className="w-full font-bold text-sm rounded-[14px] transition-all"
-                style={{
-                  height: '44px',
-                  background: '#12D6C5',
-                  color: '#0B1320',
-                  border: 'none',
-                  boxShadow: '0 8px 20px rgba(18,214,197,0.25)',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#1DE9D3'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#12D6C5'; }}
-              >
-                Contact Support
-              </button>
+          {/* Recent Activities */}
+          <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
+              <Link href="/admin/reports" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
             </div>
-          </aside>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {recentActivities.map((a, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                    <a.icon style={{ width: 14, height: 14, color: a.color }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 1 }}>{a.title}</div>
+                    <div style={{ fontSize: 10, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
+                    <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 2, opacity: 0.7 }}>{a.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

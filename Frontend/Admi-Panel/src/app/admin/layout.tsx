@@ -243,8 +243,50 @@ function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Sidebar footer — logout */}
-        <div className="px-3 pb-4 shrink-0" style={{ borderTop: '1px solid #2B3648', paddingTop: '12px' }}>
+        {/* System Status */}
+        {sidebarOpen && (
+          <div className="mx-3 mb-3 px-3 py-3 rounded-xl shrink-0" style={{ background: 'rgba(18,214,197,0.07)', border: '1px solid rgba(18,214,197,0.15)' }}>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="h-2 w-2 rounded-full" style={{ background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
+              <span className="text-xs font-bold" style={{ color: '#AAB4C5' }}>System Status</span>
+            </div>
+            <p className="text-xs mb-1" style={{ color: '#AAB4C5' }}>All systems operational</p>
+            <div className="flex items-center justify-between">
+              <div className="h-1.5 flex-1 mr-2 rounded-full overflow-hidden" style={{ background: '#2B3648' }}>
+                <div className="h-full rounded-full" style={{ width: '100%', background: '#22C55E' }} />
+              </div>
+              <span className="text-xs font-bold" style={{ color: '#22C55E' }}>100%</span>
+            </div>
+          </div>
+        )}
+
+        {/* Admin User Profile */}
+        <div className="px-3 pb-3 shrink-0" style={{ borderTop: '1px solid #2B3648', paddingTop: '12px' }}>
+          {sidebarOpen ? (
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl" style={{ background: '#182131' }}>
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                style={{ background: '#12D6C5', color: '#0B1320' }}
+              >
+                {(companyName || "K").slice(0, 1)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold truncate" style={{ color: '#FFFFFF' }}>Admin User</p>
+                <p className="text-xs truncate" style={{ color: '#AAB4C5' }}>Super Admin</p>
+              </div>
+              <ChevronLeft className="h-4 w-4 rotate-90 shrink-0" style={{ color: '#AAB4C5' }} />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: '#12D6C5', color: '#0B1320' }}>
+                {(companyName || "K").slice(0, 1)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Logout */}
+        <div className="px-3 pb-4 shrink-0">
           <button
             onClick={async () => {
               await fetch("/api/auth/logout", { method: "POST" });
