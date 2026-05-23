@@ -20,12 +20,36 @@ const CURRENCIES = [
   { code: "GBP", label: "British Pound", flag: "🇬🇧" },
 ];
 
+const MtnLogo = () => (
+  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+    <rect width="40" height="40" rx="8" fill="#FFCC00"/>
+    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#000">MTN</text>
+  </svg>
+);
+const AirtelLogo = () => (
+  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+    <rect width="40" height="40" rx="8" fill="#ED1C24"/>
+    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9.5" fill="#fff">airtel</text>
+  </svg>
+);
+const ZamtelLogo = () => (
+  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+    <rect width="40" height="40" rx="8" fill="#00843D"/>
+    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="8.5" fill="#fff">ZAMTEL</text>
+  </svg>
+);
+const MobileMoneyIcon = () => (
+  <div className="flex items-center -space-x-1">
+    <MtnLogo /><AirtelLogo /><ZamtelLogo />
+  </div>
+);
+
 const METHODS = [
   {
     id: "mobile",
     label: "Mobile Money",
     sub: "MTN, Airtel, Zamtel",
-    icon: Smartphone,
+    icon: MobileMoneyIcon,
     iconBg: "bg-yellow-50 dark:bg-yellow-900/20",
     iconColor: "text-yellow-600",
   },

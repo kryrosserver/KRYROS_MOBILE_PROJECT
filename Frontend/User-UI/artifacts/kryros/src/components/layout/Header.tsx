@@ -178,7 +178,7 @@ export default function Header() {
               )}
             </div>
 
-            <Link href="/shop">
+            <Link href="/wishlist">
               <button className="relative p-2 rounded-xl hover:bg-muted transition-colors">
                 <Heart className="w-5 h-5" />
                 {wishlist.length > 0 && (
@@ -215,7 +215,7 @@ export default function Header() {
                 <button className="p-1.5 rounded-xl hover:bg-muted transition-colors"><User className="w-5 h-5" /></button>
               </Link>
             )}
-            <Link href="/shop">
+            <Link href="/wishlist">
               <button className="relative p-1.5 rounded-xl hover:bg-muted transition-colors">
                 <Heart className="w-5 h-5" />
                 {wishlist.length > 0 && (

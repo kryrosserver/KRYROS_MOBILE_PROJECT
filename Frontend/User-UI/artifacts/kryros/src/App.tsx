@@ -31,6 +31,7 @@ import ReturnsPage from "@/pages/ReturnsPage";
 import ShippingPage from "@/pages/ShippingPage";
 import SecurityPage from "@/pages/SecurityPage";
 import PayPage from "@/pages/PayPage";
+import WishlistPage from "@/pages/WishlistPage";
 import NotFound from "@/pages/not-found";
 
 import { useAuthStore } from "@/store/authStore";
@@ -112,6 +113,7 @@ function Router() {
       <Route path="/shipping">{() => <Layout path="/shipping"><ShippingPage /></Layout>}</Route>
       <Route path="/security">{() => <Layout path="/security"><SecurityPage /></Layout>}</Route>
       <Route path="/pay">{() => <Layout path="/pay"><PayPage /></Layout>}</Route>
+      <Route path="/wishlist">{() => <Layout path="/wishlist"><WishlistPage /></Layout>}</Route>
       <Route>{() => <Layout path="/404"><NotFound /></Layout>}</Route>
     </Switch>
   );

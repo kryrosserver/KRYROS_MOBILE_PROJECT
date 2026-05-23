@@ -16,6 +16,7 @@ export class SettingsService implements OnModuleInit {
       { key: 'closing_time', value: '18:00', type: 'string', category: 'general' },
       { key: 'is_store_closed_manual', value: 'false', type: 'boolean', category: 'general' },
       { key: 'store_closed_message', value: 'We are currently closed. Please come back later.', type: 'string', category: 'general' },
+      { key: 'whatsapp_number', value: process.env.WHATSAPP_NUMBER || '', type: 'string', category: 'contact' },
     ];
 
     for (const s of defaultSettings) {

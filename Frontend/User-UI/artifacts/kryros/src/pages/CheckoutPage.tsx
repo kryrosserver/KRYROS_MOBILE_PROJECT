@@ -17,11 +17,36 @@ const SHIPPING_OPTIONS = [
   { id: "priority", label: "Priority Delivery", detail: "Next business day", price: 30, icon: Clock },
 ];
 
+const MtnLogo = () => (
+  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+    <rect width="40" height="40" rx="8" fill="#FFCC00"/>
+    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#000">MTN</text>
+  </svg>
+);
+const AirtelLogo = () => (
+  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+    <rect width="40" height="40" rx="8" fill="#ED1C24"/>
+    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9.5" fill="#fff">airtel</text>
+  </svg>
+);
+const ZamtelLogo = () => (
+  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+    <rect width="40" height="40" rx="8" fill="#00843D"/>
+    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="8.5" fill="#fff">ZAMTEL</text>
+  </svg>
+);
+
+const MobileMoneyCombinedIcon = () => (
+  <div className="flex items-center -space-x-1">
+    <MtnLogo /><AirtelLogo /><ZamtelLogo />
+  </div>
+);
+
 const CHECKOUT_METHODS = [
   {
     id: "mobile", label: "Mobile Money", sub: "MTN, Airtel, Zamtel",
     iconBg: "bg-yellow-50 dark:bg-yellow-900/20",
-    icon: () => <Smartphone className="w-5 h-5 text-yellow-600" />,
+    icon: () => <MobileMoneyCombinedIcon />,
   },
   {
     id: "card", label: "Card Payment", sub: "Visa, Mastercard & more",
@@ -115,6 +140,18 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [placedOrderNumber, setPlacedOrderNumber] = useState<string>("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/settings`)
+      .then((r) => r.json())
+      .then((data) => {
+        const list: { key: string; value: string }[] = Array.isArray(data) ? data : [];
+        const found = list.find((s) => s.key === "whatsapp_number");
+        if (found?.value) setWhatsappNumber(found.value);
+      })
+      .catch(() => {});
+  }, []);
 
   const [firstName, setFirstName] = useState(authUser?.firstName ?? "");
   const [lastName, setLastName] = useState(authUser?.lastName ?? "");
@@ -250,7 +287,7 @@ export default function CheckoutPage() {
               )}
               {openMethod === "whatsapp" && (
                 <a
-                  href={`https://wa.me/260966423719?text=Hi%20KRYROS%2C%20I%20just%20placed%20order%20${encodeURIComponent(placedOrderNumber)}%20and%20would%20like%20to%20confirm%20my%20WhatsApp%20payment.%20Total%3A%20${encodeURIComponent(format(total))}`}
+                  href={`https://wa.me/${whatsappNumber}?text=Hi%20KRYROS%2C%20I%20just%20placed%20order%20${encodeURIComponent(placedOrderNumber)}%20and%20would%20like%20to%20confirm%20my%20WhatsApp%20payment.%20Total%3A%20${encodeURIComponent(format(total))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full py-3.5 bg-[#25D366] text-white rounded-2xl font-bold text-sm text-center mb-3 flex items-center justify-center gap-2 hover:bg-[#1ebe5d] transition-colors"

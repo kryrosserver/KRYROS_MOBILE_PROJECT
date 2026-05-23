@@ -108,6 +108,7 @@ export default function DashboardPage() {
 
   const { user, token, logout } = useAuthStore();
   const format = useCurrencyStore((s) => s.format);
+  const selectedCurrency = useCurrencyStore((s) => s.selected);
   const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
   const firstName = user?.firstName ?? "there";
   const initials = user
@@ -223,7 +224,7 @@ export default function DashboardPage() {
   const sidebarItems: { icon: any; label: string; section?: ActiveSection; href?: string }[] = [
     { icon: LayoutDashboard, label: "Dashboard", section: "overview" },
     { icon: Package, label: "Orders", href: "/track" },
-    { icon: Heart, label: "Wishlist", href: "/shop" },
+    { icon: Heart, label: "Wishlist", href: "/wishlist" },
     { icon: MapPin, label: "Addresses", section: "addresses" },
     { icon: CreditCard, label: "Payment Methods", href: "/get-now" },
     { icon: Zap, label: "Get Now Plans", href: "/get-now" },
@@ -291,9 +292,8 @@ export default function DashboardPage() {
 
       <div className="border-t border-border p-3 space-y-0.5">
         {[
-          { icon: DollarSign, label: "USD - US Dollar" },
+          { icon: DollarSign, label: `${selectedCurrency.code} - ${selectedCurrency.name}` },
           { icon: Globe, label: "English" },
-          { icon: Sun, label: "Light Mode" },
         ].map(({ icon: Icon, label }) => (
           <div key={label} className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted cursor-pointer transition-all">
             <div className="flex items-center gap-2">
@@ -692,7 +692,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                 {[
                   { icon: ShoppingBag, label: "Total Orders", value: ordersLoading ? "—" : String(recentOrders.length), href: "/track", iconBg: "#e6faf8", iconColor: "#0d9488" },
-                  { icon: Heart, label: "Wishlist Items", value: wishlistLoading ? "—" : String(wishlist.length), href: "/shop", iconBg: "#fdf2f8", iconColor: "#ec4899" },
+                  { icon: Heart, label: "Wishlist Items", value: wishlistLoading ? "—" : String(wishlist.length), href: "/wishlist", iconBg: "#fdf2f8", iconColor: "#ec4899" },
                   { icon: Zap, label: "Get Now Credit", value: "Apply", href: "/get-now", iconBg: "#fff7ed", iconColor: "#f97316" },
                   { icon: MapPin, label: "Addresses", value: profileLoading ? "—" : String(profile?.addresses?.length ?? 0), onClick: () => { setActiveSection("addresses"); window.scrollTo({ top: 0, behavior: "smooth" }); }, iconBg: "#f5f3ff", iconColor: "#8b5cf6" },
                 ].map(({ icon: Icon, label, value, href, onClick, iconBg, iconColor }) => (
