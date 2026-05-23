@@ -360,12 +360,12 @@ export default function AdminDashboard() {
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {recentOrders.map((o, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", shrink: 0 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <ShoppingCart style={{ width: 16, height: 16, color: ACCENT }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{o.id}</div>
-                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, truncate: true, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
                       <div style={{ fontSize: 11, color: TEXT_SECONDARY, marginBottom: 3 }}>{o.time}</div>
