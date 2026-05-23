@@ -21,10 +21,10 @@ const CURRENCIES = [
 ];
 
 const MobileMoneyIcon = () => (
-  <div className="flex items-center -space-x-2">
-    <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
-    <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
-    <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
+  <div className="flex items-center -space-x-1">
+    <img src="/mtn-logo.jpg" alt="MTN" className="w-3.5 h-3.5 rounded-md object-cover border border-background" />
+    <img src="/airtel-logo.jpg" alt="Airtel" className="w-3.5 h-3.5 rounded-md object-cover border border-background" />
+    <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-3.5 h-3.5 rounded-md object-cover border border-background" />
   </div>
 );
 
@@ -190,13 +190,19 @@ export default function PayPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [proofFile, setProofFile] = useState<string | null>(null);
 
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "";
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260966423719";
+  const [showProviderDrop, setShowProviderDrop] = useState(false);
 
   const handlePay = () => setSuccess(true);
 
   const handleWhatsAppPay = () => {
+    const cleanNumber = whatsappNumber.replace(/\D/g, "");
+    if (!cleanNumber || cleanNumber.length < 7) {
+      alert("WhatsApp number is not configured. Please contact KRYROS support.");
+      return;
+    }
     const msg = `Hi KRYROS, I would like to make a payment of ${currency} ${total.toFixed(2)}.${note ? " Note: " + note : ""}`;
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
   };
 
@@ -458,22 +464,47 @@ export default function PayPage() {
               {/* ── MOBILE MONEY ── */}
               {openMethod === "mobile" && (
                 <div className="space-y-4">
-                  <div>
+                  <div className="relative">
                     <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Provider</label>
-                    <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
+                    <button
+                      type="button"
+                      onClick={() => setShowProviderDrop((v) => !v)}
+                      className="w-full flex items-center gap-2.5 border border-border rounded-2xl px-3.5 py-3 bg-background hover:border-primary/50 transition-colors"
+                    >
                       <ProviderLogo provider={mmProvider} />
-                      <select
-                        value={mmProvider}
-                        onChange={(e) => setMmProvider(e.target.value)}
-                        className="flex-1 text-sm text-foreground outline-none bg-transparent"
-                      >
-                        <option>MTN Mobile Money</option>
-                        <option>Airtel Money</option>
-                        <option>Zamtel Money</option>
-                        <option>M-Pesa</option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    </div>
+                      <span className="flex-1 text-sm font-semibold text-foreground text-left">{mmProvider}</span>
+                      <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${showProviderDrop ? "rotate-180" : ""}`} />
+                    </button>
+                    {showProviderDrop && (
+                      <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-background border border-border rounded-2xl shadow-xl overflow-hidden">
+                        {[
+                          { name: "MTN Mobile Money", logo: "/mtn-logo.jpg", color: "bg-yellow-50 dark:bg-yellow-900/20" },
+                          { name: "Airtel Money", logo: "/airtel-logo.jpg", color: "bg-red-50 dark:bg-red-900/20" },
+                          { name: "Zamtel Money", logo: "/zamtel-logo.jpg", color: "bg-green-50 dark:bg-green-900/20" },
+                          { name: "M-Pesa", logo: "/mtn-logo.jpg", color: "bg-emerald-50 dark:bg-emerald-900/20" },
+                        ].map((p) => (
+                          <button
+                            key={p.name}
+                            type="button"
+                            onClick={() => { setMmProvider(p.name); setShowProviderDrop(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted transition-colors border-b border-border last:border-0
+                              ${mmProvider === p.name ? "bg-primary/5" : ""}`}
+                          >
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${p.color}`}>
+                              <img src={p.logo} alt={p.name} className="w-6 h-6 rounded-md object-cover" />
+                            </div>
+                            <span className={`text-sm font-semibold flex-1 ${mmProvider === p.name ? "text-primary" : "text-foreground"}`}>
+                              {p.name}
+                            </span>
+                            {mmProvider === p.name && (
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                <Check className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Mobile Money Number</label>
