@@ -300,40 +300,39 @@ export default function PayPage() {
           </div>
 
           {/* Amount input */}
-          <div className="border-2 border-border rounded-2xl px-4 py-3 bg-background focus-within:border-primary/60 transition-colors">
-            <label className="block text-[10px] font-semibold text-muted-foreground mb-1.5">Enter Amount</label>
-            <div className="flex items-center gap-3">
+          <div className="border border-border rounded-xl px-4 py-2.5 bg-background focus-within:border-primary/60 transition-colors flex items-center gap-3">
+            <div className="flex-1 flex items-center gap-2">
+              <span className="text-muted-foreground/50">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5c.5-1 1.5-1.5 2.5-1.5s2 .7 2 1.8c0 2.2-4.5 2.2-4.5 5.2h4.5"/><line x1="12" y1="17" x2="12" y2="18"/></svg>
+              </span>
               <input
                 value={rawAmount}
                 onChange={(e) => setRawAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-                placeholder="0.00"
+                placeholder="Enter Amount"
                 inputMode="decimal"
-                className="flex-1 text-3xl font-black text-foreground outline-none bg-transparent placeholder:text-muted-foreground/40"
+                className="flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1"
               />
-              <button
-                onClick={() => setShowCurrencyDrop(!showCurrencyDrop)}
-                className="flex items-center gap-1.5 border border-border rounded-xl px-2.5 py-1.5 bg-muted/30 hover:bg-muted transition-colors flex-shrink-0"
-              >
-                <span className="text-base leading-none">{currencyObj.flag}</span>
-                <span className="text-xs font-bold text-foreground">{currency}</span>
-                <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${showCurrencyDrop ? "rotate-180" : ""}`} />
-              </button>
             </div>
+            <button
+              onClick={() => setShowCurrencyDrop(!showCurrencyDrop)}
+              className="flex items-center gap-1 text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
+            >
+              <span>{currencyObj.flag}</span>
+              <span>{currency}</span>
+              <ChevronDown className={`w-3 h-3 transition-transform ${showCurrencyDrop ? "rotate-180" : ""}`} />
+            </button>
           </div>
 
           {/* Currency selector row */}
           <button
             onClick={() => setShowCurrencyDrop(!showCurrencyDrop)}
-            className="w-full border border-border rounded-2xl px-4 py-3 bg-background text-left hover:border-primary/50 hover:bg-primary/[0.02] transition-colors"
+            className="w-full border border-border rounded-xl px-4 py-2.5 bg-background text-left hover:border-primary/50 hover:bg-primary/[0.02] transition-colors flex items-center gap-3"
           >
-            <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">Select Currency</p>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{currencyObj.flag}</span>
-                <span className="text-sm font-semibold text-foreground">{currency} — {currencyObj.label}</span>
-              </div>
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showCurrencyDrop ? "rotate-180" : ""}`} />
-            </div>
+            <span className="text-muted-foreground/50">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </span>
+            <span className="flex-1 text-sm font-semibold text-foreground">{currencyObj.flag} {currency} — {currencyObj.label}</span>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ${showCurrencyDrop ? "rotate-180" : ""}`} />
           </button>
 
           {/* Currency dropdown */}
@@ -355,13 +354,15 @@ export default function PayPage() {
           )}
 
           {/* Note */}
-          <div className="border border-border rounded-2xl px-4 py-3 bg-background focus-within:border-primary/60 transition-colors">
-            <label className="block text-[10px] font-semibold text-muted-foreground mb-1.5">Add a note (optional)</label>
+          <div className="border border-border rounded-xl px-4 py-2.5 bg-background focus-within:border-primary/60 transition-colors flex items-center gap-3">
+            <span className="text-muted-foreground/50 flex-shrink-0">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </span>
             <input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g Meal payment, Invoice, Support..."
-              className="w-full text-sm text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50"
+              placeholder="Their Reference (optional)"
+              className="flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1"
             />
           </div>
 
