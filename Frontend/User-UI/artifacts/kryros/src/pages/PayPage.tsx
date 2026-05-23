@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ChevronLeft, Lock, ChevronDown, ChevronRight, X,
-  Smartphone, Building2, Check, Upload, AlertCircle, Download,
+  Smartphone, CreditCard, Building2, Check, Upload, AlertCircle, Download,
 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
@@ -46,6 +46,14 @@ const METHODS = [
     comingSoon: false,
   },
   {
+    id: "card",
+    label: "Card Payment",
+    sub: "Visa, Mastercard & more",
+    icon: CreditCard,
+    iconBg: "bg-blue-50 dark:bg-blue-900/20",
+    comingSoon: false,
+  },
+  {
     id: "bank",
     label: "Bank Transfer",
     sub: "Local & International",
@@ -64,6 +72,43 @@ const METHODS = [
     ),
     iconBg: "bg-green-50 dark:bg-green-900/20",
     comingSoon: false,
+  },
+  {
+    id: "apple",
+    label: "Apple Pay",
+    sub: "Pay with Apple Pay",
+    icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5 text-foreground" fill="currentColor">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+      </svg>
+    ),
+    iconBg: "bg-slate-50 dark:bg-slate-800",
+    comingSoon: false,
+  },
+  {
+    id: "google",
+    label: "Google Pay",
+    sub: "Pay with Google Pay",
+    icon: () => (
+      <span className="text-sm font-black leading-none">
+        <span className="text-blue-500">G</span>
+        <span className="text-red-500">o</span>
+        <span className="text-yellow-500">o</span>
+        <span className="text-blue-500">g</span>
+        <span className="text-green-500">l</span>
+        <span className="text-red-500">e</span>
+      </span>
+    ),
+    iconBg: "bg-white dark:bg-slate-800 border border-border",
+    comingSoon: false,
+  },
+  {
+    id: "crypto",
+    label: "Crypto Payment",
+    sub: "USDT, BTC & more",
+    icon: () => <span className="text-xs font-black text-orange-500">₿</span>,
+    iconBg: "bg-orange-50 dark:bg-orange-900/20",
+    comingSoon: true,
   },
 ];
 
@@ -853,6 +898,106 @@ export default function PayPage() {
                     </svg>
                     Continue on WhatsApp
                   </button>
+                  <SecureFooter />
+                </div>
+              )}
+
+              {/* CARD PAYMENT */}
+              {openMethod === "card" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Card Number</label>
+                    <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
+                      <input
+                        placeholder="1234 5678 9012 3456"
+                        inputMode="numeric"
+                        className="flex-1 text-sm text-foreground outline-none bg-transparent"
+                      />
+                      <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Expiry Date</label>
+                      <input
+                        placeholder="MM / YY"
+                        className="w-full border border-border rounded-2xl px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">CVV</label>
+                      <input
+                        placeholder="123"
+                        type="password"
+                        className="w-full border border-border rounded-2xl px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Cardholder Name</label>
+                    <input
+                      placeholder="John Doe"
+                      className="w-full border border-border rounded-2xl px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground"
+                    />
+                  </div>
+                  <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
+                  <button
+                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all"
+                  >
+                    <Lock className="w-4 h-4" /> Pay {currency} {total.toFixed(2)}
+                  </button>
+                  <SecureFooter />
+                </div>
+              )}
+
+              {/* APPLE PAY */}
+              {openMethod === "apple" && (
+                <div className="space-y-4">
+                  <p className="text-xs text-center text-muted-foreground">Authenticate with Face ID or Touch ID to complete payment.</p>
+                  <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
+                  <button
+                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
+                    style={{ background: "#000", color: "#fff" }}
+                  >
+                     Buy with Apple Pay
+                  </button>
+                  <SecureFooter />
+                </div>
+              )}
+
+              {/* GOOGLE PAY */}
+              {openMethod === "google" && (
+                <div className="space-y-4">
+                  <p className="text-xs text-center text-muted-foreground">You'll be redirected to Google Pay to complete your payment.</p>
+                  <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
+                  <button
+                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all border border-border"
+                    style={{ background: "#fff", color: "#000" }}
+                  >
+                    <span className="font-black text-lg">
+                      <span className="text-blue-500">G</span>
+                      <span className="text-red-500">o</span>
+                      <span className="text-yellow-500">o</span>
+                      <span className="text-blue-500">g</span>
+                      <span className="text-green-500">l</span>
+                      <span className="text-red-500">e</span>
+                    </span>
+                    &nbsp;Pay
+                  </button>
+                  <SecureFooter />
+                </div>
+              )}
+
+              {/* CRYPTO — Coming Soon */}
+              {openMethod === "crypto" && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center py-10 gap-3">
+                    <span className="text-5xl font-black text-orange-500">₿</span>
+                    <p className="text-base font-bold text-foreground">Coming Soon</p>
+                    <p className="text-sm text-center text-muted-foreground px-4">
+                      Crypto payments (USDT, BTC & more) are coming soon. Stay tuned!
+                    </p>
+                  </div>
                   <SecureFooter />
                 </div>
               )}
