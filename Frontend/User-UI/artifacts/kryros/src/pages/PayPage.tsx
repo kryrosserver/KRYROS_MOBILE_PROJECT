@@ -192,8 +192,10 @@ export default function PayPage() {
 
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
   const [showProviderDrop, setShowProviderDrop] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [payRef] = useState(() => "PAY-" + Date.now().toString(36).toUpperCase().slice(-8));
 
-  const handlePay = () => setSuccess(true);
+  const handlePay = () => setPending(true);
 
   const handleWhatsAppPay = () => {
     const cleanNumber = whatsappNumber.replace(/\D/g, "");
@@ -201,28 +203,57 @@ export default function PayPage() {
       alert("WhatsApp number is not configured. Please contact KRYROS support.");
       return;
     }
-    const msg = `Hi KRYROS, I would like to make a payment of ${currency} ${total.toFixed(2)}.${note ? " Note: " + note : ""}`;
+    const ref = payRef;
+    const msg =
+      `Hi KRYROS! 💳 *Direct Payment Request*\n\n` +
+      `*Reference:* ${ref}\n` +
+      `*Amount:* ${currency} ${total.toFixed(2)}\n` +
+      (note ? `*Note:* ${note}\n` : "") +
+      `\nPlease confirm this payment. Thank you!`;
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
+    setPending(true);
   };
 
-  if (success) {
+  if (pending) {
+    const isWhatsapp = openMethod === "whatsapp";
+    const isBank = openMethod === "bank";
+    const methodLabel = METHODS.find((m) => m.id === openMethod)?.label ?? "Payment";
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
         <div className="w-full max-w-sm">
-          <div className="rounded-3xl overflow-hidden" style={{ background: "linear-gradient(160deg, #07392f 0%, #0a5544 100%)" }}>
+          <div
+            className="rounded-3xl overflow-hidden"
+            style={{ background: isWhatsapp || isBank ? "linear-gradient(160deg, #2d2000 0%, #5a3a00 100%)" : "linear-gradient(160deg, #07392f 0%, #0a5544 100%)" }}
+          >
             <div className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-green-400/20 border-4 border-green-400 flex items-center justify-center mx-auto mb-4">
-                <Check className="w-8 h-8 text-green-400" />
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isWhatsapp || isBank ? "bg-yellow-400/20 border-4 border-yellow-400" : "bg-green-400/20 border-4 border-green-400"}`}>
+                <Check className={`w-8 h-8 ${isWhatsapp || isBank ? "text-yellow-400" : "text-green-400"}`} />
               </div>
-              <h2 className="text-xl font-black text-white mb-1">Payment Successful!</h2>
-              <p className="text-white/60 text-sm mb-6">Your payment has been processed securely.</p>
+              <h2 className="text-xl font-black text-white mb-1">
+                {isWhatsapp || isBank ? "Payment Submitted" : "Prompt Sent!"}
+              </h2>
+              <p className="text-white/60 text-sm mb-4">
+                {openMethod === "mobile"
+                  ? `A payment prompt has been sent to ${mmPhone || "your phone"}. Please approve it on your ${mmProvider} app to complete the payment.`
+                  : isWhatsapp
+                  ? "Your payment details have been sent to our WhatsApp. Our team will confirm your payment shortly."
+                  : isBank
+                  ? "Once we receive your transfer, we will confirm your payment manually."
+                  : "Your payment request has been submitted. Our team will verify and confirm shortly."}
+              </p>
+              {openMethod === "mobile" && (
+                <div className="flex justify-center mb-4">
+                  <span className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                </div>
+              )}
               <div className="bg-white/10 rounded-2xl p-4 text-left space-y-2.5 mb-6">
                 {[
-                  ["Reference", "PAY-2024-00123345"],
-                  ["Amount Paid", `${currency} ${total.toFixed(2)}`],
-                  ["Method", METHODS.find((m) => m.id === openMethod)?.label ?? "—"],
+                  ["Reference", payRef],
+                  ["Amount", `${currency} ${total.toFixed(2)}`],
+                  ["Method", methodLabel],
                   ["Date", new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })],
+                  ["Status", openMethod === "mobile" ? "⏳ Awaiting Approval" : "⏳ Pending Confirmation"],
                 ].map(([label, val]) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-white/60 text-xs">{label}</span>
@@ -615,7 +646,7 @@ export default function PayPage() {
                       { label: "Bank Name", val: "Stanbic Bank Zambia" },
                       { label: "Account Name", val: "KRYROS LIMITED" },
                       { label: "Account Number", val: "91200012345667" },
-                      { label: "Reference", val: "#KRY-2024-00012345" },
+                      { label: "Reference", val: payRef },
                     ].map(({ label, val }) => (
                       <div key={label} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                         <div>

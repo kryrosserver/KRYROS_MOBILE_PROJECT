@@ -129,6 +129,11 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [placedOrderNumber, setPlacedOrderNumber] = useState<string>("");
+  const [placedOrderId, setPlacedOrderId] = useState<string>("");
+  const [mmPhase, setMmPhase] = useState<"idle" | "initializing" | "waiting" | "failed_init" | "timed_out">("idle");
+  const [waMessage, setWaMessage] = useState<string>("");
+  const [savedCartItems, setSavedCartItems] = useState<typeof cartItems>([]);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
 
   const [firstName, setFirstName] = useState(authUser?.firstName ?? "");
@@ -162,10 +167,123 @@ export default function CheckoutPage() {
   const [proofFile, setProofFile] = useState<string | null>(null);
 
   useEffect(() => {
-    if (cartItems.length === 0 && !ordered) {
+    if (cartItems.length === 0 && !ordered && mmPhase === "idle") {
       navigate("/cart");
     }
-  }, [cartItems.length, ordered, navigate]);
+  }, [cartItems.length, ordered, mmPhase, navigate]);
+
+  useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
+
+  const buildOrderPayload = (backendPaymentMethod: string, totalZMW: number) => ({
+    items: cartItems.map((item) => ({ productId: item.id, quantity: item.qty })),
+    paymentMethod: backendPaymentMethod,
+    ...(openMethod === "mobile" && mmPhone ? { paymentPhone: mmPhone } : {}),
+    totalZMW: Math.round(totalZMW * 100) / 100,
+    currencyCode: selectedCurrency.code,
+    currencySymbol: selectedCurrency.symbol,
+    exchangeRate: selectedCurrency.exchangeRate,
+    ...(openMethod === "mobile" && mmProvider ? { notes: `Mobile money provider: ${mmProvider}` } : {}),
+    addressDetails: {
+      email, firstName, lastName, phone,
+      address: addressLine || `${city}, ${state}, ${country}`,
+      zipCode: zipCode || undefined,
+      countryName: country,
+      stateName: state || undefined,
+      cityName: city || undefined,
+      manual: true,
+    },
+  });
+
+  const startPolling = (orderId: string, orderNum: string) => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+
+    let attempts = 0;
+    const MAX_ATTEMPTS = 36;
+
+    pollRef.current = setInterval(async () => {
+      attempts++;
+      if (attempts > MAX_ATTEMPTS) {
+        clearInterval(pollRef.current!);
+        setMmPhase("timed_out");
+        return;
+      }
+      try {
+        const r = await fetch(`${API_BASE}/api/payments/status/${orderId}`, { headers });
+        if (!r.ok) return;
+        const d = await r.json().catch(() => null);
+        if (!d) return;
+        const status = d.status ?? d.paymentStatus ?? "";
+        if (status === "PAID") {
+          clearInterval(pollRef.current!);
+          setPlacedOrderNumber(orderNum);
+          clearCart();
+          setOrdered(true);
+          setMmPhase("idle");
+        } else if (status === "FAILED") {
+          clearInterval(pollRef.current!);
+          setMmPhase("failed_init");
+        }
+      } catch {  }
+    }, 5000);
+  };
+
+  const handleMobileMoneyPay = async () => {
+    if (isSubmitting || !mmPhone.trim()) return;
+    setIsSubmitting(true);
+    setOrderError(null);
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+
+      const zmwRate = allCurrencies.find((c) => c.code === "ZMW")?.exchangeRate ?? 18.86;
+      const totalZMW = total * zmwRate;
+
+      const res = await fetch(`${API_BASE}/api/orders`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(buildOrderPayload("MOBILE_MONEY", totalZMW)),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = Array.isArray(data.message) ? data.message.join(", ") : data.message || "Failed to place order.";
+        setOrderError(msg);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const orderId = data.id ?? "";
+      const orderNum = data.orderNumber ?? data.id ?? "";
+      setPlacedOrderId(orderId);
+      setSavedCartItems([...cartItems]);
+      setMmPhase("initializing");
+      setOpenMethod(null);
+
+      try {
+        const initRes = await fetch(`${API_BASE}/api/payments/initialize`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ orderId, phone: mmPhone, amount: Math.round(totalZMW * 100) / 100 }),
+        });
+        if (!initRes.ok) {
+          setMmPhase("failed_init");
+          setIsSubmitting(false);
+          return;
+        }
+        setMmPhase("waiting");
+        startPolling(orderId, orderNum);
+      } catch {
+        setMmPhase("failed_init");
+      }
+    } catch {
+      setOrderError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (isSubmitting || cartItems.length === 0) return;
@@ -176,61 +294,45 @@ export default function CheckoutPage() {
       if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
 
       const PAYMENT_METHOD_MAP: Record<string, string> = {
-        mobile: "MOBILE_MONEY",
-        card: "CARD",
-        bank: "BANK_TRANSFER",
-        whatsapp: "WHATSAPP",
-        apple: "CARD",
-        google: "CARD",
-        crypto: "CARD",
+        card: "CARD", bank: "BANK_TRANSFER", whatsapp: "WHATSAPP",
+        apple: "CARD", google: "CARD", crypto: "CARD",
       };
       const backendPaymentMethod = PAYMENT_METHOD_MAP[openMethod ?? "card"] ?? "CARD";
-
       const zmwRate = allCurrencies.find((c) => c.code === "ZMW")?.exchangeRate ?? 18.86;
       const totalZMW = total * zmwRate;
 
       const res = await fetch(`${API_BASE}/api/orders`, {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          items: cartItems.map((item) => ({
-            productId: item.id,
-            quantity: item.qty,
-          })),
-          paymentMethod: backendPaymentMethod,
-          ...(openMethod === "mobile" && mmPhone ? { paymentPhone: mmPhone } : {}),
-          totalZMW: Math.round(totalZMW * 100) / 100,
-          currencyCode: selectedCurrency.code,
-          currencySymbol: selectedCurrency.symbol,
-          exchangeRate: selectedCurrency.exchangeRate,
-          ...(openMethod === "mobile" && mmProvider ? { notes: `Mobile money provider: ${mmProvider}` } : {}),
-          addressDetails: {
-            email,
-            firstName,
-            lastName,
-            phone,
-            address: addressLine || `${city}, ${state}, ${country}`,
-            zipCode: zipCode || undefined,
-            countryName: country,
-            stateName: state || undefined,
-            cityName: city || undefined,
-            manual: true,
-          },
-        }),
+        body: JSON.stringify(buildOrderPayload(backendPaymentMethod, totalZMW)),
       });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const msg =
-          Array.isArray(data.message)
-            ? data.message.join(", ")
-            : data.message || "Failed to place order. Please try again.";
+        const msg = Array.isArray(data.message) ? data.message.join(", ") : data.message || "Failed to place order. Please try again.";
         setOrderError(msg);
         setIsSubmitting(false);
         return;
       }
 
-      setPlacedOrderNumber(data.orderNumber ?? data.id ?? "");
+      const orderNum = data.orderNumber ?? data.id ?? "";
+
+      if (openMethod === "whatsapp") {
+        const itemLines = cartItems.map((i) => `  • ${i.name} x${i.qty} — ${format(i.price * i.qty)}`).join("\n");
+        const addr = [addressLine, city, state, country].filter(Boolean).join(", ");
+        const msg =
+          `Hi KRYROS! 🛍️\n*Order Confirmation: #${orderNum}*\n\n` +
+          `*Customer Details:*\nName: ${firstName} ${lastName}\nPhone: ${phone}\nEmail: ${email}\n\n` +
+          `*Items Ordered:*\n${itemLines}\n\n` +
+          `*Order Total: ${format(total)}*\n` +
+          `Shipping: ${shippingPrice === 0 ? "Free" : format(shippingPrice)}\n\n` +
+          `*Delivery Address:*\n${addr}\n\n` +
+          `Payment Method: WhatsApp Transfer\nPlease confirm my payment. Thank you!`;
+        setWaMessage(msg);
+      }
+
+      setSavedCartItems([...cartItems]);
+      setPlacedOrderNumber(orderNum);
       clearCart();
       setOrdered(true);
     } catch {
@@ -239,6 +341,76 @@ export default function CheckoutPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (mmPhase === "initializing" || mmPhase === "waiting" || mmPhase === "failed_init" || mmPhase === "timed_out") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
+        <div className="w-full max-w-sm">
+          {(mmPhase === "initializing" || mmPhase === "waiting") && (
+            <div className="rounded-3xl overflow-hidden" style={{ background: "linear-gradient(160deg, #07392f 0%, #0a5544 100%)" }}>
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/20 border-4 border-primary flex items-center justify-center mx-auto mb-4">
+                  <Smartphone className="w-8 h-8 text-primary animate-pulse" />
+                </div>
+                <h2 className="text-xl font-black text-white mb-1">
+                  {mmPhase === "initializing" ? "Sending Prompt…" : "Waiting for Approval"}
+                </h2>
+                <p className="text-white/60 text-sm mb-4">
+                  {mmPhase === "initializing"
+                    ? "Sending payment request to your phone…"
+                    : `A payment prompt has been sent to ${mmPhone}. Please open your ${mmProvider} app and approve the payment.`}
+                </p>
+                <div className="flex justify-center mb-6">
+                  <span className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                </div>
+                <div className="bg-white/10 rounded-2xl p-4 text-left space-y-2 mb-4">
+                  {[
+                    ["Provider", mmProvider],
+                    ["Phone", mmPhone],
+                    ["Amount", format(total)],
+                  ].map(([label, val]) => (
+                    <div key={label} className="flex justify-between">
+                      <span className="text-white/60 text-xs">{label}</span>
+                      <span className="text-white text-xs font-bold">{val}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-white/40 text-[11px]">Checking automatically every 5 seconds…</p>
+              </div>
+            </div>
+          )}
+          {(mmPhase === "failed_init" || mmPhase === "timed_out") && (
+            <div className="rounded-3xl overflow-hidden" style={{ background: "linear-gradient(160deg, #3a0707 0%, #5a1010 100%)" }}>
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-400/20 border-4 border-red-400 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-red-400 text-2xl font-black">✕</span>
+                </div>
+                <h2 className="text-xl font-black text-white mb-1">
+                  {mmPhase === "timed_out" ? "Payment Timed Out" : "Payment Failed"}
+                </h2>
+                <p className="text-white/60 text-sm mb-6">
+                  {mmPhase === "timed_out"
+                    ? "We didn't receive confirmation within 3 minutes. Please try again."
+                    : "The payment could not be processed. Please check your phone number and try again."}
+                </p>
+                <button
+                  onClick={() => { setMmPhase("idle"); setOrderError(null); }}
+                  className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm mb-2 hover:bg-primary/90 transition-colors"
+                >
+                  Try Again
+                </button>
+                <Link href="/">
+                  <button className="w-full py-3.5 border border-white/30 text-white rounded-2xl font-bold text-sm hover:bg-white/10 transition-colors">
+                    Back to Home
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (ordered) {
     const methodLabel = CHECKOUT_METHODS.find((m) => m.id === openMethod)?.label ?? "Card";
@@ -265,7 +437,7 @@ export default function CheckoutPage() {
               )}
               {openMethod === "whatsapp" && (
                 <a
-                  href={`https://wa.me/${whatsappNumber}?text=Hi%20KRYROS%2C%20I%20just%20placed%20order%20${encodeURIComponent(placedOrderNumber)}%20and%20would%20like%20to%20confirm%20my%20WhatsApp%20payment.%20Total%3A%20${encodeURIComponent(format(total))}`}
+                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full py-3.5 bg-[#25D366] text-white rounded-2xl font-bold text-sm text-center mb-3 flex items-center justify-center gap-2 hover:bg-[#1ebe5d] transition-colors"
@@ -292,7 +464,7 @@ export default function CheckoutPage() {
               <button className="w-full py-3.5 bg-white/20 border border-white/30 text-white rounded-2xl font-bold text-sm mb-2.5 flex items-center justify-center gap-2 hover:bg-white/30 transition-colors">
                 <Download className="w-4 h-4" /> Download Receipt
               </button>
-              <Link href="/track">
+              <Link href={`/track?orderNumber=${encodeURIComponent(placedOrderNumber)}&email=${encodeURIComponent(email)}`}>
                 <button className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm mb-2.5 hover:bg-primary/90 transition-colors">Track My Order</button>
               </Link>
               <Link href="/">
@@ -672,10 +844,10 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-xs font-black pt-1 border-t border-border"><span className="text-foreground">Total</span><span className="text-primary">{format(total)}</span></div>
                   </div>
                   {orderError && <p className="text-xs text-red-500 text-center font-semibold">{orderError}</p>}
-                  <button onClick={handlePlaceOrder} disabled={isSubmitting}
+                  <button onClick={handleMobileMoneyPay} disabled={isSubmitting || !mmPhone.trim()}
                     className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     {isSubmitting ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Smartphone className="w-4 h-4" />}
-                    {isSubmitting ? "Placing Order…" : `Pay ${format(total)}`}
+                    {isSubmitting ? "Processing…" : `Send Payment Prompt — ${format(total)}`}
                   </button>
                   <SecureFooter />
                 </div>
