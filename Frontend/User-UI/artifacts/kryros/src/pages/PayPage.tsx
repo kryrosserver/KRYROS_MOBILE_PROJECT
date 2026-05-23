@@ -531,7 +531,7 @@ export default function PayPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-4 pb-8 min-h-screen relative">
+    <div className="max-w-md mx-auto px-4 py-4 pb-8 relative">
       {/* TOP BAR */}
       <div className="flex items-center justify-between mb-5">
         <button
@@ -556,26 +556,16 @@ export default function PayPage() {
 
           {/* Amount input */}
           <div className="border border-border rounded-xl px-4 py-2.5 bg-background focus-within:border-primary/60 transition-colors flex items-center gap-3">
-            <div className="flex-1 flex items-center gap-2">
-              <span className="text-muted-foreground/50">
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5c.5-1 1.5-1.5 2.5-1.5s2 .7 2 1.8c0 2.2-4.5 2.2-4.5 5.2h4.5"/><line x1="12" y1="17" x2="12" y2="18"/></svg>
-              </span>
-              <input
-                value={rawAmount}
-                onChange={(e) => setRawAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-                placeholder="Enter Amount"
-                inputMode="decimal"
-                className="flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1"
-              />
-            </div>
-            <button
-              onClick={() => setShowCurrencyDrop(!showCurrencyDrop)}
-              className="flex items-center gap-1 text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
-            >
-              <span>{currencyObj.flag}</span>
-              <span>{currency}</span>
-              <ChevronDown className={`w-3 h-3 transition-transform ${showCurrencyDrop ? "rotate-180" : ""}`} />
-            </button>
+            <span className="text-muted-foreground/50">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5c.5-1 1.5-1.5 2.5-1.5s2 .7 2 1.8c0 2.2-4.5 2.2-4.5 5.2h4.5"/><line x1="12" y1="17" x2="12" y2="18"/></svg>
+            </span>
+            <input
+              value={rawAmount}
+              onChange={(e) => setRawAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+              placeholder="Enter Amount"
+              inputMode="decimal"
+              className="flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1"
+            />
           </div>
 
           {/* Currency selector row */}
