@@ -190,8 +190,8 @@ export default function AdminDashboard() {
   const card = { background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14 };
 
   return (
-    /* Outer wrapper — clips overflow and holds correct height after scaling */
-    <div ref={outerRef} style={{ overflow: "hidden", background: DARK_BG, width: "100%" }}>
+    /* Outer wrapper — breaks out of parent p-6, clips overflow, holds correct height after scaling */
+    <div ref={outerRef} style={{ overflow: "hidden", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
 
       {/* Inner wrapper — fixed BASE_WIDTH, scales down via transform */}
       <div

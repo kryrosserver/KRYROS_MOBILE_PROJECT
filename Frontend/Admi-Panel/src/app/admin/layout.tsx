@@ -106,7 +106,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     );
 
   return (
-    <div className="min-h-screen" style={{ background: '#F7F9FC' }}>
+    <div className="min-h-screen" style={{ background: '#0D1626' }}>
       {/* Mobile top bar */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 h-16 z-40 flex items-center justify-between px-4"
