@@ -581,7 +581,7 @@ export default function DashboardPage() {
             </Link>
 
             {/* Wishlist */}
-            <Link href="/shop">
+            <Link href="/wishlist">
               <button className="relative w-8 h-8 flex items-center justify-center rounded-xl hover:bg-muted transition-colors">
                 <Heart style={{ width: 18, height: 18 }} className="text-foreground" />
                 {wishlist.length > 0 && (

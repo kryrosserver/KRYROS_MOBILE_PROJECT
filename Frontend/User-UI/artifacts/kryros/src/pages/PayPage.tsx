@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ChevronLeft, Lock, ChevronDown, ChevronRight, X,
   Smartphone, CreditCard, Building2, Check, Upload,
 } from "lucide-react";
+import { API_BASE } from "@/lib/api";
 
 const FEE_RATE = 0.01;
 
@@ -20,29 +21,19 @@ const CURRENCIES = [
   { code: "GBP", label: "British Pound", flag: "🇬🇧" },
 ];
 
-const MtnLogo = () => (
-  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-    <rect width="40" height="40" rx="8" fill="#FFCC00"/>
-    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#000">MTN</text>
-  </svg>
-);
-const AirtelLogo = () => (
-  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-    <rect width="40" height="40" rx="8" fill="#ED1C24"/>
-    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9.5" fill="#fff">airtel</text>
-  </svg>
-);
-const ZamtelLogo = () => (
-  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-    <rect width="40" height="40" rx="8" fill="#00843D"/>
-    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="8.5" fill="#fff">ZAMTEL</text>
-  </svg>
-);
 const MobileMoneyIcon = () => (
-  <div className="flex items-center -space-x-1">
-    <MtnLogo /><AirtelLogo /><ZamtelLogo />
+  <div className="flex items-center -space-x-2">
+    <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
+    <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
+    <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
   </div>
 );
+
+function ProviderLogo({ provider }: { provider: string }) {
+  if (provider.startsWith("Airtel")) return <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover" />;
+  if (provider.startsWith("Zamtel")) return <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover" />;
+  return <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover" />;
+}
 
 const METHODS = [
   {
@@ -200,7 +191,26 @@ export default function PayPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [proofFile, setProofFile] = useState<string | null>(null);
 
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/settings`)
+      .then((r) => r.json())
+      .then((data) => {
+        const list: { key: string; value: string }[] = Array.isArray(data) ? data : [];
+        const found = list.find((s) => s.key === "whatsapp_number");
+        if (found?.value) setWhatsappNumber(found.value);
+      })
+      .catch(() => {});
+  }, []);
+
   const handlePay = () => setSuccess(true);
+
+  const handleWhatsAppPay = () => {
+    const msg = `Hi KRYROS, I would like to make a payment of ${currency} ${total.toFixed(2)}.${note ? " Note: " + note : ""}`;
+    const url = `https://wa.me/${whatsappNumber || "260"}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  };
 
   if (success) {
     return (
@@ -463,9 +473,7 @@ export default function PayPage() {
                   <div>
                     <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Provider</label>
                     <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
-                      <div className="w-6 h-6 rounded-md bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[8px] font-black text-black">MTN</span>
-                      </div>
+                      <ProviderLogo provider={mmProvider} />
                       <select
                         value={mmProvider}
                         onChange={(e) => setMmProvider(e.target.value)}
@@ -645,7 +653,7 @@ export default function PayPage() {
                   </div>
                   <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
                   <button
-                    onClick={handlePay}
+                    onClick={handleWhatsAppPay}
                     className="w-full py-4 bg-[#25D366] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#1ebe5d] active:scale-95 transition-all"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">

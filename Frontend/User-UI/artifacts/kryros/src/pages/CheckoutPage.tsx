@@ -17,30 +17,19 @@ const SHIPPING_OPTIONS = [
   { id: "priority", label: "Priority Delivery", detail: "Next business day", price: 30, icon: Clock },
 ];
 
-const MtnLogo = () => (
-  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-    <rect width="40" height="40" rx="8" fill="#FFCC00"/>
-    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="13" fill="#000">MTN</text>
-  </svg>
-);
-const AirtelLogo = () => (
-  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-    <rect width="40" height="40" rx="8" fill="#ED1C24"/>
-    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9.5" fill="#fff">airtel</text>
-  </svg>
-);
-const ZamtelLogo = () => (
-  <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-    <rect width="40" height="40" rx="8" fill="#00843D"/>
-    <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="8.5" fill="#fff">ZAMTEL</text>
-  </svg>
-);
-
 const MobileMoneyCombinedIcon = () => (
-  <div className="flex items-center -space-x-1">
-    <MtnLogo /><AirtelLogo /><ZamtelLogo />
+  <div className="flex items-center -space-x-2">
+    <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
+    <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
+    <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
   </div>
 );
+
+function ProviderLogo({ provider }: { provider: string }) {
+  if (provider.startsWith("Airtel")) return <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover" />;
+  if (provider.startsWith("Zamtel")) return <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover" />;
+  return <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover" />;
+}
 
 const CHECKOUT_METHODS = [
   {
@@ -665,9 +654,7 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Provider</label>
                     <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
-                      <div className="w-6 h-6 rounded-md bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[8px] font-black text-black">MTN</span>
-                      </div>
+                      <ProviderLogo provider={mmProvider} />
                       <select value={mmProvider} onChange={(e) => setMmProvider(e.target.value)}
                         className="flex-1 text-sm text-foreground outline-none bg-transparent">
                         <option>MTN Mobile Money</option>

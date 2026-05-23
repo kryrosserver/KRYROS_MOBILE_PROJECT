@@ -16,7 +16,7 @@ interface Product {
 }
 
 export default function WishlistPage() {
-  const { items: wishlistIds, toggleWishlist } = useWishlistStore();
+  const { items: wishlistIds, toggleWishlist, _hasHydrated } = useWishlistStore();
   const addToCart = useCartStore((s) => s.addToCart);
   const format = useCurrencyStore((s) => s.format);
 
@@ -79,7 +79,13 @@ export default function WishlistPage() {
           </p>
         </div>
 
-        {wishlistIds.length === 0 ? (
+        {!_hasHydrated ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl bg-muted animate-pulse h-64" />
+            ))}
+          </div>
+        ) : wishlistIds.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center mb-5">
               <PackageSearch className="w-9 h-9 text-muted-foreground" />
