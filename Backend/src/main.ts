@@ -95,15 +95,33 @@ async function bootstrap() {
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
 
-  // CORS — explicit allowlist, no localhost fallback in production
+  // CORS — explicit allowlist with wildcard subdomain support (e.g. https://*.replit.dev)
   const rawOrigins = process.env.CORS_ORIGINS || (isProd ? '' : 'http://localhost:3000,http://localhost:3001,http://localhost:5000');
   const corsList = rawOrigins
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
 
+  function originAllowed(origin: string, patterns: string[]): boolean {
+    return patterns.some((pattern) => {
+      if (pattern.includes('*')) {
+        const regexStr =
+          '^' +
+          pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^.]+') +
+          '$';
+        return new RegExp(regexStr).test(origin);
+      }
+      return pattern === origin;
+    });
+  }
+
   app.enableCors({
-    origin: corsList.length > 0 ? corsList : false,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (corsList.length === 0) return callback(null, false);
+      if (originAllowed(origin, corsList)) return callback(null, true);
+      callback(null, false);
+    },
     credentials: true,
   });
 

@@ -140,12 +140,37 @@ export const useAuthStore = create<AuthState>()(
       },
 
       getMe: async () => {
-        const { token } = get();
+        const { token, refreshToken } = get();
         if (!token) return;
         try {
           const res = await fetch(`${API_BASE}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          if (res.status === 401 && refreshToken) {
+            try {
+              const refreshRes = await fetch(`${API_BASE}/api/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken }),
+              });
+              if (refreshRes.ok) {
+                const { accessToken: newAccess, refreshToken: newRefresh } = await refreshRes.json();
+                set({ token: newAccess, refreshToken: newRefresh });
+                const retryRes = await fetch(`${API_BASE}/api/auth/me`, {
+                  headers: { Authorization: `Bearer ${newAccess}` },
+                });
+                if (retryRes.ok) {
+                  const user = await retryRes.json();
+                  set({ user });
+                  return;
+                }
+              }
+            } catch {
+              /* silent */
+            }
+            set({ token: null, refreshToken: null, user: null });
+            return;
+          }
           if (!res.ok) {
             set({ token: null, refreshToken: null, user: null });
             return;

@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   private signAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp' | 'type'>): string {
-    return this.jwtService.sign({ ...payload, type: 'access' }, { expiresIn: '15m' });
+    return this.jwtService.sign({ ...payload, type: 'access' }, { expiresIn: '7d' });
   }
 
   private async createRefreshToken(userId: string): Promise<string> {
