@@ -531,7 +531,7 @@ export default function PayPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-4 pb-32 min-h-screen relative">
+    <div className="max-w-md mx-auto px-4 py-4 pb-8 min-h-screen relative">
       {/* TOP BAR */}
       <div className="flex items-center justify-between mb-5">
         <button
