@@ -2,6 +2,21 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck, AlertCircle, Loader2, Phone } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import { API_BASE } from "@/lib/api";
+
+async function syncLocalWishlistToServer(token: string, localIds: string[]) {
+  if (!localIds.length) return;
+  await Promise.allSettled(
+    localIds.map((productId) =>
+      fetch(`${API_BASE}/api/wishlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ productId }),
+      })
+    )
+  );
+}
 
 export default function RegisterPage() {
   const [showPw, setShowPw] = useState(false);
@@ -13,6 +28,7 @@ export default function RegisterPage() {
   const [, setLocation] = useLocation();
 
   const { register, isLoading, error, clearError, token, user } = useAuthStore();
+  const { items: localWishlistIds, toggleWishlist } = useWishlistStore();
 
   useEffect(() => {
     if (token && user) setLocation("/dashboard");
@@ -51,6 +67,8 @@ export default function RegisterPage() {
       return;
     }
 
+    const localIds = [...localWishlistIds];
+
     const result = await register({
       email: form.email.trim(),
       password: form.password,
@@ -60,6 +78,11 @@ export default function RegisterPage() {
     });
 
     if (result.success) {
+      const newToken = useAuthStore.getState().token;
+      if (newToken && localIds.length > 0) {
+        await syncLocalWishlistToServer(newToken, localIds);
+        localIds.forEach((id) => toggleWishlist(id));
+      }
       setLocation("/dashboard");
     }
   };

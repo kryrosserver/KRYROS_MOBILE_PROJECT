@@ -2,6 +2,21 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, Zap, Headphones, AlertCircle, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import { API_BASE } from "@/lib/api";
+
+async function syncLocalWishlistToServer(token: string, localIds: string[]) {
+  if (!localIds.length) return;
+  await Promise.allSettled(
+    localIds.map((productId) =>
+      fetch(`${API_BASE}/api/wishlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ productId }),
+      })
+    )
+  );
+}
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -11,6 +26,7 @@ export default function LoginPage() {
   const search = useSearch();
 
   const { login, isLoading, error, clearError, token, user } = useAuthStore();
+  const { items: localWishlistIds, toggleWishlist } = useWishlistStore();
 
   const redirectTo = (() => {
     const params = new URLSearchParams(search);
@@ -30,8 +46,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim() || !password) return;
+    const localIds = [...localWishlistIds];
     const result = await login(identifier.trim(), password);
     if (result.success) {
+      const newToken = useAuthStore.getState().token;
+      if (newToken && localIds.length > 0) {
+        await syncLocalWishlistToServer(newToken, localIds);
+        localIds.forEach((id) => toggleWishlist(id));
+      }
       setLocation(redirectTo);
     }
   };
