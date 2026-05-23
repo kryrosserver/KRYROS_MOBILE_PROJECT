@@ -6,13 +6,13 @@ import {
   Bell, Settings, Search, Calendar, Sun, ChevronDown,
   TrendingUp, TrendingDown, Minus, FileText, FileEdit,
   CreditCard, ShoppingBag, Users, Package, BarChart3,
-  Eye, Plus, ArrowRight, ShoppingCart, Activity,
-  DollarSign, AlertCircle, CheckCircle, Clock, XCircle,
+  Plus, ShoppingCart, Activity, DollarSign, AlertCircle,
+  CheckCircle, Clock, X,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
 } from "recharts";
 
 const DARK_BG = "#0D1626";
@@ -26,7 +26,7 @@ const salesData = [
   { day: "May 20", value: 800 },
   { day: "May 21", value: 1200 },
   { day: "May 22", value: 900 },
-  { day: "May 23", value: 2680, label: "$2,680.50" },
+  { day: "May 23", value: 2680 },
   { day: "May 24", value: 1500 },
   { day: "May 25", value: 1100 },
   { day: "May 26", value: 2100 },
@@ -65,24 +65,18 @@ const newCustomers = [
 
 const recentActivities = [
   { icon: ShoppingCart, color: ACCENT, title: "New order received", sub: "#KRY123456", time: "2 mins ago" },
-  { icon: CreditCard, color: "#3B82F6", title: "Payment received", sub: "$1,099.00 from Bwalya Chileshe", time: "10 mins ago" },
+  { icon: CreditCard, color: "#3B82F6", title: "Payment received", sub: "$1,099.00 from Bwalya", time: "10 mins ago" },
   { icon: CheckCircle, color: "#22C55E", title: "Order completed", sub: "#KRY123454", time: "25 mins ago" },
   { icon: Users, color: "#F59E0B", title: "New customer registered", sub: "Mulenga Sichone", time: "1 hr ago" },
   { icon: Package, color: "#8B5CF6", title: "Product updated", sub: "iPhone 15 Pro Max", time: "2 hrs ago" },
 ];
 
 const statusColors: Record<string, string> = {
-  Completed: "#22C55E",
-  Processing: "#3B82F6",
-  Pending: "#F59E0B",
-  Cancelled: "#EF4444",
+  Completed: "#22C55E", Processing: "#3B82F6", Pending: "#F59E0B", Cancelled: "#EF4444",
 };
-
 const statusBg: Record<string, string> = {
-  Completed: "rgba(34,197,94,0.12)",
-  Processing: "rgba(59,130,246,0.12)",
-  Pending: "rgba(245,158,11,0.12)",
-  Cancelled: "rgba(239,68,68,0.12)",
+  Completed: "rgba(34,197,94,0.12)", Processing: "rgba(59,130,246,0.12)",
+  Pending: "rgba(245,158,11,0.12)", Cancelled: "rgba(239,68,68,0.12)",
 };
 
 const MiniSparkline = ({ color = ACCENT, up = true }: { color?: string; up?: boolean }) => {
@@ -90,7 +84,7 @@ const MiniSparkline = ({ color = ACCENT, up = true }: { color?: string; up?: boo
     ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
     : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
   return (
-    <ResponsiveContainer width="100%" height={40}>
+    <ResponsiveContainer width="100%" height={36}>
       <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id={`sg-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
@@ -117,9 +111,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function AdminDashboard() {
+  const [searchOpen, setSearchOpen] = useState(false);
   const [summary, setSummary] = useState({
-    sales: 6162, orders: 102, purchases: 0, paymentReceived: 6162, paymentPaid: 0,
-    outstandingBalance: 0, outstandingPayment: 0, expense: 0, profit: 6162,
+    sales: 6162, orders: 102, purchases: 0,
+    paymentReceived: 6162, paymentPaid: 0,
+    outstandingBalance: 0, outstandingPayment: 0,
+    expense: 0, profit: 6162,
   });
 
   useEffect(() => {
@@ -139,11 +136,11 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { title: "Total Sales", value: formatPrice(summary.sales), change: "+18.6%", up: true, color: "#F59E0B", vs: "May 13 – 19" },
-    { title: "Total Orders", value: String(summary.orders), change: "+12.4%", up: true, color: ACCENT, vs: "May 13 – 19" },
-    { title: "Total Purchases", value: formatPrice(summary.purchases), change: "—0.0%", up: null, color: "#8B5CF6", vs: "May 13 – 19" },
-    { title: "Payment Received", value: formatPrice(summary.paymentReceived), change: "+18.6%", up: true, color: "#22C55E", vs: "May 13 – 19" },
-    { title: "Payment Paid", value: formatPrice(summary.paymentPaid), change: "—0.0%", up: null, color: "#EF4444", vs: "May 13 – 19" },
+    { title: "Total Sales", value: formatPrice(summary.sales), change: "+18.6%", up: true, color: "#F59E0B" },
+    { title: "Total Orders", value: String(summary.orders), change: "+12.4%", up: true, color: ACCENT },
+    { title: "Total Purchases", value: formatPrice(summary.purchases), change: "—0.0%", up: null, color: "#8B5CF6" },
+    { title: "Payment Received", value: formatPrice(summary.paymentReceived), change: "+18.6%", up: true, color: "#22C55E" },
+    { title: "Payment Paid", value: formatPrice(summary.paymentPaid), change: "—0.0%", up: null, color: "#EF4444" },
   ];
 
   const quickActions = [
@@ -169,135 +166,167 @@ export default function AdminDashboard() {
   const ringCircumference = 2 * Math.PI * 54;
   const ringOffset = ringCircumference * (1 - completionPct / 100);
 
-  const card = (content: React.ReactNode, extra?: React.CSSProperties) => (
-    <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 16, ...extra }}>
-      {content}
-    </div>
-  );
+  const cardStyle = {
+    background: CARD_BG,
+    border: `1px solid ${BORDER}`,
+    borderRadius: 14,
+  };
 
   return (
     <div style={{ background: DARK_BG, minHeight: "100vh", color: TEXT_PRIMARY }}>
-      {/* Top Header */}
+
+      {/* ── TOP HEADER ───────────────────────────────────────── */}
       <header
-        style={{
-          background: "#0B1320",
-          borderBottom: `1px solid ${BORDER}`,
-          height: 60,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 24px",
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-        }}
+        className="sticky top-0 z-30 flex items-center justify-between gap-3 px-4 md:px-6"
+        style={{ background: "#0B1320", borderBottom: `1px solid ${BORDER}`, height: 60 }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: TEXT_PRIMARY }}>Dashboard</h1>
+        {/* Left: title */}
+        <h1 className="text-base md:text-lg font-bold shrink-0" style={{ color: TEXT_PRIMARY }}>
+          Dashboard
+        </h1>
+
+        {/* Center: search — hidden on small, visible md+ */}
+        <div className="hidden md:flex flex-1 max-w-xs relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: TEXT_SECONDARY }} />
+          <input
+            placeholder="Search anything..."
+            className="w-full pl-9 pr-10 py-2 text-sm rounded-lg outline-none"
+            style={{ background: CARD_BG, border: `1px solid ${BORDER}`, color: TEXT_PRIMARY }}
+          />
+          <span
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] px-1.5 py-0.5 rounded"
+            style={{ color: TEXT_SECONDARY, background: "#1E2D42" }}
+          >⌘K</span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, justifyContent: "center", maxWidth: 360 }}>
-          <div style={{ position: "relative", width: "100%" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT_SECONDARY, width: 15, height: 15 }} />
-            <input
-              placeholder="Search anything..."
-              style={{
-                width: "100%",
-                background: CARD_BG,
-                border: `1px solid ${BORDER}`,
-                borderRadius: 10,
-                padding: "8px 12px 8px 36px",
-                color: TEXT_PRIMARY,
-                fontSize: 13,
-                outline: "none",
-              }}
-            />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT_SECONDARY, background: "#1E2D42", padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-        </div>
+        {/* Right: icons */}
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          {/* Mobile search toggle */}
+          <button
+            className="md:hidden p-2 rounded-lg"
+            style={{ color: TEXT_SECONDARY }}
+            onClick={() => setSearchOpen(o => !o)}
+          >
+            {searchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+          </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT_SECONDARY, fontSize: 13, cursor: "pointer" }}>
-            <Calendar style={{ width: 14, height: 14 }} />
+          {/* Date — hidden on mobile */}
+          <button
+            className="hidden lg:flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg shrink-0"
+            style={{ background: CARD_BG, border: `1px solid ${BORDER}`, color: TEXT_SECONDARY }}
+          >
+            <Calendar className="w-3.5 h-3.5" />
             <span>May 20 – May 26, 2025</span>
-            <ChevronDown style={{ width: 13, height: 13 }} />
+            <ChevronDown className="w-3 h-3" />
           </button>
 
-          <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
-            <Bell style={{ width: 20, height: 20 }} />
-            <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>3</span>
+          {/* Bell */}
+          <button className="relative p-1.5" style={{ color: TEXT_SECONDARY }}>
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center text-white" style={{ background: "#EF4444" }}>3</span>
           </button>
 
-          <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
-            <Sun style={{ width: 20, height: 20 }} />
+          {/* Sun — hidden on mobile */}
+          <button className="hidden sm:block p-1.5" style={{ color: TEXT_SECONDARY }}>
+            <Sun className="w-5 h-5" />
           </button>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-            <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, lineHeight: 1 }}>Admin</div>
-              <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 1 }}>Super Admin</div>
+          {/* Admin profile */}
+          <div className="flex items-center gap-2 cursor-pointer">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0" style={{ background: ACCENT, color: "#0B1320" }}>K</div>
+            <div className="hidden sm:block">
+              <div className="text-sm font-bold leading-none" style={{ color: TEXT_PRIMARY }}>Admin</div>
+              <div className="text-[10px] mt-0.5" style={{ color: TEXT_SECONDARY }}>Super Admin</div>
             </div>
-            <ChevronDown style={{ width: 14, height: 14, color: TEXT_SECONDARY }} />
+            <ChevronDown className="hidden sm:block w-3.5 h-3.5" style={{ color: TEXT_SECONDARY }} />
           </div>
         </div>
       </header>
 
-      <div style={{ padding: "24px", display: "flex", gap: 20 }}>
-        {/* LEFT MAIN CONTENT */}
-        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Mobile search bar (expands below header) */}
+      {searchOpen && (
+        <div className="md:hidden px-4 py-2" style={{ background: "#0B1320", borderBottom: `1px solid ${BORDER}` }}>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: TEXT_SECONDARY }} />
+            <input
+              autoFocus
+              placeholder="Search anything..."
+              className="w-full pl-9 pr-4 py-2 text-sm rounded-lg outline-none"
+              style={{ background: CARD_BG, border: `1px solid ${BORDER}`, color: TEXT_PRIMARY }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── MAIN CONTENT ────────────────────────────────────── */}
+      <div className="p-4 md:p-5 xl:p-6 flex flex-col xl:flex-row gap-5">
+
+        {/* LEFT: main dashboard content */}
+        <div className="flex-1 min-w-0 flex flex-col gap-5">
+
           {/* Welcome */}
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
-            <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
+            <h2 className="text-xl md:text-2xl font-bold" style={{ color: TEXT_PRIMARY }}>
+              Welcome back, Admin! 👋
+            </h2>
+            <p className="text-sm mt-1" style={{ color: TEXT_SECONDARY }}>
+              Here's what's happening with your business today.
+            </p>
           </div>
 
-          {/* 5 Stat Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14 }}>
+          {/* ── STAT CARDS ─── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4">
             {statCards.map((card, i) => (
-              <div
-                key={i}
-                style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px 16px 12px", display: "flex", flexDirection: "column", gap: 6 }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${card.color}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Activity style={{ width: 15, height: 15, color: card.color }} />
+              <div key={i} className="flex flex-col gap-2 p-4" style={cardStyle}>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: `${card.color}20` }}>
+                    <Activity className="w-4 h-4" style={{ color: card.color }} />
                   </div>
-                  <span style={{ fontSize: 11, color: TEXT_SECONDARY, fontWeight: 600 }}>{card.title}</span>
+                  <span className="text-xs font-semibold leading-tight" style={{ color: TEXT_SECONDARY }}>
+                    {card.title}
+                  </span>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{card.value}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  {card.up === true && <TrendingUp style={{ width: 12, height: 12, color: "#22C55E" }} />}
-                  {card.up === false && <TrendingDown style={{ width: 12, height: 12, color: "#EF4444" }} />}
-                  {card.up === null && <Minus style={{ width: 12, height: 12, color: TEXT_SECONDARY }} />}
-                  <span style={{ fontSize: 11, color: card.up === true ? "#22C55E" : card.up === false ? "#EF4444" : TEXT_SECONDARY, fontWeight: 600 }}>
+                <div className="text-xl md:text-2xl font-extrabold" style={{ color: TEXT_PRIMARY }}>
+                  {card.value}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {card.up === true && <TrendingUp className="w-3 h-3" style={{ color: "#22C55E" }} />}
+                  {card.up === false && <TrendingDown className="w-3 h-3" style={{ color: "#EF4444" }} />}
+                  {card.up === null && <Minus className="w-3 h-3" style={{ color: TEXT_SECONDARY }} />}
+                  <span className="text-xs font-semibold"
+                    style={{ color: card.up === true ? "#22C55E" : card.up === false ? "#EF4444" : TEXT_SECONDARY }}>
                     {card.change}
                   </span>
-                  <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>vs {card.vs}</span>
+                  <span className="text-[10px]" style={{ color: TEXT_SECONDARY }}>vs last week</span>
                 </div>
                 <MiniSparkline color={card.color} up={card.up === true} />
               </div>
             ))}
           </div>
 
-          {/* Sales Analytics + Sales by Channel */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16 }}>
+          {/* ── CHARTS ROW ─── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+
             {/* Sales Analytics */}
-            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <div className="p-4 md:p-5" style={cardStyle}>
+              <div className="flex items-start justify-between mb-4 gap-2">
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Sales Analytics</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
-                    <span style={{ fontSize: 24, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</span>
-                    <span style={{ fontSize: 12, color: "#22C55E", fontWeight: 600 }}>↑ 18.6% vs last week</span>
+                  <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>Sales Analytics</div>
+                  <div className="flex items-baseline gap-2 mt-1 flex-wrap">
+                    <span className="text-xl md:text-2xl font-extrabold" style={{ color: TEXT_PRIMARY }}>
+                      {formatPrice(summary.sales)}
+                    </span>
+                    <span className="text-xs font-semibold" style={{ color: "#22C55E" }}>↑ 18.6% vs last week</span>
                   </div>
                 </div>
-                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
-                  This Week <ChevronDown style={{ width: 12, height: 12 }} />
+                <button className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg shrink-0"
+                  style={{ background: "#1E2D42", border: `1px solid ${BORDER}`, color: TEXT_SECONDARY }}>
+                  This Week <ChevronDown className="w-3 h-3" />
                 </button>
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                <AreaChart data={salesData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={160}>
+                <AreaChart data={salesData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
@@ -307,70 +336,79 @@ export default function AdminDashboard() {
                   <XAxis dataKey="day" tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)" dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
+                  <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)"
+                    dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
             {/* Sales by Channel */}
-            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Sales by Channel</div>
-                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
-                  This Week <ChevronDown style={{ width: 12, height: 12 }} />
+            <div className="p-4 md:p-5" style={cardStyle}>
+              <div className="flex items-center justify-between mb-3 gap-2">
+                <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>Sales by Channel</div>
+                <button className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg shrink-0"
+                  style={{ background: "#1E2D42", border: `1px solid ${BORDER}`, color: TEXT_SECONDARY }}>
+                  This Week <ChevronDown className="w-3 h-3" />
                 </button>
               </div>
-              <div style={{ position: "relative", height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <ResponsiveContainer width="100%" height={160}>
+              <div className="relative flex justify-center" style={{ height: 150 }}>
+                <ResponsiveContainer width="100%" height={150}>
                   <PieChart>
-                    <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={3}>
+                    <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={45} outerRadius={68} dataKey="value" paddingAngle={3}>
                       {salesByChannel.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                     </Pie>
-                    <Tooltip formatter={(val: any) => `${val}%`} contentStyle={{ background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8 }} labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
+                    <Tooltip formatter={(val: any) => `${val}%`}
+                      contentStyle={{ background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8 }}
+                      labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
-                  <div style={{ fontSize: 10, color: TEXT_SECONDARY }}>Total Sales</div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <div className="text-sm font-extrabold" style={{ color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
+                  <div className="text-[10px]" style={{ color: TEXT_SECONDARY }}>Total Sales</div>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+              <div className="flex flex-col gap-2 mt-3">
                 {salesByChannel.map((ch, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: ch.color }} />
-                      <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.name}</span>
-                      <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.value}%</span>
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: ch.color }} />
+                      <span className="text-xs" style={{ color: TEXT_SECONDARY }}>{ch.name}</span>
+                      <span className="text-xs" style={{ color: TEXT_SECONDARY }}>{ch.value}%</span>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
+                    <span className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Bottom Tables Row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+          {/* ── BOTTOM TABLES ─── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+
             {/* Recent Orders */}
-            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Orders</div>
-                <Link href="/admin/orders" style={{ fontSize: 12, color: ACCENT, textDecoration: "none" }}>View All</Link>
+            <div className="p-4 md:p-5" style={cardStyle}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>Recent Orders</div>
+                <Link href="/admin/orders" className="text-xs font-semibold" style={{ color: ACCENT }}>View All</Link>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="flex flex-col gap-3">
                 {recentOrders.map((o, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <ShoppingCart style={{ width: 16, height: 16, color: ACCENT }} />
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: "#1E2D42" }}>
+                      <ShoppingCart className="w-4 h-4" style={{ color: ACCENT }} />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{o.id}</div>
-                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>{o.id}</div>
+                      <div className="text-xs truncate" style={{ color: TEXT_SECONDARY }}>{o.customer}</div>
                     </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, marginBottom: 3 }}>{o.time}</div>
-                      <div style={{ fontSize: 11, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 3 }}>{formatPrice(o.amount)}</div>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: statusColors[o.status], background: statusBg[o.status], padding: "2px 7px", borderRadius: 20 }}>{o.status}</span>
+                    <div className="text-right shrink-0">
+                      <div className="text-[10px] mb-1" style={{ color: TEXT_SECONDARY }}>{o.time}</div>
+                      <div className="text-xs font-semibold mb-1" style={{ color: TEXT_PRIMARY }}>{formatPrice(o.amount)}</div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ color: statusColors[o.status], background: statusBg[o.status] }}>
+                        {o.status}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -378,24 +416,25 @@ export default function AdminDashboard() {
             </div>
 
             {/* Top Selling Products */}
-            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>Top Selling Products</div>
-                <Link href="/admin/products" style={{ fontSize: 12, color: ACCENT, textDecoration: "none" }}>View All</Link>
+            <div className="p-4 md:p-5" style={cardStyle}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>Top Selling Products</div>
+                <Link href="/admin/products" className="text-xs font-semibold" style={{ color: ACCENT }}>View All</Link>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="flex flex-col gap-3">
                 {topProducts.map((p, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Package style={{ width: 16, height: 16, color: "#8B5CF6" }} />
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: "#1E2D42" }}>
+                      <Package className="w-4 h-4" style={{ color: "#8B5CF6" }} />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                      <div style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.sub}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold truncate" style={{ color: TEXT_PRIMARY }}>{p.name}</div>
+                      <div className="text-xs" style={{ color: TEXT_SECONDARY }}>{p.sub}</div>
                     </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, marginBottom: 2 }}>{p.sold} Sold</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
+                    <div className="text-right shrink-0">
+                      <div className="text-[10px] mb-1" style={{ color: TEXT_SECONDARY }}>{p.sold} Sold</div>
+                      <div className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
                     </div>
                   </div>
                 ))}
@@ -403,20 +442,21 @@ export default function AdminDashboard() {
             </div>
 
             {/* New Customers */}
-            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY }}>New Customers</div>
-                <Link href="/admin/users" style={{ fontSize: 12, color: ACCENT, textDecoration: "none" }}>View All</Link>
+            <div className="p-4 md:p-5 md:col-span-2 xl:col-span-1" style={cardStyle}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>New Customers</div>
+                <Link href="/admin/users" className="text-xs font-semibold" style={{ color: ACCENT }}>View All</Link>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
                 {newCustomers.map((c, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "#fff", flexShrink: 0 }}>
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                      style={{ background: c.color, color: "#fff" }}>
                       {c.initials}
                     </div>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{c.name}</div>
-                      <div style={{ fontSize: 11, color: TEXT_SECONDARY }}>{c.date}</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold truncate" style={{ color: TEXT_PRIMARY }}>{c.name}</div>
+                      <div className="text-xs" style={{ color: TEXT_SECONDARY }}>{c.date}</div>
                     </div>
                   </div>
                 ))}
@@ -424,132 +464,121 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Financial Summary */}
+          {/* ── FINANCIAL SUMMARY ─── */}
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 14 }}>Financial Summary</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+            <div className="text-sm font-bold mb-3" style={{ color: TEXT_PRIMARY }}>Financial Summary</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
               {[
                 { label: "Outstanding Balance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
                 { label: "Outstanding Payment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
                 { label: "Total Expenses", value: formatPrice(summary.expense), sub: "This month", icon: DollarSign, color: "#EF4444" },
                 { label: "Profit / Loss", value: formatPrice(summary.profit), sub: "This month", icon: TrendingUp, color: "#22C55E", highlight: true },
               ].map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
-                    border: `1px solid ${item.highlight ? "transparent" : BORDER}`,
-                    borderRadius: 14,
-                    padding: "20px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <item.icon style={{ width: 18, height: 18, color: item.highlight ? "#fff" : item.color }} />
+                <div key={i} className="p-4" style={{
+                  ...cardStyle,
+                  background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
+                  border: item.highlight ? "none" : `1px solid ${BORDER}`,
+                }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20` }}>
+                      <item.icon className="w-4 h-4" style={{ color: item.highlight ? "#fff" : item.color }} />
                     </div>
-                    <span style={{ fontSize: 12, color: item.highlight ? "rgba(255,255,255,0.8)" : TEXT_SECONDARY, fontWeight: 600 }}>{item.label}</span>
+                    <span className="text-xs font-semibold leading-tight"
+                      style={{ color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY }}>
+                      {item.label}
+                    </span>
                   </div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
-                  <div style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.7)" : TEXT_SECONDARY, marginTop: 4 }}>{item.sub}</div>
+                  <div className="text-xl md:text-2xl font-extrabold"
+                    style={{ color: item.highlight ? "#fff" : TEXT_PRIMARY }}>
+                    {item.value}
+                  </div>
+                  <div className="text-xs mt-1"
+                    style={{ color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY }}>
+                    {item.sub}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* ── RIGHT PANEL ─────────────────────────────────────── */}
+        <div className="w-full xl:w-60 shrink-0 flex flex-col gap-4">
+
           {/* Quick Actions */}
-          <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px" }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 14 }}>Quick Actions</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div className="p-4" style={cardStyle}>
+            <div className="text-sm font-bold mb-3" style={{ color: TEXT_PRIMARY }}>Quick Actions</div>
+            <div className="grid grid-cols-4 sm:grid-cols-8 xl:grid-cols-4 gap-2">
               {quickActions.map((a, i) => (
-                <Link
-                  key={i}
-                  href={a.href}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "12px 6px",
-                    background: "#1E2D42",
-                    borderRadius: 10,
-                    textDecoration: "none",
-                    border: `1px solid ${BORDER}`,
-                    cursor: "pointer",
-                    transition: "background 0.2s",
-                  }}
-                >
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <a.icon style={{ width: 16, height: 16, color: ACCENT }} />
+                <Link key={i} href={a.href}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-colors"
+                  style={{ background: "#1E2D42", border: `1px solid ${BORDER}`, textDecoration: "none" }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ background: `${ACCENT}20` }}>
+                    <a.icon className="w-4 h-4" style={{ color: ACCENT }} />
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.3 }}>{a.label}</span>
+                  <span className="text-[10px] font-semibold text-center leading-tight"
+                    style={{ color: TEXT_SECONDARY }}>{a.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Order Progress */}
-          <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Order Progress</div>
-              <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+          <div className="p-4" style={cardStyle}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>Order Progress</div>
+              <Link href="/admin/orders" className="text-xs font-semibold" style={{ color: ACCENT }}>View All</Link>
             </div>
 
             {/* Ring */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-              <div style={{ position: "relative", width: 130, height: 130 }}>
+            <div className="flex justify-center mb-4">
+              <div className="relative" style={{ width: 130, height: 130 }}>
                 <svg width="130" height="130" viewBox="0 0 130 130">
                   <circle cx="65" cy="65" r="54" fill="none" stroke="#1E2D42" strokeWidth="10" />
-                  <circle
-                    cx="65" cy="65" r="54"
-                    fill="none"
-                    stroke={ACCENT}
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                    strokeDasharray={ringCircumference}
-                    strokeDashoffset={ringOffset}
-                    transform="rotate(-90 65 65)"
-                    style={{ transition: "stroke-dashoffset 1s ease" }}
-                  />
+                  <circle cx="65" cy="65" r="54" fill="none" stroke={ACCENT} strokeWidth="10"
+                    strokeLinecap="round" strokeDasharray={ringCircumference}
+                    strokeDashoffset={ringOffset} transform="rotate(-90 65 65)"
+                    style={{ transition: "stroke-dashoffset 1s ease" }} />
                 </svg>
-                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
-                  <div style={{ fontSize: 9, color: TEXT_SECONDARY, textAlign: "center" }}>Completion<br />Rate</div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-2xl font-extrabold" style={{ color: TEXT_PRIMARY }}>{completionPct}%</div>
+                  <div className="text-[10px] text-center" style={{ color: TEXT_SECONDARY }}>Completion<br />Rate</div>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="flex flex-col gap-2">
               {orderProgress.map((p, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color }} />
-                    <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.label}</span>
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }} />
+                    <span className="text-xs" style={{ color: TEXT_SECONDARY }}>{p.label}</span>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
+                  <span className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>{p.value}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Recent Activities */}
-          <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
-              <Link href="/admin/reports" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+          <div className="p-4" style={cardStyle}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm font-bold" style={{ color: TEXT_PRIMARY }}>Recent Activities</div>
+              <Link href="/admin/reports" className="text-xs font-semibold" style={{ color: ACCENT }}>View All</Link>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="flex flex-col gap-3">
               {recentActivities.map((a, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                  <div style={{ width: 30, height: 30, borderRadius: 8, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                    <a.icon style={{ width: 14, height: 14, color: a.color }} />
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: `${a.color}20` }}>
+                    <a.icon className="w-3.5 h-3.5" style={{ color: a.color }} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 1 }}>{a.title}</div>
-                    <div style={{ fontSize: 10, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
-                    <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 2, opacity: 0.7 }}>{a.time}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>{a.title}</div>
+                    <div className="text-xs truncate" style={{ color: TEXT_SECONDARY }}>{a.sub}</div>
+                    <div className="text-[10px] mt-0.5" style={{ color: TEXT_SECONDARY, opacity: 0.7 }}>{a.time}</div>
                   </div>
                 </div>
               ))}
