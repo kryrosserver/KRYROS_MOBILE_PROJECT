@@ -67,7 +67,8 @@ export class PaymentsService {
       
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
-          'Content-Type': 'application/soap+xml;charset=UTF-8',
+          'Content-Type': 'text/xml;charset=UTF-8',
+          'SOAPAction': '',
           'Accept': 'text/xml',
         },
         timeout: 60000,
@@ -256,7 +257,8 @@ export class PaymentsService {
     try {
       const response = await axios.post(this.apiUrl, soapRequest, {
         headers: {
-          'Content-Type': 'application/soap+xml;charset=UTF-8',
+          'Content-Type': 'text/xml;charset=UTF-8',
+          'SOAPAction': '',
           'Accept': 'text/xml',
         },
       });
@@ -303,6 +305,6 @@ export class PaymentsService {
     } catch (error) {
       this.logger.error(`Status Check Error: ${error.message}`);
     }
-    return null;
+    return { status: order.paymentStatus ?? 'PENDING' };
   }
 }

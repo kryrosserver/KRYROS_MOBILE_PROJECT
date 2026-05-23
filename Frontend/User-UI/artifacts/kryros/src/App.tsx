@@ -57,7 +57,7 @@ function WhatsAppFloatingButton() {
       rel="noopener noreferrer"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="fixed bottom-20 right-4 z-50 flex items-center gap-2.5 group"
+      className="fixed bottom-28 right-4 z-50 flex items-center gap-2.5 group"
       aria-label="Chat on WhatsApp"
     >
       {hovered && (

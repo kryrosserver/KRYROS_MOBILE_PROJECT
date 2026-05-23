@@ -17,7 +17,7 @@ export class PaymentsController {
   constructor(private paymentsService: PaymentsService) {}
 
   @Post('initialize')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Send a 543/cGrate payment prompt to the customer mobile number' })
   initialize(@Body() body: InitializePaymentDto) {
     return this.paymentsService.process543Payment(body.orderId, body.phone, body.amount);
