@@ -4,7 +4,6 @@ import {
   ChevronLeft, Lock, ChevronDown, ChevronRight, X,
   Smartphone, CreditCard, Building2, Check, Upload,
 } from "lucide-react";
-import { API_BASE } from "@/lib/api";
 
 const FEE_RATE = 0.01;
 
@@ -191,24 +190,13 @@ export default function PayPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [proofFile, setProofFile] = useState<string | null>(null);
 
-  const [whatsappNumber, setWhatsappNumber] = useState("");
-
-  useEffect(() => {
-    fetch(`${API_BASE}/api/settings`)
-      .then((r) => r.json())
-      .then((data) => {
-        const list: { key: string; value: string }[] = Array.isArray(data) ? data : [];
-        const found = list.find((s) => s.key === "whatsapp_number");
-        if (found?.value) setWhatsappNumber(found.value);
-      })
-      .catch(() => {});
-  }, []);
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "";
 
   const handlePay = () => setSuccess(true);
 
   const handleWhatsAppPay = () => {
     const msg = `Hi KRYROS, I would like to make a payment of ${currency} ${total.toFixed(2)}.${note ? " Note: " + note : ""}`;
-    const url = `https://wa.me/${whatsappNumber || "260"}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
   };
 

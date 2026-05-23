@@ -129,18 +129,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [placedOrderNumber, setPlacedOrderNumber] = useState<string>("");
-  const [whatsappNumber, setWhatsappNumber] = useState("");
-
-  useEffect(() => {
-    fetch(`${API_BASE}/api/settings`)
-      .then((r) => r.json())
-      .then((data) => {
-        const list: { key: string; value: string }[] = Array.isArray(data) ? data : [];
-        const found = list.find((s) => s.key === "whatsapp_number");
-        if (found?.value) setWhatsappNumber(found.value);
-      })
-      .catch(() => {});
-  }, []);
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "";
 
   const [firstName, setFirstName] = useState(authUser?.firstName ?? "");
   const [lastName, setLastName] = useState(authUser?.lastName ?? "");
