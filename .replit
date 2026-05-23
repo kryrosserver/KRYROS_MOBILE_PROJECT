@@ -37,7 +37,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Frontend/User-UI && PORT=5000 pnpm --filter @workspace/kryros run dev"
+args = "cd Frontend/User-UI && pnpm --filter @workspace/kryros run dev"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -87,10 +87,6 @@ externalPort = 3003
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
 
 [[ports]]
 localPort = 19796
