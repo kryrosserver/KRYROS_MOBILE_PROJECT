@@ -21,7 +21,9 @@ const BORDER = "#1E2D42";
 const TEXT_PRIMARY = "#FFFFFF";
 const TEXT_SECONDARY = "#AAB4C5";
 const ACCENT = "#12D6C5";
-const BASE_WIDTH = 1380;
+// BASE_WIDTH adapts per viewport so mobile content stays readable
+const MOBILE_BASE = 860;
+const DESKTOP_BASE = 1380;
 
 const salesData = [
   { day: "May 20", value: 800 },
@@ -116,23 +118,38 @@ export default function AdminDashboard() {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
+    let raf: number;
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
-      const vw = outerRef.current.getBoundingClientRect().width || window.innerWidth;
-      const nextScale = Math.min(1, vw / BASE_WIDTH);
+      const vw = outerRef.current.offsetWidth || window.innerWidth;
+      // Use a smaller base on mobile so content is ~50% size instead of ~30%
+      const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
+      const nextScale = Math.min(1, vw / baseW);
+
+      innerRef.current.style.width = `${baseW}px`;
+      innerRef.current.style.transform = `scale(${nextScale})`;
+      innerRef.current.style.transformOrigin = "top left";
       setScale(nextScale);
-      // Let it paint, then fix outer height to avoid empty space below
-      requestAnimationFrame(() => {
-        if (!innerRef.current || !outerRef.current) return;
-        const ih = innerRef.current.scrollHeight;
-        outerRef.current.style.height = `${ih * nextScale}px`;
+
+      // Fix outer height — wait two frames so DOM has fully painted
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!innerRef.current || !outerRef.current) return;
+          const ih = innerRef.current.offsetHeight;
+          outerRef.current.style.height = `${ih * nextScale}px`;
+        });
       });
     }
     recalc();
     window.addEventListener("resize", recalc);
     const ro = new ResizeObserver(recalc);
     if (innerRef.current) ro.observe(innerRef.current);
-    return () => { window.removeEventListener("resize", recalc); ro.disconnect(); };
+    return () => {
+      window.removeEventListener("resize", recalc);
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   const [summary, setSummary] = useState({
@@ -197,9 +214,6 @@ export default function AdminDashboard() {
       <div
         ref={innerRef}
         style={{
-          width: BASE_WIDTH,
-          transformOrigin: "top left",
-          transform: `scale(${scale})`,
           background: DARK_BG,
           color: TEXT_PRIMARY,
         }}
