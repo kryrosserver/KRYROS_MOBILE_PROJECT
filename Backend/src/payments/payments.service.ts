@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { PaymentStatus } from '@prisma/client';
@@ -37,9 +37,9 @@ export class PaymentsService {
     this.logger.log(`Password configured: ${password ? 'Yes' : 'NO!'}`);
 
     if (!username || !password) {
-      const errorMsg = 'CGRATE_USERNAME or CGRATE_PASSWORD not configured in environment variables!';
-      this.logger.error(errorMsg);
-      throw new Error(errorMsg);
+      const errorMsg = 'Payment service is not configured. Please contact KRYROS support.';
+      this.logger.error('CGRATE_USERNAME or CGRATE_PASSWORD not configured in environment variables!');
+      throw new HttpException({ message: errorMsg }, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     // Ensure phone format: 09XXXXXXXX or 07XXXXXXXX (Postman collection uses 0... format)
@@ -165,7 +165,19 @@ export class PaymentsService {
         this.logger.error(`Failed to update order status to FAILED: ${dbError.message}`);
       }
 
-      throw error;
+      if (error instanceof HttpException) throw error;
+
+      if (axios.isAxiosError(error)) {
+        const msg = error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT'
+          ? 'Could not reach the payment gateway. Please try again shortly.'
+          : 'Payment gateway returned an error. Please try again.';
+        throw new HttpException({ message: msg }, HttpStatus.BAD_GATEWAY);
+      }
+
+      throw new HttpException(
+        { message: error.message || 'Payment failed. Please try again.' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -192,17 +204,12 @@ export class PaymentsService {
 
     this.logger.log(`Created placeholder order: ${order.id} (${orderNumber})`);
 
-    try {
-      const result = await this.process543Payment(order.id, phone, amountZMW);
-      return {
-        orderId: order.id,
-        orderNumber,
-        ...result,
-      };
-    } catch (error) {
-      this.logger.error(`Direct payment failed: ${error.message}`);
-      throw error;
-    }
+    const result = await this.process543Payment(order.id, phone, amountZMW);
+    return {
+      orderId: order.id,
+      orderNumber,
+      ...result,
+    };
   }
 
   async findAll() {
