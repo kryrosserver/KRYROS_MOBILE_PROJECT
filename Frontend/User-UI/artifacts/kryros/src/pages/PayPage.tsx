@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ChevronLeft, Lock, ChevronDown, ChevronRight, X,
-  Smartphone, CreditCard, Building2, Check, Upload, AlertCircle,
+  Smartphone, Building2, Check, Upload, AlertCircle, Download,
 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
@@ -43,15 +43,7 @@ const METHODS = [
     sub: "MTN, Airtel, Zamtel",
     icon: MobileMoneyIcon,
     iconBg: "bg-yellow-50 dark:bg-yellow-900/20",
-    iconColor: "text-yellow-600",
-  },
-  {
-    id: "card",
-    label: "Card Payment",
-    sub: "Visa, Mastercard & more",
-    icon: CreditCard,
-    iconBg: "bg-blue-50 dark:bg-blue-900/20",
-    iconColor: "text-blue-600",
+    comingSoon: false,
   },
   {
     id: "bank",
@@ -59,7 +51,7 @@ const METHODS = [
     sub: "Local & International",
     icon: Building2,
     iconBg: "bg-slate-50 dark:bg-slate-800",
-    iconColor: "text-slate-600",
+    comingSoon: false,
   },
   {
     id: "whatsapp",
@@ -71,52 +63,7 @@ const METHODS = [
       </svg>
     ),
     iconBg: "bg-green-50 dark:bg-green-900/20",
-    iconColor: "text-green-600",
-  },
-  {
-    id: "apple",
-    label: "Apple Pay",
-    sub: "Pay with Apple Pay",
-    icon: () => (
-      <svg viewBox="0 0 24 24" className="w-5 h-5 text-foreground" fill="currentColor">
-        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-      </svg>
-    ),
-    iconBg: "bg-slate-50 dark:bg-slate-800",
-    iconColor: "text-foreground",
-  },
-  {
-    id: "google",
-    label: "Google Pay",
-    sub: "Pay with Google Pay",
-    icon: () => (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-        <text x="1" y="17" fontSize="14" fontWeight="bold">
-          <tspan fill="#4285F4">G</tspan>
-        </text>
-      </svg>
-    ),
-    iconBg: "bg-white dark:bg-slate-800 border border-border",
-    iconColor: "",
-    customIcon: (
-      <span className="text-sm font-black leading-none">
-        <span className="text-blue-500">G</span>
-        <span className="text-red-500">o</span>
-        <span className="text-yellow-500">o</span>
-        <span className="text-blue-500">g</span>
-        <span className="text-green-500">l</span>
-        <span className="text-red-500">e</span>
-      </span>
-    ),
-  },
-  {
-    id: "crypto",
-    label: "Crypto Payment",
-    sub: "USDT, BTC & more",
-    icon: () => <span className="text-xs font-black text-orange-500">₿</span>,
-    iconBg: "bg-orange-50 dark:bg-orange-900/20",
-    iconColor: "text-orange-500",
-    comingSoon: true,
+    comingSoon: false,
   },
 ];
 
@@ -145,7 +92,6 @@ function SecureFooter() {
 }
 
 function AmountSummaryBar({ amount, fee, currency }: { amount: number; fee: number; currency: string }) {
-  const total = amount + fee;
   return (
     <div className="border-t border-border pt-4 mt-2 space-y-1.5">
       <div className="flex items-center justify-between text-xs">
@@ -160,13 +106,152 @@ function AmountSummaryBar({ amount, fee, currency }: { amount: number; fee: numb
   );
 }
 
+interface ReceiptData {
+  recipientNumber: string;
+  recipientName: string;
+  operatorName: string;
+  transactionId: string;
+  dateTime: string;
+  convenienceCharges: number;
+  amount: number;
+  currency: string;
+  reference: string;
+}
+
+function ReceiptScreen({ receipt, onClose }: { receipt: ReceiptData; onClose: () => void }) {
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = () => {
+    const el = receiptRef.current;
+    if (!el) return;
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>KRYROS Receipt - ${receipt.reference}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 40px 16px; }
+  .card { background: #fff; border-radius: 16px; max-width: 420px; width: 100%; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+  .header { background: #fff; padding: 32px 24px 20px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  .icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .checkmark { color: #fff; font-size: 28px; font-weight: bold; }
+  .title { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #555; line-height: 1.5; }
+  .amount-highlight { color: #ef4444; font-weight: 700; }
+  .body { padding: 20px 24px; }
+  .row { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+  .row:last-child { border-bottom: none; }
+  .label { font-size: 13px; color: #888; flex: 1; }
+  .value { font-size: 13px; font-weight: 600; color: #111; text-align: right; flex: 1; }
+  .value.red { color: #ef4444; }
+  .footer { padding: 16px 24px; text-align: center; background: #fafafa; border-top: 1px solid #f0f0f0; font-size: 11px; color: #aaa; }
+  .kryros { font-weight: 700; color: #10b981; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="icon-wrap"><span class="checkmark">✓</span></div>
+    <div class="title">Transaction Successful</div>
+    <div class="subtitle">
+      <span class="amount-highlight">${receipt.currency} ${receipt.amount.toFixed(1)}</span>
+      has been successfully sent to<br/>KRYROS MOBILE TECH LIMITED (${receipt.recipientNumber}).
+    </div>
+  </div>
+  <div class="body">
+    <div class="row"><span class="label">Recipient Number</span><span class="value">${receipt.recipientNumber}</span></div>
+    <div class="row"><span class="label">Recipient Name</span><span class="value">${receipt.recipientName}</span></div>
+    <div class="row"><span class="label">Operator Name</span><span class="value">${receipt.operatorName}</span></div>
+    <div class="row"><span class="label">Transaction ID</span><span class="value">${receipt.transactionId}</span></div>
+    <div class="row"><span class="label">Transaction Date &amp; Time</span><span class="value">${receipt.dateTime}</span></div>
+    <div class="row"><span class="label">Convenience Charges</span><span class="value red">${receipt.currency} ${receipt.convenienceCharges.toFixed(1)}</span></div>
+    <div class="row"><span class="label">Amount</span><span class="value red">${receipt.currency} ${receipt.amount.toFixed(1)}</span></div>
+  </div>
+  <div class="footer">Powered by <span class="kryros">KRYROS</span> &bull; Secure &bull; Encrypted &bull; Safe</div>
+</div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `KRYROS-Receipt-${receipt.reference}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
+      <div className="w-full max-w-sm space-y-4">
+
+        {/* Receipt card */}
+        <div ref={receiptRef} className="bg-white dark:bg-white rounded-3xl overflow-hidden shadow-xl border border-border">
+          {/* Header */}
+          <div className="px-6 pt-8 pb-6 text-center border-b border-gray-100">
+            <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-white" strokeWidth={3} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-1.5">Transaction Successful</h2>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              <span className="text-red-500 font-bold">{receipt.currency} {receipt.amount.toFixed(1)}</span>
+              {" "}has been successfully sent to<br />
+              KRYROS MOBILE TECH LIMITED ({receipt.recipientNumber}).
+            </p>
+          </div>
+
+          {/* Details */}
+          <div className="px-6 py-2">
+            {[
+              { label: "Recipient Number", value: receipt.recipientNumber, red: false },
+              { label: "Recipient Name", value: receipt.recipientName, red: false },
+              { label: "Operator Name", value: receipt.operatorName, red: false },
+              { label: "Transaction ID", value: receipt.transactionId, red: false },
+              { label: "Transaction Date & Time", value: receipt.dateTime, red: false },
+              { label: "Convenience Charges", value: `${receipt.currency} ${receipt.convenienceCharges.toFixed(1)}`, red: true },
+              { label: "Amount", value: `${receipt.currency} ${receipt.amount.toFixed(1)}`, red: true },
+            ].map(({ label, value, red }) => (
+              <div key={label} className="flex items-start justify-between py-3.5 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-500 flex-1">{label}</span>
+                <span className={`text-sm font-semibold text-right flex-1 ${red ? "text-red-500" : "text-gray-900"}`}>
+                  {value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Download button */}
+        <button
+          onClick={handleDownload}
+          className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all"
+        >
+          <Download className="w-4 h-4" /> Download Receipt
+        </button>
+
+        {/* Back home */}
+        <Link href="/">
+          <button className="w-full py-3.5 border border-border bg-background text-foreground rounded-2xl font-semibold text-sm hover:bg-muted transition-colors">
+            Back to Home
+          </button>
+        </Link>
+
+        <SecureFooter />
+      </div>
+    </div>
+  );
+}
+
 export default function PayPage() {
   const [, navigate] = useLocation();
   const [step, setStep] = useState<1 | 2>(1);
-  const [success, setSuccess] = useState(false);
 
   const [rawAmount, setRawAmount] = useState("");
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("ZMW");
   const [showCurrencyDrop, setShowCurrencyDrop] = useState(false);
   const [note, setNote] = useState("");
 
@@ -176,13 +261,6 @@ export default function PayPage() {
   const fee = calcFee(amount);
   const total = amount + fee;
   const currencyObj = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
-
-  // Card
-  const [cardNum, setCardNum] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [saveCard, setSaveCard] = useState(false);
 
   // Mobile money
   const [mmProvider, setMmProvider] = useState("MTN Mobile Money");
@@ -194,12 +272,13 @@ export default function PayPage() {
 
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
   const [showProviderDrop, setShowProviderDrop] = useState(false);
-  const [pending, setPending] = useState(false);
   const [payRef, setPayRef] = useState(() => "PAY-" + Date.now().toString(36).toUpperCase().slice(-8));
   const [payError, setPayError] = useState<string | null>(null);
   const [payLoading, setPayLoading] = useState(false);
   const [payStatus, setPayStatus] = useState<"idle" | "sending" | "waiting" | "paid" | "failed">("idle");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const token = useAuthStore((s) => s.token);
 
@@ -211,6 +290,25 @@ export default function PayPage() {
   }, []);
 
   useEffect(() => () => stopPolling(), [stopPolling]);
+
+  const buildReceipt = useCallback((data: { orderId?: string; reference?: string; raw?: any }) => {
+    const providerName = mmProvider.replace(" Mobile Money", "").replace(" Money", "");
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) +
+      ", " + now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+    return {
+      recipientNumber: "966629719",
+      recipientName: "KRYROS MOBILE TECH LIMITED",
+      operatorName: providerName,
+      transactionId: data.reference || data.orderId || payRef,
+      dateTime: dateStr,
+      convenienceCharges: fee,
+      amount: total,
+      currency,
+      reference: payRef,
+    } as ReceiptData;
+  }, [mmProvider, fee, total, currency, payRef]);
 
   const startPolling = useCallback((oid: string) => {
     stopPolling();
@@ -225,18 +323,18 @@ export default function PayPage() {
         if (status === "PAID") {
           stopPolling();
           setPayStatus("paid");
-          setPending(true);
+          setReceipt(buildReceipt({ orderId: oid, reference: data?.reference || data?.paymentReference }));
         } else if (status === "FAILED") {
           stopPolling();
           setPayStatus("failed");
-          setPayError("Payment was declined or cancelled by the customer.");
+          setPayError("Payment was declined or cancelled.");
           setPayLoading(false);
         }
       } catch {
         // keep polling
       }
     }, 5000);
-  }, [token, stopPolling]);
+  }, [token, stopPolling, buildReceipt]);
 
   const handleMobileMoneyPay = async () => {
     if (!mmPhone || mmPhone.trim().length < 9) {
@@ -260,7 +358,7 @@ export default function PayPage() {
         method: "POST",
         headers,
         body: JSON.stringify({
-          phone: mmPhone,
+          phone: mmPhone.trim(),
           amount: Math.round(total * 100) / 100,
           currency,
           note: note || undefined,
@@ -283,7 +381,6 @@ export default function PayPage() {
       setPayRef(newRef);
       setPayStatus("waiting");
       setPayLoading(false);
-      setPending(true);
       startPolling(newOrderId);
     } catch {
       setPayError("Network error. Please check your connection and try again.");
@@ -292,35 +389,34 @@ export default function PayPage() {
     }
   };
 
-  const handlePay = () => setPending(true);
-
   const handleWhatsAppPay = () => {
     const cleanNumber = whatsappNumber.replace(/\D/g, "");
     if (!cleanNumber || cleanNumber.length < 7) {
       alert("WhatsApp number is not configured. Please contact KRYROS support.");
       return;
     }
-    const ref = payRef;
     const msg =
       `Hi KRYROS! 💳 *Direct Payment Request*\n\n` +
-      `*Reference:* ${ref}\n` +
+      `*Reference:* ${payRef}\n` +
       `*Amount:* ${currency} ${total.toFixed(2)}\n` +
       (note ? `*Note:* ${note}\n` : "") +
       `\nPlease confirm this payment. Thank you!`;
     const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
-    setPending(true);
+    setPayStatus("waiting");
   };
 
-  if (pending) {
-    const isWhatsapp = openMethod === "whatsapp";
-    const isBank = openMethod === "bank";
-    const isMobile = openMethod === "mobile";
-    const methodLabel = METHODS.find((m) => m.id === openMethod)?.label ?? "Payment";
-    const isPaid = payStatus === "paid";
-    const isFailed = payStatus === "failed";
-    const isWaiting = payStatus === "waiting" || (isMobile && !isPaid && !isFailed);
+  const isPaid = payStatus === "paid";
+  const isFailed = payStatus === "failed";
+  const isWaiting = payStatus === "waiting" && !isPaid && !isFailed;
 
+  // Show receipt screen on paid
+  if (isPaid && receipt) {
+    return <ReceiptScreen receipt={receipt} onClose={() => { setPayStatus("idle"); setReceipt(null); }} />;
+  }
+
+  // Waiting / failed screen
+  if (isWaiting || isFailed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
         <div className="w-full max-w-sm">
@@ -329,63 +425,36 @@ export default function PayPage() {
             style={{
               background: isFailed
                 ? "linear-gradient(160deg, #3a0000 0%, #7a1a1a 100%)"
-                : isWhatsapp || isBank
-                ? "linear-gradient(160deg, #2d2000 0%, #5a3a00 100%)"
                 : "linear-gradient(160deg, #07392f 0%, #0a5544 100%)",
             }}
           >
             <div className="p-8 text-center">
-              {/* Icon */}
               {isFailed ? (
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-400/20 border-4 border-red-400">
                   <X className="w-8 h-8 text-red-400" />
                 </div>
-              ) : isWaiting && isMobile ? (
+              ) : (
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary/20 border-4 border-primary">
                   <span className="w-7 h-7 border-2 border-primary/40 border-t-primary rounded-full animate-spin" />
                 </div>
-              ) : (
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isWhatsapp || isBank ? "bg-yellow-400/20 border-4 border-yellow-400" : "bg-green-400/20 border-4 border-green-400"}`}>
-                  <Check className={`w-8 h-8 ${isWhatsapp || isBank ? "text-yellow-400" : "text-green-400"}`} />
-                </div>
               )}
 
-              {/* Title */}
               <h2 className="text-xl font-black text-white mb-1">
-                {isFailed
-                  ? "Payment Failed"
-                  : isMobile && isWaiting
-                  ? "Waiting for Approval"
-                  : isPaid
-                  ? "Payment Confirmed!"
-                  : isWhatsapp || isBank
-                  ? "Payment Submitted"
-                  : "Prompt Sent!"}
+                {isFailed ? "Payment Failed" : "Waiting for Approval"}
               </h2>
 
-              {/* Description */}
-              <p className="text-white/60 text-sm mb-4">
+              <p className="text-white/60 text-sm mb-6">
                 {isFailed
                   ? (payError || "The payment was not completed. Please try again.")
-                  : isMobile && isWaiting
-                  ? `A payment prompt has been sent to ${mmPhone || "your phone"}. Please open your ${mmProvider} app and approve the request to complete payment.`
-                  : isMobile && isPaid
-                  ? `Your payment of ${currency} ${total.toFixed(2)} was approved and confirmed successfully.`
-                  : isWhatsapp
-                  ? "Your payment details have been sent to our WhatsApp. Our team will confirm your payment shortly."
-                  : isBank
-                  ? "Once we receive your transfer, we will confirm your payment manually."
-                  : "Your payment request has been submitted. Our team will verify and confirm shortly."}
+                  : `A payment prompt has been sent to ${mmPhone || "your phone"}. Please open your ${mmProvider} app and approve to complete payment.`}
               </p>
 
-              {/* Details card */}
               <div className="bg-white/10 rounded-2xl p-4 text-left space-y-2.5 mb-6">
                 {[
                   ["Reference", payRef],
                   ["Amount", `${currency} ${total.toFixed(2)}`],
-                  ["Method", methodLabel],
-                  ["Date", new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })],
-                  ["Status", isFailed ? "❌ Failed" : isPaid ? "✅ Confirmed" : "⏳ Awaiting Approval"],
+                  ["Phone", mmPhone || "—"],
+                  ["Status", isFailed ? "❌ Failed" : "⏳ Awaiting Approval"],
                 ].map(([label, val]) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-white/60 text-xs">{label}</span>
@@ -397,21 +466,17 @@ export default function PayPage() {
               {isFailed ? (
                 <button
                   onClick={() => {
-                    setPending(false);
                     setPayStatus("idle");
                     setPayError(null);
                     setOrderId(null);
+                    setOpenMethod("mobile");
                   }}
                   className="w-full py-3.5 bg-red-500 text-white rounded-2xl font-bold text-sm hover:bg-red-400 transition-colors"
                 >
                   Try Again
                 </button>
               ) : (
-                <Link href="/">
-                  <button className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-colors">
-                    Back to Home
-                  </button>
-                </Link>
+                <p className="text-white/40 text-xs">Checking status automatically every 5 seconds…</p>
               )}
             </div>
           </div>
@@ -422,7 +487,7 @@ export default function PayPage() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-4 pb-32 min-h-screen relative">
-      {/* ── TOP BAR ── */}
+      {/* TOP BAR */}
       <div className="flex items-center justify-between mb-5">
         <button
           onClick={() => (step === 2 ? setStep(1) : navigate("/"))}
@@ -436,9 +501,7 @@ export default function PayPage() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════
-          STEP 1 — Enter Amount
-      ══════════════════════════════════════════ */}
+      {/* STEP 1 — Enter Amount */}
       {step === 1 && (
         <div className="space-y-4">
           <div>
@@ -499,7 +562,7 @@ export default function PayPage() {
             </div>
           )}
 
-          {/* Note */}
+          {/* Note / Reference */}
           <div className="border border-border rounded-xl px-4 py-2.5 bg-background focus-within:border-primary/60 transition-colors flex items-center gap-3">
             <span className="text-muted-foreground/50 flex-shrink-0">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -507,7 +570,7 @@ export default function PayPage() {
             <input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Their Reference (optional)"
+              placeholder="Reference (optional)"
               className="flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1"
             />
           </div>
@@ -541,12 +604,9 @@ export default function PayPage() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════
-          STEP 2 — Choose Payment Method
-      ══════════════════════════════════════════ */}
+      {/* STEP 2 — Choose Payment Method */}
       {step === 2 && (
         <div className="space-y-4">
-          {/* You are sending */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">You are sending</span>
@@ -565,7 +625,6 @@ export default function PayPage() {
             </div>
           </div>
 
-          {/* Method list */}
           <div>
             <p className="text-sm font-bold text-foreground mb-3">Choose payment method</p>
             <div className="space-y-2">
@@ -574,25 +633,17 @@ export default function PayPage() {
                 return (
                   <button
                     key={m.id}
-                    onClick={() => !m.comingSoon && setOpenMethod(m.id)}
-                    disabled={m.comingSoon}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-left
-                      ${m.comingSoon ? "border-border opacity-60 cursor-not-allowed bg-card" : "border-border bg-card hover:border-primary/50 hover:bg-primary/[0.02] active:scale-[0.99]"}`}
+                    onClick={() => setOpenMethod(m.id)}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/[0.02] active:scale-[0.99] transition-all text-left"
                   >
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${m.iconBg}`}>
-                      {m.customIcon ?? <Icon />}
+                      <Icon />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-foreground">{m.label}</p>
                       <p className="text-[11px] text-muted-foreground">{m.sub}</p>
                     </div>
-                    {m.comingSoon ? (
-                      <span className="text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 px-2 py-0.5 rounded-full flex-shrink-0">
-                        Coming Soon
-                      </span>
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    )}
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   </button>
                 );
               })}
@@ -601,9 +652,7 @@ export default function PayPage() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════
-          PAYMENT METHOD PANELS (bottom sheet)
-      ══════════════════════════════════════════ */}
+      {/* PAYMENT METHOD PANELS (bottom sheet) */}
       {openMethod && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div
@@ -611,7 +660,6 @@ export default function PayPage() {
             onClick={() => setOpenMethod(null)}
           />
           <div className="relative bg-background rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto">
-            {/* Sheet drag handle */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-border" />
             </div>
@@ -625,7 +673,7 @@ export default function PayPage() {
                   return (
                     <div className="flex items-center gap-2.5">
                       <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${m.iconBg}`}>
-                        {m.customIcon ?? <Icon />}
+                        <Icon />
                       </div>
                       <span className="text-base font-black text-foreground">{m.label}</span>
                     </div>
@@ -639,7 +687,7 @@ export default function PayPage() {
                 </button>
               </div>
 
-              {/* ── MOBILE MONEY ── */}
+              {/* MOBILE MONEY */}
               {openMethod === "mobile" && (
                 <div className="space-y-4">
                   <div className="relative">
@@ -659,21 +707,17 @@ export default function PayPage() {
                           { name: "MTN Mobile Money", logo: "/mtn-logo.jpg", color: "bg-yellow-50 dark:bg-yellow-900/20" },
                           { name: "Airtel Money", logo: "/airtel-logo.jpg", color: "bg-red-50 dark:bg-red-900/20" },
                           { name: "Zamtel Money", logo: "/zamtel-logo.jpg", color: "bg-green-50 dark:bg-green-900/20" },
-                          { name: "M-Pesa", logo: "/mtn-logo.jpg", color: "bg-emerald-50 dark:bg-emerald-900/20" },
                         ].map((p) => (
                           <button
                             key={p.name}
                             type="button"
                             onClick={() => { setMmProvider(p.name); setShowProviderDrop(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted transition-colors border-b border-border last:border-0
-                              ${mmProvider === p.name ? "bg-primary/5" : ""}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted transition-colors border-b border-border last:border-0 ${mmProvider === p.name ? "bg-primary/5" : ""}`}
                           >
                             <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${p.color}`}>
                               <img src={p.logo} alt={p.name} className="w-6 h-6 rounded-md object-cover" />
                             </div>
-                            <span className={`text-sm font-semibold flex-1 ${mmProvider === p.name ? "text-primary" : "text-foreground"}`}>
-                              {p.name}
-                            </span>
+                            <span className={`text-sm font-semibold flex-1 ${mmProvider === p.name ? "text-primary" : "text-foreground"}`}>{p.name}</span>
                             {mmProvider === p.name && (
                               <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                                 <Check className="w-3 h-3 text-white" />
@@ -684,6 +728,7 @@ export default function PayPage() {
                       </div>
                     )}
                   </div>
+
                   <div>
                     <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Mobile Money Number</label>
                     <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
@@ -697,18 +742,22 @@ export default function PayPage() {
                       />
                     </div>
                   </div>
+
                   <div className="bg-primary/5 border border-primary/15 rounded-2xl px-4 py-3">
                     <p className="text-[11px] text-muted-foreground">
                       A payment prompt will be sent to your mobile phone. Please approve it to complete the payment.
                     </p>
                   </div>
+
                   {payError && (
                     <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl px-4 py-3">
                       <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                       <p className="text-[12px] text-red-600 dark:text-red-400">{payError}</p>
                     </div>
                   )}
+
                   <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
+
                   <button
                     onClick={handleMobileMoneyPay}
                     disabled={payLoading}
@@ -727,73 +776,7 @@ export default function PayPage() {
                 </div>
               )}
 
-              {/* ── CARD PAYMENT ── */}
-              {openMethod === "card" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Card Number</label>
-                    <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
-                      <input
-                        value={cardNum}
-                        onChange={(e) => setCardNum(e.target.value)}
-                        placeholder="1234 5678 9012 3456"
-                        inputMode="numeric"
-                        className="flex-1 text-sm text-foreground outline-none bg-transparent"
-                      />
-                      <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Expiry Date</label>
-                      <input
-                        value={expiry}
-                        onChange={(e) => setExpiry(e.target.value)}
-                        placeholder="MM / YY"
-                        className="w-full border border-border rounded-2xl px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">CVV</label>
-                      <input
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value)}
-                        placeholder="123"
-                        type="password"
-                        className="w-full border border-border rounded-2xl px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">Cardholder Name</label>
-                    <input
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value)}
-                      placeholder="John Doe"
-                      className="w-full border border-border rounded-2xl px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-xs font-semibold text-foreground">Save card for future payments</span>
-                    <button
-                      onClick={() => setSaveCard(!saveCard)}
-                      className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${saveCard ? "bg-primary" : "bg-muted"}`}
-                    >
-                      <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-1 transition-transform ${saveCard ? "translate-x-6" : "translate-x-1"}`} />
-                    </button>
-                  </div>
-                  <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
-                  <button
-                    onClick={handlePay}
-                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all"
-                  >
-                    <Lock className="w-4 h-4" /> Pay {currency} {total.toFixed(2)}
-                  </button>
-                  <SecureFooter />
-                </div>
-              )}
-
-              {/* ── BANK TRANSFER ── */}
+              {/* BANK TRANSFER */}
               {openMethod === "bank" && (
                 <div className="space-y-4">
                   <div className="bg-primary/5 border border-primary/15 rounded-2xl px-4 py-3 flex items-start gap-2">
@@ -825,9 +808,7 @@ export default function PayPage() {
                       onClick={() => fileRef.current?.click()}
                     >
                       <Upload className="w-6 h-6 text-muted-foreground mb-2" />
-                      <p className="text-xs font-semibold text-foreground">
-                        {proofFile ?? "Choose File or Drag & Drop"}
-                      </p>
+                      <p className="text-xs font-semibold text-foreground">{proofFile ?? "Choose File or Drag & Drop"}</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG, PDF up to 10MB</p>
                       <input
                         ref={fileRef}
@@ -840,7 +821,7 @@ export default function PayPage() {
                   </div>
                   <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
                   <button
-                    onClick={handlePay}
+                    onClick={() => setPayStatus("waiting")}
                     className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all"
                   >
                     <Check className="w-4 h-4" /> I Have Made the Transfer
@@ -849,7 +830,7 @@ export default function PayPage() {
                 </div>
               )}
 
-              {/* ── WHATSAPP ── */}
+              {/* WHATSAPP */}
               {openMethod === "whatsapp" && (
                 <div className="space-y-4">
                   <div className="flex flex-col items-center py-6 gap-3">
@@ -871,46 +852,6 @@ export default function PayPage() {
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                     </svg>
                     Continue on WhatsApp
-                  </button>
-                  <SecureFooter />
-                </div>
-              )}
-
-              {/* ── APPLE PAY ── */}
-              {openMethod === "apple" && (
-                <div className="space-y-4">
-                  <p className="text-xs text-center text-muted-foreground">Authenticate with Face ID or Touch ID to complete payment.</p>
-                  <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
-                  <button
-                    onClick={handlePay}
-                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
-                    style={{ background: "#000", color: "#fff" }}
-                  >
-                     Buy with Apple Pay
-                  </button>
-                  <SecureFooter />
-                </div>
-              )}
-
-              {/* ── GOOGLE PAY ── */}
-              {openMethod === "google" && (
-                <div className="space-y-4">
-                  <p className="text-xs text-center text-muted-foreground">You'll be redirected to Google Pay to complete your payment.</p>
-                  <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
-                  <button
-                    onClick={handlePay}
-                    className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all border border-border"
-                    style={{ background: "#fff", color: "#000" }}
-                  >
-                    <span className="font-black text-lg">
-                      <span className="text-blue-500">G</span>
-                      <span className="text-red-500">o</span>
-                      <span className="text-yellow-500">o</span>
-                      <span className="text-blue-500">g</span>
-                      <span className="text-green-500">l</span>
-                      <span className="text-red-500">e</span>
-                    </span>
-                    &nbsp;Pay
                   </button>
                   <SecureFooter />
                 </div>
