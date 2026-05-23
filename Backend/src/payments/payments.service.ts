@@ -96,11 +96,11 @@ export class PaymentsService {
 
       this.logger.log(`Transaction Return: ${JSON.stringify(txReturn, null, 2)}`);
 
-      // responseCode 0 means prompt was successfully sent
+      // responseCode 0 means prompt was successfully sent to the customer's phone.
+      // We mark as PENDING here — the customer still needs to approve on their device.
+      // Status will move to PAID only after polling confirms customer approval.
       const isSuccess = txReturn.responseCode === 0 || txReturn.responseCode === '0';
-      // For automated payments, if prompt is sent successfully, we transition to PAID
-      // to avoid user confusion, as requested by the user.
-      const status = isSuccess ? 'PAID' : 'FAILED';
+      const status = isSuccess ? 'PENDING' : 'FAILED';
       const reference = txReturn.paymentID || transactionId;
       const message = txReturn.responseMessage || 'No message provided';
 
@@ -108,15 +108,13 @@ export class PaymentsService {
       this.logger.log(`Payment Reference: ${reference}`);
       this.logger.log(`Payment Message: ${message}`);
 
-      // Update order status in DB
+      // Update order status in DB — stays PENDING until customer approves on phone
       const updatedOrder = await this.prisma.order.update({
         where: { id: orderId },
         data: {
           paymentReference: reference,
           paymentPhone: phone,
           paymentStatus: status as PaymentStatus,
-          // If PAID, also update order status to PROCESSING
-          ...(status === 'PAID' ? { status: 'PROCESSING' } : {})
         },
       });
 
@@ -124,8 +122,10 @@ export class PaymentsService {
       await this.prisma.orderLog.create({
         data: {
           orderId: orderId,
-          status: status === 'PAID' ? 'PROCESSING' : 'PENDING',
-          notes: `Payment prompt sent successfully. Automated transition to ${status}.`,
+          status: 'PENDING',
+          notes: isSuccess
+            ? `Mobile money prompt sent to customer phone. Awaiting customer approval.`
+            : `Payment prompt failed to send. Status: ${message}`,
         },
       });
 
@@ -165,6 +165,42 @@ export class PaymentsService {
         this.logger.error(`Failed to update order status to FAILED: ${dbError.message}`);
       }
 
+      throw error;
+    }
+  }
+
+  async processDirectPayment(userId: string | null, phone: string, amountZMW: number, currency = 'ZMW', note?: string) {
+    this.logger.log(`=== Direct Payment (no order) for user: ${userId} ===`);
+
+    // Create a lightweight placeholder order so we can track the payment
+    const orderNumber = `DIR-${Date.now().toString(36).toUpperCase()}`;
+    const order = await this.prisma.order.create({
+      data: {
+        orderNumber,
+        ...(userId ? { userId } : {}),
+        paymentMethod: 'MOBILE_MONEY',
+        paymentPhone: phone,
+        subtotal: amountZMW,
+        total: amountZMW,
+        currencyCode: currency,
+        currencySymbol: currency,
+        notes: note || 'Direct payment via Pay page',
+        paymentStatus: 'PENDING',
+        status: 'PENDING',
+      },
+    });
+
+    this.logger.log(`Created placeholder order: ${order.id} (${orderNumber})`);
+
+    try {
+      const result = await this.process543Payment(order.id, phone, amountZMW);
+      return {
+        orderId: order.id,
+        orderNumber,
+        ...result,
+      };
+    } catch (error) {
+      this.logger.error(`Direct payment failed: ${error.message}`);
       throw error;
     }
   }

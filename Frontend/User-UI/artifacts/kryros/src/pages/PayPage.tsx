@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ChevronLeft, Lock, ChevronDown, ChevronRight, X,
-  Smartphone, CreditCard, Building2, Check, Upload,
+  Smartphone, CreditCard, Building2, Check, Upload, AlertCircle,
 } from "lucide-react";
+import { API_BASE } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 
 const FEE_RATE = 0.01;
 
@@ -193,7 +195,102 @@ export default function PayPage() {
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
   const [showProviderDrop, setShowProviderDrop] = useState(false);
   const [pending, setPending] = useState(false);
-  const [payRef] = useState(() => "PAY-" + Date.now().toString(36).toUpperCase().slice(-8));
+  const [payRef, setPayRef] = useState(() => "PAY-" + Date.now().toString(36).toUpperCase().slice(-8));
+  const [payError, setPayError] = useState<string | null>(null);
+  const [payLoading, setPayLoading] = useState(false);
+  const [payStatus, setPayStatus] = useState<"idle" | "sending" | "waiting" | "paid" | "failed">("idle");
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const token = useAuthStore((s) => s.token);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => stopPolling(), [stopPolling]);
+
+  const startPolling = useCallback((oid: string) => {
+    stopPolling();
+    pollRef.current = setInterval(async () => {
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch(`${API_BASE}/api/payments/status/${oid}`, { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        const status = data?.status as string | undefined;
+        if (status === "PAID") {
+          stopPolling();
+          setPayStatus("paid");
+          setPending(true);
+        } else if (status === "FAILED") {
+          stopPolling();
+          setPayStatus("failed");
+          setPayError("Payment was declined or cancelled by the customer.");
+          setPayLoading(false);
+        }
+      } catch {
+        // keep polling
+      }
+    }, 5000);
+  }, [token, stopPolling]);
+
+  const handleMobileMoneyPay = async () => {
+    if (!mmPhone || mmPhone.trim().length < 9) {
+      setPayError("Please enter a valid mobile money number.");
+      return;
+    }
+    if (amount <= 0) {
+      setPayError("Please enter a valid amount.");
+      return;
+    }
+
+    setPayError(null);
+    setPayLoading(true);
+    setPayStatus("sending");
+
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE}/api/payments/direct`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          phone: mmPhone,
+          amount: Math.round(total * 100) / 100,
+          currency,
+          note: note || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const msg = data?.message || "Payment could not be started. Please try again.";
+        setPayError(Array.isArray(msg) ? msg.join(", ") : msg);
+        setPayLoading(false);
+        setPayStatus("idle");
+        return;
+      }
+
+      const newOrderId = data.orderId as string;
+      const newRef = data.reference || data.orderNumber || payRef;
+      setOrderId(newOrderId);
+      setPayRef(newRef);
+      setPayStatus("waiting");
+      setPayLoading(false);
+      setPending(true);
+      startPolling(newOrderId);
+    } catch {
+      setPayError("Network error. Please check your connection and try again.");
+      setPayLoading(false);
+      setPayStatus("idle");
+    }
+  };
 
   const handlePay = () => setPending(true);
 
@@ -218,42 +315,77 @@ export default function PayPage() {
   if (pending) {
     const isWhatsapp = openMethod === "whatsapp";
     const isBank = openMethod === "bank";
+    const isMobile = openMethod === "mobile";
     const methodLabel = METHODS.find((m) => m.id === openMethod)?.label ?? "Payment";
+    const isPaid = payStatus === "paid";
+    const isFailed = payStatus === "failed";
+    const isWaiting = payStatus === "waiting" || (isMobile && !isPaid && !isFailed);
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
         <div className="w-full max-w-sm">
           <div
             className="rounded-3xl overflow-hidden"
-            style={{ background: isWhatsapp || isBank ? "linear-gradient(160deg, #2d2000 0%, #5a3a00 100%)" : "linear-gradient(160deg, #07392f 0%, #0a5544 100%)" }}
+            style={{
+              background: isFailed
+                ? "linear-gradient(160deg, #3a0000 0%, #7a1a1a 100%)"
+                : isWhatsapp || isBank
+                ? "linear-gradient(160deg, #2d2000 0%, #5a3a00 100%)"
+                : "linear-gradient(160deg, #07392f 0%, #0a5544 100%)",
+            }}
           >
             <div className="p-8 text-center">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isWhatsapp || isBank ? "bg-yellow-400/20 border-4 border-yellow-400" : "bg-green-400/20 border-4 border-green-400"}`}>
-                <Check className={`w-8 h-8 ${isWhatsapp || isBank ? "text-yellow-400" : "text-green-400"}`} />
-              </div>
+              {/* Icon */}
+              {isFailed ? (
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-400/20 border-4 border-red-400">
+                  <X className="w-8 h-8 text-red-400" />
+                </div>
+              ) : isWaiting && isMobile ? (
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary/20 border-4 border-primary">
+                  <span className="w-7 h-7 border-2 border-primary/40 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isWhatsapp || isBank ? "bg-yellow-400/20 border-4 border-yellow-400" : "bg-green-400/20 border-4 border-green-400"}`}>
+                  <Check className={`w-8 h-8 ${isWhatsapp || isBank ? "text-yellow-400" : "text-green-400"}`} />
+                </div>
+              )}
+
+              {/* Title */}
               <h2 className="text-xl font-black text-white mb-1">
-                {isWhatsapp || isBank ? "Payment Submitted" : "Prompt Sent!"}
+                {isFailed
+                  ? "Payment Failed"
+                  : isMobile && isWaiting
+                  ? "Waiting for Approval"
+                  : isPaid
+                  ? "Payment Confirmed!"
+                  : isWhatsapp || isBank
+                  ? "Payment Submitted"
+                  : "Prompt Sent!"}
               </h2>
+
+              {/* Description */}
               <p className="text-white/60 text-sm mb-4">
-                {openMethod === "mobile"
-                  ? `A payment prompt has been sent to ${mmPhone || "your phone"}. Please approve it on your ${mmProvider} app to complete the payment.`
+                {isFailed
+                  ? (payError || "The payment was not completed. Please try again.")
+                  : isMobile && isWaiting
+                  ? `A payment prompt has been sent to ${mmPhone || "your phone"}. Please open your ${mmProvider} app and approve the request to complete payment.`
+                  : isMobile && isPaid
+                  ? `Your payment of ${currency} ${total.toFixed(2)} was approved and confirmed successfully.`
                   : isWhatsapp
                   ? "Your payment details have been sent to our WhatsApp. Our team will confirm your payment shortly."
                   : isBank
                   ? "Once we receive your transfer, we will confirm your payment manually."
                   : "Your payment request has been submitted. Our team will verify and confirm shortly."}
               </p>
-              {openMethod === "mobile" && (
-                <div className="flex justify-center mb-4">
-                  <span className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                </div>
-              )}
+
+              {/* Details card */}
               <div className="bg-white/10 rounded-2xl p-4 text-left space-y-2.5 mb-6">
                 {[
                   ["Reference", payRef],
                   ["Amount", `${currency} ${total.toFixed(2)}`],
                   ["Method", methodLabel],
                   ["Date", new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })],
-                  ["Status", openMethod === "mobile" ? "⏳ Awaiting Approval" : "⏳ Pending Confirmation"],
+                  ["Status", isFailed ? "❌ Failed" : isPaid ? "✅ Confirmed" : "⏳ Awaiting Approval"],
                 ].map(([label, val]) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-white/60 text-xs">{label}</span>
@@ -261,11 +393,26 @@ export default function PayPage() {
                   </div>
                 ))}
               </div>
-              <Link href="/">
-                <button className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-colors">
-                  Back to Home
+
+              {isFailed ? (
+                <button
+                  onClick={() => {
+                    setPending(false);
+                    setPayStatus("idle");
+                    setPayError(null);
+                    setOrderId(null);
+                  }}
+                  className="w-full py-3.5 bg-red-500 text-white rounded-2xl font-bold text-sm hover:bg-red-400 transition-colors"
+                >
+                  Try Again
                 </button>
-              </Link>
+              ) : (
+                <Link href="/">
+                  <button className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-colors">
+                    Back to Home
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -556,12 +703,26 @@ export default function PayPage() {
                       A payment prompt will be sent to your mobile phone. Please approve it to complete the payment.
                     </p>
                   </div>
+                  {payError && (
+                    <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl px-4 py-3">
+                      <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-[12px] text-red-600 dark:text-red-400">{payError}</p>
+                    </div>
+                  )}
                   <AmountSummaryBar amount={amount} fee={fee} currency={currency} />
                   <button
-                    onClick={handlePay}
-                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all"
+                    onClick={handleMobileMoneyPay}
+                    disabled={payLoading}
+                    className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <Smartphone className="w-4 h-4" /> Pay {currency} {total.toFixed(2)}
+                    {payLoading ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        {payStatus === "sending" ? "Sending prompt…" : "Processing…"}
+                      </>
+                    ) : (
+                      <><Smartphone className="w-4 h-4" /> Pay {currency} {total.toFixed(2)}</>
+                    )}
                   </button>
                   <SecureFooter />
                 </div>
