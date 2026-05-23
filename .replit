@@ -49,7 +49,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Backend && ./node_modules/.bin/nest build && PORT=8080 node dist/main.js"
+args = "cd Backend && npm run build && PORT=8080 node dist/main.js"
 waitForPort = 8080
 
 [[workflows.workflow]]
@@ -61,7 +61,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Frontend/Admi-Panel && ./node_modules/.bin/next dev -p 3001 -H 0.0.0.0"
+args = "cd Frontend/Admi-Panel && npx next dev -p 3001 -H 0.0.0.0"
 waitForPort = 3001
 
 [agent]
@@ -81,24 +81,12 @@ localPort = 3001
 externalPort = 3001
 
 [[ports]]
-localPort = 3002
-externalPort = 4200
-
-[[ports]]
 localPort = 3099
 externalPort = 3003
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 8081
-externalPort = 8081
 
 [[ports]]
 localPort = 19796
