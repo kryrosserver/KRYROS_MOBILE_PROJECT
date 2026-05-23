@@ -4,6 +4,7 @@ import { Heart, ShoppingCart, Star, Truck, Share2, Minus, Plus, ChevronRight, Bo
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 import { fetchProductById, fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
@@ -29,6 +30,7 @@ export default function ProductPage() {
 
   const addToCart = useCartStore((s) => s.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const format = useCurrencyStore((s) => s.format);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/credit/plans`)
@@ -175,11 +177,11 @@ export default function ProductPage() {
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="text-3xl font-black text-foreground">
-              ${product.price.toLocaleString("en", { minimumFractionDigits: 2 })}
+              {format(product.price)}
             </span>
             {product.oldPrice > product.price && (
               <span className="text-base text-muted-foreground line-through">
-                ${product.oldPrice.toLocaleString("en", { minimumFractionDigits: 2 })}
+                {format(product.oldPrice)}
               </span>
             )}
             {product.discount > 0 && (
@@ -200,7 +202,7 @@ export default function ProductPage() {
               </div>
               <div>
                 <p className="text-[10px] text-muted-foreground">Flexible Monthly Payment</p>
-                <p className="text-sm font-black text-foreground">From <span className="text-primary">${monthly}</span>/month</p>
+                <p className="text-sm font-black text-foreground">From <span className="text-primary">{format(monthly)}</span>/month</p>
               </div>
             </div>
             <Link href="/get-now">
@@ -208,7 +210,7 @@ export default function ProductPage() {
             </Link>
           </div>
           <div className="flex items-center gap-2 text-center mb-3 border-t border-border pt-3">
-            {[["Upfront", `$${upfront}.00`], ["Duration", "6 Months"], ["Total Payable", `$${totalPayable}`]].map(([label, val]) => (
+            {[["Upfront", format(upfront)], ["Duration", "6 Months"], ["Total Payable", format(totalPayable)]].map(([label, val]) => (
               <div key={label} className="flex-1 border-r border-border last:border-0">
                 <p className="text-[9px] text-muted-foreground mb-0.5">{label}</p>
                 <p className="text-xs font-bold text-foreground">{val}</p>
@@ -341,8 +343,8 @@ export default function ProductPage() {
                     </div>
                     <p className="text-[10px] font-semibold text-foreground truncate">{p.name}</p>
                     <div className="flex items-center gap-1 flex-wrap">
-                      <span className="text-[10px] font-black text-primary">${p.price.toLocaleString()}</span>
-                      {p.oldPrice > p.price && <span className="text-[9px] text-muted-foreground line-through">${p.oldPrice.toLocaleString()}</span>}
+                      <span className="text-[10px] font-black text-primary">{format(p.price)}</span>
+                      {p.oldPrice > p.price && <span className="text-[9px] text-muted-foreground line-through">{format(p.oldPrice)}</span>}
                     </div>
                   </div>
                 </Link>

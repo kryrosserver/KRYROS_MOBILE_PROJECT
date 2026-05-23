@@ -8,6 +8,7 @@ import {
   UserCircle, Phone, Mail, Edit2, Save, Loader2, Home, Building2,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 import { API_BASE } from "@/lib/api";
 
 const footerLinks = [
@@ -106,6 +107,7 @@ export default function DashboardPage() {
   const addressesRef = useRef<HTMLDivElement>(null);
 
   const { user, token, logout } = useAuthStore();
+  const format = useCurrencyStore((s) => s.format);
   const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
   const firstName = user?.firstName ?? "there";
   const initials = user
@@ -933,7 +935,7 @@ export default function DashboardPage() {
                       {wishlistDisplay.map((item) => {
                         const img = item.product?.images?.find((i) => i.isPrimary)?.url ?? item.product?.images?.[0]?.url;
                         const price = item.product?.price != null
-                          ? `$${Number(item.product.price).toFixed(2)}`
+                          ? format(Number(item.product.price))
                           : "";
                         return (
                           <div key={item.id} className="flex flex-col items-center gap-1.5 flex-1">

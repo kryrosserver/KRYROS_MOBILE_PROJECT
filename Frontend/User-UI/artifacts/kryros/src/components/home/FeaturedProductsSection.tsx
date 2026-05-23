@@ -4,6 +4,7 @@ import { Heart, ShoppingCart, Star, Zap, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 import { fetchProducts, fetchFlashSaleProducts } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
@@ -18,8 +19,9 @@ function FeaturedCard({ product }: { product: Product }) {
   const [imgErr, setImgErr] = useState(false);
   const addToCart = useCartStore((s) => s.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const format = useCurrencyStore((s) => s.format);
   const wishlisted = isWishlisted(product.id);
-  const monthly = (product.price / 12).toFixed(2);
+  const monthly = format(product.price / 12);
 
   const handleCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,17 +94,17 @@ function FeaturedCard({ product }: { product: Product }) {
 
         <div className="flex items-center gap-1.5 mb-1">
           <span className="text-sm font-bold text-foreground">
-            ${product.price.toLocaleString("en", { minimumFractionDigits: 2 })}
+            {format(product.price)}
           </span>
           {product.oldPrice > product.price && (
             <span className="text-[10px] text-muted-foreground line-through">
-              ${product.oldPrice.toLocaleString("en", { minimumFractionDigits: 2 })}
+              {format(product.oldPrice)}
             </span>
           )}
         </div>
 
         <p className="text-[10px] font-semibold text-teal-600 mb-2">
-          Get Now from ${monthly}/mo
+          Get Now from {monthly}/mo
         </p>
 
         <div className="flex items-center gap-1.5">

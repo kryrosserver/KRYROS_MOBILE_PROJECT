@@ -4,6 +4,7 @@ import { ArrowRight, ShieldCheck, Heart, ShoppingBag, CreditCard, FileCheck, Pac
 import { motion } from "framer-motion";
 import { fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
+import { useCurrencyStore } from "@/store/currencyStore";
 
 interface CreditPlan {
   id: string;
@@ -35,6 +36,7 @@ export default function GetNowPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [userCredit, setUserCredit] = useState<UserCredit | null>(null);
   const [loading, setLoading] = useState(true);
+  const format = useCurrencyStore((s) => s.format);
 
   useEffect(() => {
     const load = async () => {
@@ -68,7 +70,7 @@ export default function GetNowPage() {
   const interestRate = activePlan?.interestRate ?? 0;
 
   const formatCredit = (val?: number) =>
-    val != null ? `$${val.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—";
+    val != null ? format(val) : "—";
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
@@ -180,7 +182,7 @@ export default function GetNowPage() {
               ))
             : products.map((p, i) => {
                 const monthly = monthlyDivisor > 0
-                  ? (p.price * (1 + interestRate / 100) / monthlyDivisor).toFixed(2)
+                  ? format(p.price * (1 + interestRate / 100) / monthlyDivisor)
                   : "—";
                 return (
                   <motion.div
@@ -212,9 +214,9 @@ export default function GetNowPage() {
                       <div className="p-2.5">
                         <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5 line-clamp-2">{p.name}</p>
                         <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
-                        <p className="text-sm font-black text-foreground leading-tight">${p.price.toFixed(2)}</p>
+                        <p className="text-sm font-black text-foreground leading-tight">{format(p.price)}</p>
                         {activePlan && (
-                          <p className="text-[9px] text-muted-foreground mb-2">or ${monthly}/mo for {activePlan.duration} mos</p>
+                          <p className="text-[9px] text-muted-foreground mb-2">or {format(monthly)}/mo for {activePlan.duration} mos</p>
                         )}
                         <Link href={`/product/${p.id}`}>
                           <button className="w-full py-1.5 bg-foreground text-background rounded-lg text-[10px] font-bold hover:opacity-90 transition-all">
@@ -256,7 +258,7 @@ export default function GetNowPage() {
                 </p>
                 <p className="text-[8px] text-muted-foreground leading-snug">{plan.name}</p>
                 <p className="text-[8px] text-muted-foreground leading-snug">
-                  Min: ${plan.minimumAmount.toLocaleString()}
+                  Min: {format(plan.minimumAmount)}
                 </p>
               </button>
             ))}

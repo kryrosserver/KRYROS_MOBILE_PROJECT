@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Tag, Truck, ShieldCheck, Headphones, ShoppingCart, ChevronRight, Heart, LayoutGrid, Search, ClipboardList, SendHorizonal, CheckCircle2 } from "lucide-react";
 import { fetchProducts, fetchCategories } from "@/lib/api";
 import type { Product, ApiCategory } from "@/lib/api";
+import { useCurrencyStore } from "@/store/currencyStore";
 
 const steps = [
   { icon: Search, title: "Browse Products", desc: "Explore products available for wholesale" },
@@ -24,6 +25,7 @@ export default function WholesalePage() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [wholesaleProducts, setWholesaleProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const format = useCurrencyStore((s) => s.format);
 
   useEffect(() => {
     setLoading(true);
@@ -193,7 +195,7 @@ export default function WholesalePage() {
                     <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5 line-clamp-2">{p.name}</p>
                     <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
                     <p className="text-sm font-black text-foreground leading-tight">
-                      ${p.price.toFixed(2)}<span className="text-[9px] text-muted-foreground font-normal"> /unit</span>
+                      {format(p.price)}<span className="text-[9px] text-muted-foreground font-normal"> /unit</span>
                     </p>
                     <p className="text-[9px] text-muted-foreground mb-2">Min. Order: 5 units</p>
                     <Link href={`/product/${p.id}`}>

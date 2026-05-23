@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Heart, ShoppingCart, Star, ChevronRight } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 import { toast } from "sonner";
 import { fetchProducts } from "@/lib/api";
 import type { Product } from "@/lib/api";
@@ -34,6 +35,7 @@ interface ProductSectionProps {
 function HCard({ product }: { product: Product }) {
   const addToCart = useCartStore((s) => s.addToCart);
   const { items: wishlist, toggleWishlist } = useWishlistStore();
+  const format = useCurrencyStore((s) => s.format);
   const wishlisted = wishlist.includes(product.id);
   const [imgError, setImgError] = useState(false);
 
@@ -81,9 +83,9 @@ function HCard({ product }: { product: Product }) {
         )}
         <div className="flex items-end justify-between">
           <div>
-            <div className="text-sm font-black text-foreground">${product.price.toLocaleString()}</div>
+            <div className="text-sm font-black text-foreground">{format(product.price)}</div>
             {product.oldPrice > product.price && (
-              <span className="text-[10px] text-muted-foreground line-through">${product.oldPrice.toLocaleString()}</span>
+              <span className="text-[10px] text-muted-foreground line-through">{format(product.oldPrice)}</span>
             )}
           </div>
           <button

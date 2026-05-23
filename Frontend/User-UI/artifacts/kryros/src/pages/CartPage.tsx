@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQty, clearCart } = useCartStore();
+  const format = useCurrencyStore((s) => s.format);
   const cartCount = items.reduce((t, i) => t + i.qty, 0);
   const subtotal = items.reduce((t, i) => t + i.price * i.qty, 0);
   const shipping = subtotal >= 100 ? 0 : 9.99;
@@ -75,8 +77,8 @@ export default function CartPage() {
                 <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-xl bg-muted flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground text-sm leading-snug mb-1">{item.name}</h3>
-                  <p className="text-lg font-black text-foreground">${(item.price * item.qty).toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">${item.price.toFixed(2)} each</p>
+                  <p className="text-lg font-black text-foreground">{format(item.price * item.qty)}</p>
+                  <p className="text-xs text-muted-foreground">{format(item.price)} each</p>
                 </div>
                 <div className="flex flex-col items-end gap-3">
                   <button onClick={() => { removeFromCart(item.id); toast.success("Removed from cart"); }} className="text-muted-foreground hover:text-destructive transition-colors">
@@ -104,22 +106,22 @@ export default function CartPage() {
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal ({cartCount} items)</span>
-                <span className="font-semibold text-foreground">${subtotal.toFixed(2)}</span>
+                <span className="font-semibold text-foreground">{format(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className={`font-semibold ${shipping === 0 ? "text-green-600" : "text-foreground"}`}>
-                  {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? "Free" : format(shipping)}
                 </span>
               </div>
               {shipping > 0 && (
-                <p className="text-xs text-primary">Add ${(100 - subtotal).toFixed(2)} more for free shipping</p>
+                <p className="text-xs text-primary">Add {format(100 - subtotal)} more for free shipping</p>
               )}
             </div>
             <div className="border-t border-border pt-3 mb-5">
               <div className="flex justify-between">
                 <span className="font-bold text-foreground">Total</span>
-                <span className="font-black text-xl text-foreground">${total.toFixed(2)}</span>
+                <span className="font-black text-xl text-foreground">{format(total)}</span>
               </div>
             </div>
 

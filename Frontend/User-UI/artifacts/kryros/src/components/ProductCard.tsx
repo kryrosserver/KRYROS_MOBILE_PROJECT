@@ -5,6 +5,7 @@ import { Heart, ShoppingCart, Star, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 import type { Product } from "@/data/mockData";
 
 interface ProductCardProps {
@@ -16,6 +17,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
   const addToCart = useCartStore((s) => s.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const format = useCurrencyStore((s) => s.format);
   const wishlisted = isWishlisted(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -112,11 +114,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             {/* Price */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-base md:text-lg font-bold text-foreground">
-                ${product.price.toLocaleString("en", { minimumFractionDigits: 2 })}
+                {format(product.price)}
               </span>
               {product.oldPrice > product.price && (
                 <span className="text-xs text-muted-foreground line-through">
-                  ${product.oldPrice.toLocaleString("en", { minimumFractionDigits: 2 })}
+                  {format(product.oldPrice)}
                 </span>
               )}
             </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Loader2, Tag } from "lucide-react";
 import { fetchProducts } from "@/lib/api";
 import type { Product } from "@/lib/api";
+import { useCurrencyStore } from "@/store/currencyStore";
 
 interface SearchAutocompleteProps {
   placeholder?: string;
@@ -27,6 +28,7 @@ export default function SearchAutocomplete({
   showSearchButton = false,
   rightSlot,
 }: SearchAutocompleteProps) {
+  const format = useCurrencyStore((s) => s.format);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -175,11 +177,11 @@ export default function SearchAutocomplete({
                 </div>
                 <div className="flex-shrink-0 text-right">
                   <p className="text-sm font-semibold text-primary">
-                    ${product.price.toFixed(2)}
+                    {format(product.price)}
                   </p>
                   {product.discount > 0 && (
                     <p className="text-[10px] text-muted-foreground line-through">
-                      ${product.oldPrice.toFixed(2)}
+                      {format(product.oldPrice)}
                     </p>
                   )}
                 </div>
