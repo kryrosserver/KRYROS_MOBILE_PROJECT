@@ -1,17 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { 
-  Users, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Building2,
-  Mail,
-  FileText,
-  RefreshCw,
-  Search,
-  ChevronLeft
+import { useEffect, useState, useCallback, useRef } from "react";
+import {
+  Users, CheckCircle, XCircle, Clock, Building2, Mail,
+  FileText, RefreshCw, Search, ChevronLeft, Shield,
+  AlertTriangle, CheckSquare, Square, ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 
@@ -26,201 +19,302 @@ type WholesaleAccount = {
   discountTier: number;
   notes: string;
   createdAt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
+  user: { firstName: string; lastName: string; email: string };
 };
 
+const ACCENT = "#12D6C5";
+
+function StatusBadge({ status }: { status: WholesaleAccount["status"] }) {
+  const map = {
+    APPROVED:  { bg: "rgba(22,199,132,0.12)",  color: "#16C784", icon: CheckCircle },
+    PENDING:   { bg: "rgba(245,158,11,0.12)",  color: "#F59E0B", icon: Clock },
+    SUSPENDED: { bg: "rgba(239,68,68,0.1)",    color: "#EF4444", icon: AlertTriangle },
+    REJECTED:  { bg: "rgba(239,68,68,0.1)",    color: "#EF4444", icon: XCircle },
+  };
+  const { bg, color, icon: Icon } = map[status] ?? map.PENDING;
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold" style={{ background: bg, color }}>
+      <Icon className="h-3 w-3" /> {status}
+    </span>
+  );
+}
+
 export default function WholesaleAccountsPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; const h = innerRef.current.scrollHeight * s; const avail = window.innerWidth < 1024 ? window.innerHeight - 64 : Infinity; outerRef.current.style.height = `${Math.max(h, avail)}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const base = vw < 960 ? 960 : 1380; const s = Math.min(1, vw / base); innerRef.current.style.width = `${base}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
+
   const [accounts, setAccounts] = useState<WholesaleAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadAccounts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
     try {
       const res = await fetch("/api/admin/wholesale/accounts");
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load wholesale accounts");
-      setAccounts(data);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+      if (!res.ok) throw new Error(data.error || "Failed to load");
+      setAccounts(Array.isArray(data) ? data : data.items ?? []);
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : "Error"); }
+    finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    loadAccounts();
-  }, [loadAccounts]);
+  useEffect(() => { load(); }, [load]);
+
+  const handleRefresh = () => { setIsRefreshing(true); load().finally(() => setTimeout(() => setIsRefreshing(false), 300)); };
 
   const updateStatus = async (id: string, status: string) => {
     setUpdatingId(id);
     try {
       const res = await fetch(`/api/admin/wholesale/accounts/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }),
       });
-      if (!res.ok) throw new Error("Failed to update status"); 
-      await loadAccounts(); 
-    } catch (e: any) { 
-      alert(e.message); 
-    } finally { 
-      setUpdatingId(null); 
-    }
+      if (!res.ok) throw new Error("Failed to update");
+      await load();
+    } catch (e: unknown) { alert(e instanceof Error ? e.message : "Error"); }
+    finally { setUpdatingId(null); }
   };
 
-  const filteredAccounts = accounts.filter(acc => 
-    acc.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    acc.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    acc.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = accounts.filter(a => {
+    const matchSearch = !search ||
+      a.companyName.toLowerCase().includes(search.toLowerCase()) ||
+      a.user.email.toLowerCase().includes(search.toLowerCase()) ||
+      a.contactPerson.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "all" || a.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+  const paginated = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  const stats = [
+    { label: "Total Accounts", value: accounts.length, color: ACCENT, icon: Users, bg: "rgba(18,214,197,0.12)" },
+    { label: "Pending Review", value: accounts.filter(a => a.status === "PENDING").length, color: "#F59E0B", icon: Clock, bg: "rgba(245,158,11,0.12)" },
+    { label: "Approved", value: accounts.filter(a => a.status === "APPROVED").length, color: "#16C784", icon: CheckCircle, bg: "rgba(22,199,132,0.12)" },
+    { label: "Suspended / Rejected", value: accounts.filter(a => a.status === "SUSPENDED" || a.status === "REJECTED").length, color: "#EF4444", icon: Shield, bg: "rgba(239,68,68,0.1)" },
+  ];
+
+  const handleSelectAll = () => {
+    if (selected.size === paginated.length && paginated.length > 0) setSelected(new Set());
+    else setSelected(new Set(paginated.map(a => a.id)));
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/wholesale" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Wholesale Accounts</h1>
-            <p className="text-slate-500 text-sm">Review applications and manage wholesale partners</p>
+    <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+
+          {/* Header */}
+          <div className="flex flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Link href="/admin/wholesale" className="h-9 w-9 rounded-xl flex items-center justify-center btn-secondary !px-0">
+                <ChevronLeft className="h-4 w-4" />
+              </Link>
+              <div>
+                <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
+                  <Link href="/admin/wholesale" style={{ color: "var(--text-muted)" }}>Wholesale</Link>
+                  <span>/</span><span>Accounts</span>
+                </div>
+                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Wholesale Accounts</h1>
+              </div>
+            </div>
+            <button onClick={handleRefresh} className="btn-secondary !h-10 !w-10 !px-0 flex items-center justify-center">
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            </button>
           </div>
-        </div>
-        <button 
-          onClick={loadAccounts} 
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <input 
-          type="text" 
-          placeholder="Search companies, emails, or contacts..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-        />
-      </div>
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-4">
+            {stats.map(s => (
+              <div key={s.label} className="admin-card !p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: s.bg }}>
+                    <s.icon className="h-5 w-5" style={{ color: s.color }} />
+                  </div>
+                </div>
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+                <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
+              </div>
+            ))}
+          </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th className="px-6 py-4">Company Details</th>
-                <th className="px-6 py-4">Contact Person</th>
-                <th className="px-6 py-4">Tax ID / Address</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredAccounts.map((acc) => (
-                <tr key={acc.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-slate-900 flex items-center gap-1.5">
-                        <Building2 className="h-3.5 w-3.5 text-slate-400" /> {acc.companyName}
-                      </span>
-                      <span className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
-                        <Mail className="h-3.5 w-3.5 text-slate-400" /> {acc.user.email}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    <p className="font-medium text-slate-900">{acc.contactPerson}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{acc.user.firstName} {acc.user.lastName}</p>
-                  </td>
-                  <td className="px-6 py-4 text-xs text-slate-600 max-w-[200px]">
-                    <p className="flex items-center gap-1.5 font-mono">
-                      <FileText className="h-3.5 w-3.5 text-slate-400" /> {acc.taxId || "N/A"}
-                    </p>
-                    <p className="mt-1 line-clamp-2 italic">{acc.address || "No address provided"}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase border ${
-                      acc.status === "APPROVED" ? "bg-green-100 text-green-700 border-green-200" :
-                      acc.status === "REJECTED" ? "bg-red-100 text-red-700 border-red-200" :
-                      acc.status === "PENDING" ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
-                      "bg-slate-100 text-slate-700 border-slate-200"
-                    }`}>
-                      {acc.status === "APPROVED" && <CheckCircle className="h-3 w-3" />}
-                      {acc.status === "REJECTED" && <XCircle className="h-3 w-3" />}
-                      {acc.status === "PENDING" && <Clock className="h-3 w-3" />}
-                      {acc.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {acc.status === "PENDING" && (
-                        <>
-                          <button 
-                            onClick={() => updateStatus(acc.id, "APPROVED")}
-                            disabled={updatingId === acc.id}
-                            className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50 shadow-sm shadow-green-500/20"
-                          >
-                            Approve
-                          </button>
-                          <button 
-                            onClick={() => updateStatus(acc.id, "REJECTED")}
-                            disabled={updatingId === acc.id}
-                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50 shadow-sm shadow-red-500/20"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                      {acc.status === "APPROVED" && (
-                        <button 
-                          onClick={() => updateStatus(acc.id, "SUSPENDED")}
-                          disabled={updatingId === acc.id}
-                          className="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold rounded-lg transition-all disabled:opacity-50"
-                        >
-                          Suspend
-                        </button>
-                      )}
-                      {acc.status === "SUSPENDED" && (
-                        <button 
-                          onClick={() => updateStatus(acc.id, "APPROVED")}
-                          disabled={updatingId === acc.id}
-                          className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50 shadow-sm shadow-blue-500/20"
-                        >
-                          Re-activate
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          
-          {loading && (
-            <div className="p-12 flex flex-col items-center justify-center text-slate-400 gap-3">
-              <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
-              <p className="text-sm font-medium italic">Fetching partners...</p>
-            </div>
+          {error && (
+            <div className="rounded-xl p-4 text-sm" style={{ background: "rgba(239,68,68,0.1)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>
           )}
-          
-          {!loading && !filteredAccounts.length && (
-            <div className="p-12 flex flex-col items-center justify-center text-slate-400 gap-2">
-              <Building2 className="h-12 w-12 opacity-20" />
-              <p className="text-sm font-medium italic">No wholesale partners found</p>
+
+          {/* Filter Bar */}
+          <div className="admin-card !p-4 flex items-center gap-3">
+            <div className="relative flex-1 min-w-[220px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: "var(--text-muted)" }} />
+              <input
+                placeholder="Search company, email, contact..."
+                value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
+                className="admin-input pl-10 w-full"
+              />
             </div>
-          )}
+            <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} className="admin-input h-9 text-sm !w-auto min-w-[150px]">
+              <option value="all">All Statuses</option>
+              <option value="PENDING">Pending</option>
+              <option value="APPROVED">Approved</option>
+              <option value="SUSPENDED">Suspended</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+
+          {/* Table */}
+          <div className="admin-card !p-0 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th className="!px-4 !py-3 w-10">
+                      <button onClick={handleSelectAll}>
+                        {selected.size === paginated.length && paginated.length > 0
+                          ? <CheckSquare className="h-4 w-4" style={{ color: ACCENT }} />
+                          : <Square className="h-4 w-4" style={{ color: "var(--text-muted)" }} />}
+                      </button>
+                    </th>
+                    <th>Company</th>
+                    <th>Contact Person</th>
+                    <th>Tax ID / Address</th>
+                    <th>Discount Tier</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th className="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    [...Array(rowsPerPage)].map((_, i) => (
+                      <tr key={i}><td colSpan={8}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "var(--icon-bg)" }} /></td></tr>
+                    ))
+                  ) : paginated.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-14">
+                        <Building2 className="h-10 w-10 mx-auto mb-3 opacity-30" style={{ color: "var(--text-muted)" }} />
+                        <p className="font-semibold text-sm" style={{ color: "var(--text-muted)" }}>No wholesale accounts found</p>
+                      </td>
+                    </tr>
+                  ) : paginated.map(acc => (
+                    <tr key={acc.id}>
+                      <td className="!px-4">
+                        <button onClick={() => { const n = new Set(selected); n.has(acc.id) ? n.delete(acc.id) : n.add(acc.id); setSelected(n); }}>
+                          {selected.has(acc.id)
+                            ? <CheckSquare className="h-4 w-4" style={{ color: ACCENT }} />
+                            : <Square className="h-4 w-4" style={{ color: "var(--text-muted)" }} />}
+                        </button>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--icon-bg)" }}>
+                            <Building2 className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm truncate max-w-[180px]" style={{ color: "var(--text-primary)" }}>{acc.companyName}</p>
+                            <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--text-muted)" }}>
+                              <Mail className="h-3 w-3" /> {acc.user.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{acc.contactPerson}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{acc.user.firstName} {acc.user.lastName}</p>
+                      </td>
+                      <td>
+                        <p className="text-xs font-mono flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+                          <FileText className="h-3 w-3 shrink-0" /> {acc.taxId || "N/A"}
+                        </p>
+                        <p className="text-xs mt-1 truncate max-w-[180px] italic" style={{ color: "var(--text-muted)" }}>
+                          {acc.address || "No address"}
+                        </p>
+                      </td>
+                      <td>
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background: "rgba(18,214,197,0.1)", color: ACCENT }}>
+                          Tier {acc.discountTier || 0}
+                        </span>
+                      </td>
+                      <td><StatusBadge status={acc.status} /></td>
+                      <td className="text-xs" style={{ color: "var(--text-muted)" }}>
+                        {acc.createdAt ? new Date(acc.createdAt).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {acc.status === "PENDING" && (<>
+                            <button
+                              onClick={() => updateStatus(acc.id, "APPROVED")}
+                              disabled={updatingId === acc.id}
+                              className="px-3 h-8 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                              style={{ background: "rgba(22,199,132,0.12)", color: "#16C784" }}
+                            >Approve</button>
+                            <button
+                              onClick={() => updateStatus(acc.id, "REJECTED")}
+                              disabled={updatingId === acc.id}
+                              className="px-3 h-8 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                              style={{ background: "rgba(239,68,68,0.1)", color: "#EF4444" }}
+                            >Reject</button>
+                          </>)}
+                          {acc.status === "APPROVED" && (
+                            <button
+                              onClick={() => updateStatus(acc.id, "SUSPENDED")}
+                              disabled={updatingId === acc.id}
+                              className="px-3 h-8 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                              style={{ background: "rgba(245,158,11,0.12)", color: "#F59E0B" }}
+                            >Suspend</button>
+                          )}
+                          {acc.status === "SUSPENDED" && (
+                            <button
+                              onClick={() => updateStatus(acc.id, "APPROVED")}
+                              disabled={updatingId === acc.id}
+                              className="px-3 h-8 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                              style={{ background: "rgba(18,214,197,0.12)", color: ACCENT }}
+                            >Re-activate</button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: "1px solid var(--card-border)" }}>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {filtered.length === 0 ? "0" : `${(page - 1) * rowsPerPage + 1}–${Math.min(page * rowsPerPage, filtered.length)}`} of {filtered.length}
+              </span>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="h-8 w-8 rounded-lg flex items-center justify-center btn-secondary !px-0 disabled:opacity-40">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const n = totalPages <= 5 ? i + 1 : page <= 3 ? i + 1 : page >= totalPages - 2 ? totalPages - 4 + i : page - 2 + i;
+                  return (
+                    <button key={n} onClick={() => setPage(n)}
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold"
+                      style={n === page ? { background: ACCENT, color: "#fff" } : { color: "var(--text-muted)" }}
+                    >{n}</button>
+                  );
+                })}
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="h-8 w-8 rounded-lg flex items-center justify-center btn-secondary !px-0 disabled:opacity-40">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
