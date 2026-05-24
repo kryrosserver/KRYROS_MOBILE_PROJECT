@@ -243,7 +243,7 @@ export default function HomePageCMS() {
             </div>
 
             {/* Section Rows */}
-            <div style={{ divide: "var(--card-border)" }}>
+            <div>
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <div key={i} className="flex items-center gap-4 px-5 py-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
