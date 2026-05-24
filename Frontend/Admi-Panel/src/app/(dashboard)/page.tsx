@@ -120,10 +120,19 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     let raf: number;
+
+    function applyHeight() {
+      if (!innerRef.current || !outerRef.current) return;
+      // Temporarily remove height constraint so getBoundingClientRect is unclipped
+      outerRef.current.style.height = "auto";
+      // getBoundingClientRect().height already reflects the CSS transform scale
+      const visualH = innerRef.current.getBoundingClientRect().height;
+      outerRef.current.style.height = `${visualH}px`;
+    }
+
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
       const vw = outerRef.current.offsetWidth || window.innerWidth;
-      // Use a smaller base on mobile so content is ~50% size instead of ~30%
       const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
       const nextScale = Math.min(1, vw / baseW);
 
@@ -132,24 +141,21 @@ export default function AdminDashboard() {
       innerRef.current.style.transformOrigin = "top left";
       setScale(nextScale);
 
-      // Fix outer height — wait two frames so DOM has fully painted
+      // Wait two frames for the transform to paint, then lock the exact height
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!innerRef.current || !outerRef.current) return;
-          const ih = innerRef.current.scrollHeight;
-          outerRef.current.style.height = `${ih * nextScale}px`;
-        });
+        requestAnimationFrame(applyHeight);
       });
     }
+
     recalc();
+    // Re-run once after 400ms to catch any late-loading content shifts
+    const t = setTimeout(recalc, 400);
     window.addEventListener("resize", recalc);
-    const ro = new ResizeObserver(recalc);
-    if (innerRef.current) ro.observe(innerRef.current);
     return () => {
       window.removeEventListener("resize", recalc);
-      ro.disconnect();
       cancelAnimationFrame(raf);
+      clearTimeout(t);
     };
   }, []);
 
