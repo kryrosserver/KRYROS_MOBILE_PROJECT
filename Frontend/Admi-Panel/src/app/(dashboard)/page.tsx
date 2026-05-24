@@ -22,7 +22,8 @@ const TEXT_PRIMARY = "#FFFFFF";
 const TEXT_SECONDARY = "#AAB4C5";
 const ACCENT = "#12D6C5";
 // BASE_WIDTH adapts per viewport so mobile content stays readable
-const MOBILE_BASE = 860;
+// 960 → scale=0.45 on a 430px phone: 3 tables get 248px each (vs 191px at 860)
+const MOBILE_BASE = 960;
 const DESKTOP_BASE = 1380;
 
 const salesData = [
@@ -136,7 +137,7 @@ export default function AdminDashboard() {
       raf = requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (!innerRef.current || !outerRef.current) return;
-          const ih = innerRef.current.offsetHeight;
+          const ih = innerRef.current.scrollHeight;
           outerRef.current.style.height = `${ih * nextScale}px`;
         });
       });
@@ -279,7 +280,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* ── BODY ── */}
-        <div style={{ padding: "20px 20px", display: "flex", gap: 16 }}>
+        <div style={{ padding: "16px 16px", display: "flex", gap: 12 }}>
 
           {/* LEFT MAIN */}
           <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -495,7 +496,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* RIGHT PANEL — always fixed width */}
-          <div style={{ width: 230, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ width: 200, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
 
             {/* Quick Actions */}
             <div style={{ ...card, padding: "16px" }}>
