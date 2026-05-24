@@ -121,13 +121,20 @@ export default function AdminDashboard() {
   useEffect(() => {
     let raf: number;
 
-    function applyHeight() {
+    function applyHeight(nextScale: number) {
       if (!innerRef.current || !outerRef.current) return;
-      // Temporarily remove height constraint so getBoundingClientRect is unclipped
+      // Unlock height so measurement is unclipped
       outerRef.current.style.height = "auto";
-      // getBoundingClientRect().height already reflects the CSS transform scale
-      const visualH = innerRef.current.getBoundingClientRect().height;
-      outerRef.current.style.height = `${visualH}px`;
+      // scrollHeight = true layout height before transform; multiply by scale = visual height
+      const naturalH = innerRef.current.scrollHeight;
+      const visualH = naturalH * nextScale;
+
+      // On mobile: fill full available viewport so the layout's min-h-screen
+      // doesn't bleed below the dashboard as blank background.
+      // Available height = viewport minus the 64px mobile top-bar.
+      const isMobile = window.innerWidth < 1024;
+      const screenAvail = isMobile ? window.innerHeight - 64 : Infinity;
+      outerRef.current.style.height = `${Math.max(visualH, screenAvail)}px`;
     }
 
     function recalc() {
@@ -144,7 +151,7 @@ export default function AdminDashboard() {
       // Wait two frames for the transform to paint, then lock the exact height
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        requestAnimationFrame(applyHeight);
+        requestAnimationFrame(() => applyHeight(nextScale));
       });
     }
 
