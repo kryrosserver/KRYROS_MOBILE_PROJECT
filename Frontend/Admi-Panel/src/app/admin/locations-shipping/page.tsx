@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Globe,
   Map as MapIcon,
@@ -13,6 +13,14 @@ import {
 } from "lucide-react";
 
 export default function ShippingDashboardPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(nextScale: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; const naturalH = innerRef.current.scrollHeight; const visualH = naturalH * nextScale; const isMobile = window.innerWidth < 1024; const screenAvail = isMobile ? window.innerHeight - 64 : Infinity; outerRef.current.style.height = `${Math.max(visualH, screenAvail)}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? 960 : 1380; const nextScale = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${nextScale})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(nextScale))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
   const [counts, setCounts] = useState({ countries: 0, states: 0, cities: 0, zones: 0, methods: 0 });
   const [isEnabled, setIsEnabled] = useState(false);
 
@@ -65,6 +73,8 @@ export default function ShippingDashboardPage() {
   ];
 
   return (
+    <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -148,6 +158,8 @@ export default function ShippingDashboardPage() {
             </div>
           </Link>
         ))}
+      </div>
+    </div>
       </div>
     </div>
   );
