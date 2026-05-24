@@ -90,7 +90,7 @@ export default function ReportsPage() {
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
             Reports & Analytics
@@ -133,7 +133,7 @@ export default function ReportsPage() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         {loading ? (
           [...Array(4)].map((_, i) => (
             <div key={i} className="admin-card animate-pulse">
@@ -198,7 +198,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6">
         {/* Top Products */}
         <div className="admin-card">
           <div className="flex items-center justify-between mb-5">
@@ -315,7 +315,7 @@ export default function ReportsPage() {
         <h2 className="text-base font-semibold mb-5" style={{ color: "var(--text-primary)" }}>
           Credit System Performance
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           {[
             { label: "Active Credit Accounts", value: (credit?.activeAccounts ?? 0).toLocaleString() },
             { label: "Total Outstanding",      value: formatPrice(Number(credit?.totalOutstanding || 0)) },
@@ -339,13 +339,13 @@ export default function ReportsPage() {
             Sales by Category
           </h2>
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-5 gap-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: "var(--hover-bg)" }} />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-5 gap-4">
               {categories.map((cat, idx) => {
                 const colors = [ACCENT, "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981", "#6366F1"];
                 const color = colors[idx % colors.length];

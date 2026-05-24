@@ -161,7 +161,7 @@ export default function BrandsPage() {
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
             Brand Management
@@ -173,7 +173,7 @@ export default function BrandsPage() {
         <div className="flex items-center gap-3">
           <button onClick={loadBrands} className="btn-secondary flex items-center gap-2">
             <RefreshCcw className="h-4 w-4" />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="inline">Refresh</span>
           </button>
           <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2">
             <Plus className="h-4 w-4" />
@@ -222,9 +222,9 @@ export default function BrandsPage() {
             <thead>
               <tr>
                 <th>Brand</th>
-                <th className="hidden sm:table-cell">Category</th>
-                <th className="hidden md:table-cell">Slug</th>
-                <th className="hidden lg:table-cell">Website</th>
+                <th className="table-cell">Category</th>
+                <th className="table-cell">Slug</th>
+                <th className="table-cell">Website</th>
                 <th>Status</th>
                 <th className="text-right">Actions</th>
               </tr>
@@ -260,14 +260,14 @@ export default function BrandsPage() {
                       </div>
                       <div className="min-w-0">
                         <p
-                          className="font-semibold text-sm truncate max-w-[140px] sm:max-w-[200px]"
+                          className="font-semibold text-sm truncate max-w-[140px] max-w-[200px]"
                           style={{ color: "var(--text-primary)" }}
                         >
                           {brand.name}
                         </p>
                         {brand.description && (
                           <p
-                            className="text-xs truncate max-w-[140px] mt-0.5 sm:hidden"
+                            className="text-xs truncate max-w-[140px] mt-0.5 "
                             style={{ color: "var(--text-secondary)" }}
                           >
                             {brand.description}
@@ -276,14 +276,14 @@ export default function BrandsPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="hidden sm:table-cell">
+                  <td className="table-cell">
                     {brand.category ? (
                       <span className="badge badge-info">{brand.category.name}</span>
                     ) : (
                       <span className="text-xs italic" style={{ color: "var(--text-muted)" }}>Unassigned</span>
                     )}
                   </td>
-                  <td className="hidden md:table-cell">
+                  <td className="table-cell">
                     <code
                       className="text-xs px-2 py-1 rounded font-mono"
                       style={{ background: "var(--icon-bg)", color: "#12D6C5" }}
@@ -291,7 +291,7 @@ export default function BrandsPage() {
                       {brand.slug}
                     </code>
                   </td>
-                  <td className="hidden lg:table-cell">
+                  <td className="table-cell">
                     {brand.website ? (
                       <a
                         href={brand.website}

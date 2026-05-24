@@ -157,7 +157,7 @@ export default function ServicesPage() {
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Services Management</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>Configure service offerings and bookings</p>
@@ -169,7 +169,7 @@ export default function ServicesPage() {
       </div>
 
       {/* Stats Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {[
           { label: "Total Services", value: services.length, icon: Wrench, color: "bg-teal-50 text-[#12D6C5]" },
           { label: "Today's Bookings", value: todaysBookings, icon: Calendar, color: "bg-blue-50 text-blue-600" },
@@ -217,7 +217,7 @@ export default function ServicesPage() {
           {/* Quick Create */}
           <div className="admin-card bg-slate-50/50">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Quick Create Service</p>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-6 gap-3">
               <input placeholder="Name" className="admin-input" value={form.name || ""} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} />
               <input placeholder="Slug" className="admin-input" value={form.slug || ""} onChange={(e) => setForm(f => ({ ...f, slug: e.target.value }))} />
               <input placeholder="Category" className="admin-input" value={form.category || ""} onChange={(e) => setForm(f => ({ ...f, category: e.target.value }))} />
@@ -251,7 +251,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input type="text" placeholder="Search services..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="admin-input pl-10" />
@@ -270,7 +270,7 @@ export default function ServicesPage() {
 
           {/* Services Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => <div key={i} className="admin-card h-48 animate-pulse" />)}
             </div>
           ) : filteredServices.length === 0 ? (
@@ -279,7 +279,7 @@ export default function ServicesPage() {
               <p className="text-sm font-semibold">No services found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {filteredServices.map((service) => (
                 <div key={service.id} className="admin-card hover:shadow-lg hover:border-[#12D6C5]/30 transition-all duration-200">
                   <div className="flex items-start justify-between mb-4">

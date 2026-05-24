@@ -77,7 +77,7 @@ export default function ShippingDashboardPage() {
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div
             className="h-10 w-10 rounded-xl flex items-center justify-center"
@@ -97,7 +97,7 @@ export default function ShippingDashboardPage() {
 
         {/* System Status Badge */}
         <div
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest self-auto"
           style={isEnabled
             ? { background: "rgba(22,199,132,0.12)", color: "#16C784", border: "1px solid rgba(22,199,132,0.25)" }
             : { background: "var(--icon-bg)", color: "var(--text-muted)", border: "1px solid var(--card-border)" }
@@ -112,7 +112,7 @@ export default function ShippingDashboardPage() {
       </div>
 
       {/* Section Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {sections.map((section) => (
           <Link
             key={section.id}

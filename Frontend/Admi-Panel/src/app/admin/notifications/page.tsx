@@ -217,8 +217,8 @@ export default function NotificationsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8">
+      <div className="grid grid-cols-12 gap-8">
+        <div className="col-span-8">
           <div className="bg-white border-2 border-slate-100 shadow-sm rounded-[2.5rem] overflow-hidden">
             {activeTab === 'EMAIL' ? (
               <form onSubmit={handleSendEmail} className="p-8 space-y-6">
@@ -302,7 +302,7 @@ export default function NotificationsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-50">
+                <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-50">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                       <Calendar className="h-3 w-3" /> Schedule (Optional)
@@ -350,7 +350,7 @@ export default function NotificationsPage() {
               </div>
             ) : (
               <form onSubmit={handleSendPush} className="p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Notification Title</label>
                     <input 
@@ -384,7 +384,7 @@ export default function NotificationsPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-50">
+                <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-50">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-[#1FA89A] flex items-center gap-2">
                       <Target className="h-3 w-3" /> Target Audience
@@ -414,7 +414,7 @@ export default function NotificationsPage() {
                   </div>
 
                   {targetType === 'SINGLE' && (
-                    <div className="md:col-span-2 space-y-2 animate-in slide-in-from-left-2">
+                    <div className="col-span-2 space-y-2 animate-in slide-in-from-left-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">User UUID</label>
                       <input 
                         required
@@ -427,7 +427,7 @@ export default function NotificationsPage() {
                   )}
 
                   {targetType === 'BULK' && (
-                    <div className="md:col-span-2 space-y-2 animate-in slide-in-from-left-2">
+                    <div className="col-span-2 space-y-2 animate-in slide-in-from-left-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order IDs (Comma Separated)</label>
                       <input 
                         required
@@ -440,7 +440,7 @@ export default function NotificationsPage() {
                   )}
 
                   {targetType === 'STATUS_BASED' && (
-                    <div className="md:col-span-2 space-y-2 animate-in slide-in-from-left-2">
+                    <div className="col-span-2 space-y-2 animate-in slide-in-from-left-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Order Status</label>
                       <select 
                         value={formData.orderStatus}
@@ -475,7 +475,7 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-4 space-y-6">
+        <div className="col-span-4 space-y-6">
           <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 shadow-sm space-y-6">
             <h3 className="font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
               <Info className="h-5 w-5 text-[#1FA89A]" /> Best Practices

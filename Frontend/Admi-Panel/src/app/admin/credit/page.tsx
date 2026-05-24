@@ -237,12 +237,12 @@ export default function CreditPage() {
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Credit Management</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Manage applications and rules for installments</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2">
           {(["requests", "plans", "products"] as const).map((tab, i) => (
             <button
               key={tab}
@@ -262,7 +262,7 @@ export default function CreditPage() {
       {activeTab === "requests" ? (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <div className="admin-card p-5 border-l-4 border-l-blue-500">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Accounts</p>
               <div className="flex items-center justify-between">
@@ -383,7 +383,7 @@ export default function CreditPage() {
 
           {showCreate && (
             <div className="admin-card p-6 border-2 border-green-100 bg-green-50/5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Product Name</label>
@@ -433,7 +433,7 @@ export default function CreditPage() {
                       {currentCategoryAttributes.length > 0 && (
                         <div className="mb-3">
                           <p className="text-[9px] font-bold text-slate-400 uppercase mb-1.5">Quick Suggestions:</p>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex gap-1.5">
                             {currentCategoryAttributes.map(attr => (
                               <button
                                 key={attr}
@@ -723,7 +723,7 @@ export default function CreditPage() {
             </button>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-3 gap-6">
             {plans.map((plan) => (
               <div key={plan.id} className="admin-card p-6 border-t-4 border-t-green-500 relative group">
                 <div className="flex justify-between items-start mb-4">
@@ -747,7 +747,7 @@ export default function CreditPage() {
                   </div>
                   <div className="pt-2 border-t border-slate-100">
                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Applicable To</p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex gap-1">
                       {!plan.targetBrandId && !plan.targetCategoryId && (
                         <span className="bg-blue-50 text-blue-600 text-[10px] px-2 py-0.5 rounded-full font-bold">ALL PRODUCTS</span>
                       )}
@@ -918,7 +918,7 @@ export default function CreditPage() {
               </button>
             </div>
             
-            <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-8 overflow-y-auto grid grid-cols-2 gap-8">
               <div className="space-y-5">
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Product Name</label>
@@ -967,7 +967,7 @@ export default function CreditPage() {
                       {currentEditCategoryAttributes.length > 0 && (
                         <div className="mb-3">
                           <p className="text-[9px] font-bold text-slate-400 uppercase mb-1.5">Quick Suggestions:</p>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex gap-1.5">
                             {currentEditCategoryAttributes.map(attr => (
                               <button
                                 key={attr}

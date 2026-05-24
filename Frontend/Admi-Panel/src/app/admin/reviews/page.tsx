@@ -101,7 +101,7 @@ export default function ReviewsPage() {
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
             Reviews Management
@@ -110,7 +110,7 @@ export default function ReviewsPage() {
             Manage customer feedback and featured homepage reviews
           </p>
         </div>
-        <div className="relative w-full sm:w-72">
+        <div className="relative w-72">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
             style={{ color: "var(--text-muted)" }}
@@ -148,7 +148,7 @@ export default function ReviewsPage() {
           <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Customer reviews will appear here.</p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-3 gap-4">
           {filteredReviews.map((review) => (
             <div
               key={review.id}

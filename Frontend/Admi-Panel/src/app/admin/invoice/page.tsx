@@ -35,7 +35,7 @@ export default function InvoicePage() {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Total Invoiced", value: invoices.reduce((s, i) => s + i.total, 0), color: "var(--text-primary)" },
           { label: "Paid",           value: 0,                                          color: "#16C784" },
@@ -52,7 +52,7 @@ export default function InvoicePage() {
       </div>
 
       {/* Filters & Search */}
-      <div className="admin-card !p-4 flex flex-wrap items-center gap-3">
+      <div className="admin-card !p-4 flex items-center gap-3">
         <div className="relative flex-1 min-w-[280px]">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
