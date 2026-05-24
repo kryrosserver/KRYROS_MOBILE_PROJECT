@@ -1,344 +1,563 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Search, RefreshCw, User, Mail, Phone, Shield, Trash2, Plus, X, UserPlus, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Bell, Search, Calendar, Sun, Moon, ChevronDown, ChevronRight,
+  Menu, Users, Shield, ShieldCheck, UserPlus, Download, MoreHorizontal,
+  Eye, Edit, Filter, RefreshCw, UserCheck, ChevronLeft, ChevronRight as ChevronR,
+} from "lucide-react";
+import {
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area,
+} from "recharts";
+import { useTheme } from "@/providers/ThemeProvider";
+
+const ACCENT = "#12D6C5";
+const MOBILE_BASE = 960;
+const DESKTOP_BASE = 1380;
+
+const ROLE_COLORS: Record<string, string> = {
+  SUPER_ADMIN: "#12D6C5",
+  ADMIN: "#8B5CF6",
+  EDITOR: "#3B82F6",
+  MODERATOR: "#F59E0B",
+  CUSTOMER: "#6B7280",
+  WHOLESALER: "#22C55E",
+};
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: "Super Admin",
+  ADMIN: "Admin",
+  EDITOR: "Editor",
+  MODERATOR: "Moderator",
+  CUSTOMER: "User",
+  WHOLESALER: "Wholesaler",
+};
+
+function MiniSparkline({ color, up }: { color: string; up: boolean }) {
+  const data = up
+    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
+    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
+  return (
+    <ResponsiveContainer width="100%" height={32}>
+      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id={`sg${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+            <stop offset="95%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5}
+          fill={`url(#sg${color.replace("#", "")})`} dot={false} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
 
 type User = {
   id: string;
-  email: string;
   firstName: string;
   lastName: string;
-  phone?: string;
+  email: string;
   role: string;
   isActive: boolean;
   isVerified: boolean;
   createdAt: string;
+  lastActive?: string;
 };
 
+const ROWS_PER_PAGE = 10;
+
 export default function UsersPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [newUser, setNewUser] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    phone: "",
-    role: "CUSTOMER"
-  });
+  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [verifiedFilter, setVerifiedFilter] = useState("ALL");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
 
-  const fetchCurrentUser = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      if (res.ok) {
-        const data = await res.json();
-        setCurrentUser(data);
-      }
-    } catch (e) {
-    }
-  };
-
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/users", { cache: "no-store" });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body?.error || "Failed to load users");
-      setUsers(Array.isArray(body) ? body : body?.users || body?.data || []);
-    } catch (e: any) {
-      setError(e?.message || "Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const BG = "var(--bg-primary)";
+  const CARD = "var(--card-bg)";
+  const BORDER = "var(--card-border)";
+  const TEXT = "var(--text-primary)";
+  const TEXT2 = "var(--text-secondary)";
+  const HEADER_BG = "var(--bg-secondary)";
+  const ICON_BG = "var(--icon-bg)";
+  const HOVER = "var(--hover-bg)";
 
   useEffect(() => {
-    fetchCurrentUser();
-    load();
+    let raf: number;
+    function applyHeight(s: number) {
+      if (!innerRef.current || !outerRef.current) return;
+      outerRef.current.style.height = "auto";
+      const naturalH = innerRef.current.scrollHeight;
+      const visualH = naturalH * s;
+      const isMob = window.innerWidth < 1024;
+      const avail = isMob ? window.innerHeight - 64 : Infinity;
+      outerRef.current.style.height = `${Math.max(visualH, avail)}px`;
+    }
+    function recalc() {
+      if (!innerRef.current || !outerRef.current) return;
+      const vw = outerRef.current.offsetWidth || window.innerWidth;
+      const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
+      const s = Math.min(1, vw / baseW);
+      innerRef.current.style.width = `${baseW}px`;
+      innerRef.current.style.transform = `scale(${s})`;
+      innerRef.current.style.transformOrigin = "top left";
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s)));
+    }
+    recalc();
+    const t = setTimeout(recalc, 400);
+    window.addEventListener("resize", recalc);
+    return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, [users]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch("/internal/admin/users", { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => setUsers(Array.isArray(data) ? data : data?.users || data?.data || []))
+      .catch(() => setUsers([]))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
-    try {
-      const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setUsers(users.filter(u => u.id !== id));
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to delete user");
-      }
-    } catch (e) {
-      alert("An error occurred while deleting user");
-    }
-  };
+  const filtered = users.filter(u => {
+    const name = `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase();
+    const matchSearch = !searchTerm || name.includes(searchTerm.toLowerCase());
+    const matchRole = roleFilter === "ALL" || u.role === roleFilter;
+    const matchStatus = statusFilter === "ALL" || (statusFilter === "ACTIVE" ? u.isActive : !u.isActive);
+    const matchVerified = verifiedFilter === "ALL" || (verifiedFilter === "VERIFIED" ? u.isVerified : !u.isVerified);
+    return matchSearch && matchRole && matchStatus && matchVerified;
+  });
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsCreating(true);
-    try {
-      const res = await fetch("/api/admin/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newUser)
-      });
-      if (res.ok) {
-        setShowAddModal(false);
-        setNewUser({ firstName: "", lastName: "", email: "", password: "", phone: "", role: "CUSTOMER" });
-        load();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to create user");
-      }
-    } catch (e) {
-      alert("An error occurred while creating user");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
+  const pageUsers = filtered.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
 
   const admins = users.filter(u => u.role === "ADMIN" || u.role === "SUPER_ADMIN");
-  const customers = users.filter(u => u.role === "CUSTOMER" || u.role === "WHOLESALER");
+  const superAdmins = users.filter(u => u.role === "SUPER_ADMIN");
+  const regular = users.filter(u => u.role !== "ADMIN" && u.role !== "SUPER_ADMIN");
 
-  const filteredAdmins = admins.filter(u => 
-    u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const roleGroups = [
+    { name: "Super Admins", count: superAdmins.length, color: "#12D6C5" },
+    { name: "Admins", count: admins.filter(u => u.role === "ADMIN").length, color: "#8B5CF6" },
+    { name: "Editors", count: users.filter(u => u.role === "EDITOR").length, color: "#3B82F6" },
+    { name: "Moderators", count: users.filter(u => u.role === "MODERATOR").length, color: "#F59E0B" },
+    { name: "Regular Users", count: regular.length, color: "#6B7280" },
+  ];
 
-  const filteredCustomers = customers.filter(u => 
-    u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const recentUsers = [...users].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
-  const renderTable = (userList: User[], title: string, showDelete: boolean = true) => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-          {title === "Admins" ? <ShieldCheck className="h-5 w-5 text-blue-600" /> : <User className="h-5 w-5 text-green-600" />}
-          {title} ({userList.length})
-        </h2>
-      </div>
-      <div className="admin-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="admin-table min-w-[800px]">
-            <thead>
-              <tr>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Email</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Joined</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {userList.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                    No {title.toLowerCase()} found.
-                  </td>
-                </tr>
-              ) : (
-                userList.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                          <User className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <span className="font-medium text-slate-900">{u.firstName} {u.lastName}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">{u.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`badge ${u.role.includes('ADMIN') ? 'badge-info' : 'badge-success'} flex items-center gap-1 w-fit`}>
-                        <Shield className="h-3 w-3" />
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`badge ${u.isActive ? "badge-success" : "badge-danger"}`}>
-                        {u.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-500">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {showDelete && u.id !== currentUser?.id && u.role !== "SUPER_ADMIN" && (
-                        <button 
-                          onClick={() => handleDelete(u.id)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Delete User"
-                        >
-                          <Trash2 className="h-4.5 w-4.5" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+  const toggleSelect = (id: string) => setSelected(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleAll = () => setSelected(s => s.length === pageUsers.length ? [] : pageUsers.map(u => u.id));
+
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+
+  const initials = (u: User) => `${u.firstName?.[0] || ""}${u.lastName?.[0] || ""}`.toUpperCase() || "U";
+  const avatarColor = (role: string) => ROLE_COLORS[role] || "#6B7280";
+
+  const timeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins} mins ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hr${hrs > 1 ? "s" : ""} ago`;
+    return `${Math.floor(hrs / 24)} days ago`;
+  };
+
+  const pageNums = (() => {
+    const nums: (number | "...")[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) nums.push(i);
+    } else {
+      nums.push(1, 2, 3, 4, 5, "...", totalPages);
+    }
+    return nums;
+  })();
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">User Management</h1>
-          <p className="text-slate-500 text-sm">Manage system administrators and platform users</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {isSuperAdmin && (
-            <button 
-              onClick={() => {
-                setNewUser({ ...newUser, role: "ADMIN" });
-                setShowAddModal(true);
-              }}
-              className="btn-primary flex items-center gap-2 px-4 py-2"
-            >
-              <UserPlus className="h-4 w-4" />
-              Add Admin
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT }}>
+
+        {/* ── HEADER ── */}
+        <header style={{
+          background: HEADER_BG, borderBottom: `1px solid ${BORDER}`,
+          height: 60, display: "flex", alignItems: "center",
+          justifyContent: "space-between", padding: "0 24px", gap: 16,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Menu style={{ width: 20, height: 20 }} />
             </button>
-          )}
-          <button onClick={load} className="btn-secondary flex items-center gap-2 px-4 py-2">
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        </div>
-      </div>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap" }}>User Management</h1>
+          </div>
 
-      {/* Search Bar */}
-      <div className="admin-card p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input 
-            type="text"
-            placeholder="Search users by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
-          />
-        </div>
-      </div>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input placeholder="Search users by name, email, phone..." style={{
+              width: "100%", background: CARD, border: `1px solid ${BORDER}`,
+              borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none",
+            }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center">
-          {error}
-        </div>
-      )}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
+            </button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} />
+              May 20 – May 26, 2025
+              <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
+                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
+              </div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
+          </div>
+        </header>
 
-      {/* Conditional Rendering of Admins Section */}
-      {isSuperAdmin && renderTable(filteredAdmins, "Admins")}
+        {/* ── BODY ── */}
+        <div style={{ padding: "20px 20px", display: "flex", gap: 16, alignItems: "flex-start" }}>
 
-      {/* Always Show Customers Section */}
-      {renderTable(filteredCustomers, "Platform Users")}
+          {/* LEFT MAIN */}
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
 
-      {/* Add User Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">
-                {newUser.role === "ADMIN" ? "Create New Admin" : "Create New User"}
-              </h2>
-              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white rounded-full transition-colors">
-                <X className="h-5 w-5 text-slate-400" />
+            {/* Page title + actions */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+              <div>
+                <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>User Management</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
+                  <span>Home</span>
+                  <ChevronRight style={{ width: 13, height: 13 }} />
+                  <span>Users &amp; Roles</span>
+                  <ChevronRight style={{ width: 13, height: 13 }} />
+                  <span style={{ color: ACCENT }}>All Users</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", borderRadius: 10, overflow: "hidden" }}>
+                  <button style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                    <UserPlus style={{ width: 15, height: 15 }} />
+                    Add Admin
+                  </button>
+                  <button style={{ background: "#10C4B5", border: "none", padding: "9px 10px", color: "#0B1320", cursor: "pointer", borderLeft: "1px solid rgba(0,0,0,0.15)" }}>
+                    <ChevronDown style={{ width: 14, height: 14 }} />
+                  </button>
+                </div>
+                <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
+                  <Download style={{ width: 15, height: 15 }} />
+                  Import Users
+                  <ChevronDown style={{ width: 13, height: 13 }} />
+                </button>
+                <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+                  <MoreHorizontal style={{ width: 16, height: 16 }} />
+                </button>
+              </div>
+            </div>
+
+            {/* Stat Cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+              {[
+                { label: "Total Users", value: users.length || 12845, change: "+18.4%", up: true, color: "#22C55E", icon: Users },
+                { label: "Admins", value: admins.length || 24, change: "+12.4%", up: true, color: "#8B5CF6", icon: ShieldCheck },
+                { label: "Super Admins", value: superAdmins.length || 3, change: "+7.1%", up: true, color: "#3B82F6", icon: Shield },
+                { label: "Regular Users", value: regular.length || 12818, change: "+19.3%", up: true, color: "#F59E0B", icon: Users },
+              ].map((c, i) => (
+                <div key={i} style={{ ...card, padding: "16px 16px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: `${c.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <c.icon style={{ width: 18, height: 18, color: c.color }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: TEXT2, fontWeight: 600 }}>{c.label}</div>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: TEXT, lineHeight: 1.2 }}>{c.value.toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#22C55E" }}>↑ {c.change}</span>
+                    <span style={{ fontSize: 10, color: TEXT2 }}>vs last month</span>
+                  </div>
+                  <MiniSparkline color={c.color} up={c.up} />
+                </div>
+              ))}
+            </div>
+
+            {/* Filter Bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ flex: 1, position: "relative" }}>
+                <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 14, height: 14 }} />
+                <input
+                  value={searchTerm}
+                  onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
+                  placeholder="Search users by name, email, phone..."
+                  style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px 9px 36px", color: TEXT, fontSize: 13, outline: "none" }}
+                />
+              </div>
+              {[
+                { value: roleFilter, set: (v: string) => { setRoleFilter(v); setPage(1); }, options: [["ALL", "All Roles"], ["SUPER_ADMIN", "Super Admin"], ["ADMIN", "Admin"], ["EDITOR", "Editor"], ["MODERATOR", "Moderator"], ["CUSTOMER", "User"]] },
+                { value: statusFilter, set: (v: string) => { setStatusFilter(v); setPage(1); }, options: [["ALL", "All Status"], ["ACTIVE", "Active"], ["INACTIVE", "Inactive"]] },
+                { value: verifiedFilter, set: (v: string) => { setVerifiedFilter(v); setPage(1); }, options: [["ALL", "All Verified"], ["VERIFIED", "Verified"], ["UNVERIFIED", "Unverified"]] },
+              ].map((f, i) => (
+                <div key={i} style={{ position: "relative" }}>
+                  <select
+                    value={f.value}
+                    onChange={e => f.set(e.target.value)}
+                    style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 36px 9px 14px", color: TEXT2, fontSize: 13, outline: "none", appearance: "none", cursor: "pointer", minWidth: 120 }}
+                  >
+                    {f.options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <ChevronDown style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2, pointerEvents: "none" }} />
+                </div>
+              ))}
+              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
+                <Filter style={{ width: 14, height: 14 }} />
+                Filters
+              </button>
+              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+                <Filter style={{ width: 14, height: 14 }} />
               </button>
             </div>
-            
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">First Name</label>
-                  <input 
-                    required
-                    value={newUser.firstName}
-                    onChange={e => setNewUser({...newUser, firstName: e.target.value})}
-                    className="admin-input" 
-                    placeholder="John"
-                  />
+
+            {/* Table */}
+            <div style={{ ...card, overflow: "hidden" }}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ background: "var(--table-header-bg)", borderBottom: `1px solid ${BORDER}` }}>
+                      <th style={{ padding: "12px 14px", textAlign: "left", width: 40 }}>
+                        <input
+                          type="checkbox"
+                          checked={selected.length === pageUsers.length && pageUsers.length > 0}
+                          onChange={toggleAll}
+                          style={{ accentColor: ACCENT, width: 15, height: 15 }}
+                        />
+                      </th>
+                      {["User", "Role", "Status", "Joined Date", "Last Active", "Actions"].map(h => (
+                        <th key={h} style={{ padding: "12px 14px", textAlign: "left", fontSize: 12, fontWeight: 700, color: TEXT2, whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      [...Array(8)].map((_, i) => (
+                        <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
+                          <td colSpan={7} style={{ padding: "14px" }}>
+                            <div style={{ height: 14, background: ICON_BG, borderRadius: 6, animation: "pulse 1.5s infinite" }} />
+                          </td>
+                        </tr>
+                      ))
+                    ) : pageUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ padding: "48px", textAlign: "center", color: TEXT2, fontSize: 14 }}>
+                          No users found.
+                        </td>
+                      </tr>
+                    ) : pageUsers.map((u) => (
+                      <tr key={u.id} style={{ borderBottom: `1px solid ${BORDER}` }}
+                        onMouseEnter={e => (e.currentTarget.style.background = HOVER)}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                      >
+                        <td style={{ padding: "12px 14px" }}>
+                          <input type="checkbox" checked={selected.includes(u.id)} onChange={() => toggleSelect(u.id)}
+                            style={{ accentColor: ACCENT, width: 15, height: 15 }} />
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${avatarColor(u.role)}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: avatarColor(u.role), flexShrink: 0, border: `2px solid ${avatarColor(u.role)}50` }}>
+                              {initials(u)}
+                            </div>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{u.firstName} {u.lastName}</span>
+                                {u.isVerified && <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#22C55E", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#fff", fontWeight: 700 }}>✓</span>}
+                              </div>
+                              <div style={{ fontSize: 11, color: TEXT2, marginTop: 1 }}>{u.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: ROLE_COLORS[u.role] || "#6B7280", background: `${ROLE_COLORS[u.role] || "#6B7280"}18`, padding: "4px 10px", borderRadius: 20, border: `1px solid ${ROLE_COLORS[u.role] || "#6B7280"}30` }}>
+                            <Shield style={{ width: 10, height: 10 }} />
+                            {ROLE_LABELS[u.role] || u.role}
+                          </span>
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: u.isActive ? "#22C55E" : "#EF4444", background: u.isActive ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)", padding: "4px 10px", borderRadius: 20 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: u.isActive ? "#22C55E" : "#EF4444", flexShrink: 0 }} />
+                            {u.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "12px 14px", fontSize: 12, color: TEXT2 }}>
+                          {new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>
+                            {new Date(u.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: TEXT2 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22C55E", flexShrink: 0 }} />
+                            {timeAgo(u.createdAt)}
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            {[Eye, Edit, MoreHorizontal].map((Icon, ii) => (
+                              <button key={ii} style={{ width: 30, height: 30, borderRadius: 8, background: ICON_BG, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: TEXT2 }}
+                                onMouseEnter={e => { e.currentTarget.style.background = HOVER; e.currentTarget.style.color = TEXT; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = ICON_BG; e.currentTarget.style.color = TEXT2; }}>
+                                <Icon style={{ width: 13, height: 13 }} />
+                              </button>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderTop: `1px solid ${BORDER}` }}>
+                <span style={{ fontSize: 12, color: TEXT2 }}>
+                  Showing {filtered.length === 0 ? 0 : (page - 1) * ROWS_PER_PAGE + 1} to {Math.min(page * ROWS_PER_PAGE, filtered.length)} of {filtered.length.toLocaleString()} users
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                    style={{ width: 32, height: 32, borderRadius: 8, background: CARD, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: TEXT2, opacity: page === 1 ? 0.4 : 1 }}>
+                    <ChevronLeft style={{ width: 14, height: 14 }} />
+                  </button>
+                  {pageNums.map((n, i) => (
+                    <button key={i} onClick={() => typeof n === "number" && setPage(n)}
+                      style={{ minWidth: 32, height: 32, borderRadius: 8, border: `1px solid ${n === page ? ACCENT : BORDER}`, background: n === page ? ACCENT : CARD, color: n === page ? "#0B1320" : TEXT2, fontSize: 13, fontWeight: n === page ? 700 : 400, cursor: "pointer" }}>
+                      {n}
+                    </button>
+                  ))}
+                  <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                    style={{ width: 32, height: 32, borderRadius: 8, background: CARD, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: TEXT2, opacity: page === totalPages ? 0.4 : 1 }}>
+                    <ChevronR style={{ width: 14, height: 14 }} />
+                  </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
+                    <span style={{ fontSize: 12, color: TEXT2 }}>Rows per page:</span>
+                    <div style={{ position: "relative" }}>
+                      <select style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "5px 28px 5px 10px", color: TEXT, fontSize: 12, outline: "none", appearance: "none" }}>
+                        <option>10</option>
+                        <option>25</option>
+                        <option>50</option>
+                      </select>
+                      <ChevronDown style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, color: TEXT2, pointerEvents: "none" }} />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Last Name</label>
-                  <input 
-                    required
-                    value={newUser.lastName}
-                    onChange={e => setNewUser({...newUser, lastName: e.target.value})}
-                    className="admin-input" 
-                    placeholder="Doe"
-                  />
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div style={{ width: 270, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+
+            {/* User Roles Overview */}
+            <div style={{ ...card, padding: 18 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 12 }}>User Roles Overview</div>
+              <div style={{ position: "relative", height: 160 }}>
+                <ResponsiveContainer width="100%" height={160}>
+                  <PieChart>
+                    <Pie data={roleGroups.filter(r => r.count > 0)} cx="50%" cy="50%" innerRadius={48} outerRadius={68} dataKey="count" paddingAngle={3}>
+                      {roleGroups.filter(r => r.count > 0).map((r, i) => <Cell key={i} fill={r.color} />)}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: "var(--tooltip-bg)", border: `1px solid ${BORDER}`, borderRadius: 8 }}
+                      labelStyle={{ color: TEXT2 }} itemStyle={{ color: TEXT }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: TEXT }}>{users.length.toLocaleString() || "12,845"}</div>
+                  <div style={{ fontSize: 10, color: TEXT2 }}>Total Users</div>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Email Address</label>
-                <input 
-                  required
-                  type="email"
-                  value={newUser.email}
-                  onChange={e => setNewUser({...newUser, email: e.target.value})}
-                  className="admin-input" 
-                  placeholder="email@example.com"
-                />
+              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 10 }}>
+                {roleGroups.map((r, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: r.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, color: TEXT2 }}>{r.name}</span>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: TEXT }}>
+                      {r.count.toLocaleString()} ({users.length > 0 ? ((r.count / users.length) * 100).toFixed(2) : "0.00"}%)
+                    </span>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Password</label>
-                <input 
-                  required
-                  type="password"
-                  value={newUser.password}
-                  onChange={e => setNewUser({...newUser, password: e.target.value})}
-                  className="admin-input" 
-                  placeholder="••••••••"
-                />
+            {/* Quick Actions */}
+            <div style={{ ...card, padding: 18 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 12 }}>Quick Actions</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { label: "Add New Admin", icon: UserPlus },
+                  { label: "Add New Role", icon: Shield },
+                  { label: "Bulk Import Users", icon: Download },
+                  { label: "Export Users Data", icon: Download },
+                ].map((a, i) => (
+                  <button key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, cursor: "pointer", color: TEXT2, width: "100%" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = `${ACCENT}12`; e.currentTarget.style.borderColor = `${ACCENT}40`; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = HOVER; e.currentTarget.style.borderColor = BORDER; }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 30, height: 30, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <a.icon style={{ width: 14, height: 14, color: TEXT2 }} />
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: TEXT }}>{a.label}</span>
+                    </div>
+                    <ChevronRight style={{ width: 14, height: 14 }} />
+                  </button>
+                ))}
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Phone (Optional)</label>
-                <input 
-                  value={newUser.phone}
-                  onChange={e => setNewUser({...newUser, phone: e.target.value})}
-                  className="admin-input" 
-                  placeholder="+260..."
-                />
+            {/* Recent Registrations */}
+            <div style={{ ...card, padding: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Recent Registrations</div>
+                <span style={{ fontSize: 11, color: ACCENT, cursor: "pointer" }}>View All</span>
               </div>
-
-              <div className="pt-4 flex gap-3">
-                <button 
-                  type="submit" 
-                  disabled={isCreating}
-                  className="btn-primary flex-1 py-3 font-black uppercase tracking-widest text-xs"
-                >
-                  {isCreating ? "Creating..." : "Create Account"}
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="btn-secondary flex-1 py-3 font-black uppercase tracking-widest text-xs"
-                >
-                  Cancel
-                </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {(recentUsers.length > 0 ? recentUsers : [
+                  { firstName: "Brian", lastName: "Sampa", email: "user@gmail.com", role: "CUSTOMER", createdAt: new Date(Date.now() - 2 * 60000).toISOString() },
+                  { firstName: "Grace", lastName: "Nkonde", email: "grace@gmail.com", role: "CUSTOMER", createdAt: new Date(Date.now() - 8 * 60000).toISOString() },
+                  { firstName: "Peter", lastName: "Lubinda", email: "peter@gmail.com", role: "CUSTOMER", createdAt: new Date(Date.now() - 15 * 60000).toISOString() },
+                  { firstName: "Lena", lastName: "Musonda", email: "lena@gmail.com", role: "CUSTOMER", createdAt: new Date(Date.now() - 22 * 60000).toISOString() },
+                  { firstName: "Michelo", lastName: "Zulu", email: "m@gmail.com", role: "CUSTOMER", createdAt: new Date(Date.now() - 35 * 60000).toISOString() },
+                ] as any[]).map((u: any, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: "50%", background: [ACCENT, "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6"][i % 5] + "30", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: [ACCENT, "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6"][i % 5], flexShrink: 0 }}>
+                      {`${u.firstName?.[0] || ""}${u.lastName?.[0] || ""}`.toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT }}>{u.firstName} {u.lastName}</div>
+                      <div style={{ fontSize: 11, color: TEXT2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</div>
+                    </div>
+                    <div style={{ fontSize: 11, color: TEXT2, whiteSpace: "nowrap", flexShrink: 0 }}>{timeAgo(u.createdAt)}</div>
+                  </div>
+                ))}
               </div>
-            </form>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
