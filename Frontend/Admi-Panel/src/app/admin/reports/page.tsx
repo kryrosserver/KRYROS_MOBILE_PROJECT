@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
+const ACCENT = "#12D6C5";
+
 type Summary = {
   stats: { totalRevenue: number; totalOrders: number; activeUsers: number; creditDisbursed: number };
   revenueSeries: { label: string; revenue: number; orders: number }[];
@@ -61,10 +63,10 @@ export default function ReportsPage() {
     if (!s) return [];
     const fmt = (n: number) => formatPrice(Number(n || 0));
     return [
-      { title: "Total Revenue", value: fmt(s.totalRevenue), change: "", trend: "up", icon: DollarSign, color: "green" },
-      { title: "Total Orders", value: (s.totalOrders || 0).toLocaleString(), change: "", trend: "up", icon: ShoppingCart, color: "blue" },
-      { title: "Active Users", value: (s.activeUsers || 0).toLocaleString(), change: "", trend: "up", icon: Users, color: "purple" },
-      { title: "Credit Disbursed", value: fmt(s.creditDisbursed), change: "", trend: "up", icon: CreditCard, color: "orange" },
+      { title: "Total Revenue", value: fmt(s.totalRevenue), trend: "up", icon: DollarSign, bg: "bg-teal-50", iconColor: "text-[#12D6C5]" },
+      { title: "Total Orders", value: (s.totalOrders || 0).toLocaleString(), trend: "up", icon: ShoppingCart, bg: "bg-blue-50", iconColor: "text-blue-600" },
+      { title: "Active Users", value: (s.activeUsers || 0).toLocaleString(), trend: "up", icon: Users, bg: "bg-purple-50", iconColor: "text-purple-600" },
+      { title: "Credit Disbursed", value: fmt(s.creditDisbursed), trend: "up", icon: CreditCard, bg: "bg-amber-50", iconColor: "text-amber-600" },
     ];
   }, [data]);
 
@@ -76,18 +78,18 @@ export default function ReportsPage() {
   const categories = data?.salesByCategory || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Reports & Analytics</h1>
-          <p className="mt-1 text-slate-600">Track performance and business insights</p>
+          <p className="mt-1 text-slate-500 text-sm">Track performance and business insights</p>
         </div>
         <div className="flex items-center gap-3">
           <select 
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700"
+            className="admin-input !min-h-[44px] !w-auto px-4"
           >
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -96,191 +98,206 @@ export default function ReportsPage() {
           </select>
           <button 
             onClick={handleRefresh}
-            className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            className="btn-secondary !h-[44px] !w-[44px] !px-0"
           >
-            <RefreshCw className={`h-4 w-4 text-slate-600 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">
+          <button className="btn-primary flex items-center gap-2 px-4 !h-[44px]">
             <Download className="h-4 w-4" />
             Export
           </button>
         </div>
       </div>
 
+      {error && (
+        <div className="admin-card !p-4 bg-red-50 border-red-200 text-red-700 text-sm">{error}</div>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat) => (
-          <div key={stat.title} className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between">
-              <div className={`h-10 w-10 rounded-lg flex items-center justify-center bg-${stat.color}-100`}>
-                <stat.icon className={`h-5 w-5 text-${stat.color}-600`} />
-              </div>
-              <div className={`flex items-center gap-1 text-sm font-medium ${
-                stat.trend === "up" ? "text-green-600" : "text-red-600"
-              }`}>
-                {stat.change ? (stat.trend === "up" ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />) : null}
-                {stat.change}
-              </div>
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="admin-card animate-pulse">
+              <div className="h-10 w-10 bg-slate-100 rounded-xl mb-4" />
+              <div className="h-4 bg-slate-100 rounded w-1/2 mb-2" />
+              <div className="h-7 bg-slate-100 rounded w-3/4" />
             </div>
-            <div className="mt-4">
-              <p className="text-sm text-slate-500">{stat.title}</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</p>
+          ))
+        ) : statCards.map((stat) => (
+          <div key={stat.title} className="admin-card !p-5">
+            <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${stat.bg} mb-4`}>
+              <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
             </div>
+            <p className="text-sm text-slate-500">{stat.title}</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Revenue Chart */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="admin-card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-slate-900">Revenue Overview</h2>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 bg-green-500 rounded-full"></div>
-              <span className="text-slate-600">Revenue</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
-              <span className="text-slate-600">Orders</span>
+              <div className="h-3 w-3 rounded-full" style={{ background: ACCENT }} />
+              <span className="text-slate-500">Revenue</span>
             </div>
           </div>
         </div>
-        <div className="h-72 flex items-end gap-2">
-          {revenueData.map((data) => (
-            <div key={data.label} className="flex-1 flex flex-col items-center gap-2">
-              <div 
-                className="w-full bg-green-100 rounded-t-lg relative group"
-                style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}
-              >
-                <div className="absolute bottom-0 left-0 right-0 bg-green-500 rounded-t-lg group-hover:bg-green-600 transition-colors" style={{ height: "100%" }}></div>
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  {formatPrice(Number(data.revenue))}
+        {loading ? (
+          <div className="h-64 bg-slate-50 rounded-xl animate-pulse" />
+        ) : revenueData.length === 0 ? (
+          <div className="h-64 flex items-center justify-center text-slate-400">No data available for this period</div>
+        ) : (
+          <div className="h-64 flex items-end gap-2">
+            {revenueData.map((d) => (
+              <div key={d.label} className="flex-1 flex flex-col items-center gap-2">
+                <div 
+                  className="w-full rounded-t-lg relative group cursor-pointer"
+                  style={{ height: `${Math.max(4, (d.revenue / maxRevenue) * 100)}%`, background: `${ACCENT}20` }}
+                >
+                  <div 
+                    className="absolute bottom-0 left-0 right-0 rounded-t-lg transition-opacity group-hover:opacity-80"
+                    style={{ height: "100%", background: ACCENT }}
+                  />
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                    {formatPrice(Number(d.revenue))}
+                  </div>
                 </div>
+                <span className="text-xs text-slate-500">{d.label}</span>
               </div>
-              <span className="text-xs text-slate-500">{data.label}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Products */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-900">Top Products</h2>
-            <button className="text-sm text-green-600 hover:text-green-700 font-medium">View All</button>
+        <div className="admin-card">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-semibold text-slate-900">Top Products</h2>
           </div>
-          <div className="space-y-4">
-            {topProducts.map((product, index) => (
-              <div key={product.name} className="flex items-center gap-4">
-                <span className="text-sm font-medium text-slate-400 w-6">#{index + 1}</span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-slate-900">{product.name}</span>
-                    <span className={`text-sm font-medium ${(product.growth ?? 0) > 0 ? "text-green-600" : "text-red-600"}`}>
-                      {(product.growth ?? 0) > 0 ? "+" : ""}{product.growth ?? 0}%
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-slate-500 mt-1">
-                    <span>{product.sales} sales</span>
-                    <span>{formatPrice(Number(product.revenue))}</span>
-                  </div>
-                  <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-green-500 rounded-full"
-                      style={{ width: `${(product.sales / 456) * 100}%` }}
-                    />
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => <div key={i} className="h-12 bg-slate-50 rounded-xl animate-pulse" />)}
+            </div>
+          ) : topProducts.length === 0 ? (
+            <p className="text-slate-400 text-sm text-center py-8">No data available</p>
+          ) : (
+            <div className="space-y-4">
+              {topProducts.map((product, index) => (
+                <div key={product.name} className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-slate-400 w-6">#{index + 1}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-slate-900 text-sm">{product.name}</span>
+                      <span className={`text-xs font-semibold ${(product.growth ?? 0) >= 0 ? "text-green-600" : "text-red-500"}`}>
+                        {(product.growth ?? 0) >= 0 ? "+" : ""}{product.growth ?? 0}%
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-slate-500 mt-0.5">
+                      <span>{product.sales} sales</span>
+                      <span className="font-semibold text-slate-700">{formatPrice(Number(product.revenue))}</span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full"
+                        style={{ width: `${Math.max(5, (product.sales / (topProducts[0]?.sales || 1)) * 100)}%`, background: ACCENT }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-900">Recent Transactions</h2>
-            <button className="text-sm text-green-600 hover:text-green-700 font-medium">View All</button>
+        <div className="admin-card">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-semibold text-slate-900">Recent Transactions</h2>
           </div>
-          <div className="space-y-4">
-            {recentTransactions.map((txn) => (
-              <div key={txn.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                    txn.status === "paid" || txn.status === "completed" ? "bg-green-100" : txn.status === "pending" ? "bg-yellow-100" : "bg-red-100"
-                  }`}>
-                    <DollarSign className={`h-5 w-5 ${
-                      txn.status === "paid" || txn.status === "completed" ? "text-green-600" : txn.status === "pending" ? "text-yellow-600" : "text-red-600"
-                    }`} />
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => <div key={i} className="h-14 bg-slate-50 rounded-xl animate-pulse" />)}
+            </div>
+          ) : recentTransactions.length === 0 ? (
+            <p className="text-slate-400 text-sm text-center py-8">No transactions found</p>
+          ) : (
+            <div className="space-y-3">
+              {recentTransactions.map((txn) => {
+                const isPaid = txn.status === "paid" || txn.status === "completed";
+                const isPending = txn.status === "pending";
+                return (
+                  <div key={txn.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isPaid ? "bg-teal-50" : isPending ? "bg-amber-50" : "bg-red-50"}`}>
+                        <DollarSign className={`h-4 w-4 ${isPaid ? "text-[#12D6C5]" : isPending ? "text-amber-500" : "text-red-500"}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900 text-sm">{txn.customer}</p>
+                        <p className="text-xs text-slate-500">{txn.id} · {txn.date}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-slate-900 text-sm">{formatPrice(Number(txn.amount))}</p>
+                      <span className={`badge text-xs ${isPaid ? "badge-success" : isPending ? "badge-warning" : "badge-danger"}`}>
+                        {txn.status}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-slate-900">{txn.customer}</p>
-                    <p className="text-sm text-slate-500">{txn.id} • {txn.date}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-slate-900">{formatPrice(Number(txn.amount))}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    txn.status === "paid" || txn.status === "completed" ? "bg-green-100 text-green-700" : txn.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
-                  }`}>
-                    {txn.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Credit Performance */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-900">Credit System Performance</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="p-4 bg-slate-50 rounded-xl">
-            <p className="text-sm text-slate-500">Active Credit Accounts</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{credit?.activeAccounts ?? 0}</p>
-            <p className="text-sm text-slate-500 mt-2">&nbsp;</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl">
-            <p className="text-sm text-slate-500">Total Outstanding</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{formatPrice(Number(credit?.totalOutstanding || 0))}</p>
-            <p className="text-sm text-slate-500 mt-2">&nbsp;</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl">
-            <p className="text-sm text-slate-500">Repayment Rate</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{(credit?.repaymentRate ?? 0).toFixed(1)}%</p>
-            <p className="text-sm text-slate-500 mt-2">&nbsp;</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl">
-            <p className="text-sm text-slate-500">Default Rate</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{(credit?.defaultRate ?? 0).toFixed(1)}%</p>
-            <p className="text-sm text-slate-500 mt-2">&nbsp;</p>
-          </div>
+      <div className="admin-card">
+        <h2 className="text-base font-semibold text-slate-900 mb-5">Credit System Performance</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: "Active Credit Accounts", value: (credit?.activeAccounts ?? 0).toLocaleString() },
+            { label: "Total Outstanding", value: formatPrice(Number(credit?.totalOutstanding || 0)) },
+            { label: "Repayment Rate", value: `${(credit?.repaymentRate ?? 0).toFixed(1)}%` },
+            { label: "Default Rate", value: `${(credit?.defaultRate ?? 0).toFixed(1)}%` },
+          ].map((m, i) => (
+            <div key={i} className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs text-slate-500 mb-1">{m.label}</p>
+              <p className="text-2xl font-bold text-slate-900">{loading ? "—" : m.value}</p>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Sales by Category */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-900">Sales by Category</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {(categories.length ? categories : []).map((cat, idx) => {
-            const colors = ["bg-blue-500","bg-green-500","bg-purple-500","bg-orange-500","bg-pink-500","bg-teal-500","bg-indigo-500"];
-            const color = colors[idx % colors.length];
-            return (
-            <div key={cat.name} className="text-center p-4 border border-slate-200 rounded-xl">
-              <div className={`h-2 ${color} rounded-full mb-3`} style={{ width: `${cat.value}%`, margin: "0 auto" }}></div>
-              <p className="font-semibold text-slate-900">{cat.name}</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{cat.value}%</p>
+      {(categories.length > 0 || loading) && (
+        <div className="admin-card">
+          <h2 className="text-base font-semibold text-slate-900 mb-5">Sales by Category</h2>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[...Array(5)].map((_, i) => <div key={i} className="h-24 bg-slate-50 rounded-xl animate-pulse" />)}
             </div>
-          )})}
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {categories.map((cat, idx) => {
+                const colors = ["#12D6C5", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981", "#6366F1"];
+                const color = colors[idx % colors.length];
+                return (
+                  <div key={cat.name} className="text-center p-4 bg-slate-50 rounded-xl">
+                    <div className="h-2 rounded-full mb-3 mx-auto" style={{ width: `${cat.value}%`, background: color, maxWidth: "100%" }} />
+                    <p className="font-semibold text-slate-900 text-sm">{cat.name}</p>
+                    <p className="text-2xl font-bold mt-1" style={{ color }}>{cat.value}%</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

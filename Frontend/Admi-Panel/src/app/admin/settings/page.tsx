@@ -7,7 +7,8 @@ import {
   CreditCard, 
   Shield, 
   Palette,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  ChevronRight
 } from "lucide-react";
 
 export default function SettingsDashboardPage() {
@@ -17,74 +18,71 @@ export default function SettingsDashboardPage() {
       label: "Company Profile",
       icon: Building,
       href: "/admin/settings/company",
-      description: "Manage business identity, contact info, and branding."
+      description: "Manage business identity, contact info, and branding.",
+      color: "bg-teal-50 text-[#12D6C5]",
     },
     {
       id: "notifications",
       label: "Notifications",
       icon: Bell,
       href: "/admin/settings/notifications",
-      description: "Control how you receive system alerts and email updates."
+      description: "Control how you receive system alerts and email updates.",
+      color: "bg-amber-50 text-amber-500",
     },
     {
       id: "payment",
       label: "Payment Gateways",
       icon: CreditCard,
       href: "/admin/settings/payment",
-      description: "Configure online payment providers and bank transfers."
+      description: "Configure online payment providers and bank transfers.",
+      color: "bg-green-50 text-green-600",
     },
     {
       id: "security",
       label: "Security Center",
       icon: Shield,
       href: "/admin/settings/security",
-      description: "Protect your admin account with 2FA and password rules."
+      description: "Protect your admin account with 2FA and password rules.",
+      color: "bg-red-50 text-red-500",
     },
     {
       id: "appearance",
       label: "Appearance",
       icon: Palette,
       href: "/admin/settings/appearance",
-      description: "Customize colors, themes, and dashboard layouts."
+      description: "Customize colors, themes, and dashboard layouts.",
+      color: "bg-purple-50 text-purple-600",
     }
   ];
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="text-left">
-        <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
-          <SettingsIcon className="h-8 w-8 text-slate-400" />
+    <div className="space-y-6 pb-20">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+          <SettingsIcon className="h-6 w-6 text-slate-400" />
           Settings Hub
         </h1>
-        <p className="text-slate-500 font-medium">Manage global configuration and preferences</p>
+        <p className="text-slate-500 text-sm mt-1">Manage global configuration and platform preferences</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section) => (
           <Link
             key={section.id}
             href={section.href}
-            className="group relative flex flex-col p-6 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-slate-900/30 hover:shadow-xl transition-all duration-300 text-left overflow-hidden shadow-sm"
+            className="group admin-card flex flex-col gap-4 hover:shadow-lg hover:border-slate-300 transition-all duration-200"
           >
-            <div className="mb-4 p-4 rounded-2xl w-fit bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-              <section.icon className="h-6 w-6" />
+            <div className={`p-3 rounded-xl w-fit ${section.color}`}>
+              <section.icon className="h-5 w-5" />
             </div>
-            
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-black uppercase tracking-tight text-lg text-slate-900 group-hover:text-slate-600 transition-colors">
+            <div className="flex-1">
+              <h3 className="font-bold text-slate-900 text-base group-hover:text-[#12D6C5] transition-colors">
                 {section.label}
               </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{section.description}</p>
             </div>
-            
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6">
-              {section.description}
-            </p>
-
-            <div className="mt-auto flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity">
-                Open Settings
-              </span>
-              <div className="h-2 w-2 rounded-full bg-slate-100 group-hover:bg-slate-900 transition-colors" />
+            <div className="flex items-center text-xs font-semibold text-[#12D6C5] opacity-0 group-hover:opacity-100 transition-opacity">
+              Configure <ChevronRight className="h-3.5 w-3.5 ml-1" />
             </div>
           </Link>
         ))}

@@ -6,7 +6,8 @@ import {
   Users, 
   Star, 
   Package,
-  Store
+  Store,
+  ChevronRight
 } from "lucide-react";
 
 export default function WholesaleDashboardPage() {
@@ -39,8 +40,7 @@ export default function WholesaleDashboardPage() {
           const items = Array.isArray(data?.products) ? data.products : data?.data || [];
           setCounts(prev => ({ ...prev, products: items.filter((p: any) => !!p.isWholesaleOnly).length }));
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     };
     loadCounts();
   }, []);
@@ -52,7 +52,9 @@ export default function WholesaleDashboardPage() {
       icon: Users,
       count: counts.accounts,
       href: "/admin/wholesale/accounts",
-      description: "Manage applications and approved wholesale partners."
+      description: "Manage applications and approved wholesale partners.",
+      color: "bg-teal-50 text-[#12D6C5]",
+      hoverBorder: "hover:border-[#12D6C5]/30",
     },
     {
       id: "deals",
@@ -60,7 +62,9 @@ export default function WholesaleDashboardPage() {
       icon: Star,
       count: counts.deals,
       href: "/admin/wholesale/deals",
-      description: "Customize the wholesale offers shown on the storefront."
+      description: "Customize the wholesale offers shown on the storefront.",
+      color: "bg-amber-50 text-amber-500",
+      hoverBorder: "hover:border-amber-400/30",
     },
     {
       id: "products",
@@ -68,49 +72,58 @@ export default function WholesaleDashboardPage() {
       icon: Package,
       count: counts.products,
       href: "/admin/wholesale/products",
-      description: "Exclusive products only available to wholesale buyers."
+      description: "Exclusive products only available to wholesale buyers.",
+      color: "bg-blue-50 text-blue-600",
+      hoverBorder: "hover:border-blue-400/30",
     }
   ];
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="text-left">
-        <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
-          <Store className="h-8 w-8 text-blue-600" />
+    <div className="space-y-6 pb-20">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+          <Store className="h-6 w-6 text-slate-400" />
           Wholesale Hub
         </h1>
-        <p className="text-slate-500 font-medium">Manage your B2B operations and inventory</p>
+        <p className="text-slate-500 text-sm mt-1">Manage your B2B operations and inventory</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Summary stat strip */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Active Accounts", value: counts.accounts },
+          { label: "Active Deals", value: counts.deals },
+          { label: "Wholesale Products", value: counts.products },
+        ].map((s, i) => (
+          <div key={i} className="admin-card !p-4">
+            <div className="text-2xl font-bold text-slate-900">{s.value}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Section cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section) => (
           <Link
             key={section.id}
             href={section.href}
-            className="group relative flex flex-col p-6 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-blue-500/30 hover:shadow-xl transition-all duration-300 text-left overflow-hidden shadow-sm"
+            className={`group admin-card flex flex-col gap-4 hover:shadow-lg ${section.hoverBorder} transition-all duration-200`}
           >
-            <div className="mb-4 p-4 rounded-2xl w-fit bg-slate-50 text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-              <section.icon className="h-6 w-6" />
+            <div className="flex items-start justify-between">
+              <div className={`p-3 rounded-xl ${section.color}`}>
+                <section.icon className="h-5 w-5" />
+              </div>
+              <span className="badge badge-info text-xs">{section.count} Items</span>
             </div>
-            
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-black uppercase tracking-tight text-lg text-slate-900 group-hover:text-blue-600 transition-colors">
+            <div className="flex-1">
+              <h3 className="font-bold text-slate-900 text-base group-hover:text-[#12D6C5] transition-colors">
                 {section.label}
               </h3>
-              <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                {section.count} Items
-              </span>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{section.description}</p>
             </div>
-            
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6">
-              {section.description}
-            </p>
-
-            <div className="mt-auto flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                Open Section
-              </span>
-              <div className="h-2 w-2 rounded-full bg-slate-100 group-hover:bg-blue-600 transition-colors" />
+            <div className="flex items-center text-xs font-semibold text-[#12D6C5] opacity-0 group-hover:opacity-100 transition-opacity">
+              Open Section <ChevronRight className="h-3.5 w-3.5 ml-1" />
             </div>
           </Link>
         ))}
