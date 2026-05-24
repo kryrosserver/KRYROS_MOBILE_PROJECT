@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Search, ChevronLeft, ChevronRight, Headphones, CheckCircle, Truck, MapPin, Loader2, Package } from "lucide-react";
+import { Search, ChevronRight, Headphones, CheckCircle, Truck, MapPin, Loader2, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/authStore";
 import { fetchOrders, type ApiOrder } from "@/lib/api";
+import AccountLayout from "@/components/layout/AccountLayout";
 
 const statusColors: Record<string, string> = {
   "In Transit": "bg-primary/10 text-primary border-primary/20",
@@ -124,22 +125,8 @@ export default function TrackOrderPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3">
-        <Link href="/shop">
-          <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors">
-            <ChevronLeft className="w-5 h-5 text-foreground" />
-          </button>
-        </Link>
-        <span className="text-base font-black text-foreground">KRY<span className="text-primary">ROS</span></span>
-        <div className="flex-1" />
-        <Link href="/">
-          <span className="text-xs text-primary font-semibold hover:underline">Home</span>
-        </Link>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
-        <h1 className="text-2xl font-black text-foreground mb-0.5">Track Order</h1>
+    <AccountLayout>
+      <h1 className="text-2xl font-black text-foreground mb-0.5">Track Order</h1>
         <p className="text-muted-foreground text-xs mb-5">Stay updated with your order status in real time</p>
 
         {/* Search */}
@@ -285,11 +272,12 @@ export default function TrackOrderPage() {
             <p className="text-sm font-bold text-foreground">Need Help?</p>
             <p className="text-xs text-muted-foreground">Our support team is here to help you with your order.</p>
           </div>
-          <button className="px-3 py-2 border border-primary/40 text-primary rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex-shrink-0">
-            Contact Support
-          </button>
+          <Link href="/contact">
+            <button className="px-3 py-2 border border-primary/40 text-primary rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex-shrink-0">
+              Contact Support
+            </button>
+          </Link>
         </div>
-      </div>
-    </div>
+    </AccountLayout>
   );
 }

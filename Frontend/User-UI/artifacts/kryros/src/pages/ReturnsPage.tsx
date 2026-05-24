@@ -1,6 +1,9 @@
+import AccountLayout from "@/components/layout/AccountLayout";
+
 export default function ReturnsPage() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
+    <AccountLayout>
+      <div className="max-w-2xl">
       <h1 className="text-2xl font-black text-foreground mb-0.5">Returns & Exchanges</h1>
       <p className="text-xs text-muted-foreground mb-5">Simple and straightforward — within 7 days of delivery.</p>
 
@@ -58,5 +61,6 @@ export default function ReturnsPage() {
         </p>
       </div>
     </div>
+    </AccountLayout>
   );
 }

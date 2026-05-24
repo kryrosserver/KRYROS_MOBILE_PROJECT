@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
 import { useCurrencyStore } from "@/store/currencyStore";
+import AccountLayout from "@/components/layout/AccountLayout";
 
 interface CreditPlan {
   id: string;
@@ -73,7 +74,8 @@ export default function GetNowPage() {
     val != null ? format(val) : "—";
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
+    <AccountLayout>
+    <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-5">
         <div>
@@ -276,5 +278,6 @@ export default function GetNowPage() {
         <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
       </div>
     </div>
+    </AccountLayout>
   );
 }

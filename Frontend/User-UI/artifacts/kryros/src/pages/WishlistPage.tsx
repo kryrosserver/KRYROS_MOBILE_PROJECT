@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { Heart, ShoppingCart, Trash2, ChevronLeft, PackageSearch } from "lucide-react";
+import { Heart, ShoppingCart, Trash2, PackageSearch } from "lucide-react";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCartStore } from "@/store/cartStore";
 import { useCurrencyStore } from "@/store/currencyStore";
 import { useAuthStore } from "@/store/authStore";
 import { API_BASE } from "@/lib/api";
+import AccountLayout from "@/components/layout/AccountLayout";
 
 interface Product {
   id: string;
@@ -99,24 +100,8 @@ export default function WishlistPage() {
   const isEmpty = isAuthenticated ? (!loading && products.length === 0) : (_hasHydrated && wishlistIds.length === 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3">
-        <Link href="/">
-          <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors">
-            <ChevronLeft className="w-5 h-5 text-foreground" />
-          </button>
-        </Link>
-        <span className="text-base font-black text-foreground">
-          KRY<span className="text-primary">ROS</span>
-        </span>
-        <div className="flex-1" />
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
-          <Heart className="w-4 h-4 text-primary fill-primary" />
-          Wishlist
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <AccountLayout>
+      <div className="max-w-2xl">
         <div className="mb-6">
           <h1 className="text-2xl font-black text-foreground">My Wishlist</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -228,6 +213,6 @@ export default function WishlistPage() {
           </div>
         )}
       </div>
-    </div>
+    </AccountLayout>
   );
 }

@@ -75,7 +75,7 @@ function WhatsAppFloatingButton() {
   );
 }
 
-const NO_LAYOUT_ROUTES = ["/login", "/register", "/dashboard", "/track", "/cart", "/checkout", "/pay"];
+const NO_LAYOUT_ROUTES = ["/login", "/register", "/dashboard", "/track", "/cart", "/checkout", "/pay", "/wishlist", "/returns", "/get-now", "/pickup-stations"];
 
 function Layout({ children, path }: { children: React.ReactNode; path: string }) {
   const noLayout = NO_LAYOUT_ROUTES.some((r) => path.startsWith(r));

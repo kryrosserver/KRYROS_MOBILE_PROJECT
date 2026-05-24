@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, MapPin, Clock, Navigation, Package, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchShippingZones, type ApiShippingZone } from "@/lib/api";
+import AccountLayout from "@/components/layout/AccountLayout";
 
 interface Station {
   id: string;
@@ -63,7 +64,8 @@ export default function PickupStationsPage() {
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
+    <AccountLayout>
+    <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-5">
         <div>
@@ -215,5 +217,6 @@ export default function PickupStationsPage() {
         ))}
       </div>
     </div>
+    </AccountLayout>
   );
 }
