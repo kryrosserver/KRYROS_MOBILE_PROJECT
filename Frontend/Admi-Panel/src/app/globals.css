@@ -523,3 +523,40 @@ input[type="checkbox"], input[type="radio"] {
   background-color: #0d1a28 !important;
   color: #fff !important;
 }
+
+/* Opacity / fraction bg variants (e.g. hover:bg-slate-50/50) */
+.dark .hover\:bg-slate-50\/50:hover { background-color: var(--hover-bg) !important; }
+.dark .bg-slate-50\/50 { background-color: var(--hover-bg) !important; }
+.dark .bg-green-50\/5 { background-color: transparent !important; }
+
+/* Inactive tab buttons that use bg-white + border */
+.dark button.bg-white { background-color: var(--icon-bg) !important; color: var(--text-secondary) !important; }
+
+/* Select element dark mode fix */
+.dark select.bg-white { background-color: var(--input-bg) !important; color: var(--text-primary) !important; }
+.dark select { background-color: var(--input-bg) !important; color: var(--text-primary) !important; border-color: var(--input-border) !important; }
+
+/* Input bg-slate-50 fix */
+.dark input.bg-slate-50 { background-color: var(--input-bg) !important; color: var(--text-primary) !important; }
+
+/* Purple / blue overlay buttons in dark mode */
+.dark .bg-purple-50 { background-color: rgba(139,92,246,0.1) !important; }
+.dark .hover\:bg-purple-100:hover { background-color: rgba(139,92,246,0.15) !important; }
+.dark .text-purple-700 { color: #a78bfa !important; }
+.dark .border-purple-200 { border-color: rgba(139,92,246,0.3) !important; }
+
+/* bg-green-100 text-green-700 status badges: keep readable in dark */
+.dark .bg-green-100 { background-color: rgba(22,199,132,0.12) !important; }
+.dark .text-green-700 { color: #16C784 !important; }
+.dark .bg-blue-100  { background-color: rgba(59,130,246,0.12)  !important; }
+.dark .text-blue-700 { color: #60a5fa !important; }
+.dark .bg-red-100   { background-color: rgba(239,68,68,0.12)   !important; }
+.dark .text-red-700  { color: #f87171 !important; }
+.dark .bg-yellow-100 { background-color: rgba(245,158,11,0.12) !important; }
+.dark .text-yellow-700 { color: #fbbf24 !important; }
+.dark .bg-orange-100 { background-color: rgba(249,115,22,0.12) !important; }
+.dark .text-orange-700 { color: #fb923c !important; }
+
+/* CMS homepage forms: bg-slate-50 rounded section panels */
+.dark .bg-slate-50.p-4.rounded-xl { background-color: var(--hover-bg) !important; }
+.dark .rounded-\[2rem\] { border-color: var(--card-border); }

@@ -178,6 +178,42 @@ export class CMSController {
     return this.cmsService.getPage(slug);
   }
 
+  @Get('pages')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all CMS pages (admin)' })
+  listPages() {
+    return this.cmsService.listPages();
+  }
+
+  @Post('pages')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create CMS page' })
+  createPage(@Body() data: any) {
+    return this.cmsService.createPage(data);
+  }
+
+  @Put('pages/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update CMS page' })
+  updatePage(@Param('id') id: string, @Body() data: any) {
+    return this.cmsService.updatePage(id, data);
+  }
+
+  @Delete('pages/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete CMS page' })
+  deletePage(@Param('id') id: string) {
+    return this.cmsService.deletePage(id);
+  }
+
   // ==================== FOOTER MANAGEMENT ====================
 
   @Get('footer')

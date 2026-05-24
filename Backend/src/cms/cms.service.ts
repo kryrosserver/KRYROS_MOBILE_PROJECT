@@ -415,6 +415,22 @@ export class CMSService {
     return this.prisma.cMSPage.findUnique({ where: { slug } });
   }
 
+  async listPages() {
+    return this.prisma.cMSPage.findMany({ orderBy: { createdAt: 'desc' } });
+  }
+
+  async createPage(data: { title: string; slug: string; content?: string; metaTitle?: string; metaDescription?: string; isActive?: boolean }) {
+    return this.prisma.cMSPage.create({ data });
+  }
+
+  async updatePage(id: string, data: { title?: string; slug?: string; content?: string; metaTitle?: string; metaDescription?: string; isActive?: boolean }) {
+    return this.prisma.cMSPage.update({ where: { id }, data });
+  }
+
+  async deletePage(id: string) {
+    return this.prisma.cMSPage.delete({ where: { id } });
+  }
+
   // Sections management
   async listSections() {
     return this.prisma.cMSSection.findMany({ orderBy: { order: 'asc' } });
