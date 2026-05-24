@@ -2,36 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   LIGHT MODE TOKENS (default)
+   ============================================================ */
 :root {
   --font-inter: 'Inter', sans-serif;
   --font-poppins: 'Poppins', sans-serif;
 
-  /* KRyros Brand Colors */
+  /* Brand — never changes between modes */
   --brand: #12D6C5;
-  --brand-dark: #0B1320;
-  --brand-surface: #111827;
-  --brand-secondary: #182131;
-  --brand-glow: #1DE9D3;
   --brand-hover: #10C4B5;
-  --brand-card: #151E2D;
-  --brand-border-dark: #2B3648;
-  --brand-text-muted: #AAB4C5;
+  --brand-glow: #1DE9D3;
 
-  /* Light mode tokens */
-  --bg-light: #F7F9FC;
-  --card-light: #FFFFFF;
-  --border-light: #E5E7EB;
-  --text-primary-light: #111827;
-  --text-secondary-light: #6B7280;
-
-  /* Status Colors — do not override */
+  /* Status — never changes between modes */
   --success: #16C784;
   --warning: #F59E0B;
   --danger: #EF4444;
   --info: #3B82F6;
   --refunded: #8B5CF6;
+
+  /* Page / layout backgrounds */
+  --bg-primary: #F7F9FC;
+  --bg-secondary: #FFFFFF;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #E5E7EB;
+  --topbar-bg: #FFFFFF;
+
+  /* Card */
+  --card-bg: #FFFFFF;
+  --card-border: #E5E7EB;
+  --card-shadow: 0 10px 35px rgba(15, 23, 42, 0.06);
+
+  /* Text */
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+
+  /* Hover / active states */
+  --hover-bg: #F3F4F6;
+  --nav-item-hover: #F3F4F6;
+  --nav-item-active-bg: rgba(18, 214, 197, 0.10);
+  --nav-text: #6B7280;
+
+  /* Inputs */
+  --input-bg: #FFFFFF;
+  --input-border: #E5E7EB;
+
+  /* Tables */
+  --table-header-bg: #F7F9FC;
+  --table-row-hover: #F7F9FC;
+  --table-border: #F3F4F6;
+
+  /* Icon chips */
+  --icon-bg: #F3F4F6;
+
+  /* Chart tooltips */
+  --tooltip-bg: #FFFFFF;
+
+  /* Modals */
+  --modal-overlay: rgba(17, 24, 39, 0.60);
+
+  /* Scrollbar */
+  --scrollbar-thumb: #D1D5DB;
+
+  /* Skeleton */
+  --skeleton-base: #F7F9FC;
+  --skeleton-shine: #E5E7EB;
 }
 
+/* ============================================================
+   DARK MODE TOKENS
+   ============================================================ */
+.dark {
+  --bg-primary: #0D1626;
+  --bg-secondary: #0B1320;
+  --sidebar-bg: #0B1320;
+  --sidebar-border: #2B3648;
+  --topbar-bg: #0B1320;
+
+  --card-bg: #132035;
+  --card-border: #1E2D42;
+  --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #AAB4C5;
+  --text-muted: #6B7280;
+
+  --hover-bg: #182131;
+  --nav-item-hover: #182131;
+  --nav-item-active-bg: rgba(18, 214, 197, 0.12);
+  --nav-text: #AAB4C5;
+
+  --input-bg: #132035;
+  --input-border: #2B3648;
+
+  --table-header-bg: #0B1320;
+  --table-row-hover: #182131;
+  --table-border: #1E2D42;
+
+  --icon-bg: #1E2D42;
+
+  --tooltip-bg: #1E2D42;
+
+  --modal-overlay: rgba(11, 19, 32, 0.75);
+
+  --scrollbar-thumb: #2B3648;
+
+  --skeleton-base: #132035;
+  --skeleton-shine: #1E2D42;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -46,133 +129,79 @@ body {
 }
 
 body {
-  background-color: var(--bg-light);
-  color: var(--text-primary-light);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--brand-border-dark);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--brand-text-muted);
-}
-
-/* Animations */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes slideInRight {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
 }
-
 @keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
 }
-
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.25s ease-out;
-}
-
-.animate-slide-in {
-  animation: slideIn 0.25s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.3s ease-out;
-}
-
-.animate-slide-out-right {
-  animation: slideOutRight 0.3s ease-out;
-}
+.animate-fade-in       { animation: fadeIn 0.25s ease-out; }
+.animate-slide-in      { animation: slideIn 0.25s ease-out; }
+.animate-slide-in-right  { animation: slideInRight 0.3s ease-out; }
+.animate-slide-out-right { animation: slideOutRight 0.3s ease-out; }
 
 /* ============================================================
    CARD SYSTEM
    ============================================================ */
-
 .admin-card {
-  background: #FFFFFF;
+  background: var(--card-bg);
   border-radius: 22px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 10px 35px rgba(15, 23, 42, 0.06);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
   padding: 24px;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .admin-card-header {
   padding: 0 0 20px 0;
   margin-bottom: 20px;
-  border-bottom: 1px solid #E5E7EB;
-}
-
-.admin-card-body {
-  /* no extra padding — admin-card already has 24px */
+  border-bottom: 1px solid var(--card-border);
 }
 
 /* ============================================================
    TABLE SYSTEM
    ============================================================ */
-
-.admin-table {
-  @apply w-full text-sm;
-}
+.admin-table { @apply w-full text-sm; }
 
 .admin-table thead {
-  background: #F7F9FC;
-  border-bottom: 1px solid #E5E7EB;
+  background: var(--table-header-bg);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .admin-table th {
   @apply px-4 py-3 text-left font-semibold;
-  color: var(--text-primary-light);
+  color: var(--text-primary);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -180,19 +209,18 @@ body {
 
 .admin-table td {
   @apply px-4 py-3;
-  border-bottom: 1px solid #F3F4F6;
-  color: var(--text-primary-light);
+  border-bottom: 1px solid var(--table-border);
+  color: var(--text-primary);
 }
 
 .admin-table tbody tr:hover {
-  background: #F7F9FC;
+  background: var(--table-row-hover);
   transition: background 0.15s ease;
 }
 
 /* ============================================================
    BUTTON SYSTEM
    ============================================================ */
-
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -211,22 +239,9 @@ body {
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
   white-space: nowrap;
 }
-
-.btn-primary:hover {
-  background: #10C4B5;
-  box-shadow: 0 12px 30px rgba(18, 214, 197, 0.35);
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-.btn-primary:disabled {
-  background: #2B3648;
-  color: #6B7280;
-  box-shadow: none;
-  cursor: not-allowed;
-}
+.btn-primary:hover { background: #10C4B5; box-shadow: 0 12px 30px rgba(18, 214, 197, 0.35); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { background: var(--icon-bg); color: var(--text-muted); box-shadow: none; cursor: not-allowed; }
 
 .btn-secondary {
   display: inline-flex;
@@ -234,22 +249,18 @@ body {
   justify-content: center;
   gap: 8px;
   background: transparent;
-  color: var(--text-primary-light);
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.875rem;
   padding: 0 22px;
   border-radius: 14px;
   height: 48px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--card-border);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
   white-space: nowrap;
 }
-
-.btn-secondary:hover {
-  background: #F7F9FC;
-  border-color: #D1D5DB;
-}
+.btn-secondary:hover { background: var(--hover-bg); border-color: var(--input-border); }
 
 .btn-danger {
   display: inline-flex;
@@ -268,185 +279,95 @@ body {
   transition: background 0.15s ease;
   white-space: nowrap;
 }
-
-.btn-danger:hover {
-  background: #DC2626;
-}
+.btn-danger:hover { background: #DC2626; }
 
 /* ============================================================
    INPUT SYSTEM
    ============================================================ */
-
 .admin-input {
   display: flex;
   width: 100%;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 14px;
-  border: 1px solid #E5E7EB;
-  background: #FFFFFF;
-  color: var(--text-primary-light);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-primary);
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
 }
-
-.admin-input::placeholder {
-  color: #9CA3AF;
-}
-
-.admin-input:focus {
-  border-color: #12D6C5;
-  box-shadow: 0 0 0 4px rgba(18, 214, 197, 0.15);
-}
-
-.admin-input:disabled {
-  background: #F7F9FC;
-  color: #9CA3AF;
-  cursor: not-allowed;
-}
+.admin-input::placeholder { color: var(--text-muted); }
+.admin-input:focus { border-color: #12D6C5; box-shadow: 0 0 0 4px rgba(18, 214, 197, 0.15); }
+.admin-input:disabled { background: var(--hover-bg); color: var(--text-muted); cursor: not-allowed; }
 
 /* ============================================================
-   BADGE SYSTEM — status colors preserved exactly
+   BADGE SYSTEM
    ============================================================ */
-
-.badge {
-  @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold;
-}
-
-/* Completed / Success */
-.badge-success {
-  background: rgba(22, 199, 132, 0.12);
-  color: #16C784;
-}
-
-/* Danger / Failed */
-.badge-danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
-}
-
-/* Warning / Pending */
-.badge-warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #F59E0B;
-}
-
-/* Info / Processing */
-.badge-info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
-}
-
-/* Refunded */
-.badge-refunded {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8B5CF6;
-}
+.badge { @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold; }
+.badge-success  { background: rgba(22, 199, 132, 0.12); color: #16C784; }
+.badge-danger   { background: rgba(239, 68, 68, 0.10);  color: #EF4444; }
+.badge-warning  { background: rgba(245, 158, 11, 0.10); color: #F59E0B; }
+.badge-info     { background: rgba(59, 130, 246, 0.10); color: #3B82F6; }
+.badge-refunded { background: rgba(139, 92, 246, 0.10); color: #8B5CF6; }
 
 /* ============================================================
-   TOUCH + MOBILE UTILITIES
+   MODAL BACKDROP
    ============================================================ */
-
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-.table-responsive-container {
-  @apply overflow-x-auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.table-responsive-container::-webkit-scrollbar {
-  height: 4px;
-}
-
-/* Modal Backdrop */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 19, 32, 0.75);
+  background: var(--modal-overlay);
   backdrop-filter: blur(4px);
   z-index: 50;
 }
 
-/* Mobile-specific utilities */
-@media (max-width: 640px) {
-  .admin-input {
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-
-  .btn-primary,
-  .btn-secondary,
-  .btn-danger {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* Safe area insets for notched devices */
-@supports (padding: max(0px)) {
-  .safe-area-inset-bottom {
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-  }
-
-  .safe-area-inset-top {
-    padding-top: max(16px, env(safe-area-inset-top));
-  }
-}
-
-@media (max-width: 768px) {
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-/* Focus visible — brand ring */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(18, 214, 197, 0.35);
-}
-
-input[type="checkbox"],
-input[type="radio"] {
-  @apply cursor-pointer;
-  accent-color: #12D6C5;
-}
-
-/* Loading skeleton */
+/* ============================================================
+   SKELETON
+   ============================================================ */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
-
 .skeleton {
-  background: linear-gradient(90deg, #F7F9FC 25%, #E5E7EB 50%, #F7F9FC 75%);
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.touch-target { min-height: 44px; min-width: 44px; }
+
+.table-responsive-container { @apply overflow-x-auto; -webkit-overflow-scrolling: touch; }
+.table-responsive-container::-webkit-scrollbar { height: 4px; }
+
+.brand-glow { box-shadow: 0 0 20px rgba(18, 214, 197, 0.2); }
+
 @media (max-width: 640px) {
-  .primary-action {
-    @apply fixed bottom-4 right-4 z-30;
-    box-shadow: 0 10px 25px rgba(18, 214, 197, 0.3);
-  }
+  .admin-input { font-size: 16px; }
+  .btn-primary, .btn-secondary, .btn-danger { width: 100%; justify-content: center; }
+  .primary-action { @apply fixed bottom-4 right-4 z-30; box-shadow: 0 10px 25px rgba(18, 214, 197, 0.3); }
 }
 
-/* Brand glow utility */
-.brand-glow {
-  box-shadow: 0 0 20px rgba(18, 214, 197, 0.2);
+@media (max-width: 768px) {
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+@supports (padding: max(0px)) {
+  .safe-area-inset-bottom { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  .safe-area-inset-top    { padding-top:    max(16px, env(safe-area-inset-top)); }
+}
+
+button:focus-visible, a:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(18, 214, 197, 0.35);
+}
+
+input[type="checkbox"], input[type="radio"] {
+  @apply cursor-pointer;
+  accent-color: #12D6C5;
 }

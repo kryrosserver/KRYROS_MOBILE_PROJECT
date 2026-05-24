@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Users, 
-  ShoppingBag, 
-  Package, 
+import {
+  LayoutDashboard,
+  Users,
+  ShoppingBag,
+  Package,
   CreditCard,
   LayoutGrid,
   Tag,
@@ -23,11 +23,14 @@ import {
   Globe,
   Map as MapIcon,
   Store,
-  MessageSquare
+  MessageSquare,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AdminSettingsProvider, useAdminSettings } from "@/providers/AdminSettingsProvider";
 import { formatPrice } from "@/lib/utils";
+import { useTheme } from "@/providers/ThemeProvider";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
@@ -55,6 +58,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { companyName, logoDataUrl, unseenCount, addNotifications, markAllRead } = useAdminSettings();
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     let alive = true;
@@ -68,68 +72,89 @@ function Shell({ children }: { children: React.ReactNode }) {
         if (ordersRes.status === "fulfilled" && ordersRes.value.ok) {
           const data = await ordersRes.value.json().catch(() => []);
           const arr = Array.isArray(data) ? data : data?.data || [];
-          arr.slice(0,5).forEach((o: any) => items.push({
-            id: `order-${o.id}`,
-            type: "order",
-            title: `Order ${o.orderNumber || o.id}`,
-            message: `${o.status} • ${formatPrice(Number(o.total || 0))}`,
-            date: o.createdAt || new Date().toISOString(),
-            seen: false,
-          }));
+          arr.slice(0, 5).forEach((o: any) =>
+            items.push({
+              id: `order-${o.id}`,
+              type: "order",
+              title: `Order ${o.orderNumber || o.id}`,
+              message: `${o.status} • ${formatPrice(Number(o.total || 0))}`,
+              date: o.createdAt || new Date().toISOString(),
+              seen: false,
+            })
+          );
         }
         if (txRes.status === "fulfilled" && txRes.value.ok) {
           const data = await txRes.value.json().catch(() => []);
           const arr = Array.isArray(data) ? data : data?.data || data?.items || [];
-          arr.slice(0,5).forEach((t: any) => items.push({
-            id: `txn-${t.id}`,
-            type: "payment",
-            title: `Payment ${t.reference || t.id}`,
-            message: `${t.status || ""} • ${formatPrice(Number(t.amount || 0))}`,
-            date: t.createdAt || new Date().toISOString(),
-            seen: false,
-          }));
+          arr.slice(0, 5).forEach((t: any) =>
+            items.push({
+              id: `txn-${t.id}`,
+              type: "payment",
+              title: `Payment ${t.reference || t.id}`,
+              message: `${t.status || ""} • ${formatPrice(Number(t.amount || 0))}`,
+              date: t.createdAt || new Date().toISOString(),
+              seen: false,
+            })
+          );
         }
         if (alive && items.length) addNotifications(items as any);
       } catch {}
     }
     poll();
     const int = setInterval(poll, 60000);
-    return () => { alive = false; clearInterval(int); };
+    return () => {
+      alive = false;
+      clearInterval(int);
+    };
   }, [addNotifications]);
 
-  const logoNode = logoDataUrl
-    ? <img src={logoDataUrl} alt="Logo" className="h-8 w-8 rounded-lg object-cover" />
-    : (
-      <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #12D6C5, #0e9e91)' }}>
-        <span className="text-white font-bold text-sm">{(companyName || "K").slice(0, 1)}</span>
-      </div>
-    );
+  const logoNode = logoDataUrl ? (
+    <img src={logoDataUrl} alt="Logo" className="h-8 w-8 rounded-lg object-cover" />
+  ) : (
+    <div
+      className="h-8 w-8 rounded-lg flex items-center justify-center"
+      style={{ background: "linear-gradient(135deg, #12D6C5, #0e9e91)" }}
+    >
+      <span className="text-white font-bold text-sm">{(companyName || "K").slice(0, 1)}</span>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen" style={{ background: '#0D1626' }}>
+    <div className="min-h-screen" style={{ background: "var(--bg-primary)" }}>
       {/* Mobile top bar */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 h-16 z-40 flex items-center justify-between px-4"
-        style={{ background: '#0B1320', borderBottom: '1px solid #2B3648' }}
+        style={{
+          background: "var(--sidebar-bg)",
+          borderBottom: "1px solid var(--sidebar-border)",
+        }}
       >
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileOpen(true)}
             className="transition-colors"
-            style={{ color: '#AAB4C5' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#AAB4C5')}
+            style={{ color: "var(--text-secondary)" }}
           >
             <Menu className="h-6 w-6" />
           </button>
           <div className="flex items-center gap-2">
             {logoNode}
-            <span className="text-white font-bold text-sm">{companyName || "KRYROS"}</span>
+            <span className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
+              {companyName || "KRYROS"}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Theme toggle — mobile */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center h-8 w-8 rounded-lg transition-colors"
+            style={{ color: "var(--text-secondary)", background: "var(--icon-bg)" }}
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           <div className="relative">
-            <button onClick={markAllRead} className="relative" style={{ color: '#AAB4C5' }}>
+            <button onClick={markAllRead} className="relative" style={{ color: "var(--text-secondary)" }}>
               <Bell className="h-5 w-5" />
               {!!unseenCount && (
                 <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white">
@@ -139,14 +164,16 @@ function Shell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
           <div className="h-8 w-8 rounded-full overflow-hidden">
-            {logoDataUrl
-              ? <img src={logoDataUrl} className="h-8 w-8 object-cover" alt="Avatar" />
-              : (
-                <div className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: '#12D6C5' }}>
-                  {(companyName || "K").slice(0, 1)}
-                </div>
-              )
-            }
+            {logoDataUrl ? (
+              <img src={logoDataUrl} className="h-8 w-8 object-cover" alt="Avatar" />
+            ) : (
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                style={{ background: "#12D6C5" }}
+              >
+                {(companyName || "K").slice(0, 1)}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -155,7 +182,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40"
-          style={{ background: 'rgba(11,19,32,0.75)', backdropFilter: 'blur(4px)' }}
+          style={{ background: "var(--modal-overlay)", backdropFilter: "blur(4px)" }}
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -165,19 +192,30 @@ function Shell({ children }: { children: React.ReactNode }) {
         className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 flex flex-col ${
           sidebarOpen ? "w-64" : "w-20"
         } ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
-        style={{ background: '#0B1320', borderRight: '1px solid #2B3648' }}
+        style={{
+          background: "var(--sidebar-bg)",
+          borderRight: "1px solid var(--sidebar-border)",
+        }}
       >
         {/* Sidebar header */}
         <div
           className="h-16 flex items-center justify-between px-4 shrink-0"
-          style={{ borderBottom: '1px solid #2B3648' }}
+          style={{ borderBottom: "1px solid var(--sidebar-border)" }}
         >
           <Link href="/admin" className="flex items-center gap-3 min-w-0">
             {logoNode}
             {sidebarOpen && (
               <div className="min-w-0">
-                <span className="text-white font-bold text-sm block truncate">{companyName || "KRYROS"}</span>
-                <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: '#12D6C5' }}>
+                <span
+                  className="font-bold text-sm block truncate"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {companyName || "KRYROS"}
+                </span>
+                <span
+                  className="text-[10px] font-semibold tracking-widest uppercase"
+                  style={{ color: "#12D6C5" }}
+                >
                   Admin Portal
                 </span>
               </div>
@@ -186,16 +224,22 @@ function Shell({ children }: { children: React.ReactNode }) {
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="hidden lg:flex items-center justify-center h-7 w-7 rounded-lg transition-colors shrink-0"
-            style={{ color: '#AAB4C5' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#182131'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#AAB4C5'; }}
+            style={{ color: "var(--text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--hover-bg)";
+              e.currentTarget.style.color = "var(--text-primary)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--text-secondary)";
+            }}
           >
             <ChevronLeft className={`h-4 w-4 transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} />
           </button>
           <button
             onClick={() => setMobileOpen(false)}
             className="lg:hidden flex items-center justify-center h-7 w-7 rounded-lg transition-colors"
-            style={{ color: '#AAB4C5' }}
+            style={{ color: "var(--text-secondary)" }}
           >
             <X className="h-4 w-4" />
           </button>
@@ -212,26 +256,26 @@ function Shell({ children }: { children: React.ReactNode }) {
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative"
                 style={{
-                  background: isActive ? 'rgba(18,214,197,0.12)' : 'transparent',
-                  color: isActive ? '#12D6C5' : '#AAB4C5',
+                  background: isActive ? "var(--nav-item-active-bg)" : "transparent",
+                  color: isActive ? "#12D6C5" : "var(--nav-text)",
                 }}
-                onMouseEnter={e => {
+                onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.background = '#182131';
-                    e.currentTarget.style.color = '#FFFFFF';
+                    e.currentTarget.style.background = "var(--nav-item-hover)";
+                    e.currentTarget.style.color = "var(--text-primary)";
                   }
                 }}
-                onMouseLeave={e => {
+                onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#AAB4C5';
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "var(--nav-text)";
                   }
                 }}
               >
                 {isActive && (
                   <span
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full"
-                    style={{ background: '#12D6C5' }}
+                    style={{ background: "#12D6C5" }}
                   />
                 )}
                 <item.icon className="h-5 w-5 shrink-0" />
@@ -243,42 +287,111 @@ function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
+        {/* Theme Toggle — sidebar */}
+        {sidebarOpen && (
+          <div className="mx-3 mb-2 shrink-0">
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
+              style={{ color: "var(--nav-text)", background: "var(--icon-bg)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--hover-bg)";
+                e.currentTarget.style.color = "var(--text-primary)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--icon-bg)";
+                e.currentTarget.style.color = "var(--nav-text)";
+              }}
+            >
+              {isDark ? <Sun className="h-5 w-5 shrink-0" /> : <Moon className="h-5 w-5 shrink-0" />}
+              <span className="text-sm font-medium">
+                {isDark ? "Light Mode" : "Dark Mode"}
+              </span>
+            </button>
+          </div>
+        )}
+        {!sidebarOpen && (
+          <div className="flex justify-center mb-2 shrink-0">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center h-8 w-8 rounded-lg transition-colors"
+              style={{ color: "var(--nav-text)", background: "var(--icon-bg)" }}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
+        )}
+
         {/* System Status */}
         {sidebarOpen && (
-          <div className="mx-3 mb-3 px-3 py-3 rounded-xl shrink-0" style={{ background: 'rgba(18,214,197,0.07)', border: '1px solid rgba(18,214,197,0.15)' }}>
+          <div
+            className="mx-3 mb-3 px-3 py-3 rounded-xl shrink-0"
+            style={{
+              background: "rgba(18,214,197,0.07)",
+              border: "1px solid rgba(18,214,197,0.15)",
+            }}
+          >
             <div className="flex items-center gap-2 mb-1">
-              <div className="h-2 w-2 rounded-full" style={{ background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-              <span className="text-xs font-bold" style={{ color: '#AAB4C5' }}>System Status</span>
+              <div
+                className="h-2 w-2 rounded-full"
+                style={{ background: "#22C55E", boxShadow: "0 0 6px #22C55E" }}
+              />
+              <span className="text-xs font-bold" style={{ color: "var(--text-secondary)" }}>
+                System Status
+              </span>
             </div>
-            <p className="text-xs mb-1" style={{ color: '#AAB4C5' }}>All systems operational</p>
+            <p className="text-xs mb-1" style={{ color: "var(--text-secondary)" }}>
+              All systems operational
+            </p>
             <div className="flex items-center justify-between">
-              <div className="h-1.5 flex-1 mr-2 rounded-full overflow-hidden" style={{ background: '#2B3648' }}>
-                <div className="h-full rounded-full" style={{ width: '100%', background: '#22C55E' }} />
+              <div
+                className="h-1.5 flex-1 mr-2 rounded-full overflow-hidden"
+                style={{ background: "var(--card-border)" }}
+              >
+                <div className="h-full rounded-full" style={{ width: "100%", background: "#22C55E" }} />
               </div>
-              <span className="text-xs font-bold" style={{ color: '#22C55E' }}>100%</span>
+              <span className="text-xs font-bold" style={{ color: "#22C55E" }}>
+                100%
+              </span>
             </div>
           </div>
         )}
 
         {/* Admin User Profile */}
-        <div className="px-3 pb-3 shrink-0" style={{ borderTop: '1px solid #2B3648', paddingTop: '12px' }}>
+        <div
+          className="px-3 pb-3 shrink-0"
+          style={{ borderTop: "1px solid var(--sidebar-border)", paddingTop: "12px" }}
+        >
           {sidebarOpen ? (
-            <div className="flex items-center gap-3 px-3 py-2 rounded-xl" style={{ background: '#182131' }}>
+            <div
+              className="flex items-center gap-3 px-3 py-2 rounded-xl"
+              style={{ background: "var(--hover-bg)" }}
+            >
               <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                style={{ background: '#12D6C5', color: '#0B1320' }}
+                style={{ background: "#12D6C5", color: "#0B1320" }}
               >
                 {(companyName || "K").slice(0, 1)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate" style={{ color: '#FFFFFF' }}>Admin User</p>
-                <p className="text-xs truncate" style={{ color: '#AAB4C5' }}>Super Admin</p>
+                <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                  Admin User
+                </p>
+                <p className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>
+                  Super Admin
+                </p>
               </div>
-              <ChevronLeft className="h-4 w-4 rotate-90 shrink-0" style={{ color: '#AAB4C5' }} />
+              <ChevronLeft
+                className="h-4 w-4 rotate-90 shrink-0"
+                style={{ color: "var(--text-secondary)" }}
+              />
             </div>
           ) : (
             <div className="flex justify-center">
-              <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: '#12D6C5', color: '#0B1320' }}>
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold"
+                style={{ background: "#12D6C5", color: "#0B1320" }}
+              >
                 {(companyName || "K").slice(0, 1)}
               </div>
             </div>
@@ -293,9 +406,15 @@ function Shell({ children }: { children: React.ReactNode }) {
               window.location.href = "/login";
             }}
             className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl transition-all"
-            style={{ color: '#AAB4C5' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#182131'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#AAB4C5'; }}
+            style={{ color: "var(--nav-text)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--hover-bg)";
+              e.currentTarget.style.color = "var(--text-primary)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--nav-text)";
+            }}
           >
             <LogOut className="h-5 w-5" />
             {sidebarOpen && <span className="text-sm font-medium">Logout</span>}
@@ -304,7 +423,11 @@ function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className={`pt-16 lg:pt-0 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}`}>
+      <main
+        className={`pt-16 lg:pt-0 transition-all duration-300 ${
+          sidebarOpen ? "lg:ml-64" : "lg:ml-20"
+        }`}
+      >
         <div className="p-6">{children}</div>
       </main>
     </div>

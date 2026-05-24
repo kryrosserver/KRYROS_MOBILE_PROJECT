@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  Bell, Settings, Search, Calendar, Sun, ChevronDown,
+  Bell, Settings, Search, Calendar, Sun, Moon, ChevronDown,
   TrendingUp, TrendingDown, Minus, FileText, FileEdit,
   CreditCard, ShoppingBag, Users, Package, BarChart3,
   ShoppingCart, Activity, DollarSign, AlertCircle,
@@ -14,13 +14,18 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from "recharts";
+import { useTheme } from "@/providers/ThemeProvider";
 
-const DARK_BG = "#0D1626";
-const CARD_BG = "#132035";
-const BORDER = "#1E2D42";
-const TEXT_PRIMARY = "#FFFFFF";
-const TEXT_SECONDARY = "#AAB4C5";
+const DARK_BG = "var(--bg-primary)";
+const CARD_BG = "var(--card-bg)";
+const BORDER = "var(--card-border)";
+const TEXT_PRIMARY = "var(--text-primary)";
+const TEXT_SECONDARY = "var(--text-secondary)";
 const ACCENT = "#12D6C5";
+const HEADER_BG = "var(--bg-secondary)";
+const ICON_BG = "var(--icon-bg)";
+const HOVER_BG = "var(--hover-bg)";
+const TOOLTIP_BG = "var(--tooltip-bg)";
 // BASE_WIDTH adapts per viewport so mobile content stays readable
 // 960 → scale=0.45 on a 430px phone: 3 tables get 248px each (vs 191px at 860)
 const MOBILE_BASE = 960;
@@ -106,7 +111,7 @@ function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boo
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px" }}>
+    <div style={{ background: TOOLTIP_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px" }}>
       <p style={{ color: TEXT_SECONDARY, fontSize: 11, marginBottom: 2 }}>{label}</p>
       <p style={{ color: TEXT_PRIMARY, fontSize: 13, fontWeight: 700 }}>{formatPrice(payload[0].value)}</p>
     </div>
@@ -117,6 +122,7 @@ export default function AdminDashboard() {
   const outerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     let raf: number;
@@ -234,7 +240,7 @@ export default function AdminDashboard() {
       >
         {/* ── HEADER ── */}
         <header style={{
-          background: "#0B1320",
+          background: HEADER_BG,
           borderBottom: `1px solid ${BORDER}`,
           height: 60,
           display: "flex",
@@ -253,7 +259,7 @@ export default function AdminDashboard() {
             }} />
             <span style={{
               position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-              fontSize: 10, color: TEXT_SECONDARY, background: "#1E2D42", padding: "2px 5px", borderRadius: 4,
+              fontSize: 10, color: TEXT_SECONDARY, background: ICON_BG, padding: "2px 5px", borderRadius: 4,
             }}>⌘K</span>
           </div>
 
@@ -277,8 +283,14 @@ export default function AdminDashboard() {
               }}>3</span>
             </button>
 
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
-              <Sun style={{ width: 20, height: 20 }} />
+            <button
+              onClick={toggleTheme}
+              style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark
+                ? <Sun style={{ width: 20, height: 20 }} />
+                : <Moon style={{ width: 20, height: 20 }} />}
             </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
@@ -342,7 +354,7 @@ export default function AdminDashboard() {
                       <span style={{ fontSize: 12, color: "#22C55E", fontWeight: 600 }}>↑ 18.6% vs last week</span>
                     </div>
                   </div>
-                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
+                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
                     This Week <ChevronDown style={{ width: 12, height: 12 }} />
                   </button>
                 </div>
@@ -367,7 +379,7 @@ export default function AdminDashboard() {
               <div style={{ ...card, padding: "18px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales by Channel</div>
-                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
+                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
                     This Week <ChevronDown style={{ width: 12, height: 12 }} />
                   </button>
                 </div>
@@ -378,7 +390,7 @@ export default function AdminDashboard() {
                         {salesByChannel.map((e, i) => <Cell key={i} fill={e.color} />)}
                       </Pie>
                       <Tooltip formatter={(v: any) => `${v}%`}
-                        contentStyle={{ background: "#1E2D42", border: `1px solid ${BORDER}`, borderRadius: 8 }}
+                        contentStyle={{ background: TOOLTIP_BG, border: `1px solid ${BORDER}`, borderRadius: 8 }}
                         labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
                     </PieChart>
                   </ResponsiveContainer>
@@ -414,7 +426,7 @@ export default function AdminDashboard() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
                   {recentOrders.map((o, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <ShoppingCart style={{ width: 15, height: 15, color: ACCENT }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -440,7 +452,7 @@ export default function AdminDashboard() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
                   {topProducts.map((p, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 8, background: "#1E2D42", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <Package style={{ width: 15, height: 15, color: "#8B5CF6" }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -518,7 +530,7 @@ export default function AdminDashboard() {
                 {quickActions.map((a, i) => (
                   <Link key={i} href={a.href} style={{
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    padding: "7px 4px", background: "#1E2D42", borderRadius: 8,
+                    padding: "7px 4px", background: ICON_BG, borderRadius: 8,
                     border: `1px solid ${BORDER}`, textDecoration: "none",
                   }}>
                     <div style={{ width: 24, height: 24, borderRadius: 6, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -539,7 +551,7 @@ export default function AdminDashboard() {
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
                 <div style={{ position: "relative", width: 90, height: 90 }}>
                   <svg width="90" height="90" viewBox="0 0 90 90">
-                    <circle cx="45" cy="45" r="37" fill="none" stroke="#1E2D42" strokeWidth="8" />
+                    <circle cx="45" cy="45" r="37" fill="none" stroke="var(--icon-bg)" strokeWidth="8" />
                     <circle cx="45" cy="45" r="37" fill="none" stroke={ACCENT} strokeWidth="8"
                       strokeLinecap="round"
                       strokeDasharray={`${2 * Math.PI * 37}`}
