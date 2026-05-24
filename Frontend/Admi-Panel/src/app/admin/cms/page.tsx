@@ -7,7 +7,7 @@ import {
   Download, Upload, Settings, ArrowUpDown, CheckSquare, Square,
   Home, FileText, Shield, Info, Phone, HelpCircle, AlertCircle,
   FileCode, ChevronLeft, ChevronRight, Layout, X, Save, Globe,
-  SortAsc, SortDesc, LayoutGrid
+  SortAsc, SortDesc, LayoutGrid, CheckCircle2, Clock
 } from "lucide-react";
 
 type CMSPage = {
@@ -174,10 +174,10 @@ export default function CMSPagesManager() {
   const draft = pages.filter(p => !p.isActive).length;
 
   const statCards = [
-    { label: "Total Pages", value: pages.length, color: "#12D6C5", iconBg: "rgba(18,214,197,0.12)", spark: [20, 28, 22, 35, 30, 40, pages.length] },
-    { label: "Published Pages", value: published, color: "#16C784", iconBg: "rgba(22,199,132,0.12)", spark: [15, 20, 18, 25, 22, 30, published] },
-    { label: "Draft Pages", value: draft, color: "#F59E0B", iconBg: "rgba(245,158,11,0.12)", spark: [2, 3, 2, 4, 3, 3, draft] },
-    { label: "Trash Pages", value: 0, color: "#EF4444", iconBg: "rgba(239,68,68,0.12)", spark: [1, 0, 1, 0, 1, 0, 0] },
+    { label: "Total Pages", value: pages.length, color: "#12D6C5", iconBg: "rgba(18,214,197,0.12)", icon: LayoutGrid, trend: 14.2, up: true, spark: [20, 28, 22, 35, 30, 40, pages.length] },
+    { label: "Published Pages", value: published, color: "#16C784", iconBg: "rgba(22,199,132,0.12)", icon: CheckCircle2, trend: 11.8, up: true, spark: [15, 20, 18, 25, 22, 30, published] },
+    { label: "Draft Pages", value: draft, color: "#F59E0B", iconBg: "rgba(245,158,11,0.12)", icon: Clock, trend: 20.0, up: false, spark: [2, 3, 2, 4, 3, 3, draft] },
+    { label: "Trash Pages", value: 0, color: "#EF4444", iconBg: "rgba(239,68,68,0.12)", icon: Trash2, trend: 33.3, up: false, spark: [1, 0, 1, 0, 1, 0, 0] },
   ];
 
   const topPages = [...pages].slice(0, 5).map((p, i) => ({
@@ -281,18 +281,16 @@ export default function CMSPagesManager() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
           <div key={i} className="admin-card !p-5 flex flex-col gap-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>{card.label}</p>
-                <p className="text-3xl font-bold mt-1" style={{ color: card.color }}>{card.value}</p>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl shrink-0" style={{ background: card.iconBg }}>
+                <card.icon className="h-5 w-5" style={{ color: card.color }} />
               </div>
-              <div className="p-2 rounded-xl" style={{ background: card.iconBg }}>
-                <LayoutGrid className="h-4 w-4" style={{ color: card.color }} />
-              </div>
+              <p className="text-sm font-semibold leading-tight" style={{ color: "var(--text-secondary)" }}>{card.label}</p>
             </div>
+            <p className="text-3xl font-bold" style={{ color: card.color }}>{card.value}</p>
             <div className="flex items-end justify-between">
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                <span style={{ color: "#16C784" }}>↑ {i === 0 ? "14.2" : i === 1 ? "11.8" : i === 2 ? "20.0" : "33.3"}%</span> vs last month
+                <span style={{ color: card.up ? "#16C784" : "#EF4444" }}>{card.up ? "↑" : "↓"} {card.trend}%</span> vs last month
               </p>
               <Sparkline values={card.spark} color={card.color} />
             </div>
@@ -301,7 +299,7 @@ export default function CMSPagesManager() {
       </div>
 
       {/* Main Content + Sidebar */}
-      <div className="flex flex-col xl:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Content */}
         <div className="flex-1 min-w-0 space-y-4">
           {/* Filter Bar */}

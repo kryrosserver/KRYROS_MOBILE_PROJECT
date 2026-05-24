@@ -560,3 +560,51 @@ input[type="checkbox"], input[type="radio"] {
 /* CMS homepage forms: bg-slate-50 rounded section panels */
 .dark .bg-slate-50.p-4.rounded-xl { background-color: var(--hover-bg) !important; }
 .dark .rounded-\[2rem\] { border-color: var(--card-border); }
+
+/* Very light slate text (icons in empty states) — make visible in dark */
+.dark .text-slate-100,
+.dark .text-slate-200 { color: var(--text-muted) !important; }
+
+/* Notifications/Services: inputs with border-2 and border-slate-100 */
+.dark input,
+.dark textarea {
+  background-color: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Override focus states to still show teal ring */
+.dark input:focus,
+.dark textarea:focus {
+  border-color: #12D6C5 !important;
+  outline: none;
+}
+
+/* bg-[#1FA89A]/10 icon wrappers — keep teal tint in dark mode */
+.dark .bg-\[\#1FA89A\]\/10 { background-color: rgba(18,214,197,0.12) !important; }
+
+/* Countries page: bg-purple-50 "Update Live Rates" button already handled above */
+/* Countries seed button: bg-white hover:bg-slate-50 */
+.dark .hover\:bg-slate-50:hover { background-color: var(--hover-bg) !important; }
+
+/* indigo badge (credit repayment cards) */
+.dark .bg-indigo-100 { background-color: rgba(99,102,241,0.12) !important; }
+.dark .text-indigo-700 { color: #818cf8 !important; }
+.dark .text-indigo-500 { color: #818cf8 !important; }
+.dark .text-blue-500   { color: #60a5fa !important; }
+.dark .text-teal-600, .dark .text-teal-700 { color: #12D6C5 !important; }
+
+/* Credit page left-border stat cards: keep colored left borders */
+.dark .border-l-blue-500  { border-left-color: #3B82F6 !important; }
+.dark .border-l-green-500 { border-left-color: #16C784 !important; }
+.dark .border-l-indigo-500 { border-left-color: #818cf8 !important; }
+.dark .border-l-red-500   { border-left-color: #EF4444 !important; }
+
+/* Services: tab count badge (bg-slate-100 text-slate-600) — already covered by bg-slate-100 + text-slate-600 overrides */
+
+/* Row hover in tables */
+.dark .hover\:bg-slate-50\/50:hover { background-color: rgba(255,255,255,0.02) !important; }
+
+/* Text colors used in countries table */
+.dark .text-slate-700 { color: var(--text-primary) !important; }
+.dark .font-mono.text-slate-600 { color: var(--text-secondary) !important; }

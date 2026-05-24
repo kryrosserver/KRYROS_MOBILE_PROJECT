@@ -91,12 +91,12 @@ export default function BannersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
+          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors" style={{ color: "var(--text-secondary)" }}>
+            <ChevronLeft className="h-6 w-6" />
           </Link>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Hero Banners</h1>
-            <p className="text-slate-500 font-medium">Manage your homepage promotional banners</p>
+            <h1 className="text-2xl font-black uppercase tracking-tight" style={{ color: "var(--text-primary)" }}>Hero Banners</h1>
+            <p className="font-medium" style={{ color: "var(--text-secondary)" }}>Manage your homepage promotional banners</p>
           </div>
         </div>
         

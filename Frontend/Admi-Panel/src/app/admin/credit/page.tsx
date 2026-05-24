@@ -229,28 +229,23 @@ export default function CreditPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Credit Management</h1>
-          <p className="text-slate-500">Manage applications and rules for installments</p>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Credit Management</h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Manage applications and rules for installments</p>
         </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setActiveTab("requests")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "requests" ? "bg-green-500 text-white shadow-lg shadow-green-500/20" : "bg-white text-slate-600 border border-slate-200"}`}
-          >
-            Applications
-          </button>
-          <button 
-            onClick={() => setActiveTab("plans")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "plans" ? "bg-green-500 text-white shadow-lg shadow-green-500/20" : "bg-white text-slate-600 border border-slate-200"}`}
-          >
-            Manage Plans
-          </button>
-          <button 
-            onClick={() => setActiveTab("products")}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "products" ? "bg-green-500 text-white shadow-lg shadow-green-500/20" : "bg-white text-slate-600 border border-slate-200"}`}
-          >
-            Installment Products
-          </button>
+        <div className="flex gap-2 flex-wrap">
+          {(["requests", "plans", "products"] as const).map((tab, i) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+              style={activeTab === tab
+                ? { background: "#12D6C5", color: "#fff", boxShadow: "0 4px 14px rgba(18,214,197,0.25)" }
+                : { background: "var(--icon-bg)", color: "var(--text-secondary)", border: "1px solid var(--card-border)" }
+              }
+            >
+              {["Applications", "Manage Plans", "Installment Products"][i]}
+            </button>
+          ))}
         </div>
       </div>
 

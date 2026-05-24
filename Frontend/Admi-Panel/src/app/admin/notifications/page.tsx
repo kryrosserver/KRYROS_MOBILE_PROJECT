@@ -156,8 +156,8 @@ export default function NotificationsPage() {
             <Bell className="h-6 w-6 text-[#1FA89A]" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Notification Center</h1>
-            <p className="text-sm text-slate-500 font-medium">Create, target, and schedule push notifications</p>
+            <h1 className="text-2xl font-black uppercase tracking-tight" style={{ color: "var(--text-primary)" }}>Notification Center</h1>
+            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Create, target, and schedule push notifications</p>
           </div>
         </div>
         <button 

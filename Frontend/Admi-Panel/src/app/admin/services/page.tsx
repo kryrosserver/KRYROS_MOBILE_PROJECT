@@ -149,8 +149,8 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Services Management</h1>
-          <p className="mt-1 text-slate-500 text-sm">Configure service offerings and bookings</p>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Services Management</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>Configure service offerings and bookings</p>
         </div>
         <button onClick={() => setForm(emptyForm)} className="btn-primary flex items-center gap-2">
           <Plus className="h-4 w-4" />
@@ -171,8 +171,8 @@ export default function ServicesPage() {
               <s.icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-slate-500">{s.label}</p>
-              <p className="text-xl font-bold text-slate-900">{s.value}</p>
+              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+              <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{s.value}</p>
             </div>
           </div>
         ))}
