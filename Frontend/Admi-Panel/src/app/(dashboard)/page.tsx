@@ -293,7 +293,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* ── BODY ── */}
-        <div style={{ padding: "16px 16px", display: "flex", gap: 12 }}>
+        <div style={{ padding: "16px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
 
           {/* LEFT MAIN */}
           <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -509,79 +509,79 @@ export default function AdminDashboard() {
           </div>
 
           {/* RIGHT PANEL — always fixed width */}
-          <div style={{ width: 200, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ width: 200, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
 
             {/* Quick Actions */}
-            <div style={{ ...card, padding: "16px" }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 12 }}>Quick Actions</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <div style={{ ...card, padding: "12px" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 8 }}>Quick Actions</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {quickActions.map((a, i) => (
                   <Link key={i} href={a.href} style={{
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                    padding: "10px 6px", background: "#1E2D42", borderRadius: 10,
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                    padding: "7px 4px", background: "#1E2D42", borderRadius: 8,
                     border: `1px solid ${BORDER}`, textDecoration: "none",
                   }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <a.icon style={{ width: 14, height: 14, color: ACCENT }} />
+                    <div style={{ width: 24, height: 24, borderRadius: 6, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <a.icon style={{ width: 12, height: 12, color: ACCENT }} />
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.3 }}>{a.label}</span>
+                    <span style={{ fontSize: 9, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.2 }}>{a.label}</span>
                   </Link>
                 ))}
               </div>
             </div>
 
             {/* Order Progress */}
-            <div style={{ ...card, padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ ...card, padding: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Order Progress</div>
                 <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
               </div>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                <div style={{ position: "relative", width: 120, height: 120 }}>
-                  <svg width="120" height="120" viewBox="0 0 120 120">
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#1E2D42" strokeWidth="9" />
-                    <circle cx="60" cy="60" r="50" fill="none" stroke={ACCENT} strokeWidth="9"
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+                <div style={{ position: "relative", width: 90, height: 90 }}>
+                  <svg width="90" height="90" viewBox="0 0 90 90">
+                    <circle cx="45" cy="45" r="37" fill="none" stroke="#1E2D42" strokeWidth="8" />
+                    <circle cx="45" cy="45" r="37" fill="none" stroke={ACCENT} strokeWidth="8"
                       strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 50}`}
-                      strokeDashoffset={`${2 * Math.PI * 50 * (1 - completionPct / 100)}`}
-                      transform="rotate(-90 60 60)"
+                      strokeDasharray={`${2 * Math.PI * 37}`}
+                      strokeDashoffset={`${2 * Math.PI * 37 * (1 - completionPct / 100)}`}
+                      transform="rotate(-90 45 45)"
                       style={{ transition: "stroke-dashoffset 1s ease" }} />
                   </svg>
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
-                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, textAlign: "center" }}>Completion<br />Rate</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
+                    <div style={{ fontSize: 8, color: TEXT_SECONDARY, textAlign: "center" }}>Completion<br />Rate</div>
                   </div>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 {orderProgress.map((p, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.label}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>{p.label}</span>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Recent Activities */}
-            <div style={{ ...card, padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            {/* Recent Activities — capped at 4 items to prevent right panel from overflowing left */}
+            <div style={{ ...card, padding: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
                 <Link href="/admin/reports" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                {recentActivities.map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 7, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                      <a.icon style={{ width: 13, height: 13, color: a.color }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                {recentActivities.slice(0, 4).map((a, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: 6, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                      <a.icon style={{ width: 11, height: 11, color: a.color }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 1 }}>{a.title}</div>
-                      <div style={{ fontSize: 10, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
-                      <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 2, opacity: 0.7 }}>{a.time}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 1 }}>{a.title}</div>
+                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
+                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, marginTop: 1, opacity: 0.7 }}>{a.time}</div>
                     </div>
                   </div>
                 ))}
