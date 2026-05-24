@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { 
-  Wallet, 
-  CreditCard, 
-  ArrowUpRight, 
+import {
+  Wallet,
+  CreditCard,
+  ArrowUpRight,
   ArrowDownLeft,
   DollarSign,
   Search,
@@ -88,20 +88,14 @@ export default function WalletPage() {
     }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const stats = useMemo(() => {
     const totalBalance = wallets.reduce((sum, w) => sum + Number(w.balance || 0), 0);
     const today = new Date().toDateString();
     const todayTxns = txns.filter((x) => new Date(x.createdAt).toDateString() === today);
-    const todayIncoming = todayTxns
-      .filter((x) => x.type === "CREDIT")
-      .reduce((s, x) => s + Number(x.amount), 0);
-    const todayOutgoing = todayTxns
-      .filter((x) => x.type === "DEBIT" || x.type === "PAYMENT")
-      .reduce((s, x) => s + Number(x.amount), 0);
+    const todayIncoming = todayTxns.filter((x) => x.type === "CREDIT").reduce((s, x) => s + Number(x.amount), 0);
+    const todayOutgoing = todayTxns.filter((x) => x.type === "DEBIT" || x.type === "PAYMENT").reduce((s, x) => s + Number(x.amount), 0);
     return {
       totalBalance,
       todayIncoming,
@@ -117,108 +111,86 @@ export default function WalletPage() {
     { id: "checkout_methods", label: "Checkout Methods", icon: CreditCard },
   ];
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
-  };
+  const formatAmount = (amount: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(amount);
+
+  const statDefs = [
+    { label: "Total Balance",    value: formatAmount(stats.totalBalance),      iconBg: "rgba(22,199,132,0.12)", iconColor: "#16C784",  icon: Wallet,       trend: <TrendingUp className="h-4 w-4" style={{ color: "#16C784" }} /> },
+    { label: "Today's Incoming", value: formatAmount(stats.todayIncoming),     iconBg: "rgba(59,130,246,0.12)", iconColor: "#3B82F6",  icon: ArrowDownLeft, trend: <span className="text-xs" style={{ color: "#16C784" }}>+12%</span> },
+    { label: "Today's Outgoing", value: formatAmount(stats.todayOutgoing),     iconBg: "rgba(239,68,68,0.12)", iconColor: "#EF4444",  icon: ArrowUpRight, trend: <span className="text-xs" style={{ color: "#EF4444" }}>-8%</span> },
+    { label: "Pending",          value: stats.pendingTransactions,              iconBg: "rgba(245,158,11,0.12)", iconColor: "#F59E0B",  icon: Clock,        trend: null },
+    { label: "Active Wallets",   value: stats.activeWallets.toLocaleString(),  iconBg: "rgba(139,92,246,0.12)", iconColor: "#8B5CF6",  icon: Users,        trend: null },
+  ];
+
+  const filteredTxns = txns.filter((txn) =>
+    (txn.wallet?.user?.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (txn.wallet?.user?.lastName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (txn.wallet?.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (txn.reference || txn.id).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Wallet & Payments</h1>
-          <p className="mt-1 text-slate-600">Manage wallets, transactions, and payment settings</p>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+            Wallet & Payments
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            Manage wallets, transactions, and payment settings
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
-            onClick={handleRefresh}
-            className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-          >
-            <RefreshCw className={`h-4 w-4 text-slate-600 ${isRefreshing ? "animate-spin" : ""}`} />
+          <button onClick={handleRefresh} className="btn-secondary !h-[44px] !w-[44px] !px-0 flex items-center justify-center">
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">
-            <Download className="h-4 w-4" />
-            Export
+          <button className="btn-primary flex items-center gap-2 px-4">
+            <Download className="h-4 w-4" /> Export
           </button>
         </div>
       </div>
+
+      {error && (
+        <div
+          className="rounded-xl p-4 text-sm"
+          style={{ background: "rgba(239,68,68,0.1)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.2)" }}
+        >
+          {error}
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <Wallet className="h-5 w-5 text-green-600" />
+        {statDefs.map((s) => (
+          <div key={s.label} className="admin-card !p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: s.iconBg }}>
+                <s.icon className="h-5 w-5" style={{ color: s.iconColor }} />
+              </div>
+              {s.trend}
             </div>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: "var(--text-primary)" }}>{s.value}</p>
           </div>
-          <p className="text-sm text-slate-500">Total Balance</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{formatAmount(stats.totalBalance)}</p>
-        </div>
-        
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <ArrowDownLeft className="h-5 w-5 text-blue-600" />
-            </div>
-            <span className="text-sm text-green-600">+12%</span>
-          </div>
-          <p className="text-sm text-slate-500">Today's Incoming</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{formatAmount(stats.todayIncoming)}</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <ArrowUpRight className="h-5 w-5 text-red-600" />
-            </div>
-            <span className="text-sm text-red-600">-8%</span>
-          </div>
-          <p className="text-sm text-slate-500">Today's Outgoing</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{formatAmount(stats.todayOutgoing)}</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-          </div>
-          <p className="text-sm text-slate-500">Pending</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{stats.pendingTransactions}</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Users className="h-5 w-5 text-purple-600" />
-            </div>
-          </div>
-          <p className="text-sm text-slate-500">Active Wallets</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{stats.activeWallets.toLocaleString()}</p>
-        </div>
+        ))}
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-200">
-        <nav className="flex gap-6 overflow-x-auto">
+      <div style={{ borderBottom: "1px solid var(--card-border)" }}>
+        <nav className="flex gap-2 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-slate-600 hover:text-slate-900"
-              }`}
+              className="flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors whitespace-nowrap border-b-2"
+              style={activeTab === tab.id
+                ? { borderColor: "#12D6C5", color: "#12D6C5" }
+                : { borderColor: "transparent", color: "var(--text-secondary)" }
+              }
             >
               <tab.icon className="h-4 w-4" />
               {tab.label}
-              {('count' in tab && typeof tab.count === 'number' && tab.count > 0) ? (
-                <span className="ml-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-xs">
-                  {tab.count}
-                </span>
-              ) : null}
             </button>
           ))}
         </nav>
@@ -227,216 +199,253 @@ export default function WalletPage() {
       {/* Transactions Tab */}
       {activeTab === "transactions" && (
         <>
-          {/* Search */}
-          <div className="flex gap-4">
+          {/* Search / Filter */}
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1 max-w-md">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
+                style={{ color: "var(--text-muted)" }}
+              />
               <input
                 type="text"
                 placeholder="Search transactions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="admin-input pl-10 w-full"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             </div>
-            <select className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white">
-              <option>All Methods</option>
-              <option>Paystack</option>
-              <option>Flutterwave</option>
-              <option>Bank Transfer</option>
-              <option>Wallet</option>
-            </select>
-            <select className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white">
-              <option>All Status</option>
-              <option>Completed</option>
-              <option>Pending</option>
-              <option>Failed</option>
-            </select>
           </div>
 
           {/* Transactions Table */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Transaction</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">User</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Amount</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Fee</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Method</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Status</th>
-                  <th className="text-left px-6 py-3 text-sm font-medium text-slate-600">Date</th>
-                  <th className="text-right px-6 py-3 text-sm font-medium text-slate-600">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {txns
-                  .filter((txn) =>
-                    (txn.wallet?.user?.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (txn.wallet?.user?.lastName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (txn.wallet?.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (txn.reference || txn.id).toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-                  .map((txn) => (
-                  <tr key={txn.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                          txn.type === "CREDIT" ? "bg-green-100" : "bg-red-100"
-                        }`}>
-                          {txn.type === "CREDIT" ? (
-                            <ArrowDownLeft className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <ArrowUpRight className="h-4 w-4 text-red-600" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-900">{txn.reference || txn.id}</p>
-                          <p className="text-xs text-slate-500">{txn.description || "-"}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {(txn.wallet?.user && `${txn.wallet.user.firstName || ""} ${txn.wallet.user.lastName || ""}`.trim()) || txn.wallet?.user?.email || "—"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`font-semibold ${
-                        txn.type === "CREDIT" ? "text-green-600" : "text-red-600"
-                      }`}>
-                        {txn.type === "CREDIT" ? "+" : "-"}{formatAmount(Number(txn.amount))}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {txn.metadata?.fee ? formatAmount(Number(txn.metadata.fee)) : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {txn.metadata?.method || "—"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        txn.status === "COMPLETED" 
-                          ? "bg-green-100 text-green-700"
-                          : txn.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}>
-                        {txn.status === "COMPLETED" && <CheckCircle className="h-3 w-3" />}
-                        {txn.status === "PENDING" && <Clock className="h-3 w-3" />}
-                        {txn.status === "FAILED" && <XCircle className="h-3 w-3" />}
-                        {txn.status.toLowerCase()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {new Date(txn.createdAt).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-sm text-green-600 hover:underline">
-                        View
-                      </button>
-                    </td>
+          <div className="admin-card !p-0 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Transaction</th>
+                    <th>User</th>
+                    <th>Amount</th>
+                    <th>Fee</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th className="text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    [...Array(5)].map((_, i) => (
+                      <tr key={i}>
+                        <td colSpan={8}>
+                          <div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "var(--icon-bg)" }} />
+                        </td>
+                      </tr>
+                    ))
+                  ) : filteredTxns.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-12" style={{ color: "var(--text-muted)" }}>
+                        No transactions found.
+                      </td>
+                    </tr>
+                  ) : filteredTxns.map((txn) => (
+                    <tr key={txn.id}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+                            style={{ background: txn.type === "CREDIT" ? "rgba(22,199,132,0.12)" : "rgba(239,68,68,0.12)" }}
+                          >
+                            {txn.type === "CREDIT" ? (
+                              <ArrowDownLeft className="h-4 w-4" style={{ color: "#16C784" }} />
+                            ) : (
+                              <ArrowUpRight className="h-4 w-4" style={{ color: "#EF4444" }} />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>
+                              {txn.reference || txn.id}
+                            </p>
+                            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                              {txn.description || "—"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                        {(txn.wallet?.user && `${txn.wallet.user.firstName || ""} ${txn.wallet.user.lastName || ""}`.trim()) || txn.wallet?.user?.email || "—"}
+                      </td>
+                      <td>
+                        <span
+                          className="font-semibold"
+                          style={{ color: txn.type === "CREDIT" ? "#16C784" : "#EF4444" }}
+                        >
+                          {txn.type === "CREDIT" ? "+" : "−"}{formatAmount(Number(txn.amount))}
+                        </span>
+                      </td>
+                      <td className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                        {txn.metadata?.fee ? formatAmount(Number(txn.metadata.fee)) : "—"}
+                      </td>
+                      <td className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                        {txn.metadata?.method || "—"}
+                      </td>
+                      <td>
+                        {txn.status === "COMPLETED" && (
+                          <span className="badge badge-success inline-flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" /> Completed
+                          </span>
+                        )}
+                        {txn.status === "PENDING" && (
+                          <span className="badge badge-warning inline-flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Pending
+                          </span>
+                        )}
+                        {txn.status === "FAILED" && (
+                          <span className="badge badge-danger inline-flex items-center gap-1">
+                            <XCircle className="h-3 w-3" /> Failed
+                          </span>
+                        )}
+                      </td>
+                      <td className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                        {new Date(txn.createdAt).toLocaleString()}
+                      </td>
+                      <td className="text-right">
+                        <button className="text-sm font-medium" style={{ color: "#12D6C5" }}>View</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
 
       {/* Checkout Methods Tab */}
-      {activeTab === "checkout_methods" && (
-        <CheckoutMethodsTab />
-      )}
+      {activeTab === "checkout_methods" && <CheckoutMethodsTab />}
 
       {/* Payment Links Tab */}
       {activeTab === "links" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Payment Links</h2>
-              <p className="text-slate-500">Generate secure, locked-amount payment links for clients</p>
+              <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Payment Links</h2>
+              <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+                Generate secure, locked-amount payment links for clients
+              </p>
             </div>
-            <button onClick={() => setIsCreatingLink(true)} className="bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-slate-800">
+            <button onClick={() => setIsCreatingLink(true)} className="btn-primary flex items-center gap-2">
               <Plus className="h-4 w-4" /> Create Link
             </button>
           </div>
 
           {isCreatingLink && (
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Generate New Payment Link</h3>
+            <div className="admin-card">
+              <h3 className="font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
+                Generate New Payment Link
+              </h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Locked Amount</label>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                    Locked Amount
+                  </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <input 
-                      type="number" 
-                      placeholder="0.00" 
+                    <DollarSign
+                      className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
+                      style={{ color: "var(--text-muted)" }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="0.00"
                       value={newLink.amount}
-                      onChange={(e) => setNewLink({...newLink, amount: e.target.value})}
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      onChange={(e) => setNewLink({ ...newLink, amount: e.target.value })}
+                      className="admin-input pl-10 w-full"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Description / Purpose</label>
-                  <input 
-                    placeholder="e.g. Custom Order #552" 
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                    Description / Purpose
+                  </label>
+                  <input
+                    placeholder="e.g. Custom Order #552"
                     value={newLink.description}
-                    onChange={(e) => setNewLink({...newLink, description: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    onChange={(e) => setNewLink({ ...newLink, description: e.target.value })}
+                    className="admin-input w-full"
                   />
                 </div>
               </div>
-              <div className="mt-6 flex gap-3">
-                <button onClick={handleCreateLink} disabled={!newLink.amount} className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50">
+              <div className="mt-5 flex gap-3">
+                <button
+                  onClick={handleCreateLink}
+                  disabled={!newLink.amount}
+                  className="btn-primary disabled:opacity-50"
+                >
                   Generate Link
                 </button>
-                <button onClick={() => setIsCreatingLink(false)} className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50">
+                <button onClick={() => setIsCreatingLink(false)} className="btn-secondary">
                   Cancel
                 </button>
               </div>
             </div>
           )}
 
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {/* Payment Links Table */}
+          <div className="admin-card !p-0 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b border-slate-200">
+              <table className="admin-table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-4 text-sm font-medium text-slate-600">Reference</th>
-                    <th className="px-6 py-4 text-sm font-medium text-slate-600">Description</th>
-                    <th className="px-6 py-4 text-sm font-medium text-slate-600">Amount</th>
-                    <th className="px-6 py-4 text-sm font-medium text-slate-600">Created</th>
-                    <th className="px-6 py-4 text-sm font-medium text-slate-600">Status</th>
-                    <th className="px-6 py-4 text-sm font-medium text-slate-600 text-right">Actions</th>
+                    <th>Reference</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th className="text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody>
                   {paymentLinks.map((link) => (
-                    <tr key={link.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 font-medium text-slate-900">{link.id}</td>
-                      <td className="px-6 py-4 text-slate-600">{link.description}</td>
-                      <td className="px-6 py-4 font-semibold text-green-600">{formatAmount(link.amount)}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{new Date(link.createdAt).toLocaleDateString()}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          link.status === "ACTIVE" ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
-                        }`}>
-                          {link.status}
-                        </span>
+                    <tr key={link.id}>
+                      <td className="font-mono font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                        {link.id}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                        {link.description}
+                      </td>
+                      <td className="font-semibold" style={{ color: "#16C784" }}>
+                        {formatAmount(link.amount)}
+                      </td>
+                      <td className="text-sm" style={{ color: "var(--text-muted)" }}>
+                        {new Date(link.createdAt).toLocaleDateString()}
+                      </td>
+                      <td>
+                        {link.status === "ACTIVE" ? (
+                          <span className="badge badge-success">Active</span>
+                        ) : (
+                          <span className="badge" style={{ background: "var(--icon-bg)", color: "var(--text-muted)" }}>
+                            {link.status}
+                          </span>
+                        )}
+                      </td>
+                      <td className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button 
+                          <button
                             onClick={() => copyToClipboard(link.id)}
-                            className={`p-2 rounded-lg transition-colors flex items-center gap-2 text-xs font-medium ${
-                              copiedId === link.id ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
+                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                            style={copiedId === link.id
+                              ? { background: "rgba(22,199,132,0.12)", color: "#16C784" }
+                              : { background: "var(--icon-bg)", color: "var(--text-secondary)" }
+                            }
                           >
-                            {copiedId === link.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            {copiedId === link.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                             {copiedId === link.id ? "Copied" : "Copy"}
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50">
+                          <button
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ color: "var(--text-muted)" }}
+                            onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "transparent"; }}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -449,16 +458,15 @@ export default function WalletPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
 
 function CheckoutMethodsTab() {
   const [methods, setMethods] = useState([
-    { id: "WHATSAPP", name: "WhatsApp Payment", enabled: true, sortOrder: 1 },
-    { id: "MOBILE_MONEY", name: "Mobile Money", enabled: true, sortOrder: 2 },
-    { id: "BANK_TRANSFER", name: "Bank Transfer", enabled: true, sortOrder: 3 },
+    { id: "WHATSAPP",      name: "WhatsApp Payment", enabled: true, sortOrder: 1 },
+    { id: "MOBILE_MONEY",  name: "Mobile Money",     enabled: true, sortOrder: 2 },
+    { id: "BANK_TRANSFER", name: "Bank Transfer",    enabled: true, sortOrder: 3 },
   ]);
   const [saving, setSaving] = useState(false);
 
@@ -468,9 +476,7 @@ function CheckoutMethodsTab() {
       .then(data => {
         const item = data?.find?.((d: any) => d.key === "CHECKOUT_METHODS");
         if (item?.value) {
-          try {
-            setMethods(JSON.parse(item.value));
-          } catch {}
+          try { setMethods(JSON.parse(item.value)); } catch {}
         }
       });
   }, []);
@@ -481,7 +487,7 @@ function CheckoutMethodsTab() {
       const res = await fetch("/internal/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: "CHECKOUT_METHODS", value: JSON.stringify(methods) })
+        body: JSON.stringify({ key: "CHECKOUT_METHODS", value: JSON.stringify(methods) }),
       });
       if (!res.ok) throw new Error("Failed to save");
       alert("Checkout methods saved!");
@@ -501,41 +507,61 @@ function CheckoutMethodsTab() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6">
+    <div className="admin-card">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Checkout Methods</h3>
-          <p className="text-sm text-slate-500">Enable/disable payment methods and set their display order at checkout.</p>
+          <h3 className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>Checkout Methods</h3>
+          <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            Enable/disable payment methods and set their display order at checkout.
+          </p>
         </div>
-        <button 
-          onClick={handleSave} 
+        <button
+          onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
+          className="btn-primary disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {methods.sort((a, b) => a.sortOrder - b.sortOrder).map(method => (
-          <div key={method.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+          <div
+            key={method.id}
+            className="flex items-center justify-between p-4 rounded-xl transition-colors"
+            style={{ border: "1px solid var(--card-border)" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "#12D6C5"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--card-border)"; }}
+          >
             <div className="flex items-center gap-4">
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" checked={method.enabled} onChange={() => toggleMethod(method.id)} className="sr-only peer" />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                <input
+                  type="checkbox"
+                  checked={method.enabled}
+                  onChange={() => toggleMethod(method.id)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:rounded-full after:h-5 after:w-5 after:transition-all"
+                  style={{
+                    background: method.enabled ? "#12D6C5" : "var(--icon-bg)",
+                    border: "1px solid var(--card-border)"
+                  }}
+                />
               </label>
               <div>
-                <h4 className="font-semibold text-slate-900">{method.name}</h4>
-                <span className="text-xs text-slate-500 font-mono">{method.id}</span>
+                <h4 className="font-semibold" style={{ color: "var(--text-primary)" }}>{method.name}</h4>
+                <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{method.id}</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Sort Order:</label>
-              <input 
-                type="number" 
-                value={method.sortOrder} 
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                Order:
+              </span>
+              <input
+                type="number"
+                value={method.sortOrder}
                 onChange={(e) => updateSortOrder(method.id, e.target.value)}
-                className="w-20 px-3 py-1.5 border border-slate-300 rounded-lg text-center font-bold"
+                className="admin-input w-20 text-center font-bold !py-1.5"
               />
             </div>
           </div>

@@ -2,23 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { 
-  Globe, 
-  Map as MapIcon, 
-  Building2, 
-  Truck, 
+import {
+  Globe,
+  Map as MapIcon,
+  Building2,
+  Truck,
   Settings2,
-  MapPin
+  MapPin,
+  ChevronRight
 } from "lucide-react";
 
 export default function ShippingDashboardPage() {
-  const [counts, setCounts] = useState({
-    countries: 0,
-    states: 0,
-    cities: 0,
-    zones: 0,
-    methods: 0
-  });
+  const [counts, setCounts] = useState({ countries: 0, states: 0, cities: 0, zones: 0, methods: 0 });
   const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
@@ -29,126 +24,127 @@ export default function ShippingDashboardPage() {
           fetch("/api/admin/states"),
           fetch("/api/admin/cities"),
           fetch("/api/admin/shipping-zones"),
-          fetch("/api/admin/shipping-zones/status")
+          fetch("/api/admin/shipping-zones/status"),
         ]);
-
-        if (cRes.ok) {
-          const data = await cRes.json();
-          setCounts(prev => ({ ...prev, countries: data.length }));
-        }
-        if (sRes.ok) {
-          const data = await sRes.json();
-          setCounts(prev => ({ ...prev, states: data.length }));
-        }
-        if (ctRes.ok) {
-          const data = await ctRes.json();
-          setCounts(prev => ({ ...prev, cities: data.length }));
-        }
-        if (zRes.ok) {
-          const data = await zRes.json();
-          setCounts(prev => ({ ...prev, zones: data.length }));
-        }
-        if (stRes.ok) {
-          const data = await stRes.json();
-          setIsEnabled(data);
-        }
-      } catch (err) {
-      }
+        if (cRes.ok)  { const d = await cRes.json();  setCounts(p => ({ ...p, countries: d.length })); }
+        if (sRes.ok)  { const d = await sRes.json();  setCounts(p => ({ ...p, states: d.length })); }
+        if (ctRes.ok) { const d = await ctRes.json(); setCounts(p => ({ ...p, cities: d.length })); }
+        if (zRes.ok)  { const d = await zRes.json();  setCounts(p => ({ ...p, zones: d.length })); }
+        if (stRes.ok) { const d = await stRes.json(); setIsEnabled(d); }
+      } catch (err) {}
     };
     loadCounts();
   }, []);
 
   const sections = [
     {
-      id: "countries",
-      label: "Countries",
-      icon: Globe,
-      count: counts.countries,
-      href: "/admin/locations-shipping/countries",
-      description: "Manage supported nations and their currencies."
+      id: "countries", label: "Countries",          icon: Globe,     count: counts.countries,
+      href: "/admin/locations-shipping/countries",  description: "Manage supported nations and their currencies.",
+      iconBg: "rgba(18,214,197,0.12)", iconColor: "#12D6C5",
     },
     {
-      id: "states",
-      label: "States / Provinces",
-      icon: MapIcon,
-      count: counts.states,
-      href: "/admin/locations-shipping/states",
-      description: "Define administrative regions for specific countries."
+      id: "states",    label: "States / Provinces", icon: MapIcon,   count: counts.states,
+      href: "/admin/locations-shipping/states",     description: "Define administrative regions for specific countries.",
+      iconBg: "rgba(59,130,246,0.12)", iconColor: "#3B82F6",
     },
     {
-      id: "cities",
-      label: "Cities",
-      icon: Building2,
-      count: counts.cities,
-      href: "/admin/locations-shipping/cities",
-      description: "Specific city-level data for precise shipping."
+      id: "cities",    label: "Cities",             icon: Building2, count: counts.cities,
+      href: "/admin/locations-shipping/cities",     description: "Specific city-level data for precise shipping.",
+      iconBg: "rgba(245,158,11,0.12)", iconColor: "#F59E0B",
     },
     {
-      id: "zones",
-      label: "Shipping Zones",
-      icon: Truck,
-      count: counts.zones,
-      href: "/admin/locations-shipping/zones",
-      description: "Group locations into zones with custom rates."
+      id: "zones",     label: "Shipping Zones",     icon: Truck,     count: counts.zones,
+      href: "/admin/locations-shipping/zones",      description: "Group locations into zones with custom rates.",
+      iconBg: "rgba(239,68,68,0.12)", iconColor: "#EF4444",
     },
     {
-      id: "global",
-      label: "Global Methods",
-      icon: Settings2,
-      count: 0,
-      href: "/admin/locations-shipping/global",
-      description: "Default shipping rules for the entire storefront."
-    }
+      id: "global",    label: "Global Methods",     icon: Settings2, count: 0,
+      href: "/admin/locations-shipping/global",     description: "Default shipping rules for the entire storefront.",
+      iconBg: "rgba(139,92,246,0.12)", iconColor: "#8B5CF6",
+    },
   ];
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex items-center justify-between">
-        <div className="text-left">
-          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
-            <MapPin className="h-8 w-8 text-green-600" />
-            Locations & Shipping
-          </h1>
-          <p className="text-slate-500 font-medium">Configure where you ship and how much it costs</p>
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="h-10 w-10 rounded-xl flex items-center justify-center"
+            style={{ background: "rgba(18,214,197,0.12)" }}
+          >
+            <MapPin className="h-5 w-5" style={{ color: "#12D6C5" }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+              Locations & Shipping
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              Configure where you ship and how much it costs
+            </p>
+          </div>
         </div>
-        
-        <div className={`px-4 py-2 rounded-2xl border-2 flex items-center gap-3 ${isEnabled ? "bg-green-50 border-green-100 text-green-700" : "bg-slate-50 border-slate-100 text-slate-400"}`}>
-          <div className={`h-2.5 w-2.5 rounded-full ${isEnabled ? "bg-green-500 animate-pulse" : "bg-slate-300"}`} />
-          <span className="text-[10px] font-black uppercase tracking-widest">
-            System: {isEnabled ? "Location Based" : "Global Only"}
-          </span>
+
+        {/* System Status Badge */}
+        <div
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest self-start sm:self-auto"
+          style={isEnabled
+            ? { background: "rgba(22,199,132,0.12)", color: "#16C784", border: "1px solid rgba(22,199,132,0.25)" }
+            : { background: "var(--icon-bg)", color: "var(--text-muted)", border: "1px solid var(--card-border)" }
+          }
+        >
+          <div
+            className="h-2.5 w-2.5 rounded-full"
+            style={{ background: isEnabled ? "#16C784" : "var(--text-muted)" }}
+          />
+          System: {isEnabled ? "Location Based" : "Global Only"}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Section Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section) => (
           <Link
             key={section.id}
             href={section.href}
-            className="group relative flex flex-col p-6 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-green-500/30 hover:shadow-xl transition-all duration-300 text-left overflow-hidden shadow-sm"
+            className="group admin-card flex flex-col gap-4 transition-all duration-200"
+            style={{ textDecoration: "none" }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = section.iconColor;
+              e.currentTarget.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = "var(--card-border)";
+              e.currentTarget.style.transform = "none";
+            }}
           >
-            <div className="mb-4 p-4 rounded-2xl w-fit bg-slate-50 text-slate-400 group-hover:bg-green-600 group-hover:text-white transition-colors">
-              <section.icon className="h-6 w-6" />
-            </div>
-            
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-black uppercase tracking-tight text-lg text-slate-900 group-hover:text-green-600 transition-colors">
-                {section.label}
-              </h3>
-              <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest group-hover:bg-green-50 group-hover:text-green-600 transition-colors">
+            <div className="flex items-start justify-between">
+              <div
+                className="p-3 rounded-xl"
+                style={{ background: section.iconBg }}
+              >
+                <section.icon className="h-5 w-5" style={{ color: section.iconColor }} />
+              </div>
+              <span
+                className="text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{ background: section.iconBg, color: section.iconColor }}
+              >
                 {section.count} Items
               </span>
             </div>
-            
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6">
-              {section.description}
-            </p>
-
-            <div className="mt-auto flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                Configure Section
-              </span>
-              <div className="h-2 w-2 rounded-full bg-slate-100 group-hover:bg-green-600 transition-colors" />
+            <div className="flex-1">
+              <h3 className="font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                {section.label}
+              </h3>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                {section.description}
+              </p>
+            </div>
+            <div
+              className="flex items-center text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ color: section.iconColor }}
+            >
+              Configure <ChevronRight className="h-3.5 w-3.5 ml-1" />
             </div>
           </Link>
         ))}

@@ -371,3 +371,155 @@ input[type="checkbox"], input[type="radio"] {
   @apply cursor-pointer;
   accent-color: #12D6C5;
 }
+
+/* ============================================================
+   DARK MODE OVERRIDES — auto-fix hardcoded Tailwind slate colors
+   across ALL admin pages without individual rewrites
+   ============================================================ */
+
+/* Text */
+.dark .text-slate-900,
+.dark .text-slate-800 { color: var(--text-primary) !important; }
+
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500 { color: var(--text-secondary) !important; }
+
+.dark .text-slate-400,
+.dark .text-slate-300 { color: var(--text-muted) !important; }
+
+/* Backgrounds */
+.dark .bg-white      { background-color: var(--card-bg)   !important; }
+.dark .bg-slate-50   { background-color: var(--hover-bg)  !important; }
+.dark .bg-slate-100  { background-color: var(--icon-bg)   !important; }
+.dark .bg-slate-200  { background-color: var(--card-border) !important; }
+
+/* Borders */
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300 { border-color: var(--card-border) !important; }
+
+/* Dividers */
+.dark .divide-y > * + * { border-color: var(--card-border) !important; }
+
+/* Hover backgrounds */
+.dark .hover\:bg-slate-50:hover  { background-color: var(--hover-bg) !important; }
+.dark .hover\:bg-slate-100:hover { background-color: var(--icon-bg)  !important; }
+.dark .hover\:bg-slate-200:hover { background-color: var(--card-border) !important; }
+
+/* Hover text */
+.dark .hover\:text-slate-900:hover,
+.dark .hover\:text-slate-800:hover,
+.dark .hover\:text-slate-600:hover { color: var(--text-primary) !important; }
+
+/* Modal / overlay backdrops */
+.dark .bg-black\/50,
+.dark .bg-black\/60,
+.dark .bg-black\/70,
+.dark .bg-black\/80 { background-color: var(--modal-overlay) !important; }
+
+/* Placeholders */
+.dark input::placeholder,
+.dark textarea::placeholder { color: var(--text-muted) !important; }
+
+/* Inline code */
+.dark code { background-color: var(--icon-bg) !important; color: #12D6C5 !important; }
+
+/* Select options */
+.dark select option { background-color: var(--card-bg); color: var(--text-primary); }
+
+/* Skeleton pulse in dark mode */
+.dark .bg-slate-100.animate-pulse { background-color: var(--icon-bg) !important; }
+
+/* Preserve semantic status colors */
+.dark .bg-green-50  { background-color: rgba(22,199,132,0.10) !important; }
+.dark .bg-red-50    { background-color: rgba(239,68,68,0.10)  !important; }
+.dark .bg-yellow-50 { background-color: rgba(245,158,11,0.10) !important; }
+.dark .bg-blue-50   { background-color: rgba(59,130,246,0.10) !important; }
+.dark .bg-amber-50  { background-color: rgba(245,158,11,0.08) !important; }
+.dark .bg-purple-50 { background-color: rgba(139,92,246,0.10) !important; }
+.dark .bg-teal-50   { background-color: rgba(18,214,197,0.08) !important; }
+.dark .bg-green-100 { background-color: rgba(22,199,132,0.15) !important; }
+.dark .bg-teal-100  { background-color: rgba(18,214,197,0.12) !important; }
+
+/* Preserve semantic text colors */
+.dark .text-green-700  { color: #16C784 !important; }
+.dark .text-green-600  { color: #16C784 !important; }
+.dark .text-red-700    { color: #EF4444 !important; }
+.dark .text-red-600    { color: #EF4444 !important; }
+.dark .text-amber-600  { color: #F59E0B !important; }
+.dark .text-amber-500  { color: #F59E0B !important; }
+.dark .text-blue-600   { color: #3B82F6 !important; }
+.dark .text-purple-600 { color: #8B5CF6 !important; }
+
+/* Hover action button colors */
+.dark .hover\:text-blue-600:hover  { color: #3B82F6 !important; }
+.dark .hover\:text-red-600:hover   { color: #EF4444 !important; }
+.dark .hover\:bg-blue-50:hover     { background-color: rgba(59,130,246,0.12) !important; }
+.dark .hover\:bg-red-50:hover      { background-color: rgba(239,68,68,0.12) !important; }
+.dark .hover\:bg-amber-50:hover    { background-color: rgba(245,158,11,0.10) !important; }
+.dark .hover\:bg-green-200:hover   { background-color: rgba(22,199,132,0.20) !important; }
+
+/* Admin card hover in dark */
+.dark .hover\:shadow-lg:hover   { box-shadow: 0 12px 40px rgba(0,0,0,0.4) !important; }
+.dark .hover\:border-slate-300:hover { border-color: #12D6C5 !important; }
+
+/* Focus ring for file inputs */
+.dark .file\:bg-blue-50 { background-color: rgba(59,130,246,0.15) !important; }
+.dark .file\:text-blue-700 { color: #3B82F6 !important; }
+
+/* Ring colors */
+.dark .focus\:ring-blue-500:focus { --tw-ring-color: rgba(59,130,246,0.4); }
+
+/* bg-slate-900 used as custom primary buttons / dark chips */
+.dark .bg-slate-900 { background-color: var(--icon-bg) !important; }
+.dark .hover\:bg-slate-800:hover { background-color: var(--hover-bg) !important; }
+.dark .hover\:bg-slate-700:hover { background-color: var(--card-border) !important; }
+.dark .bg-slate-800 { background-color: var(--hover-bg) !important; }
+
+/* Tab nav borders */
+.dark .border-b { border-color: var(--card-border); }
+
+/* Focus ring for custom inputs */
+.dark .focus\:ring-2.focus\:ring-green-500 { --tw-ring-color: rgba(18,214,197,0.4); }
+.dark .focus\:border-green-500 { border-color: #12D6C5 !important; }
+
+/* Checkbox/radio borders */
+.dark .border-slate-300 { border-color: var(--card-border) !important; }
+
+/* Inline progress bars track */
+.dark .bg-slate-100.rounded-full { background-color: var(--icon-bg) !important; }
+
+/* White borders used as "seamless" inputs inside light panels */
+.dark .border-white { border-color: var(--card-border) !important; }
+.dark .border-white\/50 { border-color: var(--card-border) !important; }
+
+/* Disabled button state */
+.dark .disabled\:bg-slate-200:disabled { background-color: var(--icon-bg) !important; }
+
+/* Green buttons used outside btn-primary (e.g. bg-green-600) */
+.dark .bg-green-600 { background-color: #12D6C5 !important; }
+.dark .hover\:bg-green-700:hover { background-color: #10c4b4 !important; }
+.dark .bg-green-500 { background-color: #12D6C5 !important; }
+
+/* Toggle switch track in dark mode */
+.dark .bg-slate-200.peer-checked\:after\:translate-x-full { background-color: var(--icon-bg) !important; }
+
+/* Notifications page: unique rounded containers */
+.dark .rounded-\[2\.5rem\] { border-color: var(--card-border); }
+
+/* Shadow adjustments in dark mode */
+.dark .shadow-sm { box-shadow: 0 1px 6px rgba(0,0,0,0.3) !important; }
+.dark .shadow-xl { box-shadow: 0 20px 60px rgba(0,0,0,0.4) !important; }
+
+/* Custom hardcoded dark slate buttons — make them use teal accent in dark mode */
+.dark .bg-\[#1e293b\] { background-color: #12D6C5 !important; color: #0B1320 !important; }
+.dark .bg-\[#1E293B\] { background-color: #12D6C5 !important; color: #0B1320 !important; }
+.dark .hover\:bg-\[#1e293b\]\:hover { background-color: #10c4b4 !important; }
+.dark .hover\:bg-slate-800:hover { background-color: #10c4b4 !important; }
+
+/* Chart tooltip stays dark in both modes — intentional */
+.dark .group:hover .absolute.bg-slate-900 {
+  background-color: #0d1a28 !important;
+  color: #fff !important;
+}

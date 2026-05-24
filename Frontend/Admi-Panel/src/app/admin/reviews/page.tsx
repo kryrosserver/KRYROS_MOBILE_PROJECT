@@ -82,36 +82,45 @@ export default function ReviewsPage() {
     r.product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const stats = [
+    { label: "Total Reviews", value: reviews.length, color: "var(--text-primary)" },
+    { label: "Approved", value: reviews.filter(r => r.isApproved).length, color: "#16C784" },
+    { label: "Featured", value: reviews.filter(r => r.isFeatured).length, color: "#12D6C5" },
+  ];
+
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Reviews Management</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage customer feedback and featured homepage reviews.</p>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+            Reviews Management
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            Manage customer feedback and featured homepage reviews
+          </p>
         </div>
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
           <input
             type="text"
             placeholder="Search reviews, users, products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="admin-input pl-10"
+            className="admin-input pl-10 w-full"
           />
         </div>
       </div>
 
-      {/* Summary strip */}
+      {/* Stats Strip */}
       <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Total Reviews", value: reviews.length },
-          { label: "Approved", value: reviews.filter(r => r.isApproved).length },
-          { label: "Featured", value: reviews.filter(r => r.isFeatured).length },
-        ].map((s, i) => (
+        {stats.map((s, i) => (
           <div key={i} className="admin-card !p-4">
-            <div className="text-2xl font-bold text-slate-900">{s.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+            <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -119,25 +128,29 @@ export default function ReviewsPage() {
       {/* Reviews Grid */}
       {loading ? (
         <div className="admin-card flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-[#12D6C5] mb-4" />
-          <p className="text-slate-400 text-sm font-semibold">Loading reviews...</p>
+          <Loader2 className="h-8 w-8 animate-spin mb-4" style={{ color: "#12D6C5" }} />
+          <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Loading reviews...</p>
         </div>
       ) : filteredReviews.length === 0 ? (
         <div className="admin-card flex flex-col items-center justify-center py-20">
-          <MessageCircle className="h-14 w-14 text-slate-100 mb-4" />
-          <p className="text-slate-400 font-semibold text-sm">No reviews found</p>
-          <p className="text-slate-300 text-xs mt-1">Customer reviews will appear here.</p>
+          <MessageCircle className="h-14 w-14 mb-4" style={{ color: "var(--icon-bg)" }} />
+          <p className="font-semibold text-sm" style={{ color: "var(--text-muted)" }}>No reviews found</p>
+          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Customer reviews will appear here.</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredReviews.map((review) => (
             <div
               key={review.id}
-              className="admin-card flex flex-col gap-4 hover:shadow-lg hover:border-[#12D6C5]/30 transition-all duration-200"
+              className="admin-card flex flex-col gap-4 hover:shadow-lg transition-all duration-200"
+              style={{ borderColor: "var(--card-border)" }}
             >
               {/* Product Header */}
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div className="h-12 w-12 bg-slate-50 rounded-xl border border-slate-100 p-1 shrink-0 overflow-hidden">
+              <div className="flex items-center gap-3 pb-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
+                <div
+                  className="h-12 w-12 rounded-xl p-1 shrink-0 overflow-hidden"
+                  style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}
+                >
                   <img
                     src={review.product?.images?.[0]?.url || "/placeholder.jpg"}
                     alt={review.product?.name}
@@ -145,15 +158,22 @@ export default function ReviewsPage() {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#12D6C5] mb-0.5">Product Review</p>
-                  <h4 className="text-sm font-bold text-slate-900 truncate">{review.product?.name}</h4>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "#12D6C5" }}>
+                    Product Review
+                  </p>
+                  <h4 className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                    {review.product?.name}
+                  </h4>
                 </div>
               </div>
 
               {/* Reviewer Info */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm overflow-hidden shrink-0">
+                  <div
+                    className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden shrink-0"
+                    style={{ background: "var(--icon-bg)", color: "var(--text-secondary)" }}
+                  >
                     {review.user?.avatar ? (
                       <img src={review.user.avatar} alt="User" className="h-full w-full object-cover" />
                     ) : (
@@ -161,13 +181,17 @@ export default function ReviewsPage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                       {review.user ? `${review.user.firstName} ${review.user.lastName}` : "Guest User"}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <div className="flex text-yellow-400">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`h-3 w-3 ${i < review.rating ? "fill-current" : "text-slate-200"}`} />
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${i < review.rating ? "fill-current" : ""}`}
+                            style={{ color: i < review.rating ? "#F59E0B" : "var(--icon-bg)" }}
+                          />
                         ))}
                       </div>
                       {review.isVerified && (
@@ -178,33 +202,39 @@ export default function ReviewsPage() {
                     </div>
                   </div>
                 </div>
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                   {new Date(review.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
               {/* Comment */}
-              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 rounded-xl p-3 italic">
+              <p
+                className="text-xs leading-relaxed rounded-xl p-3 italic"
+                style={{ background: "var(--hover-bg)", color: "var(--text-secondary)" }}
+              >
                 "{review.comment}"
               </p>
 
               {/* Review Image */}
               {review.imageUrl && (
-                <div className="aspect-video rounded-xl overflow-hidden bg-slate-100">
+                <div
+                  className="aspect-video rounded-xl overflow-hidden"
+                  style={{ background: "var(--icon-bg)" }}
+                >
                   <img src={review.imageUrl} alt="Review attachment" className="h-full w-full object-cover" />
                 </div>
               )}
 
               {/* Admin Actions */}
-              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-2 pt-2" style={{ borderTop: "1px solid var(--card-border)" }}>
                 <button
                   disabled={updatingId === review.id}
                   onClick={() => handleToggleStatus(review.id, "isApproved", review.isApproved)}
-                  className={`flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-all border ${
-                    review.isApproved
-                      ? "bg-teal-50 text-[#12D6C5] border-teal-200"
-                      : "bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100"
-                  }`}
+                  className="flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-all"
+                  style={review.isApproved
+                    ? { background: "rgba(18,214,197,0.12)", color: "#12D6C5", border: "1px solid rgba(18,214,197,0.3)" }
+                    : { background: "var(--hover-bg)", color: "var(--text-muted)", border: "1px solid var(--card-border)" }
+                  }
                 >
                   <CheckCircle className="h-3.5 w-3.5" />
                   {review.isApproved ? "Approved" : "Approve"}
@@ -212,11 +242,11 @@ export default function ReviewsPage() {
                 <button
                   disabled={updatingId === review.id}
                   onClick={() => handleToggleStatus(review.id, "isFeatured", review.isFeatured)}
-                  className={`flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-all border ${
-                    review.isFeatured
-                      ? "bg-[#12D6C5] text-white border-[#12D6C5] shadow-md"
-                      : "bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100"
-                  }`}
+                  className="flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-all"
+                  style={review.isFeatured
+                    ? { background: "#12D6C5", color: "#fff", border: "1px solid #12D6C5" }
+                    : { background: "var(--hover-bg)", color: "var(--text-muted)", border: "1px solid var(--card-border)" }
+                  }
                 >
                   <Home className="h-3.5 w-3.5" />
                   {review.isFeatured ? "Featured" : "Feature"}
@@ -224,7 +254,10 @@ export default function ReviewsPage() {
                 <button
                   disabled={updatingId === review.id}
                   onClick={() => handleDelete(review.id)}
-                  className="h-10 w-10 rounded-xl border border-red-100 bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shrink-0"
+                  className="h-10 w-10 rounded-xl flex items-center justify-center transition-all shrink-0"
+                  style={{ background: "rgba(239,68,68,0.1)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#EF4444"; e.currentTarget.style.color = "#fff"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; e.currentTarget.style.color = "#EF4444"; }}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

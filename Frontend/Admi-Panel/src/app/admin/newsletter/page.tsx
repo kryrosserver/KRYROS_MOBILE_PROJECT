@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Mail, Users, Send, Download, Search, Trash2, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Mail, Users, Download, Search, Trash2,
+  CheckCircle2, XCircle, Loader2
+} from "lucide-react";
 
 export default function NewsletterPage() {
   const [subscribers, setSubscribers] = useState<any[]>([]);
@@ -9,157 +12,186 @@ export default function NewsletterPage() {
   const [search, setSearch] = useState("");
   const [activeOnly, setActiveOnly] = useState(false);
 
-  useEffect(() => {
-    fetchSubscribers();
-  }, []);
+  useEffect(() => { fetchSubscribers(); }, []);
 
   const fetchSubscribers = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/newsletter?type=list');
-      if (res.ok) {
-        const data = await res.json();
-        setSubscribers(data);
-      }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch("/api/admin/newsletter?type=list");
+      if (res.ok) setSubscribers(await res.json());
+    } catch {}
+    finally { setLoading(false); }
   };
 
-  const filteredSubscribers = subscribers.filter(s => 
-    s.email.toLowerCase().includes(search.toLowerCase()) && 
-    (!activeOnly || s.isActive)
+  const filtered = subscribers.filter(s =>
+    s.email.toLowerCase().includes(search.toLowerCase()) && (!activeOnly || s.isActive)
   );
 
+  const exportCSV = () => {
+    const csv =
+      "Email,Status,Joined Date\n" +
+      filtered.map(s =>
+        `${s.email},${s.isActive ? "Active" : "Unsubscribed"},${new Date(s.createdAt).toLocaleDateString()}`
+      ).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), { href: url, download: "subscribers.csv" });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+
+  const stats = [
+    { label: "Total Subscribers", value: subscribers.length,                          icon: Users,         color: "var(--text-primary)",  bg: "var(--icon-bg)" },
+    { label: "Active",            value: subscribers.filter(s =>  s.isActive).length, icon: CheckCircle2,  color: "#16C784",               bg: "rgba(22,199,132,0.10)" },
+    { label: "Unsubscribed",      value: subscribers.filter(s => !s.isActive).length, icon: XCircle,       color: "#EF4444",               bg: "rgba(239,68,68,0.10)" },
+  ];
+
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-50 rounded-2xl">
-            <Mail className="h-6 w-6 text-blue-600" />
+          <div className="p-3 rounded-xl" style={{ background: "rgba(59,130,246,0.12)" }}>
+            <Mail className="h-5 w-5" style={{ color: "#3B82F6" }} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Newsletter Hub</h1>
-            <p className="text-sm text-slate-500 font-medium">Manage your subscribers and marketing campaigns</p>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Newsletter Hub</h1>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              Manage subscribers and marketing campaigns
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-           <button 
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
-            onClick={() => {
-              const csv = "Email,Status,Joined Date\n" + filteredSubscribers.map(s => `${s.email},${s.isActive ? 'Active' : 'Unsubscribed'},${new Date(s.createdAt).toLocaleDateString()}`).join("\n");
-              const blob = new Blob([csv], { type: 'text/csv' });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.setAttribute('hidden', '');
-              a.setAttribute('href', url);
-              a.setAttribute('download', 'subscribers.csv');
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-            }}
-          >
-            <Download className="h-4 w-4" /> Export CSV
-          </button>
-        </div>
+        <button
+          onClick={exportCSV}
+          className="btn-secondary flex items-center gap-2 self-start sm:self-auto"
+        >
+          <Download className="h-4 w-4" /> Export CSV
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Subscribers</p>
-          <div className="flex items-end justify-between">
-            <h3 className="text-3xl font-black text-slate-900">{subscribers.length}</h3>
-            <Users className="h-8 w-8 text-slate-100" />
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stats.map(({ label, value, icon: Icon, color, bg }) => (
+          <div key={label} className="admin-card flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                {label}
+              </p>
+              <p className="text-3xl font-black mt-1" style={{ color }}>{value}</p>
+            </div>
+            <div className="p-3 rounded-xl" style={{ background: bg }}>
+              <Icon className="h-6 w-6 opacity-60" style={{ color }} />
+            </div>
           </div>
-        </div>
-        <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-green-400">Active</p>
-          <div className="flex items-end justify-between">
-            <h3 className="text-3xl font-black text-slate-900">{subscribers.filter(s => s.isActive).length}</h3>
-            <CheckCircle2 className="h-8 w-8 text-green-50" />
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-red-400">Unsubscribed</p>
-          <div className="flex items-end justify-between">
-            <h3 className="text-3xl font-black text-slate-900">{subscribers.filter(s => !s.isActive).length}</h3>
-            <XCircle className="h-8 w-8 text-red-50" />
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
+      {/* Table */}
+      <div className="admin-card !p-0 overflow-hidden">
+        <div
+          className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"
+          style={{ borderBottom: "1px solid var(--card-border)" }}
+        >
+          <div className="relative w-full sm:w-80">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
+              style={{ color: "var(--text-muted)" }}
+            />
+            <input
+              type="text"
               placeholder="Search emails..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none transition-all font-medium text-sm"
+              className="admin-input pl-10 w-full"
             />
           </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <div 
-                className={`w-10 h-6 rounded-full relative transition-colors ${activeOnly ? 'bg-green-500' : 'bg-slate-200'}`}
-                onClick={() => setActiveOnly(!activeOnly)}
-              >
-                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${activeOnly ? 'translate-x-4' : ''}`} />
-              </div>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Only</span>
-            </label>
-          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <div
+              className="w-10 h-6 rounded-full relative transition-colors"
+              style={{ background: activeOnly ? "#12D6C5" : "var(--card-border)" }}
+              onClick={() => setActiveOnly(!activeOnly)}
+            >
+              <div
+                className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform`}
+                style={{
+                  background: "white",
+                  transform: activeOnly ? "translateX(16px)" : "none",
+                }}
+              />
+            </div>
+            <span
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Active Only
+            </span>
+          </label>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="admin-table">
             <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Subscriber Email</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Joined Date</th>
-                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</th>
+              <tr>
+                <th>Subscriber Email</th>
+                <th>Status</th>
+                <th>Joined Date</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-slate-200" />
+                  <td colSpan={4} className="px-6 py-14 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto opacity-30" style={{ color: "var(--text-muted)" }} />
                   </td>
                 </tr>
-              ) : filteredSubscribers.length === 0 ? (
+              ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center">
-                    <p className="text-sm font-bold text-slate-400">No subscribers found</p>
+                  <td colSpan={4} className="px-6 py-14 text-center">
+                    <div className="flex flex-col items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                      <Mail className="h-10 w-10 opacity-20" />
+                      <p className="font-semibold text-sm">No subscribers found</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
-                filteredSubscribers.map((subscriber) => (
-                  <tr key={subscriber.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4">
+                filtered.map((subscriber) => (
+                  <tr key={subscriber.id} className="group">
+                    <td>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                          style={{ background: "var(--icon-bg)", color: "var(--text-secondary)" }}
+                        >
                           {subscriber.email[0].toUpperCase()}
                         </div>
-                        <span className="text-sm font-bold text-slate-700">{subscriber.email}</span>
+                        <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                          {subscriber.email}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      {subscriber.isActive ? (
-                        <span className="px-3 py-1 rounded-full bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest">Active</span>
-                      ) : (
-                        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-widest">Inactive</span>
-                      )}
+                    <td>
+                      <span
+                        className="px-2.5 py-1 rounded-full text-xs font-bold"
+                        style={subscriber.isActive
+                          ? { background: "rgba(22,199,132,0.12)", color: "#16C784" }
+                          : { background: "var(--icon-bg)", color: "var(--text-muted)" }
+                        }
+                      >
+                        {subscriber.isActive ? "Active" : "Unsubscribed"}
+                      </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-medium text-slate-500">{new Date(subscriber.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    <td className="text-sm" style={{ color: "var(--text-muted)" }}>
+                      {new Date(subscriber.createdAt).toLocaleDateString("en-US", {
+                        month: "short", day: "numeric", year: "numeric"
+                      })}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                    <td className="text-right">
+                      <button
+                        className="p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        style={{ color: "#EF4444" }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>

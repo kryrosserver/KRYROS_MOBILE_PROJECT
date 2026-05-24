@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Edit,
+  Trash2,
   Search,
   RefreshCcw,
   LayoutGrid,
-  CheckCircle2, 
-  XCircle, 
-  X, 
+  CheckCircle2,
+  XCircle,
+  X,
   ChevronRight,
   Sparkles
 } from "lucide-react";
@@ -37,7 +37,7 @@ export default function CategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [cmsSection, setCmsSection] = useState<any>(null);
   const [updatingCms, setUpdatingCms] = useState(false);
-  
+
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -90,8 +90,7 @@ export default function CategoriesPage() {
         const catSection = (sections.data || sections).find((s: any) => s.type === "categories");
         setCmsSection(catSection);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }, []);
 
   useEffect(() => {
@@ -108,9 +107,7 @@ export default function CategoriesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [field]: value }),
       });
-      if (res.ok) {
-        setCmsSection({ ...cmsSection, [field]: value });
-      }
+      if (res.ok) setCmsSection({ ...cmsSection, [field]: value });
     } catch (e) {
     } finally {
       setUpdatingCms(false);
@@ -132,15 +129,7 @@ export default function CategoriesPage() {
       });
     } else {
       setEditingCategory(null);
-      setForm({
-        name: "",
-        slug: "",
-        description: "",
-        image: "",
-        parentId: "",
-        isActive: true,
-        showOnHome: false,
-      });
+      setForm({ name: "", slug: "", description: "", image: "", parentId: "", isActive: true, showOnHome: false });
     }
     setShowModal(true);
   };
@@ -153,38 +142,24 @@ export default function CategoriesPage() {
         body: JSON.stringify({ showOnHome: !category.showOnHome }),
       });
       if (res.ok) await loadCategories();
-    } catch (e) {
-    }
+    } catch (e) {}
   };
 
   const handleSave = async () => {
-    if (!form.name) {
-      alert("Please enter a category name");
-      return;
-    }
-
+    if (!form.name) { alert("Please enter a category name"); return; }
     setSaving(true);
     try {
-      const url = editingCategory 
-        ? `/api/admin/categories/${editingCategory.id}` 
-        : "/api/admin/categories";
-      
-      const payload = {
-        ...form,
-        parentId: form.parentId || null
-      };
-
+      const url = editingCategory ? `/api/admin/categories/${editingCategory.id}` : "/api/admin/categories";
+      const payload = { ...form, parentId: form.parentId || null };
       const res = await fetch(url, {
         method: editingCategory ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to save category");
       }
-
       await loadCategories();
       setShowModal(false);
     } catch (e: any) {
@@ -196,7 +171,6 @@ export default function CategoriesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this category? Products in this category might become unassigned.")) return;
-
     try {
       const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete category");
@@ -206,195 +180,266 @@ export default function CategoriesPage() {
     }
   };
 
-  const filteredCategories = categories.filter(c => 
+  const filteredCategories = categories.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.slug.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Header Section */}
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Category Management</h1>
-          <p className="text-slate-500 text-sm hidden sm:block">Organize your products into logical categories</p>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+            Category Management
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            Organize your products into logical categories
+          </p>
         </div>
-        <div className="flex items-center gap-2 md:gap-3">
-          <button onClick={loadCategories} className="btn-secondary flex items-center gap-2 min-h-[44px] px-4 py-2">
+        <div className="flex items-center gap-3">
+          <button onClick={loadCategories} className="btn-secondary flex items-center gap-2">
             <RefreshCcw className="h-4 w-4" />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2 min-h-[44px] px-4 py-2">
+          <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Category
           </button>
         </div>
       </div>
 
-      {/* Homepage CMS Section Settings */}
+      {error && (
+        <div
+          className="rounded-xl p-4 text-sm"
+          style={{ background: "rgba(239,68,68,0.1)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.2)" }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* CMS Section Settings */}
       {cmsSection && (
-        <div className="admin-card p-4 md:p-6 bg-green-50/50 border-green-100">
+        <div
+          className="admin-card p-5"
+          style={{ borderColor: "rgba(22,199,132,0.25)", background: "rgba(22,199,132,0.04)" }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+            <div
+              className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "rgba(22,199,132,0.15)", color: "#16C784" }}
+            >
               <Sparkles className="h-5 w-5 fill-current" />
             </div>
             <div>
-              <h2 className="text-base md:text-lg font-bold text-slate-900">Homepage "Shop by Category" Settings</h2>
-              <p className="text-sm text-slate-500 hidden sm:block">Customize how categories appear on the storefront homepage</p>
+              <h2 className="font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                Homepage "Shop by Category" Settings
+              </h2>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                Customize how categories appear on the storefront homepage
+              </p>
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Section Title</label>
+              <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Section Title</label>
               <input
                 defaultValue={cmsSection.title}
                 onBlur={(e) => handleUpdateCms("title", e.target.value)}
-                className="admin-input w-full bg-white min-h-[44px]"
+                className="admin-input w-full"
                 placeholder="e.g. Shop by Category"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Section Subtitle</label>
+              <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Section Subtitle</label>
               <input
                 defaultValue={cmsSection.subtitle}
                 onBlur={(e) => handleUpdateCms("subtitle", e.target.value)}
-                className="admin-input w-full bg-white min-h-[44px]"
+                className="admin-input w-full"
                 placeholder="e.g. Browse our wide range of tech products"
               />
             </div>
           </div>
-          
-          <div className="mt-4 p-3 bg-white/50 rounded-lg border border-green-100/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="text-sm text-slate-600">
-              Showing <span className="font-bold text-green-600">{categories.filter(c => c.showOnHome).length}</span> categories on the homepage.
+
+          <div
+            className="mt-4 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+            style={{ background: "rgba(22,199,132,0.06)", border: "1px solid rgba(22,199,132,0.15)" }}
+          >
+            <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Showing{" "}
+              <span className="font-bold" style={{ color: "#16C784" }}>
+                {categories.filter(c => c.showOnHome).length}
+              </span>{" "}
+              categories on the homepage.
             </div>
-            <div className="text-xs text-slate-400 italic">
+            <div className="text-xs italic" style={{ color: "var(--text-muted)" }}>
               {updatingCms ? "Saving..." : "Auto-saved on blur"}
             </div>
           </div>
         </div>
       )}
 
-      {/* Categories Table Card */}
-      <div className="admin-card overflow-hidden">
+      {/* Table Card */}
+      <div className="admin-card !p-0 overflow-hidden">
         {/* Search Bar */}
-        <div className="p-3 md:p-4 border-b bg-slate-50">
+        <div className="p-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
+              style={{ color: "var(--text-muted)" }}
+            />
             <input
               type="text"
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="admin-input pl-10 w-full min-h-[44px]"
+              className="admin-input pl-10 w-full"
             />
           </div>
         </div>
 
-        {/* Responsive Table Container */}
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-left min-w-[700px]">
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="admin-table">
             <thead>
-              <tr className="text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 border-b">
-                <th className="px-4 md:px-6 py-3">Category</th>
-                <th className="px-4 md:px-6 py-3 hidden sm:table-cell">Slug</th>
-                <th className="px-4 md:px-6 py-3 hidden md:table-cell">Parent</th>
-                <th className="px-4 md:px-6 py-3 text-center">Home</th>
-                <th className="px-4 md:px-6 py-3 text-center">Status</th>
-                <th className="px-4 md:px-6 py-3 text-right">Actions</th>
+              <tr>
+                <th>Category</th>
+                <th className="hidden sm:table-cell">Slug</th>
+                <th className="hidden md:table-cell">Parent</th>
+                <th className="text-center">Homepage</th>
+                <th className="text-center">Status</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-4 md:px-6 py-12 text-center text-slate-500">Loading categories...</td>
-                </tr>
-              ) : filteredCategories.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 md:px-6 py-12 text-center text-slate-500">No categories found.</td>
-                </tr>
-              ) : (
-                filteredCategories.map((category) => (
-                  <tr key={category.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 md:px-6 py-3 md:py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 md:h-10 w-9 md:w-10 rounded bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden border border-slate-200 shrink-0">
-                          {category.image ? (
-                            <img src={category.image} alt={category.name} className="h-full w-full object-contain p-1" />
-                          ) : (
-                            <LayoutGrid className="h-4 w-4" />
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-slate-900 truncate max-w-[100px] sm:max-w-[180px]">{category.name}</p>
-                          {category.description && (
-                            <p className="text-xs text-slate-500 truncate max-w-[100px] sm:max-w-[180px] sm:hidden">{category.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 hidden sm:table-cell">
-                      <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600 break-all">{category.slug}</code>
-                    </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
-                      {category.parentId ? (
-                        <div className="flex items-center gap-1 text-sm text-slate-600">
-                          <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
-                          <span className="truncate max-w-[100px]">{categories.find(c => c.id === category.parentId)?.name || "Parent"}</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 text-sm">Root</span>
-                      )}
-                    </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 text-center">
-                      <button
-                        onClick={() => handleToggleHome(category)}
-                        className={`p-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                          category.showOnHome 
-                            ? "bg-green-100 text-green-600 hover:bg-green-200" 
-                            : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-                        }`}
-                        title={category.showOnHome ? "Remove from Homepage" : "Show on Homepage"}
-                        aria-label={category.showOnHome ? "Remove from Homepage" : "Show on Homepage"}
-                      >
-                        <Sparkles className={`h-4 w-4 ${category.showOnHome ? "fill-current" : ""}`} />
-                      </button>
-                    </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 text-center">
-                      {category.isActive ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                          <CheckCircle2 className="h-3 w-3" />
-                          <span className="hidden xs:inline">Active</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
-                          <XCircle className="h-3 w-3" />
-                          <span className="hidden xs:inline">Inactive</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 text-right">
-                      <div className="flex items-center justify-end gap-1 md:gap-2">
-                        <button 
-                          onClick={() => handleOpenModal(category)} 
-                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-blue-50"
-                          aria-label="Edit category"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(category.id)} 
-                          className="p-2 text-slate-400 hover:text-red-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-red-50"
-                          aria-label="Delete category"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={6}>
+                      <div
+                        className="h-5 rounded animate-pulse my-1 mx-2"
+                        style={{ background: "var(--icon-bg)" }}
+                      />
                     </td>
                   </tr>
                 ))
-              )}
+              ) : filteredCategories.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-14" style={{ color: "var(--text-muted)" }}>
+                    <LayoutGrid className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                    <p className="font-semibold text-sm">No categories found</p>
+                  </td>
+                </tr>
+              ) : filteredCategories.map((category) => (
+                <tr key={category.id}>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-9 w-9 rounded-xl flex items-center justify-center overflow-hidden shrink-0"
+                        style={{
+                          background: "var(--icon-bg)",
+                          color: "var(--text-muted)",
+                          border: "1px solid var(--card-border)"
+                        }}
+                      >
+                        {category.image ? (
+                          <img src={category.image} alt={category.name} className="h-full w-full object-contain p-1" />
+                        ) : (
+                          <LayoutGrid className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p
+                          className="font-semibold text-sm truncate max-w-[110px] sm:max-w-[180px]"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {category.name}
+                        </p>
+                        {category.description && (
+                          <p
+                            className="text-xs truncate max-w-[110px] mt-0.5 sm:hidden"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            {category.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="hidden sm:table-cell">
+                    <code
+                      className="text-xs px-2 py-1 rounded font-mono break-all"
+                      style={{ background: "var(--icon-bg)", color: "#12D6C5" }}
+                    >
+                      {category.slug}
+                    </code>
+                  </td>
+                  <td className="hidden md:table-cell">
+                    {category.parentId ? (
+                      <div className="flex items-center gap-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                        <ChevronRight className="h-3 w-3 shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <span className="truncate max-w-[100px]">
+                          {categories.find(c => c.id === category.parentId)?.name || "Parent"}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm" style={{ color: "var(--text-muted)" }}>Root</span>
+                    )}
+                  </td>
+                  <td className="text-center">
+                    <button
+                      onClick={() => handleToggleHome(category)}
+                      className="p-1.5 rounded-xl flex items-center justify-center mx-auto transition-all"
+                      title={category.showOnHome ? "Remove from Homepage" : "Show on Homepage"}
+                      style={category.showOnHome
+                        ? { background: "rgba(22,199,132,0.15)", color: "#16C784" }
+                        : { background: "var(--icon-bg)", color: "var(--text-muted)" }
+                      }
+                    >
+                      <Sparkles className={`h-4 w-4 ${category.showOnHome ? "fill-current" : ""}`} />
+                    </button>
+                  </td>
+                  <td className="text-center">
+                    {category.isActive ? (
+                      <span className="badge badge-success inline-flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Active
+                      </span>
+                    ) : (
+                      <span
+                        className="badge inline-flex items-center gap-1"
+                        style={{ background: "var(--icon-bg)", color: "var(--text-muted)" }}
+                      >
+                        <XCircle className="h-3 w-3" /> Inactive
+                      </span>
+                    )}
+                  </td>
+                  <td className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => handleOpenModal(category)}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ color: "var(--text-muted)" }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "#3B82F6"; e.currentTarget.style.background = "rgba(59,130,246,0.1)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "transparent"; }}
+                        title="Edit category"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(category.id)}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ color: "var(--text-muted)" }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "transparent"; }}
+                        title="Delete category"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -402,26 +447,57 @@ export default function CategoriesPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="px-4 md:px-6 py-4 border-b flex items-center justify-between bg-slate-50 sticky top-0 z-10">
-              <h3 className="font-bold text-slate-900">{editingCategory ? "Edit Category" : "Add New Category"}</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          style={{ background: "var(--modal-overlay)" }}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl overflow-hidden max-h-[90vh] flex flex-col shadow-2xl"
+            style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
+          >
+            {/* Modal Header */}
+            <div
+              className="px-6 py-4 flex items-center justify-between shrink-0 sticky top-0 z-10"
+              style={{ borderBottom: "1px solid var(--card-border)", background: "var(--card-bg)" }}
+            >
+              <h3 className="font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                {editingCategory ? "Edit Category" : "Add New Category"}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1.5 rounded-lg transition-colors"
+                style={{ color: "var(--text-muted)" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "var(--hover-bg)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-4 md:p-6 space-y-4">
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 overflow-y-auto">
               {/* Image Preview & Upload */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <div className="h-16 w-16 rounded bg-white border flex items-center justify-center overflow-hidden shrink-0">
+              <div
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl"
+                style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}
+              >
+                <div
+                  className="h-16 w-16 rounded-xl flex items-center justify-center overflow-hidden shrink-0"
+                  style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
+                >
                   {form.image ? (
                     <img src={form.image} alt="Preview" className="h-full w-full object-contain p-1" />
                   ) : (
-                    <LayoutGrid className="h-8 w-8 text-slate-300" />
+                    <LayoutGrid className="h-8 w-8" style={{ color: "var(--text-muted)" }} />
                   )}
                 </div>
                 <div className="flex-1 w-full">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Category Image</label>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wider mb-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Category Image
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
@@ -433,35 +509,42 @@ export default function CategoriesPage() {
                         setFile(f);
                       }
                     }}
-                    className="text-sm text-slate-600 w-full file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 min-h-[44px]"
+                    className="text-sm w-full file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:cursor-pointer"
+                    style={{ color: "var(--text-secondary)" }}
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Category Name</label>
+                <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  Category Name <span style={{ color: "#EF4444" }}>*</span>
+                </label>
                 <input
                   placeholder="e.g. Phones, Laptops, Accessories"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="admin-input w-full min-h-[44px]"
+                  className="admin-input w-full"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Custom Slug (Optional)</label>
+                <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  Custom Slug <span className="font-normal text-xs" style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
                 <input
                   placeholder="e.g. phones (auto-generated if empty)"
                   value={form.slug}
                   onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  className="admin-input w-full min-h-[44px]"
+                  className="admin-input w-full"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Parent Category (Optional)</label>
+                <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  Parent Category <span className="font-normal text-xs" style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
                 <select
                   value={form.parentId}
                   onChange={(e) => setForm({ ...form, parentId: e.target.value })}
-                  className="admin-input w-full min-h-[44px]"
+                  className="admin-input w-full"
                 >
                   <option value="">None (Root Category)</option>
                   {categories
@@ -473,7 +556,9 @@ export default function CategoriesPage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Description</label>
+                <label className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  Description
+                </label>
                 <textarea
                   placeholder="Brief category overview..."
                   value={form.description}
@@ -481,35 +566,40 @@ export default function CategoriesPage() {
                   className="admin-input w-full h-20 resize-none"
                 />
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     id="isActive"
                     checked={form.isActive}
                     onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
+                    className="w-4 h-4 rounded"
                   />
-                  <label htmlFor="isActive" className="text-sm font-medium text-slate-700">Active</label>
-                </div>
-                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Active</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     id="showOnHome"
                     checked={form.showOnHome}
                     onChange={(e) => setForm({ ...form, showOnHome: e.target.checked })}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
+                    className="w-4 h-4 rounded"
                   />
-                  <label htmlFor="showOnHome" className="text-sm font-medium text-slate-700">Show on Homepage</label>
-                </div>
+                  <span className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Show on Homepage</span>
+                </label>
               </div>
             </div>
-            <div className="px-4 md:px-6 py-4 border-t bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="btn-secondary min-h-[44px] px-4 py-2">Cancel</button>
-              <button 
-                onClick={handleSave} 
+
+            {/* Modal Footer */}
+            <div
+              className="px-6 py-4 flex justify-end gap-3 shrink-0"
+              style={{ borderTop: "1px solid var(--card-border)" }}
+            >
+              <button onClick={() => setShowModal(false)} className="btn-secondary">Cancel</button>
+              <button
+                onClick={handleSave}
                 disabled={saving}
-                className="btn-primary min-w-[120px] min-h-[44px] flex items-center justify-center"
+                className="btn-primary min-w-[130px] flex items-center justify-center"
               >
                 {saving ? "Saving..." : "Save Category"}
               </button>

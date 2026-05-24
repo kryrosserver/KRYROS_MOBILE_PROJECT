@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { 
-  Users, 
-  Star, 
+import {
+  Users,
+  Star,
   Package,
   Store,
   ChevronRight
@@ -25,7 +25,6 @@ export default function WholesaleDashboardPage() {
           fetch("/internal/admin/cms/sections"),
           fetch("/api/admin/products?showInactive=true")
         ]);
-
         if (accRes.ok) {
           const data = await accRes.json();
           setCounts(prev => ({ ...prev, accounts: data.length }));
@@ -53,8 +52,8 @@ export default function WholesaleDashboardPage() {
       count: counts.accounts,
       href: "/admin/wholesale/accounts",
       description: "Manage applications and approved wholesale partners.",
-      color: "bg-teal-50 text-[#12D6C5]",
-      hoverBorder: "hover:border-[#12D6C5]/30",
+      iconBg: "rgba(18,214,197,0.12)",
+      iconColor: "#12D6C5",
     },
     {
       id: "deals",
@@ -63,8 +62,8 @@ export default function WholesaleDashboardPage() {
       count: counts.deals,
       href: "/admin/wholesale/deals",
       description: "Customize the wholesale offers shown on the storefront.",
-      color: "bg-amber-50 text-amber-500",
-      hoverBorder: "hover:border-amber-400/30",
+      iconBg: "rgba(245,158,11,0.12)",
+      iconColor: "#F59E0B",
     },
     {
       id: "products",
@@ -73,31 +72,34 @@ export default function WholesaleDashboardPage() {
       count: counts.products,
       href: "/admin/wholesale/products",
       description: "Exclusive products only available to wholesale buyers.",
-      color: "bg-blue-50 text-blue-600",
-      hoverBorder: "hover:border-blue-400/30",
-    }
+      iconBg: "rgba(59,130,246,0.12)",
+      iconColor: "#3B82F6",
+    },
   ];
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-          <Store className="h-6 w-6 text-slate-400" />
+        <h1 className="text-2xl font-bold flex items-center gap-3" style={{ color: "var(--text-primary)" }}>
+          <Store className="h-6 w-6" style={{ color: "var(--text-muted)" }} />
           Wholesale Hub
         </h1>
-        <p className="text-slate-500 text-sm mt-1">Manage your B2B operations and inventory</p>
+        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+          Manage your B2B operations and inventory
+        </p>
       </div>
 
       {/* Summary stat strip */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Active Accounts", value: counts.accounts },
-          { label: "Active Deals", value: counts.deals },
+          { label: "Active Accounts",    value: counts.accounts },
+          { label: "Active Deals",       value: counts.deals },
           { label: "Wholesale Products", value: counts.products },
         ].map((s, i) => (
           <div key={i} className="admin-card !p-4">
-            <div className="text-2xl font-bold text-slate-900">{s.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+            <div className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{s.value}</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -108,21 +110,35 @@ export default function WholesaleDashboardPage() {
           <Link
             key={section.id}
             href={section.href}
-            className={`group admin-card flex flex-col gap-4 hover:shadow-lg ${section.hoverBorder} transition-all duration-200`}
+            className="group admin-card flex flex-col gap-4 transition-all duration-200"
+            style={{ textDecoration: "none" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = section.iconColor; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--card-border)"; e.currentTarget.style.transform = "none"; }}
           >
             <div className="flex items-start justify-between">
-              <div className={`p-3 rounded-xl ${section.color}`}>
-                <section.icon className="h-5 w-5" />
+              <div
+                className="p-3 rounded-xl"
+                style={{ background: section.iconBg }}
+              >
+                <section.icon className="h-5 w-5" style={{ color: section.iconColor }} />
               </div>
               <span className="badge badge-info text-xs">{section.count} Items</span>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-slate-900 text-base group-hover:text-[#12D6C5] transition-colors">
+              <h3
+                className="font-bold text-base transition-colors"
+                style={{ color: "var(--text-primary)" }}
+              >
                 {section.label}
               </h3>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{section.description}</p>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                {section.description}
+              </p>
             </div>
-            <div className="flex items-center text-xs font-semibold text-[#12D6C5] opacity-0 group-hover:opacity-100 transition-opacity">
+            <div
+              className="flex items-center text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ color: "#12D6C5" }}
+            >
               Open Section <ChevronRight className="h-3.5 w-3.5 ml-1" />
             </div>
           </Link>

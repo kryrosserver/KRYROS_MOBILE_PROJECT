@@ -4,45 +4,57 @@ import { useState } from "react";
 import { Plus, Search, FileText, Eye, Trash2 } from "lucide-react";
 
 export default function DeliveryNotesPage() {
+  const [search, setSearch] = useState("");
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Delivery Notes</h1>
-          <p className="text-slate-500">Manage shipments and delivery proof</p>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Delivery Notes</h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            Manage shipments and delivery proof
+          </p>
         </div>
-        <button className="bg-[#1e293b] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-slate-800 transition-colors">
+        <button className="btn-primary flex items-center gap-2">
           <Plus className="h-4 w-4" /> New Delivery Note
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-100">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              placeholder="Search delivery notes..." 
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none"
+      {/* Table */}
+      <div className="admin-card !p-0 overflow-hidden">
+        <div className="p-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
+          <div className="relative max-w-md">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none"
+              style={{ color: "var(--text-muted)" }}
+            />
+            <input
+              placeholder="Search delivery notes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="admin-input pl-10 w-full"
             />
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Note #</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th>Note #</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody>
               <tr>
-                <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
-                  <div className="flex flex-col items-center gap-2">
-                    <FileText className="h-12 w-12 text-slate-200" />
-                    <p>No delivery notes found. Create your first delivery note!</p>
+                <td colSpan={5} className="px-6 py-20 text-center">
+                  <div className="flex flex-col items-center gap-3" style={{ color: "var(--text-muted)" }}>
+                    <FileText className="h-12 w-12 opacity-20" />
+                    <p className="font-semibold text-sm">No delivery notes yet</p>
+                    <p className="text-xs">Create your first delivery note to track shipments.</p>
                   </div>
                 </td>
               </tr>
