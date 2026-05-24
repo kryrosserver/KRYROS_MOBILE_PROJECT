@@ -318,7 +318,7 @@ export default function CMSPagesManager() {
         <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
 
           {/* ── Header ─────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-row items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-xs mb-1" style={{ color: "var(--text-muted)" }}>
                 <Link href="/admin" className="hover:underline" style={{ color: "var(--text-muted)" }}>Home</Link>
@@ -351,7 +351,7 @@ export default function CMSPagesManager() {
           </div>
 
           {/* ── Stat Cards ─────────────────────────────────── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             {statCards.map((card, i) => (
               <div key={i} className="admin-card !p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
@@ -372,13 +372,13 @@ export default function CMSPagesManager() {
           </div>
 
           {/* ── Main Content + Sidebar ─────────────────────── */}
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-row gap-6">
 
             {/* Main Content */}
             <div className="flex-1 min-w-0 space-y-4">
 
               {/* Filter Bar */}
-              <div className="admin-card !p-4 flex flex-wrap items-center gap-3">
+              <div className="admin-card !p-4 flex items-center gap-3">
                 <div className="relative flex-1 min-w-[220px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: "var(--text-muted)" }} />
                   <input
@@ -429,10 +429,10 @@ export default function CMSPagesManager() {
                           </button>
                         </th>
                         <th>Page Title</th>
-                        <th className="hidden md:table-cell">Page Type</th>
+                        <th>Page Type</th>
                         <th>Status</th>
                         <th
-                          className="hidden lg:table-cell cursor-pointer select-none"
+                          className="cursor-pointer select-none"
                           onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
                         >
                           <div className="flex items-center gap-1">
@@ -440,7 +440,7 @@ export default function CMSPagesManager() {
                             {sortDir === "asc" ? <SortAsc className="h-3.5 w-3.5" /> : <SortDesc className="h-3.5 w-3.5" />}
                           </div>
                         </th>
-                        <th className="hidden sm:table-cell text-center">Order</th>
+                        <th className="text-center">Order</th>
                         <th className="text-right">Actions</th>
                       </tr>
                     </thead>
@@ -493,20 +493,20 @@ export default function CMSPagesManager() {
                                 </div>
                               </div>
                             </td>
-                            <td className="hidden md:table-cell">
+                            <td>
                               <span className="px-2.5 py-1 rounded-lg text-xs font-semibold" style={{ background: type.bg, color: type.color }}>
                                 {type.label}
                               </span>
                             </td>
                             <td><StatusBadge status={status} /></td>
-                            <td className="hidden lg:table-cell text-xs" style={{ color: "var(--text-muted)" }}>
+                            <td className="text-xs" style={{ color: "var(--text-muted)" }}>
                               <p>{typeof dateInfo === "object" ? dateInfo.date : dateInfo}</p>
                               <p className="text-[10px] mt-0.5">
                                 {typeof dateInfo === "object" ? dateInfo.time : ""}{" "}
                                 <span style={{ color: "var(--text-muted)" }}>Admin</span>
                               </p>
                             </td>
-                            <td className="hidden sm:table-cell text-center text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+                            <td className="text-center text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
                               {(page - 1) * rowsPerPage + idx + 1}
                             </td>
                             <td className="text-right">
@@ -644,7 +644,7 @@ export default function CMSPagesManager() {
             </div>
 
             {/* ── Right Sidebar ───────────────────────────────── */}
-            <div className="xl:w-72 space-y-4 shrink-0">
+            <div className="w-72 space-y-4 shrink-0">
 
               {/* Page Overview */}
               <div className="admin-card !p-5">
