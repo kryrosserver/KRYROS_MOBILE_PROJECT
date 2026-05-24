@@ -5,8 +5,10 @@ import { formatPrice } from "@/lib/utils";
 import {
   Search, Filter, RefreshCw, ExternalLink, ChevronRight,
   Clock, CheckCircle, Package, X, ChevronDown,
+  Bell, Calendar, Sun, Moon, Menu,
 } from "lucide-react";
 import Link from "next/link";
+import { useTheme } from "@/providers/ThemeProvider";
 
 const ACCENT = "#12D6C5";
 const MOBILE_BASE = 960;
@@ -44,6 +46,8 @@ export default function OrdersPage() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [updating, setUpdating] = useState<string | null>(null);
 
+  const { isDark, toggleTheme } = useTheme();
+
   const BG = "var(--bg-primary)";
   const CARD = "var(--card-bg)";
   const BORDER = "var(--card-border)";
@@ -51,6 +55,7 @@ export default function OrdersPage() {
   const TEXT2 = "var(--text-secondary)";
   const HOVER = "var(--hover-bg)";
   const HEADER_BG = "var(--bg-secondary)";
+  const ICON_BG = "var(--icon-bg)";
 
   useEffect(() => {
     let raf: number;
@@ -174,20 +179,53 @@ export default function OrdersPage() {
     <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
       <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
 
-        {/* Page Header */}
-        <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, background: HEADER_BG, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Orders Management</h1>
-            <p style={{ fontSize: 13, color: TEXT2, margin: "4px 0 0" }}>Review, confirm, and process customer orders</p>
+        {/* ── TOP HEADER BAR ── */}
+        <header style={{
+          background: HEADER_BG, borderBottom: `1px solid ${BORDER}`,
+          height: 60, display: "flex", alignItems: "center",
+          justifyContent: "space-between", padding: "0 24px", gap: 16,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Menu style={{ width: 20, height: 20 }} />
+            </button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Orders Management</h1>
           </div>
-          <button
-            onClick={load}
-            disabled={loading}
-            style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
-            <RefreshCw style={{ width: 14, height: 14, ...(loading ? { animation: "spin 1s linear infinite" } : {}) }} />
-            Refresh
-          </button>
-        </div>
+
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input
+              placeholder="Search orders by ID, customer, email..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }}
+            />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
+            </button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} />
+              May 20 – May 26, 2025
+              <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
+                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
+              </div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
+          </div>
+        </header>
 
         <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
 
@@ -198,17 +236,7 @@ export default function OrdersPage() {
           )}
 
           {/* Filters */}
-          <div style={{ display: "flex", gap: 12 }}>
-            <div style={{ position: "relative", flex: 1 }}>
-              <Search style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: TEXT2 }} />
-              <input
-                type="text"
-                placeholder="Search orders by ID, customer, email..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px 10px 34px", color: TEXT, fontSize: 13, outline: "none" }}
-              />
-            </div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <div style={{ position: "relative" }}>
               <Filter style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2 }} />
               <select
@@ -225,6 +253,13 @@ export default function OrdersPage() {
               </select>
               <ChevronDown style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2, pointerEvents: "none" }} />
             </div>
+            <button
+              onClick={load}
+              disabled={loading}
+              style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 16px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
+              <RefreshCw style={{ width: 13, height: 13 }} />
+              Refresh
+            </button>
           </div>
 
           {/* Bulk Actions */}
