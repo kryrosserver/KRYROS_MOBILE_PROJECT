@@ -257,49 +257,52 @@ export default function CategoriesPage() {
         </header>
 
         {/* ── BODY ── */}
-        <div style={{ padding: "20px 20px", display: "flex", gap: 16, alignItems: "flex-start" }}>
+        <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+          {/* Page title + actions — full width above both columns */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Category Management</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
+                <span>Home</span>
+                <ChevronRight style={{ width: 13, height: 13 }} />
+                <span>Categories</span>
+                <ChevronRight style={{ width: 13, height: 13 }} />
+                <span style={{ color: ACCENT }}>All Categories</span>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", borderRadius: 10, overflow: "hidden" }}>
+                <button
+                  onClick={() => handleOpenModal()}
+                  style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  <Plus style={{ width: 15, height: 15 }} />
+                  Add New Category
+                </button>
+                <button style={{ background: "#10C4B5", border: "none", padding: "9px 10px", color: "#0B1320", cursor: "pointer", borderLeft: "1px solid rgba(0,0,0,0.15)" }}>
+                  <ChevronDown style={{ width: 14, height: 14 }} />
+                </button>
+              </div>
+              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+                <Download style={{ width: 15, height: 15 }} />
+                Export Categories
+                <ChevronDown style={{ width: 13, height: 13 }} />
+              </button>
+              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+                <MoreHorizontal style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>
+          )}
+
+          {/* Two-column layout: stat cards + table (left) | sidebar (right) */}
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
 
           {/* LEFT MAIN */}
           <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Page title + actions */}
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-              <div>
-                <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Category Management</h2>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
-                  <span>Home</span>
-                  <ChevronRight style={{ width: 13, height: 13 }} />
-                  <span>Categories</span>
-                  <ChevronRight style={{ width: 13, height: 13 }} />
-                  <span style={{ color: ACCENT }}>All Categories</span>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ display: "flex", borderRadius: 10, overflow: "hidden" }}>
-                  <button
-                    onClick={() => handleOpenModal()}
-                    style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                    <Plus style={{ width: 15, height: 15 }} />
-                    Add New Category
-                  </button>
-                  <button style={{ background: "#10C4B5", border: "none", padding: "9px 10px", color: "#0B1320", cursor: "pointer", borderLeft: "1px solid rgba(0,0,0,0.15)" }}>
-                    <ChevronDown style={{ width: 14, height: 14 }} />
-                  </button>
-                </div>
-                <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
-                  <Download style={{ width: 15, height: 15 }} />
-                  Export Categories
-                  <ChevronDown style={{ width: 13, height: 13 }} />
-                </button>
-                <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
-                  <MoreHorizontal style={{ width: 16, height: 16 }} />
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>
-            )}
 
             {/* Stat cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
@@ -612,7 +615,8 @@ export default function CategoriesPage() {
               </div>
             </div>
           </div>
-        </div>
+          </div>{/* end two-column row */}
+        </div>{/* end body */}
       </div>
 
       {/* ── ADD/EDIT MODAL ── */}
