@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  RefreshCw, Search, ChevronDown, ArrowLeft, Clock, Package,
-  FileText, User, MapPin, CreditCard, ChevronRight, Filter, Box,
-  Bell, Calendar, Sun, Moon, Menu,
+  ChevronDown, ArrowLeft, Clock, Package,
+  FileText, User, MapPin, CreditCard, ChevronRight, Box,
+  Bell, Calendar, Sun, Moon, Menu, CheckCircle, XCircle,
+  Download, MoreHorizontal, RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
@@ -103,11 +104,8 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
   const innerRef = useRef<HTMLDivElement>(null);
 
   const [order, setOrder] = useState<Order | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [sideSearch, setSideSearch] = useState("");
-  const [sideStatus, setSideStatus] = useState("ALL");
 
   const { isDark, toggleTheme } = useTheme();
 
@@ -125,11 +123,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
     function applyHeight(s: number) {
       if (!innerRef.current || !outerRef.current) return;
       outerRef.current.style.height = "auto";
-      const naturalH = innerRef.current.scrollHeight;
-      const visualH = naturalH * s;
-      const isMob = window.innerWidth < 1024;
-      const avail = isMob ? window.innerHeight - 64 : Infinity;
-      outerRef.current.style.height = `${visualH}px`;
+      outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`;
     }
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
@@ -158,19 +152,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
     setLoading(false);
   };
 
-  const fetchOrders = async () => {
-    try {
-      const res = await fetch("/api/admin/orders", { cache: "no-store" });
-      const data = await res.json();
-      const arr = Array.isArray(data) ? data : data?.data || [];
-      setOrders(arr);
-    } catch {}
-  };
-
-  useEffect(() => {
-    fetchOrder();
-    fetchOrders();
-  }, [id]);
+  useEffect(() => { fetchOrder(); }, [id]);
 
   const updateOrder = async (status: string, paymentStatus?: string) => {
     setUpdating(true);
@@ -198,18 +180,22 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
     return { color, background: bg, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 };
   };
 
-  const filteredOrders = orders.filter(o => {
-    const name = `${o.orderNumber} ${o.user?.firstName || ""} ${o.user?.lastName || ""} ${o.user?.email || ""}`.toLowerCase();
-    const matchSearch = !sideSearch || name.includes(sideSearch.toLowerCase());
-    const matchStatus = sideStatus === "ALL" || o.status === sideStatus;
-    return matchSearch && matchStatus;
-  });
+  const payBadgeStyle = (s: string) => {
+    const map: Record<string, [string, string]> = {
+      PAID: ["#22C55E", "rgba(34,197,94,0.14)"],
+      PENDING: ["#F59E0B", "rgba(245,158,11,0.14)"],
+      FAILED: ["#EF4444", "rgba(239,68,68,0.14)"],
+      REFUNDED: ["#8B5CF6", "rgba(139,92,246,0.14)"],
+    };
+    const [color, bg] = map[s] || ["#6B7280", "rgba(107,114,128,0.14)"];
+    return { color, background: bg, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 };
+  };
 
-  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12 };
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
 
   return (
     <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
 
         {/* ── TOP HEADER BAR ── */}
         <header style={{
@@ -221,17 +207,13 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
             <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
               <Menu style={{ width: 20, height: 20 }} />
             </button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Order Details</h1>
           </div>
-
           <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
-            <input placeholder="Search orders by ID, customer, email..." style={{
-              width: "100%", background: CARD, border: `1px solid ${BORDER}`,
-              borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none",
-            }} />
+            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, fontSize: 13 }}>🔍</span>
+            <input placeholder="Search anything..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
             <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
           </div>
-
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
               <Bell style={{ width: 20, height: 20 }} />
@@ -256,117 +238,96 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
           </div>
         </header>
 
-        {/* ── BODY: 3 columns ── */}
-        <div style={{ display: "flex", gap: 0, minHeight: "100vh" }}>
+        {/* ── BODY ── */}
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* LEFT: Orders list panel */}
-          <div style={{ width: 224, flexShrink: 0, background: CARD, borderRight: `1px solid ${BORDER}`, display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "14px 12px", borderBottom: `1px solid ${BORDER}` }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: TEXT2, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>Orders Management</div>
-
-              <button
-                onClick={() => { fetchOrders(); fetchOrder(); }}
-                style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT2, fontSize: 12, cursor: "pointer", marginBottom: 8 }}>
-                <RefreshCw style={{ width: 13, height: 13 }} />
-                Refresh
-              </button>
-
-              <div style={{ position: "relative", marginBottom: 8 }}>
-                <Search style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, color: TEXT2 }} />
-                <input
-                  value={sideSearch}
-                  onChange={e => setSideSearch(e.target.value)}
-                  placeholder="Search orders..."
-                  style={{ width: "100%", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "7px 10px 7px 28px", color: TEXT, fontSize: 12, outline: "none" }}
-                />
+          {/* Page title row */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                <Link href="/admin/orders" style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "5px 12px", color: TEXT2, fontSize: 12, textDecoration: "none" }}>
+                  <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Orders
+                </Link>
+                {order && <span style={statusBadgeStyle(order.status)}>{STATUS_MAP[order.status] || order.status}</span>}
+                {order && <span style={payBadgeStyle(order.paymentStatus)}>{PAYMENT_STATUS_MAP[order.paymentStatus] || order.paymentStatus}</span>}
               </div>
-
-              <div style={{ position: "relative" }}>
-                <Filter style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, color: TEXT2 }} />
-                <select
-                  value={sideStatus}
-                  onChange={e => setSideStatus(e.target.value)}
-                  style={{ width: "100%", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "7px 26px 7px 28px", color: TEXT2, fontSize: 12, outline: "none", appearance: "none" }}>
-                  <option value="ALL">All Status</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="CONFIRMED">Confirmed</option>
-                  <option value="PROCESSING">Processing</option>
-                  <option value="SHIPPED">Shipped</option>
-                  <option value="DELIVERED">Delivered</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-                <ChevronDown style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, color: TEXT2, pointerEvents: "none" }} />
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>
+                {order ? `Order ${order.orderNumber}` : "Order Details"}
+              </h2>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
+                <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
+                <ChevronRight style={{ width: 13, height: 13 }} />
+                <Link href="/admin/orders" style={{ color: TEXT2, textDecoration: "none" }}>Orders</Link>
+                <ChevronRight style={{ width: 13, height: 13 }} />
+                <span style={{ color: ACCENT }}>Order Details</span>
               </div>
             </div>
-
-            {/* Order cards */}
-            <div style={{ flex: 1, overflowY: "auto" }}>
-              {filteredOrders.length === 0 ? (
-                <div style={{ padding: 16, color: TEXT2, fontSize: 12, textAlign: "center" }}>No orders found</div>
-              ) : filteredOrders.map(o => {
-                const isActive = o.id === id;
-                const customer = o.user ? `${o.user.firstName} ${o.user.lastName}` : "Guest";
-                return (
-                  <Link key={o.id} href={`/admin/orders/${o.id}`}
-                    style={{ display: "block", padding: "12px 12px", borderBottom: `1px solid ${BORDER}`, background: isActive ? `${ACCENT}10` : "transparent", textDecoration: "none", borderLeft: isActive ? `3px solid ${ACCENT}` : "3px solid transparent" }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = HOVER; }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: TEXT, fontFamily: "monospace" }}>{o.orderNumber}</span>
-                      <span style={{ ...statusBadgeStyle(o.status), fontSize: 9, padding: "2px 7px" }}>{STATUS_MAP[o.status] || o.status}</span>
-                    </div>
-                    <div style={{ fontSize: 11, color: TEXT2, marginBottom: 2 }}>{customer}</div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 8 }}>{new Date(o.createdAt).toLocaleDateString()}</div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: TEXT }}>{formatPrice(o.total)}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: ACCENT, display: "flex", alignItems: "center", gap: 2 }}>
-                        View <ChevronRight style={{ width: 10, height: 10 }} />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button onClick={fetchOrder} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, cursor: "pointer" }}>
+                <RefreshCw style={{ width: 15, height: 15 }} />
+              </button>
+              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
+                <Download style={{ width: 14, height: 14 }} /> Export
+              </button>
+              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+                <MoreHorizontal style={{ width: 16, height: 16 }} />
+              </button>
             </div>
           </div>
 
-          {/* CENTER: Order detail */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0 }}>
-
-            {/* Page header */}
-            <div style={{ padding: "16px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
-              <div>
-                <h1 style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0 }}>Order Details</h1>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: TEXT2 }}>
-                  <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
-                  <ChevronRight style={{ width: 12, height: 12 }} />
-                  <Link href="/admin/orders" style={{ color: TEXT2, textDecoration: "none" }}>Orders</Link>
-                  <ChevronRight style={{ width: 12, height: 12 }} />
-                  <span style={{ color: ACCENT }}>Order Details</span>
-                </div>
+          {/* ── STATUS STEPPER — full width ── */}
+          {order && (
+            <div style={{ ...card, padding: "20px 24px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                {STATUS_STEPS.map((step, i) => {
+                  const state = getStepState(step, order);
+                  const isLast = i === STATUS_STEPS.length - 1;
+                  return (
+                    <div key={step} style={{ display: "flex", alignItems: "center", flex: isLast ? "0 0 auto" : 1 }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: stepBg[state], border: `2px solid ${stepColor[state]}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          {state === "completed" && <CheckCircle style={{ width: 16, height: 16, color: stepColor[state] }} />}
+                          {state === "failed" && <XCircle style={{ width: 16, height: 16, color: stepColor[state] }} />}
+                          {state === "pending" && <div style={{ width: 10, height: 10, borderRadius: "50%", background: stepColor[state] }} />}
+                        </div>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: state === "pending" ? TEXT2 : TEXT, textAlign: "center", whiteSpace: "nowrap", maxWidth: 90 }}>{step}</div>
+                      </div>
+                      {!isLast && (
+                        <div style={{ flex: 1, height: 2, background: state === "completed" ? stepColor.completed : BORDER, margin: "0 8px", marginBottom: 24 }} />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              <Link href="/admin/orders" style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, textDecoration: "none" }}>
-                <ArrowLeft style={{ width: 14, height: 14 }} />
-                Back to Orders
-              </Link>
             </div>
+          )}
 
-            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 14 }}>
-              {loading || !order ? (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 48, color: TEXT2 }}>
-                  Loading order details...
-                </div>
-              ) : (
-                <>
-                  {/* Management Actions + Price Summary — side by side */}
-                  <div style={{ display: "flex", gap: 14 }}>
+          {loading ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 60, color: TEXT2, fontSize: 14 }}>
+              Loading order details...
+            </div>
+          ) : !order ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 60, color: "#EF4444", fontSize: 14 }}>
+              Order not found.
+            </div>
+          ) : (
+            <>
+              {/* ── MAIN 2-COLUMN CONTENT ── */}
+              <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+
+                {/* LEFT — main content */}
+                <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+
+                  {/* Management Actions + Price Summary side by side */}
+                  <div style={{ display: "flex", gap: 16 }}>
                     {/* Management Actions */}
                     <div style={{ ...card, padding: 18, flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                        <Clock style={{ width: 16, height: 16, color: ACCENT }} />
+                        <Clock style={{ width: 15, height: 15, color: ACCENT }} />
                         <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>Management Actions</span>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                        <div>
+                      <div style={{ display: "flex", gap: 12 }}>
+                        <div style={{ flex: 1 }}>
                           <label style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>Order Status</label>
                           <div style={{ position: "relative" }}>
                             <select
@@ -379,7 +340,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                             <ChevronDown style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: TEXT2, pointerEvents: "none" }} />
                           </div>
                         </div>
-                        <div>
+                        <div style={{ flex: 1 }}>
                           <label style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>Payment Status</label>
                           <div style={{ position: "relative" }}>
                             <select
@@ -395,22 +356,26 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                       </div>
                     </div>
 
-                    {/* Price Summary */}
-                    <div style={{ ...card, padding: 18, minWidth: 200 }}>
+                    {/* Quick summary stats */}
+                    <div style={{ ...card, padding: 18, minWidth: 180 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                        <CreditCard style={{ width: 15, height: 15, color: ACCENT }} />
+                        <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>Order Summary</span>
+                      </div>
                       {[
                         { label: "Subtotal", value: order.subtotal },
                         { label: "Shipping", value: order.shipping },
                         { label: "Tax", value: order.tax },
                       ].map(r => (
-                        <div key={r.label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                          <span style={{ fontSize: 13, color: TEXT2 }}>{r.label}</span>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{formatPrice(r.value)}</span>
+                        <div key={r.label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span style={{ fontSize: 12, color: TEXT2 }}>{r.label}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: TEXT }}>{formatPrice(r.value)}</span>
                         </div>
                       ))}
-                      <div style={{ height: 1, background: BORDER, margin: "10px 0" }} />
+                      <div style={{ height: 1, background: BORDER, margin: "8px 0" }} />
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>Total</span>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>{formatPrice(order.total)}</span>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: ACCENT }}>{formatPrice(order.total)}</span>
                       </div>
                     </div>
                   </div>
@@ -420,37 +385,23 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                     <div style={{ padding: "14px 18px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 8 }}>
                       <Package style={{ width: 15, height: 15, color: TEXT2 }} />
                       <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>Order Items</span>
+                      <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, color: TEXT2 }}>{order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? "s" : ""}</span>
                     </div>
                     <div style={{ padding: "0 18px" }}>
-                      {order.items && order.items.length > 0 ? order.items.map(item => (
-                        <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${BORDER}` }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 8, background: ICON_BG, flexShrink: 0, overflow: "hidden" }}>
+                      {order.items && order.items.length > 0 ? order.items.map((item, idx) => (
+                        <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: idx < order.items.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                          <div style={{ width: 48, height: 48, borderRadius: 10, background: ICON_BG, flexShrink: 0, overflow: "hidden" }}>
                             {item.product.images?.[0] && <img src={item.product.images[0].url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product.name}</div>
-                            <div style={{ fontSize: 11, color: TEXT2 }}>{item.quantity} × {formatPrice(item.price)}</div>
+                            <div style={{ fontSize: 11, color: TEXT2, marginTop: 2 }}>Qty: {item.quantity} × {formatPrice(item.price)}</div>
                           </div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{formatPrice(item.total)}</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: TEXT, flexShrink: 0 }}>{formatPrice(item.total)}</div>
                         </div>
-                      )) : null}
-                    </div>
-                    <div style={{ padding: "12px 18px" }}>
-                      {[
-                        { label: "Subtotal", value: order.subtotal },
-                        { label: "Shipping", value: order.shipping },
-                        { label: "Tax", value: order.tax },
-                      ].map(r => (
-                        <div key={r.label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                          <span style={{ fontSize: 13, color: TEXT2 }}>{r.label}</span>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{formatPrice(r.value)}</span>
-                        </div>
-                      ))}
-                      <div style={{ height: 1, background: BORDER, margin: "8px 0" }} />
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>Total</span>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>{formatPrice(order.total)}</span>
-                      </div>
+                      )) : (
+                        <div style={{ padding: "20px 0", color: TEXT2, fontSize: 13, textAlign: "center" }}>No items found</div>
+                      )}
                     </div>
                   </div>
 
@@ -467,7 +418,6 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                         const isLast = i === STATUS_STEPS.length - 1;
                         return (
                           <div key={step} style={{ display: "flex", alignItems: "flex-start", gap: 14, paddingBottom: isLast ? 0 : 18, position: "relative" }}>
-                            {/* Dot + line */}
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, width: 16 }}>
                               <div style={{ width: 14, height: 14, borderRadius: "50%", background: stepColor[state], flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
                                 {state === "completed" && <span style={{ color: "#fff", fontSize: 8, fontWeight: 700 }}>✓</span>}
@@ -475,7 +425,6 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                               </div>
                               {!isLast && <div style={{ width: 2, flex: 1, background: state === "completed" ? stepColor[state] + "50" : BORDER, minHeight: 18, marginTop: 3 }} />}
                             </div>
-                            {/* Content */}
                             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 600, color: state === "pending" ? TEXT2 : TEXT }}>{step}</div>
@@ -496,98 +445,96 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                       })}
                     </div>
                   </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT SIDEBAR */}
-          <div style={{ width: 280, flexShrink: 0, borderLeft: `1px solid ${BORDER}`, display: "flex", flexDirection: "column", gap: 0 }}>
-            {order && (
-              <>
-                {/* Order Notes */}
-                <div style={{ padding: 18, borderBottom: `1px solid ${BORDER}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <FileText style={{ width: 15, height: 15, color: TEXT2 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Order Notes</span>
-                  </div>
-                  <div style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 12px", fontSize: 13, color: order.notes ? TEXT : TEXT2, fontStyle: order.notes ? "normal" : "italic", minHeight: 60 }}>
-                    {order.notes || "No notes provided."}
-                  </div>
                 </div>
 
-                {/* Package Notes */}
-                <div style={{ padding: 18, borderBottom: `1px solid ${BORDER}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <Box style={{ width: 15, height: 15, color: TEXT2 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Order Notes</span>
-                  </div>
-                  <div style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 12px", fontSize: 13, color: order.notes ? TEXT : TEXT2, fontStyle: order.notes ? "normal" : "italic", minHeight: 60 }}>
-                    {order.notes || "No notes provided."}
-                  </div>
-                </div>
+                {/* RIGHT SIDEBAR — customer info, notes, payment */}
+                <div style={{ width: 300, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
 
-                {/* Customer Details */}
-                <div style={{ padding: 18, borderBottom: `1px solid ${BORDER}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <User style={{ width: 15, height: 15, color: TEXT2 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Customer Details</span>
-                  </div>
-                  {order.user ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{order.user.firstName} {order.user.lastName}</div>
-                      <div style={{ fontSize: 12, color: TEXT2 }}>{order.user.email}</div>
-                      {order.user.phone && <div style={{ fontSize: 12, color: TEXT2 }}>{order.user.phone}</div>}
+                  {/* Customer Details */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <User style={{ width: 15, height: 15, color: ACCENT }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Customer</span>
                     </div>
-                  ) : (
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 6 }}>
-                        {order.shippingAddress ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}` : "Unknown"}
+                    {order.user ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{order.user.firstName} {order.user.lastName}</div>
+                        <div style={{ fontSize: 12, color: TEXT2 }}>{order.user.email}</div>
+                        {order.user.phone && <div style={{ fontSize: 12, color: TEXT2 }}>{order.user.phone}</div>}
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT, background: `${ACCENT}18`, padding: "3px 10px", borderRadius: 6 }}>Guest Order</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Shipping Address */}
-                <div style={{ padding: 18, borderBottom: `1px solid ${BORDER}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <MapPin style={{ width: 15, height: 15, color: TEXT2 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Shipping Address</span>
-                  </div>
-                  {order.shippingAddress ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: 12, color: TEXT2 }}>
-                      <div style={{ fontWeight: 600, color: TEXT }}>{order.shippingAddress.street}</div>
-                      <div>{order.shippingAddress.cityName}{order.shippingAddress.stateName ? `, ${order.shippingAddress.stateName}` : ""}</div>
-                      <div>{order.shippingAddress.country}</div>
-                      <div style={{ marginTop: 4, fontWeight: 700, color: TEXT }}>{order.shippingAddress.phone}</div>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 13, color: TEXT2 }}>No address provided</div>
-                  )}
-                </div>
-
-                {/* Payment Info */}
-                <div style={{ padding: 18 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <CreditCard style={{ width: 15, height: 15, color: TEXT2 }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Payment Info</span>
-                  </div>
-                  {order.paymentMethod ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{order.paymentMethod}</div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: order.paymentStatus === "PAID" ? "#22C55E" : order.paymentStatus === "FAILED" ? "#EF4444" : "#F59E0B", flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: TEXT2 }}>{PAYMENT_STATUS_MAP[order.paymentStatus] || order.paymentStatus}</span>
+                    ) : (
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 6 }}>
+                          {order.shippingAddress ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}` : "Unknown"}
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT, background: `${ACCENT}18`, padding: "3px 10px", borderRadius: 6 }}>Guest Order</span>
                       </div>
+                    )}
+                  </div>
+
+                  {/* Shipping Address */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <MapPin style={{ width: 15, height: 15, color: ACCENT }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Shipping Address</span>
                     </div>
-                  ) : (
-                    <div style={{ fontSize: 13, color: TEXT2 }}>No payment information available</div>
-                  )}
+                    {order.shippingAddress ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: 12, color: TEXT2 }}>
+                        <div style={{ fontWeight: 600, color: TEXT }}>{order.shippingAddress.street}</div>
+                        <div>{order.shippingAddress.cityName}{order.shippingAddress.stateName ? `, ${order.shippingAddress.stateName}` : ""}</div>
+                        <div>{order.shippingAddress.country}</div>
+                        <div style={{ marginTop: 4, fontWeight: 700, color: TEXT }}>{order.shippingAddress.phone}</div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 13, color: TEXT2 }}>No address provided</div>
+                    )}
+                  </div>
+
+                  {/* Payment Info */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <CreditCard style={{ width: 15, height: 15, color: ACCENT }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Payment Info</span>
+                    </div>
+                    {order.paymentMethod ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{order.paymentMethod}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: order.paymentStatus === "PAID" ? "#22C55E" : order.paymentStatus === "FAILED" ? "#EF4444" : "#F59E0B", flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, color: TEXT2 }}>{PAYMENT_STATUS_MAP[order.paymentStatus] || order.paymentStatus}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 13, color: TEXT2 }}>No payment information available</div>
+                    )}
+                  </div>
+
+                  {/* Order Notes */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <FileText style={{ width: 15, height: 15, color: ACCENT }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Order Notes</span>
+                    </div>
+                    <div style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 12px", fontSize: 13, color: order.notes ? TEXT : TEXT2, fontStyle: order.notes ? "normal" : "italic", minHeight: 60 }}>
+                      {order.notes || "No notes provided."}
+                    </div>
+                  </div>
+
+                  {/* Package / Delivery Notes */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <Box style={{ width: 15, height: 15, color: ACCENT }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Package Notes</span>
+                    </div>
+                    <div style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 12px", fontSize: 13, color: TEXT2, fontStyle: "italic", minHeight: 60 }}>
+                      No special packaging notes.
+                    </div>
+                  </div>
+
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
