@@ -104,7 +104,7 @@ export default function CitiesPage() {
                 <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
                   <Link href="/admin/locations-shipping" style={{ color: "var(--text-muted)" }}>Locations & Shipping</Link><span>/</span><span>Cities</span>
                 </div>
-                <h1 className="text-2xl font-bold">Cities</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap">Cities</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Manage city-level locations for your shipping network</p>
               </div>
             </div>

@@ -91,7 +91,7 @@ export default function WholesaleDashboardPage() {
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-3" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-2xl font-bold flex whitespace-nowrap items-center gap-3" style={{ color: "var(--text-primary)" }}>
           <Store className="h-6 w-6" style={{ color: "var(--text-muted)" }} />
           Wholesale Hub
         </h1>

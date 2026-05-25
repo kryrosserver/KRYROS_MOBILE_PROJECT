@@ -12,7 +12,7 @@ export default function ExpensesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Expenses</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Expenses</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
             Track business expenses and costs
           </p>

@@ -416,7 +416,7 @@ export default function FooterManagementPage() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Footer Designer</h1>
+            <h1 className="text-3xl font-bold text-gray-900 whitespace-nowrap">Footer Designer</h1>
             <p className="text-gray-600 mt-2">Manage your website's bottom navigation and contact information</p>
           </div>
           <div className="flex gap-3">

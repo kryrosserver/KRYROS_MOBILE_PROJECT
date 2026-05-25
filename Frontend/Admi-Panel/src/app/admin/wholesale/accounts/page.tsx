@@ -127,7 +127,7 @@ export default function WholesaleAccountsPage() {
                   <Link href="/admin/wholesale" style={{ color: "var(--text-muted)" }}>Wholesale</Link>
                   <span>/</span><span>Accounts</span>
                 </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Wholesale Accounts</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Wholesale Accounts</h1>
               </div>
             </div>
             <button onClick={handleRefresh} className="btn-secondary !h-10 !w-10 !px-0 flex items-center justify-center">

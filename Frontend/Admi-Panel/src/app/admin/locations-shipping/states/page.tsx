@@ -104,7 +104,7 @@ export default function StatesPage() {
                 <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
                   <Link href="/admin/locations-shipping" style={{ color: "var(--text-muted)" }}>Locations & Shipping</Link><span>/</span><span>States</span>
                 </div>
-                <h1 className="text-2xl font-bold">States / Provinces</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap">States / Provinces</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Manage administrative regions for each country</p>
               </div>
             </div>

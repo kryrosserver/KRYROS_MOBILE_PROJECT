@@ -93,7 +93,7 @@ export default function NotificationSettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Notifications</span>
                 </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Notifications</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Notifications</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Control how and when you receive system alerts</p>
               </div>
             </div>

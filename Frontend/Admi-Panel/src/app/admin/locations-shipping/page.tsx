@@ -86,7 +86,7 @@ export default function ShippingDashboardPage() {
             <MapPin className="h-5 w-5" style={{ color: "#12D6C5" }} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>
               Locations & Shipping
             </h1>
             <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>

@@ -49,7 +49,7 @@ export default function NewEstimatePage() {
             <ChevronLeft className="h-6 w-6 text-slate-600" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">New Estimate</h1>
+            <h1 className="text-2xl font-bold text-slate-900 whitespace-nowrap">New Estimate</h1>
             <p className="text-slate-500">Provide a quote for your services</p>
           </div>
         </div>

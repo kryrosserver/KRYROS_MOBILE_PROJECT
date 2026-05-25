@@ -58,7 +58,7 @@ export default function AppearanceSettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Appearance</span>
                 </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Appearance</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Appearance</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Customize the look and feel of the admin dashboard</p>
               </div>
             </div>

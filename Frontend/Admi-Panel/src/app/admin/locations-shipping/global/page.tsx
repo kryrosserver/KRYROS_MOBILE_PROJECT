@@ -98,7 +98,7 @@ export default function GlobalMethodsPage() {
                 <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
                   <Link href="/admin/locations-shipping" style={{ color: "var(--text-muted)" }}>Locations & Shipping</Link><span>/</span><span>Global Methods</span>
                 </div>
-                <h1 className="text-2xl font-bold">Global Methods</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap">Global Methods</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Default shipping rules applied across all locations</p>
               </div>
             </div>

@@ -239,7 +239,7 @@ export default function CreditPage() {
       {/* Header */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Credit Management</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Credit Management</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Manage applications and rules for installments</p>
         </div>
         <div className="flex gap-2">

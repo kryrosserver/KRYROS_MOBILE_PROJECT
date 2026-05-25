@@ -159,7 +159,7 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Services Management</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Services Management</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>Configure service offerings and bookings</p>
         </div>
         <button onClick={() => setForm(emptyForm)} className="btn-primary flex items-center gap-2">

@@ -95,7 +95,7 @@ export default function WholesaleDealsPage() {
                   <Link href="/admin/wholesale" style={{ color: "var(--text-muted)" }}>Wholesale</Link>
                   <span>/</span><span>Deals</span>
                 </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Wholesale Deals</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Wholesale Deals</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Manage featured wholesale offers shown on the storefront</p>
               </div>
             </div>

@@ -103,7 +103,7 @@ export default function ReviewsPage() {
       {/* Header */}
       <div className="flex flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>
             Reviews Management
           </h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>

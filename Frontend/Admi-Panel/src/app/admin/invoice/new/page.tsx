@@ -50,7 +50,7 @@ export default function NewInvoicePage() {
             <ChevronLeft className="h-6 w-6 text-slate-600" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">New Invoice</h1>
+            <h1 className="text-2xl font-bold text-slate-900 whitespace-nowrap">New Invoice</h1>
             <p className="text-slate-500">Create a professional invoice for your client</p>
           </div>
         </div>

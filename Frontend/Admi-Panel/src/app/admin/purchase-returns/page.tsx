@@ -10,7 +10,7 @@ export default function PurchaseReturnsPage() {
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Purchase Returns</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Purchase Returns</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
             Manage returns to suppliers
           </p>

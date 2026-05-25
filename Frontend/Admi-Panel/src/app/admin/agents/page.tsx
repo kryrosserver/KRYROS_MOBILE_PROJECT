@@ -11,7 +11,7 @@ export default function AgentsPage() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Agents</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 whitespace-nowrap">Agents</h1>
           <p className="text-slate-500 text-sm hidden sm:block">Manage sales agents and their performance</p>
         </div>
         <button className="btn-primary flex items-center gap-2 justify-center min-h-[44px]">

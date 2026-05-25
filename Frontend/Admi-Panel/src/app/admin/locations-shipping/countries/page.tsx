@@ -113,7 +113,7 @@ export default function CountriesPage() {
                   <Link href="/admin/locations-shipping" style={{ color: "var(--text-muted)" }}>Locations & Shipping</Link>
                   <span>/</span><span>Countries</span>
                 </div>
-                <h1 className="text-2xl font-bold">Countries</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap">Countries</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Manage supported countries and currencies</p>
               </div>
             </div>

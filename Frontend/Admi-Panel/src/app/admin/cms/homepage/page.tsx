@@ -227,7 +227,7 @@ export default function HomePageCMS() {
             <span>/</span>
             <span style={{ color: "var(--text-primary)" }}>Home Page</span>
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Home Page</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Home Page</h1>
         </div>
         <div className="flex items-center gap-2">
           <button

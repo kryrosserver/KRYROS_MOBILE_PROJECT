@@ -171,7 +171,7 @@ export default function ProductsPage() {
                 <span>/</span>
                 <span>Products</span>
               </div>
-              <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Products</h1>
+              <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Products</h1>
               <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
                 Manage your product catalogue — {products.length} total
               </p>

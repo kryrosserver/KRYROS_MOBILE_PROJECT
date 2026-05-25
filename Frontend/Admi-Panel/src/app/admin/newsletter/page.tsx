@@ -54,7 +54,7 @@ export default function NewsletterPage() {
             <Mail className="h-5 w-5" style={{ color: "#3B82F6" }} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Newsletter Hub</h1>
+            <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Newsletter Hub</h1>
             <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
               Manage subscribers and marketing campaigns
             </p>

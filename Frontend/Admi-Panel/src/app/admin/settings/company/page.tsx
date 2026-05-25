@@ -140,7 +140,7 @@ export default function CompanySettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Company</span>
                 </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Company Profile</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Company Profile</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">

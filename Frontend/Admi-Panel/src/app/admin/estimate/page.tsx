@@ -13,7 +13,7 @@ export default function EstimatePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Estimates</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Estimates</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
             Manage and track your customer estimates
           </p>

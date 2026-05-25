@@ -118,7 +118,7 @@ export default function SecuritySettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Security</span>
                 </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Security Center</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Security Center</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Protect your administrator account and sessions</p>
               </div>
             </div>

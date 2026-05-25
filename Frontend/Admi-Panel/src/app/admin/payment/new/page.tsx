@@ -35,7 +35,7 @@ export default function NewPaymentPage() {
           <Link href="/admin/payment" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <ChevronLeft className="h-6 w-6 text-slate-600" />
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900">Record Payment</h1>
+          <h1 className="text-2xl font-bold text-slate-900 whitespace-nowrap">Record Payment</h1>
         </div>
         <button onClick={handleSave} className="px-6 py-2 bg-[#1e293b] text-white rounded-lg flex items-center gap-2 hover:bg-slate-800 transition-colors">
           <Save className="h-4 w-4" /> Save Payment

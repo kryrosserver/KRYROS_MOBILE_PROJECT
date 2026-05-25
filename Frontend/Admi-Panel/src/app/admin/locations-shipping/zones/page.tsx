@@ -123,7 +123,7 @@ export default function ShippingZonesPage() {
                 <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
                   <Link href="/admin/locations-shipping" style={{ color: "var(--text-muted)" }}>Locations & Shipping</Link><span>/</span><span>Zones</span>
                 </div>
-                <h1 className="text-2xl font-bold">Shipping Zones</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap">Shipping Zones</h1>
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Create regional shipping rules and pricing</p>
               </div>
             </div>

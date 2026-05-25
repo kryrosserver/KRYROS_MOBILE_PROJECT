@@ -201,7 +201,7 @@ export default function EditHeroBannerPage() {
             <span>/</span>
             <span style={{ color: "var(--text-primary)" }}>Edit Hero Banner</span>
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Edit Hero Banner</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Edit Hero Banner</h1>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/admin/cms/homepage" className="btn-secondary h-10 px-4 flex items-center gap-2 text-sm">
