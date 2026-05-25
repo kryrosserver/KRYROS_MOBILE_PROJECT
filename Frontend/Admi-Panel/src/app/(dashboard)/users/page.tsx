@@ -265,12 +265,7 @@ export default function UsersPage() {
               </div>
           </div>
 
-          {/* Two-column row: stats/table left + sidebar right — both start at same top edge */}
-          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-
-          {/* LEFT MAIN */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
+          {/* Stat cards — full width, matching dashboard layout */}
             {/* Stat Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
               {[
@@ -466,10 +461,9 @@ export default function UsersPage() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div style={{ width: 270, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* Overview panels row — 3 columns matching dashboard layout */}
+          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 14 }}>
 
             {/* User Roles Overview */}
             <div style={{ ...card, padding: 18 }}>
@@ -558,7 +552,6 @@ export default function UsersPage() {
                 ))}
               </div>
             </div>
-          </div>
           </div>
         </div>
       </div>

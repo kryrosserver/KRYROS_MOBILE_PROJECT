@@ -298,13 +298,7 @@ export default function CategoriesPage() {
             <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>
           )}
 
-          {/* Two-column layout: stat cards + table (left) | sidebar (right) */}
-          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-
-          {/* LEFT MAIN */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Stat cards */}
+          {/* Stat cards — full width, matching dashboard layout */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
               {[
                 { label: "Total Categories", value: categories.length, change: "+12.4%", up: true, color: "#22C55E", icon: LayoutGrid },
@@ -503,10 +497,9 @@ export default function CategoriesPage() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div style={{ width: 230, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* Overview panels row — 3 columns matching dashboard layout */}
+          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 14 }}>
 
             {/* Category Overview */}
             <div style={{ ...card, padding: 18 }}>
@@ -615,7 +608,6 @@ export default function CategoriesPage() {
               </div>
             </div>
           </div>
-          </div>{/* end two-column row */}
         </div>{/* end body */}
       </div>
 
