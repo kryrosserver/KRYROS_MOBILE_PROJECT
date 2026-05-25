@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Bell, Settings, Search, Calendar, Sun, Moon, ChevronDown,
@@ -24,12 +24,7 @@ const TEXT_SECONDARY = "var(--text-secondary)";
 const ACCENT = "#12D6C5";
 const HEADER_BG = "var(--bg-secondary)";
 const ICON_BG = "var(--icon-bg)";
-const HOVER_BG = "var(--hover-bg)";
 const TOOLTIP_BG = "var(--tooltip-bg)";
-// BASE_WIDTH adapts per viewport so mobile content stays readable
-// 960 → scale=0.45 on a 430px phone: 3 tables get 248px each (vs 191px at 860)
-const MOBILE_BASE = 750;
-const DESKTOP_BASE = 1380;
 
 const salesData = [
   { day: "May 20", value: 800 },
@@ -118,60 +113,30 @@ function ChartTooltip({ active, payload, label }: any) {
   );
 }
 
+/* Thin scrollbar styling injected once */
+const scrollStyle = `
+  .hscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .hscroll::-webkit-scrollbar { height: 4px; }
+  .hscroll::-webkit-scrollbar-track { background: transparent; }
+  .hscroll::-webkit-scrollbar-thumb { background: rgba(18,214,197,0.35); border-radius: 4px; }
+`;
+
 export default function AdminDashboard() {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
   const { isDark, toggleTheme } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    let raf: number;
-
-    function applyHeight(nextScale: number) {
-      if (!innerRef.current || !outerRef.current) return;
-      // Unlock height so measurement is unclipped
-      outerRef.current.style.height = "auto";
-      // scrollHeight = true layout height before transform; multiply by scale = visual height
-      const naturalH = innerRef.current.scrollHeight;
-      const visualH = naturalH * nextScale;
-      // Set outer height to exactly the visual (scaled) height — no extra blank space
-      outerRef.current.style.height = `${visualH}px`;
-    }
-
-    function recalc() {
-      if (!innerRef.current || !outerRef.current) return;
-      const vw = outerRef.current.offsetWidth || window.innerWidth;
-      const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
-      const nextScale = Math.min(1, vw / baseW);
-
-      innerRef.current.style.width = `${baseW}px`;
-      innerRef.current.style.transform = `scale(${nextScale})`;
-      innerRef.current.style.transformOrigin = "top left";
-      setScale(nextScale);
-
-      // Wait two frames for the transform to paint, then lock the exact height
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => applyHeight(nextScale));
-      });
-    }
-
-    recalc();
-    // Re-run once after 400ms to catch any late-loading content shifts
-    const t = setTimeout(recalc, 400);
-    window.addEventListener("resize", recalc);
-    return () => {
-      window.removeEventListener("resize", recalc);
-      cancelAnimationFrame(raf);
-      clearTimeout(t);
-    };
+    function check() { setIsMobile(window.innerWidth < 1024); }
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   const [summary, setSummary] = useState({
-    sales: 6162, orders: 102, purchases: 0,
-    paymentReceived: 6162, paymentPaid: 0,
+    sales: 3664, orders: 102, purchases: 0,
+    paymentReceived: 3664, paymentPaid: 0,
     outstandingBalance: 0, outstandingPayment: 0,
-    expense: 0, profit: 6162,
+    expense: 0, profit: 3664,
   });
 
   useEffect(() => {
@@ -216,36 +181,30 @@ export default function AdminDashboard() {
   ];
 
   const completionPct = Math.round((68 / 102) * 100);
-  const ringCircumference = 2 * Math.PI * 54;
-  const ringOffset = ringCircumference * (1 - completionPct / 100);
 
   const card = { background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14 };
 
   return (
-    /* Outer wrapper — breaks out of parent p-6, clips overflow, holds correct height after scaling */
-    <div ref={outerRef} style={{ overflow: "hidden", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div style={{ background: DARK_BG, color: TEXT_PRIMARY, minHeight: "100vh" }}>
+      <style>{scrollStyle}</style>
 
-      {/* Inner wrapper — fixed BASE_WIDTH, scales down via transform */}
-      <div
-        ref={innerRef}
-        style={{
-          background: DARK_BG,
-          color: TEXT_PRIMARY,
-        }}
-      >
-        {/* ── HEADER ── */}
-        <header style={{
-          background: HEADER_BG,
-          borderBottom: `1px solid ${BORDER}`,
-          height: 60,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 24px",
-          gap: 16,
-        }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: TEXT_PRIMARY, whiteSpace: "nowrap" }}>Dashboard</h1>
+      {/* ── HEADER ── */}
+      <header style={{
+        background: HEADER_BG,
+        borderBottom: `1px solid ${BORDER}`,
+        height: 60,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
+        gap: 12,
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+      }}>
+        <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT_PRIMARY, whiteSpace: "nowrap" }}>Dashboard</h1>
 
+        {!isMobile && (
           <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
             <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT_SECONDARY, width: 15, height: 15 }} />
             <input placeholder="Search anything..." style={{
@@ -257,8 +216,10 @@ export default function AdminDashboard() {
               fontSize: 10, color: TEXT_SECONDARY, background: ICON_BG, padding: "2px 5px", borderRadius: 4,
             }}>⌘K</span>
           </div>
+        )}
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
+          {!isMobile && (
             <button style={{
               display: "flex", alignItems: "center", gap: 8, background: CARD_BG,
               border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px",
@@ -268,312 +229,353 @@ export default function AdminDashboard() {
               May 20 – May 26, 2025
               <ChevronDown style={{ width: 13, height: 13 }} />
             </button>
+          )}
 
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{
-                position: "absolute", top: 0, right: 0, background: "#EF4444",
-                borderRadius: "50%", width: 16, height: 16, fontSize: 10,
-                display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700,
-              }}>3</span>
-            </button>
+          <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
+            <Bell style={{ width: 20, height: 20 }} />
+            <span style={{
+              position: "absolute", top: 0, right: 0, background: "#EF4444",
+              borderRadius: "50%", width: 16, height: 16, fontSize: 10,
+              display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700,
+            }}>3</span>
+          </button>
 
-            <button
-              onClick={toggleTheme}
-              style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {isDark
-                ? <Sun style={{ width: 20, height: 20 }} />
-                : <Moon style={{ width: 20, height: 20 }} />}
-            </button>
+          <button
+            onClick={toggleTheme}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}
+          >
+            {isDark
+              ? <Sun style={{ width: 20, height: 20 }} />
+              : <Moon style={{ width: 20, height: 20 }} />}
+          </button>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, lineHeight: 1 }}>Admin</div>
-                <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 1 }}>Super Admin</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
+            {!isMobile && (
+              <>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, lineHeight: 1 }}>Admin</div>
+                  <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 1 }}>Super Admin</div>
+                </div>
+                <ChevronDown style={{ width: 14, height: 14, color: TEXT_SECONDARY }} />
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* ── BODY ── */}
+      <div style={{ padding: isMobile ? "14px 12px" : "20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Welcome */}
+        <div>
+          <h2 style={{ fontSize: isMobile ? 18 : 20, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
+          <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
+        </div>
+
+        {/* ── STAT CARDS — swipe horizontally on mobile ── */}
+        <div className="hscroll" style={{ margin: "0 -12px", padding: "0 12px" }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(5, minmax(${isMobile ? 160 : 1}px, 1fr))`,
+            gap: 12,
+            minWidth: isMobile ? 840 : "auto",
+            paddingBottom: 4,
+          }}>
+            {statCards.map((c, i) => (
+              <div key={i} style={{ ...card, padding: "16px 16px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: `${c.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Activity style={{ width: 15, height: 15, color: c.color }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: c.up === true ? "#22C55E" : c.up === false ? "#EF4444" : TEXT_SECONDARY }}>{c.change}</span>
+                </div>
+                <span style={{ fontSize: 12, color: TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3 }}>{c.title}</span>
+                <div style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{c.value}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  {c.up === true && <TrendingUp style={{ width: 11, height: 11, color: "#22C55E" }} />}
+                  {c.up === false && <TrendingDown style={{ width: 11, height: 11, color: "#EF4444" }} />}
+                  {c.up === null && <Minus style={{ width: 11, height: 11, color: TEXT_SECONDARY }} />}
+                  <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>vs last week</span>
+                </div>
+                <MiniSparkline color={c.color} up={c.up === true} />
               </div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT_SECONDARY }} />
-            </div>
+            ))}
           </div>
-        </header>
+        </div>
 
-        {/* ── BODY ── */}
-        <div style={{ padding: "16px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-
-          {/* Welcome — full-width so stat cards + Quick Actions align at the same top edge */}
-          <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
-            <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
-          </div>
-
-          {/* Two-column layout: left main + right panel — both start at the same line */}
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        {/* ── TWO-COLUMN: left main / right panel ── stacks on mobile */}
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 14, alignItems: "flex-start" }}>
 
           {/* LEFT MAIN */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 14 }}>
 
-            {/* Stat Cards — always 5 columns */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
-              {statCards.map((c, i) => (
-                <div key={i} style={{ ...card, padding: "14px 14px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: `${c.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Activity style={{ width: 14, height: 14, color: c.color }} />
+            {/* Charts row — swipe horizontally on mobile */}
+            <div className="hscroll" style={{ margin: "0 -12px", padding: "0 12px" }}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "340px 260px" : "1.6fr 1fr",
+                gap: 14,
+                minWidth: isMobile ? 614 : "auto",
+                paddingBottom: 4,
+              }}>
+                {/* Sales Analytics */}
+                <div style={{ ...card, padding: "18px" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales Analytics</div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
+                        <span style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</span>
+                        <span style={{ fontSize: 12, color: "#22C55E", fontWeight: 600 }}>↑ 18.6% vs last week</span>
+                      </div>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: c.up === true ? "#22C55E" : c.up === false ? "#EF4444" : TEXT_SECONDARY }}>{c.change}</span>
+                    <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer", flexShrink: 0 }}>
+                      This Week <ChevronDown style={{ width: 12, height: 12 }} />
+                    </button>
                   </div>
-                  <span style={{ fontSize: 11, color: TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3, display: "block" }}>{c.title}</span>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: TEXT_PRIMARY }}>{c.value}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    {c.up === true && <TrendingUp style={{ width: 11, height: 11, color: "#22C55E" }} />}
-                    {c.up === false && <TrendingDown style={{ width: 11, height: 11, color: "#EF4444" }} />}
-                    {c.up === null && <Minus style={{ width: 11, height: 11, color: TEXT_SECONDARY }} />}
-                    <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>vs last week</span>
-                  </div>
-                  <MiniSparkline color={c.color} up={c.up === true} />
-                </div>
-              ))}
-            </div>
-
-            {/* Charts — always side by side */}
-            <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 14 }}>
-
-              {/* Sales Analytics */}
-              <div style={{ ...card, padding: "18px" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales Analytics</div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
-                      <span style={{ fontSize: 22, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</span>
-                      <span style={{ fontSize: 12, color: "#22C55E", fontWeight: 600 }}>↑ 18.6% vs last week</span>
-                    </div>
-                  </div>
-                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
-                    This Week <ChevronDown style={{ width: 12, height: 12 }} />
-                  </button>
-                </div>
-                <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={salesData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
-                        <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="day" tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
-                    <Tooltip content={<ChartTooltip />} />
-                    <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)"
-                      dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Sales by Channel */}
-              <div style={{ ...card, padding: "18px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales by Channel</div>
-                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
-                    This Week <ChevronDown style={{ width: 12, height: 12 }} />
-                  </button>
-                </div>
-                <div style={{ position: "relative", height: 150 }}>
-                  <ResponsiveContainer width="100%" height={150}>
-                    <PieChart>
-                      <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={45} outerRadius={68} dataKey="value" paddingAngle={3}>
-                        {salesByChannel.map((e, i) => <Cell key={i} fill={e.color} />)}
-                      </Pie>
-                      <Tooltip formatter={(v: any) => `${v}%`}
-                        contentStyle={{ background: TOOLTIP_BG, border: `1px solid ${BORDER}`, borderRadius: 8 }}
-                        labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
-                    </PieChart>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <AreaChart data={salesData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
+                          <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="day" tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: TEXT_SECONDARY, fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
+                      <Tooltip content={<ChartTooltip />} />
+                      <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)"
+                        dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
+                    </AreaChart>
                   </ResponsiveContainer>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
-                    <div style={{ fontSize: 10, color: TEXT_SECONDARY }}>Total Sales</div>
+                </div>
+
+                {/* Sales by Channel */}
+                <div style={{ ...card, padding: "18px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales by Channel</div>
+                    <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 10px", color: TEXT_SECONDARY, fontSize: 12, cursor: "pointer" }}>
+                      This Week <ChevronDown style={{ width: 12, height: 12 }} />
+                    </button>
+                  </div>
+                  <div style={{ position: "relative", height: 150 }}>
+                    <ResponsiveContainer width="100%" height={150}>
+                      <PieChart>
+                        <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={45} outerRadius={68} dataKey="value" paddingAngle={3}>
+                          {salesByChannel.map((e, i) => <Cell key={i} fill={e.color} />)}
+                        </Pie>
+                        <Tooltip formatter={(v: any) => `${v}%`}
+                          contentStyle={{ background: TOOLTIP_BG, border: `1px solid ${BORDER}`, borderRadius: 8 }}
+                          labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
+                      <div style={{ fontSize: 10, color: TEXT_SECONDARY }}>Total Sales</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 8 }}>
+                    {salesByChannel.map((ch, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: ch.color, flexShrink: 0 }} />
+                          <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.name}</span>
+                          <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.value}%</span>
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 8 }}>
-                  {salesByChannel.map((ch, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: ch.color, flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.name}</span>
-                        <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{ch.value}%</span>
+              </div>
+            </div>
+
+            {/* Bottom Tables — swipe horizontally on mobile */}
+            <div className="hscroll" style={{ margin: "0 -12px", padding: "0 12px" }}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "repeat(3, 240px)" : "1fr 1fr 1fr",
+                gap: 14,
+                minWidth: isMobile ? 744 : "auto",
+                paddingBottom: 4,
+              }}>
+
+                {/* Recent Orders */}
+                <div style={{ ...card, padding: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Orders</div>
+                    <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {recentOrders.map((o, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 9, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <ShoppingCart style={{ width: 16, height: 16, color: ACCENT }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{o.id}</div>
+                          <div style={{ fontSize: 11, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginBottom: 2 }}>{o.time}</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 3 }}>{formatPrice(o.amount)}</div>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: statusColors[o.status], background: statusBg[o.status], padding: "2px 8px", borderRadius: 20 }}>{o.status}</span>
+                        </div>
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Selling Products */}
+                <div style={{ ...card, padding: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Top Selling Products</div>
+                    <Link href="/admin/products" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {topProducts.map((p, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 9, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Package style={{ width: 16, height: 16, color: "#8B5CF6" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                          <div style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.sub}</div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginBottom: 2 }}>{p.sold} Sold</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* New Customers */}
+                <div style={{ ...card, padding: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>New Customers</div>
+                    <Link href="/admin/users" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {newCustomers.map((c, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "#fff", flexShrink: 0 }}>
+                          {c.initials}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: TEXT_SECONDARY }}>{c.date}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom Tables — always 3 columns */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+          </div>{/* end LEFT MAIN */}
 
-              {/* Recent Orders */}
-              <div style={{ ...card, padding: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Orders</div>
-                  <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                  {recentOrders.map((o, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <ShoppingCart style={{ width: 15, height: 15, color: ACCENT }} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{o.id}</div>
-                        <div style={{ fontSize: 10, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
-                      </div>
-                      <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginBottom: 2 }}>{o.time}</div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 2 }}>{formatPrice(o.amount)}</div>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: statusColors[o.status], background: statusBg[o.status], padding: "2px 7px", borderRadius: 20 }}>{o.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Top Selling Products */}
-              <div style={{ ...card, padding: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Top Selling Products</div>
-                  <Link href="/admin/products" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                  {topProducts.map((p, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <Package style={{ width: 15, height: 15, color: "#8B5CF6" }} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                        <div style={{ fontSize: 10, color: TEXT_SECONDARY }}>{p.sub}</div>
-                      </div>
-                      <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginBottom: 2 }}>{p.sold} Sold</div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* New Customers */}
-              <div style={{ ...card, padding: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>New Customers</div>
-                  <Link href="/admin/users" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                  {newCustomers.map((c, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: "50%", background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12, color: "#fff", flexShrink: 0 }}>
-                        {c.initials}
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                        <div style={{ fontSize: 10, color: TEXT_SECONDARY }}>{c.date}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* RIGHT PANEL — always fixed width */}
-          <div style={{ width: 200, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* RIGHT PANEL — full width on mobile, fixed on desktop */}
+          <div style={{
+            width: isMobile ? "100%" : 240,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: isMobile ? "row" : "column",
+            flexWrap: isMobile ? "wrap" : "nowrap",
+            gap: 12,
+          }}>
 
             {/* Quick Actions */}
-            <div style={{ ...card, padding: "12px" }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 8 }}>Quick Actions</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            <div style={{ ...card, padding: "14px", flex: isMobile ? "1 1 calc(50% - 6px)" : "none" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 10 }}>Quick Actions</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
                 {quickActions.map((a, i) => (
                   <Link key={i} href={a.href} style={{
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    padding: "7px 4px", background: ICON_BG, borderRadius: 8,
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                    padding: "10px 6px", background: ICON_BG, borderRadius: 10,
                     border: `1px solid ${BORDER}`, textDecoration: "none",
                   }}>
-                    <div style={{ width: 24, height: 24, borderRadius: 6, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <a.icon style={{ width: 12, height: 12, color: ACCENT }} />
+                    <div style={{ width: 28, height: 28, borderRadius: 7, background: `${ACCENT}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <a.icon style={{ width: 14, height: 14, color: ACCENT }} />
                     </div>
-                    <span style={{ fontSize: 9, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.2 }}>{a.label}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.3 }}>{a.label}</span>
                   </Link>
                 ))}
               </div>
             </div>
 
             {/* Order Progress */}
-            <div style={{ ...card, padding: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ ...card, padding: "14px", flex: isMobile ? "1 1 calc(50% - 6px)" : "none" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Order Progress</div>
                 <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
               </div>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
-                <div style={{ position: "relative", width: 90, height: 90 }}>
-                  <svg width="90" height="90" viewBox="0 0 90 90">
-                    <circle cx="45" cy="45" r="37" fill="none" stroke="var(--icon-bg)" strokeWidth="8" />
-                    <circle cx="45" cy="45" r="37" fill="none" stroke={ACCENT} strokeWidth="8"
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+                <div style={{ position: "relative", width: 100, height: 100 }}>
+                  <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--icon-bg)" strokeWidth="9" />
+                    <circle cx="50" cy="50" r="42" fill="none" stroke={ACCENT} strokeWidth="9"
                       strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 37}`}
-                      strokeDashoffset={`${2 * Math.PI * 37 * (1 - completionPct / 100)}`}
-                      transform="rotate(-90 45 45)"
+                      strokeDasharray={`${2 * Math.PI * 42}`}
+                      strokeDashoffset={`${2 * Math.PI * 42 * (1 - completionPct / 100)}`}
+                      transform="rotate(-90 50 50)"
                       style={{ transition: "stroke-dashoffset 1s ease" }} />
                   </svg>
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
-                    <div style={{ fontSize: 8, color: TEXT_SECONDARY, textAlign: "center" }}>Completion<br />Rate</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
+                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, textAlign: "center" }}>Completion<br />Rate</div>
                   </div>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {orderProgress.map((p, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>{p.label}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, color: TEXT_SECONDARY }}>{p.label}</span>
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Recent Activities — capped at 4 items to prevent right panel from overflowing left */}
-            <div style={{ ...card, padding: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            {/* Recent Activities — full width on mobile */}
+            <div style={{ ...card, padding: "14px", flex: isMobile ? "1 1 100%" : "none" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
                 <Link href="/admin/reports" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                {recentActivities.slice(0, 4).map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: 6, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                      <a.icon style={{ width: 11, height: 11, color: a.color }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {recentActivities.map((a, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 9, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                      <a.icon style={{ width: 14, height: 14, color: a.color }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 1 }}>{a.title}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, marginTop: 1, opacity: 0.7 }}>{a.time}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 2 }}>{a.title}</div>
+                      <div style={{ fontSize: 11, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
+                      <div style={{ fontSize: 10, color: TEXT_SECONDARY, marginTop: 2, opacity: 0.7 }}>{a.time}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          </div>{/* end two-column flex */}
+        </div>{/* end two-column */}
 
-          {/* Financial Summary — full-width, below both columns so no blank space bottom-right */}
-          <div style={{ paddingBottom: 24 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 12 }}>Financial Summary</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+        {/* ── FINANCIAL SUMMARY — swipe horizontally on mobile ── */}
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 12 }}>Financial Summary</div>
+          <div className="hscroll" style={{ margin: "0 -12px", padding: "0 12px" }}>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "repeat(4, minmax(170px, 1fr))" : "repeat(4, 1fr)",
+              gap: 12,
+              minWidth: isMobile ? 716 : "auto",
+              paddingBottom: 4,
+            }}>
               {[
                 { label: "Outstanding Balance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
                 { label: "Outstanding Payment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
@@ -586,20 +588,20 @@ export default function AdminDashboard() {
                   background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
                   border: item.highlight ? "none" : `1px solid ${BORDER}`,
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <item.icon style={{ width: 16, height: 16, color: item.highlight ? "#fff" : item.color }} />
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 9, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <item.icon style={{ width: 17, height: 17, color: item.highlight ? "#fff" : item.color }} />
                     </div>
-                    <span style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3 }}>{item.label}</span>
+                    <span style={{ fontSize: 12, color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3 }}>{item.label}</span>
                   </div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
-                  <div style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY, marginTop: 4 }}>{item.sub}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
+                  <div style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY, marginTop: 5 }}>{item.sub}</div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
 
-        </div>{/* end outer body column */}
       </div>
     </div>
   );
