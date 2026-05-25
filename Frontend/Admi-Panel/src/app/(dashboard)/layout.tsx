@@ -48,10 +48,12 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const isDashboard = pathname === "/admin";
+
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 z-40 flex items-center justify-between px-4 shadow-lg">
+      {/* Mobile Header — hidden on dashboard (dashboard renders its own full header) */}
+      <div className={`lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 z-40 flex items-center justify-between px-4 shadow-lg ${isDashboard ? "hidden" : ""}`}>
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setMobileOpen(true)} 
@@ -152,10 +154,10 @@ export default function AdminLayout({
 
       {/* Main Content */}
       <main className={`
-        pt-16 lg:pt-0 transition-all duration-300 ease-in-out
+        ${isDashboard ? "pt-0" : "pt-16 lg:pt-0"} transition-all duration-300 ease-in-out
         ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}
       `}>
-        <div className="p-4 md:p-6">
+        <div className={isDashboard ? "p-0 md:p-6" : "p-4 md:p-6"}>
           {children}
         </div>
       </main>
