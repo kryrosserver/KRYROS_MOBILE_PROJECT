@@ -86,7 +86,7 @@ export default function EditHeroBannerPage() {
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
       const vw = outerRef.current.offsetWidth || window.innerWidth;
-      const baseW = vw < 960 ? 960 : 1380;
+      const baseW = vw < 960 ? 750 : 1380;
       const nextScale = Math.min(1, vw / baseW);
       innerRef.current.style.width = `${baseW}px`;
       innerRef.current.style.transform = `scale(${nextScale})`;
@@ -186,7 +186,7 @@ export default function EditHeroBannerPage() {
   const previewSlide = activeSlide || slides[0];
 
   return (
-    <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "auto", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}

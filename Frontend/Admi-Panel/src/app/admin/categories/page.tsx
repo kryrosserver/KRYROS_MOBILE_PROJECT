@@ -11,7 +11,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useTheme } from "@/providers/ThemeProvider";
 
 const ACCENT = "#12D6C5";
-const MOBILE_BASE = 960;
+const MOBILE_BASE = 750;
 const DESKTOP_BASE = 1380;
 const ROWS_PER_PAGE = 10;
 
@@ -211,7 +211,7 @@ export default function CategoriesPage() {
   })();
 
   return (
-    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "auto", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
       <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
 
         {/* ── TOP HEADER BAR ── */}

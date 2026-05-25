@@ -28,7 +28,7 @@ const HOVER_BG = "var(--hover-bg)";
 const TOOLTIP_BG = "var(--tooltip-bg)";
 // BASE_WIDTH adapts per viewport so mobile content stays readable
 // 960 → scale=0.45 on a 430px phone: 3 tables get 248px each (vs 191px at 860)
-const MOBILE_BASE = 960;
+const MOBILE_BASE = 750;
 const DESKTOP_BASE = 1380;
 
 const salesData = [
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
 
   return (
     /* Outer wrapper — breaks out of parent p-6, clips overflow, holds correct height after scaling */
-    <div ref={outerRef} style={{ overflow: "hidden", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "auto", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
 
       {/* Inner wrapper — fixed BASE_WIDTH, scales down via transform */}
       <div
