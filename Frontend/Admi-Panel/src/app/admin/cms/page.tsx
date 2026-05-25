@@ -350,6 +350,39 @@ export default function CMSPagesManager() {
             </div>
           </div>
 
+          {/* ── Site Configuration Quick Access ─────────────── */}
+          <div className="admin-card !p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-xl" style={{ background: "rgba(18,214,197,0.15)" }}>
+                <Settings className="h-4 w-4" style={{ color: "#12D6C5" }} />
+              </div>
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-widest" style={{ color: "var(--text-primary)" }}>Site Configuration</h2>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>Edit dynamic content for User-UI pages</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: "Trust Badges", icon: "🛡️", href: "/admin/cms/trust-badges", desc: "Homepage trust items" },
+                { label: "Upgrade Banner", icon: "📢", href: "/admin/cms/upgrade-banner", desc: "Promo upgrade section" },
+                { label: "Members Banner", icon: "👥", href: "/admin/cms/members-banner", desc: "Shop members section" },
+                { label: "Brand Banners", icon: "🏷️", href: "/admin/cms/brand-banners", desc: "Per-brand hero banners" },
+                { label: "Wholesale Page", icon: "📦", href: "/admin/cms/wholesale", desc: "Wholesale page content" },
+                { label: "Product Settings", icon: "⚙️", href: "/admin/cms/product-settings", desc: "Delivery & payments" },
+                { label: "Header & Nav", icon: "🔗", href: "/admin/cms/header", desc: "Nav links & announcement" },
+                { label: "Banners", icon: "🖼️", href: "/admin/cms/banners", desc: "Hero & promo banners" },
+              ].map((item) => (
+                <Link key={item.href} href={item.href}>
+                  <div className="p-3 rounded-xl border cursor-pointer hover:shadow-md transition-all" style={{ background: "var(--hover-bg)", borderColor: "var(--card-border)" }}>
+                    <span className="text-2xl mb-2 block">{item.icon}</span>
+                    <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>{item.label}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{item.desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
           {/* ── Stat Cards ─────────────────────────────────── */}
           <div className="grid grid-cols-4 gap-4">
             {statCards.map((card, i) => (

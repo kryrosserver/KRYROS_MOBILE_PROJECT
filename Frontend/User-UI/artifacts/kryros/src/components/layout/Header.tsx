@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown, LogOut, LayoutDashboard,
@@ -9,10 +9,11 @@ import { useThemeStore } from "@/store/themeStore";
 import { useSidebarStore } from "@/store/sidebarStore";
 import { useCurrencyStore } from "@/store/currencyStore";
 import { useAuthStore } from "@/store/authStore";
+import { API_BASE } from "@/lib/api";
 import Sidebar from "./Sidebar";
 import SearchAutocomplete from "./SearchAutocomplete";
 
-const desktopNav = [
+const DEFAULT_NAV = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Get Now", href: "/get-now" },
@@ -22,7 +23,25 @@ const desktopNav = [
   { label: "Contact Us", href: "/contact" },
 ];
 
+const DEFAULT_HEADER = {
+  announcementEnabled: true,
+  announcementText: "Free Delivery on all orders over $100",
+  announcementCta: "Track Order",
+  announcementCtaLink: "/track",
+  navLinks: DEFAULT_NAV,
+};
+
 export default function Header() {
+  const [headerCfg, setHeaderCfg] = useState(DEFAULT_HEADER);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/cms/site-config/header`, { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.value) setHeaderCfg({ ...DEFAULT_HEADER, ...d.value }); })
+      .catch(() => {});
+  }, []);
+
+  const desktopNav = (headerCfg.navLinks || DEFAULT_NAV).filter((l: any) => l.isActive !== false);
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebarStore();
   const [location] = useLocation();
   const items = useCartStore((s) => s.items);
@@ -48,16 +67,19 @@ export default function Header() {
 
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
         {/* Announcement bar */}
-        <div className="bg-foreground text-background text-[10px] md:text-xs flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
-          <span>
-            <span className="text-primary font-semibold">Free Delivery</span> on all orders over $100
-          </span>
-          <Link href="/track">
-            <span className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity font-medium">
-              Track Order <span className="text-[10px]">&rsaquo;</span>
+        {headerCfg.announcementEnabled !== false && (
+          <div className="bg-foreground text-background text-[10px] md:text-xs flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
+            <span>
+              <span className="text-primary font-semibold">Free Delivery</span>{" "}
+              {headerCfg.announcementText}
             </span>
-          </Link>
-        </div>
+            <Link href={headerCfg.announcementCtaLink || "/track"}>
+              <span className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity font-medium">
+                {headerCfg.announcementCta || "Track Order"} <span className="text-[10px]">&rsaquo;</span>
+              </span>
+            </Link>
+          </div>
+        )}
 
         {/* Main header row */}
         <div className="flex items-center gap-2 px-3 md:px-6 h-[52px] md:h-[68px]">

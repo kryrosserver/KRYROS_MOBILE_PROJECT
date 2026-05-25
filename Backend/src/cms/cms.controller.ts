@@ -321,4 +321,100 @@ export class CMSController {
   seedFooter() {
     return this.cmsService.seedFooter();
   }
+
+  // ==================== SITE CONFIG ====================
+
+  @Get('site-config')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get all site config entries' })
+  getAllSiteConfigs() {
+    return this.cmsService.getAllSiteConfigs();
+  }
+
+  @Get('site-config/:key')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get site config by key' })
+  getSiteConfig(@Param('key') key: string) {
+    return this.cmsService.getSiteConfig(key);
+  }
+
+  @Put('site-config/:key')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upsert site config by key' })
+  upsertSiteConfig(@Param('key') key: string, @Body() body: { value: any }) {
+    return this.cmsService.upsertSiteConfig(key, body.value);
+  }
+
+  @Post('site-config/seed')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed default site configs' })
+  seedSiteConfigs() {
+    return this.cmsService.seedSiteConfigs();
+  }
+
+  // ==================== BRAND BANNERS ====================
+
+  @Get('brand-banners')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get active brand banners' })
+  getBrandBanners() {
+    return this.cmsService.getBrandBanners(true);
+  }
+
+  @Get('brand-banners/manage')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all brand banners (admin)' })
+  listBrandBanners() {
+    return this.cmsService.getBrandBanners(false);
+  }
+
+  @Get('brand-banners/:slug')
+  @UseInterceptors(CacheInterceptor)
+  @ApiOperation({ summary: 'Get brand banner by slug' })
+  getBrandBannerBySlug(@Param('slug') slug: string) {
+    return this.cmsService.getBrandBannerBySlug(slug);
+  }
+
+  @Post('brand-banners')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create or update brand banner' })
+  upsertBrandBanner(@Body() data: any) {
+    return this.cmsService.upsertBrandBanner(data);
+  }
+
+  @Put('brand-banners/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update brand banner by id' })
+  updateBrandBanner(@Param('id') id: string, @Body() data: any) {
+    const { id: _id, ...rest } = data;
+    return this.cmsService.upsertBrandBanner({ ...rest });
+  }
+
+  @Delete('brand-banners/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete brand banner' })
+  deleteBrandBanner(@Param('id') id: string) {
+    return this.cmsService.deleteBrandBanner(id);
+  }
+
+  @Post('brand-banners/seed')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Seed default brand banners' })
+  seedBrandBanners() {
+    return this.cmsService.seedBrandBanners();
+  }
 }

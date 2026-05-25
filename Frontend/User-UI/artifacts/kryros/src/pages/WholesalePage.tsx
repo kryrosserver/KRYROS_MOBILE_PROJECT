@@ -2,29 +2,36 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Tag, Truck, ShieldCheck, Headphones, ShoppingCart, ChevronRight, Heart, LayoutGrid, Search, ClipboardList, SendHorizonal, CheckCircle2 } from "lucide-react";
-import { fetchProducts, fetchCategories } from "@/lib/api";
+import { fetchProducts, fetchCategories, API_BASE } from "@/lib/api";
 import type { Product, ApiCategory } from "@/lib/api";
 import { useCurrencyStore } from "@/store/currencyStore";
 
-const steps = [
-  { icon: Search, title: "Browse Products", desc: "Explore products available for wholesale" },
-  { icon: ClipboardList, title: "Add to Quote", desc: "Add products to your quote list" },
-  { icon: SendHorizonal, title: "Submit Quote", desc: "Our team will review your request" },
-  { icon: CheckCircle2, title: "Confirm & Order", desc: "Confirm the quote and place your order" },
-];
+const STEP_ICONS = [Search, ClipboardList, SendHorizonal, CheckCircle2];
+const FEATURE_ICONS = [Tag, Truck, ShieldCheck, Headphones];
 
-const features = [
-  { icon: Tag, title: "Bulk Discounts", desc: "Better prices on larger quantities" },
-  { icon: Truck, title: "Priority Shipping", desc: "Faster delivery for wholesale orders" },
-  { icon: ShieldCheck, title: "Secure Payments", desc: "Safe & encrypted transactions" },
-  { icon: Headphones, title: "Dedicated Support", desc: "24/7 priority customer support" },
-];
+const DEFAULT_WHOLESALE = {
+  hero: { heading: "Buy More, Save More!", subheading: "Exclusive wholesale prices on thousands of products.", ctaText: "Explore Products", ctaLink: "/shop" },
+  steps: [
+    { title: "Browse Products", desc: "Explore products available for wholesale" },
+    { title: "Add to Quote", desc: "Add products to your quote list" },
+    { title: "Submit Quote", desc: "Our team will review your request" },
+    { title: "Confirm & Order", desc: "Confirm the quote and place your order" },
+  ],
+  features: [
+    { title: "Bulk Discounts", desc: "Better prices on larger quantities" },
+    { title: "Priority Shipping", desc: "Faster delivery for wholesale orders" },
+    { title: "Secure Payments", desc: "Safe & encrypted transactions" },
+    { title: "Dedicated Support", desc: "24/7 priority customer support" },
+  ],
+  quoteCta: { title: "Want Better Prices?", subtitle: "Request a custom quote for bulk orders and get the best deals curated for your business.", ctaText: "Request a Quote", ctaLink: "/contact" },
+};
 
 export default function WholesalePage() {
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [wholesaleProducts, setWholesaleProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cms, setCms] = useState(DEFAULT_WHOLESALE);
   const format = useCurrencyStore((s) => s.format);
 
   useEffect(() => {
@@ -33,6 +40,11 @@ export default function WholesalePage() {
       fetchCategories().then((cats) => setCategories(cats.filter((c: any) => c.isActive !== false).slice(0, 5))),
       fetchProducts({ take: 8 }).then((prods) => setWholesaleProducts(prods.slice(0, 4))),
     ]).finally(() => setLoading(false));
+
+    fetch(`${API_BASE}/api/cms/site-config/wholesale`, { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.value) setCms({ ...DEFAULT_WHOLESALE, ...d.value }); })
+      .catch(() => {});
   }, []);
 
   return (
@@ -58,12 +70,12 @@ export default function WholesalePage() {
       <div className="rounded-2xl overflow-hidden mb-6 relative" style={{ background: "linear-gradient(135deg, #050F1A 0%, #0A1E2E 100%)" }}>
         <div className="flex items-center p-5 gap-3">
           <div className="flex-1">
-            <h2 className="text-xl font-black text-white leading-tight">Buy More,</h2>
-            <h2 className="text-xl font-black text-primary leading-tight mb-2">Save More!</h2>
-            <p className="text-white/50 text-xs mb-4 leading-relaxed">Exclusive wholesale prices on<br />thousands of products.</p>
-            <Link href="/shop">
+            <h2 className="text-xl font-black text-white leading-tight">{cms.hero.heading.split(",")[0]}{cms.hero.heading.includes(",") ? "," : ""}</h2>
+            <h2 className="text-xl font-black text-primary leading-tight mb-2">{cms.hero.heading.split(",")[1]?.trim() || ""}</h2>
+            <p className="text-white/50 text-xs mb-4 leading-relaxed">{cms.hero.subheading}</p>
+            <Link href={cms.hero.ctaLink || "/shop"}>
               <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-xl font-bold text-xs hover:bg-white/90 transition-all">
-                Explore Products <ArrowRight className="w-3.5 h-3.5" />
+                {cms.hero.ctaText} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </Link>
           </div>
@@ -130,13 +142,16 @@ export default function WholesalePage() {
 
       {/* Feature badges */}
       <div className="grid grid-cols-4 gap-2 mb-5">
-        {features.map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="flex flex-col items-center text-center p-2 bg-card border border-border rounded-xl">
-            <Icon className="w-4 h-4 text-primary mb-1" />
-            <p className="text-[9px] font-bold text-foreground leading-tight mb-0.5">{title}</p>
-            <p className="text-[8px] text-muted-foreground leading-tight">{desc}</p>
-          </div>
-        ))}
+        {(cms.features || []).map(({ title, desc }, i) => {
+          const Icon = FEATURE_ICONS[i % FEATURE_ICONS.length];
+          return (
+            <div key={title} className="flex flex-col items-center text-center p-2 bg-card border border-border rounded-xl">
+              <Icon className="w-4 h-4 text-primary mb-1" />
+              <p className="text-[9px] font-bold text-foreground leading-tight mb-0.5">{title}</p>
+              <p className="text-[8px] text-muted-foreground leading-tight">{desc}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Top Wholesale Deals */}
@@ -212,35 +227,40 @@ export default function WholesalePage() {
         )}
       </div>
 
-      {/* Want Better Prices */}
+      {/* Want Better Prices (Quote CTA) */}
       <div className="flex items-center justify-between bg-card border border-border rounded-2xl p-4 mb-5">
         <div className="flex-1 mr-3">
-          <p className="text-xs font-bold text-foreground mb-1">Want Better Prices?</p>
-          <p className="text-[9px] text-muted-foreground leading-snug">Request a custom quote for bulk orders and get the best deals curated for your business.</p>
+          <p className="text-xs font-bold text-foreground mb-1">{cms.quoteCta.title}</p>
+          <p className="text-[9px] text-muted-foreground leading-snug">{cms.quoteCta.subtitle}</p>
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl text-[10px] font-bold hover:bg-primary/90 transition-all flex-shrink-0 whitespace-nowrap">
-          Request a Quote <ArrowRight className="w-3 h-3" />
-        </button>
+        <Link href={cms.quoteCta.ctaLink || "/contact"}>
+          <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl text-[10px] font-bold hover:bg-primary/90 transition-all flex-shrink-0 whitespace-nowrap">
+            {cms.quoteCta.ctaText} <ArrowRight className="w-3 h-3" />
+          </button>
+        </Link>
       </div>
 
       {/* How Wholesale Works */}
       <div>
         <h2 className="text-sm font-bold text-foreground mb-4">How Wholesale Works</h2>
         <div className="flex items-start">
-          {steps.map((step, i) => (
-            <div key={step.title} className="flex items-center flex-1 min-w-0">
-              <div className="flex flex-col items-center text-center flex-1 min-w-0 px-0.5">
-                <div className="w-10 h-10 rounded-xl border border-border bg-primary/10 flex items-center justify-center mb-2 shadow-sm">
-                  <step.icon className="w-4 h-4 text-primary" />
+          {(cms.steps || []).map((step, i) => {
+            const Icon = STEP_ICONS[i % STEP_ICONS.length];
+            return (
+              <div key={step.title} className="flex items-center flex-1 min-w-0">
+                <div className="flex flex-col items-center text-center flex-1 min-w-0 px-0.5">
+                  <div className="w-10 h-10 rounded-xl border border-border bg-primary/10 flex items-center justify-center mb-2 shadow-sm">
+                    <Icon className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-[9px] font-bold text-foreground leading-tight mb-0.5">{i + 1}. {step.title}</p>
+                  <p className="text-[8px] text-muted-foreground leading-tight">{step.desc}</p>
                 </div>
-                <p className="text-[9px] font-bold text-foreground leading-tight mb-0.5">{i + 1}. {step.title}</p>
-                <p className="text-[8px] text-muted-foreground leading-tight">{step.desc}</p>
+                {i < (cms.steps || []).length - 1 && (
+                  <ChevronRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 mb-5" />
+                )}
               </div>
-              {i < steps.length - 1 && (
-                <ChevronRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 mb-5" />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

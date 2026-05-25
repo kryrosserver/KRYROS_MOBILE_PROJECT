@@ -795,4 +795,159 @@ export class CMSService {
 
     return { success: true, message: 'Footer seeded successfully' };
   }
+
+  // ==================== SITE CONFIG ====================
+
+  async getAllSiteConfigs() {
+    return this.prisma.cMSSiteConfig.findMany({ orderBy: { key: 'asc' } });
+  }
+
+  async getSiteConfig(key: string) {
+    return this.prisma.cMSSiteConfig.findUnique({ where: { key } });
+  }
+
+  async upsertSiteConfig(key: string, value: any) {
+    return this.prisma.cMSSiteConfig.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
+
+  async seedSiteConfigs() {
+    const defaults: Record<string, any> = {
+      'trust-badges': {
+        items: [
+          { icon: 'Truck', title: 'Free Shipping', subtitle: 'On orders over $100' },
+          { icon: 'ShieldCheck', title: 'Secure Payments', subtitle: '100% Secure' },
+          { icon: 'RefreshCcw', title: 'Easy Returns', subtitle: '7-Day Returns' },
+          { icon: 'Headphones', title: '24/7 Support', subtitle: 'We are here' },
+        ],
+      },
+      'upgrade-banner': {
+        heading: 'Upgrade Your Tech Game',
+        subtitle: 'Unbeatable performance. Unmatched style.',
+        ctaText: 'Shop Now',
+        ctaLink: '/shop',
+        discountText: '30%',
+        discountSubtext: 'OFF',
+        bgImage: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=85',
+      },
+      'members-banner': {
+        title: 'KRYROS Members',
+        subtitle: 'Join and get exclusive discounts on every order',
+        discount: '5%',
+        ctaText: 'Join Now',
+        ctaLink: '/signup',
+        bgColor: '#050F1A',
+      },
+      'wholesale': {
+        hero: {
+          heading: 'Buy More, Save More!',
+          subheading: 'Exclusive wholesale prices on thousands of products.',
+          ctaText: 'Explore Products',
+          ctaLink: '/shop',
+        },
+        steps: [
+          { title: 'Browse Products', desc: 'Explore products available for wholesale' },
+          { title: 'Add to Quote', desc: 'Add products to your quote list' },
+          { title: 'Submit Quote', desc: 'Our team will review your request' },
+          { title: 'Confirm & Order', desc: 'Confirm the quote and place your order' },
+        ],
+        features: [
+          { title: 'Bulk Discounts', desc: 'Better prices on larger quantities' },
+          { title: 'Priority Shipping', desc: 'Faster delivery for wholesale orders' },
+          { title: 'Secure Payments', desc: 'Safe & encrypted transactions' },
+          { title: 'Dedicated Support', desc: '24/7 priority customer support' },
+        ],
+        quoteCta: {
+          title: 'Need a Custom Quote?',
+          subtitle: 'Contact our wholesale team for personalised pricing',
+          ctaText: 'Request Quote',
+          ctaLink: '/contact',
+        },
+      },
+      'product-settings': {
+        deliveryThreshold: 100,
+        freeDeliveryText: 'Free delivery on orders over $100',
+        pickupAvailable: true,
+        pickupText: 'Available at 3 pickup stations',
+        paymentMethods: [
+          { name: 'MTN Money', icon: 'mobile', isActive: true },
+          { name: 'Airtel Money', icon: 'mobile', isActive: true },
+          { name: 'Zamtel Kwacha', icon: 'mobile', isActive: true },
+          { name: 'Visa Card', icon: 'card', isActive: true },
+          { name: 'Mastercard', icon: 'card', isActive: true },
+          { name: 'Bank Transfer', icon: 'bank', isActive: true },
+        ],
+        creditPlansVisible: true,
+        defaultCreditDurations: [3, 6, 12],
+      },
+      'header': {
+        logoText: 'KRYROS',
+        announcementEnabled: true,
+        announcementText: 'Free Delivery on all orders over $100',
+        announcementCta: 'Track Order',
+        announcementCtaLink: '/track',
+        navLinks: [
+          { label: 'Home', href: '/', isActive: true },
+          { label: 'Shop', href: '/shop', isActive: true },
+          { label: 'Get Now', href: '/get-now', isActive: true },
+          { label: 'Wholesale', href: '/wholesale', isActive: true },
+          { label: 'Pickup Stations', href: '/pickup-stations', isActive: true },
+          { label: 'About Us', href: '/about', isActive: true },
+          { label: 'Contact Us', href: '/contact', isActive: true },
+        ],
+      },
+    };
+
+    const results = [];
+    for (const [key, value] of Object.entries(defaults)) {
+      const existing = await this.prisma.cMSSiteConfig.findUnique({ where: { key } });
+      if (!existing) {
+        results.push(await this.prisma.cMSSiteConfig.create({ data: { key, value } }));
+      }
+    }
+    return { success: true, seeded: results.length, message: `Seeded ${results.length} site configs` };
+  }
+
+  // ==================== BRAND BANNERS ====================
+
+  async getBrandBanners(onlyActive = false) {
+    return this.prisma.cMSBrandBanner.findMany({
+      where: onlyActive ? { isActive: true } : undefined,
+      orderBy: { brandName: 'asc' },
+    });
+  }
+
+  async getBrandBannerBySlug(brandSlug: string) {
+    return this.prisma.cMSBrandBanner.findUnique({ where: { brandSlug } });
+  }
+
+  async upsertBrandBanner(data: any) {
+    const { brandSlug, ...rest } = data;
+    return this.prisma.cMSBrandBanner.upsert({
+      where: { brandSlug },
+      update: rest,
+      create: { brandSlug, ...rest },
+    });
+  }
+
+  async deleteBrandBanner(id: string) {
+    return this.prisma.cMSBrandBanner.delete({ where: { id } });
+  }
+
+  async seedBrandBanners() {
+    const defaults = [
+      { brandSlug: 'apple', brandName: 'Apple', tagline: 'Think Different', description: 'Premium Apple products', bgColor: '#1d1d1f', bgGradient: 'linear-gradient(135deg,#1d1d1f,#3d3d3f)', ctaText: 'Shop Apple', ctaLink: '/shop?brand=Apple' },
+      { brandSlug: 'samsung', brandName: 'Samsung', tagline: 'Do What You Cant', description: 'Galaxy Series & more', bgColor: '#1428A0', bgGradient: 'linear-gradient(135deg,#1428A0,#0070D2)', ctaText: 'Shop Samsung', ctaLink: '/shop?brand=Samsung' },
+      { brandSlug: 'sony', brandName: 'Sony', tagline: 'Make Believe', description: 'Premium audio & electronics', bgColor: '#000000', bgGradient: 'linear-gradient(135deg,#000,#222)', ctaText: 'Shop Sony', ctaLink: '/shop?brand=Sony' },
+    ];
+    const results = [];
+    for (const d of defaults) {
+      const existing = await this.prisma.cMSBrandBanner.findUnique({ where: { brandSlug: d.brandSlug } });
+      if (!existing) results.push(await this.prisma.cMSBrandBanner.create({ data: d }));
+    }
+    return { success: true, seeded: results.length };
+  }
 }
