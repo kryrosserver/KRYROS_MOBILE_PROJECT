@@ -180,7 +180,7 @@ export default function WalletPage() {
               </div>
               {s.trend}
             </div>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+            <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
             <p className="text-2xl font-bold mt-1" style={{ color: "var(--text-primary)" }}>{s.value}</p>
           </div>
         ))}

@@ -122,7 +122,7 @@ export default function CitiesPage() {
             {stats.map(s => (
               <div key={s.label} className="admin-card !p-5">
                 <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ background: s.bg }}><s.icon className="h-5 w-5" style={{ color: s.color }} /></div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}

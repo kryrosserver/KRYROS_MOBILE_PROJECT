@@ -199,7 +199,7 @@ export default function ProductsPage() {
                   </div>
                   <div className="text-xs font-semibold">{s.trend}</div>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: "var(--text-primary)" }}>{s.value}</p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{s.sub}</p>
               </div>

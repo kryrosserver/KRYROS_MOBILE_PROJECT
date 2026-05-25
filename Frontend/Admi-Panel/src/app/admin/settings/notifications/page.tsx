@@ -115,7 +115,7 @@ export default function NotificationSettingsPage() {
                   </div>
                   <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{s.value}/{s.total}</span>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}

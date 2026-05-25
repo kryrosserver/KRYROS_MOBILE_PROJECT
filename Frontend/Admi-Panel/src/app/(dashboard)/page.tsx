@@ -323,20 +323,18 @@ export default function AdminDashboard() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
               {statCards.map((c, i) => (
                 <div key={i} style={{ ...card, padding: "14px 14px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ width: 30, height: 30, borderRadius: 8, background: `${c.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <Activity style={{ width: 14, height: 14, color: c.color }} />
                     </div>
-                    <span style={{ fontSize: 11, color: TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3 }}>{c.title}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: c.up === true ? "#22C55E" : c.up === false ? "#EF4444" : TEXT_SECONDARY }}>{c.change}</span>
                   </div>
+                  <span style={{ fontSize: 11, color: TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3, display: "block" }}>{c.title}</span>
                   <div style={{ fontSize: 20, fontWeight: 800, color: TEXT_PRIMARY }}>{c.value}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     {c.up === true && <TrendingUp style={{ width: 11, height: 11, color: "#22C55E" }} />}
                     {c.up === false && <TrendingDown style={{ width: 11, height: 11, color: "#EF4444" }} />}
                     {c.up === null && <Minus style={{ width: 11, height: 11, color: TEXT_SECONDARY }} />}
-                    <span style={{ fontSize: 11, fontWeight: 600, color: c.up === true ? "#22C55E" : c.up === false ? "#EF4444" : TEXT_SECONDARY }}>
-                      {c.change}
-                    </span>
                     <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>vs last week</span>
                   </div>
                   <MiniSparkline color={c.color} up={c.up === true} />
