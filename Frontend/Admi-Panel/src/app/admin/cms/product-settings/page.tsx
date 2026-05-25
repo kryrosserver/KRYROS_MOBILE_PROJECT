@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Save, ToggleLeft } from "lucide-react";
+import { ScaledPage } from "@/components/ScaledPage";
 
 const DEFAULT = {
   deliveryThreshold: 100,
@@ -52,6 +53,7 @@ export default function ProductSettingsPage() {
   const toggleMethod = (i: number) => setForm((p) => ({ ...p, paymentMethods: p.paymentMethods.map((m, idx) => idx === i ? { ...m, isActive: !m.isActive } : m) }));
 
   return (
+    <ScaledPage>
     <div className="space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -132,5 +134,6 @@ export default function ProductSettingsPage() {
         </div>
       )}
     </div>
+    </ScaledPage>
   );
 }

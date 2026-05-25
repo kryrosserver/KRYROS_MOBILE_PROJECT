@@ -13,6 +13,7 @@ import {
   Circle
 } from "lucide-react";
 import Link from "next/link";
+import { ScaledPage } from "@/components/ScaledPage";
 
 export default function NewsletterPage() {
   const [config, setConfig] = useState<any>(null);
@@ -57,6 +58,7 @@ export default function NewsletterPage() {
   };
 
   return (
+    <ScaledPage>
     <div className="space-y-8 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -217,5 +219,6 @@ export default function NewsletterPage() {
         </div>
       )}
     </div>
+    </ScaledPage>
   );
 }

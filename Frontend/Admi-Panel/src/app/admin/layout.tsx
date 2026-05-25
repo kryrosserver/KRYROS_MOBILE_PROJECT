@@ -121,62 +121,13 @@ function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg-primary)" }}>
-      {/* Mobile top bar */}
-      <div
-        className="lg:hidden fixed top-0 left-0 right-0 h-16 z-40 flex items-center justify-between px-4"
-        style={{
-          background: "var(--sidebar-bg)",
-          borderBottom: "1px solid var(--sidebar-border)",
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="transition-colors"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-          <div className="flex items-center gap-2">
-            {logoNode}
-            <span className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-              {companyName || "KRYROS"}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Theme toggle — mobile */}
-          <button
-            onClick={toggleTheme}
-            className="flex items-center justify-center h-8 w-8 rounded-lg transition-colors"
-            style={{ color: "var(--text-secondary)", background: "var(--icon-bg)" }}
-          >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-          <div className="relative">
-            <button onClick={markAllRead} className="relative" style={{ color: "var(--text-secondary)" }}>
-              <Bell className="h-5 w-5" />
-              {!!unseenCount && (
-                <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white">
-                  {unseenCount}
-                </span>
-              )}
-            </button>
-          </div>
-          <div className="h-8 w-8 rounded-full overflow-hidden">
-            {logoDataUrl ? (
-              <img src={logoDataUrl} className="h-8 w-8 object-cover" alt="Avatar" />
-            ) : (
-              <div
-                className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                style={{ background: "#12D6C5" }}
-              >
-                {(companyName || "K").slice(0, 1)}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Mobile sidebar trigger — invisible overlay over each page's own hamburger icon */}
+      <button
+        className="lg:hidden fixed top-0 left-0 z-[200]"
+        style={{ width: 60, height: 60, background: "transparent", border: "none", cursor: "pointer" }}
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open menu"
+      />
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -424,7 +375,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main
-        className={`pt-16 lg:pt-0 transition-all duration-300 ${
+        className={`pt-0 transition-all duration-300 ${
           sidebarOpen ? "lg:ml-64" : "lg:ml-20"
         }`}
       >

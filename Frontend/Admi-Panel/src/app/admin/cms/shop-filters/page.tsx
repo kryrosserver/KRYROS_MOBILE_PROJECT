@@ -13,6 +13,7 @@ import {
   Circle
 } from "lucide-react";
 import Link from "next/link";
+import { ScaledPage } from "@/components/ScaledPage";
 
 interface FilterItem {
   label: string;
@@ -152,6 +153,7 @@ export default function ShopFiltersPage() {
   };
 
   return (
+    <ScaledPage>
     <div className="space-y-8 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -289,5 +291,6 @@ export default function ShopFiltersPage() {
         )}
       </div>
     </div>
+    </ScaledPage>
   );
 }

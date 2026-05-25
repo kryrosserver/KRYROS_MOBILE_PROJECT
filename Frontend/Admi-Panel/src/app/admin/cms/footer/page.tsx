@@ -8,6 +8,7 @@ import {
   X,
   Settings,
 } from "lucide-react";
+import { ScaledPage } from "@/components/ScaledPage";
 
 interface FooterSection {
   id: string;
@@ -411,6 +412,7 @@ export default function FooterManagementPage() {
   };
 
   return (
+    <ScaledPage>
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -899,5 +901,6 @@ export default function FooterManagementPage() {
         )}
       </div>
     </div>
+    </ScaledPage>
   );
 }

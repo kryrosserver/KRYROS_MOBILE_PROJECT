@@ -5,6 +5,7 @@ import { Save, ChevronLeft, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useInvoiceStore } from "@/providers/InvoiceStore";
+import { ScaledPage } from "@/components/ScaledPage";
 
 export default function NewPaymentPage() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function NewPaymentPage() {
   };
 
   return (
+    <ScaledPage>
     <div className="max-w-3xl mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -103,5 +105,6 @@ export default function NewPaymentPage() {
         </div>
       </div>
     </div>
+    </ScaledPage>
   );
 }

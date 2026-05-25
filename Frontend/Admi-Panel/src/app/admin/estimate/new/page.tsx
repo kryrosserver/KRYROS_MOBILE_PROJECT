@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useInvoiceStore, LineItem } from "@/providers/InvoiceStore";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 import { formatPrice } from "@/lib/utils";
+import { ScaledPage } from "@/components/ScaledPage";
 
 export default function NewEstimatePage() {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function NewEstimatePage() {
   };
 
   return (
+    <ScaledPage>
     <div className="max-w-5xl mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -145,5 +147,6 @@ export default function NewEstimatePage() {
         </div>
       </div>
     </div>
+    </ScaledPage>
   );
 }
