@@ -230,13 +230,10 @@ export default function UsersPage() {
         </header>
 
         {/* ── BODY ── */}
-        <div style={{ padding: "20px 20px", display: "flex", gap: 16, alignItems: "flex-start" }}>
+        <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* LEFT MAIN */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Page title + actions */}
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+          {/* Page title + actions — full width above both columns */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
               <div>
                 <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>User Management</h2>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
@@ -266,7 +263,13 @@ export default function UsersPage() {
                   <MoreHorizontal style={{ width: 16, height: 16 }} />
                 </button>
               </div>
-            </div>
+          </div>
+
+          {/* Two-column row: stats/table left + sidebar right — both start at same top edge */}
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+
+          {/* LEFT MAIN */}
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
 
             {/* Stat Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
@@ -555,6 +558,7 @@ export default function UsersPage() {
                 ))}
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
