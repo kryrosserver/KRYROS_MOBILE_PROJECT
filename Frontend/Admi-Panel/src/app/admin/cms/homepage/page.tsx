@@ -115,7 +115,7 @@ export default function HomePageCMS() {
       const visualH = naturalH * nextScale;
       const isMobile = window.innerWidth < 1024;
       const screenAvail = isMobile ? window.innerHeight - 64 : Infinity;
-      outerRef.current.style.height = `${Math.max(visualH, screenAvail)}px`;
+      outerRef.current.style.height = `${visualH}px`;
     }
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
@@ -214,7 +214,7 @@ export default function HomePageCMS() {
   const lastPublished = sections.find(s => s.updatedAt) || sections[0];
 
   return (
-    <div ref={outerRef} style={{ overflow: "auto", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
       {/* Header */}

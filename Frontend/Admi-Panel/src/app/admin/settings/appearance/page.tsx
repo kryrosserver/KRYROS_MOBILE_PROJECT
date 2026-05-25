@@ -43,7 +43,7 @@ export default function AppearanceSettingsPage() {
   };
 
   return (
-    <div ref={outerRef} style={{ overflow: "auto", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
       <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
         <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
 

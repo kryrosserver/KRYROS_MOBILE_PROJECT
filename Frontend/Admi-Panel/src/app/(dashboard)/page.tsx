@@ -134,13 +134,8 @@ export default function AdminDashboard() {
       // scrollHeight = true layout height before transform; multiply by scale = visual height
       const naturalH = innerRef.current.scrollHeight;
       const visualH = naturalH * nextScale;
-
-      // On mobile: fill full available viewport so the layout's min-h-screen
-      // doesn't bleed below the dashboard as blank background.
-      // Available height = viewport minus the 64px mobile top-bar.
-      const isMobile = window.innerWidth < 1024;
-      const screenAvail = isMobile ? window.innerHeight - 64 : Infinity;
-      outerRef.current.style.height = `${Math.max(visualH, screenAvail)}px`;
+      // Set outer height to exactly the visual (scaled) height — no extra blank space
+      outerRef.current.style.height = `${visualH}px`;
     }
 
     function recalc() {
@@ -228,7 +223,7 @@ export default function AdminDashboard() {
 
   return (
     /* Outer wrapper — breaks out of parent p-6, clips overflow, holds correct height after scaling */
-    <div ref={outerRef} style={{ overflow: "auto", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "hidden", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
 
       {/* Inner wrapper — fixed BASE_WIDTH, scales down via transform */}
       <div

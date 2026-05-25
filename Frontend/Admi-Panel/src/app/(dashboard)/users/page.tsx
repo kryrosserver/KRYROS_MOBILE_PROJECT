@@ -98,7 +98,7 @@ export default function UsersPage() {
       const visualH = naturalH * s;
       const isMob = window.innerWidth < 1024;
       const avail = isMob ? window.innerHeight - 64 : Infinity;
-      outerRef.current.style.height = `${Math.max(visualH, avail)}px`;
+      outerRef.current.style.height = `${visualH}px`;
     }
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
@@ -180,7 +180,7 @@ export default function UsersPage() {
   })();
 
   return (
-    <div ref={outerRef} style={{ overflow: "auto", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
       <div ref={innerRef} style={{ background: BG, color: TEXT }}>
 
         {/* ── HEADER ── */}
