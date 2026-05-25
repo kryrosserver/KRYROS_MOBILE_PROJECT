@@ -25,20 +25,28 @@ type CMSPage = {
 };
 
 const PAGE_ICONS: Record<string, any> = {
-  home: Home,
-  "about-us": Info,
+  home:               Home,
+  shop:               LayoutGrid,
+  "about-us":         Info,
   "terms-conditions": FileText,
-  "privacy-policy": Shield,
-  "refund-policy": AlertCircle,
-  "shipping-policy": FileText,
-  faq: HelpCircle,
-  "contact-us": Phone,
-  "how-it-works": FileCode,
+  "privacy-policy":   Shield,
+  "refund-policy":    AlertCircle,
+  "shipping-policy":  FileText,
+  faq:                HelpCircle,
+  "contact-us":       Phone,
+  "how-it-works":     FileCode,
+  wholesale:          Globe,
+  "get-now":          FileCode,
+  cart:               FileText,
+  checkout:           FileText,
+  "track-order":      RefreshCw,
+  account:            Settings,
   "maintenance-mode": Settings,
 };
 
 const PAGE_COLORS: Record<string, { color: string; bg: string }> = {
   home:               { color: "#3B82F6", bg: "rgba(59,130,246,0.15)" },
+  shop:               { color: "#12D6C5", bg: "rgba(18,214,197,0.15)" },
   "about-us":         { color: "#12D6C5", bg: "rgba(18,214,197,0.15)" },
   "terms-conditions": { color: "#64748B", bg: "rgba(100,116,139,0.15)" },
   "privacy-policy":   { color: "#3B82F6", bg: "rgba(59,130,246,0.15)" },
@@ -47,10 +55,36 @@ const PAGE_COLORS: Record<string, { color: string; bg: string }> = {
   faq:                { color: "#8B5CF6", bg: "rgba(139,92,246,0.15)" },
   "contact-us":       { color: "#12D6C5", bg: "rgba(18,214,197,0.15)" },
   "how-it-works":     { color: "#6366F1", bg: "rgba(99,102,241,0.15)" },
+  wholesale:          { color: "#8B5CF6", bg: "rgba(139,92,246,0.15)" },
+  "get-now":          { color: "#FACC15", bg: "rgba(250,204,21,0.15)" },
+  cart:               { color: "#22C55E", bg: "rgba(34,197,94,0.15)"  },
+  checkout:           { color: "#EF4444", bg: "rgba(239,68,68,0.15)"  },
+  "track-order":      { color: "#14B8A6", bg: "rgba(20,184,166,0.15)" },
+  account:            { color: "#6366F1", bg: "rgba(99,102,241,0.15)" },
   "maintenance-mode": { color: "#EF4444", bg: "rgba(239,68,68,0.15)" },
 };
 
-const SYSTEM_SLUGS = ["home", "maintenance-mode"];
+const STATIC_PAGES: CMSPage[] = [
+  { id: "static-home",               title: "Home",             slug: "home",               isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-shop",               title: "Shop",             slug: "shop",               isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-about-us",           title: "About Us",         slug: "about-us",           isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-contact-us",         title: "Contact Us",       slug: "contact-us",         isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-faq",                title: "FAQ",              slug: "faq",                isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-how-it-works",       title: "How It Works",     slug: "how-it-works",       isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-wholesale",          title: "Wholesale",        slug: "wholesale",          isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-get-now",            title: "Get Now (BNPL)",   slug: "get-now",            isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-terms-conditions",   title: "Terms & Conditions",slug: "terms-conditions",  isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-privacy-policy",     title: "Privacy Policy",   slug: "privacy-policy",     isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-refund-policy",      title: "Refund Policy",    slug: "refund-policy",      isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-shipping-policy",    title: "Shipping Policy",  slug: "shipping-policy",    isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-cart",               title: "Cart",             slug: "cart",               isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-checkout",           title: "Checkout",         slug: "checkout",           isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-track-order",        title: "Track Order",      slug: "track-order",        isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-account",            title: "My Account",       slug: "account",            isActive: true,  createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: "static-maintenance-mode",   title: "Maintenance Mode", slug: "maintenance-mode",   isActive: false, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+];
+
+const SYSTEM_SLUGS = ["home", "shop", "cart", "checkout", "account", "maintenance-mode"];
 const TRASH_SLUGS  = ["maintenance-mode"];
 
 function getPageIcon(slug: string) {
@@ -176,10 +210,23 @@ export default function CMSPagesManager() {
       const res = await fetch("/api/admin/cms/pages", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        setPages(Array.isArray(data) ? data : []);
+        const backendPages: CMSPage[] = Array.isArray(data) ? data : [];
+        if (backendPages.length > 0) {
+          const backendSlugs = new Set(backendPages.map(p => p.slug));
+          const merged = [
+            ...backendPages,
+            ...STATIC_PAGES.filter(p => !backendSlugs.has(p.slug)),
+          ];
+          setPages(merged);
+        } else {
+          setPages(STATIC_PAGES);
+        }
+      } else {
+        setPages(STATIC_PAGES);
       }
-    } catch {}
-    finally { setLoading(false); }
+    } catch {
+      setPages(STATIC_PAGES);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
