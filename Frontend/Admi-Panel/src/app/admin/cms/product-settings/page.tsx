@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Save, Toggle } from "lucide-react";
+import { ChevronLeft, Save, ToggleLeft } from "lucide-react";
 
 const DEFAULT = {
   deliveryThreshold: 100,
