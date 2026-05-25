@@ -5,10 +5,12 @@ import { formatPrice } from "@/lib/utils";
 import {
   Search, Filter, RefreshCw, ExternalLink, ChevronRight,
   Clock, CheckCircle, Package, X, ChevronDown,
-  Bell, Calendar, Sun, Moon, Menu,
+  Bell, Calendar, Sun, Moon, Menu, Download, MoreHorizontal,
+  Plus, ShoppingCart, TrendingUp, TrendingDown,
 } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "@/providers/ThemeProvider";
+import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
 const ACCENT = "#12D6C5";
 const MOBILE_BASE = 750;
@@ -33,6 +35,25 @@ const STATUS_MAP: Record<string, string> = {
   DELIVERED: "Delivered",
   CANCELLED: "Cancelled",
 };
+
+function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boolean }) {
+  const data = up
+    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
+    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
+  return (
+    <ResponsiveContainer width="100%" height={32}>
+      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id={`sgo${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+            <stop offset="95%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sgo${color.replace("#", "")})`} dot={false} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
 
 export default function OrdersPage() {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -62,11 +83,7 @@ export default function OrdersPage() {
     function applyHeight(s: number) {
       if (!innerRef.current || !outerRef.current) return;
       outerRef.current.style.height = "auto";
-      const naturalH = innerRef.current.scrollHeight;
-      const visualH = naturalH * s;
-      const isMob = window.innerWidth < 1024;
-      const avail = isMob ? window.innerHeight - 64 : Infinity;
-      outerRef.current.style.height = `${visualH}px`;
+      outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`;
     }
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
@@ -160,6 +177,12 @@ export default function OrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const totalRevenue = orders.reduce((s, o) => s + (o.total || 0), 0);
+  const pendingCount = orders.filter(o => o.status === "PENDING").length;
+  const processingCount = orders.filter(o => o.status === "PROCESSING" || o.status === "CONFIRMED").length;
+  const deliveredCount = orders.filter(o => o.status === "DELIVERED").length;
+  const cancelledCount = orders.filter(o => o.status === "CANCELLED").length;
+
   const statusBadgeStyle = (s: string) => {
     const map: Record<string, [string, string]> = {
       PENDING: ["#F59E0B", "rgba(245,158,11,0.14)"],
@@ -173,7 +196,15 @@ export default function OrdersPage() {
     return { color, background: bg, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 };
   };
 
-  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12 };
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+
+  const statCards = [
+    { label: "Total Orders", value: orders.length, change: "+12.4%", up: true, color: ACCENT, icon: ShoppingCart },
+    { label: "Total Revenue", value: formatPrice(totalRevenue), change: "+18.6%", up: true, color: "#22C55E", icon: TrendingUp },
+    { label: "Pending", value: pendingCount, change: "+3.1%", up: false, color: "#F59E0B", icon: Clock },
+    { label: "Delivered", value: deliveredCount, change: "+8.3%", up: true, color: "#3B82F6", icon: CheckCircle },
+    { label: "Cancelled", value: cancelledCount, change: "-2.1%", up: false, color: "#EF4444", icon: X },
+  ];
 
   return (
     <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
@@ -227,7 +258,28 @@ export default function OrdersPage() {
           </div>
         </header>
 
-        <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+        {/* ── BODY ── */}
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+          {/* Page title + actions */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Orders Management</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
+                <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
+                <ChevronRight style={{ width: 13, height: 13 }} />
+                <span style={{ color: ACCENT }}>Orders</span>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+                <Download style={{ width: 15, height: 15 }} /> Export <ChevronDown style={{ width: 13, height: 13 }} />
+              </button>
+              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+                <MoreHorizontal style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+          </div>
 
           {error && (
             <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>
@@ -235,7 +287,28 @@ export default function OrdersPage() {
             </div>
           )}
 
-          {/* Filters */}
+          {/* Stat Cards — full width 5-column grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+            {statCards.map((s, i) => (
+              <div key={i} style={{ ...card, padding: "16px 18px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `${s.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <s.icon style={{ width: 20, height: 20, color: s.color }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: s.up ? "#22C55E" : "#EF4444" }}>
+                    {s.up ? "▲" : "▼"} {s.change}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: TEXT2, marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontSize: typeof s.value === "string" ? 18 : 26, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 4 }}>{typeof s.value === "number" ? s.value.toLocaleString() : s.value}</div>
+                <div style={{ marginTop: 8 }}>
+                  <MiniSparkline color={s.color} up={s.up} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Filters + Bulk Actions */}
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <div style={{ position: "relative" }}>
               <Filter style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2 }} />
@@ -260,32 +333,23 @@ export default function OrdersPage() {
               <RefreshCw style={{ width: 13, height: 13 }} />
               Refresh
             </button>
-          </div>
-
-          {/* Bulk Actions */}
-          {selectedOrders.length > 0 && (
-            <div style={{ background: `${ACCENT}0D`, border: `1px solid ${ACCENT}40`, borderRadius: 10, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                {selectedOrders.length} Selected
-              </span>
-              <div style={{ width: 1, height: 16, background: `${ACCENT}40` }} />
-              <div style={{ display: "flex", gap: 8 }}>
+            {selectedOrders.length > 0 && (
+              <>
+                <div style={{ height: 24, width: 1, background: BORDER }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT }}>{selectedOrders.length} Selected</span>
                 {["PROCESSING", "SHIPPED", "DELIVERED"].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => bulkUpdateStatus(s)}
-                    style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "5px 12px", color: TEXT2, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                  <button key={s} onClick={() => bulkUpdateStatus(s)}
+                    style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 12px", color: TEXT2, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                     Mark {s.charAt(0) + s.slice(1).toLowerCase()}
                   </button>
                 ))}
-              </div>
-              <button
-                onClick={() => setSelectedOrders([])}
-                style={{ marginLeft: "auto", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-                <X style={{ width: 14, height: 14 }} />
-              </button>
-            </div>
-          )}
+                <button onClick={() => setSelectedOrders([])}
+                  style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4, marginLeft: "auto" }}>
+                  <X style={{ width: 14, height: 14 }} />
+                </button>
+              </>
+            )}
+          </div>
 
           {/* Table */}
           <div style={{ ...card, overflow: "hidden" }}>
@@ -313,14 +377,15 @@ export default function OrdersPage() {
                     [...Array(6)].map((_, i) => (
                       <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
                         <td colSpan={7} style={{ padding: "14px 16px" }}>
-                          <div style={{ height: 16, borderRadius: 6, background: HOVER, animation: "pulse 1.5s ease-in-out infinite" }} />
+                          <div style={{ height: 16, borderRadius: 6, background: HOVER }} />
                         </td>
                       </tr>
                     ))
                   ) : filteredOrders.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ padding: 48, textAlign: "center", fontSize: 13, color: TEXT2 }}>
-                        No orders found.
+                        <ShoppingCart style={{ width: 36, height: 36, margin: "0 auto 10px", opacity: 0.3 }} />
+                        <div>No orders found.</div>
                       </td>
                     </tr>
                   ) : filteredOrders.map(o => {
@@ -334,12 +399,7 @@ export default function OrdersPage() {
                         onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = HOVER; }}
                         onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}>
                         <td style={{ padding: "14px 16px" }}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleSelect(o.id)}
-                            style={{ accentColor: ACCENT, width: 14, height: 14 }}
-                          />
+                          <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(o.id)} style={{ accentColor: ACCENT, width: 14, height: 14 }} />
                         </td>
                         <td style={{ padding: "14px 16px" }}>
                           <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: TEXT }}>{o.orderNumber}</div>
@@ -361,9 +421,7 @@ export default function OrdersPage() {
                               <CheckCircle style={{ width: 11, height: 11 }} /> Paid
                             </span>
                           ) : o.paymentStatus === "FAILED" ? (
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, ...statusBadgeStyle("CANCELLED") }}>
-                              Failed
-                            </span>
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, ...statusBadgeStyle("CANCELLED") }}>Failed</span>
                           ) : (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, ...statusBadgeStyle("PENDING") }}>
                               <Clock style={{ width: 11, height: 11 }} /> Pending
@@ -373,25 +431,20 @@ export default function OrdersPage() {
                         <td style={{ padding: "14px 16px", textAlign: "right" }}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
                             {o.status === "CONFIRMED" && (
-                              <button
-                                onClick={e => { e.preventDefault(); updateStatus(o.id, "PROCESSING"); }}
-                                disabled={updating === o.id}
+                              <button onClick={e => { e.preventDefault(); updateStatus(o.id, "PROCESSING"); }} disabled={updating === o.id}
                                 title="Mark Processing"
                                 style={{ background: "rgba(245,158,11,0.1)", border: "none", borderRadius: 8, padding: 8, color: "#F59E0B", cursor: "pointer" }}>
                                 <Package style={{ width: 14, height: 14 }} />
                               </button>
                             )}
                             {o.status === "PROCESSING" && (
-                              <button
-                                onClick={e => { e.preventDefault(); updateStatus(o.id, "SHIPPED"); }}
-                                disabled={updating === o.id}
+                              <button onClick={e => { e.preventDefault(); updateStatus(o.id, "SHIPPED"); }} disabled={updating === o.id}
                                 title="Mark Shipped"
                                 style={{ background: "rgba(59,130,246,0.1)", border: "none", borderRadius: 8, padding: 8, color: "#3B82F6", cursor: "pointer" }}>
                                 <ExternalLink style={{ width: 14, height: 14 }} />
                               </button>
                             )}
-                            <Link
-                              href={`/admin/orders/${o.id}`}
+                            <Link href={`/admin/orders/${o.id}`}
                               style={{ display: "inline-flex", alignItems: "center", gap: 5, background: ACCENT, color: "#000", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, textDecoration: "none" }}>
                               View <ChevronRight style={{ width: 13, height: 13 }} />
                             </Link>
