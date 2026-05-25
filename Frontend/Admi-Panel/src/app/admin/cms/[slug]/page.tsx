@@ -9,7 +9,7 @@ import {
   Layers, Grid, Zap, ShieldCheck, ImageIcon, List, Type, Settings,
   Palette, PlayCircle, Layout, Package, CreditCard, Tag, Star,
   TrendingUp, Mail, MessageCircle, Code, Megaphone, Home, Save,
-  ArrowLeft, BarChart3, FileText,
+  ArrowLeft, BarChart3, FileText, CheckCircle2, XCircle,
 } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
 
@@ -103,39 +103,6 @@ function getSectionCount(section: any): string {
   return "1 Section";
 }
 
-function DonutChart({ active, inactive }: { active: number; inactive: number }) {
-  const total = active + inactive || 1;
-  const r = 40, cx = 50, cy = 50, circ = 2 * Math.PI * r;
-  const aDash = (active / total) * circ;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <svg width={100} height={100} viewBox="0 0 100 100">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--icon-bg)" strokeWidth="10" />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#16C784" strokeWidth="10"
-          strokeDasharray={`${aDash} ${circ}`} strokeDashoffset={0} strokeLinecap="round"
-          transform={`rotate(-90 ${cx} ${cy})`} />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#EF4444" strokeWidth="10"
-          strokeDasharray={`${circ - aDash} ${circ}`} strokeDashoffset={-aDash} strokeLinecap="round"
-          transform={`rotate(-90 ${cx} ${cy})`} />
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="13" fontWeight="700" fill="var(--text-primary)">{total}</text>
-        <text x={cx} y={cy + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">Total Sections</text>
-      </svg>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#16C784", flexShrink: 0 }} />
-          <span style={{ color: "var(--text-secondary)" }}>Active</span>
-          <span style={{ fontWeight: 700, marginLeft: "auto", paddingLeft: 12, color: "var(--text-primary)" }}>{active} ({Math.round((active / total) * 100)}%)</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#EF4444", flexShrink: 0 }} />
-          <span style={{ color: "var(--text-secondary)" }}>Inactive</span>
-          <span style={{ fontWeight: 700, marginLeft: "auto", paddingLeft: 12, color: "var(--text-primary)" }}>{inactive} ({Math.round((inactive / total) * 100)}%)</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function CMSPageSections() {
   const params = useParams();
   const router = useRouter();
@@ -149,6 +116,7 @@ export default function CMSPageSections() {
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -206,6 +174,11 @@ export default function CMSPageSections() {
 
   useEffect(() => { load(); }, [load]);
 
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    load().finally(() => setTimeout(() => setIsRefreshing(false), 300));
+  };
+
   const handleToggle = async (section: any) => {
     const updated = sections.map(s => s.id === section.id ? { ...s, isActive: !s.isActive } : s);
     setSections(updated);
@@ -231,7 +204,6 @@ export default function CMSPageSections() {
   const handleSaveOrder = async () => {
     setSaving(true);
     try {
-      const sectionType = slug === "home" ? "homepage" : "generic";
       setMsg("Order saved!");
       setTimeout(() => setMsg(null), 2000);
     } finally { setSaving(false); }
@@ -268,6 +240,13 @@ export default function CMSPageSections() {
   const BG = "var(--bg-primary)";
   const HEADER_BG = "var(--bg-secondary)";
   const ICON_BG = "var(--icon-bg)";
+
+  const statCards = [
+    { label: "Total Sections",   value: sections.length, color: ACCENT,    bg: "rgba(18,214,197,0.12)",  icon: Layers },
+    { label: "Active Sections",  value: active,          color: "#16C784", bg: "rgba(22,199,132,0.12)",  icon: CheckCircle2 },
+    { label: "Inactive Sections",value: inactive,        color: "#EF4444", bg: "rgba(239,68,68,0.12)",   icon: XCircle },
+    { label: "Last Published",   value: "Today",         color: "#F59E0B", bg: "rgba(245,158,11,0.12)",  icon: RefreshCw, isText: true },
+  ];
 
   return (
     <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
@@ -313,10 +292,10 @@ export default function CMSPageSections() {
         </header>
 
         {/* PAGE CONTENT */}
-        <div style={{ padding: 20, flex: 1 }}>
+        <div style={{ padding: 20, flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* Title + breadcrumb + actions */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, gap: 16 }}>
+          {/* Breadcrumb + Title + Actions */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: TEXT2, marginBottom: 6 }}>
                 <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
@@ -325,168 +304,214 @@ export default function CMSPageSections() {
                 <ChevronRight style={{ width: 12, height: 12 }} />
                 <span style={{ color: TEXT }}>{pageLabel}</span>
               </div>
-              <h2 style={{ fontSize: 24, fontWeight: 700, color: TEXT, margin: 0 }}>{pageLabel}</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>{pageLabel}</h2>
+              <p style={{ fontSize: 13, color: TEXT2, margin: "4px 0 0" }}>Manage and reorder content sections for the {pageLabel.toLowerCase()}.</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
-                <Eye style={{ width: 14, height: 14 }} /> Preview {pageLabel.replace(" Page", "").replace(" Page", "")}
+              <button
+                onClick={handleRefresh}
+                style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 14px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
+                <RefreshCw style={{ width: 14, height: 14, ...(isRefreshing ? { animation: "spin 1s linear infinite" } : {}) }} />
               </button>
-              <button onClick={handleSaveOrder} disabled={saving} style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 16px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
+              <button
+                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                <Eye style={{ width: 14, height: 14 }} /> Preview
+              </button>
+              <button
+                onClick={() => setShowAdd(true)}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                <Plus style={{ width: 14, height: 14 }} /> Add Section
+              </button>
+              <button
+                onClick={handleSaveOrder}
+                disabled={saving}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
                 <Save style={{ width: 14, height: 14 }} /> {saving ? "Saving..." : "Save Changes"}
-              </button>
-              <button style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 10px", color: TEXT2, cursor: "pointer" }}>
-                <MoreVertical style={{ width: 16, height: 16 }} />
               </button>
             </div>
           </div>
 
           {msg && (
-            <div style={{ marginBottom: 16, padding: "10px 16px", background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.3)", borderRadius: 10, color: "#16C784", fontSize: 13, fontWeight: 600 }}>
-              {msg}
+            <div style={{ padding: "10px 16px", background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.3)", borderRadius: 10, color: "#16C784", fontSize: 13, fontWeight: 600 }}>
+              ✓ {msg}
             </div>
           )}
 
-          {/* Two-column layout */}
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-
-            {/* MAIN: Sections List */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
-                <div style={{ padding: "16px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{pageLabel} Sections</h3>
-                    <p style={{ fontSize: 12, color: TEXT2, margin: "4px 0 0" }}>Manage and customize the content sections displayed on your {pageLabel.toLowerCase()}.</p>
+          {/* ── STAT CARDS ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+            {statCards.map((c, i) => (
+              <div key={i} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: c.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <c.icon style={{ width: 18, height: 18, color: c.color }} />
                   </div>
-                  <button onClick={() => setShowAdd(true)} style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                    <Plus style={{ width: 14, height: 14 }} /> Add Section
+                  <p style={{ fontSize: 12, fontWeight: 700, color: TEXT2, lineHeight: 1.3, margin: 0 }}>{c.label}</p>
+                </div>
+                <p style={{ fontSize: (c as any).isText ? 18 : 28, fontWeight: 800, color: c.color, margin: 0 }}>{c.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── SECTIONS LIST ── */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
+
+            {/* Table header */}
+            <div style={{ padding: "14px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
+              <div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{pageLabel} Sections</h3>
+                <p style={{ fontSize: 12, color: TEXT2, margin: "3px 0 0" }}>
+                  Drag rows to reorder · Toggle to show or hide each section on the storefront
+                </p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 12, color: TEXT2 }}>{sections.length} section{sections.length !== 1 ? "s" : ""}</span>
+                <button
+                  onClick={() => setShowAdd(true)}
+                  style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                  <Plus style={{ width: 14, height: 14 }} /> Add Section
+                </button>
+              </div>
+            </div>
+
+            {/* Column headers */}
+            {!loading && sections.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "32px 48px 1fr 120px 80px 60px 90px 80px", alignItems: "center", padding: "10px 20px", borderBottom: `1px solid ${BORDER}`, background: ICON_BG }}>
+                <span />
+                <span />
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Section</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Type</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Content</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Order</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Status</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Actions</span>
+              </div>
+            )}
+
+            {loading ? (
+              <div style={{ padding: 40, textAlign: "center", color: TEXT2 }}>
+                <RefreshCw style={{ width: 24, height: 24, margin: "0 auto 8px", animation: "spin 1s linear infinite", display: "block" }} />
+                Loading sections...
+              </div>
+            ) : sections.length === 0 ? (
+              <div style={{ padding: 60, textAlign: "center", color: TEXT2 }}>
+                <Layers style={{ width: 40, height: 40, margin: "0 auto 14px", opacity: 0.3, display: "block" }} />
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: TEXT }}>No sections yet</p>
+                <p style={{ margin: "6px 0 16px", fontSize: 13 }}>Add your first section to get started.</p>
+                <button onClick={() => setShowAdd(true)} style={{ padding: "9px 20px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                  + Add First Section
+                </button>
+              </div>
+            ) : (
+              <div>
+                {sections.map((section, idx) => {
+                  const meta = getSectionMeta(section.type);
+                  const Icon = meta.icon;
+                  const count = getSectionCount(section);
+                  const isDragging = dragIdx === idx;
+                  const editHref = `/admin/cms/${slug}/${section.type.toLowerCase().replace(/([A-Z])/g, (m: string) => `-${m.toLowerCase()}`).replace(/^-/, "")}`;
+                  return (
+                    <div key={section.id}
+                      draggable
+                      onDragStart={() => handleDragStart(idx)}
+                      onDragOver={(e) => handleDragOver(e, idx)}
+                      onDragEnd={handleDragEnd}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "32px 48px 1fr 120px 80px 60px 90px 80px",
+                        alignItems: "center",
+                        padding: "14px 20px",
+                        borderBottom: idx < sections.length - 1 ? `1px solid ${BORDER}` : "none",
+                        background: isDragging ? "var(--hover-bg)" : "transparent",
+                        cursor: "grab",
+                        transition: "background 0.15s",
+                      }}>
+
+                      {/* Drag handle */}
+                      <div style={{ color: TEXT2, opacity: 0.4 }}>
+                        <GripVertical style={{ width: 16, height: 16 }} />
+                      </div>
+
+                      {/* Icon */}
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon style={{ width: 16, height: 16, color: meta.color }} />
+                      </div>
+
+                      {/* Name + description */}
+                      <div style={{ minWidth: 0, paddingRight: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {section.label || meta.label}
+                        </div>
+                        <div style={{ fontSize: 12, color: TEXT2, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {meta.description}
+                        </div>
+                      </div>
+
+                      {/* Type badge */}
+                      <div>
+                        <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: meta.bg, color: meta.color, border: `1px solid ${meta.color}30`, whiteSpace: "nowrap" }}>
+                          {meta.label}
+                        </span>
+                      </div>
+
+                      {/* Content count */}
+                      <div style={{ fontSize: 12, color: TEXT2 }}>{count}</div>
+
+                      {/* Order number */}
+                      <div style={{ fontSize: 13, fontWeight: 700, color: TEXT2 }}>#{idx + 1}</div>
+
+                      {/* Toggle */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <button
+                          onClick={() => handleToggle(section)}
+                          style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", background: section.isActive ? ACCENT : ICON_BG, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                          <span style={{ position: "absolute", top: 3, left: section.isActive ? "calc(100% - 19px)" : 3, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
+                        </button>
+                        <span style={{ fontSize: 11, color: section.isActive ? "#16C784" : TEXT2, fontWeight: 600 }}>
+                          {section.isActive ? "On" : "Off"}
+                        </span>
+                      </div>
+
+                      {/* Actions */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <Link href={editHref} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 8px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", textDecoration: "none" }}>
+                          <Edit style={{ width: 13, height: 13 }} />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(section)}
+                          style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "6px 8px", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                          <Trash2 style={{ width: 13, height: 13 }} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Footer hint */}
+                <div style={{ padding: "12px 20px", borderTop: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 12, color: TEXT2 }}>
+                    Showing {sections.length} of {sections.length} sections · Drag rows to reorder
+                  </span>
+                  <button
+                    onClick={() => setShowAdd(true)}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: `1px dashed ${BORDER}`, borderRadius: 8, padding: "6px 14px", color: TEXT2, fontSize: 12, cursor: "pointer" }}>
+                    <Plus style={{ width: 12, height: 12 }} /> Add New Section
                   </button>
                 </div>
-
-                {loading ? (
-                  <div style={{ padding: 40, textAlign: "center", color: TEXT2 }}>
-                    <RefreshCw style={{ width: 24, height: 24, margin: "0 auto 8px", animation: "spin 1s linear infinite", display: "block" }} />
-                    Loading sections...
-                  </div>
-                ) : sections.length === 0 ? (
-                  <div style={{ padding: 40, textAlign: "center", color: TEXT2 }}>
-                    <Layers style={{ width: 32, height: 32, margin: "0 auto 12px", opacity: 0.4, display: "block" }} />
-                    <p style={{ margin: 0, fontWeight: 600 }}>No sections yet</p>
-                    <p style={{ margin: "6px 0 0", fontSize: 12 }}>Add your first section to get started.</p>
-                  </div>
-                ) : (
-                  <div>
-                    {sections.map((section, idx) => {
-                      const meta = getSectionMeta(section.type);
-                      const Icon = meta.icon;
-                      const count = getSectionCount(section);
-                      const isDragging = dragIdx === idx;
-                      return (
-                        <div key={section.id}
-                          draggable
-                          onDragStart={() => handleDragStart(idx)}
-                          onDragOver={(e) => handleDragOver(e, idx)}
-                          onDragEnd={handleDragEnd}
-                          style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: idx < sections.length - 1 ? `1px solid ${BORDER}` : "none", background: isDragging ? "var(--hover-bg)" : "transparent", cursor: "grab", transition: "background 0.15s" }}>
-                          <div style={{ color: TEXT2, cursor: "grab", flexShrink: 0, opacity: 0.5 }}>
-                            <GripVertical style={{ width: 18, height: 18 }} />
-                          </div>
-                          <div style={{ width: 40, height: 40, borderRadius: 10, background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <Icon style={{ width: 18, height: 18, color: meta.color }} />
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>{section.label || meta.label}</div>
-                            <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>{meta.description}</div>
-                          </div>
-                          <div style={{ fontSize: 12, color: TEXT2, whiteSpace: "nowrap", marginRight: 8 }}>
-                            <span style={{ color: section.isActive ? "#16C784" : TEXT2 }}>● </span>
-                            {count} &nbsp;·&nbsp; {section.isActive ? "Active" : "Inactive"}
-                          </div>
-                          {/* Toggle */}
-                          <button onClick={() => handleToggle(section)} style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: section.isActive ? ACCENT : "var(--icon-bg)", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
-                            <span style={{ position: "absolute", top: 3, left: section.isActive ? "calc(100% - 21px)" : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
-                          </button>
-                          <Link href={`/admin/cms/${slug}/${section.type.toLowerCase().replace(/([A-Z])/g, (m: string) => `-${m.toLowerCase()}`).replace(/^-/, "")}`} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 8px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", textDecoration: "none" }}>
-                            <Edit style={{ width: 14, height: 14 }} />
-                          </Link>
-                          <button onClick={() => handleDelete(section)} style={{ background: "transparent", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 8px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center" }}>
-                            <MoreVertical style={{ width: 14, height: 14 }} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                    <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, borderTop: `1px solid ${BORDER}`, cursor: "pointer", color: TEXT2, fontSize: 13 }} onClick={() => setShowAdd(true)}>
-                      <Plus style={{ width: 14, height: 14 }} />
-                      Add New Section
-                    </div>
-                    <div style={{ padding: "8px 20px", textAlign: "center", fontSize: 11, color: TEXT2, borderTop: `1px solid ${BORDER}` }}>
-                      Drag and drop sections to reorder them
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
-
-            {/* SIDEBAR */}
-            <div style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
-              {/* Page Overview */}
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 16 }}>
-                <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 14px" }}>{pageLabel} Overview</h4>
-                <DonutChart active={active} inactive={inactive} />
-              </div>
-
-              {/* Quick Actions */}
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 16 }}>
-                <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 10px" }}>Quick Actions</h4>
-                {[
-                  { label: `Preview ${pageLabel.replace(" Page","").replace(" Page","")}`, icon: Eye },
-                  { label: `Import ${pageLabel.replace(" Page","")}`, icon: ArrowLeft },
-                  { label: `Export ${pageLabel.replace(" Page","")}`, icon: BarChart3 },
-                  { label: "Reset to Default", icon: RefreshCw },
-                  { label: `${pageLabel.replace(" Page","")} Settings`, icon: Settings },
-                ].map((a, i) => (
-                  <button key={i} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 0", background: "transparent", border: "none", borderBottom: i < 4 ? `1px solid ${BORDER}` : "none", color: TEXT2, fontSize: 12, cursor: "pointer", fontWeight: 500 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <a.icon style={{ width: 13, height: 13, color: ACCENT }} />
-                      {a.label}
-                    </div>
-                    <ChevronRight style={{ width: 12, height: 12 }} />
-                  </button>
-                ))}
-              </div>
-
-              {/* Last Published */}
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 16 }}>
-                <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 8px" }}>Last Published</h4>
-                <p style={{ fontSize: 12, color: TEXT2, margin: 0 }}>{lastPublished}</p>
-                <p style={{ fontSize: 12, color: TEXT2, margin: "4px 0 0" }}>by Admin User</p>
-                <span style={{ display: "inline-block", marginTop: 8, padding: "3px 10px", background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.3)", borderRadius: 20, fontSize: 11, color: "#16C784", fontWeight: 600 }}>Published</span>
-              </div>
-
-              {/* Tips */}
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 16 }}>
-                <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 10px" }}>Tips</h4>
-                {[
-                  "Drag and drop sections to reorder them.",
-                  "Toggle sections on/off to show or hide them from the page.",
-                ].map((tip, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: i < 1 ? 8 : 0, fontSize: 11, color: TEXT2 }}>
-                    <span style={{ color: ACCENT, flexShrink: 0, marginTop: 1 }}>ℹ</span>
-                    {tip}
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
         {/* ADD SECTION MODAL */}
         {showAdd && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 28, width: 520, maxHeight: "80vh", overflow: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.4)" }}>
+            <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 28, width: 560, maxHeight: "80vh", overflow: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.4)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>Add New Section</h3>
-                <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}>✕</button>
+                <div>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>Add New Section</h3>
+                  <p style={{ fontSize: 12, color: TEXT2, margin: "4px 0 0" }}>Choose a section type to add to {pageLabel}.</p>
+                </div>
+                <button onClick={() => setShowAdd(false)} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: TEXT2, fontSize: 13 }}>✕</button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
                 {Object.entries(SECTION_META).map(([type, meta]) => {

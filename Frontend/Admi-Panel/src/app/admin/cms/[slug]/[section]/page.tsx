@@ -6,8 +6,8 @@ import { useParams } from "next/navigation";
 import {
   Bell, Calendar, Sun, Moon, Menu, ChevronDown, ChevronRight,
   Plus, Edit, Trash2, Save, ArrowLeft, RefreshCw, X, ImageIcon,
-  Monitor, Tablet, Smartphone, HelpCircle, ExternalLink, MoreVertical,
-  GripVertical, Eye, EyeOff, CheckCircle, Settings, Layers,
+  Monitor, Tablet, Smartphone, Eye, MoreVertical,
+  GripVertical, CheckCircle, Settings, Layers,
 } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
 import { resolveImageUrl } from "@/lib/utils";
@@ -68,7 +68,6 @@ export default function CMSSectionEditor() {
   const [section, setSection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"content" | "design">("content");
   const [msg, setMsg] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
   const [displaySettings, setDisplaySettings] = useState({ desktop: true, tablet: true, mobile: true });
@@ -157,10 +156,7 @@ export default function CMSSectionEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const config = {
-        ...form, slides, autoSlide, slideInterval,
-        display: displaySettings, isActive,
-      };
+      const config = { ...form, slides, autoSlide, slideInterval, display: displaySettings, isActive };
       if (section?.id) {
         const endpoint = slug === "home"
           ? `/api/admin/cms/homepage-sections/${section.id}`
@@ -198,18 +194,18 @@ export default function CMSSectionEditor() {
   const openEditSlide = (s: any, idx: number) => { setEditingSlide({ ...s }); setEditingSlideIdx(idx); };
   const saveSlideEdit = () => { if (editingSlideIdx !== null && editingSlide) { updateSlide(editingSlideIdx, editingSlide); } setEditingSlide(null); setEditingSlideIdx(null); };
 
+  const isSlidesType = ["hero-slider", "promo-banners", "dual-banner-section"].includes(sectionKey);
+  const isItemsType = ["trust-badges", "wholesale-features", "get-now-features"].includes(sectionKey);
+  const isTextType = ["page-content", "text-block", "custom-h-t-m-l"].includes(sectionKey);
+
   const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)";
   const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
   const BG = "var(--bg-primary)"; const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)"; const INPUT = "var(--input-bg, var(--card-bg))";
+  const ICON_BG = "var(--icon-bg)";
 
   const inputStyle: React.CSSProperties = { width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" };
   const labelStyle: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: TEXT2, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.04em" };
   const cardStyle: React.CSSProperties = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
-
-  const isSlidesType = ["hero-slider", "promo-banners", "dual-banner-section"].includes(sectionKey);
-  const isItemsType = ["trust-badges", "wholesale-features", "get-now-features"].includes(sectionKey);
-  const isTextType = ["page-content", "text-block", "custom-h-t-m-l"].includes(sectionKey);
 
   return (
     <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
@@ -253,10 +249,10 @@ export default function CMSSectionEditor() {
         </header>
 
         {/* PAGE CONTENT */}
-        <div style={{ padding: 20, flex: 1 }}>
+        <div style={{ padding: 20, flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* Title + breadcrumb + actions */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20, gap: 16 }}>
+          {/* Breadcrumb + Title + Actions */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: TEXT2, marginBottom: 6 }}>
                 <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
@@ -267,36 +263,29 @@ export default function CMSSectionEditor() {
                 <ChevronRight style={{ width: 12, height: 12 }} />
                 <span style={{ color: TEXT }}>Edit {sectionLabel}</span>
               </div>
-              <h2 style={{ fontSize: 24, fontWeight: 700, color: TEXT, margin: 0 }}>Edit {sectionLabel}</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Edit {sectionLabel}</h2>
+              <p style={{ fontSize: 13, color: TEXT2, margin: "4px 0 0" }}>Customize the content and display settings for this section.</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-              <Link href={`/admin/cms/${slug}`} style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
+              <Link
+                href={`/admin/cms/${slug}`}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
                 <ArrowLeft style={{ width: 14, height: 14 }} /> Back to {pageLabel}
               </Link>
-              <button onClick={handleSave} disabled={saving} style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 16px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
                 <Save style={{ width: 14, height: 14 }} /> {saving ? "Saving..." : "Save Changes"}
-              </button>
-              <button style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 10px", color: TEXT2, cursor: "pointer" }}>
-                <MoreVertical style={{ width: 16, height: 16 }} />
               </button>
             </div>
           </div>
 
           {msg && (
-            <div style={{ marginBottom: 16, padding: "10px 16px", background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.3)", borderRadius: 10, color: "#16C784", fontSize: 13, fontWeight: 600 }}>
+            <div style={{ padding: "10px 16px", background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.3)", borderRadius: 10, color: "#16C784", fontSize: 13, fontWeight: 600 }}>
               ✓ {msg}
             </div>
           )}
-
-          {/* Tabs */}
-          <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `1px solid ${BORDER}` }}>
-            {(["content", "design"] as const).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                style={{ padding: "10px 20px", background: "transparent", border: "none", borderBottom: activeTab === tab ? `2px solid ${ACCENT}` : "2px solid transparent", color: activeTab === tab ? ACCENT : TEXT2, fontSize: 14, fontWeight: 600, cursor: "pointer", textTransform: "capitalize", marginBottom: -1 }}>
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
 
           {loading ? (
             <div style={{ textAlign: "center", padding: 60, color: TEXT2 }}>
@@ -304,240 +293,243 @@ export default function CMSSectionEditor() {
               Loading section data...
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "280px 1fr 280px", gap: 16, alignItems: "flex-start" }}>
 
-              {/* LEFT PANEL: Section Content */}
-              <div style={{ ...cardStyle, overflow: "hidden" }}>
-                <div style={{ padding: "14px 16px", borderBottom: `1px solid ${BORDER}` }}>
-                  <h3 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>Section Content</h3>
-                  <p style={{ fontSize: 11, color: TEXT2, margin: "4px 0 0" }}>Update the content for the {sectionLabel.toLowerCase()} section.</p>
+            /* ── 2-COLUMN LAYOUT ── */
+            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+
+              {/* ── LEFT: Main Content Editor ── */}
+              <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+
+                {/* Section overview card */}
+                <div style={{ ...cardStyle, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(18,214,197,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Layers style={{ width: 20, height: 20, color: ACCENT }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: TEXT }}>{sectionLabel}</div>
+                    <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>
+                      {isSlidesType ? `${slides.length} slide${slides.length !== 1 ? "s" : ""} configured` : isItemsType ? `${form.items.length} item${form.items.length !== 1 ? "s" : ""} configured` : "Content configured"}
+                    </div>
+                  </div>
+                  <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: isActive ? "rgba(22,199,132,0.12)" : "rgba(239,68,68,0.1)", color: isActive ? "#16C784" : "#EF4444", border: `1px solid ${isActive ? "rgba(22,199,132,0.3)" : "rgba(239,68,68,0.3)"}` }}>
+                    {isActive ? "Active" : "Inactive"}
+                  </span>
                 </div>
-                <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div>
-                    <label style={labelStyle}>Section Title (Small)</label>
-                    <input value={form.sectionTitle} onChange={e => setForm(p => ({ ...p, sectionTitle: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Main Heading</label>
-                    <textarea value={form.mainHeading} onChange={e => setForm(p => ({ ...p, mainHeading: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 70 }} placeholder="Discover the best products..." />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Description</label>
-                    <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} placeholder="Shop from a wide range..." />
-                    <div style={{ fontSize: 10, color: TEXT2, marginTop: 4, textAlign: "right" }}>{form.description.length}/200</div>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+
+                {/* Slides / Items / Content editor */}
+                <div style={{ ...cardStyle, overflow: "hidden" }}>
+                  <div style={{ padding: "14px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
                     <div>
-                      <label style={labelStyle}>Primary Button</label>
-                      <input value={form.primaryBtnText} onChange={e => setForm(p => ({ ...p, primaryBtnText: e.target.value }))} style={inputStyle} placeholder="Shop Now" />
+                      <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>
+                        {isSlidesType ? "Slides" : isItemsType ? "Items" : isTextType ? "Content Editor" : "Section Data"}
+                      </h3>
+                      <p style={{ fontSize: 12, color: TEXT2, margin: "3px 0 0" }}>
+                        {isSlidesType ? `Manage the slides displayed in the ${sectionLabel.toLowerCase()}` : isItemsType ? "Manage the items in this section" : "Edit the main content for this section"}
+                      </p>
                     </div>
-                    <div>
-                      <label style={labelStyle}>Link</label>
-                      <input value={form.primaryBtnLink} onChange={e => setForm(p => ({ ...p, primaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/shop" />
-                    </div>
+                    {(isSlidesType || isItemsType) && (
+                      <button
+                        onClick={addSlide}
+                        style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                        <Plus style={{ width: 13, height: 13 }} /> Add {isSlidesType ? "Slide" : "Item"}
+                      </button>
+                    )}
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    <div>
-                      <label style={labelStyle}>Secondary Button</label>
-                      <input value={form.secondaryBtnText} onChange={e => setForm(p => ({ ...p, secondaryBtnText: e.target.value }))} style={inputStyle} placeholder="Explore" />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Link</label>
-                      <input value={form.secondaryBtnLink} onChange={e => setForm(p => ({ ...p, secondaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/categories" />
-                    </div>
-                  </div>
-                  {!isSlidesType && (
-                    <div>
-                      <label style={labelStyle}>Banner Image</label>
-                      <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 12, textAlign: "center", position: "relative" }}>
-                        {form.bgImage ? (
-                          <div style={{ position: "relative" }}>
-                            <img src={resolveImageUrl(form.bgImage)} alt="" style={{ width: "100%", height: 70, objectFit: "cover", borderRadius: 6 }} />
-                            <button onClick={() => setForm(p => ({ ...p, bgImage: "" }))} style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 18, height: 18, cursor: "pointer", color: "#fff", fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-                          </div>
-                        ) : (
-                          <>
-                            <ImageIcon style={{ width: 20, height: 20, color: TEXT2, margin: "0 auto 4px", display: "block" }} />
-                            <p style={{ fontSize: 11, color: TEXT2, margin: 0 }}>Click to upload</p>
-                          </>
-                        )}
-                        <input type="file" accept="image/*" onChange={e => handleImageUpload(e, "bgImage")} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
+
+                  <div style={{ padding: 20 }}>
+                    {isTextType ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div>
+                          <label style={labelStyle}>Section Title</label>
+                          <input value={form.sectionTitle} onChange={e => setForm(p => ({ ...p, sectionTitle: e.target.value }))} style={inputStyle} placeholder="Section title..." />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>HTML Content</label>
+                          <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                            style={{ ...inputStyle, minHeight: 280, resize: "vertical", fontFamily: "monospace", fontSize: 12 }}
+                            placeholder="Enter your HTML content here..." />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {isSlidesType && (
-                    <button onClick={addSlide} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", background: "rgba(18,214,197,0.1)", border: `1px dashed ${ACCENT}`, borderRadius: 10, color: ACCENT, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                      <Plus style={{ width: 14, height: 14 }} /> Add New Slide
-                    </button>
-                  )}
-                  {isSlidesType && slides.length > 0 && (
-                    <p style={{ fontSize: 11, color: TEXT2, margin: 0, textAlign: "center" }}>You can add up to 5 slides</p>
-                  )}
-                </div>
-              </div>
+                    ) : (isSlidesType || isItemsType) ? (
+                      slides.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: 60, color: TEXT2 }}>
+                          <Layers style={{ width: 40, height: 40, margin: "0 auto 14px", opacity: 0.3, display: "block" }} />
+                          <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: TEXT }}>No {isSlidesType ? "slides" : "items"} yet</p>
+                          <p style={{ margin: "6px 0 16px", fontSize: 13 }}>Click "Add {isSlidesType ? "Slide" : "Item"}" to get started.</p>
+                          <button onClick={addSlide} style={{ padding: "9px 20px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                            + Add {isSlidesType ? "Slide" : "Item"}
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                          {slides.map((slide, idx) => (
+                            <div key={slide.id || idx} style={{ border: `1px solid ${editingSlideIdx === idx ? ACCENT : BORDER}`, borderRadius: 12, overflow: "hidden", background: editingSlideIdx === idx ? "rgba(18,214,197,0.04)" : "transparent" }}>
 
-              {/* CENTER PANEL: Slides / Items editor */}
-              <div style={{ ...cardStyle, overflow: "hidden" }}>
-                <div style={{ padding: "14px 16px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <h3 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>
-                      {isSlidesType ? "Slides" : isItemsType ? "Items" : isTextType ? "Content Editor" : "Section Data"}
-                    </h3>
-                    <p style={{ fontSize: 11, color: TEXT2, margin: "4px 0 0" }}>
-                      {isSlidesType ? `Manage ${sectionLabel.toLowerCase()} slides` : isItemsType ? `Manage section items` : "Edit section content"}
-                    </p>
-                  </div>
-                  {(isSlidesType || isItemsType) && (
-                    <button onClick={addSlide} style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "7px 12px", color: "#0B1320", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                      <Plus style={{ width: 13, height: 13 }} /> Add {isSlidesType ? "Slide" : "Item"}
-                    </button>
-                  )}
-                </div>
+                              {/* Slide row */}
+                              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px" }}>
+                                <span style={{ width: 28, height: 28, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: TEXT2, flexShrink: 0 }}>
+                                  {String(idx + 1).padStart(2, "0")}
+                                </span>
+                                {slide.image ? (
+                                  <img src={resolveImageUrl(slide.image)} alt="" style={{ width: 56, height: 40, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
+                                ) : (
+                                  <div style={{ width: 56, height: 40, borderRadius: 6, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                    <ImageIcon style={{ width: 14, height: 14, color: TEXT2 }} />
+                                  </div>
+                                )}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: 14, fontWeight: 600, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {slide.heading || slide.title || `Slide ${idx + 1}`}
+                                  </div>
+                                  <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>
+                                    {slide.description ? slide.description.slice(0, 50) + (slide.description.length > 50 ? "…" : "") : "No description"}
+                                  </div>
+                                </div>
+                                <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: slide.isActive !== false ? "rgba(22,199,132,0.1)" : "rgba(239,68,68,0.1)", color: slide.isActive !== false ? "#16C784" : "#EF4444", border: `1px solid ${slide.isActive !== false ? "rgba(22,199,132,0.3)" : "rgba(239,68,68,0.3)"}`, flexShrink: 0 }}>
+                                  {slide.isActive !== false ? "Active" : "Inactive"}
+                                </span>
+                                <button onClick={() => openEditSlide(slide, idx)} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "7px 10px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 12, whiteSpace: "nowrap" }}>
+                                  <Edit style={{ width: 13, height: 13 }} /> Edit
+                                </button>
+                                <button onClick={() => deleteSlide(idx)} style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "7px 8px", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                                  <Trash2 style={{ width: 13, height: 13 }} />
+                                </button>
+                              </div>
 
-                <div style={{ padding: 16 }}>
-                  {isTextType ? (
-                    <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                      style={{ ...inputStyle, minHeight: 300, resize: "vertical", fontFamily: "monospace" }}
-                      placeholder="Enter your HTML content here..." />
-                  ) : (isSlidesType || isItemsType) ? (
-                    slides.length === 0 ? (
-                      <div style={{ textAlign: "center", padding: 40, color: TEXT2 }}>
-                        <Layers style={{ width: 32, height: 32, margin: "0 auto 12px", opacity: 0.4, display: "block" }} />
-                        <p style={{ margin: 0, fontWeight: 600 }}>No {isSlidesType ? "slides" : "items"} yet</p>
-                        <p style={{ margin: "6px 0 12px", fontSize: 12 }}>Click "Add {isSlidesType ? "Slide" : "Item"}" to get started.</p>
-                        <button onClick={addSlide} style={{ padding: "8px 16px", background: ACCENT, border: "none", borderRadius: 8, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                          + Add {isSlidesType ? "Slide" : "Item"}
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        {slides.map((slide, idx) => (
-                          <div key={slide.id || idx} style={{ border: `1px solid ${editingSlideIdx === idx ? ACCENT : BORDER}`, borderRadius: 12, overflow: "hidden", background: editingSlideIdx === idx ? "rgba(18,214,197,0.04)" : "transparent" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px" }}>
-                              <span style={{ width: 28, height: 28, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: TEXT2, flexShrink: 0 }}>
-                                {String(idx + 1).padStart(2, "0")}
-                              </span>
-                              {slide.image ? (
-                                <img src={resolveImageUrl(slide.image)} alt="" style={{ width: 48, height: 36, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
-                              ) : (
-                                <div style={{ width: 48, height: 36, borderRadius: 6, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                  <ImageIcon style={{ width: 14, height: 14, color: TEXT2 }} />
+                              {/* Inline slide editor */}
+                              {editingSlideIdx === idx && editingSlide && (
+                                <div style={{ borderTop: `1px solid ${BORDER}`, padding: 16, display: "flex", flexDirection: "column", gap: 12, background: ICON_BG }}>
+                                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                    <div>
+                                      <label style={labelStyle}>Title (Small)</label>
+                                      <input value={editingSlide.title || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, title: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
+                                    </div>
+                                    <div>
+                                      <label style={labelStyle}>Main Heading</label>
+                                      <input value={editingSlide.heading || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, heading: e.target.value }))} style={inputStyle} placeholder="Discover the best..." />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label style={labelStyle}>Description</label>
+                                    <textarea value={editingSlide.description || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 60 }} />
+                                  </div>
+                                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+                                    <div>
+                                      <label style={labelStyle}>CTA Text</label>
+                                      <input value={editingSlide.ctaText || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaText: e.target.value }))} style={inputStyle} />
+                                    </div>
+                                    <div>
+                                      <label style={labelStyle}>CTA Link</label>
+                                      <input value={editingSlide.ctaLink || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaLink: e.target.value }))} style={inputStyle} />
+                                    </div>
+                                    <div>
+                                      <label style={labelStyle}>CTA 2 Text</label>
+                                      <input value={editingSlide.ctaText2 || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaText2: e.target.value }))} style={inputStyle} />
+                                    </div>
+                                    <div>
+                                      <label style={labelStyle}>CTA 2 Link</label>
+                                      <input value={editingSlide.ctaLink2 || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaLink2: e.target.value }))} style={inputStyle} />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label style={labelStyle}>Slide Image</label>
+                                    <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 12, textAlign: "center", position: "relative", cursor: "pointer" }}>
+                                      {editingSlide.image ? (
+                                        <div style={{ position: "relative" }}>
+                                          <img src={resolveImageUrl(editingSlide.image)} alt="" style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 6 }} />
+                                          <button onClick={() => setEditingSlide((p: any) => ({ ...p, image: "" }))} style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <ImageIcon style={{ width: 20, height: 20, color: TEXT2, margin: "0 auto 4px", display: "block" }} />
+                                          <p style={{ fontSize: 12, color: TEXT2, margin: 0 }}>Click to upload image</p>
+                                        </>
+                                      )}
+                                      <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; const c = await compressImage(f); setEditingSlide((p: any) => ({ ...p, image: c })); }} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
+                                    </div>
+                                  </div>
+                                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                                    <button onClick={() => { setEditingSlide(null); setEditingSlideIdx(null); }} style={{ padding: "8px 16px", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                                    <button onClick={saveSlideEdit} style={{ padding: "8px 16px", background: ACCENT, border: "none", borderRadius: 8, color: "#0B1320", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Save Slide</button>
+                                  </div>
                                 </div>
                               )}
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                  {slide.heading || slide.title || `Slide ${idx + 1}`}
-                                </div>
-                                <div style={{ fontSize: 11, color: TEXT2, marginTop: 2 }}>
-                                  Updated {slide.updatedAt ? new Date(slide.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Recently"}
-                                </div>
-                              </div>
-                              <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: slide.isActive ? "rgba(22,199,132,0.1)" : "rgba(239,68,68,0.1)", color: slide.isActive ? "#16C784" : "#EF4444", border: `1px solid ${slide.isActive ? "rgba(22,199,132,0.3)" : "rgba(239,68,68,0.3)"}` }}>
-                                {slide.isActive !== false ? "Active" : "Inactive"}
-                              </span>
-                              <button onClick={() => openEditSlide(slide, idx)} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 8px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center" }}>
-                                <Edit style={{ width: 13, height: 13 }} />
-                              </button>
-                              <button onClick={() => deleteSlide(idx)} style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "6px 8px", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                                <Trash2 style={{ width: 13, height: 13 }} />
-                              </button>
                             </div>
+                          ))}
 
-                            {/* Inline slide editor */}
-                            {editingSlideIdx === idx && editingSlide && (
-                              <div style={{ borderTop: `1px solid ${BORDER}`, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                                  <div>
-                                    <label style={labelStyle}>Title (Small)</label>
-                                    <input value={editingSlide.title || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, title: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
-                                  </div>
-                                  <div>
-                                    <label style={labelStyle}>Main Heading</label>
-                                    <input value={editingSlide.heading || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, heading: e.target.value }))} style={inputStyle} placeholder="Discover the best..." />
-                                  </div>
-                                </div>
-                                <div>
-                                  <label style={labelStyle}>Description</label>
-                                  <textarea value={editingSlide.description || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 60 }} />
-                                </div>
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                                  <div>
-                                    <label style={labelStyle}>CTA Text</label>
-                                    <input value={editingSlide.ctaText || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaText: e.target.value }))} style={inputStyle} />
-                                  </div>
-                                  <div>
-                                    <label style={labelStyle}>CTA Link</label>
-                                    <input value={editingSlide.ctaLink || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaLink: e.target.value }))} style={inputStyle} />
-                                  </div>
-                                </div>
-                                <div>
-                                  <label style={labelStyle}>Slide Image</label>
-                                  <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 10, textAlign: "center", position: "relative", cursor: "pointer" }}>
-                                    {editingSlide.image ? (
-                                      <img src={resolveImageUrl(editingSlide.image)} alt="" style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 6 }} />
-                                    ) : (
-                                      <>
-                                        <ImageIcon style={{ width: 18, height: 18, color: TEXT2, margin: "0 auto 4px", display: "block" }} />
-                                        <p style={{ fontSize: 11, color: TEXT2, margin: 0 }}>Click to upload image</p>
-                                      </>
-                                    )}
-                                    <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; const c = await compressImage(f); setEditingSlide((p: any) => ({ ...p, image: c })); }} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
-                                  </div>
-                                </div>
-                                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                                  <button onClick={() => { setEditingSlide(null); setEditingSlideIdx(null); }} style={{ padding: "7px 14px", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontSize: 12 }}>Cancel</button>
-                                  <button onClick={saveSlideEdit} style={{ padding: "7px 14px", background: ACCENT, border: "none", borderRadius: 8, color: "#0B1320", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Save Slide</button>
-                                </div>
-                              </div>
-                            )}
+                          <div style={{ textAlign: "center", padding: "6px 0", fontSize: 12, color: TEXT2 }}>
+                            Showing 1 to {slides.length} of {slides.length} {isSlidesType ? "slides" : "items"}
                           </div>
-                        ))}
-                        <div style={{ fontSize: 12, color: TEXT2, textAlign: "center", padding: "6px 0" }}>
-                          Showing 1 to {slides.length} of {slides.length} {isSlidesType ? "slides" : "items"}
+                        </div>
+                      )
+                    ) : (
+                      /* Generic section — image + link + CTA */
+                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                        <div>
+                          <label style={labelStyle}>Section Title (Small)</label>
+                          <input value={form.sectionTitle} onChange={e => setForm(p => ({ ...p, sectionTitle: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Main Heading</label>
+                          <textarea value={form.mainHeading} onChange={e => setForm(p => ({ ...p, mainHeading: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 70 }} placeholder="Discover the best products..." />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Description</label>
+                          <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} placeholder="Shop from a wide range..." />
+                          <div style={{ fontSize: 10, color: TEXT2, marginTop: 4, textAlign: "right" }}>{form.description.length}/200</div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                          <div>
+                            <label style={labelStyle}>Primary Button Text</label>
+                            <input value={form.primaryBtnText} onChange={e => setForm(p => ({ ...p, primaryBtnText: e.target.value }))} style={inputStyle} placeholder="Shop Now" />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Primary Button Link</label>
+                            <input value={form.primaryBtnLink} onChange={e => setForm(p => ({ ...p, primaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/shop" />
+                          </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                          <div>
+                            <label style={labelStyle}>Secondary Button Text</label>
+                            <input value={form.secondaryBtnText} onChange={e => setForm(p => ({ ...p, secondaryBtnText: e.target.value }))} style={inputStyle} placeholder="Explore" />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Secondary Button Link</label>
+                            <input value={form.secondaryBtnLink} onChange={e => setForm(p => ({ ...p, secondaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/categories" />
+                          </div>
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Background / Banner Image</label>
+                          <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 16, textAlign: "center", position: "relative" }}>
+                            {form.bgImage ? (
+                              <div style={{ position: "relative" }}>
+                                <img src={resolveImageUrl(form.bgImage)} alt="" style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 8 }} />
+                                <button onClick={() => setForm(p => ({ ...p, bgImage: "" }))} style={{ position: "absolute", top: 6, right: 6, background: "#EF4444", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                              </div>
+                            ) : (
+                              <>
+                                <ImageIcon style={{ width: 26, height: 26, color: TEXT2, margin: "0 auto 8px", display: "block" }} />
+                                <p style={{ fontSize: 13, color: TEXT2, margin: "0 0 4px", fontWeight: 600 }}>Click to upload image</p>
+                                <p style={{ fontSize: 11, color: TEXT2, margin: 0 }}>PNG, JPG, WebP up to 5MB</p>
+                              </>
+                            )}
+                            <input type="file" accept="image/*" onChange={e => handleImageUpload(e, "bgImage")} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
+                          </div>
                         </div>
                       </div>
-                    )
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                      <div>
-                        <label style={labelStyle}>Background Image</label>
-                        <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 16, textAlign: "center", position: "relative" }}>
-                          {form.bgImage ? (
-                            <div style={{ position: "relative" }}>
-                              <img src={resolveImageUrl(form.bgImage)} alt="" style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 8 }} />
-                              <button onClick={() => setForm(p => ({ ...p, bgImage: "" }))} style={{ position: "absolute", top: 6, right: 6, background: "#EF4444", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", color: "#fff", fontSize: 11 }}>✕</button>
-                            </div>
-                          ) : (
-                            <>
-                              <ImageIcon style={{ width: 24, height: 24, color: TEXT2, margin: "0 auto 8px", display: "block" }} />
-                              <p style={{ fontSize: 12, color: TEXT2, margin: "0 0 4px" }}>Click to upload image</p>
-                              <p style={{ fontSize: 11, color: TEXT2, margin: 0 }}>PNG, JPG, WebP up to 5MB</p>
-                            </>
-                          )}
-                          <input type="file" accept="image/*" onChange={e => handleImageUpload(e, "bgImage")} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
-                        </div>
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Link URL</label>
-                        <input value={form.primaryBtnLink} onChange={e => setForm(p => ({ ...p, primaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/shop" />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>CTA Text</label>
-                        <input value={form.primaryBtnText} onChange={e => setForm(p => ({ ...p, primaryBtnText: e.target.value }))} style={inputStyle} placeholder="Shop Now" />
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* RIGHT PANEL */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* ── RIGHT: Settings Panel ── */}
+              <div style={{ width: 300, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
 
                 {/* Live Preview */}
                 <div style={{ ...cardStyle, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 16px", borderBottom: `1px solid ${BORDER}` }}>
+                  <div style={{ padding: "14px 16px", borderBottom: `1px solid ${BORDER}`, background: HEADER_BG }}>
                     <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>Live Preview</h4>
-                    <p style={{ fontSize: 11, color: TEXT2, margin: "4px 0 0" }}>See how this section looks on the homepage.</p>
+                    <p style={{ fontSize: 11, color: TEXT2, margin: "3px 0 0" }}>How this section will look on the storefront.</p>
                   </div>
                   <div style={{ padding: 12 }}>
                     <div style={{ borderRadius: 8, overflow: "hidden", background: "#0B1320", aspectRatio: "16/9", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -562,7 +554,7 @@ export default function CMSSectionEditor() {
                       )}
                     </div>
                     {slides.length > 1 && (
-                      <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 6 }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 8 }}>
                         {slides.map((_, i) => <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? ACCENT : BORDER }} />)}
                       </div>
                     )}
@@ -571,12 +563,14 @@ export default function CMSSectionEditor() {
 
                 {/* Section Status */}
                 <div style={{ ...cardStyle, padding: 16 }}>
-                  <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 12px" }}>Section Status</h4>
-                  <p style={{ fontSize: 11, color: TEXT2, margin: "0 0 10px" }}>Enable or disable this section on {pageLabel.toLowerCase()}.</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, color: TEXT }}>Status</span>
+                  <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 10px" }}>Section Status</h4>
+                  <p style={{ fontSize: 12, color: TEXT2, margin: "0 0 12px" }}>Enable or disable this section on {pageLabel.toLowerCase()}.</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Visible on Page</span>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <button onClick={() => setIsActive(!isActive)} style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: isActive ? ACCENT : "var(--icon-bg)", position: "relative", transition: "background 0.2s" }}>
+                      <button
+                        onClick={() => setIsActive(!isActive)}
+                        style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: isActive ? ACCENT : ICON_BG, position: "relative", transition: "background 0.2s" }}>
                         <span style={{ position: "absolute", top: 3, left: isActive ? "calc(100% - 21px)" : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
                       </button>
                       <span style={{ fontSize: 12, color: isActive ? "#16C784" : TEXT2, fontWeight: 600 }}>{isActive ? "Active" : "Inactive"}</span>
@@ -587,51 +581,75 @@ export default function CMSSectionEditor() {
                 {/* Display Settings */}
                 <div style={{ ...cardStyle, padding: 16 }}>
                   <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 6px" }}>Display Settings</h4>
-                  <p style={{ fontSize: 11, color: TEXT2, margin: "0 0 12px" }}>Choose on which devices this section will appear.</p>
+                  <p style={{ fontSize: 11, color: TEXT2, margin: "0 0 14px" }}>Choose which devices show this section.</p>
                   {[
                     { key: "desktop", icon: Monitor, label: "Desktop" },
-                    { key: "tablet", icon: Tablet, label: "Tablet" },
-                    { key: "mobile", icon: Smartphone, label: "Mobile" },
+                    { key: "tablet",  icon: Tablet,  label: "Tablet" },
+                    { key: "mobile",  icon: Smartphone, label: "Mobile" },
                   ].map(({ key, icon: Icon, label }) => (
-                    <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                    <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: key !== "mobile" ? `1px solid ${BORDER}` : "none" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input type="checkbox" checked={displaySettings[key as keyof typeof displaySettings]} onChange={e => setDisplaySettings(p => ({ ...p, [key]: e.target.checked }))} style={{ accentColor: ACCENT, width: 14, height: 14 }} />
-                        <Icon style={{ width: 14, height: 14, color: TEXT2 }} />
+                        <Icon style={{ width: 15, height: 15, color: TEXT2 }} />
                         <span style={{ fontSize: 13, color: TEXT }}>{label}</span>
                       </div>
+                      <input
+                        type="checkbox"
+                        checked={displaySettings[key as keyof typeof displaySettings]}
+                        onChange={e => setDisplaySettings(p => ({ ...p, [key]: e.target.checked }))}
+                        style={{ accentColor: ACCENT, width: 15, height: 15 }} />
                     </div>
                   ))}
                 </div>
 
-                {/* Additional Settings */}
+                {/* Additional Settings — slides only */}
                 {isSlidesType && (
                   <div style={{ ...cardStyle, padding: 16 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 12px" }}>Additional Settings</h4>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                      <span style={{ fontSize: 13, color: TEXT }}>Auto Slide Change</span>
-                      <button onClick={() => setAutoSlide(!autoSlide)} style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: autoSlide ? ACCENT : "var(--icon-bg)", position: "relative", transition: "background 0.2s" }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 14px" }}>Slider Settings</h4>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                      <div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Auto Slide</span>
+                        <p style={{ fontSize: 11, color: TEXT2, margin: "2px 0 0" }}>Auto-advance slides</p>
+                      </div>
+                      <button
+                        onClick={() => setAutoSlide(!autoSlide)}
+                        style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: autoSlide ? ACCENT : ICON_BG, position: "relative", transition: "background 0.2s" }}>
                         <span style={{ position: "absolute", top: 3, left: autoSlide ? "calc(100% - 21px)" : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
                       </button>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 13, color: TEXT }}>Change Interval (seconds)</span>
-                      <input type="number" min={1} max={30} value={slideInterval} onChange={e => setSlideInterval(Number(e.target.value))} style={{ width: 50, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 8px", color: TEXT, fontSize: 13, textAlign: "center", outline: "none" }} />
-                    </div>
+                    {autoSlide && (
+                      <div>
+                        <label style={labelStyle}>Interval (seconds)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={30}
+                          value={slideInterval}
+                          onChange={e => setSlideInterval(Number(e.target.value))}
+                          style={{ ...inputStyle, width: "100%" }} />
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Need Help */}
-                <div style={{ ...cardStyle, padding: 16 }}>
-                  <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 6px" }}>Need Help?</h4>
-                  <p style={{ fontSize: 11, color: TEXT2, margin: "0 0 10px" }}>Learn how to manage {pageLabel.toLowerCase()} sections.</p>
-                  <button style={{ display: "flex", alignItems: "center", gap: 6, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT2, fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
-                    <ExternalLink style={{ width: 12, height: 12 }} /> View Documentation
-                  </button>
-                </div>
+                {/* Slides upload hint for slide-type sections */}
+                {isSlidesType && (
+                  <div style={{ ...cardStyle, padding: 16 }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 10px" }}>Quick Add</h4>
+                    <button
+                      onClick={addSlide}
+                      style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px", background: "rgba(18,214,197,0.08)", border: `1px dashed ${ACCENT}`, borderRadius: 10, color: ACCENT, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                      <Plus style={{ width: 14, height: 14 }} /> Add New Slide
+                    </button>
+                    {slides.length > 0 && (
+                      <p style={{ fontSize: 11, color: TEXT2, margin: "8px 0 0", textAlign: "center" }}>{slides.length} / 5 slides used</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
+
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
