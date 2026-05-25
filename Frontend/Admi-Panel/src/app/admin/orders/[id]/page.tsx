@@ -11,7 +11,7 @@ import { formatPrice } from "@/lib/utils";
 import { useTheme } from "@/providers/ThemeProvider";
 
 const ACCENT = "#12D6C5";
-const MOBILE_BASE = 720;
+const MOBILE_BASE = 960;
 const DESKTOP_BASE = 1380;
 
 type OrderItem = {

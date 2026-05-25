@@ -28,7 +28,7 @@ const HOVER_BG = "var(--hover-bg)";
 const TOOLTIP_BG = "var(--tooltip-bg)";
 // BASE_WIDTH adapts per viewport so mobile content stays readable
 // 960 → scale=0.45 on a 430px phone: 3 tables get 248px each (vs 191px at 860)
-const MOBILE_BASE = 720;
+const MOBILE_BASE = 960;
 const DESKTOP_BASE = 1380;
 
 const salesData = [

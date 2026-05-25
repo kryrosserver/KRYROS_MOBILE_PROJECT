@@ -204,7 +204,7 @@ export default function CMSPagesManager() {
     function recalc() {
       if (!innerRef.current || !outerRef.current) return;
       const vw      = outerRef.current.offsetWidth || window.innerWidth;
-      const baseW   = vw < 960 ? 720 : 1380;
+      const baseW   = vw < 960 ? 960 : 1380;
       const nextScale = Math.min(1, vw / baseW);
       innerRef.current.style.width           = `${baseW}px`;
       innerRef.current.style.transform       = `scale(${nextScale})`;
