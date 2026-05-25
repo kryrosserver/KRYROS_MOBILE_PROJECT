@@ -1,99 +1,123 @@
 "use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ChevronLeft, Save } from "lucide-react";
 
-const DEFAULT = {
-  title: "KRYROS Members",
-  subtitle: "Join and get exclusive discounts on every order",
-  discount: "5%",
-  ctaText: "Join Now",
-  ctaLink: "/signup",
-  bgColor: "#050F1A",
-};
+import { useEffect, useState, useRef } from "react";
+import { Save, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
+
+const ACCENT = "#12D6C5";
+const MOBILE_BASE = 750;
+const DESKTOP_BASE = 1380;
+const DEFAULT = { title: "KRYROS Members", subtitle: "Join and get exclusive discounts on every order", discount: "5%", ctaText: "Join Now", ctaLink: "/signup", bgColor: "#050F1A" };
 
 export default function MembersBannerPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+  const BG = "var(--bg-primary)"; const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
+  const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)"; const HOVER = "var(--hover-bg)";
+  const HEADER_BG = "var(--bg-secondary)"; const ICON_BG = "var(--icon-bg)";
+
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE; const s = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
+
   const [form, setForm] = useState(DEFAULT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
+  useEffect(() => {
+    (async () => {
+      try { const res = await fetch("/api/admin/cms/site-config/members-banner", { cache: "no-store" }); if (res.ok) { const d = await res.json(); if (d?.value) setForm({ ...DEFAULT, ...d.value }); } } finally { setLoading(false); }
+    })();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
     try {
-      const res = await fetch("/api/admin/cms/site-config/members-banner", { cache: "no-store", credentials: "same-origin" });
-      if (res.ok) { const d = await res.json(); if (d?.value) setForm({ ...DEFAULT, ...d.value }); }
-    } finally { setLoading(false); }
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const save = async () => {
-    setSaving(true); setErr(null);
-    try {
-      const res = await fetch("/api/admin/cms/site-config/members-banner", {
-        method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
-        body: JSON.stringify({ value: form }),
-      });
-      if (res.ok) { setMsg("Members banner saved!"); setTimeout(() => setMsg(null), 3000); }
-      else { const d = await res.json(); setErr(d.error || "Save failed"); }
+      await fetch("/api/admin/cms/site-config/members-banner", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "members-banner", value: form }) });
+      setMsg("Saved!"); setTimeout(() => setMsg(null), 2000);
     } finally { setSaving(false); }
   };
 
-  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-
-  const fields: { key: keyof typeof DEFAULT; label: string }[] = [
-    { key: "title", label: "Banner Title" },
-    { key: "subtitle", label: "Subtitle" },
-    { key: "discount", label: "Discount Text (e.g. 5%)" },
-    { key: "ctaText", label: "Button Text" },
-    { key: "ctaLink", label: "Button Link" },
-    { key: "bgColor", label: "Background Color (hex)" },
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const fields = [
+    { label: "Title", key: "title" }, { label: "Subtitle", key: "subtitle" },
+    { label: "Discount Badge", key: "discount" }, { label: "CTA Text", key: "ctaText" },
+    { label: "CTA Link", key: "ctaLink" }, { label: "Background Color", key: "bgColor" },
   ];
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Members Banner</h1>
-            <p className="text-slate-500 font-medium">Edit the members section in the shop page</p>
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Members Banner</h1>
           </div>
-        </div>
-        <button onClick={save} disabled={saving || loading} className="flex items-center gap-2 px-6 py-2 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#1FA89A]/20">
-          <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
-        </button>
-      </div>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input placeholder="Search..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} /><span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
+          </div>
+        </header>
 
-      {msg && <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium">{msg}</div>}
-      {err && <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{err}</div>}
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Members Banner</h2>
+              <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Configure the membership promotional section</p>
+            </div>
+            <button onClick={handleSave} disabled={saving || loading}
+              style={{ background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-48 text-slate-400">Loading…</div>
-      ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h2 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-5">Members Banner Settings</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {fields.map(({ key, label }) => (
-              <div key={key}>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">{label}</label>
-                <input value={form[key]} onChange={(e) => set(key, e.target.value)} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1FA89A]/30" />
+          {msg && <div style={{ background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#16C784", fontWeight: 600 }}>{msg}</div>}
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ ...card, padding: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Banner Settings</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {fields.map(f => (
+                  <div key={f.key}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
+                    <input value={(form as any)[f.key] || ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                      style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-
-          <div className="mt-6 p-4 rounded-xl" style={{ backgroundColor: form.bgColor || "#050F1A" }}>
-            <p className="text-white/50 text-[10px] uppercase tracking-widest mb-1">Preview</p>
-            <p className="text-white font-black text-lg">{form.title}</p>
-            <p className="text-white/60 text-xs mb-2">{form.subtitle}</p>
-            <p className="text-[#1FA89A] font-black text-2xl">{form.discount} OFF</p>
+            </div>
+            <div style={{ ...card, padding: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Preview</div>
+              <div style={{ borderRadius: 12, overflow: "hidden", background: form.bgColor || "#050F1A", padding: 32, textAlign: "center" }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: ACCENT }}>{form.discount}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginTop: 8 }}>{form.title}</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 6 }}>{form.subtitle}</div>
+                <div style={{ marginTop: 14, display: "inline-block", background: ACCENT, color: "#0B1320", padding: "8px 20px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>{form.ctaText}</div>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

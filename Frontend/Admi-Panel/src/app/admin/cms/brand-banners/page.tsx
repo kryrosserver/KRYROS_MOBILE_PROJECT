@@ -1,169 +1,176 @@
 "use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ChevronLeft, Save, Plus, Trash2, Edit, RefreshCw, X } from "lucide-react";
 
-type BrandBanner = {
-  id?: string;
-  brandSlug: string;
-  brandName: string;
-  tagline?: string;
-  description?: string;
-  bgColor?: string;
-  bgGradient?: string;
-  imageUrl?: string;
-  ctaText?: string;
-  ctaLink?: string;
-  isActive?: boolean;
-};
+import { useEffect, useState, useRef } from "react";
+import { Plus, Trash2, Edit, Save, X, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
 
+const ACCENT = "#12D6C5";
+const MOBILE_BASE = 750;
+const DESKTOP_BASE = 1380;
+type BrandBanner = { id?: string; brandSlug: string; brandName: string; tagline?: string; description?: string; bgColor?: string; bgGradient?: string; imageUrl?: string; ctaText?: string; ctaLink?: string; isActive?: boolean };
 const EMPTY: BrandBanner = { brandSlug: "", brandName: "", tagline: "", description: "", bgColor: "#050F1A", bgGradient: "", imageUrl: "", ctaText: "Shop Now", ctaLink: "/shop", isActive: true };
 
 export default function BrandBannersPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+  const BG = "var(--bg-primary)"; const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
+  const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)"; const HOVER = "var(--hover-bg)";
+  const HEADER_BG = "var(--bg-secondary)"; const ICON_BG = "var(--icon-bg)";
+
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE; const s = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
+
   const [banners, setBanners] = useState<BrandBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
   const [editing, setEditing] = useState<BrandBanner | null>(null);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/cms/brand-banners", { cache: "no-store", credentials: "same-origin" });
-      if (res.ok) setBanners(await res.json());
+      const res = await fetch("/api/admin/cms/site-config/brand-banners", { cache: "no-store" });
+      if (res.ok) { const d = await res.json(); setBanners(Array.isArray(d?.value) ? d.value : []); }
     } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
-  const seed = async () => {
+  const handleSave = async () => {
+    if (!editing) return;
     setSaving(true);
     try {
-      await fetch("/api/admin/cms/brand-banners?action=seed", { method: "POST", credentials: "same-origin" });
-      await load(); setMsg("Defaults seeded"); setTimeout(() => setMsg(null), 3000);
+      const updated = editing.id ? banners.map(b => b.id === editing.id ? editing : b) : [...banners, { ...editing, id: Date.now().toString() }];
+      const res = await fetch("/api/admin/cms/site-config/brand-banners", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "brand-banners", value: updated }) });
+      if (res.ok) { setBanners(updated); setEditing(null); setMsg("Saved!"); setTimeout(() => setMsg(null), 2000); }
     } finally { setSaving(false); }
   };
 
-  const saveBanner = async () => {
-    if (!editing) return;
-    setSaving(true); setErr(null);
-    try {
-      const res = editing.id
-        ? await fetch(`/api/admin/cms/brand-banners/${editing.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify(editing) })
-        : await fetch("/api/admin/cms/brand-banners", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify(editing) });
-      if (res.ok) { setMsg("Banner saved!"); setTimeout(() => setMsg(null), 3000); setEditing(null); await load(); }
-      else { const d = await res.json(); setErr(d.error || "Save failed"); }
-    } finally { setSaving(false); }
+  const handleDelete = async (id?: string) => {
+    if (!id || !confirm("Delete this banner?")) return;
+    const updated = banners.filter(b => b.id !== id);
+    await fetch("/api/admin/cms/site-config/brand-banners", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "brand-banners", value: updated }) });
+    setBanners(updated);
   };
 
-  const deleteBanner = async (id: string) => {
-    if (!confirm("Delete this brand banner?")) return;
-    const res = await fetch(`/api/admin/cms/brand-banners/${id}`, { method: "DELETE", credentials: "same-origin" });
-    if (res.ok) { await load(); setMsg("Deleted"); setTimeout(() => setMsg(null), 2000); }
-  };
-
-  const set = (k: string, v: string | boolean) => setEditing((p) => p ? { ...p, [k]: v } : p);
-
-  const fields: { key: keyof BrandBanner; label: string; type?: string }[] = [
-    { key: "brandSlug", label: "Brand Slug (e.g. apple)" },
-    { key: "brandName", label: "Brand Name" },
-    { key: "tagline", label: "Tagline" },
-    { key: "description", label: "Description" },
-    { key: "bgColor", label: "Background Color (hex)" },
-    { key: "bgGradient", label: "Background Gradient (CSS)" },
-    { key: "imageUrl", label: "Image URL" },
-    { key: "ctaText", label: "CTA Button Text" },
-    { key: "ctaLink", label: "CTA Link" },
-  ];
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Brand Banners</h1>
-            <p className="text-slate-500 font-medium">Manage per-brand hero banners for the shop page</p>
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Brand Banners</h1>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={seed} disabled={saving} className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-bold text-xs uppercase tracking-widest">
-            <RefreshCw className="h-4 w-4" /> Seed Defaults
-          </button>
-          <button onClick={() => setEditing({ ...EMPTY })} className="flex items-center gap-2 px-5 py-2 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#1FA89A]/20">
-            <Plus className="h-4 w-4" /> Add Banner
-          </button>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input placeholder="Search..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} /><span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
+          </div>
+        </header>
+
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Brand Banners</h2>
+              <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Manage featured brand promotional banners — {banners.length} total</p>
+            </div>
+            <button onClick={() => setEditing({ ...EMPTY })}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+              <Plus style={{ width: 15, height: 15 }} /> Add Banner
+            </button>
+          </div>
+
+          {msg && <div style={{ background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#16C784", fontWeight: 600 }}>{msg}</div>}
+
+          {editing && (
+            <div style={{ ...card, padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{editing.id ? "Edit Banner" : "New Banner"}</h3>
+                <button onClick={() => setEditing(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 18, height: 18 }} /></button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+                {[
+                  { label: "Brand Slug", key: "brandSlug", ph: "apple" }, { label: "Brand Name", key: "brandName", ph: "Apple" },
+                  { label: "Tagline", key: "tagline", ph: "Think Different" }, { label: "Description", key: "description", ph: "Short description" },
+                  { label: "BG Color", key: "bgColor", ph: "#050F1A" }, { label: "Image URL", key: "imageUrl", ph: "https://..." },
+                  { label: "CTA Text", key: "ctaText", ph: "Shop Now" }, { label: "CTA Link", key: "ctaLink", ph: "/shop/apple" },
+                ].map(f => (
+                  <div key={f.key}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
+                    <input value={(editing as any)[f.key] || ""} onChange={e => setEditing({ ...editing, [f.key]: e.target.value })} placeholder={f.ph}
+                      style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: 10, paddingTop: 16, marginTop: 16, borderTop: `1px solid ${BORDER}` }}>
+                <button onClick={handleSave} disabled={saving} style={{ background: ACCENT, border: "none", padding: "10px 24px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+                  {saving ? "Saving..." : "Save Banner"}
+                </button>
+                <button onClick={() => setEditing(null)} style={{ background: CARD, border: `1px solid ${BORDER}`, padding: "10px 24px", color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ ...card, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
+                  {["Brand", "Tagline", "Status", "Actions"].map((h, i) => (
+                    <th key={h} style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: i === 3 ? "right" : "left" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? [...Array(3)].map((_, i) => <tr key={i}><td colSpan={4} style={{ padding: "14px 16px" }}><div style={{ height: 16, borderRadius: 6, background: HOVER }} /></td></tr>) :
+                  banners.length === 0 ? <tr><td colSpan={4} style={{ padding: 48, textAlign: "center", fontSize: 13, color: TEXT2 }}>No brand banners yet</td></tr> :
+                    banners.map(b => (
+                      <tr key={b.id} style={{ borderBottom: `1px solid ${BORDER}` }}
+                        onMouseEnter={e => e.currentTarget.style.background = HOVER}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <td style={{ padding: "14px 16px" }}>
+                          <div style={{ fontWeight: 700, fontSize: 13, color: TEXT }}>{b.brandName}</div>
+                          <div style={{ fontSize: 11, color: TEXT2, fontFamily: "monospace" }}>{b.brandSlug}</div>
+                        </td>
+                        <td style={{ padding: "14px 16px", fontSize: 12, color: TEXT2 }}>{b.tagline || "—"}</td>
+                        <td style={{ padding: "14px 16px" }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: b.isActive ? "#16C784" : TEXT2, background: b.isActive ? "rgba(22,199,132,0.12)" : ICON_BG, padding: "3px 10px", borderRadius: 20 }}>
+                            {b.isActive ? "Active" : "Hidden"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                          <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                            <button onClick={() => setEditing(b)} style={{ padding: 8, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: "pointer" }}><Edit style={{ width: 14, height: 14 }} /></button>
+                            <button onClick={() => handleDelete(b.id)} style={{ padding: 8, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: "#EF4444", cursor: "pointer" }}><Trash2 style={{ width: 14, height: 14 }} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-
-      {msg && <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium">{msg}</div>}
-      {err && <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{err}</div>}
-
-      {editing && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h2 className="font-black text-slate-900 uppercase text-sm tracking-widest">{editing.id ? "Edit" : "Add"} Brand Banner</h2>
-              <button onClick={() => setEditing(null)} className="p-1.5 hover:bg-slate-100 rounded-lg">
-                <X className="h-4 w-4 text-slate-600" />
-              </button>
-            </div>
-            <div className="p-5 space-y-3">
-              {fields.map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">{label}</label>
-                  <input value={(editing[key] as string) || ""} onChange={(e) => set(key, e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1FA89A]/30" />
-                </div>
-              ))}
-              <div className="flex items-center gap-3 pt-1">
-                <button onClick={() => set("isActive", !editing.isActive)} className={`relative w-10 h-6 rounded-full transition-colors ${editing.isActive ? "bg-[#1FA89A]" : "bg-slate-200"}`}>
-                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${editing.isActive ? "left-5" : "left-1"}`} />
-                </button>
-                <span className="text-sm font-semibold text-slate-600">Active</span>
-              </div>
-            </div>
-            <div className="flex gap-2 p-5 border-t border-slate-100">
-              <button onClick={() => setEditing(null)} className="flex-1 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button onClick={saveBanner} disabled={saving} className="flex-1 py-2 bg-[#1FA89A] text-white rounded-xl text-sm font-bold hover:bg-[#168a7e]">{saving ? "Saving…" : "Save Banner"}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex items-center justify-center h-48 text-slate-400">Loading…</div>
-      ) : banners.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-48 text-slate-400 space-y-3">
-          <p className="text-sm">No brand banners yet. Add one or seed defaults.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-4">
-          {banners.map((b) => (
-            <div key={b.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-black text-slate-900">{b.brandName}</p>
-                  <p className="text-xs text-slate-400 font-mono">{b.brandSlug}</p>
-                </div>
-                <div className="flex gap-1">
-                  <button onClick={() => setEditing(b)} className="p-1.5 hover:bg-slate-100 rounded-lg"><Edit className="h-4 w-4 text-slate-500" /></button>
-                  <button onClick={() => b.id && deleteBanner(b.id)} className="p-1.5 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4 text-red-400" /></button>
-                </div>
-              </div>
-              <div className="rounded-xl p-3 text-white text-xs" style={{ background: b.bgGradient || b.bgColor || "#050F1A" }}>
-                <p className="font-black">{b.tagline || b.brandName}</p>
-                <p className="text-white/50 mt-0.5">{b.description}</p>
-              </div>
-              <div className={`mt-2 inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${b.isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
-                {b.isActive ? "Active" : "Inactive"}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

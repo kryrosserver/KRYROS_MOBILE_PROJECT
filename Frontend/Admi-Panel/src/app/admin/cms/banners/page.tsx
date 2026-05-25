@@ -1,302 +1,267 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { resolveImageUrl } from "@/lib/utils";
-import { 
-  Image as ImageIcon, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  X,
-  RefreshCw,
-  PlayCircle,
-  ChevronLeft
+import {
+  Image as ImageIcon, Plus, Edit, Trash2, X, RefreshCw, PlayCircle,
+  Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search,
 } from "lucide-react";
-import Link from "next/link";
+import { useTheme } from "@/providers/ThemeProvider";
+
+const ACCENT = "#12D6C5";
+const MOBILE_BASE = 750;
+const DESKTOP_BASE = 1380;
 
 export default function BannersPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+
+  const BG = "var(--bg-primary)";
+  const CARD = "var(--card-bg)";
+  const BORDER = "var(--card-border)";
+  const TEXT = "var(--text-primary)";
+  const TEXT2 = "var(--text-secondary)";
+  const HOVER = "var(--hover-bg)";
+  const HEADER_BG = "var(--bg-secondary)";
+  const ICON_BG = "var(--icon-bg)";
+
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) {
+      if (!innerRef.current || !outerRef.current) return;
+      outerRef.current.style.height = "auto";
+      outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`;
+    }
+    function recalc() {
+      if (!innerRef.current || !outerRef.current) return;
+      const vw = outerRef.current.offsetWidth || window.innerWidth;
+      const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
+      const s = Math.min(1, vw / baseW);
+      innerRef.current.style.width = `${baseW}px`;
+      innerRef.current.style.transform = `scale(${s})`;
+      innerRef.current.style.transformOrigin = "top left";
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s)));
+    }
+    recalc();
+    const t = setTimeout(recalc, 400);
+    window.addEventListener("resize", recalc);
+    return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
+
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editingBanner, setEditingBanner] = useState<any>(null);
-  const [form, setForm] = useState<{ 
-    title: string; 
-    subtitle?: string; 
-    mediaType: string;
-    image: string; 
-    videoUrl: string;
-    link?: string; 
-    linkText?: string; 
-    position?: number; 
-    duration?: number;
-    displayDays?: number;
-    isActive?: boolean 
-  }>({
-    title: "",
-    subtitle: "",
-    mediaType: "image",
-    image: "",
-    videoUrl: "",
-    link: "",
-    linkText: "Shop Now",
-    position: 0,
-    isActive: true,
-  });
+  const [form, setForm] = useState<any>({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
 
   const loadBanners = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/internal/cms/banners/manage", { cache: "no-store", credentials: "same-origin" });
+      const res = await fetch("/internal/cms/banners/manage", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        const arr = Array.isArray(data) ? data : data?.data || [];
-        setBanners(arr);
+        setBanners(Array.isArray(data) ? data : data?.data || []);
       }
     } catch (err: any) {
       setError(`Error loading banners: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
+
+  useEffect(() => { loadBanners(); }, []);
 
   const handleSeedBanners = async () => {
     if (!confirm("This will restore the default promotional banners. Continue?")) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/cms/banners/seed", {
-        method: "POST",
-        credentials: "same-origin",
-      });
-      if (res.ok) {
-        setMessage("Default banners restored successfully");
-        await loadBanners();
-      }
-    } catch (err: any) {
-      setError(`Error seeding banners: ${err.message}`);
-    } finally {
-      setSaving(false);
-    }
+      await fetch("/api/cms/banners/seed", { method: "POST" });
+      await loadBanners();
+    } catch (err: any) { setError(err.message); } finally { setSaving(false); }
   };
 
-  useEffect(() => {
-    loadBanners();
-  }, []);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const method = editingBanner ? "PUT" : "POST";
+      const url = editingBanner ? `/internal/cms/banners/${editingBanner.id}` : "/internal/cms/banners";
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      if (res.ok) { setShowAdd(false); setEditingBanner(null); await loadBanners(); }
+    } catch {} finally { setSaving(false); }
+  };
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors" style={{ color: "var(--text-secondary)" }}>
-            <ChevronLeft className="h-6 w-6" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-black uppercase tracking-tight" style={{ color: "var(--text-primary)" }}>Hero Banners</h1>
-            <p className="font-medium" style={{ color: "var(--text-secondary)" }}>Manage your homepage promotional banners</p>
-          </div>
-        </div>
-        
-        <div className="flex gap-3">
-          <button
-            onClick={() => handleSeedBanners()}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors font-bold text-xs uppercase tracking-widest border border-slate-100"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Restore Defaults
-          </button>
-          <button
-            onClick={() => {
-              setEditingBanner(null);
-              setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, duration: undefined, displayDays: undefined, isActive: true });
-              setShowAdd(true);
-            }}
-            className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#1FA89A]/20"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Banner
-          </button>
-        </div>
-      </div>
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
 
-      {showAdd && (
-        <div className="bg-white rounded-[2rem] border-2 border-slate-100 p-8 mb-8 shadow-xl shadow-slate-200/20 animate-in zoom-in-95 duration-300 text-left">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
-              {editingBanner ? "Edit Banner" : "Create New Banner"}
-            </h2>
-            <button onClick={() => setShowAdd(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
-              <X className="h-5 w-5" />
+        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Hero Banners</h1>
+          </div>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input placeholder="Search banners..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
             </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Title</label>
-              <input
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                placeholder="Banner title"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subtitle</label>
-              <input
-                value={form.subtitle || ""}
-                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
-                className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                placeholder="Optional subtitle"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Link Text</label>
-              <input
-                value={form.linkText || ""}
-                onChange={(e) => setForm({ ...form, linkText: e.target.value })}
-                className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                placeholder="Shop Now"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Media Type</label>
-              <div className="flex gap-2 p-1 bg-slate-50 rounded-xl border-2 border-slate-100">
-                <button
-                  onClick={() => setForm({ ...form, mediaType: "image" })}
-                  className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${
-                    form.mediaType === "image" ? "bg-white text-[#1FA89A] shadow-sm" : "text-slate-400 hover:text-slate-600"
-                  }`}
-                >
-                  Image
-                </button>
-                <button
-                  onClick={() => setForm({ ...form, mediaType: "video" })}
-                  className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${
-                    form.mediaType === "video" ? "bg-white text-[#1FA89A] shadow-sm" : "text-slate-400 hover:text-slate-600"
-                  }`}
-                >
-                  Video
-                </button>
-              </div>
-            </div>
-
-            {form.mediaType === 'image' ? (
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Image Source</label>
-                <input
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value.trim() })}
-                  className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                  placeholder="https://... (Image URL)"
-                />
-              </div>
-            ) : (
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Video Source</label>
-                <input
-                  value={form.videoUrl}
-                  onChange={(e) => setForm({ ...form, videoUrl: e.target.value.trim() })}
-                  className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                  placeholder="https://... (Video URL)"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-3 pt-6 border-t border-slate-50">
-            <button
-              onClick={async () => {
-                try {
-                  setSaving(true);
-                  const method = editingBanner ? "PUT" : "POST";
-                  const url = editingBanner ? `/internal/cms/banners/${editingBanner.id}` : "/internal/cms/banners";
-                  const res = await fetch(url, {
-                    method,
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(form),
-                  });
-                  if (res.ok) {
-                    setShowAdd(false);
-                    loadBanners();
-                  }
-                } catch (e) {
-                } finally {
-                  setSaving(false);
-                }
-              }}
-              disabled={saving}
-              className="px-8 py-3 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] transition-all font-black uppercase tracking-widest text-xs shadow-lg shadow-[#1FA89A]/20"
-            >
-              {saving ? "Saving..." : (editingBanner ? "Update Banner" : "Save Banner")}
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
             </button>
-            <button 
-              onClick={() => { setShowAdd(false); setEditingBanner(null); }} 
-              className="px-8 py-3 bg-slate-50 text-slate-500 rounded-xl hover:bg-slate-100 transition-all font-black uppercase tracking-widest text-xs"
-            >
-              Cancel
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
             </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
+                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
+              </div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
           </div>
-        </div>
-      )}
+        </header>
 
-      {/* Banners List */}
-      <div className="bg-white rounded-[2.5rem] border-2 border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden text-left">
-        <table className="w-full">
-          <thead className="bg-slate-50/50 border-b border-slate-100">
-            <tr>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Banner</th>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Details</th>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-              <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {banners.map((banner) => (
-              <tr key={banner.id} className="hover:bg-slate-50/30 transition-colors">
-                <td className="px-8 py-6">
-                  <div className="h-16 w-32 bg-slate-100 rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-                    {banner.mediaType === 'video' ? (
-                      <div className="h-full w-full flex items-center justify-center bg-slate-900"><PlayCircle className="h-6 w-6 text-white" /></div>
-                    ) : (
-                      <img src={resolveImageUrl(banner.image)} className="h-full w-full object-cover" alt="" />
-                    )}
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Hero Banners</h2>
+              <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Manage your homepage promotional banners — {banners.length} total</p>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handleSeedBanners} disabled={saving} style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                <RefreshCw style={{ width: 14, height: 14 }} /> Restore Defaults
+              </button>
+              <button onClick={() => { setEditingBanner(null); setForm({ title: "", subtitle: "", mediaType: "image", image: "", videoUrl: "", link: "", linkText: "Shop Now", position: 0, isActive: true }); setShowAdd(true); }}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10, whiteSpace: "nowrap" }}>
+                <Plus style={{ width: 15, height: 15 }} /> New Banner
+              </button>
+            </div>
+          </div>
+
+          {error && <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>}
+
+          {showAdd && (
+            <div style={{ ...card, padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{editingBanner ? "Edit Banner" : "Create New Banner"}</h3>
+                <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 18, height: 18 }} /></button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 }}>
+                {[
+                  { label: "Title", key: "title", placeholder: "Banner title" },
+                  { label: "Subtitle", key: "subtitle", placeholder: "Optional subtitle" },
+                  { label: "Link Text", key: "linkText", placeholder: "Shop Now" },
+                  { label: "Link URL", key: "link", placeholder: "https://... or /shop" },
+                ].map(f => (
+                  <div key={f.key}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
+                    <input value={(form as any)[f.key] || ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} placeholder={f.placeholder}
+                      style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
-                </td>
-                <td className="px-8 py-6">
-                  <p className="font-black text-slate-900 uppercase tracking-tight mb-1">{banner.title}</p>
-                  <p className="text-xs text-slate-400 font-medium">{banner.link || "No link set"}</p>
-                </td>
-                <td className="px-8 py-6">
-                  <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                    banner.isActive ? "bg-green-50 text-green-600 border border-green-100" : "bg-slate-100 text-slate-400"
-                  }`}>
-                    {banner.isActive ? "Active" : "Hidden"}
-                  </span>
-                </td>
-                <td className="px-8 py-6">
-                  <div className="flex items-center justify-end gap-2">
-                    <button 
-                      onClick={() => { setEditingBanner(banner); setForm({ ...banner }); setShowAdd(true); }}
-                      className="p-3 bg-slate-50 text-slate-400 hover:text-[#1FA89A] hover:bg-[#1FA89A]/10 rounded-xl transition-all"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={async () => { if (confirm("Delete?")) { await fetch(`/internal/cms/banners/${banner.id}`, { method: "DELETE" }); loadBanners(); } }}
-                      className="p-3 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                ))}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Media Type</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {["image", "video"].map(t => (
+                      <button key={t} onClick={() => setForm({ ...form, mediaType: t })}
+                        style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: `1px solid ${form.mediaType === t ? ACCENT : BORDER}`, background: form.mediaType === t ? `${ACCENT}15` : CARD, color: form.mediaType === t ? ACCENT : TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer", textTransform: "capitalize" }}>
+                        {t}
+                      </button>
+                    ))}
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{form.mediaType === "image" ? "Image URL" : "Video URL"}</div>
+                  <input value={form.mediaType === "image" ? (form.image || "") : (form.videoUrl || "")}
+                    onChange={e => setForm({ ...form, [form.mediaType === "image" ? "image" : "videoUrl"]: e.target.value.trim() })}
+                    placeholder="https://..."
+                    style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 10, paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
+                <button onClick={handleSave} disabled={saving}
+                  style={{ background: ACCENT, border: "none", padding: "10px 24px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+                  {saving ? "Saving..." : editingBanner ? "Update Banner" : "Save Banner"}
+                </button>
+                <button onClick={() => { setShowAdd(false); setEditingBanner(null); }}
+                  style={{ background: CARD, border: `1px solid ${BORDER}`, padding: "10px 24px", color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ ...card, overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
+                    {["Banner", "Details", "Status", "Actions"].map((h, i) => (
+                      <th key={h} style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: i === 3 ? "right" : "left" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    [...Array(3)].map((_, i) => (
+                      <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
+                        <td colSpan={4} style={{ padding: "14px 16px" }}><div style={{ height: 16, borderRadius: 6, background: HOVER }} /></td>
+                      </tr>
+                    ))
+                  ) : banners.length === 0 ? (
+                    <tr><td colSpan={4} style={{ padding: 48, textAlign: "center", fontSize: 13, color: TEXT2 }}>
+                      <ImageIcon style={{ width: 36, height: 36, margin: "0 auto 10px", opacity: 0.3 }} />
+                      <div>No banners yet</div>
+                    </td></tr>
+                  ) : banners.map((banner) => (
+                    <tr key={banner.id} style={{ borderBottom: `1px solid ${BORDER}` }}
+                      onMouseEnter={e => e.currentTarget.style.background = HOVER}
+                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ width: 96, height: 56, borderRadius: 10, overflow: "hidden", background: ICON_BG, border: `1px solid ${BORDER}` }}>
+                          {banner.mediaType === "video"
+                            ? <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#0B1320" }}><PlayCircle style={{ width: 20, height: 20, color: TEXT2 }} /></div>
+                            : <img src={resolveImageUrl(banner.image)} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />}
+                        </div>
+                      </td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ fontWeight: 700, fontSize: 13, color: TEXT }}>{banner.title}</div>
+                        <div style={{ fontSize: 11, color: TEXT2, marginTop: 2 }}>{banner.link || "No link"}</div>
+                      </td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: banner.isActive ? "#16C784" : TEXT2, background: banner.isActive ? "rgba(22,199,132,0.12)" : ICON_BG, padding: "3px 10px", borderRadius: 20 }}>
+                          {banner.isActive ? "Active" : "Hidden"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                          <button onClick={() => { setEditingBanner(banner); setForm({ ...banner }); setShowAdd(true); }}
+                            style={{ padding: 8, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: "pointer" }}>
+                            <Edit style={{ width: 14, height: 14 }} />
+                          </button>
+                          <button onClick={async () => { if (confirm("Delete?")) { await fetch(`/internal/cms/banners/${banner.id}`, { method: "DELETE" }); loadBanners(); } }}
+                            style={{ padding: 8, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: "pointer" }}>
+                            <Trash2 style={{ width: 14, height: 14 }} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

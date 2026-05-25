@@ -1,198 +1,151 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { 
-  Megaphone, 
-  RefreshCw,
-  ChevronLeft,
-  Layout,
-  Type,
-  Palette,
-  Link as LinkIcon
-} from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
+import { Megaphone, RefreshCw, Layout, Type, Palette, Link as LinkIcon, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
+
+const ACCENT = "#12D6C5";
+const MOBILE_BASE = 750;
+const DESKTOP_BASE = 1380;
 
 export default function AnnouncementPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+  const BG = "var(--bg-primary)"; const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
+  const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)"; const HOVER = "var(--hover-bg)";
+  const HEADER_BG = "var(--bg-secondary)"; const ICON_BG = "var(--icon-bg)";
+
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE; const s = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
+
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
 
   const loadConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/cms/footer/config", { cache: "no-store", credentials: "same-origin" });
-      if (res.ok) {
-        const data = await res.json();
-        setConfig(data);
-      }
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch("/api/admin/cms/footer/config", { cache: "no-store" });
+      if (res.ok) setConfig(await res.json());
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    loadConfig();
-  }, []);
+  useEffect(() => { loadConfig(); }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/cms/footer/config", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
-        credentials: "same-origin"
-      });
-      if (res.ok) {
-        setMessage("Announcement bar updated successfully");
-        setTimeout(() => setMessage(null), 3000);
-      }
-    } finally {
-      setSaving(false);
-    }
+      const res = await fetch("/api/admin/cms/footer/config", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(config) });
+      if (res.ok) { setMsg("Announcement bar updated"); setTimeout(() => setMsg(null), 3000); }
+    } finally { setSaving(false); }
   };
 
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+
   return (
-    <div className="space-y-8 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Announcement Bar</h1>
-            <p className="text-slate-500 font-medium">Configure the promotional bar at the top of your site</p>
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Announcement Bar</h1>
           </div>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input placeholder="Search..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
+          </div>
+        </header>
+
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Announcement Bar</h2>
+              <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Configure the promotional bar at the top of your site</p>
+            </div>
+            <button onClick={handleSave} disabled={saving || !config}
+              style={{ background: ACCENT, border: "none", padding: "10px 24px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+
+          {msg && <div style={{ background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#16C784", fontWeight: 600 }}>{msg}</div>}
+
+          {loading && <div style={{ padding: "48px 0", textAlign: "center", color: TEXT2, fontSize: 13 }}><RefreshCw style={{ width: 28, height: 28, margin: "0 auto 10px", opacity: 0.3 }} /><div>Loading...</div></div>}
+
+          {config && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div style={{ ...card, padding: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingBottom: 16, borderBottom: `1px solid ${BORDER}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Layout style={{ width: 16, height: 16, color: ACCENT }} />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Visibility Settings</span>
+                  </div>
+                  <button onClick={() => setConfig({ ...config, announcementBarEnabled: !config.announcementBarEnabled })}
+                    style={{ width: 44, height: 24, borderRadius: 12, border: "none", background: config.announcementBarEnabled ? ACCENT : ICON_BG, cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                    <span style={{ position: "absolute", top: 3, left: config.announcementBarEnabled ? 23 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
+                  </button>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {[
+                    { label: "Announcement Text", key: "announcementBarText", placeholder: "e.g. 30% off special...", icon: Type, multi: true },
+                    { label: "Action Link", key: "announcementBarLink", placeholder: "/shop or https://...", icon: LinkIcon },
+                    { label: "Background Color", key: "announcementBarBgColor", placeholder: "bg-kryros-dark", icon: Palette },
+                    { label: "Text Color", key: "announcementBarTextColor", placeholder: "text-white", icon: Palette },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <f.icon style={{ width: 12, height: 12 }} />{f.label}
+                      </div>
+                      {(f as any).multi ? (
+                        <textarea value={config[f.key] || ""} onChange={e => setConfig({ ...config, [f.key]: e.target.value })} placeholder={f.placeholder}
+                          style={{ width: "100%", height: 80, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", resize: "none", boxSizing: "border-box" }} />
+                      ) : (
+                        <input value={config[f.key] || ""} onChange={e => setConfig({ ...config, [f.key]: e.target.value })} placeholder={f.placeholder}
+                          style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ ...card, padding: 24 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Live Preview</div>
+                <div style={{ background: HOVER, borderRadius: 12, padding: 24, border: `2px dashed ${BORDER}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 180 }}>
+                  {!config.announcementBarEnabled ? (
+                    <p style={{ fontSize: 12, color: TEXT2, fontStyle: "italic" }}>Announcement Bar is Hidden</p>
+                  ) : (
+                    <div style={{ width: "100%", padding: "8px 16px", textAlign: "center", fontSize: 12, fontWeight: 700, borderRadius: 8, background: config.announcementBarBgColor || ACCENT, color: config.announcementBarTextColor || "#fff" }}>
+                      {config.announcementBarText || "Announcement text will show here"}
+                    </div>
+                  )}
+                  <p style={{ fontSize: 11, color: TEXT2, marginTop: 16, textAlign: "center", maxWidth: 240 }}>This is how your announcement bar will appear at the top of your storefront.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        
-        <button
-          onClick={handleSave}
-          disabled={saving || !config}
-          className="inline-flex items-center justify-center gap-2 px-8 py-2 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#1FA89A]/20"
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
       </div>
-
-      {message && (
-        <div className="p-4 bg-green-50 text-green-700 rounded-2xl border border-green-100 font-bold text-xs uppercase tracking-widest text-center animate-in fade-in zoom-in duration-300">
-          {message}
-        </div>
-      )}
-
-      {config && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Settings */}
-          <div className="bg-white rounded-[2rem] border-2 border-slate-100 p-8 shadow-xl shadow-slate-200/20 text-left space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-50">
-              <div className="flex items-center gap-2">
-                <Layout className="h-5 w-5 text-[#1FA89A]" />
-                <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">Visibility Settings</h2>
-              </div>
-              <button
-                onClick={() => setConfig({ ...config, announcementBarEnabled: !config.announcementBarEnabled })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  config.announcementBarEnabled ? "bg-[#1FA89A]" : "bg-slate-200"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    config.announcementBarEnabled ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <Type className="h-3 w-3" />
-                  Announcement Text
-                </div>
-                <textarea
-                  value={config.announcementBarText || ""}
-                  onChange={(e) => setConfig({ ...config, announcementBarText: e.target.value })}
-                  className="w-full h-24 p-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900 resize-none"
-                  placeholder="e.g. 30% discount on all products special for November!"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <LinkIcon className="h-3 w-3" />
-                  Action Link
-                </div>
-                <input
-                  value={config.announcementBarLink || ""}
-                  onChange={(e) => setConfig({ ...config, announcementBarLink: e.target.value })}
-                  className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                  placeholder="e.g. /shop or https://..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <Palette className="h-3 w-3" />
-                    Background Color
-                  </div>
-                  <input
-                    value={config.announcementBarBgColor || ""}
-                    onChange={(e) => setConfig({ ...config, announcementBarBgColor: e.target.value })}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                    placeholder="e.g. bg-kryros-dark"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <Palette className="h-3 w-3" />
-                    Text Color
-                  </div>
-                  <input
-                    value={config.announcementBarTextColor || ""}
-                    onChange={(e) => setConfig({ ...config, announcementBarTextColor: e.target.value })}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                    placeholder="e.g. text-kryros-green"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Preview */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-[2rem] border-2 border-slate-100 p-8 shadow-xl shadow-slate-200/20 text-left">
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-6">Live Preview</h2>
-              
-              <div className="bg-slate-50 rounded-2xl p-8 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center min-h-[200px]">
-                {!config.announcementBarEnabled && (
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-xs italic">Announcement Bar is Hidden</p>
-                )}
-                
-                {config.announcementBarEnabled && (
-                  <div className={`w-full py-2 px-4 text-center text-xs font-bold uppercase tracking-widest rounded-lg shadow-sm ${config.announcementBarBgColor} ${config.announcementBarTextColor}`}>
-                    {config.announcementBarText || "Announcement text will show here"}
-                  </div>
-                )}
-                
-                <p className="mt-8 text-slate-400 font-medium text-[10px] max-w-xs text-center">
-                  This is how your announcement bar will appear at the very top of your storefront pages.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {loading && (
-        <div className="py-20 text-center">
-          <RefreshCw className="h-10 w-10 text-slate-200 animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Configuration...</p>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,41 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { 
-  MessageSquare, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  X,
-  RefreshCw,
-  ChevronLeft,
-  Star,
-  User,
-  MapPin
-} from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
+import { MessageSquare, Plus, Edit, Trash2, X, RefreshCw, Star, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
 
-interface Testimonial {
-  id: string;
-  name: string;
-  avatar: string;
-  rating: number;
-  comment: string;
-  location: string;
-}
+const ACCENT = "#12D6C5";
+const MOBILE_BASE = 750;
+const DESKTOP_BASE = 1380;
 
 export default function TestimonialsPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+  const BG = "var(--bg-primary)"; const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
+  const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)"; const HOVER = "var(--hover-bg)";
+  const HEADER_BG = "var(--bg-secondary)"; const ICON_BG = "var(--icon-bg)";
+
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE; const s = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
+
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [editingTestimonial, setEditingTestimonial] = useState<any>(null);
-  const [form, setForm] = useState<Partial<Testimonial>>({
-    name: "",
-    avatar: "",
-    rating: 5,
-    comment: "",
-    location: ""
-  });
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [form, setForm] = useState({ name: "", avatar: "", rating: 5, comment: "", location: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,311 +35,153 @@ export default function TestimonialsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/internal/admin/cms/sections", { cache: "no-store", credentials: "same-origin" });
+      const res = await fetch("/internal/admin/cms/sections", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         const arr = Array.isArray(data) ? data : data?.data || [];
-        // Testimonials are stored as sections of type 'testimonials'
-        // Each section's config might contain a single testimonial or a list
-        // For simplicity, we assume each section is ONE testimonial
         setSections(arr.filter((s: any) => s.type === "testimonials"));
       }
-    } catch (err: any) {
-      setError(`Error loading testimonials: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
 
-  const handleSeed = async () => {
-    if (!confirm("This will restore default testimonials. Continue?")) return;
-    setSaving(true);
-    try {
-      const mockTestimonials = [
-        {
-          name: 'John Mwansa',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
-          rating: 5,
-          comment: 'Excellent service! Bought my iPhone on credit and the process was smooth. Highly recommend KRYROS.',
-          location: 'Lusaka',
-        },
-        {
-          name: 'Sarah Chanda',
-          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
-          rating: 5,
-          comment: 'Best electronics store in Zambia. Great prices and amazing customer service.',
-          location: 'Kitwe',
-        },
-        {
-          name: 'Michael Phiri',
-          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-          rating: 4,
-          comment: 'Quick delivery and the product quality is top notch. Will definitely buy again.',
-          location: 'Ndola',
-        },
-      ];
-
-      for (const t of mockTestimonials) {
-        await fetch("/internal/admin/cms/sections", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: "testimonials",
-            title: t.name,
-            isActive: true,
-            config: t
-          }),
-          credentials: "same-origin"
-        });
-      }
-      loadTestimonials();
-    } catch (err: any) {
-      setError(`Error seeding: ${err.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTestimonials();
-  }, []);
+  useEffect(() => { loadTestimonials(); }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = {
-        type: "testimonials",
-        title: form.name,
-        isActive: true,
-        config: form
-      };
-
-      const method = editingTestimonial ? "PUT" : "POST";
-      const url = editingTestimonial 
-        ? `/internal/admin/cms/sections/${editingTestimonial.id}` 
-        : "/internal/admin/cms/sections";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "same-origin"
-      });
-
-      if (res.ok) {
-        setShowAdd(false);
-        setEditingTestimonial(null);
-        loadTestimonials();
-      }
-    } catch (err: any) {
-      setError(`Error saving: ${err.message}`);
-    } finally {
-      setSaving(false);
-    }
+      const payload = { type: "testimonials", title: form.name, isActive: true, config: form };
+      const method = editingItem ? "PUT" : "POST";
+      const url = editingItem ? `/internal/admin/cms/sections/${editingItem.id}` : "/internal/admin/cms/sections";
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (res.ok) { setShowAdd(false); setEditingItem(null); await loadTestimonials(); }
+    } catch {} finally { setSaving(false); }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this testimonial?")) return;
-    try {
-      const res = await fetch(`/internal/admin/cms/sections/${id}`, { 
-        method: "DELETE",
-        credentials: "same-origin"
-      });
-      if (res.ok) loadTestimonials();
-    } catch (err: any) {
-      setError(`Error deleting: ${err.message}`);
-    }
+    await fetch(`/internal/admin/cms/sections/${id}`, { method: "DELETE" });
+    loadTestimonials();
   };
 
+  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+
   return (
-    <div className="space-y-8 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/cms" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Testimonials</h1>
-            <p className="text-slate-500 font-medium">Manage customer reviews and feedback</p>
+    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Testimonials</h1>
           </div>
-        </div>
-        
-        <div className="flex gap-3">
-          <button
-            onClick={handleSeed}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors font-bold text-xs uppercase tracking-widest border border-slate-100"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Restore Defaults
-          </button>
-          <button
-            onClick={() => {
-              setEditingTestimonial(null);
-              setForm({ name: "", avatar: "", rating: 5, comment: "", location: "" });
-              setShowAdd(true);
-            }}
-            className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#1FA89A]/20"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Testimonial
-          </button>
-        </div>
-      </div>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
+            <input placeholder="Search testimonials..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
+              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+            </div>
+          </div>
+        </header>
 
-      {showAdd && (
-        <div className="bg-white rounded-[2rem] border-2 border-slate-100 p-8 mb-8 shadow-xl shadow-slate-200/20 animate-in zoom-in-95 duration-300 text-left">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
-              {editingTestimonial ? "Edit Testimonial" : "Create New Testimonial"}
-            </h2>
-            <button onClick={() => setShowAdd(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
-              <X className="h-5 w-5" />
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Testimonials</h2>
+              <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Manage customer reviews shown on homepage — {sections.length} total</p>
+            </div>
+            <button onClick={() => { setEditingItem(null); setForm({ name: "", avatar: "", rating: 5, comment: "", location: "" }); setShowAdd(true); }}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+              <Plus style={{ width: 15, height: 15 }} /> Add Testimonial
             </button>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Customer Name</label>
-              <input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                placeholder="e.g. John Doe"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Location</label>
-              <input
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-                className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                placeholder="e.g. Lusaka, Zambia"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Avatar URL</label>
-              <input
-                value={form.avatar}
-                onChange={(e) => setForm({ ...form, avatar: e.target.value })}
-                className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900"
-                placeholder="https://..."
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rating (1-5)</label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setForm({ ...form, rating: star })}
-                    className={`p-2 rounded-lg transition-colors ${
-                      (form.rating || 0) >= star ? "text-yellow-400" : "text-slate-200"
-                    }`}
-                  >
-                    <Star className="h-6 w-6 fill-current" />
-                  </button>
-                ))}
+
+          {error && <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>}
+
+          {showAdd && (
+            <div style={{ ...card, padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{editingItem ? "Edit Testimonial" : "Add Testimonial"}</h3>
+                <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 18, height: 18 }} /></button>
               </div>
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Comment</label>
-              <textarea
-                value={form.comment}
-                onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                className="w-full h-32 p-4 rounded-xl border-2 border-slate-100 focus:border-[#1FA89A] outline-none transition-all font-medium text-slate-900 resize-none"
-                placeholder="What did they say?"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-6 border-t border-slate-50">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-8 py-3 bg-[#1FA89A] text-white rounded-xl hover:bg-[#168a7e] transition-all font-black uppercase tracking-widest text-xs shadow-lg shadow-[#1FA89A]/20"
-            >
-              {saving ? "Saving..." : (editingTestimonial ? "Update Testimonial" : "Save Testimonial")}
-            </button>
-            <button 
-              onClick={() => { setShowAdd(false); setEditingTestimonial(null); }} 
-              className="px-8 py-3 bg-slate-50 text-slate-500 rounded-xl hover:bg-slate-100 transition-all font-black uppercase tracking-widest text-xs"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Testimonials Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sections.map((section) => {
-          const t = section.config as Testimonial;
-          return (
-            <div key={section.id} className="bg-white rounded-[2rem] border-2 border-slate-100 p-6 hover:shadow-lg transition-all relative group">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="h-12 w-12 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-50">
-                  {t.avatar ? (
-                    <img src={t.avatar} className="h-full w-full object-cover" alt={t.name} />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-slate-400">
-                      <User className="h-6 w-6" />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-black text-slate-900 uppercase tracking-tight text-sm">{t.name}</h3>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
-                    <MapPin className="h-3 w-3" />
-                    {t.location}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginBottom: 16 }}>
+                {[
+                  { label: "Name", key: "name", placeholder: "John Mwansa" },
+                  { label: "Location", key: "location", placeholder: "Lusaka" },
+                  { label: "Avatar URL", key: "avatar", placeholder: "https://..." },
+                ].map(f => (
+                  <div key={f.key}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
+                    <input value={(form as any)[f.key] || ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} placeholder={f.placeholder}
+                      style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
+                ))}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Rating (1-5)</div>
+                  <select value={form.rating} onChange={e => setForm({ ...form, rating: Number(e.target.value) })}
+                    style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", appearance: "none" }}>
+                    {[1,2,3,4,5].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                  </select>
+                </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Comment</div>
+                  <textarea value={form.comment} onChange={e => setForm({ ...form, comment: e.target.value })} placeholder="Customer review..."
+                    style={{ width: "100%", height: 80, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none", resize: "none", boxSizing: "border-box" }} />
                 </div>
               </div>
-
-              <div className="flex mb-3">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star 
-                    key={star} 
-                    className={`h-3 w-3 ${star <= t.rating ? "text-yellow-400 fill-current" : "text-slate-200"}`} 
-                  />
-                ))}
-              </div>
-
-              <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-4 italic">
-                "{t.comment}"
-              </p>
-
-              <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={() => {
-                    setEditingTestimonial(section);
-                    setForm(t);
-                    setShowAdd(true);
-                  }}
-                  className="p-2 bg-slate-50 text-slate-400 hover:text-[#1FA89A] hover:bg-[#1FA89A]/10 rounded-lg transition-all"
-                >
-                  <Edit className="h-3.5 w-3.5" />
+              <div style={{ display: "flex", gap: 10, paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
+                <button onClick={handleSave} disabled={saving} style={{ background: ACCENT, border: "none", padding: "10px 24px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+                  {saving ? "Saving..." : editingItem ? "Update" : "Save"}
                 </button>
-                <button 
-                  onClick={() => handleDelete(section.id)}
-                  className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <button onClick={() => setShowAdd(false)} style={{ background: CARD, border: `1px solid ${BORDER}`, padding: "10px 24px", color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>Cancel</button>
               </div>
             </div>
-          );
-        })}
+          )}
 
-        {sections.length === 0 && !loading && (
-          <div className="col-span-full py-20 bg-slate-50/50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
-            <MessageSquare className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No testimonials found.</p>
-            <button onClick={handleSeed} className="mt-4 text-[#1FA89A] font-black uppercase text-xs hover:underline">
-              Seed Default Data
-            </button>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+            {loading ? [...Array(3)].map((_, i) => <div key={i} style={{ ...card, padding: 20, height: 160 }}><div style={{ height: "100%", borderRadius: 10, background: HOVER }} /></div>) :
+              sections.length === 0 ? (
+                <div style={{ gridColumn: "span 3", padding: 48, textAlign: "center", color: TEXT2, fontSize: 13 }}>
+                  <MessageSquare style={{ width: 36, height: 36, margin: "0 auto 10px", opacity: 0.3 }} />
+                  <div>No testimonials yet</div>
+                </div>
+              ) : sections.map(s => {
+                const c = s.config || {};
+                return (
+                  <div key={s.id} style={{ ...card, padding: 20 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {c.avatar ? <img src={c.avatar} alt="" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }} /> : <div style={{ width: 36, height: 36, borderRadius: "50%", background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: ACCENT }}>{(c.name || "?")[0]}</div>}
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: TEXT2 }}>{c.location}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button onClick={() => { setEditingItem(s); setForm(c); setShowAdd(true); }} style={{ padding: 6, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: "pointer" }}><Edit style={{ width: 13, height: 13 }} /></button>
+                        <button onClick={() => handleDelete(s.id)} style={{ padding: 6, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: "pointer" }}><Trash2 style={{ width: 13, height: 13 }} /></button>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 2, marginBottom: 8 }}>
+                      {[1,2,3,4,5].map(n => <Star key={n} style={{ width: 12, height: 12, color: n <= (c.rating || 5) ? "#F59E0B" : BORDER, fill: n <= (c.rating || 5) ? "#F59E0B" : "transparent" }} />)}
+                    </div>
+                    <p style={{ fontSize: 12, color: TEXT2, lineHeight: 1.5, margin: 0 }}>{c.comment}</p>
+                  </div>
+                );
+              })}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
