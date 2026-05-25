@@ -37,7 +37,7 @@ export default function WholesaleDashboardPage() {
       if (!innerRef.current || !outerRef.current) return;
       const vw = outerRef.current.offsetWidth || window.innerWidth;
       const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
-      const nextScale = Math.min(1, vw / baseW);
+      if (vw <= 599) { innerRef.current.style.width = "750px"; innerRef.current.style.transform = "none"; innerRef.current.style.transformOrigin = "top left"; if (outerRef.current) { outerRef.current.style.overflowX = "auto"; outerRef.current.style.height = "auto"; } return; } if (outerRef.current) outerRef.current.style.overflowX = "hidden"; const nextScale = Math.min(1, vw / baseW);
       innerRef.current.style.width = `${baseW}px`;
       innerRef.current.style.transform = `scale(${nextScale})`;
       innerRef.current.style.transformOrigin = "top left";
