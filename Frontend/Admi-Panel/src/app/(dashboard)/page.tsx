@@ -429,8 +429,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Tables row — 4 columns: Recent Orders | Top Selling | New Customers | Recent Activities */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          {/* Tables row — 3 columns: Recent Orders | Top Selling | New Customers */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
 
             {/* Recent Orders */}
             <div style={{ ...card, padding: "14px" }}>
@@ -504,26 +504,27 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Recent Activities */}
-            <div style={{ ...card, padding: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
-                <Link href="/admin/reports" style={{ fontSize: 10, color: ACCENT, textDecoration: "none" }}>View All</Link>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                {recentActivities.map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: 6, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                      <a.icon style={{ width: 11, height: 11, color: a.color }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 1 }}>{a.title}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.sub}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, marginTop: 1, opacity: 0.7 }}>{a.time}</div>
-                    </div>
+          </div>
+
+          {/* Recent Activities — full-width horizontal row */}
+          <div style={{ ...card, padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
+              <Link href="/admin/reports" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
+              {recentActivities.map((a, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, background: ICON_BG, borderRadius: 10, border: `1px solid ${BORDER}`, padding: "10px" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 7, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                    <a.icon style={{ width: 13, height: 13, color: a.color }} />
                   </div>
-                ))}
-              </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 2, lineHeight: 1.3 }}>{a.title}</div>
+                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>{a.sub}</div>
+                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, opacity: 0.7 }}>{a.time}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
