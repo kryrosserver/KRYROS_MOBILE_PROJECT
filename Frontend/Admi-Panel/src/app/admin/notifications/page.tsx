@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Send, Info, Loader2, Calendar, Target, Users, Package, Eye, MessageSquare, Mail } from "lucide-react";
+import { Bell, Send, Info, Loader2, Calendar, Target, Users, Package, Eye, MessageSquare, Mail, Search, Sun, Moon, Menu, ChevronDown } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function NotificationsPage() {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -156,28 +157,38 @@ export default function NotificationsPage() {
     }
   };
 
+  const { isDark, toggleTheme } = useTheme();
+
   return (
     <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#1FA89A]/10 rounded-2xl">
-            <Bell className="h-6 w-6 text-[#1FA89A]" />
+      <div ref={innerRef} style={{ background: "var(--bg-primary)", color: "var(--text-primary)", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--card-border)", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", margin: 0 }}>Notification Center</h1>
           </div>
-          <div>
-            <h1 className="text-2xl font-black uppercase tracking-tight" style={{ color: "var(--text-primary)" }}>Notification Center</h1>
-            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Create, target, and schedule push notifications</p>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)", width: 15, height: 15 }} />
+            <input placeholder="Search..." style={{ width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "8px 40px 8px 36px", color: "var(--text-primary)", fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: "var(--text-secondary)", background: "var(--icon-bg)", padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
           </div>
-        </div>
-        <button 
-          onClick={() => setShowPreview(!showPreview)}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
-        >
-          <Eye className="h-4 w-4" />
-          {showPreview ? "Edit Mode" : "Preview Notification"}
-        </button>
-      </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "7px 14px", color: "var(--text-secondary)", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#12D6C5", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: "var(--text-secondary)", marginTop: 1 }}>Super Admin</div></div>
+              <ChevronDown style={{ width: 14, height: 14, color: "var(--text-secondary)" }} />
+            </div>
+          </div>
+        </header>
+        <div className="max-w-5xl mx-auto space-y-6" style={{ padding: "20px", width: "100%" }}>
 
       <div className="flex border-b border-slate-200">
         <button

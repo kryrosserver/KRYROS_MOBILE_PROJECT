@@ -7,8 +7,10 @@ import {
   Download, Upload, Settings, CheckSquare, Square,
   Home, FileText, Shield, Info, Phone, HelpCircle, AlertCircle,
   FileCode, ChevronLeft, ChevronRight, X, Save, Globe,
-  SortAsc, SortDesc, LayoutGrid, CheckCircle2, Clock, RefreshCw
+  SortAsc, SortDesc, LayoutGrid, CheckCircle2, Clock, RefreshCw,
+  Bell, Calendar, Sun, Moon, Menu, ChevronDown,
 } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
 
 type CMSPage = {
   id: string;
@@ -312,10 +314,49 @@ export default function CMSPagesManager() {
     };
   };
 
+  const { isDark, toggleTheme } = useTheme();
+
   return (
     <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div ref={innerRef} style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+      <div ref={innerRef} style={{ background: "var(--bg-primary)", color: "var(--text-primary)", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        {/* ── TOP HEADER BAR ── */}
+        <header style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--card-border)", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>
+              <Menu style={{ width: 20, height: 20 }} />
+            </button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", margin: 0 }}>CMS & Pages</h1>
+          </div>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)", width: 15, height: 15 }} />
+            <input placeholder="Search pages..."
+              style={{ width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "8px 40px 8px 36px", color: "var(--text-primary)", fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: "var(--text-secondary)", background: "var(--icon-bg)", padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>
+              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
+            </button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "7px 14px", color: "var(--text-secondary)", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} />
+              May 20 – May 26, 2025
+              <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#12D6C5", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>Admin</div>
+                <div style={{ fontSize: 10, color: "var(--text-secondary)", marginTop: 1 }}>Super Admin</div>
+              </div>
+              <ChevronDown style={{ width: 14, height: 14, color: "var(--text-secondary)" }} />
+            </div>
+          </div>
+        </header>
+        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)", padding: "20px" }}>
 
           {/* ── Header ─────────────────────────────────────── */}
           <div className="flex flex-row items-center justify-between gap-4">
@@ -324,25 +365,15 @@ export default function CMSPagesManager() {
                 <Link href="/admin" className="hover:underline" style={{ color: "var(--text-muted)" }}>Home</Link>
                 <span>/</span>
                 <span style={{ color: "var(--text-muted)" }}>CMS & Pages</span>
-                <span>/</span>
-                <span style={{ color: "var(--text-primary)" }}>All Pages</span>
               </div>
-              <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>CMS & Pages</h1>
+              <h2 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>CMS & Pages</h2>
             </div>
             <div className="flex items-center gap-2">
-              <div className="relative">
-                <button onClick={openAdd} className="btn-primary h-10 pl-4 pr-2 flex items-center gap-2 text-sm rounded-xl">
-                  <Plus className="h-4 w-4" /> Add New Page
-                  <span className="ml-1 pl-2 flex items-center" style={{ borderLeft: "1px solid rgba(255,255,255,0.3)" }}>
-                    <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </span>
-                </button>
-              </div>
+              <button onClick={openAdd} className="btn-primary h-10 pl-4 pr-2 flex items-center gap-2 text-sm rounded-xl">
+                <Plus className="h-4 w-4" /> Add New Page
+              </button>
               <button className="btn-secondary h-10 px-4 flex items-center gap-2 text-sm">
                 <SortAsc className="h-4 w-4" /> Reorder Pages
-                <span className="ml-1 pl-2 flex items-center" style={{ borderLeft: "1px solid var(--card-border)" }}>
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </span>
               </button>
               <button className="btn-secondary h-10 w-10 flex items-center justify-center p-0">
                 <MoreVertical className="h-4 w-4" />

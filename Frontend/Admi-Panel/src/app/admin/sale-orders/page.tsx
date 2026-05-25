@@ -1,53 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Search, ShoppingBag } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Search, ShoppingBag, Bell, Calendar, Sun, Moon, Menu, ChevronDown } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function SaleOrdersPage() {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
   const [search, setSearch] = useState("");
 
-  return (
-    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Sale Orders</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            Manage customer sales orders and fulfillment
-          </p>
-        </div>
-        <button className="btn-primary flex items-center gap-2">
-          <Plus className="h-4 w-4" /> New Sale Order
-        </button>
-      </div>
+  useEffect(() => {
+    let raf: number;
+    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`; }
+    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? 750 : 1380; const s = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
+    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
+  }, []);
 
-      <div className="admin-card !p-0 overflow-hidden">
-        <div className="p-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            <input placeholder="Search sale orders..." value={search} onChange={e => setSearch(e.target.value)} className="admin-input pl-10 w-full" />
+  return (
+    <div ref={outerRef} style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div ref={innerRef} style={{ background: "var(--bg-primary)", color: "var(--text-primary)", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--card-border)", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", margin: 0 }}>Sale Orders</h1>
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Order #</th><th>Client</th><th>Date</th>
-                <th className="text-right">Total</th><th>Status</th><th className="text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colSpan={6} className="px-6 py-20 text-center">
-                  <div className="flex flex-col items-center gap-3" style={{ color: "var(--text-muted)" }}>
-                    <ShoppingBag className="h-12 w-12 opacity-20" />
-                    <p className="font-semibold text-sm">No sale orders yet</p>
-                    <p className="text-xs">Create your first sale order to track customer fulfillment.</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
+            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)", width: 15, height: 15 }} />
+            <input placeholder="Search sale orders..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "8px 40px 8px 36px", color: "var(--text-primary)", fontSize: 13, outline: "none" }} />
+            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: "var(--text-secondary)", background: "var(--icon-bg)", padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>
+              <Bell style={{ width: 20, height: 20 }} />
+              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
+            </button>
+            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
+            <button style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "7px 14px", color: "var(--text-secondary)", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#12D6C5", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: "var(--text-secondary)", marginTop: 1 }}>Super Admin</div></div>
+              <ChevronDown style={{ width: 14, height: 14, color: "var(--text-secondary)" }} />
+            </div>
+          </div>
+        </header>
+        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)", padding: "20px" }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Sale Orders</h2>
+              <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Manage customer sales orders and fulfillment</p>
+            </div>
+            <button className="btn-primary flex items-center gap-2"><Plus className="h-4 w-4" /> New Sale Order</button>
+          </div>
+          <div className="admin-card !p-0 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="admin-table">
+                <thead><tr><th>Order #</th><th>Client</th><th>Date</th><th className="text-right">Total</th><th>Status</th><th className="text-right">Actions</th></tr></thead>
+                <tbody>
+                  <tr><td colSpan={6} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-3" style={{ color: "var(--text-muted)" }}>
+                      <ShoppingBag className="h-12 w-12 opacity-20" />
+                      <p className="font-semibold text-sm">No sale orders yet</p>
+                      <p className="text-xs">Create your first sale order to track customer fulfillment.</p>
+                    </div>
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
