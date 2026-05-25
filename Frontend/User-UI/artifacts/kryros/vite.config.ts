@@ -56,7 +56,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: process.env.BACKEND_URL || "http://localhost:8080",
+        target: process.env.BACKEND_URL || "https://kryrosbackend-rwb2.onrender.com",
         changeOrigin: true,
         secure: false,
       },

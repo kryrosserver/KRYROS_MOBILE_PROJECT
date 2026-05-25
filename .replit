@@ -22,10 +22,6 @@ args = "Start application"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Backend API"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Admin Panel"
 
 [[workflows.workflow]]
@@ -39,18 +35,6 @@ outputType = "webview"
 task = "shell.exec"
 args = "cd Frontend/User-UI && pnpm --filter @workspace/kryros run dev"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Backend API"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd Backend && npm run build && PORT=8080 node dist/main.js"
-waitForPort = 8080
 
 [[workflows.workflow]]
 name = "Admin Panel"
@@ -85,16 +69,15 @@ localPort = 3002
 externalPort = 3002
 
 [[ports]]
-localPort = 8080
-externalPort = 8080
+localPort = 5000
+externalPort = 80
 
 [userenv]
 
 [userenv.shared]
-JWT_SECRET = "0d6ffc740b788b04b359f81196e538bb2afb1c75dfe7ad17d2dec62507e725d6c98903e9e097ba4c29af8c7d2f7ebd5f35614f4f9f422b9f40f342383bf79990"
-JWT_REFRESH_SECRET = "33e5493589f335ee73a0f60f864b2cbc0e0e212471a5028bc003aaf0f7023a85fdfdd415f249b9b03176cfa4134457d0a804dcde4b7eef90988aa6b6550035d0"
-CORS_ORIGINS = "http://localhost:5000,http://localhost:3001,https://*.replit.dev,https://*.repl.co,https://*.replit.app"
-NEXT_PUBLIC_API_URL = "http://localhost:8080"
+NEXT_PUBLIC_API_URL = "https://kryrosbackend-rwb2.onrender.com"
+BACKEND_URL = "https://kryrosbackend-rwb2.onrender.com"
+CORS_ORIGINS = "https://kryrosadmin-iqcj.onrender.com,https://kryros-interface.onrender.com,https://*.replit.dev,https://*.repl.co,https://*.replit.app"
 
 [userenv.development]
 ADMIN_SEED_EMAIL = "admin@kryros.com"

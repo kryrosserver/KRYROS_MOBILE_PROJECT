@@ -20,6 +20,7 @@
   "homepage": "https://github.com/kryrosserver/KRYROS_MOBILE_PROJECT#readme",
   "dependencies": {
     "next": "^16.2.6",
+    "pnpm": "^10.33.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   }
