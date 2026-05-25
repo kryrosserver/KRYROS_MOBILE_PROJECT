@@ -12,7 +12,7 @@ import {
 import { useTheme } from "@/providers/ThemeProvider";
 
 const ACCENT = "#12D6C5";
-const MOBILE_BASE = 960;
+const MOBILE_BASE = 720;
 const DESKTOP_BASE = 1380;
 
 const ROLE_COLORS: Record<string, string> = {
