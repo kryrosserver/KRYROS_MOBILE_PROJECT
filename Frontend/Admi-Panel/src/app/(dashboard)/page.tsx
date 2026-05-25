@@ -305,16 +305,19 @@ export default function AdminDashboard() {
         </header>
 
         {/* ── BODY ── */}
-        <div style={{ padding: "16px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+        <div style={{ padding: "16px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
+
+          {/* Welcome — full-width so stat cards + Quick Actions align at the same top edge */}
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
+            <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
+          </div>
+
+          {/* Two-column layout: left main + right panel — both start at the same line */}
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
 
           {/* LEFT MAIN */}
           <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Welcome */}
-            <div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
-              <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
-            </div>
 
             {/* Stat Cards — always 5 columns */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
@@ -490,34 +493,6 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Financial Summary — always 4 columns */}
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 12 }}>Financial Summary</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-                {[
-                  { label: "Outstanding Balance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
-                  { label: "Outstanding Payment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
-                  { label: "Total Expenses", value: formatPrice(summary.expense), sub: "This month", icon: DollarSign, color: "#EF4444" },
-                  { label: "Profit / Loss", value: formatPrice(summary.profit), sub: "This month", icon: TrendingUp, color: "#22C55E", highlight: true },
-                ].map((item, i) => (
-                  <div key={i} style={{
-                    ...card,
-                    padding: "18px",
-                    background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
-                    border: item.highlight ? "none" : `1px solid ${BORDER}`,
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 9, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <item.icon style={{ width: 16, height: 16, color: item.highlight ? "#fff" : item.color }} />
-                      </div>
-                      <span style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3 }}>{item.label}</span>
-                    </div>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
-                    <div style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY, marginTop: 4 }}>{item.sub}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* RIGHT PANEL — always fixed width */}
@@ -600,7 +575,38 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
+          </div>{/* end two-column flex */}
+
+          {/* Financial Summary — full-width, below both columns so no blank space bottom-right */}
+          <div style={{ paddingBottom: 24 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 12 }}>Financial Summary</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+              {[
+                { label: "Outstanding Balance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
+                { label: "Outstanding Payment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
+                { label: "Total Expenses", value: formatPrice(summary.expense), sub: "This month", icon: DollarSign, color: "#EF4444" },
+                { label: "Profit / Loss", value: formatPrice(summary.profit), sub: "This month", icon: TrendingUp, color: "#22C55E", highlight: true },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  ...card,
+                  padding: "18px",
+                  background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
+                  border: item.highlight ? "none" : `1px solid ${BORDER}`,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 9, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <item.icon style={{ width: 16, height: 16, color: item.highlight ? "#fff" : item.color }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3 }}>{item.label}</span>
+                  </div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
+                  <div style={{ fontSize: 11, color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY, marginTop: 4 }}>{item.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>{/* end outer body column */}
       </div>
     </div>
   );
