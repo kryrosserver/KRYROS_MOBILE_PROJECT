@@ -88,13 +88,20 @@ export default function ProductsPage() {
     setError(null);
     try {
       const res = await fetch("/internal/admin/products?limit=200");
+      const body = await res.json().catch(() => ({}));
       if (res.status === 503) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || "The backend server is starting up. Please wait a moment and click Refresh.");
+        throw new Error(
+          body.message ||
+          "The backend server is starting up (cold start). Please wait 15–30 seconds and click Retry."
+        );
       }
-      if (!res.ok) throw new Error(`Server error ${res.status} — please try refreshing.`);
-      const data = await res.json();
-      setProducts(Array.isArray(data) ? data : data.items ?? data.products ?? []);
+      if (!res.ok) {
+        throw new Error(
+          body.error ||
+          `Server error ${res.status} — please try refreshing.`
+        );
+      }
+      setProducts(Array.isArray(body) ? body : body.items ?? body.products ?? []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load products");
     } finally { setLoading(false); }

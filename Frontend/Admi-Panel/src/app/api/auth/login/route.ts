@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
 import { parseBackendError } from "@/lib/api";
+import { proxyFetch, BackendTimeoutError } from "@/lib/proxy";
 
 const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN", "MANAGER"];
 
@@ -15,11 +16,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier: body.identifier, password: body.password }),
-    });
+    let res: Response;
+    try {
+      res = await proxyFetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: body.identifier, password: body.password }),
+      });
+    } catch (err) {
+      if (err instanceof BackendTimeoutError) {
+        return NextResponse.json(
+          { success: false, error: "The server is starting up (cold start). Please wait a few seconds and try again." },
+          { status: 503 }
+        );
+      }
+      throw err;
+    }
 
     if (!res.ok) {
       const message = await parseBackendError(res);

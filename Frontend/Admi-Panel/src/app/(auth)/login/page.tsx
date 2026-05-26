@@ -226,12 +226,20 @@ export default function AdminLoginPage() {
             <div
               className="rounded-xl px-4 py-3 text-sm"
               style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.25)',
-                color: '#EF4444',
+                background: error.includes("starting up") || error.includes("503")
+                  ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                border: error.includes("starting up") || error.includes("503")
+                  ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(239,68,68,0.25)',
+                color: error.includes("starting up") || error.includes("503")
+                  ? '#F59E0B' : '#EF4444',
               }}
             >
               {error}
+              {(error.includes("starting up") || error.includes("503")) && (
+                <div style={{ marginTop: 8, fontWeight: 600 }}>
+                  ↻ Wait 15–30 seconds then click Sign In again.
+                </div>
+              )}
             </div>
           )}
 
@@ -355,12 +363,20 @@ export default function AdminLoginPage() {
             <div
               className="rounded-xl px-4 py-3 text-sm"
               style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.25)',
-                color: '#EF4444',
+                background: error.includes("starting up") || error.includes("503")
+                  ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                border: error.includes("starting up") || error.includes("503")
+                  ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(239,68,68,0.25)',
+                color: error.includes("starting up") || error.includes("503")
+                  ? '#F59E0B' : '#EF4444',
               }}
             >
               {error}
+              {(error.includes("starting up") || error.includes("503")) && (
+                <div style={{ marginTop: 8, fontWeight: 600 }}>
+                  ↻ Wait 15–30 seconds then click Sign In again.
+                </div>
+              )}
             </div>
           )}
 
