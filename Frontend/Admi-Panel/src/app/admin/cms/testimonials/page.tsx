@@ -110,7 +110,7 @@ export default function TestimonialsPage() {
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{editingItem ? "Edit Testimonial" : "Add Testimonial"}</h3>
                 <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 18, height: 18 }} /></button>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginBottom: 16 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5" style={{marginBottom: 16}}>
                 {[
                   { label: "Name", key: "name", placeholder: "John Mwansa" },
                   { label: "Location", key: "location", placeholder: "Lusaka" },
@@ -144,7 +144,7 @@ export default function TestimonialsPage() {
             </div>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">>
             {loading ? [...Array(3)].map((_, i) => <div key={i} style={{ ...card, padding: 20, height: 160 }}><div style={{ height: "100%", borderRadius: 10, background: HOVER }} /></div>) :
               sections.length === 0 ? (
                 <div style={{ gridColumn: "span 3", padding: 48, textAlign: "center", color: TEXT2, fontSize: 13 }}>

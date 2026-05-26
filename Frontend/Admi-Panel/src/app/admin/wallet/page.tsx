@@ -282,7 +282,7 @@ export default function WalletPage() {
           )}
 
           {/* Stat Cards — 5 columns */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">>
             {statDefs.map((s, i) => (
               <div key={i} style={{ ...card, padding: "16px 18px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
@@ -397,7 +397,7 @@ export default function WalletPage() {
               {isCreatingLink && (
                 <div style={{ ...card, padding: "20px" }}>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: "0 0 16px" }}>Generate New Payment Link</h3>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5" style={{marginBottom: 16}}>
                     <div>
                       <label style={{ fontSize: 11, fontWeight: 700, color: TEXT2, display: "block", marginBottom: 6 }}>Locked Amount</label>
                       <div style={{ position: "relative" }}>

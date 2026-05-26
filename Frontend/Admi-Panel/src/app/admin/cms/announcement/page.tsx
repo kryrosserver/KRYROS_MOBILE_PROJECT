@@ -90,7 +90,7 @@ export default function AnnouncementPage() {
           {loading && <div style={{ padding: "48px 0", textAlign: "center", color: TEXT2, fontSize: 13 }}><RefreshCw style={{ width: 28, height: 28, margin: "0 auto 10px", opacity: 0.3 }} /><div>Loading...</div></div>}
 
           {config && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">>
               <div style={{ ...card, padding: 24 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingBottom: 16, borderBottom: `1px solid ${BORDER}` }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

@@ -155,7 +155,7 @@ export default function NotificationsPage() {
           </div>
 
           {/* Stat Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
             {[
               { label: "Total Sent", value: "0", change: "0.0%", up: true, color: ACCENT, icon: BarChart3 },
               { label: "Push Notifications", value: "0", change: "0.0%", up: true, color: "#3B82F6", icon: Bell },
@@ -203,7 +203,7 @@ export default function NotificationsPage() {
           )}
 
           {/* 2-column layout: Form + Tips */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16 }}>
+          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-4">
 
             {/* Form Card */}
             <div style={{ ...card, padding: "24px", overflow: "hidden" }}>
@@ -277,7 +277,7 @@ export default function NotificationsPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSendPush} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
                       <div>
                         <label style={labelStyle}>Notification Title</label>
                         <input required placeholder="e.g. Flash Sale: 50% Off!" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} style={inputStyle} />
@@ -291,7 +291,7 @@ export default function NotificationsPage() {
                       <label style={labelStyle}>Message Body</label>
                       <textarea required placeholder="Enter the message you want users to see on their phone..." rows={4} value={formData.body} onChange={e => setFormData({ ...formData, body: e.target.value })} style={{ ...inputStyle, resize: "none" }} />
                     </div>
-                    <div style={{ background: HOVER, borderRadius: 14, padding: "16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5" style={{background: HOVER, borderRadius: 14, padding: "16px"}}>
                       <div>
                         <label style={{ ...labelStyle, color: ACCENT, display: "flex", alignItems: "center", gap: 4 }}><Target style={{ width: 11, height: 11 }} /> Target Audience</label>
                         <select value={targetType} onChange={e => setTargetType(e.target.value as any)} style={{ ...inputStyle, background: CARD, appearance: "none" }}>

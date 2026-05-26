@@ -263,7 +263,7 @@ export default function OrdersPage() {
           )}
 
           {/* Stat Cards — full width 5-column grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">>
             {statCards.map((s, i) => (
               <div key={i} style={{ ...card, padding: "16px 18px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>

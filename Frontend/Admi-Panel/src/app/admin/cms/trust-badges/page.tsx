@@ -99,7 +99,7 @@ export default function TrustBadgesPage() {
 
           {msg && <div style={{ background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#16C784", fontWeight: 600 }}>{msg}</div>}
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
             {loading ? [...Array(4)].map((_, i) => <div key={i} style={{ ...card, padding: 20, height: 100 }}><div style={{ height: "100%", borderRadius: 10, background: HOVER }} /></div>) :
               items.map((item, idx) => (
                 <div key={idx} style={{ ...card, padding: 20 }}>

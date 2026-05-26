@@ -269,7 +269,7 @@ export default function CategoriesPage() {
           )}
 
           {/* Stat cards — full width, matching dashboard layout */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
               {[
                 { label: "Total Categories", value: categories.length, change: "+12.4%", up: true, color: "#22C55E", icon: LayoutGrid },
                 { label: "Active Categories", value: active.length, change: "+11.8%", up: true, color: "#8B5CF6", icon: Tag },
@@ -469,7 +469,7 @@ export default function CategoriesPage() {
             </div>
 
           {/* Overview panels row — 3 columns matching dashboard layout */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 14 }}>
+          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-3.5">>
 
             {/* Category Overview */}
             <div style={{ ...card, padding: 18 }}>

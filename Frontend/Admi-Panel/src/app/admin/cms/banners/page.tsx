@@ -134,7 +134,7 @@ export default function BannersPage() {
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{editingBanner ? "Edit Banner" : "Create New Banner"}</h3>
                 <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 18, height: 18 }} /></button>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 }}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5" style={{marginBottom: 16}}>
                 {[
                   { label: "Title", key: "title", placeholder: "Banner title" },
                   { label: "Subtitle", key: "subtitle", placeholder: "Optional subtitle" },

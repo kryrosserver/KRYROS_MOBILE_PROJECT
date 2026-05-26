@@ -377,7 +377,7 @@ export default function CMSPageSections() {
           )}
 
           {/* ── STAT CARDS ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">>
             {statCards.map((c, i) => (
               <div key={i} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -392,7 +392,7 @@ export default function CMSPageSections() {
           </div>
 
           {/* ── SECTIONS LIST ── */}
-          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
+          <div className="overflow-x-auto" style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16 }}>
 
             {/* Table header */}
             <div style={{ padding: "14px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
@@ -552,7 +552,7 @@ export default function CMSPageSections() {
                 </div>
                 <button onClick={() => setShowAdd(false)} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: TEXT2, fontSize: 13 }}>✕</button>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5" style={{marginBottom: 20}}>
                 {Object.entries(SECTION_META).map(([type, meta]) => {
                   const Icon = meta.icon;
                   const isSelected = addType === type;

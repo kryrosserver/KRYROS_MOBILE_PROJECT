@@ -477,7 +477,7 @@ export default function CMSSectionEditor() {
                               {/* Inline slide editor */}
                               {editingSlideIdx === idx && editingSlide && (
                                 <div style={{ borderTop: `1px solid ${BORDER}`, padding: 16, display: "flex", flexDirection: "column", gap: 12, background: ICON_BG }}>
-                                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
                                     <div>
                                       <label style={labelStyle}>Title (Small)</label>
                                       <input value={editingSlide.title || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, title: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
@@ -491,7 +491,7 @@ export default function CMSSectionEditor() {
                                     <label style={labelStyle}>Description</label>
                                     <textarea value={editingSlide.description || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 60 }} />
                                   </div>
-                                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                                     <div>
                                       <label style={labelStyle}>CTA Text</label>
                                       <input value={editingSlide.ctaText || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaText: e.target.value }))} style={inputStyle} />
@@ -556,7 +556,7 @@ export default function CMSSectionEditor() {
                           <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} placeholder="Shop from a wide range..." />
                           <div style={{ fontSize: 10, color: TEXT2, marginTop: 4, textAlign: "right" }}>{form.description.length}/200</div>
                         </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
                           <div>
                             <label style={labelStyle}>Primary Button Text</label>
                             <input value={form.primaryBtnText} onChange={e => setForm(p => ({ ...p, primaryBtnText: e.target.value }))} style={inputStyle} placeholder="Shop Now" />
@@ -566,7 +566,7 @@ export default function CMSSectionEditor() {
                             <input value={form.primaryBtnLink} onChange={e => setForm(p => ({ ...p, primaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/shop" />
                           </div>
                         </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
                           <div>
                             <label style={labelStyle}>Secondary Button Text</label>
                             <input value={form.secondaryBtnText} onChange={e => setForm(p => ({ ...p, secondaryBtnText: e.target.value }))} style={inputStyle} placeholder="Explore" />

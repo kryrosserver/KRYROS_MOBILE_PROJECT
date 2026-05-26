@@ -95,7 +95,7 @@ export default function WholesaleCMSPage() {
 
           {tab === "hero" && (
             <div style={{ ...card, padding: 24 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
                 {[{ label: "Heading", key: "heading" }, { label: "Subheading", key: "subheading" }, { label: "CTA Text", key: "ctaText" }, { label: "CTA Link", key: "ctaLink" }].map(f => (
                   <div key={f.key}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
@@ -112,7 +112,7 @@ export default function WholesaleCMSPage() {
               {(tab === "steps" ? data.steps : data.features).map((item, idx) => (
                 <div key={idx} style={{ ...card, padding: 18, display: "flex", gap: 14 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: `${ACCENT}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: ACCENT, flexShrink: 0 }}>{idx + 1}</div>
-                  <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 2fr", gap: 12 }}>
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-3" style={{flex: 1}}>
                     <div>
                       <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>Title</div>
                       <input value={item.title} onChange={e => { const arr = [...(tab === "steps" ? data.steps : data.features)]; arr[idx] = { ...arr[idx], title: e.target.value }; setData(tab === "steps" ? { ...data, steps: arr } : { ...data, features: arr }); }}
@@ -131,7 +131,7 @@ export default function WholesaleCMSPage() {
 
           {tab === "quote" && (
             <div style={{ ...card, padding: 24 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
                 {[{ label: "Title", key: "title" }, { label: "Subtitle", key: "subtitle" }, { label: "CTA Text", key: "ctaText" }, { label: "CTA Link", key: "ctaLink" }].map(f => (
                   <div key={f.key}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>

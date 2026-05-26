@@ -207,7 +207,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Stat Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
             {[
               { label: "Total Services", value: services.length, change: "+8.4%", up: true, color: ACCENT, icon: Wrench },
               { label: "Today's Bookings", value: todaysBookings, change: "+12.1%", up: true, color: "#3B82F6", icon: Calendar },
@@ -250,7 +250,7 @@ export default function ServicesPage() {
               {/* Quick Create Form */}
               <div style={{ ...card, padding: "16px 20px" }}>
                 <p style={{ fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Quick Create Service</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 10 }}>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5">>
                   {[
                     { placeholder: "Name", key: "name", val: form.name || "", type: "text" },
                     { placeholder: "Slug", key: "slug", val: form.slug || "", type: "text" },
@@ -299,7 +299,7 @@ export default function ServicesPage() {
 
               {/* Services Grid */}
               {loading ? (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">>
                   {[...Array(6)].map((_, i) => <div key={i} style={{ ...card, height: 180 }} />)}
                 </div>
               ) : filteredServices.length === 0 ? (
@@ -308,7 +308,7 @@ export default function ServicesPage() {
                   <p style={{ fontSize: 13, fontWeight: 600, color: TEXT2 }}>No services found</p>
                 </div>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">>
                   {filteredServices.map(service => (
                     <div key={service.id} style={{ ...card, padding: "18px", transition: "box-shadow 0.15s, border-color 0.15s" }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(0,0,0,0.15)"; (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}40`; }}

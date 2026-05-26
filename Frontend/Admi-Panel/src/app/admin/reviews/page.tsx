@@ -160,7 +160,7 @@ export default function ReviewsPage() {
           </div>
 
           {/* Stat Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
             {[
               { label: "Total Reviews", value: reviews.length, change: "+12.4%", up: true, color: ACCENT, icon: MessageCircle },
               { label: "Approved", value: reviews.filter(r => r.isApproved).length, change: "+8.1%", up: true, color: "#22C55E", icon: CheckCircle },
@@ -216,7 +216,7 @@ export default function ReviewsPage() {
               <p style={{ fontSize: 11, color: TEXT2, margin: 0 }}>Customer reviews will appear here.</p>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">>
               {filteredReviews.map((review) => (
                 <div key={review.id} style={{ ...card, padding: "18px", display: "flex", flexDirection: "column", gap: 14, transition: "box-shadow 0.15s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px rgba(0,0,0,0.15)"; }}
