@@ -50,8 +50,8 @@ export default function AppearanceSettingsPage() {
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/settings" className="h-9 w-9 rounded-xl flex items-center justify-center btn-secondary !px-0">
-                <ChevronLeft className="h-4 w-4" />
+              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+                <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Settings
               </Link>
               <div>
                 <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>

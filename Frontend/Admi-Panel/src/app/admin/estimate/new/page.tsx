@@ -47,8 +47,8 @@ export default function NewEstimatePage() {
     <div className="max-w-5xl mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/estimate" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ChevronLeft className="h-6 w-6 text-slate-600" />
+          <Link href="/admin/estimate" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+            <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Estimates
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 whitespace-nowrap">New Estimate</h1>
