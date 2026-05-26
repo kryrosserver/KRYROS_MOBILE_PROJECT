@@ -55,6 +55,10 @@ const nextConfig = {
         source: "/api/:path*",
         destination: `${backendOrigin}/api/:path*`,
       },
+      {
+        source: "/internal/:path*",
+        destination: `${backendOrigin}/api/:path*`,
+      },
     ];
   },
 };
