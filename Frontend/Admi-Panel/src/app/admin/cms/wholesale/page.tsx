@@ -1,5 +1,7 @@
+import Link from "next/link";
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Save, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -83,7 +85,8 @@ export default function WholesaleCMSPage() {
 
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div><h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Wholesale Page CMS</h2><p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Configure the wholesale landing page content</p></div>
+            <div><div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Link href="/admin/cms" style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "5px 12px", color: TEXT2, fontSize: 12, textDecoration: "none" }}><ArrowLeft style={{ width: 13, height: 13 }} /> Back to CMS</Link></div>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Wholesale Page CMS</h2><p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Configure the wholesale landing page content</p></div>
             <button onClick={handleSave} disabled={saving || loading} style={{ background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>{saving ? "Saving..." : "Save Changes"}</button>
           </div>
 

@@ -220,13 +220,7 @@ export default function HomePageCMS() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>
-            <Link href="/admin" style={{ color: "var(--text-secondary)", textDecoration: "none" }}>Home</Link>
-            <span>/</span>
-            <Link href="/admin/cms" style={{ color: "var(--text-secondary)", textDecoration: "none" }}>CMS & Pages</Link>
-            <span>/</span>
-            <span style={{ color: "#12D6C5" }}>Home Page</span>
-          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Link href="/admin/cms" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}><ArrowLeft style={{ width: 13, height: 13 }} /> Back to CMS</Link></div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", whiteSpace: "nowrap", margin: 0 }}>Home Page</h1>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

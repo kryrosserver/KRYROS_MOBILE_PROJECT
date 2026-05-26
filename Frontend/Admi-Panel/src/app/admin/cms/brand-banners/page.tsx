@@ -1,5 +1,7 @@
+import Link from "next/link";
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Plus, Trash2, Edit, Save, X, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -92,6 +94,7 @@ export default function BrandBannersPage() {
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Link href="/admin/cms" style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "5px 12px", color: TEXT2, fontSize: 12, textDecoration: "none" }}><ArrowLeft style={{ width: 13, height: 13 }} /> Back to CMS</Link></div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Brand Banners</h2>
               <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Manage featured brand promotional banners — {banners.length} total</p>
             </div>
