@@ -632,16 +632,26 @@ model CMSBanner {
 }
 
 model CMSSection {
-  id        String   @id @default(uuid())
-  type      String
-  title     String?
-  subtitle  String?
-  config    Json?
-  isActive  Boolean  @default(true)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  type        String
+  title       String?
+  subtitle    String?
+  description String?
+  config      Json?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  pageSlug    String?  // which page this section belongs to (e.g. "shop", "about-us")
+  pageName    String?  // human-readable page name
+  link        String?
+  linkText    String?
+  imageUrl    String?
+  backgroundColor String?
+  textColor   String?
+  animation   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
+  @@index([pageSlug])
   @@map("cms_sections")
 }
 

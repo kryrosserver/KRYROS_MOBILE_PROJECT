@@ -9,6 +9,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const slug = params.id;
 
+  // Home page sections live in homepage_sections table
   if (slug === "home") {
     const res = await fetch(`${API_BASE}/cms/homepage-sections/manage`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -19,19 +20,14 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     try { return NextResponse.json(JSON.parse(text)); } catch { return NextResponse.json([]); }
   }
 
-  const res = await fetch(`${API_BASE}/cms/sections/manage`, {
+  // All other pages: filter cms_sections by pageSlug server-side
+  const res = await fetch(`${API_BASE}/cms/sections/manage?pageSlug=${encodeURIComponent(slug)}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
   const text = await res.text();
   if (!res.ok) return NextResponse.json({ error: text || "Failed" }, { status: res.status });
-  try {
-    const all = JSON.parse(text);
-    const filtered = Array.isArray(all)
-      ? all.filter((s: any) => s.pageSlug === slug || s.page?.slug === slug)
-      : [];
-    return NextResponse.json(filtered);
-  } catch { return NextResponse.json([]); }
+  try { return NextResponse.json(JSON.parse(text)); } catch { return NextResponse.json([]); }
 }
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {

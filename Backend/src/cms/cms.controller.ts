@@ -131,18 +131,18 @@ export class CMSController {
 
   @Get('sections')
   @UseInterceptors(CacheInterceptor)
-  @ApiOperation({ summary: 'Get active homepage sections' })
-  getSections() {
-    return this.cmsService.getSections();
+  @ApiOperation({ summary: 'Get active sections, optional ?pageSlug= filter' })
+  getSections(@Query('pageSlug') pageSlug?: string) {
+    return this.cmsService.getSections(pageSlug);
   }
 
   @Get('sections/manage')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List all sections' })
-  listSections() {
-    return this.cmsService.listSections();
+  @ApiOperation({ summary: 'List sections, optional ?pageSlug= filter' })
+  listSections(@Query('pageSlug') pageSlug?: string) {
+    return this.cmsService.listSections(pageSlug);
   }
 
   @Post('sections')

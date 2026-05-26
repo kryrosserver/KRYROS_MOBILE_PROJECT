@@ -407,11 +407,10 @@ export class CMSService {
     return this.prisma.cMSBanner.delete({ where: { id } });
   }
 
-  async getSections() {
-    return this.prisma.cMSSection.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' },
-    });
+  async getSections(pageSlug?: string) {
+    const where: any = { isActive: true };
+    if (pageSlug) where.pageSlug = pageSlug;
+    return this.prisma.cMSSection.findMany({ where, orderBy: { order: 'asc' } });
   }
 
   async getPage(slug: string) {
@@ -532,8 +531,10 @@ export class CMSService {
   }
 
   // Sections management
-  async listSections() {
-    return this.prisma.cMSSection.findMany({ orderBy: { order: 'asc' } });
+  async listSections(pageSlug?: string) {
+    const where: any = {};
+    if (pageSlug) where.pageSlug = pageSlug;
+    return this.prisma.cMSSection.findMany({ where, orderBy: { order: 'asc' } });
   }
 
   async createSection(data: CreateSectionDto) {
