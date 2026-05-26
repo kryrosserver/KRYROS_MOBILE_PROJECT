@@ -48,34 +48,61 @@ const SECTION_META: Record<string, { icon: any; color: string; bg: string; label
   ContactForm:         { icon: Mail,          color: "#14B8A6", bg: "rgba(20,184,166,0.15)",  label: "Contact Form",         description: "Contact us form section" },
   GetNowHero:          { icon: CreditCard,    color: "#FACC15", bg: "rgba(250,204,21,0.15)",  label: "Get Now Hero",         description: "Buy Now Pay Later hero section" },
   GetNowFeatures:      { icon: ShieldCheck,   color: "#16C784", bg: "rgba(22,199,132,0.15)",  label: "Get Now Features",     description: "BNPL features and benefits" },
+  // Current frontend types
+  promo_banners:       { icon: ImageIcon,     color: "#EC4899", bg: "rgba(236,72,153,0.15)",  label: "Promo Card (CategoryPromoBanners)", description: "Scrollable promo card — fetched by ?type=promo_banners" },
+  RecentlyViewed:      { icon: Package,       color: "#22C55E", bg: "rgba(34,197,94,0.15)",   label: "Recently Viewed",      description: "Client-side recently browsed products (localStorage)" },
+  RecommendedProducts: { icon: Star,          color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  label: "Recommended For You",  description: "Horizontal scroll product recommendations" },
 };
 
 const PAGE_DEFAULT_SECTIONS: Record<string, { type: string; order: number }[]> = {
+  // Matches current User-UI HomePage.tsx section order exactly
   home: [
-    { type: "HeroSlider", order: 1 }, { type: "Brands", order: 2 }, { type: "TrustBadges", order: 3 },
-    { type: "CategoriesGrid", order: 4 }, { type: "FlashSale", order: 5 }, { type: "UpgradeBanner", order: 6 },
-    { type: "PromoBanners", order: 7 }, { type: "FeaturedProducts", order: 8 }, { type: "CategoryPromo", order: 9 },
-    { type: "NewArrivals", order: 10 }, { type: "Newsletter", order: 11 },
+    { type: "HeroSlider", order: 1 },          // HeroSection — reads from cms_banners
+    { type: "Brands", order: 2 },              // BrandsSection — reads from /api/brands
+    { type: "TrustBadges", order: 3 },         // TrustBadges — reads from site-config/trust-badges
+    { type: "CategoriesGrid", order: 4 },      // CategorySection — reads /api/categories
+    { type: "FlashSale", order: 5 },           // FlashSaleSection
+    { type: "UpgradeBanner", order: 6 },       // UpgradeBanner — reads site-config/upgrade-banner
+    { type: "PromoBanners", order: 7 },        // PromoBanners — reads cms_banners filtered by tag
+    { type: "FeaturedProducts", order: 8 },    // FeaturedProductsSection
+    { type: "promo_banners", order: 9 },       // CategoryPromoBanners — reads homepage-sections?type=promo_banners
+    { type: "RecentlyViewed", order: 10 },     // RecentlyViewedSection — client-side localStorage
+    { type: "RecommendedProducts", order: 11 }, // ProductSection "Recommended For You"
   ],
   shop: [
-    { type: "MembersBanner", order: 1 }, { type: "ShopFilters", order: 2 }, { type: "ProductGrid", order: 3 },
-    { type: "Newsletter", order: 4 },
+    { type: "MembersBanner", order: 1 },
+    { type: "ShopFilters", order: 2 },
+    { type: "ProductGrid", order: 3 },
   ],
   "product-detail": [
-    { type: "ProductGallery", order: 1 }, { type: "RelatedProducts", order: 2 }, { type: "Testimonials", order: 3 },
+    { type: "ProductGallery", order: 1 },
+    { type: "RelatedProducts", order: 2 },
+    { type: "Testimonials", order: 3 },
   ],
   wholesale: [
-    { type: "WholesaleHero", order: 1 }, { type: "WholesaleFeatures", order: 2 }, { type: "Newsletter", order: 3 },
+    { type: "WholesaleHero", order: 1 },
+    { type: "WholesaleFeatures", order: 2 },
   ],
   faq: [
-    { type: "PageHero", order: 1 }, { type: "FAQAccordion", order: 2 },
+    { type: "PageHero", order: 1 },
+    { type: "FAQAccordion", order: 2 },
   ],
   "contact-us": [
-    { type: "PageHero", order: 1 }, { type: "ContactForm", order: 2 },
+    { type: "PageHero", order: 1 },
+    { type: "ContactForm", order: 2 },
   ],
   "get-now": [
-    { type: "GetNowHero", order: 1 }, { type: "GetNowFeatures", order: 2 }, { type: "Newsletter", order: 3 },
+    { type: "GetNowHero", order: 1 },
+    { type: "GetNowFeatures", order: 2 },
   ],
+  "about-us": [
+    { type: "PageHero", order: 1 },
+    { type: "PageContent", order: 2 },
+  ],
+  "terms-conditions": [{ type: "PageContent", order: 1 }],
+  "privacy-policy": [{ type: "PageContent", order: 1 }],
+  "refund-policy": [{ type: "PageContent", order: 1 }],
+  "shipping-policy": [{ type: "PageContent", order: 1 }],
 };
 
 const PAGE_LABELS: Record<string, string> = {
@@ -122,6 +149,7 @@ export default function CMSPageSections() {
   const [showAdd, setShowAdd] = useState(false);
   const [addType, setAddType] = useState("");
   const [lastPublished] = useState("May 24, 2025 at 10:30 AM");
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     let raf: number;
@@ -220,6 +248,26 @@ export default function CMSPageSections() {
     setDragIdx(idx);
   };
   const handleDragEnd = () => setDragIdx(null);
+
+  const handleResetSeed = async () => {
+    if (!confirm("This will DELETE all current homepage sections and re-seed the correct sections for the current frontend.\n\nYour hero banners and other CMS data are SAFE.\n\nContinue?")) return;
+    setResetting(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/admin/cms/homepage-sections/reset-seed", { method: "POST" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body?.error || `Error ${res.status}`);
+      setMsg(`✓ ${body.message || "Reset & re-seeded successfully!"}`);
+      // Reload sections
+      const r2 = await fetch(`/api/admin/cms/pages/${slug}/sections`, { cache: "no-store" });
+      const data = await r2.json().catch(() => []);
+      setSections(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      setMsg(`✗ ${err.message || "Reset failed"}`);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   const handleAddSection = async () => {
     if (!addType) return;
@@ -322,6 +370,16 @@ export default function CMSPageSections() {
                 style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
                 <Plus style={{ width: 14, height: 14 }} /> Add Section
               </button>
+              {slug === "home" && (
+                <button
+                  onClick={handleResetSeed}
+                  disabled={resetting}
+                  title="Wipe old sections & re-seed the correct sections for the current frontend. Hero banners are NOT deleted."
+                  style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "9px 16px", color: "#EF4444", fontSize: 13, cursor: resetting ? "not-allowed" : "pointer", fontWeight: 700, opacity: resetting ? 0.6 : 1 }}>
+                  <RefreshCw style={{ width: 14, height: 14, ...(resetting ? { animation: "spin 1s linear infinite" } : {}) }} />
+                  {resetting ? "Resetting..." : "Reset & Sync Sections"}
+                </button>
+              )}
               <button
                 onClick={handleSaveOrder}
                 disabled={saving}

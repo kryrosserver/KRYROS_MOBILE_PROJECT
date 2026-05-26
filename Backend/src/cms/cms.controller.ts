@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CMSService } from './cms.service';
@@ -27,9 +27,18 @@ export class CMSController {
 
   @Get('homepage-sections')
   @UseInterceptors(CacheInterceptor)
-  @ApiOperation({ summary: 'Get active homepage sections' })
-  getHomePageSections() {
-    return this.cmsService.getHomePageSections();
+  @ApiOperation({ summary: 'Get active homepage sections, optional ?type= filter' })
+  getHomePageSections(@Query('type') type?: string) {
+    return this.cmsService.getHomePageSections(type);
+  }
+
+  @Post('homepage-sections/reset-seed')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete ALL homepage sections and re-seed for current frontend (Super Admin only)' })
+  resetAndSeedHomePageSections() {
+    return this.cmsService.resetAndSeedHomePageSections();
   }
 
   @Get('homepage-sections/manage')

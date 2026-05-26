@@ -18,13 +18,17 @@ export class CMSService {
 
   // ==================== HOME PAGE SECTIONS ====================
 
-  async getHomePageSections() {
+  async getHomePageSections(type?: string) {
+    const where: any = { isActive: true };
+    if (type) where.type = type;
+
     const sections = await this.prisma.homePageSection.findMany({
-      where: { isActive: true },
+      where,
       orderBy: { order: 'asc' },
     });
 
-    if (sections.length === 0) {
+    // Auto-seed if completely empty (no type filter)
+    if (!type && sections.length === 0) {
       await this.seedHomePageSections();
       return this.prisma.homePageSection.findMany({
         where: { isActive: true },
@@ -66,23 +70,50 @@ export class CMSService {
     });
   }
 
+  async resetAndSeedHomePageSections() {
+    // Wipe ALL existing homepage sections (old frontend data)
+    await this.prisma.homePageSection.deleteMany({});
+    return this.seedHomePageSections();
+  }
+
   async seedHomePageSections() {
+    // Sections that match the current User-UI frontend exactly:
+    // 1. HeroSection       → type: HeroSlider  (reads from cms_banners via /api/cms/banners)
+    // 2. BrandsSection     → type: Brands       (reads from /api/brands)
+    // 3. TrustBadges       → type: TrustBadges  (reads from site-config/trust-badges)
+    // 4. CategorySection   → type: CategoriesGrid (reads from /api/categories)
+    // 5. FlashSaleSection  → type: FlashSale    (reads flash-sale products)
+    // 6. UpgradeBanner     → type: UpgradeBanner (reads from site-config/upgrade-banner)
+    // 7. PromoBanners      → type: PromoBanners  (reads from cms_banners filtered by tag)
+    // 8. FeaturedProductsSection → type: FeaturedProducts
+    // 9. CategoryPromoBanners    → type: promo_banners (fetched via homepage-sections?type=promo_banners)
+    // 10. RecentlyViewedSection  → type: RecentlyViewed (client-side, localStorage)
+    // 11. ProductSection("Recommended For You") → type: RecommendedProducts
     const defaultSections = [
       {
         type: 'HeroSlider',
         order: 1,
         isActive: true,
-        title: 'Main Hero Slider',
-        subtitle: 'Banners from the banner manager will show here',
+        title: 'Hero Banner',
+        subtitle: 'Main hero slider — banners managed in CMS → Banners',
         animation: 'fadeIn',
-        config: { showBanners: true, type: 'HERO' }
+        config: { showBanners: true, source: 'cms_banners' }
+      },
+      {
+        type: 'Brands',
+        order: 2,
+        isActive: true,
+        title: 'Top Brands',
+        subtitle: 'Featured brand logos — managed via Brands',
+        animation: 'slideUp',
+        config: {}
       },
       {
         type: 'TrustBadges',
-        order: 2,
+        order: 3,
         isActive: true,
-        title: 'Our Guarantees',
-        subtitle: 'Why shop with us',
+        title: 'Trust Badges',
+        subtitle: 'Why shop with us — managed via CMS → Trust Badges',
         backgroundColor: '#ffffff',
         animation: 'slideUp',
         config: {
@@ -90,215 +121,187 @@ export class CMSService {
             { icon: 'Truck', title: 'Fast Delivery', subtitle: 'Express Shipping' },
             { icon: 'ShieldCheck', title: 'Genuine Tech', subtitle: '100% Authentic' },
             { icon: 'Smartphone', title: 'Verified Seller', subtitle: 'Trusted Platform' },
-            { icon: 'ArrowRight', title: 'Pay on Credit', subtitle: 'Flexible Terms' }
+            { icon: 'CreditCard', title: 'Pay on Credit', subtitle: 'Flexible Terms' }
           ]
         }
-      },
-      {
-        type: 'FlashSale',
-        order: 3,
-        isActive: true,
-        title: 'Flash Sale',
-        subtitle: 'Limited time offers',
-        backgroundColor: '#f8fafc',
-        animation: 'zoomIn',
-        config: {
-          limit: 4,
-          endTime: new Date(Date.now() + 86400000).toISOString() // Tomorrow
-        }
-      },
-      {
-        type: 'CategoryProducts',
-        order: 4,
-        isActive: true,
-        title: 'Latest Smartphones',
-        subtitle: 'Own the latest tech today',
-        animation: 'slideUp',
-        targetCategorySlug: 'smartphones',
-        config: { limit: 10 }
-      },
-      {
-        type: 'PromoBanner',
-        order: 5,
-        isActive: true,
-        title: 'Fashion That Speaks',
-        subtitle: 'New Collection 2025',
-        description: 'Express your style with our latest premium fashion arrivals.',
-        imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1600&h=900&fit=crop&auto=format&q=90',
-        link: '/shop?category=fashion',
-        linkText: 'Shop Fashion',
-        backgroundColor: '#1B2533',
-        textColor: '#ffffff',
-        animation: 'fadeIn'
-      },
-      {
-        type: 'CategoryProducts',
-        order: 6,
-        isActive: true,
-        title: 'Fashion Trends',
-        subtitle: 'Streetwear, sneakers and more',
-        animation: 'slideUp',
-        targetCategorySlug: 'fashion',
-        config: { limit: 10 }
-      },
-      {
-        type: 'ProductPromoList',
-        order: 7,
-        isActive: true,
-        title: 'Featured Deals',
-        animation: 'slideUp',
-        config: {
-          items: [
-            {
-              title: 'Apple Ipad New Generation',
-              subtitle: 'Up to 20% off Apple Devices',
-              linkText: 'Buy Product',
-              imageUrl: '',
-              link: '/shop',
-              backgroundColor: '#EEF2FF',
-              textColor: '#4F46E5'
-            },
-            {
-              title: 'Smart Headphone',
-              subtitle: 'Up to 40% off new order',
-              linkText: 'Buy Product',
-              imageUrl: '',
-              link: '/shop',
-              backgroundColor: '#EEF2FF',
-              textColor: '#4F46E5'
-            },
-            {
-              title: 'Samsung Oled Smart TV',
-              subtitle: 'Up to 20% off Apple Devices',
-              linkText: 'Buy Product',
-              imageUrl: '',
-              link: '/shop',
-              backgroundColor: '#ECFDF5',
-              textColor: '#16A34A'
-            }
-          ]
-        }
-      },
-      {
-        type: 'CategoryProducts',
-        order: 8,
-        isActive: true,
-        title: 'Audio & Earphones',
-        subtitle: 'Immersive sound quality',
-        animation: 'slideUp',
-        targetCategorySlug: 'audio',
-        config: { limit: 10 }
       },
       {
         type: 'CategoriesGrid',
-        order: 9,
+        order: 4,
         isActive: true,
         title: 'Shop by Category',
-        subtitle: 'Browse our collections',
-        animation: 'zoomIn'
+        subtitle: 'Browse our collections — driven by product categories',
+        animation: 'zoomIn',
+        config: {}
       },
       {
-        type: 'CreditSection',
-        order: 10,
+        type: 'FlashSale',
+        order: 5,
         isActive: true,
-        title: 'KRYROS Credit',
-        subtitle: 'Buy now, pay later',
-        animation: 'fadeIn'
+        title: 'Flash Sale',
+        subtitle: 'Limited time offers — products marked with flash sale pricing',
+        backgroundColor: '#f8fafc',
+        animation: 'zoomIn',
+        config: {
+          limit: 8,
+          endTime: new Date(Date.now() + 86400000).toISOString()
+        }
+      },
+      {
+        type: 'UpgradeBanner',
+        order: 6,
+        isActive: true,
+        title: 'Upgrade Banner',
+        subtitle: 'Promotional banner — managed via CMS → Upgrade Banner',
+        animation: 'fadeIn',
+        config: { source: 'site-config', key: 'upgrade-banner' }
+      },
+      {
+        type: 'PromoBanners',
+        order: 7,
+        isActive: true,
+        title: 'Promo Banners',
+        subtitle: 'Get Now + Free Shipping banners — from CMS Banners by tag',
+        animation: 'slideUp',
+        config: { source: 'cms_banners', filterByTag: true }
       },
       {
         type: 'FeaturedProducts',
-        order: 11,
+        order: 8,
         isActive: true,
         title: 'Featured Products',
-        subtitle: 'Hand-picked for you',
-        animation: 'slideUp'
+        subtitle: 'Tabbed section — products marked isFeatured=true',
+        animation: 'slideUp',
+        config: { tabs: ['All', 'New Arrivals', 'Best Selling', 'Top Rated'], limit: 8 }
+      },
+      {
+        type: 'promo_banners',
+        order: 9,
+        isActive: true,
+        title: 'Mega Deal',
+        subtitle: 'On Selected Items',
+        description: 'Get the biggest discounts on top electronics and accessories',
+        link: '/shop',
+        animation: 'slideUp',
+        config: {
+          tag: 'UP TO 50% OFF',
+          title: 'Mega Deal',
+          subtitle: 'On Selected Items',
+          desc: 'Get the biggest discounts on top electronics and accessories',
+          href: '/shop',
+          gradient: 'linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #0d9488 100%)',
+          emoji: '🛒'
+        }
+      },
+      {
+        type: 'promo_banners',
+        order: 10,
+        isActive: true,
+        title: 'Refer & Earn',
+        subtitle: 'Invite Friends & Get Rewards',
+        description: 'Share with friends and earn credit per referral',
+        link: '/dashboard',
+        animation: 'slideUp',
+        config: {
+          tag: 'EARN REWARDS',
+          title: 'Refer & Earn',
+          subtitle: 'Invite Friends & Get Rewards',
+          desc: 'Share with friends and earn credit per referral',
+          href: '/dashboard',
+          gradient: 'linear-gradient(135deg, #1a3a5c 0%, #1e5f8c 50%, #0ea5c9 100%)',
+          emoji: '🎁'
+        }
+      },
+      {
+        type: 'promo_banners',
+        order: 11,
+        isActive: true,
+        title: 'Ship For Free',
+        subtitle: 'On Orders Over $100',
+        description: 'Fast delivery to your doorstep at no extra cost nationwide',
+        link: '/shop',
+        animation: 'slideUp',
+        config: {
+          tag: 'FREE DELIVERY',
+          title: 'Ship For Free',
+          subtitle: 'On Orders Over $100',
+          desc: 'Fast delivery to your doorstep at no extra cost nationwide',
+          href: '/shop',
+          gradient: 'linear-gradient(135deg, #3b1f6b 0%, #5c2fa0 50%, #7c3aed 100%)',
+          emoji: '🚚'
+        }
+      },
+      {
+        type: 'promo_banners',
+        order: 12,
+        isActive: true,
+        title: 'Flash Sale',
+        subtitle: "Today's Hot Deals",
+        description: "Grab the best prices before they're gone — limited stock only",
+        link: '/shop',
+        animation: 'slideUp',
+        config: {
+          tag: 'LIMITED TIME',
+          title: 'Flash Sale',
+          subtitle: "Today's Hot Deals",
+          desc: "Grab the best prices before they're gone — limited stock only",
+          href: '/shop',
+          gradient: 'linear-gradient(135deg, #7c1d1d 0%, #b91c1c 50%, #ef4444 100%)',
+          emoji: '⚡'
+        }
+      },
+      {
+        type: 'RecentlyViewed',
+        order: 13,
+        isActive: true,
+        title: 'Recently Viewed',
+        subtitle: 'Products you recently browsed — client-side (localStorage)',
+        animation: 'slideUp',
+        config: { limit: 8, clientSide: true }
+      },
+      {
+        type: 'RecommendedProducts',
+        order: 14,
+        isActive: true,
+        title: 'Recommended For You',
+        subtitle: 'Personalised product recommendations',
+        animation: 'slideUp',
+        config: { limit: 8, scroll: true }
       }
     ];
 
-    // Find real categories to link targetCategoryId
-    const allCategories = await this.prisma.category.findMany({
-      where: { isActive: true },
-      take: 20
-    });
-
-    const categoryMap = new Map();
-    allCategories.forEach(c => {
-      categoryMap.set(c.slug.toLowerCase(), c.id);
-      categoryMap.set(c.name.toLowerCase(), c.id);
-    });
-
-    // Update targetCategoryId if slug or name matches
-    for (const section of defaultSections) {
-      if (section.targetCategorySlug) {
-        const slug = section.targetCategorySlug.toLowerCase();
-        // Try exact slug match
-        if (categoryMap.has(slug)) {
-          (section as any).targetCategoryId = categoryMap.get(slug);
-        } else {
-          // Try to find a category that contains the slug in its name
-          const fuzzyMatch = allCategories.find(c => 
-            c.name.toLowerCase().includes(slug) || 
-            slug.includes(c.name.toLowerCase())
-          );
-          if (fuzzyMatch) {
-            (section as any).targetCategoryId = fuzzyMatch.id;
-          }
-        }
-      }
-      
-      // If still no category ID but it's a CategoryProducts section, assign a random one from available
-      if (section.type === 'CategoryProducts' && !(section as any).targetCategoryId && allCategories.length > 0) {
-        const randomIndex = Math.floor(Math.random() * allCategories.length);
-        (section as any).targetCategoryId = allCategories[randomIndex].id;
-      }
-    }
-
     const existingSections = await this.prisma.homePageSection.findMany();
-    
-    // For a cleaner transition to the new UI, we will only add if the table is empty or if we want to force new defaults
-    // If the user wants to keep their edits, we shouldn't overwrite everything.
-    // However, the user asked to fix the sections not displaying.
-    
+
     if (existingSections.length === 0) {
       for (const section of defaultSections) {
         await this.prisma.homePageSection.create({ data: section as any });
       }
-      return { success: true, message: `Initialized ${defaultSections.length} homepage sections successfully!` };
+      return { success: true, message: `Seeded ${defaultSections.length} homepage sections for the current frontend.` };
     }
 
-    // If sections exist, we want to ensure ALL prototype sections are present
-    // We compare by both Type and Title to distinguish between different CategoryProducts sections
-    const missingPrototype = defaultSections.filter(def => {
-      return !existingSections.some(ext => ext.type === def.type && ext.title === def.title);
-    });
-    
-    let addedCount = 0;
-    for (const section of missingPrototype) {
-      await this.prisma.homePageSection.create({ data: section as any });
-      addedCount++;
-    }
-
-    // Force update isActive and order for ALL default sections if they exist
-    for (const defaultSec of defaultSections) {
-      const existing = existingSections.find(s => s.type === defaultSec.type && s.title === defaultSec.title);
-      if (existing) {
+    // Upsert: add missing sections, update existing ones order/config
+    let added = 0;
+    let updated = 0;
+    for (const def of defaultSections) {
+      const existing = existingSections.find(s => s.type === def.type && s.title === def.title);
+      if (!existing) {
+        await this.prisma.homePageSection.create({ data: def as any });
+        added++;
+      } else {
         await this.prisma.homePageSection.update({
           where: { id: existing.id },
-          data: { 
-            order: defaultSec.order, 
-            isActive: true,
-            targetCategoryId: (defaultSec as any).targetCategoryId || existing.targetCategoryId,
-            targetCategorySlug: defaultSec.targetCategorySlug || existing.targetCategorySlug
-          }
+          data: { order: def.order, isActive: true, config: (def as any).config || existing.config }
         });
+        updated++;
       }
     }
 
-    return { 
-      success: true, 
-      message: addedCount > 0 ? `Restored ${addedCount} missing prototype sections.` : `Homepage layout synchronized with prototype.` 
+    return {
+      success: true,
+      message: `Sync complete — added ${added}, updated ${updated} sections.`
     };
   }
+
 
   async getBanners() {
     const banners = await this.prisma.cMSBanner.findMany({
