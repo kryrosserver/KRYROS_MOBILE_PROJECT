@@ -358,6 +358,19 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {/* Fetch status info */}
+      {!loading && !error && (
+        <div className="text-sm text-slate-500 px-1">
+          {products.length === 0
+            ? "No products returned from the database."
+            : `${products.length} products fetched — ${products.filter(p => !p.isWholesaleOnly && !p.allowCredit).length} normal, ${products.filter(p => p.isWholesaleOnly).length} wholesale, ${products.filter(p => p.allowCredit).length} credit`
+          }
+        </div>
+      )}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
+      )}
+
       {/* Tab Buttons - Touch Friendly */}
       <div className="admin-card p-2 flex gap-2 overflow-x-auto">
         <button
