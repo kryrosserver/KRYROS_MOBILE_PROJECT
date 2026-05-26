@@ -129,7 +129,7 @@ export async function middleware(request: NextRequest) {
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: 60 * 15,
+        maxAge: 60 * 60 * 24 * 7,
       });
     }
     response.cookies.set("admin_last_activity", String(now), {
@@ -147,7 +147,6 @@ export const config = {
   matcher: [
     "/",
     "/admin/:path*",
-    "/internal/:path*",
     "/login",
     "/forgot-password",
     "/reset-password",

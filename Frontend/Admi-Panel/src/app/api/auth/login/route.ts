@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 15,
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     response.cookies.set("admin_refresh_token", data.refreshToken!, {

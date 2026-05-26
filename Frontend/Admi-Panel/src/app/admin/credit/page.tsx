@@ -106,12 +106,6 @@ export default function CreditPage() {
   const [editFiles, setEditFiles] = useState<File[]>([]);
   const currentEditCategoryAttributes = CATEGORY_ATTRIBUTES[editForm.categorySlug] || CATEGORY_ATTRIBUTES["default"];
 
-  function getAdminToken(): string {
-    if (typeof document === "undefined") return "";
-    const match = document.cookie.match(/(?:^|; )admin_token=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : "";
-  }
-
   const loadData = async () => {
     setLoading(true);
     try {
