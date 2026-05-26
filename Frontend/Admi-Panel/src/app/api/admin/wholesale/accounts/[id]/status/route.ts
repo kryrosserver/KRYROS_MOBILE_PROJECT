@@ -4,9 +4,9 @@ import { requireAdminToken } from "@/lib/admin-auth";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   const token = req.cookies.get("admin_token")?.value;
   const body = await req.json();
   

@@ -178,26 +178,27 @@ export default function CMSPageSections() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/cms/pages/${slug}/sections`, { cache: "no-store" });
+      // Home uses the dedicated homepage-sections/manage route (separate DB table)
+      const url = slug === "home"
+        ? "/api/admin/cms/homepage-sections/manage"
+        : `/api/admin/cms/sections?pageSlug=${encodeURIComponent(slug)}`;
+      const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           setSections(data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)));
-        } else {
-          const defaults = (PAGE_DEFAULT_SECTIONS[slug] || [{ type: "PageContent", order: 1 }]).map((s, i) => ({
-            id: `default-${i}`, type: s.type, label: getSectionMeta(s.type).label,
-            isActive: true, order: s.order, config: {},
-          }));
-          setSections(defaults);
+          setLoading(false);
+          return;
         }
       }
-    } catch {
-      const defaults = (PAGE_DEFAULT_SECTIONS[slug] || [{ type: "PageContent", order: 1 }]).map((s, i) => ({
-        id: `default-${i}`, type: s.type, label: getSectionMeta(s.type).label,
-        isActive: true, order: s.order, config: {},
-      }));
-      setSections(defaults);
-    } finally { setLoading(false); }
+    } catch {}
+    // Fallback: show page defaults so UI is never blank
+    const defaults = (PAGE_DEFAULT_SECTIONS[slug] || [{ type: "PageContent", order: 1 }]).map((s, i) => ({
+      id: `default-${i}`, type: s.type, label: getSectionMeta(s.type).label,
+      isActive: true, order: s.order, config: {},
+    }));
+    setSections(defaults);
+    setLoading(false);
   }, [slug]);
 
   useEffect(() => { load(); }, [load]);
@@ -255,7 +256,15 @@ export default function CMSPageSections() {
     setResetting(true);
     setMsg(null);
     try {
-      const res = await fetch(`/api/admin/cms/pages/${slug}/sections/reset-seed`, { method: "POST" });
+      // Home page uses dedicated homepage-sections/reset-seed; others use backend directly
+      const resetUrl = slug === "home"
+        ? "/api/admin/cms/homepage-sections/reset-seed"
+        : `/api/admin/cms/sections/reset-seed`;
+      const res = await fetch(resetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: slug !== "home" ? JSON.stringify({ slug }) : undefined,
+      });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Error ${res.status}`);
       setMsg(`✓ ${body.message || "Reset & re-seeded successfully!"}`);

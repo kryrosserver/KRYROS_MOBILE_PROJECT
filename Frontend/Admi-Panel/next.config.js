@@ -52,7 +52,9 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
+        // Proxy public-facing API calls to backend — but NOT /api/admin/* which are
+        // handled by Next.js route handlers inside this app
+        source: "/api/(?!admin/)(:path*)",
         destination: `${backendOrigin}/api/:path*`,
       },
       {

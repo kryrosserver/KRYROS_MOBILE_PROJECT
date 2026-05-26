@@ -5,9 +5,9 @@ import { cookies } from "next/headers";
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   const token = (await cookies()).get("admin_token")?.value || "";
   const res = await fetch(`${API_BASE}/orders/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -22,9 +22,9 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   const body = await req.json();
   const token = (await cookies()).get("admin_token")?.value || "";
   const res = await fetch(`${API_BASE}/orders/${id}/status`, {

@@ -4,9 +4,9 @@ import { requireAdminToken } from "@/lib/admin-auth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ productId: string }> }
+  { params }: { params: { productId: string } }
 ) {
-  const { productId } = await params;
+  const { productId } = params;
   const token = req.cookies.get("admin_token")?.value;
   const body = await req.json();
   
@@ -24,9 +24,9 @@ export async function POST(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ productId: string }> }
+  { params }: { params: { productId: string } }
 ) {
-  const { productId } = await params;
+  const { productId } = params;
   const res = await fetch(`${API_BASE}/wholesale/prices/${productId}`, {
     cache: "no-store",
   });
