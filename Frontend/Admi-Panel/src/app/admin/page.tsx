@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Bell, Settings, Search, Calendar, ChevronDown,
   TrendingUp, TrendingDown, Minus, FileText, FileEdit,
   CreditCard, ShoppingBag, Users, Package, BarChart3,
   ShoppingCart, Activity, DollarSign, AlertCircle,
-  CheckCircle, Clock, Menu, ChevronLeft, ChevronRight,
+  CheckCircle, Clock, Menu,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import {
@@ -25,9 +25,6 @@ const ACCENT = "#12D6C5";
 const HEADER_BG = "var(--bg-secondary)";
 const ICON_BG = "var(--icon-bg)";
 const TOOLTIP_BG = "var(--tooltip-bg)";
-
-const MOBILE_BASE = 750;
-const DESKTOP_BASE = 1380;
 
 const salesData = [
   { day: "May 20", value: 800 },
@@ -117,48 +114,7 @@ function ChartTooltip({ active, payload, label }: any) {
 }
 
 export default function AdminDashboard() {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
   const { isDark } = useTheme();
-
-  useEffect(() => {
-    let raf: number;
-
-    function applyHeight(nextScale: number) {
-      if (!innerRef.current || !outerRef.current) return;
-      outerRef.current.style.height = "auto";
-      const naturalH = innerRef.current.scrollHeight;
-      const visualH = naturalH * nextScale;
-      outerRef.current.style.height = `${visualH}px`;
-    }
-
-    function recalc() {
-      if (!innerRef.current || !outerRef.current) return;
-      const vw = outerRef.current.offsetWidth || window.innerWidth;
-      const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
-      if (vw <= 599) { innerRef.current.style.width = "750px"; innerRef.current.style.transform = "none"; innerRef.current.style.transformOrigin = "top left"; if (outerRef.current) { outerRef.current.style.overflowX = "auto"; outerRef.current.style.height = "auto"; } return; } if (outerRef.current) outerRef.current.style.overflowX = "hidden"; const nextScale = Math.min(1, vw / baseW);
-
-      innerRef.current.style.width = `${baseW}px`;
-      innerRef.current.style.transform = `scale(${nextScale})`;
-      innerRef.current.style.transformOrigin = "top left";
-      setScale(nextScale);
-
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => applyHeight(nextScale));
-      });
-    }
-
-    recalc();
-    const t = setTimeout(recalc, 400);
-    window.addEventListener("resize", recalc);
-    return () => {
-      window.removeEventListener("resize", recalc);
-      cancelAnimationFrame(raf);
-      clearTimeout(t);
-    };
-  }, []);
 
   const [summary, setSummary] = useState({
     sales: 3682, orders: 102, purchases: 0,
@@ -216,392 +172,370 @@ export default function AdminDashboard() {
   const card = { background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14 };
 
   return (
-    <div ref={outerRef} style={{ overflow: "hidden", background: DARK_BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div ref={innerRef} style={{ background: DARK_BG, color: TEXT_PRIMARY }}>
+    <div className="-m-6 overflow-hidden" style={{ background: DARK_BG, color: TEXT_PRIMARY, width: "calc(100% + 48px)" }}>
 
-        {/* ── HEADER ── */}
-        <header style={{
-          background: HEADER_BG,
-          borderBottom: `1px solid ${BORDER}`,
-          height: 60,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-          gap: 12,
-        }}>
-          {/* Left: hamburger + logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 2, display: "flex", alignItems: "center" }}>
-              <Menu style={{ width: 20, height: 20 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: 8,
-                background: "linear-gradient(135deg, #12D6C5 0%, #3B82F6 50%, #F59E0B 100%)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: 800, fontSize: 14, color: "#fff", flexShrink: 0,
-              }}>K</div>
-              <span style={{ fontSize: 16, fontWeight: 800, color: TEXT_PRIMARY, letterSpacing: "-0.3px" }}>KRYROS</span>
+      {/* ── HEADER ── */}
+      <header className="flex items-center justify-between px-5 h-[60px] gap-3" style={{
+        background: HEADER_BG,
+        borderBottom: `1px solid ${BORDER}`,
+      }}>
+        {/* Left: hamburger + logo */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button className="flex items-center bg-transparent border-none cursor-pointer p-0.5" style={{ color: TEXT_SECONDARY }}>
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-[7px]">
+            <div style={{
+              width: 30, height: 30, borderRadius: 8,
+              background: "linear-gradient(135deg, #12D6C5 0%, #3B82F6 50%, #F59E0B 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 800, fontSize: 14, color: "#fff",
+            }}>K</div>
+            <span className="text-base font-extrabold tracking-tight" style={{ color: TEXT_PRIMARY }}>KRYROS</span>
+          </div>
+        </div>
+
+        {/* Center: search (hidden on mobile) */}
+        <div className="hidden md:block" style={{ flex: 1, maxWidth: 320, position: "relative" }}>
+          <Search className="absolute left-[11px] top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: TEXT_SECONDARY }} />
+          <input placeholder="Search anything..." className="w-full outline-none" style={{
+            background: CARD_BG, border: `1px solid ${BORDER}`,
+            borderRadius: 10, padding: "7px 38px 7px 32px", color: TEXT_PRIMARY, fontSize: 12,
+          }} />
+          <span className="absolute right-[9px] top-1/2 -translate-y-1/2 text-[9px] px-[5px] py-[2px] rounded" style={{ color: TEXT_SECONDARY, background: ICON_BG }}>⌘K</span>
+        </div>
+
+        {/* Right: date + bell + avatar */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button className="hidden md:flex items-center gap-1.5 whitespace-nowrap cursor-pointer" style={{
+            background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 8,
+            padding: "6px 10px", color: TEXT_SECONDARY, fontSize: 11,
+          }}>
+            <Calendar className="w-[13px] h-[13px]" />
+            May 20 – May 26, 2025
+            <ChevronDown className="w-[11px] h-[11px]" />
+          </button>
+
+          <button className="relative bg-transparent border-none cursor-pointer p-1" style={{ color: TEXT_SECONDARY }}>
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-0 right-0 rounded-full w-[15px] h-[15px] text-[9px] flex items-center justify-center text-white font-bold"
+              style={{ background: "#EF4444" }}>3</span>
+          </button>
+
+          <div className="rounded-full shrink-0 cursor-pointer flex items-center justify-center font-bold text-sm"
+            style={{ width: 32, height: 32, background: ACCENT, color: "#0B1320" }}>K</div>
+        </div>
+      </header>
+
+      {/* ── BODY ── */}
+      <div className="p-4 flex flex-col gap-3.5">
+
+        {/* Welcome */}
+        <div>
+          <h2 className="text-xl font-bold mb-1" style={{ color: TEXT_PRIMARY }}>Welcome back, Admin! 👋</h2>
+          <p className="text-[13px]" style={{ color: TEXT_SECONDARY }}>Here&apos;s what&apos;s happening with your business today.</p>
+        </div>
+
+        {/* Stat Cards — 5 cols desktop, 2 cols mobile */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+          {statCards.map((c, i) => (
+            <div key={i} className="flex flex-col gap-1 p-3 pb-2" style={{ ...card }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-center shrink-0" style={{
+                  width: 28, height: 28, borderRadius: 7, background: `${c.color}20`,
+                }}>
+                  <Activity className="w-[13px] h-[13px]" style={{ color: c.color }} />
+                </div>
+                <span className="text-[10px] font-bold" style={{
+                  color: c.up === true ? "#22C55E" : c.up === false ? "#EF4444" : TEXT_SECONDARY,
+                }}>{c.change}</span>
+              </div>
+              <span className="text-[10px] font-semibold leading-tight block whitespace-pre-line" style={{ color: TEXT_SECONDARY }}>{c.title}</span>
+              <div className="text-lg font-extrabold" style={{ color: TEXT_PRIMARY }}>{c.value}</div>
+              <div className="flex items-center gap-[3px]">
+                {c.up === true && <TrendingUp className="w-2.5 h-2.5" style={{ color: "#22C55E" }} />}
+                {c.up === false && <TrendingDown className="w-2.5 h-2.5" style={{ color: "#EF4444" }} />}
+                {c.up === null && <Minus className="w-2.5 h-2.5" style={{ color: TEXT_SECONDARY }} />}
+                <span className="text-[9px]" style={{ color: TEXT_SECONDARY }}>vs last week</span>
+              </div>
+              <MiniSparkline color={c.color} up={c.up === true} />
+            </div>
+          ))}
+        </div>
+
+        {/* Charts row — 3 cols desktop, stacked mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-3">
+
+          {/* Sales Analytics */}
+          <div className="p-4" style={{ ...card }}>
+            <div className="flex items-start justify-between mb-2.5">
+              <div>
+                <div className="text-[13px] font-bold" style={{ color: TEXT_PRIMARY }}>Sales Analytics</div>
+                <div className="flex items-baseline gap-1.5 mt-[3px]">
+                  <span className="text-xl font-extrabold" style={{ color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</span>
+                  <span className="text-[11px] font-semibold" style={{ color: "#22C55E" }}>↑ 18.6% vs last week</span>
+                </div>
+              </div>
+              <button className="flex items-center gap-1 shrink-0 cursor-pointer" style={{
+                background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 7,
+                padding: "5px 10px", color: TEXT_SECONDARY, fontSize: 11,
+              }}>
+                This Week <ChevronDown className="w-[11px] h-[11px]" />
+              </button>
+            </div>
+            <ResponsiveContainer width="100%" height={150}>
+              <AreaChart data={salesData} margin={{ top: 6, right: 2, left: -22, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="day" tick={{ fill: TEXT_SECONDARY, fontSize: 9 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: TEXT_SECONDARY, fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
+                <Tooltip content={<ChartTooltip />} />
+                <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)"
+                  dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Sales by Channel */}
+          <div className="p-4" style={{ ...card }}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[13px] font-bold" style={{ color: TEXT_PRIMARY }}>Sales by Channel</div>
+              <button className="flex items-center gap-1 cursor-pointer" style={{
+                background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 7,
+                padding: "5px 10px", color: TEXT_SECONDARY, fontSize: 11,
+              }}>
+                This Week <ChevronDown className="w-[11px] h-[11px]" />
+              </button>
+            </div>
+            <div className="relative h-[140px]">
+              <ResponsiveContainer width="100%" height={140}>
+                <PieChart>
+                  <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={42} outerRadius={62} dataKey="value" paddingAngle={3}>
+                    {salesByChannel.map((e, i) => <Cell key={i} fill={e.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: any) => `${v}%`}
+                    contentStyle={{ background: TOOLTIP_BG, border: `1px solid ${BORDER}`, borderRadius: 8 }}
+                    labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <div className="text-xs font-extrabold" style={{ color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
+                <div className="text-[9px]" style={{ color: TEXT_SECONDARY }}>Total Sales</div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 mt-1.5">
+              {salesByChannel.map((ch, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-[5px]">
+                    <div className="rounded-full shrink-0" style={{ width: 7, height: 7, background: ch.color }} />
+                    <span className="text-[10px]" style={{ color: TEXT_SECONDARY }}>{ch.name}</span>
+                    <span className="text-[10px]" style={{ color: TEXT_SECONDARY }}>{ch.value}%</span>
+                  </div>
+                  <span className="text-[10px] font-bold" style={{ color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Center: search */}
-          <div style={{ flex: 1, maxWidth: 320, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: TEXT_SECONDARY, width: 14, height: 14 }} />
-            <input placeholder="Search anything..." style={{
-              width: "100%", background: CARD_BG, border: `1px solid ${BORDER}`,
-              borderRadius: 10, padding: "7px 38px 7px 32px", color: TEXT_PRIMARY, fontSize: 12, outline: "none",
-            }} />
-            <span style={{
-              position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)",
-              fontSize: 9, color: TEXT_SECONDARY, background: ICON_BG, padding: "2px 5px", borderRadius: 4,
-            }}>⌘K</span>
-          </div>
-
-          {/* Right: date + bell + avatar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            <button style={{
-              display: "flex", alignItems: "center", gap: 6, background: CARD_BG,
-              border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 10px",
-              color: TEXT_SECONDARY, fontSize: 11, cursor: "pointer", whiteSpace: "nowrap",
-            }}>
-              <Calendar style={{ width: 13, height: 13 }} />
-              May 20 – May 26, 2025
-              <ChevronDown style={{ width: 11, height: 11 }} />
-            </button>
-
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT_SECONDARY, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{
-                position: "absolute", top: 0, right: 0, background: "#EF4444",
-                borderRadius: "50%", width: 15, height: 15, fontSize: 9,
-                display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700,
-              }}>3</span>
-            </button>
-
-            <div style={{
-              width: 32, height: 32, borderRadius: "50%", background: ACCENT,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0, cursor: "pointer",
-            }}>K</div>
-          </div>
-        </header>
-
-        {/* ── BODY ── */}
-        <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 14 }}>
-
-          {/* Welcome */}
-          <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 4 }}>Welcome back, Admin! 👋</h2>
-            <p style={{ fontSize: 13, color: TEXT_SECONDARY }}>Here's what's happening with your business today.</p>
-          </div>
-
-          {/* Stat Cards — 5 columns */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-            {statCards.map((c, i) => (
-              <div key={i} style={{ ...card, padding: "12px 12px 8px", display: "flex", flexDirection: "column", gap: 5 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 7, background: `${c.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Activity style={{ width: 13, height: 13, color: c.color }} />
+          {/* Order Progress */}
+          <div className="p-4" style={{ ...card }}>
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="text-[13px] font-bold" style={{ color: TEXT_PRIMARY }}>Order Progress</div>
+              <Link href="/admin/orders" className="text-[11px] no-underline" style={{ color: ACCENT }}>View All</Link>
+            </div>
+            <div className="flex justify-center mb-2.5">
+              <div className="relative" style={{ width: 100, height: 100 }}>
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r={ringR} fill="none" stroke="var(--icon-bg)" strokeWidth="9" />
+                  <circle cx="50" cy="50" r={ringR} fill="none" stroke={ACCENT} strokeWidth="9"
+                    strokeLinecap="round"
+                    strokeDasharray={`${ringCircumference}`}
+                    strokeDashoffset={`${ringOffset}`}
+                    transform="rotate(-90 50 50)"
+                    style={{ transition: "stroke-dashoffset 1s ease" }} />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-lg font-extrabold" style={{ color: TEXT_PRIMARY }}>{completionPct}%</div>
+                  <div className="text-[9px] text-center leading-tight" style={{ color: TEXT_SECONDARY }}>Completion<br />Rate</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {orderProgress.map((p, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="rounded-full shrink-0" style={{ width: 7, height: 7, background: p.color }} />
+                    <span className="text-[10px]" style={{ color: TEXT_SECONDARY }}>{p.label}</span>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: c.up === true ? "#22C55E" : c.up === false ? "#EF4444" : TEXT_SECONDARY }}>{c.change}</span>
+                  <span className="text-[11px] font-bold" style={{ color: TEXT_PRIMARY }}>{p.value}</span>
                 </div>
-                <span style={{ fontSize: 10, color: TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3, display: "block", whiteSpace: "pre-line" }}>{c.title}</span>
-                <div style={{ fontSize: 18, fontWeight: 800, color: TEXT_PRIMARY }}>{c.value}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                  {c.up === true && <TrendingUp style={{ width: 10, height: 10, color: "#22C55E" }} />}
-                  {c.up === false && <TrendingDown style={{ width: 10, height: 10, color: "#EF4444" }} />}
-                  {c.up === null && <Minus style={{ width: 10, height: 10, color: TEXT_SECONDARY }} />}
-                  <span style={{ fontSize: 9, color: TEXT_SECONDARY }}>vs last week</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Tables row — 3 cols desktop, stacked mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+          {/* Recent Orders */}
+          <div className="p-3.5" style={{ ...card }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>Recent Orders</div>
+              <Link href="/admin/orders" className="text-[10px] no-underline" style={{ color: ACCENT }}>View All</Link>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {recentOrders.map((o, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="flex items-center justify-center shrink-0 rounded-lg" style={{
+                    width: 30, height: 30, background: ICON_BG,
+                  }}>
+                    <ShoppingCart className="w-[13px] h-[13px]" style={{ color: ACCENT }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-bold" style={{ color: TEXT_PRIMARY }}>{o.id}</div>
+                    <div className="text-[9px] truncate" style={{ color: TEXT_SECONDARY }}>{o.customer}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[9px] mb-0.5" style={{ color: TEXT_SECONDARY }}>{o.time}</div>
+                    <div className="text-[10px] font-semibold mb-0.5" style={{ color: TEXT_PRIMARY }}>{formatPrice(o.amount)}</div>
+                    <span className="text-[9px] font-bold px-1.5 py-[2px] rounded-[20px]" style={{
+                      color: statusColors[o.status], background: statusBg[o.status],
+                    }}>{o.status}</span>
+                  </div>
                 </div>
-                <MiniSparkline color={c.color} up={c.up === true} />
+              ))}
+            </div>
+          </div>
+
+          {/* Top Selling Products */}
+          <div className="p-3.5" style={{ ...card }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>Top Selling Products</div>
+              <Link href="/admin/products" className="text-[10px] no-underline" style={{ color: ACCENT }}>View All</Link>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {topProducts.map((p, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="flex items-center justify-center shrink-0 rounded-lg" style={{
+                    width: 30, height: 30, background: ICON_BG,
+                  }}>
+                    <Package className="w-[13px] h-[13px]" style={{ color: "#8B5CF6" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-bold truncate" style={{ color: TEXT_PRIMARY }}>{p.name}</div>
+                    <div className="text-[9px]" style={{ color: TEXT_SECONDARY }}>{p.sub}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[9px] mb-0.5" style={{ color: TEXT_SECONDARY }}>{p.sold} Sold</div>
+                    <div className="text-[10px] font-bold" style={{ color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* New Customers */}
+          <div className="p-3.5" style={{ ...card }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs font-bold" style={{ color: TEXT_PRIMARY }}>New Customers</div>
+              <Link href="/admin/users" className="text-[10px] no-underline" style={{ color: ACCENT }}>View All</Link>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {newCustomers.map((c, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="flex items-center justify-center shrink-0 rounded-full text-white text-[11px] font-bold"
+                    style={{ width: 30, height: 30, background: c.color }}>{c.initials}</div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold truncate" style={{ color: TEXT_PRIMARY }}>{c.name}</div>
+                    <div className="text-[9px]" style={{ color: TEXT_SECONDARY }}>{c.date}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activities — 5 cols desktop, 2 cols mobile */}
+        <div className="p-3.5" style={{ ...card }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[13px] font-bold" style={{ color: TEXT_PRIMARY }}>Recent Activities</div>
+            <Link href="/admin/reports" className="text-[11px] no-underline" style={{ color: ACCENT }}>View All</Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+            {recentActivities.map((a, i) => (
+              <div key={i} className="flex items-start gap-2 p-2.5 rounded-[10px]" style={{
+                background: ICON_BG, border: `1px solid ${BORDER}`,
+              }}>
+                <div className="flex items-center justify-center shrink-0 rounded-lg mt-px" style={{
+                  width: 28, height: 28, background: `${a.color}20`,
+                }}>
+                  <a.icon className="w-[13px] h-[13px]" style={{ color: a.color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-bold mb-0.5 leading-tight" style={{ color: TEXT_PRIMARY }}>{a.title}</div>
+                  <div className="text-[9px] truncate mb-0.5" style={{ color: TEXT_SECONDARY }}>{a.sub}</div>
+                  <div className="text-[9px]" style={{ color: TEXT_SECONDARY, opacity: 0.7 }}>{a.time}</div>
+                </div>
               </div>
             ))}
           </div>
-
-          {/* Charts row — 3 columns: Sales Analytics | Sales by Channel | Order Progress */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 12 }}>
-
-            {/* Sales Analytics */}
-            <div style={{ ...card, padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales Analytics</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 3 }}>
-                    <span style={{ fontSize: 20, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</span>
-                    <span style={{ fontSize: 11, color: "#22C55E", fontWeight: 600 }}>↑ 18.6% vs last week</span>
-                  </div>
-                </div>
-                <button style={{ display: "flex", alignItems: "center", gap: 4, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 7, padding: "5px 10px", color: TEXT_SECONDARY, fontSize: 11, cursor: "pointer", flexShrink: 0 }}>
-                  This Week <ChevronDown style={{ width: 11, height: 11 }} />
-                </button>
-              </div>
-              <ResponsiveContainer width="100%" height={150}>
-                <AreaChart data={salesData} margin={{ top: 6, right: 2, left: -22, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
-                      <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" tick={{ fill: TEXT_SECONDARY, fontSize: 9 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: TEXT_SECONDARY, fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="value" stroke={ACCENT} strokeWidth={2} fill="url(#salesGrad)"
-                    dot={{ r: 3, fill: ACCENT, strokeWidth: 0 }} activeDot={{ r: 5, fill: ACCENT }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Sales by Channel */}
-            <div style={{ ...card, padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Sales by Channel</div>
-                <button style={{ display: "flex", alignItems: "center", gap: 4, background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 7, padding: "5px 10px", color: TEXT_SECONDARY, fontSize: 11, cursor: "pointer" }}>
-                  This Week <ChevronDown style={{ width: 11, height: 11 }} />
-                </button>
-              </div>
-              <div style={{ position: "relative", height: 140 }}>
-                <ResponsiveContainer width="100%" height={140}>
-                  <PieChart>
-                    <Pie data={salesByChannel} cx="50%" cy="50%" innerRadius={42} outerRadius={62} dataKey="value" paddingAngle={3}>
-                      {salesByChannel.map((e, i) => <Cell key={i} fill={e.color} />)}
-                    </Pie>
-                    <Tooltip formatter={(v: any) => `${v}%`}
-                      contentStyle={{ background: TOOLTIP_BG, border: `1px solid ${BORDER}`, borderRadius: 8 }}
-                      labelStyle={{ color: TEXT_SECONDARY }} itemStyle={{ color: TEXT_PRIMARY }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: TEXT_PRIMARY }}>{formatPrice(summary.sales)}</div>
-                  <div style={{ fontSize: 9, color: TEXT_SECONDARY }}>Total Sales</div>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
-                {salesByChannel.map((ch, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: ch.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>{ch.name}</span>
-                      <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>{ch.value}%</span>
-                    </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(ch.amount)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Order Progress */}
-            <div style={{ ...card, padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Order Progress</div>
-                <Link href="/admin/orders" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
-              </div>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-                <div style={{ position: "relative", width: 100, height: 100 }}>
-                  <svg width="100" height="100" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r={ringR} fill="none" stroke="var(--icon-bg)" strokeWidth="9" />
-                    <circle cx="50" cy="50" r={ringR} fill="none" stroke={ACCENT} strokeWidth="9"
-                      strokeLinecap="round"
-                      strokeDasharray={`${ringCircumference}`}
-                      strokeDashoffset={`${ringOffset}`}
-                      transform="rotate(-90 50 50)"
-                      style={{ transition: "stroke-dashoffset 1s ease" }} />
-                  </svg>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: TEXT_PRIMARY }}>{completionPct}%</div>
-                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.3 }}>Completion<br />Rate</div>
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {orderProgress.map((p, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 10, color: TEXT_SECONDARY }}>{p.label}</span>
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: TEXT_PRIMARY }}>{p.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Tables row — 3 columns: Recent Orders | Top Selling | New Customers */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-
-            {/* Recent Orders */}
-            <div style={{ ...card, padding: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Orders</div>
-                <Link href="/admin/orders" style={{ fontSize: 10, color: ACCENT, textDecoration: "none" }}>View All</Link>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {recentOrders.map((o, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 7, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <ShoppingCart style={{ width: 13, height: 13, color: ACCENT }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY }}>{o.id}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer}</div>
-                    </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, marginBottom: 2 }}>{o.time}</div>
-                      <div style={{ fontSize: 10, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 2 }}>{formatPrice(o.amount)}</div>
-                      <span style={{ fontSize: 9, fontWeight: 700, color: statusColors[o.status], background: statusBg[o.status], padding: "2px 6px", borderRadius: 20 }}>{o.status}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Top Selling Products */}
-            <div style={{ ...card, padding: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>Top Selling Products</div>
-                <Link href="/admin/products" style={{ fontSize: 10, color: ACCENT, textDecoration: "none" }}>View All</Link>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {topProducts.map((p, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 7, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Package style={{ width: 13, height: 13, color: "#8B5CF6" }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY }}>{p.sub}</div>
-                    </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY, marginBottom: 2 }}>{p.sold} Sold</div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY }}>{formatPrice(p.amount)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* New Customers */}
-            <div style={{ ...card, padding: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: TEXT_PRIMARY }}>New Customers</div>
-                <Link href="/admin/users" style={{ fontSize: 10, color: ACCENT, textDecoration: "none" }}>View All</Link>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {newCustomers.map((c, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: c.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 11, color: "#fff", flexShrink: 0 }}>
-                      {c.initials}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
-                      <div style={{ fontSize: 9, color: TEXT_SECONDARY }}>{c.date}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Recent Activities — full-width horizontal row */}
-          <div style={{ ...card, padding: "14px 16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY }}>Recent Activities</div>
-              <Link href="/admin/reports" style={{ fontSize: 11, color: ACCENT, textDecoration: "none" }}>View All</Link>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-              {recentActivities.map((a, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, background: ICON_BG, borderRadius: 10, border: `1px solid ${BORDER}`, padding: "10px" }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 7, background: `${a.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                    <a.icon style={{ width: 13, height: 13, color: a.color }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 2, lineHeight: 1.3 }}>{a.title}</div>
-                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>{a.sub}</div>
-                    <div style={{ fontSize: 9, color: TEXT_SECONDARY, opacity: 0.7 }}>{a.time}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions — full-width single horizontal row */}
-          <div style={{ ...card, padding: "14px 16px" }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 12 }}>Quick Actions</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 8 }}>
-              {quickActions.map((a, i) => (
-                <Link key={i} href={a.href} style={{
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                  padding: "10px 4px", background: ICON_BG, borderRadius: 10,
-                  border: `1px solid ${BORDER}`, textDecoration: "none",
-                }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${a.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <a.icon style={{ width: 15, height: 15, color: a.color }} />
-                  </div>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: TEXT_SECONDARY, textAlign: "center", lineHeight: 1.3 }}>{a.label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Financial Summary */}
-          <div style={{ paddingBottom: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: TEXT_PRIMARY, marginBottom: 10 }}>Financial Summary</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-              {[
-                { label: "Outstanding\nBalance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
-                { label: "Outstanding\nPayment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
-                { label: "Total Expenses", value: formatPrice(summary.expense), sub: "This month", icon: DollarSign, color: "#EF4444" },
-                { label: "Profit / Loss", value: formatPrice(summary.profit), sub: "This month", icon: TrendingUp, color: "#22C55E", highlight: true },
-              ].map((item, i) => (
-                <div key={i} style={{
-                  ...card,
-                  padding: "16px",
-                  background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
-                  border: item.highlight ? "none" : `1px solid ${BORDER}`,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <item.icon style={{ width: 14, height: 14, color: item.highlight ? "#fff" : item.color }} />
-                    </div>
-                    <span style={{ fontSize: 10, color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY, fontWeight: 600, lineHeight: 1.3, whiteSpace: "pre-line" }}>{item.label}</span>
-                  </div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
-                  <div style={{ fontSize: 10, color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY, marginTop: 3 }}>{item.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Swipe navigation */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "10px 4px 20px",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, color: TEXT_SECONDARY, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
-              <ChevronLeft style={{ width: 16, height: 16 }} />
-              <span>Swipe Left</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              {[0, 1, 2, 3, 4].map(i => (
-                <div key={i} style={{
-                  width: i === 3 ? 20 : 7, height: 7, borderRadius: 4,
-                  background: i === 3 ? ACCENT : "var(--icon-bg)",
-                  border: `1px solid ${i === 3 ? ACCENT : BORDER}`,
-                  transition: "width 0.2s",
-                }} />
-              ))}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, color: TEXT_SECONDARY, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
-              <span>Swipe Right</span>
-              <ChevronRight style={{ width: 16, height: 16 }} />
-            </div>
-          </div>
-
         </div>
+
+        {/* Quick Actions — 8 cols desktop, 4 cols mobile */}
+        <div className="p-3.5" style={{ ...card }}>
+          <div className="text-[13px] font-bold mb-3" style={{ color: TEXT_PRIMARY }}>Quick Actions</div>
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+            {quickActions.map((a, i) => (
+              <Link key={i} href={a.href} className="flex flex-col items-center gap-[5px] p-2.5 px-1 rounded-[10px] no-underline" style={{
+                background: ICON_BG, border: `1px solid ${BORDER}`,
+              }}>
+                <div className="flex items-center justify-center rounded-lg" style={{
+                  width: 32, height: 32, background: `${a.color}18`,
+                }}>
+                  <a.icon className="w-[15px] h-[15px]" style={{ color: a.color }} />
+                </div>
+                <span className="text-[9px] font-semibold text-center leading-tight" style={{ color: TEXT_SECONDARY }}>{a.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Financial Summary — 4 cols desktop, 2 cols mobile */}
+        <div className="pb-2">
+          <div className="text-[13px] font-bold mb-2.5" style={{ color: TEXT_PRIMARY }}>Financial Summary</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+            {[
+              { label: "Outstanding\nBalance", value: formatPrice(summary.outstandingBalance), sub: "No outstanding amounts", icon: AlertCircle, color: "#3B82F6" },
+              { label: "Outstanding\nPayment", value: formatPrice(summary.outstandingPayment), sub: "No pending payments", icon: Clock, color: "#F59E0B" },
+              { label: "Total Expenses", value: formatPrice(summary.expense), sub: "This month", icon: DollarSign, color: "#EF4444" },
+              { label: "Profit / Loss", value: formatPrice(summary.profit), sub: "This month", icon: TrendingUp, color: "#22C55E", highlight: true },
+            ].map((item, i) => (
+              <div key={i} className="p-4" style={{
+                ...card,
+                background: item.highlight ? "linear-gradient(135deg, #0a6a5f, #12D6C5)" : CARD_BG,
+                border: item.highlight ? "none" : `1px solid ${BORDER}`,
+              }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center justify-center shrink-0 rounded-lg" style={{
+                    width: 30, height: 30, background: item.highlight ? "rgba(255,255,255,0.2)" : `${item.color}20`,
+                  }}>
+                    <item.icon className="w-3.5 h-3.5" style={{ color: item.highlight ? "#fff" : item.color }} />
+                  </div>
+                  <span className="text-[10px] font-semibold leading-tight whitespace-pre-line" style={{
+                    color: item.highlight ? "rgba(255,255,255,0.85)" : TEXT_SECONDARY,
+                  }}>{item.label}</span>
+                </div>
+                <div className="text-lg font-extrabold" style={{ color: item.highlight ? "#fff" : TEXT_PRIMARY }}>{item.value}</div>
+                <div className="text-[10px] mt-[3px]" style={{ color: item.highlight ? "rgba(255,255,255,0.65)" : TEXT_SECONDARY }}>{item.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );

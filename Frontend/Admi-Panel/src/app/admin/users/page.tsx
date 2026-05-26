@@ -12,8 +12,6 @@ import {
 import { useTheme } from "@/providers/ThemeProvider";
 
 const ACCENT = "#12D6C5";
-const MOBILE_BASE = 750;
-const DESKTOP_BASE = 1380;
 
 const ROLE_COLORS: Record<string, string> = {
   SUPER_ADMIN: "#12D6C5",
@@ -67,8 +65,6 @@ type User = {
 const ROWS_PER_PAGE = 10;
 
 export default function UsersPage() {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -89,33 +85,7 @@ export default function UsersPage() {
   const ICON_BG = "var(--icon-bg)";
   const HOVER = "var(--hover-bg)";
 
-  useEffect(() => {
-    let raf: number;
-    function applyHeight(s: number) {
-      if (!innerRef.current || !outerRef.current) return;
-      outerRef.current.style.height = "auto";
-      const naturalH = innerRef.current.scrollHeight;
-      const visualH = naturalH * s;
-      const isMob = window.innerWidth < 1024;
-      const avail = isMob ? window.innerHeight - 64 : Infinity;
-      outerRef.current.style.height = `${visualH}px`;
-    }
-    function recalc() {
-      if (!innerRef.current || !outerRef.current) return;
-      const vw = outerRef.current.offsetWidth || window.innerWidth;
-      const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE;
-      if (vw <= 599) { innerRef.current.style.width = "750px"; innerRef.current.style.transform = "none"; innerRef.current.style.transformOrigin = "top left"; if (outerRef.current) { outerRef.current.style.overflowX = "auto"; outerRef.current.style.height = "auto"; } return; } if (outerRef.current) outerRef.current.style.overflowX = "hidden"; const s = Math.min(1, vw / baseW);
-      innerRef.current.style.width = `${baseW}px`;
-      innerRef.current.style.transform = `scale(${s})`;
-      innerRef.current.style.transformOrigin = "top left";
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s)));
-    }
-    recalc();
-    const t = setTimeout(recalc, 400);
-    window.addEventListener("resize", recalc);
-    return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
-  }, [users]);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     setLoading(true);
@@ -185,8 +155,8 @@ export default function UsersPage() {
   })();
 
   return (
-    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div ref={innerRef} style={{ background: BG, color: TEXT }}>
+    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div style={{ background: BG, color: TEXT }}>
 
         {/* ── HEADER ── */}
         <header style={{

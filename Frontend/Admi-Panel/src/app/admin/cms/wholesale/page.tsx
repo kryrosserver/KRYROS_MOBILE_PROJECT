@@ -8,8 +8,6 @@ import { Save, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "luci
 import { useTheme } from "@/providers/ThemeProvider";
 
 const ACCENT = "#12D6C5";
-const MOBILE_BASE = 750;
-const DESKTOP_BASE = 1380;
 const DEFAULT = {
   hero: { heading: "Buy More, Save More!", subheading: "Exclusive wholesale prices on thousands of products.", ctaText: "Explore Products", ctaLink: "/shop" },
   steps: [{ title: "Browse Products", desc: "Explore products available for wholesale" }, { title: "Add to Quote", desc: "Add products to your quote list" }, { title: "Submit Quote", desc: "Our team will review your request" }, { title: "Confirm & Order", desc: "Confirm the quote and place your order" }],
@@ -18,19 +16,12 @@ const DEFAULT = {
 };
 
 export default function WholesaleCMSPage() {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
   const BG = "var(--bg-primary)"; const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
   const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)"; const HOVER = "var(--hover-bg)";
   const HEADER_BG = "var(--bg-secondary)"; const ICON_BG = "var(--icon-bg)";
 
-  useEffect(() => {
-    let raf: number;
-    function applyHeight(s: number) { if (!innerRef.current || !outerRef.current) return; outerRef.current.style.height = "auto"; outerRef.current.style.height = `${innerRef.current.scrollHeight * s}px`; }
-    function recalc() { if (!innerRef.current || !outerRef.current) return; const vw = outerRef.current.offsetWidth || window.innerWidth; const baseW = vw < 960 ? MOBILE_BASE : DESKTOP_BASE; if (vw <= 599) { innerRef.current.style.width = "750px"; innerRef.current.style.transform = "none"; innerRef.current.style.transformOrigin = "top left"; if (outerRef.current) { outerRef.current.style.overflowX = "auto"; outerRef.current.style.height = "auto"; } return; } if (outerRef.current) outerRef.current.style.overflowX = "hidden"; const s = Math.min(1, vw / baseW); innerRef.current.style.width = `${baseW}px`; innerRef.current.style.transform = `scale(${s})`; innerRef.current.style.transformOrigin = "top left"; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => requestAnimationFrame(() => applyHeight(s))); }
-    recalc(); const t = setTimeout(recalc, 400); window.addEventListener("resize", recalc); return () => { window.removeEventListener("resize", recalc); cancelAnimationFrame(raf); clearTimeout(t); };
-  }, []);
+  useEffect(() => {}, []);
 
   const [data, setData] = useState(DEFAULT);
   const [loading, setLoading] = useState(true);
@@ -56,8 +47,8 @@ export default function WholesaleCMSPage() {
   const tabs = [{ id: "hero", label: "Hero Section" }, { id: "steps", label: "Steps" }, { id: "features", label: "Features" }, { id: "quote", label: "Quote CTA" }];
 
   return (
-    <div ref={outerRef} style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div ref={innerRef} style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
+      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>

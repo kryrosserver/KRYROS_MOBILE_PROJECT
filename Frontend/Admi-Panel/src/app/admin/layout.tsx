@@ -120,7 +120,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg-primary)" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "var(--bg-primary)" }}>
       {/* Mobile sidebar trigger — invisible overlay over each page's own hamburger icon */}
       <button
         className="lg:hidden fixed top-0 left-0 z-[200]"
@@ -375,7 +375,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main
-        className={`pt-0 transition-all duration-300 ${
+        className={`pt-0 transition-all duration-300 overflow-x-hidden ${
           sidebarOpen ? "lg:ml-64" : "lg:ml-20"
         }`}
       >
