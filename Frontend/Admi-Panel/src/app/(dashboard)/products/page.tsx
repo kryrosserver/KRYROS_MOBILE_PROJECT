@@ -296,7 +296,8 @@ export default function ProductsPage() {
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || "Failed to load products");
-      const items = Array.isArray(body?.products) ? body.products : (body?.data || body || []);
+      const raw = body?.products ?? body?.data ?? body;
+      const items = Array.isArray(raw) ? raw : [];
       setProducts(items);
     } catch (e: any) {
       setError(e?.message || "Failed to load products");
@@ -396,7 +397,7 @@ export default function ProductsPage() {
         ) : (
           (tab === "featured" ? products.filter(p => !!p.isFeatured) : 
           tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
-          products.filter(p => !p.isWholesaleOnly && !p.allowCredit)).map((p) => (
+          products).map((p) => (
             <div key={p.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
               <div className="flex gap-3 mb-3">
                 <div className="h-16 w-16 rounded-lg overflow-hidden border bg-slate-50 shrink-0">
@@ -491,7 +492,7 @@ export default function ProductsPage() {
               ) : (
                 (tab === "featured" ? products.filter(p => !!p.isFeatured) : 
                 tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
-                products.filter(p => !p.isWholesaleOnly && !p.allowCredit)).map((p) => (
+                products).map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="h-12 w-12 rounded-lg overflow-hidden border bg-slate-50">
