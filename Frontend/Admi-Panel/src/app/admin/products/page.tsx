@@ -101,7 +101,7 @@ export default function ProductsPage() {
           `Server error ${res.status} — please try refreshing.`
         );
       }
-      setProducts(Array.isArray(body) ? body : body.items ?? body.products ?? []);
+      setProducts(Array.isArray(body) ? body : body.data ?? body.items ?? body.products ?? []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load products");
     } finally { setLoading(false); }
