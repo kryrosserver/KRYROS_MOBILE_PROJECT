@@ -645,7 +645,7 @@ export default function CMSPagesManager() {
           {/* ── MODAL ── */}
           {showModal && (
             <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
-              <div style={{ width: "100%", maxWidth: 640, maxHeight: "90vh", overflowY: "auto", borderRadius: 20, background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 40px 100px rgba(0,0,0,0.4)" }}>
+              <div className="w-full max-w-[640px]" style={{ maxHeight: "90vh", overflowY: "auto", borderRadius: 20, background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 40px 100px rgba(0,0,0,0.4)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: `1px solid ${BORDER}` }}>
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{editingPage ? "Edit Page" : "Add New Page"}</h2>
                   <button onClick={() => setShowModal(false)}

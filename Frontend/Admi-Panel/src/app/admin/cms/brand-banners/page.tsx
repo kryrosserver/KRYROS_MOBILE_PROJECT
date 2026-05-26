@@ -128,7 +128,8 @@ export default function BrandBannersPage() {
           )}
 
           <div style={{ ...card, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
                   {["Brand", "Tagline", "Status", "Actions"].map((h, i) => (
@@ -163,6 +164,7 @@ export default function BrandBannersPage() {
                     ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>

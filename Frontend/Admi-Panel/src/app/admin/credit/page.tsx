@@ -588,7 +588,7 @@ export default function CreditPage() {
         {/* ── PLAN MODAL ── */}
         {isPlanModalOpen && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
-            <div style={{ background: CARD, borderRadius: 20, boxShadow: "0 25px 60px rgba(0,0,0,0.25)", width: "100%", maxWidth: 520, overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+            <div className="max-w-lg w-full mx-auto" style={background: CARD, borderRadius: 20, boxShadow: "0 25px 60px rgba(0,0,0,0.25)", width: "100%"overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh"}>
               <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: HOVER }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{editingPlan ? "Edit Credit Plan" : "Create New Credit Plan"}</h3>
                 <button onClick={() => setIsPlanModalOpen(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 20, height: 20 }} /></button>
@@ -638,7 +638,7 @@ export default function CreditPage() {
         {/* ── EDIT PRODUCT MODAL ── */}
         {editItem && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
-            <div style={{ background: CARD, borderRadius: 20, boxShadow: "0 25px 60px rgba(0,0,0,0.25)", width: "100%", maxWidth: 900, overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+            <div className="w-full md:max-w-4xl" style={background: CARD, borderRadius: 20, boxShadow: "0 25px 60px rgba(0,0,0,0.25)", width: "100%"overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh"}>
               <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: HOVER }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>Edit Installment Product</h3>
                 <button onClick={() => setEditItem(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 20, height: 20 }} /></button>

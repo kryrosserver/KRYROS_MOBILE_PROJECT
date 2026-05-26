@@ -426,7 +426,7 @@ export default function WalletPage() {
               )}
 
               <div style={{ ...card, overflow: "hidden" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
                       {["Reference", "Description", "Amount", "Created", "Status", "Actions"].map((h, i) => (
@@ -461,7 +461,7 @@ export default function WalletPage() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             </div>
           )}
