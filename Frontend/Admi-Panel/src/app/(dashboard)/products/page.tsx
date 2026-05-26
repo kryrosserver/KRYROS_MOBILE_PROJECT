@@ -290,9 +290,13 @@ export default function ProductsPage() {
       url.searchParams.set("take", "15");
       url.searchParams.set("skip", String(skipCount));
       
+      const token = getAdminToken();
       const res = await fetch(url.toString(), { 
-        cache: "default", // Allow some caching for faster navigation
-        headers: { "Pragma": "no-cache" } 
+        cache: "no-store",
+        headers: { 
+          "Pragma": "no-cache",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        } 
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || "Failed to load products");
