@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const { withSentryConfig } = require("@sentry/nextjs");
 
-const backendOrigin = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://kryrosbackend-rwb2.onrender.com";
+const backendOrigin = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://kryrosbackend-rwb2.onrender.com").replace(/\/api$/, "");
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },

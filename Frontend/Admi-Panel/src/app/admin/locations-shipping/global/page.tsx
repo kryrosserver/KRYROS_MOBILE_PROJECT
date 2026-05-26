@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, Edit, Trash2, Search, RefreshCw, Settings2, ChevronLeft, X, ChevronRight, Truck } from "lucide-react";
+import { Plus, Edit, Trash2, Search, RefreshCw, Settings2, ChevronLeft, X, ChevronRight, Truck,
+  ArrowLeft
+} from "lucide-react";
 import Link from "next/link";
 
 const ACCENT = "#8B5CF6";

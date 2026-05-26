@@ -1,5 +1,6 @@
-import Link from "next/link";
 "use client";
+
+import Link from "next/link";
 
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState, useRef } from "react";

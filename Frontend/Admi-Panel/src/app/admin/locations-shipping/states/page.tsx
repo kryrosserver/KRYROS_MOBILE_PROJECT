@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, Edit, Trash2, Search, RefreshCw, Map as MapIcon, ChevronLeft, X, ChevronRight, Globe } from "lucide-react";
+import { Plus, Edit, Trash2, Search, RefreshCw, Map as MapIcon, ChevronLeft, X, ChevronRight, Globe,
+  ArrowLeft
+} from "lucide-react";
 import Link from "next/link";
 
 const ACCENT = "#3B82F6";

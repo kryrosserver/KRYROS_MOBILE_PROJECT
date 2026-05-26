@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Save, ToggleLeft } from "lucide-react";
+import { ChevronLeft, Save, ToggleLeft, ArrowLeft } from "lucide-react";
 import { ScaledPage } from "@/components/ScaledPage";
 
 const DEFAULT = {

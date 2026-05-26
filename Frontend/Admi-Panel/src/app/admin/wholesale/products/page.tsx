@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Package, Plus, Trash2, Edit, X, RefreshCw, ChevronLeft,
-  Search, ShoppingCart, Tag, Layers, ChevronRight, ChevronDown, ChevronUp
+  Search, ShoppingCart, Tag, Layers, ChevronRight, ChevronDown, ChevronUp,
+  ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";

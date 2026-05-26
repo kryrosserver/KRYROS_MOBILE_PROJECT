@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import {
   Shield, Lock, RefreshCw, CheckCircle2, AlertCircle,
   ChevronLeft, Save, Clock, UserCheck, Smartphone,
-  QrCode, KeyRound, Eye, EyeOff, Copy, Check
+  QrCode, KeyRound, Eye, EyeOff, Copy, Check,
+  ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 

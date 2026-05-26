@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Printer, Plus, Trash2, Save, ChevronLeft } from "lucide-react";
+import { Printer, Plus, Trash2, Save, ChevronLeft,
+  ArrowLeft
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useInvoiceStore, LineItem } from "@/providers/InvoiceStore";

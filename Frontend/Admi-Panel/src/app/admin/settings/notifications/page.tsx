@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, Mail, Check, ChevronLeft, Save, ShoppingCart, CreditCard, Smartphone, Package } from "lucide-react";
+import { Bell, Mail, Check, ChevronLeft, Save, ShoppingCart, CreditCard, Smartphone, Package,
+  ArrowLeft
+} from "lucide-react";
 import Link from "next/link";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 

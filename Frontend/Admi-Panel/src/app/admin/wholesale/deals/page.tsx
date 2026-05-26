@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Star, RefreshCw, Plus, Trash2, Image as ImageIcon, Package,
-  X, ChevronLeft, Tag, ToggleLeft, ToggleRight, AlertTriangle
+  X, ChevronLeft, Tag, ToggleLeft, ToggleRight, AlertTriangle,
+  ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";

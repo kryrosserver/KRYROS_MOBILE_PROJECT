@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Palette, Layout, Check, ChevronLeft, Save, Sun, Moon, Monitor } from "lucide-react";
+import { Palette, Layout, Check, ChevronLeft, Save, Sun, Moon, Monitor,
+  ArrowLeft
+} from "lucide-react";
 import Link from "next/link";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 

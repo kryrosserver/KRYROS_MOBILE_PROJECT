@@ -8,7 +8,7 @@ import {
   RefreshCw, X, Layers, Image as ImageIcon, Grid, List,
   Type, Settings, Palette, PlayCircle, ShieldCheck,
   CreditCard, Layout, Package, ChevronRight, MoreVertical,
-  Home, Save, Info
+  Home, Save, Info, ArrowLeft
 } from "lucide-react";
 
 interface SectionType {
