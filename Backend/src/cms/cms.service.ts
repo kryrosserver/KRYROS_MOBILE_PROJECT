@@ -434,6 +434,103 @@ export class CMSService {
     return this.prisma.cMSPage.delete({ where: { id } });
   }
 
+  async seedAllPages() {
+    const pages = [
+      { title: 'Home',              slug: 'home',               isActive: true },
+      { title: 'Shop',              slug: 'shop',               isActive: true },
+      { title: 'About Us',          slug: 'about-us',           isActive: true },
+      { title: 'Contact Us',        slug: 'contact-us',         isActive: true },
+      { title: 'FAQ',               slug: 'faq',                isActive: true },
+      { title: 'How It Works',      slug: 'how-it-works',       isActive: true },
+      { title: 'Wholesale',         slug: 'wholesale',          isActive: true },
+      { title: 'Get Now (BNPL)',     slug: 'get-now',            isActive: true },
+      { title: 'Terms & Conditions',slug: 'terms-conditions',   isActive: true },
+      { title: 'Privacy Policy',    slug: 'privacy-policy',     isActive: true },
+      { title: 'Refund Policy',     slug: 'refund-policy',      isActive: true },
+      { title: 'Shipping Policy',   slug: 'shipping-policy',    isActive: true },
+      { title: 'Cart',              slug: 'cart',               isActive: true },
+      { title: 'Checkout',          slug: 'checkout',           isActive: true },
+      { title: 'Track Order',       slug: 'track-order',        isActive: true },
+      { title: 'My Account',        slug: 'account',            isActive: true },
+      { title: 'Maintenance Mode',  slug: 'maintenance-mode',   isActive: false },
+    ];
+    let added = 0, existing = 0;
+    for (const p of pages) {
+      const found = await this.prisma.cMSPage.findUnique({ where: { slug: p.slug } });
+      if (!found) { await this.prisma.cMSPage.create({ data: p }); added++; }
+      else { existing++; }
+    }
+    return { success: true, message: `Synced ${pages.length} pages — ${added} added, ${existing} already existed.` };
+  }
+
+  async resetAndSeedSectionsBySlug(slug: string) {
+    // Sections per page matching the current frontend exactly
+    const PAGE_SECTIONS: Record<string, { type: string; title: string; subtitle?: string; order: number; isActive: boolean; config?: any }[]> = {
+      shop: [
+        { type: 'MembersBanner',    title: 'Members Banner',    subtitle: 'Join KRYROS for exclusive deals', order: 1, isActive: true, config: { source: 'site-config', key: 'members-banner' } },
+        { type: 'ShopFilters',      title: 'Shop Filters',      subtitle: 'Filter & sort products',          order: 2, isActive: true, config: {} },
+        { type: 'ProductGrid',      title: 'Product Grid',      subtitle: 'All products listing',            order: 3, isActive: true, config: { limit: 20 } },
+      ],
+      'product-detail': [
+        { type: 'ProductGallery',   title: 'Product Gallery',   subtitle: 'Images & media',        order: 1, isActive: true, config: {} },
+        { type: 'RelatedProducts',  title: 'Related Products',  subtitle: 'You may also like',     order: 2, isActive: true, config: { limit: 6 } },
+        { type: 'Testimonials',     title: 'Testimonials',      subtitle: 'Customer reviews',      order: 3, isActive: true, config: {} },
+      ],
+      wholesale: [
+        { type: 'WholesaleHero',    title: 'Wholesale Hero',    subtitle: 'Buy More, Save More',   order: 1, isActive: true, config: { source: 'site-config', key: 'wholesale' } },
+        { type: 'WholesaleFeatures',title: 'Wholesale Features',subtitle: 'Benefits & steps',      order: 2, isActive: true, config: {} },
+      ],
+      faq: [
+        { type: 'PageHero',         title: 'FAQ Hero',          subtitle: 'Frequently Asked Questions', order: 1, isActive: true, config: {} },
+        { type: 'FAQAccordion',     title: 'FAQ Accordion',     subtitle: 'Questions & answers',        order: 2, isActive: true, config: {} },
+      ],
+      'contact-us': [
+        { type: 'PageHero',         title: 'Contact Hero',      subtitle: 'Get in touch with us', order: 1, isActive: true, config: {} },
+        { type: 'ContactForm',      title: 'Contact Form',      subtitle: 'Send us a message',    order: 2, isActive: true, config: {} },
+      ],
+      'get-now': [
+        { type: 'GetNowHero',       title: 'Get Now Hero',      subtitle: 'Buy Now, Pay Later',   order: 1, isActive: true, config: {} },
+        { type: 'GetNowFeatures',   title: 'Get Now Features',  subtitle: 'BNPL benefits',        order: 2, isActive: true, config: {} },
+      ],
+      'about-us': [
+        { type: 'PageHero',         title: 'About Hero',        subtitle: 'Our story',            order: 1, isActive: true, config: {} },
+        { type: 'PageContent',      title: 'About Content',     subtitle: 'Who we are',           order: 2, isActive: true, config: {} },
+      ],
+      'how-it-works': [
+        { type: 'PageHero',         title: 'How It Works Hero', subtitle: 'Simple steps',         order: 1, isActive: true, config: {} },
+        { type: 'PageContent',      title: 'How It Works',      subtitle: 'Step by step guide',   order: 2, isActive: true, config: {} },
+      ],
+      'terms-conditions':  [{ type: 'PageContent', title: 'Terms & Conditions', order: 1, isActive: true, config: {} }],
+      'privacy-policy':    [{ type: 'PageContent', title: 'Privacy Policy',     order: 1, isActive: true, config: {} }],
+      'refund-policy':     [{ type: 'PageContent', title: 'Refund Policy',      order: 1, isActive: true, config: {} }],
+      'shipping-policy':   [{ type: 'PageContent', title: 'Shipping Policy',    order: 1, isActive: true, config: {} }],
+      'track-order':       [{ type: 'PageContent', title: 'Track Order',        order: 1, isActive: true, config: {} }],
+      cart:                [{ type: 'PageContent', title: 'Cart',               order: 1, isActive: true, config: {} }],
+      checkout:            [{ type: 'PageContent', title: 'Checkout',           order: 1, isActive: true, config: {} }],
+      account:             [{ type: 'PageContent', title: 'My Account',         order: 1, isActive: true, config: {} }],
+    };
+
+    // Home page sections live in homepage_sections, not cms_sections
+    if (slug === 'home') {
+      return this.resetAndSeedHomePageSections();
+    }
+
+    const sections = PAGE_SECTIONS[slug];
+    if (!sections) {
+      return { success: false, message: `No section definition found for page slug: ${slug}` };
+    }
+
+    // Delete all existing cms_sections for this page slug
+    await this.prisma.cMSSection.deleteMany({ where: { pageSlug: slug } as any });
+
+    // Re-seed
+    for (const s of sections) {
+      await this.prisma.cMSSection.create({ data: { ...s, pageSlug: slug } as any });
+    }
+
+    return { success: true, message: `Reset & seeded ${sections.length} sections for page: ${slug}` };
+  }
+
   // Sections management
   async listSections() {
     return this.prisma.cMSSection.findMany({ orderBy: { order: 'asc' } });

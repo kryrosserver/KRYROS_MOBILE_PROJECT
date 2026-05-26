@@ -163,6 +163,8 @@ export default function CMSPagesManager() {
   const [showModal, setShowModal]       = useState(false);
   const [editingPage, setEditingPage]   = useState<CMSPage | null>(null);
   const [saving, setSaving]             = useState(false);
+  const [syncingPages, setSyncingPages] = useState(false);
+  const [syncMsg, setSyncMsg]           = useState<string | null>(null);
   const [openMenu, setOpenMenu]         = useState<string | null>(null);
   const menuRef   = useRef<HTMLDivElement>(null);
   const outerRef  = useRef<HTMLDivElement>(null);
@@ -247,6 +249,23 @@ export default function CMSPagesManager() {
   const openAdd = () => { setEditingPage(null); setForm({ title: "", slug: "", content: "", metaTitle: "", metaDescription: "", isActive: true }); setShowModal(true); };
   const openEdit = (p: CMSPage) => { setEditingPage(p); setForm({ title: p.title, slug: p.slug, content: p.content || "", metaTitle: p.metaTitle || "", metaDescription: p.metaDescription || "", isActive: p.isActive }); setShowModal(true); setOpenMenu(null); };
 
+  const handleSyncAllPages = async () => {
+    setSyncingPages(true);
+    setSyncMsg(null);
+    try {
+      const res = await fetch("/api/admin/cms/pages/sync-all", { method: "POST" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body?.error || `Error ${res.status}`);
+      setSyncMsg(`✓ ${body.message || "All pages synced to database!"}`);
+      await load(); // Refresh page list
+    } catch (err: any) {
+      setSyncMsg(`✗ ${err.message || "Sync failed"}`);
+    } finally {
+      setSyncingPages(false);
+      setTimeout(() => setSyncMsg(null), 5000);
+    }
+  };
+
   const handleSave = async () => {
     if (!form.title || !form.slug) return alert("Title and slug are required");
     setSaving(true);
@@ -326,6 +345,17 @@ export default function CMSPagesManager() {
               <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>CMS & Pages</h2>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {syncMsg && (
+                <span style={{ fontSize: 12, color: syncMsg.startsWith("✓") ? "#16C784" : "#EF4444", fontWeight: 600, maxWidth: 260 }}>{syncMsg}</span>
+              )}
+              <button
+                onClick={handleSyncAllPages}
+                disabled={syncingPages}
+                title="Sync all platform pages into the CMS database so each page can have sections managed under it"
+                style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(18,214,197,0.12)", border: "1px solid rgba(18,214,197,0.3)", borderRadius: 10, padding: "9px 16px", color: "#12D6C5", fontWeight: 700, fontSize: 13, cursor: syncingPages ? "not-allowed" : "pointer", opacity: syncingPages ? 0.6 : 1 }}>
+                <RefreshCw style={{ width: 14, height: 14, ...(syncingPages ? { animation: "spin 1s linear infinite" } : {}) }} />
+                {syncingPages ? "Syncing..." : "Sync All Pages"}
+              </button>
               <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
                 <Plus style={{ width: 15, height: 15 }} /> Add New Page
               </button>

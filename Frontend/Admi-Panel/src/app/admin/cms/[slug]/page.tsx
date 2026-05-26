@@ -250,18 +250,18 @@ export default function CMSPageSections() {
   const handleDragEnd = () => setDragIdx(null);
 
   const handleResetSeed = async () => {
-    if (!confirm("This will DELETE all current homepage sections and re-seed the correct sections for the current frontend.\n\nYour hero banners and other CMS data are SAFE.\n\nContinue?")) return;
+    const pageLabel2 = slug === "home" ? "homepage" : `${slug} page`;
+    if (!confirm(`This will DELETE all current sections for the ${pageLabel2} and re-seed the correct sections for the current frontend.\n\nYour hero banners and other CMS data are SAFE.\n\nContinue?`)) return;
     setResetting(true);
     setMsg(null);
     try {
-      const res = await fetch("/api/admin/cms/homepage-sections/reset-seed", { method: "POST" });
+      const res = await fetch(`/api/admin/cms/pages/${slug}/sections/reset-seed`, { method: "POST" });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body?.error || `Error ${res.status}`);
       setMsg(`✓ ${body.message || "Reset & re-seeded successfully!"}`);
-      // Reload sections
-      const r2 = await fetch(`/api/admin/cms/pages/${slug}/sections`, { cache: "no-store" });
-      const data = await r2.json().catch(() => []);
-      setSections(Array.isArray(data) ? data : []);
+      // Reload sections after a short delay to let the DB commit settle
+      await new Promise(r => setTimeout(r, 600));
+      await load();
     } catch (err: any) {
       setMsg(`✗ ${err.message || "Reset failed"}`);
     } finally {
@@ -370,16 +370,14 @@ export default function CMSPageSections() {
                 style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
                 <Plus style={{ width: 14, height: 14 }} /> Add Section
               </button>
-              {slug === "home" && (
-                <button
-                  onClick={handleResetSeed}
-                  disabled={resetting}
-                  title="Wipe old sections & re-seed the correct sections for the current frontend. Hero banners are NOT deleted."
-                  style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "9px 16px", color: "#EF4444", fontSize: 13, cursor: resetting ? "not-allowed" : "pointer", fontWeight: 700, opacity: resetting ? 0.6 : 1 }}>
-                  <RefreshCw style={{ width: 14, height: 14, ...(resetting ? { animation: "spin 1s linear infinite" } : {}) }} />
-                  {resetting ? "Resetting..." : "Reset & Sync Sections"}
-                </button>
-              )}
+              <button
+                onClick={handleResetSeed}
+                disabled={resetting}
+                title={`Wipe current sections for this page and re-seed the correct ones for the current frontend. Other CMS data is NOT affected.`}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "9px 16px", color: "#EF4444", fontSize: 13, cursor: resetting ? "not-allowed" : "pointer", fontWeight: 700, opacity: resetting ? 0.6 : 1 }}>
+                <RefreshCw style={{ width: 14, height: 14, ...(resetting ? { animation: "spin 1s linear infinite" } : {}) }} />
+                {resetting ? "Resetting..." : "Reset & Sync Sections"}
+              </button>
               <button
                 onClick={handleSaveOrder}
                 disabled={saving}

@@ -181,6 +181,24 @@ export class CMSController {
     return this.cmsService.seedSections();
   }
 
+  @Post('pages/seed-all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upsert all platform pages into cms_pages table' })
+  seedAllPages() {
+    return this.cmsService.seedAllPages();
+  }
+
+  @Post('sections/reset-seed')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Wipe cms_sections for a given pageSlug and re-seed correct sections' })
+  resetAndSeedSectionsBySlug(@Body() body: { slug: string }) {
+    return this.cmsService.resetAndSeedSectionsBySlug(body.slug);
+  }
+
   @Get('pages/:slug')
   @ApiOperation({ summary: 'Get CMS page by slug' })
   getPage(@Param('slug') slug: string) {
