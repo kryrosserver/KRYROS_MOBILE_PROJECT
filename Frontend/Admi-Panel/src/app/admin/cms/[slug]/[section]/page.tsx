@@ -135,19 +135,54 @@ export default function CMSSectionEditor() {
             bgImage: cfg.bgImage || cfg.image || "",
             items: cfg.items || [],
           }));
-          if (cfg.slides?.length) setSlides(cfg.slides);
-          else if (cfg.banners?.length) setSlides(cfg.banners);
-          else setSlides([]);
           if (cfg.autoSlide !== undefined) setAutoSlide(cfg.autoSlide);
           if (cfg.slideInterval) setSlideInterval(cfg.slideInterval);
           if (cfg.display) setDisplaySettings(cfg.display);
+
+          // For hero-slider: always load from cms_banners (the real source of truth)
+          if (sectionKey === "hero-slider") {
+            try {
+              const bannerRes = await fetch("/internal/cms/banners/manage", { cache: "no-store", credentials: "same-origin" });
+              if (bannerRes.ok) {
+                const bannerData = await bannerRes.json();
+                const list = Array.isArray(bannerData) ? bannerData : (bannerData?.banners ?? []);
+                setSlides(list);
+              } else {
+                // Fallback to section config slides
+                if (cfg.slides?.length) setSlides(cfg.slides);
+                else if (cfg.banners?.length) setSlides(cfg.banners);
+                else setSlides([]);
+              }
+            } catch {
+              if (cfg.slides?.length) setSlides(cfg.slides);
+              else if (cfg.banners?.length) setSlides(cfg.banners);
+              else setSlides([]);
+            }
+          } else {
+            if (cfg.slides?.length) setSlides(cfg.slides);
+            else if (cfg.banners?.length) setSlides(cfg.banners);
+            else setSlides([]);
+          }
         } else {
           setSection({ id: null, type: sectionKey, label: sectionLabel, isActive: true, config: {} });
-          setSlides([]);
+          // Even with no section record, load cms_banners for hero-slider
+          if (sectionKey === "hero-slider") {
+            try {
+              const bannerRes = await fetch("/internal/cms/banners/manage", { cache: "no-store", credentials: "same-origin" });
+              if (bannerRes.ok) {
+                const bannerData = await bannerRes.json();
+                const list = Array.isArray(bannerData) ? bannerData : (bannerData?.banners ?? []);
+                setSlides(list);
+              } else setSlides([]);
+            } catch { setSlides([]); }
+          } else {
+            setSlides([]);
+          }
         }
       }
     } catch {
       setSection({ id: null, type: sectionKey, label: sectionLabel, isActive: true, config: {} });
+      setSlides([]);
     } finally { setLoading(false); }
   }, [slug, sectionKey, sectionLabel]);
 
@@ -166,6 +201,21 @@ export default function CMSSectionEditor() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ config, isActive }),
         });
+      }
+      // For hero-slider: also push slide active-status changes back to cms_banners
+      if (sectionKey === "hero-slider") {
+        await Promise.allSettled(
+          slides
+            .filter((s: any) => s.id && !String(s.id).startsWith("slide-"))
+            .map((s: any) =>
+              fetch(`/internal/cms/banners/${s.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify({ isActive: s.isActive }),
+              })
+            )
+        );
       }
       setMsg("Changes saved successfully!");
       setTimeout(() => setMsg(null), 3000);
@@ -190,9 +240,42 @@ export default function CMSSectionEditor() {
   };
 
   const updateSlide = (idx: number, updates: any) => setSlides(prev => prev.map((s, i) => i === idx ? { ...s, ...updates } : s));
-  const deleteSlide = (idx: number) => { setSlides(prev => prev.filter((_, i) => i !== idx)); if (editingSlideIdx === idx) { setEditingSlide(null); setEditingSlideIdx(null); } };
+  const deleteSlide = (idx: number) => {
+    const slide = slides[idx];
+    setSlides(prev => prev.filter((_, i) => i !== idx));
+    if (editingSlideIdx === idx) { setEditingSlide(null); setEditingSlideIdx(null); }
+    // For hero-slider: delete from cms_banners
+    if (sectionKey === "hero-slider" && slide?.id && !String(slide.id).startsWith("slide-")) {
+      if (confirm("Delete this banner permanently?")) {
+        fetch(`/internal/cms/banners/${slide.id}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+      }
+    }
+  };
   const openEditSlide = (s: any, idx: number) => { setEditingSlide({ ...s }); setEditingSlideIdx(idx); };
-  const saveSlideEdit = () => { if (editingSlideIdx !== null && editingSlide) { updateSlide(editingSlideIdx, editingSlide); } setEditingSlide(null); setEditingSlideIdx(null); };
+  const saveSlideEdit = async () => {
+    if (editingSlideIdx !== null && editingSlide) {
+      updateSlide(editingSlideIdx, editingSlide);
+      // For hero-slider: persist changes directly to cms_banners
+      if (sectionKey === "hero-slider" && editingSlide.id && !String(editingSlide.id).startsWith("slide-")) {
+        const payload: any = {
+          title: editingSlide.title ?? editingSlide.heading ?? "",
+          subtitle: editingSlide.subtitle ?? editingSlide.description ?? "",
+          image: editingSlide.image ?? "",
+          link: editingSlide.ctaLink ?? editingSlide.link ?? "",
+          linkText: editingSlide.ctaText ?? editingSlide.linkText ?? "Shop Now",
+          isActive: editingSlide.isActive ?? true,
+        };
+        fetch(`/internal/cms/banners/${editingSlide.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+      }
+    }
+    setEditingSlide(null);
+    setEditingSlideIdx(null);
+  };
 
   const isSlidesType = ["hero-slider", "promo-banners", "dual-banner-section"].includes(sectionKey);
   const isItemsType = ["trust-badges", "wholesale-features", "get-now-features"].includes(sectionKey);
@@ -327,16 +410,36 @@ export default function CMSSectionEditor() {
                         {isSlidesType ? `Manage the slides displayed in the ${sectionLabel.toLowerCase()}` : isItemsType ? "Manage the items in this section" : "Edit the main content for this section"}
                       </p>
                     </div>
-                    {(isSlidesType || isItemsType) && (
-                      <button
-                        onClick={addSlide}
-                        style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                        <Plus style={{ width: 13, height: 13 }} /> Add {isSlidesType ? "Slide" : "Item"}
-                      </button>
-                    )}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {sectionKey === "hero-slider" && (
+                        <Link
+                          href="/admin/cms/homepage/edit-hero-banner"
+                          style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(18,214,197,0.1)", border: `1px solid ${ACCENT}`, borderRadius: 10, padding: "8px 14px", color: ACCENT, fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
+                          <ImageIcon style={{ width: 13, height: 13 }} /> Manage Banners
+                        </Link>
+                      )}
+                      {(isSlidesType || isItemsType) && (
+                        <button
+                          onClick={addSlide}
+                          style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                          <Plus style={{ width: 13, height: 13 }} /> Add {isSlidesType ? "Slide" : "Item"}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ padding: 20 }}>
+                    {sectionKey === "hero-slider" && (
+                      <div style={{ marginBottom: 14, padding: "10px 14px", background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.25)", borderRadius: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <svg style={{ width: 15, height: 15, color: "#3B82F6", flexShrink: 0, marginTop: 1 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 700, color: "#3B82F6", margin: "0 0 2px" }}>Hero banners loaded from your Banners library</p>
+                          <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: 0 }}>
+                            Showing {slides.length} existing banner{slides.length !== 1 ? "s" : ""}. To add new banners or upload images, click <strong style={{ color: "var(--text-primary)" }}>"Manage Banners"</strong> in the top-right.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {isTextType ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                         <div>
@@ -382,7 +485,7 @@ export default function CMSSectionEditor() {
                                     {slide.heading || slide.title || `Slide ${idx + 1}`}
                                   </div>
                                   <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>
-                                    {slide.description ? slide.description.slice(0, 50) + (slide.description.length > 50 ? "…" : "") : "No description"}
+                                    {(slide.subtitle || slide.description) ? (slide.subtitle || slide.description).slice(0, 50) + ((slide.subtitle || slide.description).length > 50 ? "…" : "") : "No description"}
                                   </div>
                                 </div>
                                 <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: slide.isActive !== false ? "rgba(22,199,132,0.1)" : "rgba(239,68,68,0.1)", color: slide.isActive !== false ? "#16C784" : "#EF4444", border: `1px solid ${slide.isActive !== false ? "rgba(22,199,132,0.3)" : "rgba(239,68,68,0.3)"}`, flexShrink: 0 }}>
@@ -539,7 +642,7 @@ export default function CMSSectionEditor() {
                           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.2))" }} />
                           <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>
                             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.7)", margin: "0 0 2px" }}>{form.sectionTitle || sectionLabel}</p>
-                            <p style={{ fontSize: 9, fontWeight: 700, color: "#fff", margin: "0 0 4px", lineHeight: 1.2, maxWidth: 80 }}>{(slides[0]?.heading || form.mainHeading || "Your Heading").slice(0, 30)}</p>
+                            <p style={{ fontSize: 9, fontWeight: 700, color: "#fff", margin: "0 0 4px", lineHeight: 1.2, maxWidth: 80 }}>{(slides[0]?.title || slides[0]?.heading || form.mainHeading || "Your Heading").slice(0, 30)}</p>
                             <div style={{ display: "flex", gap: 4 }}>
                               <span style={{ padding: "2px 5px", background: ACCENT, borderRadius: 3, fontSize: 6, color: "#0B1320", fontWeight: 700 }}>{form.primaryBtnText || "Shop Now"}</span>
                               <span style={{ padding: "2px 5px", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 3, fontSize: 6, color: "#fff" }}>{form.secondaryBtnText || "Explore"}</span>
