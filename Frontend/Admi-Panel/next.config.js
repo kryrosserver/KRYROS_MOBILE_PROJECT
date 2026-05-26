@@ -49,6 +49,14 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendOrigin}/api/:path*`,
+      },
+    ];
+  },
 };
 
 const sentryWebpackPluginOptions = {
