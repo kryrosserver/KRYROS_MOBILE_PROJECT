@@ -247,7 +247,7 @@ export default function BrandsPage() {
           )}
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: "Total Brands", value: brands.length, change: "+12.4%", up: true, color: ACCENT, icon: Tag },
               { label: "Active Brands", value: active.length, change: "+11.8%", up: true, color: "#22C55E", icon: CheckCircle2 },

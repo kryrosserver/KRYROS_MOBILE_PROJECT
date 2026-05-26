@@ -239,7 +239,7 @@ export default function CreditPage() {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: "Active Accounts", value: summaryData?.credit?.activeAccounts || 0, change: "+6.2%", up: true, color: "#3B82F6", icon: CreditCard },
               { label: "Total Outstanding", value: formatPrice(summaryData?.credit?.totalOutstanding || 0), change: "+14.5%", up: true, color: ACCENT, icon: DollarSign },
@@ -351,15 +351,15 @@ export default function CreditPage() {
 
               {showCreate && (
                 <div style={{ ...card, padding: "24px", border: `2px solid ${ACCENT}30` }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left column */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                       <div><label style={labelStyle}>Product Name</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inpStyle(HOVER)} placeholder="e.g. iPhone 15 Pro (Credit)" /></div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div><label style={labelStyle}>SKU</label><input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} style={inpStyle(HOVER)} placeholder="CR-IP15" /></div>
                         <div><label style={labelStyle}>Cash Price (USD)</label><input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} style={inpStyle(HOVER)} placeholder="0.00" /></div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div><label style={labelStyle}>Min Deposit</label><input type="number" value={form.creditMinimum} onChange={e => setForm({ ...form, creditMinimum: e.target.value })} style={inpStyle(HOVER)} placeholder="e.g. 200" /></div>
                         <div>
                           <label style={labelStyle}>Category</label>
@@ -430,7 +430,7 @@ export default function CreditPage() {
                           setForm({ ...form, images: [...form.images, ...pv] });
                           setFiles(prev => [...prev, ...fl]);
                         }} style={{ fontSize: 12, color: TEXT2, marginBottom: 10 }} />
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           {form.images.map((src, i) => (
                             <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
                               <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -543,7 +543,7 @@ export default function CreditPage() {
                   <Plus style={{ width: 15, height: 15 }} /> Create New Plan
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 {plans.map(plan => (
                   <div key={plan.id} style={{ ...card, padding: "20px", borderTop: `4px solid ${ACCENT}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
@@ -595,11 +595,11 @@ export default function CreditPage() {
               </div>
               <div style={{ padding: 24, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
                 <div><label style={labelStyle}>Plan Name</label><input placeholder="e.g. Standard 6-Month Plan" style={inpStyle(HOVER)} value={planForm.name} onChange={e => setPlanModalForm({ ...planForm, name: e.target.value })} /></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div><label style={labelStyle}>Duration (Months)</label><input type="number" style={inpStyle(HOVER)} value={planForm.duration} onChange={e => setPlanModalForm({ ...planForm, duration: Number(e.target.value) })} /></div>
                   <div><label style={labelStyle}>Interest Rate (%)</label><input type="number" style={inpStyle(HOVER)} value={planForm.interestRate} onChange={e => setPlanModalForm({ ...planForm, interestRate: Number(e.target.value) })} /></div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div><label style={labelStyle}>Min Price (USD)</label><input type="number" style={inpStyle(HOVER)} value={planForm.minimumAmount} onChange={e => setPlanModalForm({ ...planForm, minimumAmount: Number(e.target.value) })} /></div>
                   <div><label style={labelStyle}>Max Price (USD)</label><input type="number" style={inpStyle(HOVER)} value={planForm.maximumAmount} onChange={e => setPlanModalForm({ ...planForm, maximumAmount: Number(e.target.value) })} /></div>
                 </div>
@@ -647,11 +647,11 @@ export default function CreditPage() {
                 {/* Left */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div><label style={labelStyle}>Product Name</label><input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} style={inpStyle(HOVER)} /></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     <div><label style={labelStyle}>SKU</label><input value={editForm.sku} onChange={e => setEditForm({ ...editForm, sku: e.target.value })} style={inpStyle(HOVER)} /></div>
                     <div><label style={labelStyle}>Price (USD)</label><input type="number" value={editForm.price} onChange={e => setEditForm({ ...editForm, price: e.target.value })} style={inpStyle(HOVER)} /></div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     <div><label style={labelStyle}>Min Deposit</label><input type="number" value={editForm.creditMinimum} onChange={e => setEditForm({ ...editForm, creditMinimum: e.target.value })} style={inpStyle(HOVER)} /></div>
                     <div><label style={labelStyle}>Category</label><select value={editForm.categorySlug} onChange={e => setEditForm({ ...editForm, categorySlug: e.target.value })} style={{ ...inpStyle(HOVER), appearance: "none" }}>{categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}</select></div>
                   </div>
@@ -703,7 +703,7 @@ export default function CreditPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
                     <label style={labelStyle}>Product Images</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3" style={{ , gap: 8, marginBottom: 10 }}>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3" style={{ gap: 8, marginBottom: 10 }}>
                       {editForm.images.map((src, i) => (
                         <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
                           <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

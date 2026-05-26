@@ -360,7 +360,7 @@ export default function CMSPagesManager() {
           </div>
 
           {/* ── STAT CARDS ── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
             {statCards.map((c, i) => (
               <div key={i} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -656,7 +656,7 @@ export default function CMSPagesManager() {
                   </button>
                 </div>
                 <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                     <div>
                       <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Page Title *</label>
                       <input value={form.title} onChange={e => { const title = e.target.value; const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); setForm(f => ({ ...f, title, ...(!editingPage ? { slug } : {}) })); }}
@@ -676,7 +676,7 @@ export default function CMSPagesManager() {
                     <textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
                       rows={6} style={{ ...inp, height: "auto", width: "100%", resize: "none", boxSizing: "border-box" }} placeholder="Write your page content here..." />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                     <div>
                       <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Meta Title</label>
                       <input value={form.metaTitle} onChange={e => setForm(f => ({ ...f, metaTitle: e.target.value }))} style={{ ...inp, width: "100%", height: 40, boxSizing: "border-box" }} placeholder="SEO title" />

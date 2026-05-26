@@ -95,7 +95,7 @@ export default function WholesaleCMSPage() {
 
           {tab === "hero" && (
             <div style={{ ...card, padding: 24 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {[{ label: "Heading", key: "heading" }, { label: "Subheading", key: "subheading" }, { label: "CTA Text", key: "ctaText" }, { label: "CTA Link", key: "ctaLink" }].map(f => (
                   <div key={f.key}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>
@@ -131,7 +131,7 @@ export default function WholesaleCMSPage() {
 
           {tab === "quote" && (
             <div style={{ ...card, padding: 24 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {[{ label: "Title", key: "title" }, { label: "Subtitle", key: "subtitle" }, { label: "CTA Text", key: "ctaText" }, { label: "CTA Link", key: "ctaLink" }].map(f => (
                   <div key={f.key}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: TEXT2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{f.label}</div>

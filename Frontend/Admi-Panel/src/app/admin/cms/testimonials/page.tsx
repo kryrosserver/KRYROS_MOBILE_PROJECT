@@ -144,7 +144,7 @@ export default function TestimonialsPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {loading ? [...Array(3)].map((_, i) => <div key={i} style={{ ...card, padding: 20, height: 160 }}><div style={{ height: "100%", borderRadius: 10, background: HOVER }} /></div>) :
               sections.length === 0 ? (
                 <div style={{ gridColumn: "span 3", padding: 48, textAlign: "center", color: TEXT2, fontSize: 13 }}>

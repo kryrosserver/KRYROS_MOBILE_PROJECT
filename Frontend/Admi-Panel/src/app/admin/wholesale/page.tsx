@@ -119,7 +119,7 @@ export default function WholesaleDashboardPage() {
           </div>
 
           {/* Summary stat strip */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {[
               { label: "Active Accounts",    value: counts.accounts, color: ACCENT },
               { label: "Active Deals",        value: counts.deals,    color: "#F59E0B" },
@@ -133,7 +133,7 @@ export default function WholesaleDashboardPage() {
           </div>
 
           {/* Section cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {sections.map((section) => (
               <Link
                 key={section.id}

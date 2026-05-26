@@ -155,7 +155,7 @@ export default function NotificationsPage() {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: "Total Sent", value: "0", change: "0.0%", up: true, color: ACCENT, icon: BarChart3 },
               { label: "Push Notifications", value: "0", change: "0.0%", up: true, color: "#3B82F6", icon: Bell },
@@ -277,7 +277,7 @@ export default function NotificationsPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSendPush} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       <div>
                         <label style={labelStyle}>Notification Title</label>
                         <input required placeholder="e.g. Flash Sale: 50% Off!" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} style={inputStyle} />

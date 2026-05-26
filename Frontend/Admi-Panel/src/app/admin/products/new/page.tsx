@@ -258,7 +258,7 @@ export default function AddProductPage() {
                     <label style={lbl}>Product Name *</label>
                     <input required value={form.name} onChange={e => { set("name", e.target.value); if (!form.slug) set("slug", autoSlug(e.target.value)); }} style={inp} placeholder="e.g. Samsung Galaxy S24 Ultra" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label style={lbl}>URL Slug</label>
                       <input value={form.slug} onChange={e => set("slug", e.target.value)} style={inp} placeholder="auto-generated from name" />
@@ -304,7 +304,7 @@ export default function AddProductPage() {
                     <Toggle checked={form.isWholesaleOnly} onChange={() => set("isWholesaleOnly", !form.isWholesaleOnly)} />
                   </div>
                   {form.isWholesaleOnly && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div><label style={lbl}>Wholesale Price</label><input type="number" min="0" step="0.01" value={form.wholesalePrice} onChange={e => set("wholesalePrice", e.target.value)} style={inp} placeholder="0.00" /></div>
                       <div><label style={lbl}>Min Quantity</label><input type="number" min="1" value={form.wholesaleMinQty} onChange={e => set("wholesaleMinQty", e.target.value)} style={inp} placeholder="e.g. 10" /></div>
                     </div>
@@ -388,7 +388,7 @@ export default function AddProductPage() {
               {/* Images */}
               <div style={{ ...card, padding: "22px 24px" }}>
                 {sectionHead("Product Images", <ImagePlus style={{ width: 16, height: 16 }} />)}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3" style={{ , gap: 8, marginBottom: 12 }}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3" style={{ gap: 8, marginBottom: 12 }}>
                   {imagePreviews.map((src, i) => (
                     <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
                       <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

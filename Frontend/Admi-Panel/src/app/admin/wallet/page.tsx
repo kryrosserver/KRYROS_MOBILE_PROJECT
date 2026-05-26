@@ -282,7 +282,7 @@ export default function WalletPage() {
           )}
 
           {/* Stat Cards — 5 columns */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {statDefs.map((s, i) => (
               <div key={i} style={{ ...card, padding: "16px 18px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>

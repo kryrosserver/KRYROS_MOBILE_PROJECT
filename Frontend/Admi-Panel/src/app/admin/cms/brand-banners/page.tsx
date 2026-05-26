@@ -104,7 +104,7 @@ export default function BrandBannersPage() {
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{editing.id ? "Edit Banner" : "New Banner"}</h3>
                 <button onClick={() => setEditing(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 18, height: 18 }} /></button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {[
                   { label: "Brand Slug", key: "brandSlug", ph: "apple" }, { label: "Brand Name", key: "brandName", ph: "Apple" },
                   { label: "Tagline", key: "tagline", ph: "Think Different" }, { label: "Description", key: "description", ph: "Short description" },

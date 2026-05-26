@@ -103,7 +103,7 @@ export default function HeaderCMSPage() {
                   <span style={{ position: "absolute", top: 3, left: form.announcementEnabled ? 23 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {[
                   { label: "Logo Text", key: "logoText" }, { label: "Announcement Text", key: "announcementText" },
                   { label: "CTA Text", key: "announcementCta" }, { label: "CTA Link", key: "announcementCtaLink" },

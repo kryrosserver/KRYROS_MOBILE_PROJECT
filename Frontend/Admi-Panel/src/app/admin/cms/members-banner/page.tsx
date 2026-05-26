@@ -88,7 +88,7 @@ export default function MembersBannerPage() {
 
           {msg && <div style={{ background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#16C784", fontWeight: 600 }}>{msg}</div>}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div style={{ ...card, padding: 24 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Banner Settings</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>

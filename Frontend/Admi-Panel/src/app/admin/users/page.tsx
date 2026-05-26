@@ -242,7 +242,7 @@ export default function UsersPage() {
 
           {/* Stat cards — full width, matching dashboard layout */}
             {/* Stat Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { label: "Total Users", value: users.length || 12845, change: "+18.4%", up: true, color: "#22C55E", icon: Users },
                 { label: "Admins", value: admins.length || 24, change: "+12.4%", up: true, color: "#8B5CF6", icon: ShieldCheck },
@@ -438,7 +438,7 @@ export default function UsersPage() {
             </div>
 
           {/* Overview panels row — 3 columns matching dashboard layout */}
-          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-3.5">>
+          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-3.5">
 
             {/* User Roles Overview */}
             <div style={{ ...card, padding: 18 }}>

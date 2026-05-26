@@ -221,7 +221,7 @@ export default function ProductsPage() {
           )}
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {stats.map((s, i) => (
               <div key={i} style={{ ...card, padding: "16px 18px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>

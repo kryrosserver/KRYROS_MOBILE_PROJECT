@@ -90,7 +90,7 @@ export default function UpgradeBannerPage() {
           {msg && <div style={{ background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#16C784", fontWeight: 600 }}>{msg}</div>}
 
           {loading ? <div style={{ padding: "48px 0", textAlign: "center", color: TEXT2 }}><RefreshCw style={{ width: 28, height: 28, margin: "0 auto 10px", opacity: 0.3 }} /></div> : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div style={{ ...card, padding: 24 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Banner Content</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>

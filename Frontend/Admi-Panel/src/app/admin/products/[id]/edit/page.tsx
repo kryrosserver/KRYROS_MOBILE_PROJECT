@@ -374,7 +374,7 @@ export default function EditProductPage() {
               <div style={{ ...card, padding: "22px 24px" }}>
                 {sectionHead("Basic Information", <Package style={{ width: 16, height: 16 }} />)}
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label style={lbl}>Product Name *</label>
                       <input value={form.name} onChange={e => { set("name", e.target.value); if (!form.slug) set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")); }} style={inp} placeholder="e.g. iPhone 15 Pro Max" required />
@@ -384,7 +384,7 @@ export default function EditProductPage() {
                       <input value={form.slug} onChange={e => set("slug", e.target.value)} style={inp} placeholder="auto-generated-from-name" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label style={lbl}>SKU</label>
                       <input value={form.sku} onChange={e => set("sku", e.target.value)} style={inp} placeholder="e.g. PROD-001" />
@@ -513,7 +513,7 @@ export default function EditProductPage() {
                 {existingImages.length > 0 && (
                   <div style={{ marginBottom: 10 }}>
                     <p style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", marginBottom: 8 }}>Current Images</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                       {existingImages.map((img, i) => (
                         <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
                           <img src={img.url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
@@ -532,7 +532,7 @@ export default function EditProductPage() {
                 {newImagePreviews.length > 0 && (
                   <div style={{ marginBottom: 10 }}>
                     <p style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", marginBottom: 8 }}>New Images to Upload</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                       {newImagePreviews.map((src, i) => (
                         <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `2px dashed ${ACCENT}` }}>
                           <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />

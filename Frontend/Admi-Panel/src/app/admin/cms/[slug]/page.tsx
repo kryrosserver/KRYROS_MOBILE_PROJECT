@@ -377,7 +377,7 @@ export default function CMSPageSections() {
           )}
 
           {/* ── STAT CARDS ── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
             {statCards.map((c, i) => (
               <div key={i} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

@@ -178,7 +178,7 @@ export default function ReportsPage() {
           )}
 
           {/* Stat Cards — 4 columns */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {statCards.map((s, i) => (
               <div key={i} style={{ ...card, padding: "16px 18px" }}>
                 {loading ? (
@@ -337,11 +337,11 @@ export default function ReportsPage() {
             <div style={{ ...card, padding: "20px" }}>
               <h2 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: "0 0 16px" }}>Sales by Category</h2>
               {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {[...Array(5)].map((_, i) => <div key={i} style={{ height: 80, borderRadius: 9, background: HOVER }} />)}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {categories.map((cat, idx) => {
                     const colors = [ACCENT, "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981", "#6366F1"];
                     const color = colors[idx % colors.length];
