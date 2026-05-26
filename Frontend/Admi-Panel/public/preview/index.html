@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — KRYROS Admin</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon">K</div><div class="logo-text">KRYROS</div></div>
+  <nav>
+    <div class="sidebar-section"><div class="sidebar-section-title">Overview</div>
+      <a href="index.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a>
+      <a href="analytics.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg> Analytics</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Store</div>
+      <a href="orders.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Orders</a>
+      <a href="products.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 8"/><path d="m3.3 6 7.71 4.42a2 2 0 0 0 2.1 0L21 6"/><path d="M12 22V12"/><path d="m7 16-4.5-2.6"/><path d="M17 16l4.5-2.6"/></svg> Products</a>
+      <a href="categories.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Categories</a>
+      <a href="brands.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Brands</a>
+      <a href="reviews.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Reviews</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Customers</div>
+      <a href="users.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Users</a>
+      <a href="newsletter.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Newsletter</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Finance</div>
+      <a href="wallet.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4"/></svg> Wallet</a>
+      <a href="credit.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Credit</a>
+      <a href="payment.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Payment</a>
+      <a href="reports.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Reports</a>
+      <a href="expenses.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Expenses</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Sales</div>
+      <a href="sale-orders.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Sale Orders</a>
+      <a href="sale-returns.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg> Sale Returns</a>
+      <a href="estimate.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Estimates</a>
+      <a href="invoice.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Purchases</div>
+      <a href="purchase-orders.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Purchase Orders</a>
+      <a href="purchases.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Purchases</a>
+      <a href="purchase-returns.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg> Purchase Returns</a>
+      <a href="delivery-notes.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Delivery Notes</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Content</div>
+      <a href="cms.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> CMS & Pages</a>
+      <a href="notifications.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Logistics</div>
+      <a href="services.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Services</a>
+      <a href="locations-shipping.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Locations</a>
+      <a href="countries.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Countries</a>
+      <a href="inventory.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> Inventory</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Wholesale</div>
+      <a href="wholesale.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Wholesale</a>
+      <a href="wholesale-deals.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Deals</a>
+      <a href="wholesale-products.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 8"/><path d="m3.3 6 7.71 4.42a2 2 0 0 0 2.1 0L21 6"/><path d="M12 22V12"/><path d="m7 16-4.5-2.6"/><path d="M17 16l4.5-2.6"/></svg> W. Products</a>
+      <a href="wholesale-accounts.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Accounts</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">Management</div>
+      <a href="agents.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Agents</a>
+      <a href="contacts.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Contacts</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-title">System</div>
+      <a href="settings.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">AD</div>
+      <div class="sidebar-user-info"><span class="sidebar-user-name">Admin User</span><span class="sidebar-user-role">Super Admin</span></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="header-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search anything...">
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></svg></button>
+      <button class="header-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge"></span></button>
+      <div class="header-avatar">AD</div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Welcome back! Here's what's happening with your store today.</p>
+
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#16c784" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">$48,295</div>
+        <div class="stat-change up">+12.5% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">1,284</div>
+        <div class="stat-change up">+8.2% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="stat-label">Total Customers</div>
+        <div class="stat-value">3,642</div>
+        <div class="stat-change up">+5.1% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 8"/><path d="m3.3 6 7.71 4.42a2 2 0 0 0 2.1 0L21 6"/><path d="M12 22V12"/><path d="m7 16-4.5-2.6"/><path d="M17 16l4.5-2.6"/></svg></div>
+        <div class="stat-label">Products Sold</div>
+        <div class="stat-value">8,940</div>
+        <div class="stat-change down">-2.4% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="stat-label">Pending Issues</div>
+        <div class="stat-value">12</div>
+        <div class="stat-change down">+3 since yesterday</div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Charts + Recent -->
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:24px; margin-bottom:24px;">
+      <div class="card">
+        <div class="card-header"><h3>Revenue Overview</h3><div class="tabs"><button class="tab active">7 Days</button><button class="tab">30 Days</button><button class="tab">90 Days</button></div></div>
+        <div class="card-body">
+          <div style="height:260px; display:flex; align-items:flex-end; gap:12px; padding:20px 0;">
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:45%; opacity:0.9;"></div>
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:60%; opacity:0.9;"></div>
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:40%; opacity:0.9;"></div>
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:75%; opacity:0.9;"></div>
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:55%; opacity:0.9;"></div>
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:85%; opacity:0.9;"></div>
+            <div style="flex:1; background:linear-gradient(to top, #12d6c5, #0ea896); border-radius:8px 8px 0 0; height:65%; opacity:0.9;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:12px; border-top:1px solid var(--card-border);">
+            <span style="font-size:12px; color:var(--text-muted);">Mon</span><span style="font-size:12px; color:var(--text-muted);">Tue</span><span style="font-size:12px; color:var(--text-muted);">Wed</span><span style="font-size:12px; color:var(--text-muted);">Thu</span><span style="font-size:12px; color:var(--text-muted);">Fri</span><span style="font-size:12px; color:var(--text-muted);">Sat</span><span style="font-size:12px; color:var(--text-muted);">Sun</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Recent Activity</h3></div>
+        <div class="card-body" style="padding:0;">
+          <div style="padding:16px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:12px;">
+            <div class="avatar avatar-sm" style="background:#f0fdf4; color:#16c784;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:600;">Order #1243 confirmed</div><div style="font-size:11px; color:var(--text-muted);">2 minutes ago</div></div>
+          </div>
+          <div style="padding:16px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:12px;">
+            <div class="avatar avatar-sm" style="background:#eff6ff; color:#3b82f6;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:600;">New user registered</div><div style="font-size:11px; color:var(--text-muted);">15 minutes ago</div></div>
+          </div>
+          <div style="padding:16px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:12px;">
+            <div class="avatar avatar-sm" style="background:#fffbeb; color:#f59e0b;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="m7.5 4.27 9 5.15"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:600;">Product "iPhone 15 Pro" updated</div><div style="font-size:11px; color:var(--text-muted);">1 hour ago</div></div>
+          </div>
+          <div style="padding:16px 24px; display:flex; align-items:center; gap:12px;">
+            <div class="avatar avatar-sm" style="background:#fef2f2; color:#ef4444;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:600;">Order #1240 cancelled</div><div style="font-size:11px; color:var(--text-muted);">3 hours ago</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Top Products + Quick Actions + Customers -->
+    <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:24px;">
+      <div class="card">
+        <div class="card-header"><h3>Top Products</h3><a href="products.html" class="btn btn-sm btn-ghost">View All</a></div>
+        <div class="card-body" style="padding:0;">
+          <div style="padding:14px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:14px;">
+            <div style="width:48px; height:48px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">iPhone 15 Pro Max</div><div style="font-size:11px; color:var(--text-muted);">124 sold · $148,800</div></div>
+            <div style="font-size:13px; font-weight:700; color:var(--success);">+12%</div>
+          </div>
+          <div style="padding:14px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:14px;">
+            <div style="width:48px; height:48px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">Samsung Galaxy S24</div><div style="font-size:11px; color:var(--text-muted);">98 sold · $88,200</div></div>
+            <div style="font-size:13px; font-weight:700; color:var(--success);">+8%</div>
+          </div>
+          <div style="padding:14px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:14px;">
+            <div style="width:48px; height:48px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">MacBook Air M3</div><div style="font-size:11px; color:var(--text-muted);">76 sold · $91,200</div></div>
+            <div style="font-size:13px; font-weight:700; color:var(--danger);">-3%</div>
+          </div>
+          <div style="padding:14px 24px; display:flex; align-items:center; gap:14px;">
+            <div style="width:48px; height:48px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">Sony WH-1000XM5</div><div style="font-size:11px; color:var(--text-muted);">203 sold · $60,900</div></div>
+            <div style="font-size:13px; font-weight:700; color:var(--success);">+24%</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Quick Actions</h3></div>
+        <div class="card-body" style="display:flex; flex-direction:column; gap:10px;">
+          <a href="product-form.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add New Product</a>
+          <a href="orders.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Create Order</a>
+          <a href="categories.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Add Category</a>
+          <a href="cms.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Edit Homepage</a>
+          <a href="users.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Add Customer</a>
+          <a href="notifications.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Send Notification</a>
+          <a href="wholesale.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Add Wholesale</a>
+          <a href="settings.html" class="btn btn-secondary" style="justify-content:flex-start; gap:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>New Customers</h3><a href="users.html" class="btn btn-sm btn-ghost">View All</a></div>
+        <div class="card-body" style="padding:0;">
+          <div style="padding:14px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:12px;">
+            <div class="avatar">JM</div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">John Mwansa</div><div style="font-size:11px; color:var(--text-muted);">john@email.com</div></div>
+            <div class="badge badge-success">Active</div>
+          </div>
+          <div style="padding:14px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:12px;">
+            <div class="avatar" style="background:#eff6ff; color:#3b82f6;">SK</div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">Sarah Kamanga</div><div style="font-size:11px; color:var(--text-muted);">sarah@email.com</div></div>
+            <div class="badge badge-success">Active</div>
+          </div>
+          <div style="padding:14px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:12px;">
+            <div class="avatar" style="background:#fffbeb; color:#f59e0b;">MC</div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">Michael Chileshe</div><div style="font-size:11px; color:var(--text-muted);">michael@email.com</div></div>
+            <div class="badge badge-default">Pending</div>
+          </div>
+          <div style="padding:14px 24px; display:flex; align-items:center; gap:12px;">
+            <div class="avatar" style="background:#faf5ff; color:#a855f7;">LN</div>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">Lisa Nkandu</div><div style="font-size:11px; color:var(--text-muted);">lisa@email.com</div></div>
+            <div class="badge badge-success">Active</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>
