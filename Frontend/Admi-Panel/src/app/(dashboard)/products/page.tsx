@@ -397,7 +397,7 @@ export default function ProductsPage() {
         ) : (
           (tab === "featured" ? products.filter(p => !!p.isFeatured) : 
           tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
-          products).map((p) => (
+          products.filter(p => !p.isWholesaleOnly && !p.allowCredit)).map((p) => (
             <div key={p.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
               <div className="flex gap-3 mb-3">
                 <div className="h-16 w-16 rounded-lg overflow-hidden border bg-slate-50 shrink-0">
@@ -492,7 +492,7 @@ export default function ProductsPage() {
               ) : (
                 (tab === "featured" ? products.filter(p => !!p.isFeatured) : 
                 tab === "flash" ? products.filter(p => !!(p as any).isFlashSale) : 
-                products).map((p) => (
+                products.filter(p => !p.isWholesaleOnly && !p.allowCredit)).map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="h-12 w-12 rounded-lg overflow-hidden border bg-slate-50">
