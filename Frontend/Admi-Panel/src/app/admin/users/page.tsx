@@ -120,8 +120,13 @@ export default function UsersPage() {
   useEffect(() => {
     setLoading(true);
     fetch("/internal/admin/users", { cache: "no-store" })
-      .then(r => r.json())
-      .then(data => setUsers(Array.isArray(data) ? data : data?.users || data?.data || []))
+      .then(async r => {
+        const body = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(body?.error || `Server error ${r.status}`);
+        // Backend returns { data: [...], meta: {...} }
+        return Array.isArray(body) ? body : body?.data || body?.users || [];
+      })
+      .then(data => setUsers(data))
       .catch(() => setUsers([]))
       .finally(() => setLoading(false));
   }, []);
