@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
 import { cookies } from "next/headers";
+import { proxyFetch, BackendTimeoutError, timeoutError } from "@/lib/proxy";
 
 export async function GET(request: NextRequest) {
   const token = (await cookies()).get("admin_token")?.value || "";
@@ -18,15 +19,25 @@ export async function GET(request: NextRequest) {
   if (searchParams.get("featured")) url.searchParams.set("featured", searchParams.get("featured")!);
   if (searchParams.get("allowCredit")) url.searchParams.set("allowCredit", searchParams.get("allowCredit")!);
 
-  const res = await fetch(url.toString(), {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    cache: "no-store",
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    return NextResponse.json({ error: text || "Failed to load products" }, { status: res.status });
+  try {
+    const res = await proxyFetch(url.toString(), {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      cache: "no-store",
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return NextResponse.json({ error: text || "Failed to load products" }, { status: res.status });
+    }
+    try {
+      return NextResponse.json(JSON.parse(text));
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON from backend", raw: text }, { status: 502 });
+    }
+  } catch (err: unknown) {
+    if (err instanceof BackendTimeoutError) return timeoutError(url.toString());
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: msg }, { status: 502 });
   }
-  return NextResponse.json(JSON.parse(text));
 }
 
 export async function POST(request: Request) {
@@ -44,16 +55,22 @@ export async function POST(request: Request) {
   }
 
   const endpoint = isFormData ? `${API_BASE}/products/upload` : `${API_BASE}/products`;
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: isFormData
-      ? { Authorization: `Bearer ${token}` }
-      : { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: isFormData ? body : JSON.stringify(body),
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    return NextResponse.json({ error: text || "Failed to create product" }, { status: res.status });
+  try {
+    const res = await proxyFetch(endpoint, {
+      method: "POST",
+      headers: isFormData
+        ? { Authorization: `Bearer ${token}` }
+        : { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: isFormData ? body : JSON.stringify(body),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return NextResponse.json({ error: text || "Failed to create product" }, { status: res.status });
+    }
+    return NextResponse.json(JSON.parse(text));
+  } catch (err: unknown) {
+    if (err instanceof BackendTimeoutError) return timeoutError(endpoint);
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: msg }, { status: 502 });
   }
-  return NextResponse.json(JSON.parse(text));
 }

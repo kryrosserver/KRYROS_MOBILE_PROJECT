@@ -88,7 +88,11 @@ export default function ProductsPage() {
     setError(null);
     try {
       const res = await fetch("/internal/admin/products?limit=200");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (res.status === 503) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "The backend server is starting up. Please wait a moment and click Refresh.");
+      }
+      if (!res.ok) throw new Error(`Server error ${res.status} — please try refreshing.`);
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : data.items ?? data.products ?? []);
     } catch (e: unknown) {
@@ -229,7 +233,10 @@ export default function ProductsPage() {
           </div>
 
           {error && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>
+            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "14px 18px", fontSize: 13, color: "#EF4444", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <span>⚠️ {error}</span>
+              <button onClick={load} style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 7, padding: "5px 14px", color: "#EF4444", fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>Retry</button>
+            </div>
           )}
 
           {/* Stat Cards */}

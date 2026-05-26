@@ -26,7 +26,9 @@ export default function NewsletterPage() {
     try {
       setLoading(true);
       const res = await fetch("/api/admin/newsletter?type=list");
-      if (res.ok) setSubscribers(await res.json());
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 503) throw new Error(body?.message || "Backend is starting up. Please wait and refresh.");
+      if (res.ok) setSubscribers(Array.isArray(body) ? body : body?.data || []);
     } catch {}
     finally { setLoading(false); }
   };

@@ -156,8 +156,9 @@ export default function OrdersPage() {
     try {
       const res = await fetch("/api/admin/orders", { cache: "no-store" });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body?.error || "Failed to load orders");
-      const items = Array.isArray(body) ? body : body?.data || [];
+      if (res.status === 503) throw new Error(body?.message || "The backend server is starting up. Please wait a moment and click Refresh.");
+      if (!res.ok) throw new Error(body?.error || `Server error ${res.status} — please try refreshing.`);
+      const items = Array.isArray(body) ? body : body?.items || body?.data || [];
       setOrders(items);
     } catch (e: any) {
       setError(e?.message || "Failed to load orders");

@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminToken } from "@/lib/admin-auth";
 import { API_BASE } from "@/lib/config";
+import { proxyGet } from "@/lib/proxy";
 
 export async function GET(req: NextRequest) {
-  try {
-    const token = getAdminToken(req);
-    const res = await fetch(`${API_BASE}/shipping-zones`, { 
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      cache: "no-store" 
-    });
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch zones" }, { status: 500 });
-  }
+  const token = getAdminToken(req) || "";
+  return proxyGet(`${API_BASE}/shipping-zones`, token);
 }
 
 export async function POST(req: NextRequest) {

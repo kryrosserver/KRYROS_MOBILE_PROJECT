@@ -178,8 +178,9 @@ export default function WalletPage() {
     try {
       const [wRes, tRes] = await Promise.all([fetch("/internal/admin/wallets", { cache: "no-store" }), fetch("/internal/admin/wallets/transactions", { cache: "no-store" })]);
       const [w, t] = await Promise.all([wRes.json(), tRes.json()]);
-      if (!wRes.ok) throw new Error(w?.error || "Failed to load wallets");
-      if (!tRes.ok) throw new Error(t?.error || "Failed to load transactions");
+      if (wRes.status === 503 || tRes.status === 503) throw new Error(w?.message || t?.message || "The backend server is starting up. Please wait a moment and click Refresh.");
+      if (!wRes.ok) throw new Error(w?.error || `Server error ${wRes.status}`);
+      if (!tRes.ok) throw new Error(t?.error || `Server error ${tRes.status}`);
       setWallets(Array.isArray(w) ? w : []);
       setTxns(Array.isArray(t) ? t : []);
     } catch (e: any) { setError(e?.message || "Failed to load"); }
@@ -283,7 +284,10 @@ export default function WalletPage() {
           </div>
 
           {error && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444" }}>{error}</div>
+            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "14px 18px", fontSize: 13, color: "#EF4444", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <span>⚠️ {error}</span>
+              <button onClick={load} style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 7, padding: "5px 14px", color: "#EF4444", fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>Retry</button>
+            </div>
           )}
 
           {/* Stat Cards — 5 columns */}

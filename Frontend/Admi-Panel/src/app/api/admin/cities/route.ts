@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminToken } from "@/lib/admin-auth";
 import { API_BASE } from "@/lib/config";
+import { proxyGet } from "@/lib/proxy";
 
 export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const stateId = searchParams.get("stateId");
-    const url = stateId ? `${API_BASE}/cities?stateId=${stateId}` : `${API_BASE}/cities`;
-    const res = await fetch(url, { cache: "no-store" });
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch cities" }, { status: 500 });
-  }
+  const token = getAdminToken(req) || "";
+  const { searchParams } = new URL(req.url);
+  const stateId = searchParams.get("stateId");
+  const url = stateId ? `${API_BASE}/cities?stateId=${stateId}` : `${API_BASE}/cities`;
+  return proxyGet(url, token);
 }
 
 export async function POST(req: NextRequest) {

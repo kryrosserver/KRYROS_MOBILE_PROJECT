@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminToken } from "@/lib/admin-auth";
 import { API_BASE } from "@/lib/config";
+import { proxyGet } from "@/lib/proxy";
 
 export async function GET(req: NextRequest) {
-  try {
-    const res = await fetch(`${API_BASE}/countries`, {
-      cache: "no-store",
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch countries" }, { status: 500 });
-  }
+  const token = getAdminToken(req) || "";
+  return proxyGet(`${API_BASE}/countries`, token);
 }
 
 export async function POST(req: NextRequest) {
