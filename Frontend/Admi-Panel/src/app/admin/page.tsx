@@ -11,7 +11,7 @@ const YELLOW = "#F59E0B";
 const ACCENT = "#6366F1";
 const SIDEBAR_BG = "#12172B";
 
-/* ── Inline SVG icons ── */
+/*    Inline SVG icons    */
 const IconSales = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>;
 const IconOrders = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>;
 const IconCheck = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>;
@@ -23,7 +23,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  /* ── Stat cards data ── */
+  /*    Stat cards data    */
   const stats = [
     { label: "Total Sales", val: "$3,682", chg: "↑ 18.6% vs last month", color: ORANGE, grad: "linear-gradient(140deg,#F97316,#FB923C)", ico: IconSales, spark: "M0,34 L12,26 L26,30 L40,16 L55,8 L70,12 L76,3" },
     { label: "Total Orders", val: "102", chg: "↑ 12.4% vs last month", color: VIOLET, grad: "linear-gradient(140deg,#8B5CF6,#A78BFA)", ico: IconOrders, spark: "M0,36 L14,28 L28,32 L42,18 L56,10 L70,6 L76,2" },
@@ -31,7 +31,7 @@ export default function DashboardPage() {
     { label: "Profit / Loss", val: "$3,682", chg: "↑ All-time high", color: "#1E293B", grad: "linear-gradient(140deg,#1E293B,#334155)", ico: IconProfit, spark: "M0,38 L18,30 L34,34 L46,18 L58,10 L70,4 L76,0", chgColor: "#FB923C", icoBg: "rgba(249,115,22,.2)", icoStroke: "#F97316" },
   ];
 
-  /* ── Orders data ── */
+  /*    Orders data    */
   const orders = [
     { id: "#KRY123456", name: "Bwalya Chileshe", amt: "$1,099", status: "Completed", statusClass: "pg", time: "10:34" },
     { id: "#KRY123455", name: "Mulenga Sichone", amt: "$349", status: "Processing", statusClass: "pb", time: "09:15" },
@@ -40,7 +40,7 @@ export default function DashboardPage() {
     { id: "#KRY123452", name: "Chansa Mumba", amt: "$899", status: "Completed", statusClass: "pg", time: "06:10" },
   ];
 
-  /* ── Top products ── */
+  /*    Top products    */
   const products = [
     { rank: 1, abbr: "IP", name: "iPhone 15 Pro Max", units: "248 units", rev: "$268k", bg: "linear-gradient(135deg,#6366F1,#8B5CF6)", rankColor: ORANGE },
     { rank: 2, abbr: "MB", name: "MacBook Air M2", units: "186 units", rev: "$232k", bg: "linear-gradient(135deg,#0891B2,#06B6D4)" },
@@ -49,7 +49,7 @@ export default function DashboardPage() {
     { rank: 5, abbr: "SS", name: "Samsung S24 Ultra", units: "128 units", rev: "$144k", bg: "linear-gradient(135deg,#10B981,#34D399)" },
   ];
 
-  /* ── Activity data ── */
+  /*    Activity data    */
   const activities = [
     { title: "New order #KRY123456", sub: "Bwalya Chileshe · $1,099", dot: ORANGE, time: "2m" },
     { title: "Payment confirmed", sub: "Paystack · $1,099", dot: ACCENT, time: "10m" },
@@ -58,7 +58,7 @@ export default function DashboardPage() {
     { title: "Stock updated", sub: "iPhone 15 Pro Max → 142", dot: PINK, time: "2h" },
   ];
 
-  /* ── Customers data ── */
+  /*    Customers data    */
   const customers = [
     { name: "Bwalya Chileshe", date: "May 26", badge: "Active", badgeClass: "pg", bg: "linear-gradient(135deg,#3B82F6,#6366F1)", initial: "B" },
     { name: "Mulenga Sichone", date: "May 26", badge: "Active", badgeClass: "pg", bg: "linear-gradient(135deg,#F97316,#EC4899)", initial: "M" },
@@ -67,7 +67,7 @@ export default function DashboardPage() {
     { name: "Mwila Tembo", date: "May 25", badge: "New", badgeClass: "pb", bg: "linear-gradient(135deg,#06B6D4,#10B981)", initial: "M" },
   ];
 
-  /* ── Quick actions ── */
+  /*    Quick actions    */
   const quickActions = [
     { label: "New Invoice", bg: "#FFF7ED", color: ORANGE, ico: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
     { label: "New Estimate", bg: "#EEF2FF", color: ACCENT, ico: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
@@ -83,7 +83,7 @@ export default function DashboardPage() {
 
   return (
     <div style={{ padding: "20px 20px 40px", color: "#111827", fontFamily: "'Inter', sans-serif" }}>
-      {/* ── Header ── */}
+      {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20, gap: 10, flexWrap: "wrap" }}>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800, color: "#111827" }}>Good morning, Admin 👋</div>
@@ -109,7 +109,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Stat Cards ── */}
+      {/* Stat Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }} className="stat-grid">
         {stats.map((s, i) => (
           <div key={i} style={{
@@ -139,7 +139,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* ── Chart + Donut ── */}
+      {/* Chart + Donut */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 12, marginBottom: 12 }} className="g2">
         {/* Revenue Chart */}
         <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB" }}>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Quick Actions ── */}
+      {/* Quick Actions */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ background: "#fff", borderRadius: "14px 14px 0 0", border: "1px solid #E5E7EB", borderBottom: "none" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px" }}>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Recent Orders ── */}
+      {/* Recent Orders */}
       <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #E5E7EB" }}>
           <div>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Products + Activity + Customers ── */}
+      {/* Products + Activity + Customers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 12 }} className="g3">
         {/* Top Products */}
         <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB" }}>
@@ -370,7 +370,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Financial Strip ── */}
+      {/* Financial Strip */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 12 }} className="fin">
         {[
           { label: "Outstanding Balance", val: "$0.00", sub: "No outstanding amounts" },

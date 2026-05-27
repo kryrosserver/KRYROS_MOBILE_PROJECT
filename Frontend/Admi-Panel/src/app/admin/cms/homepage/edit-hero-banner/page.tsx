@@ -157,9 +157,9 @@ export default function EditHeroBannerPage() {
   const previewSlide = activeSlide || slides[0];
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+    <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -170,9 +170,9 @@ export default function EditHeroBannerPage() {
             <span>/</span>
             <Link href="/admin/cms/homepage" className="hover:underline" style={{ color: "var(--text-muted)" }}>Home Page</Link>
             <span>/</span>
-            <span style={{ color: "var(--text-primary)" }}>Edit Hero Banner</span>
+            <span style={{ color: "#111827" }}>Edit Hero Banner</span>
           </div>
-          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Edit Hero Banner</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Edit Hero Banner</h1>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/admin/cms/homepage" className="btn-secondary h-10 px-4 flex items-center gap-2 text-sm">
@@ -200,7 +200,7 @@ export default function EditHeroBannerPage() {
                   key={tab}
                   className="flex-1 py-3 text-sm font-semibold transition-colors"
                   style={i === 0
-                    ? { color: "#12D6C5", borderBottom: "2px solid #12D6C5" }
+                    ? { color: "#6366F1", borderBottom: "2px solid #12D6C5" }
                     : { color: "var(--text-muted)", borderBottom: "2px solid transparent" }
                   }
                 >
@@ -211,7 +211,7 @@ export default function EditHeroBannerPage() {
 
             <div className="p-5 space-y-4">
               <div>
-                <p className="text-sm font-bold mb-0.5" style={{ color: "var(--text-primary)" }}>Section Content</p>
+                <p className="text-sm font-bold mb-0.5" style={{ color: "#111827" }}>Section Content</p>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>Update the content for the hero banner section.</p>
               </div>
 
@@ -293,9 +293,9 @@ export default function EditHeroBannerPage() {
                 <label className="block text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Banner Image / Slider</label>
                 <div
                   className="rounded-xl p-3 flex items-center gap-3"
-                  style={{ border: "1px solid var(--card-border)", background: "var(--bg-primary)" }}
+                  style={{ border: "1px solid var(--card-border)", background: "#F8F9FA" }}
                 >
-                  <div className="h-14 w-20 rounded-lg overflow-hidden shrink-0" style={{ background: "var(--icon-bg)" }}>
+                  <div className="h-14 w-20 rounded-lg overflow-hidden shrink-0" style={{ background: "#F9FAFB" }}>
                     {bannerImage ? (
                       <img src={bannerImage} className="w-full h-full object-cover" alt="" />
                     ) : (
@@ -305,7 +305,7 @@ export default function EditHeroBannerPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{bannerImageName}</p>
+                    <p className="text-xs font-semibold truncate" style={{ color: "#111827" }}>{bannerImageName}</p>
                     <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{bannerImageSize}</p>
                   </div>
                   <label className="cursor-pointer">
@@ -322,9 +322,9 @@ export default function EditHeroBannerPage() {
                         setBannerImageSize(`${Math.round(file.size / 1024)} KB`);
                       }}
                     />
-                    <div className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors" style={{ background: "var(--icon-bg)", color: "#EF4444" }}
+                    <div className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors" style={{ background: "#F9FAFB", color: "#EF4444" }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.1)"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--icon-bg)"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#F9FAFB"; }}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </div>
@@ -336,8 +336,8 @@ export default function EditHeroBannerPage() {
                   onClick={openAdd}
                   className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-colors"
                   style={{ border: "1px dashed var(--card-border)", color: "var(--text-muted)" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#12D6C5"; e.currentTarget.style.color = "#12D6C5"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--card-border)"; e.currentTarget.style.color = "var(--text-muted)"; }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#6366F1"; e.currentTarget.style.color = "#6366F1"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "var(--text-muted)"; }}
                 >
                   <Plus className="h-4 w-4" /> Add New Slide
                 </button>
@@ -352,7 +352,7 @@ export default function EditHeroBannerPage() {
           <div className="admin-card !p-0 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
               <div>
-                <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Slides</h2>
+                <h2 className="text-sm font-bold" style={{ color: "#111827" }}>Slides</h2>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>Manage hero banner slides.</p>
               </div>
               <button onClick={openAdd} className="btn-primary h-9 px-4 flex items-center gap-2 text-sm">
@@ -369,11 +369,11 @@ export default function EditHeroBannerPage() {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0B1320, #162035)" }}>
                       <div className="text-center px-8">
-                        <p className="text-xs font-semibold mb-2" style={{ color: "#12D6C5" }}>{sectionTitle}</p>
+                        <p className="text-xs font-semibold mb-2" style={{ color: "#6366F1" }}>{sectionTitle}</p>
                         <h3 className="text-2xl font-bold text-white mb-3">{sectionHeading}</h3>
                         <p className="text-sm text-white/60 mb-6 max-w-sm mx-auto">{sectionDesc}</p>
                         <div className="flex items-center justify-center gap-3">
-                          <span className="px-5 py-2 rounded-lg text-sm font-semibold text-white" style={{ background: "#12D6C5" }}>{primaryBtnText}</span>
+                          <span className="px-5 py-2 rounded-lg text-sm font-semibold text-white" style={{ background: "#6366F1" }}>{primaryBtnText}</span>
                           <span className="px-5 py-2 rounded-lg text-sm font-semibold text-white" style={{ border: "1px solid rgba(255,255,255,0.3)" }}>{secondaryBtnText}</span>
                         </div>
                       </div>
@@ -389,7 +389,7 @@ export default function EditHeroBannerPage() {
                         style={{
                           width: activeSlide?.id === s.id ? 20 : 8,
                           height: 8,
-                          background: activeSlide?.id === s.id ? "#12D6C5" : "rgba(255,255,255,0.5)",
+                          background: activeSlide?.id === s.id ? "#6366F1" : "rgba(255,255,255,0.5)",
                         }}
                       />
                     ))}
@@ -419,10 +419,10 @@ export default function EditHeroBannerPage() {
               {loading ? (
                 [...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center gap-4 px-5 py-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-                    <div className="h-14 w-20 rounded-xl animate-pulse shrink-0" style={{ background: "var(--icon-bg)" }} />
+                    <div className="h-14 w-20 rounded-xl animate-pulse shrink-0" style={{ background: "#F9FAFB" }} />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3 w-40 rounded animate-pulse" style={{ background: "var(--icon-bg)" }} />
-                      <div className="h-2 w-24 rounded animate-pulse" style={{ background: "var(--icon-bg)" }} />
+                      <div className="h-3 w-40 rounded animate-pulse" style={{ background: "#F9FAFB" }} />
+                      <div className="h-2 w-24 rounded animate-pulse" style={{ background: "#F9FAFB" }} />
                     </div>
                   </div>
                 ))
@@ -442,7 +442,7 @@ export default function EditHeroBannerPage() {
                       background: activeSlide?.id === slide.id ? "var(--nav-item-active-bg)" : "transparent"
                     }}
                     onClick={() => setActiveSlide(slide)}
-                    onMouseEnter={e => { if (activeSlide?.id !== slide.id) e.currentTarget.style.background = "var(--hover-bg)"; }}
+                    onMouseEnter={e => { if (activeSlide?.id !== slide.id) e.currentTarget.style.background = "#F9FAFB"; }}
                     onMouseLeave={e => { if (activeSlide?.id !== slide.id) e.currentTarget.style.background = "transparent"; }}
                   >
                     {/* Slide number */}
@@ -451,7 +451,7 @@ export default function EditHeroBannerPage() {
                     </span>
 
                     {/* Thumbnail */}
-                    <div className="h-14 w-20 rounded-xl overflow-hidden shrink-0" style={{ background: "var(--icon-bg)" }}>
+                    <div className="h-14 w-20 rounded-xl overflow-hidden shrink-0" style={{ background: "#F9FAFB" }}>
                       {slide.image ? (
                         <img src={resolveImageUrl(slide.image)} className="w-full h-full object-cover" alt="" />
                       ) : (
@@ -463,7 +463,7 @@ export default function EditHeroBannerPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                      <p className="text-sm font-semibold truncate" style={{ color: "#111827" }}>
                         {slide.title || "Untitled Slide"}
                       </p>
                       <p className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -488,7 +488,7 @@ export default function EditHeroBannerPage() {
                         onClick={() => openEdit(slide)}
                         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
                         style={{ color: "var(--text-muted)" }}
-                        onMouseEnter={e => { e.currentTarget.style.background = "var(--hover-bg)"; e.currentTarget.style.color = "#12D6C5"; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "#F9FAFB"; e.currentTarget.style.color = "#6366F1"; }}
                         onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-muted)"; }}
                       >
                         <Edit className="h-4 w-4" />
@@ -520,7 +520,7 @@ export default function EditHeroBannerPage() {
           {editingSlide !== undefined && editingSlide !== null && (
             <div className="admin-card !p-0 overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-                <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                <h3 className="text-sm font-bold" style={{ color: "#111827" }}>
                   {editingSlide ? "Edit Slide" : "Add New Slide"}
                 </h3>
                 <button onClick={() => setEditingSlide(null)} className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ color: "var(--text-muted)" }}>
@@ -556,7 +556,7 @@ export default function EditHeroBannerPage() {
                           const base64 = await compressImage(file);
                           setForm(f => ({ ...f, image: base64 }));
                         }} />
-                        <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "var(--icon-bg)", color: "var(--text-muted)" }}>
+                        <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "#F9FAFB", color: "var(--text-muted)" }}>
                           <ImageIcon className="h-4 w-4" />
                         </div>
                       </label>
@@ -569,7 +569,7 @@ export default function EditHeroBannerPage() {
                       className="relative"
                       style={{ width: 40, height: 22 }}
                     >
-                      <div className="absolute inset-0 rounded-full transition-all" style={{ background: form.isActive ? "#16C784" : "var(--icon-bg)" }} />
+                      <div className="absolute inset-0 rounded-full transition-all" style={{ background: form.isActive ? "#16C784" : "#F9FAFB" }} />
                       <div className="absolute top-0.5 rounded-full transition-all" style={{ width: 18, height: 18, background: "#fff", left: form.isActive ? "calc(100% - 20px)" : 2 }} />
                     </button>
                   </div>
@@ -588,7 +588,7 @@ export default function EditHeroBannerPage() {
           {editingSlide === null && form.title !== undefined && (
             <div className="admin-card !p-0 overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-                <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Add New Slide</h3>
+                <h3 className="text-sm font-bold" style={{ color: "#111827" }}>Add New Slide</h3>
                 <button onClick={() => setEditingSlide(undefined as any)} className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ color: "var(--text-muted)" }}>
                   <X className="h-4 w-4" />
                 </button>
@@ -622,7 +622,7 @@ export default function EditHeroBannerPage() {
                           const base64 = await compressImage(file);
                           setForm(f => ({ ...f, image: base64 }));
                         }} />
-                        <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "var(--icon-bg)", color: "var(--text-muted)" }}>
+                        <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "#F9FAFB", color: "var(--text-muted)" }}>
                           <ImageIcon className="h-4 w-4" />
                         </div>
                       </label>
@@ -644,7 +644,7 @@ export default function EditHeroBannerPage() {
         <div className="xl:w-64 shrink-0 space-y-4">
           {/* Live Preview */}
           <div className="admin-card !p-5">
-            <h3 className="text-sm font-bold mb-3" style={{ color: "var(--text-primary)" }}>Live Preview</h3>
+            <h3 className="text-sm font-bold mb-3" style={{ color: "#111827" }}>Live Preview</h3>
             <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>See how this section looks on the homepage.</p>
             <div className="rounded-xl overflow-hidden" style={{ height: 120, background: "linear-gradient(135deg, #0B1320, #162035)" }}>
               {previewSlide?.image ? (
@@ -652,7 +652,7 @@ export default function EditHeroBannerPage() {
               ) : (
                 <div className="w-full h-full flex items-center justify-center px-4">
                   <div className="text-center">
-                    <p className="text-[9px] font-semibold mb-1" style={{ color: "#12D6C5" }}>{sectionTitle}</p>
+                    <p className="text-[9px] font-semibold mb-1" style={{ color: "#6366F1" }}>{sectionTitle}</p>
                     <p className="text-xs font-bold text-white leading-tight">{sectionHeading.slice(0, 40)}{sectionHeading.length > 40 ? "..." : ""}</p>
                   </div>
                 </div>
@@ -661,24 +661,24 @@ export default function EditHeroBannerPage() {
             {/* Dots */}
             <div className="flex items-center justify-center gap-1.5 mt-2">
               {Math.max(slides.length, 3).toString().split("").map((_, i) => (
-                <div key={i} className="rounded-full" style={{ width: i === 0 ? 14 : 6, height: 6, background: i === 0 ? "#12D6C5" : "var(--icon-bg)" }} />
+                <div key={i} className="rounded-full" style={{ width: i === 0 ? 14 : 6, height: 6, background: i === 0 ? "#6366F1" : "#F9FAFB" }} />
               ))}
             </div>
           </div>
 
           {/* Section Status */}
           <div className="admin-card !p-5">
-            <h3 className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)" }}>Section Status</h3>
+            <h3 className="text-sm font-bold mb-1" style={{ color: "#111827" }}>Section Status</h3>
             <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>Enable or disable this section on homepage.</p>
             <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Status</span>
+              <span className="text-sm" style={{ color: "#4B5563" }}>Status</span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSectionStatus(v => !v)}
                   className="relative"
                   style={{ width: 44, height: 24 }}
                 >
-                  <div className="absolute inset-0 rounded-full transition-all" style={{ background: sectionStatus ? "#16C784" : "var(--icon-bg)" }} />
+                  <div className="absolute inset-0 rounded-full transition-all" style={{ background: sectionStatus ? "#16C784" : "#F9FAFB" }} />
                   <div className="absolute top-1 rounded-full transition-all" style={{ width: 16, height: 16, background: "#fff", left: sectionStatus ? "calc(100% - 20px)" : 4 }} />
                 </button>
                 <span className="text-xs font-semibold" style={{ color: sectionStatus ? "#16C784" : "var(--text-muted)" }}>
@@ -690,7 +690,7 @@ export default function EditHeroBannerPage() {
 
           {/* Display Settings */}
           <div className="admin-card !p-5">
-            <h3 className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)" }}>Display Settings</h3>
+            <h3 className="text-sm font-bold mb-1" style={{ color: "#111827" }}>Display Settings</h3>
             <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>Choose on which devices this section will appear.</p>
             <div className="space-y-2.5">
               {[
@@ -704,14 +704,14 @@ export default function EditHeroBannerPage() {
                     className="h-4.5 w-4.5 rounded flex items-center justify-center shrink-0 transition-all"
                     style={{
                       width: 18, height: 18,
-                      background: item.val ? "#12D6C5" : "transparent",
-                      border: `2px solid ${item.val ? "#12D6C5" : "var(--card-border)"}`,
+                      background: item.val ? "#6366F1" : "transparent",
+                      border: `2px solid ${item.val ? "#6366F1" : "#E5E7EB"}`,
                     }}
                   >
                     {item.val && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
                   </button>
                   <item.icon className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
-                  <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{item.label}</span>
+                  <span className="text-sm" style={{ color: "#4B5563" }}>{item.label}</span>
                 </div>
               ))}
             </div>
@@ -719,22 +719,22 @@ export default function EditHeroBannerPage() {
 
           {/* Additional Settings */}
           <div className="admin-card !p-5">
-            <h3 className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)" }}>Additional Settings</h3>
+            <h3 className="text-sm font-bold mb-1" style={{ color: "#111827" }}>Additional Settings</h3>
             <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>Customize extra behavior for this section.</p>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Auto Slide Change</span>
+                <span className="text-sm" style={{ color: "#4B5563" }}>Auto Slide Change</span>
                 <button
                   onClick={() => setAutoSlide(v => !v)}
                   className="relative"
                   style={{ width: 44, height: 24 }}
                 >
-                  <div className="absolute inset-0 rounded-full transition-all" style={{ background: autoSlide ? "#16C784" : "var(--icon-bg)" }} />
+                  <div className="absolute inset-0 rounded-full transition-all" style={{ background: autoSlide ? "#16C784" : "#F9FAFB" }} />
                   <div className="absolute top-1 rounded-full transition-all" style={{ width: 16, height: 16, background: "#fff", left: autoSlide ? "calc(100% - 20px)" : 4 }} />
                 </button>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Change Interval (seconds)</span>
+                <span className="text-sm" style={{ color: "#4B5563" }}>Change Interval (seconds)</span>
                 <input
                   type="number"
                   value={changeInterval}
@@ -750,12 +750,12 @@ export default function EditHeroBannerPage() {
 
           {/* Need Help? */}
           <div className="admin-card !p-5">
-            <h3 className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)" }}>Need Help?</h3>
+            <h3 className="text-sm font-bold mb-1" style={{ color: "#111827" }}>Need Help?</h3>
             <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>Learn how to manage homepage sections.</p>
             <button
               className="w-full flex items-center justify-center gap-2 h-9 rounded-xl text-sm font-medium transition-colors"
-              style={{ border: "1px solid var(--card-border)", color: "var(--text-secondary)" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "var(--hover-bg)"; }}
+              style={{ border: "1px solid var(--card-border)", color: "#4B5563" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#F9FAFB"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
             >
               <HelpCircle className="h-4 w-4" /> View Documentation

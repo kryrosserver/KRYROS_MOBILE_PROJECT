@@ -57,7 +57,7 @@ export default function ProductSettingsPage() {
     <div className="space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/cms" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+          <Link href="/admin/cms" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
             <ArrowLeft style={{ width: 13, height: 13 }} /> Back to CMS
           </Link>
           <div>

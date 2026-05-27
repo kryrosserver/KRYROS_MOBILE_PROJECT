@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const ACCENT = "#12D6C5";
 type TwoFaStep = "idle" | "loading_setup" | "show_qr" | "verify_enable" | "verify_disable";
 type TwoFaStatus = "unknown" | "enabled" | "disabled";
 
@@ -97,14 +96,14 @@ export default function SecuritySettingsPage() {
   );
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Settings
               </Link>
               <div>
@@ -112,14 +111,14 @@ export default function SecuritySettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Security</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Security Center</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Protect your administrator account and sessions</p>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Security Center</h1>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Protect your administrator account and sessions</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
-            {/* Left — Password */}
+            {/* Left   Password */}
             <div className="space-y-5">
               <div className="admin-card">
                 <p className="text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
@@ -171,19 +170,19 @@ export default function SecuritySettingsPage() {
               {/* IP Whitelist placeholder */}
               <div className="admin-card">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "var(--icon-bg)" }}>
+                  <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "#F9FAFB" }}>
                     <UserCheck className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Login Whitelist</p>
+                    <p className="text-sm font-semibold" style={{ color: "#111827" }}>Login Whitelist</p>
                     <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Restrict access to specific IP addresses</p>
                   </div>
-                  <span className="ml-auto text-xs px-2 py-0.5 rounded-lg font-semibold" style={{ background: "var(--icon-bg)", color: "var(--text-muted)" }}>Coming soon</span>
+                  <span className="ml-auto text-xs px-2 py-0.5 rounded-lg font-semibold" style={{ background: "#F9FAFB", color: "var(--text-muted)" }}>Coming soon</span>
                 </div>
               </div>
             </div>
 
-            {/* Right — 2FA */}
+            {/* Right   2FA */}
             <div className="admin-card">
               <p className="text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
                 <Shield className="h-3.5 w-3.5" /> Two-Factor Authentication
@@ -196,13 +195,13 @@ export default function SecuritySettingsPage() {
               <div className="flex items-center gap-3 p-3 rounded-xl mb-5"
                 style={twoFaStatus === "enabled"
                   ? { background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.25)" }
-                  : { background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
+                  : { background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                 <div className="h-9 w-9 rounded-xl flex items-center justify-center"
-                  style={{ background: twoFaStatus === "enabled" ? "rgba(22,199,132,0.2)" : "var(--icon-bg)" }}>
+                  style={{ background: twoFaStatus === "enabled" ? "rgba(22,199,132,0.2)" : "#F9FAFB" }}>
                   <Smartphone className="h-4 w-4" style={{ color: twoFaStatus === "enabled" ? "#16C784" : "var(--text-muted)" }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
+                  <p className="text-xs font-bold" style={{ color: "#111827" }}>
                     {twoFaStatus === "enabled" ? "2FA Enabled" : twoFaStatus === "disabled" ? "2FA Disabled" : "Checking…"}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
@@ -241,14 +240,14 @@ export default function SecuritySettingsPage() {
               {/* Show QR */}
               {twoFaStep === "show_qr" && (
                 <div className="space-y-4">
-                  <div className="rounded-2xl p-5 text-center" style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
-                    <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>Step 1 — Scan with your Authenticator App</p>
+                  <div className="rounded-2xl p-5 text-center" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>Step 1   Scan with your Authenticator App</p>
                     <div className="flex justify-center mb-3">
                       <img src={qrCode} alt="2FA QR" className="w-36 h-36 rounded-xl p-2 bg-white" />
                     </div>
                     <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Or enter this key manually:</p>
-                    <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "var(--bg-primary)", border: "1px solid var(--card-border)" }}>
-                      <code className="text-xs font-bold flex-1 text-left tracking-wider break-all" style={{ color: "var(--text-primary)" }}>{secret}</code>
+                    <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#F8F9FA", border: "1px solid var(--card-border)" }}>
+                      <code className="text-xs font-bold flex-1 text-left tracking-wider break-all" style={{ color: "#111827" }}>{secret}</code>
                       <button onClick={() => { navigator.clipboard.writeText(secret); setSecretCopied(true); setTimeout(() => setSecretCopied(false), 2000); }}
                         style={{ color: secretCopied ? "#16C784" : "var(--text-muted)" }}>
                         {secretCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -256,7 +255,7 @@ export default function SecuritySettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>Step 2 — Enter the 6-digit code</p>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>Step 2   Enter the 6-digit code</p>
                     <input type="text" maxLength={6} value={verifyCode} onChange={e => setVerifyCode(e.target.value.replace(/\D/g, ""))}
                       placeholder="000000" className="admin-input w-full text-center text-2xl font-black tracking-[0.5em]" />
                   </div>

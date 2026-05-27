@@ -11,14 +11,11 @@ import {
   TrendingUp, Mail, MessageCircle, Code, Megaphone, Home, Save,
   ArrowLeft, BarChart3, FileText, CheckCircle2, XCircle,
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
-
-const ACCENT = "#12D6C5";
 
 const SECTION_META: Record<string, { icon: any; color: string; bg: string; label: string; description: string }> = {
   HeroSlider:          { icon: Layers,        color: "#3B82F6", bg: "rgba(59,130,246,0.15)",  label: "Hero Banner",          description: "Main banner slider with promotional content" },
   TrustBadges:         { icon: ShieldCheck,   color: "#16C784", bg: "rgba(22,199,132,0.15)",  label: "Trust Badges",         description: "Fast Delivery, Secure Payment, Returns" },
-  CategoriesGrid:      { icon: Grid,          color: "#12D6C5", bg: "rgba(18,214,197,0.15)",  label: "Categories",           description: "Display product categories" },
+  CategoriesGrid:      { icon: Grid,          color: "#6366F1", bg: "rgba(18,214,197,0.15)",  label: "Categories",           description: "Display product categories" },
   FlashSale:           { icon: Zap,           color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  label: "Flash Sale",           description: "Active flash sales with countdown" },
   UpgradeBanner:       { icon: Megaphone,     color: "#A78BFA", bg: "rgba(167,139,250,0.15)", label: "Upgrade Banner",       description: "Upgrade your tech promotional banner" },
   PromoBanners:        { icon: Layout,        color: "#38BDF8", bg: "rgba(56,189,248,0.15)",  label: "Promo Banners",        description: "Two side-by-side promotional banners" },
@@ -37,7 +34,7 @@ const SECTION_META: Record<string, { icon: any; color: string; bg: string; label
   PageHero:            { icon: ImageIcon,     color: "#3B82F6", bg: "rgba(59,130,246,0.15)",  label: "Page Hero",            description: "Top hero section for the page" },
   PageContent:         { icon: FileText,      color: "#64748B", bg: "rgba(100,116,139,0.15)", label: "Page Content",         description: "Main content area" },
   MembersBanner:       { icon: Megaphone,     color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  label: "Members Banner",       description: "Shop members promotional section" },
-  ShopFilters:         { icon: Settings,      color: "#12D6C5", bg: "rgba(18,214,197,0.15)",  label: "Shop Filters",         description: "Product filter options" },
+  ShopFilters:         { icon: Settings,      color: "#6366F1", bg: "rgba(18,214,197,0.15)",  label: "Shop Filters",         description: "Product filter options" },
   RelatedProducts:     { icon: Package,       color: "#22C55E", bg: "rgba(34,197,94,0.15)",   label: "Related Products",     description: "Related products recommendation" },
   ProductGallery:      { icon: ImageIcon,     color: "#3B82F6", bg: "rgba(59,130,246,0.15)",  label: "Product Gallery",      description: "Product images gallery" },
   WholesaleHero:       { icon: Layers,        color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  label: "Wholesale Hero",       description: "Wholesale page hero section" },
@@ -47,7 +44,7 @@ const SECTION_META: Record<string, { icon: any; color: string; bg: string; label
   GetNowHero:          { icon: CreditCard,    color: "#FACC15", bg: "rgba(250,204,21,0.15)",  label: "Get Now Hero",         description: "Buy Now Pay Later hero section" },
   GetNowFeatures:      { icon: ShieldCheck,   color: "#16C784", bg: "rgba(22,199,132,0.15)",  label: "Get Now Features",     description: "BNPL features and benefits" },
   // Current frontend types
-  promo_banners:       { icon: ImageIcon,     color: "#EC4899", bg: "rgba(236,72,153,0.15)",  label: "Promo Card (CategoryPromoBanners)", description: "Scrollable promo card — fetched by ?type=promo_banners" },
+  promo_banners:       { icon: ImageIcon,     color: "#EC4899", bg: "rgba(236,72,153,0.15)",  label: "Promo Card (CategoryPromoBanners)", description: "Scrollable promo card   fetched by ?type=promo_banners" },
   RecentlyViewed:      { icon: Package,       color: "#22C55E", bg: "rgba(34,197,94,0.15)",   label: "Recently Viewed",      description: "Client-side recently browsed products (localStorage)" },
   RecommendedProducts: { icon: Star,          color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  label: "Recommended For You",  description: "Horizontal scroll product recommendations" },
 };
@@ -55,16 +52,16 @@ const SECTION_META: Record<string, { icon: any; color: string; bg: string; label
 const PAGE_DEFAULT_SECTIONS: Record<string, { type: string; order: number }[]> = {
   // Matches current User-UI HomePage.tsx section order exactly
   home: [
-    { type: "HeroSlider", order: 1 },          // HeroSection — reads from cms_banners
-    { type: "Brands", order: 2 },              // BrandsSection — reads from /api/brands
-    { type: "TrustBadges", order: 3 },         // TrustBadges — reads from site-config/trust-badges
-    { type: "CategoriesGrid", order: 4 },      // CategorySection — reads /api/categories
+    { type: "HeroSlider", order: 1 },          // HeroSection   reads from cms_banners
+    { type: "Brands", order: 2 },              // BrandsSection   reads from /api/brands
+    { type: "TrustBadges", order: 3 },         // TrustBadges   reads from site-config/trust-badges
+    { type: "CategoriesGrid", order: 4 },      // CategorySection   reads /api/categories
     { type: "FlashSale", order: 5 },           // FlashSaleSection
-    { type: "UpgradeBanner", order: 6 },       // UpgradeBanner — reads site-config/upgrade-banner
-    { type: "PromoBanners", order: 7 },        // PromoBanners — reads cms_banners filtered by tag
+    { type: "UpgradeBanner", order: 6 },       // UpgradeBanner   reads site-config/upgrade-banner
+    { type: "PromoBanners", order: 7 },        // PromoBanners   reads cms_banners filtered by tag
     { type: "FeaturedProducts", order: 8 },    // FeaturedProductsSection
-    { type: "promo_banners", order: 9 },       // CategoryPromoBanners — reads homepage-sections?type=promo_banners
-    { type: "RecentlyViewed", order: 10 },     // RecentlyViewedSection — client-side localStorage
+    { type: "promo_banners", order: 9 },       // CategoryPromoBanners   reads homepage-sections?type=promo_banners
+    { type: "RecentlyViewed", order: 10 },     // RecentlyViewedSection   client-side localStorage
     { type: "RecommendedProducts", order: 11 }, // ProductSection "Recommended For You"
   ],
   shop: [
@@ -129,12 +126,21 @@ function getSectionCount(section: any): string {
 }
 
 export default function CMSPageSections() {
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
+
   const params = useParams();
   const router = useRouter();
   const slug = (params?.slug as string) || "home";
   const pageLabel = PAGE_LABELS[slug] || slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
-
-  const { isDark, toggleTheme } = useTheme();
 
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -264,63 +270,17 @@ export default function CMSPageSections() {
   const active = sections.filter(s => s.isActive).length;
   const inactive = sections.filter(s => !s.isActive).length;
 
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const BG = "var(--bg-primary)";
-  const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
-
   const statCards = [
-    { label: "Total Sections",   value: sections.length, color: ACCENT,    bg: "rgba(18,214,197,0.12)",  icon: Layers },
+    { label: "Total Sections",   value: sections.length, color: "#6366F1",    bg: "rgba(18,214,197,0.12)",  icon: Layers },
     { label: "Active Sections",  value: active,          color: "#16C784", bg: "rgba(22,199,132,0.12)",  icon: CheckCircle2 },
     { label: "Inactive Sections",value: inactive,        color: "#EF4444", bg: "rgba(239,68,68,0.12)",   icon: XCircle },
     { label: "Last Published",   value: "Today",         color: "#F59E0B", bg: "rgba(245,158,11,0.12)",  icon: RefreshCw, isText: true },
   ];
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
 
         {/* TOP HEADER */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16, flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Menu style={{ width: 20, height: 20 }} />
-            </button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>{pageLabel}</h1>
-          </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2 }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            </span>
-            <input placeholder="Search anything..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>3</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
-            </button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} />
-              May 20 – May 26, 2025
-              <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
-                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
-              </div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
 
         {/* PAGE CONTENT */}
         <div style={{ padding: 20, flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -341,16 +301,16 @@ export default function CMSPageSections() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
               <button
                 onClick={handleRefresh}
-                style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 14px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
+                style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 14px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
                 <RefreshCw style={{ width: 14, height: 14, ...(isRefreshing ? { animation: "spin 1s linear infinite" } : {}) }} />
               </button>
               <button
-                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
                 <Eye style={{ width: 14, height: 14 }} /> Preview
               </button>
               <button
                 onClick={() => setShowAdd(true)}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
                 <Plus style={{ width: 14, height: 14 }} /> Add Section
               </button>
               <button
@@ -364,7 +324,7 @@ export default function CMSPageSections() {
               <button
                 onClick={handleSaveOrder}
                 disabled={saving}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
                 <Save style={{ width: 14, height: 14 }} /> {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
@@ -376,10 +336,10 @@ export default function CMSPageSections() {
             </div>
           )}
 
-          {/* ── STAT CARDS ── */}
+          {/* STAT CARDS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
             {statCards.map((c, i) => (
-              <div key={i} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div key={i} style={{ background: CARD, border: "1px solid #E5E7EB", borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, background: c.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <c.icon style={{ width: 18, height: 18, color: c.color }} />
@@ -391,11 +351,11 @@ export default function CMSPageSections() {
             ))}
           </div>
 
-          {/* ── SECTIONS LIST ── */}
-          <div className="overflow-x-auto" style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16 }}>
+          {/* SECTIONS LIST */}
+          <div className="overflow-x-auto" style={{ background: CARD, border: "1px solid #E5E7EB", borderRadius: 16 }}>
 
             {/* Table header */}
-            <div style={{ padding: "14px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
               <div>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{pageLabel} Sections</h3>
                 <p style={{ fontSize: 12, color: TEXT2, margin: "3px 0 0" }}>
@@ -406,7 +366,7 @@ export default function CMSPageSections() {
                 <span style={{ fontSize: 12, color: TEXT2 }}>{sections.length} section{sections.length !== 1 ? "s" : ""}</span>
                 <button
                   onClick={() => setShowAdd(true)}
-                  style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 6, background: "#6366F1", border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
                   <Plus style={{ width: 14, height: 14 }} /> Add Section
                 </button>
               </div>
@@ -414,7 +374,7 @@ export default function CMSPageSections() {
 
             {/* Column headers */}
             {!loading && sections.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "32px 48px 1fr 120px 80px 60px 90px 80px", alignItems: "center", padding: "10px 20px", borderBottom: `1px solid ${BORDER}`, background: ICON_BG }}>
+              <div style={{ display: "grid", gridTemplateColumns: "32px 48px 1fr 120px 80px 60px 90px 80px", alignItems: "center", padding: "10px 20px", borderBottom: "1px solid #E5E7EB", background: ICON_BG }}>
                 <span />
                 <span />
                 <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Section</span>
@@ -436,7 +396,7 @@ export default function CMSPageSections() {
                 <Layers style={{ width: 40, height: 40, margin: "0 auto 14px", opacity: 0.3, display: "block" }} />
                 <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: TEXT }}>No sections yet</p>
                 <p style={{ margin: "6px 0 16px", fontSize: 13 }}>Add your first section to get started.</p>
-                <button onClick={() => setShowAdd(true)} style={{ padding: "9px 20px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                <button onClick={() => setShowAdd(true)} style={{ padding: "9px 20px", background: "#6366F1", border: "none", borderRadius: 10, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
                   + Add First Section
                 </button>
               </div>
@@ -459,8 +419,8 @@ export default function CMSPageSections() {
                         gridTemplateColumns: "32px 48px 1fr 120px 80px 60px 90px 80px",
                         alignItems: "center",
                         padding: "14px 20px",
-                        borderBottom: idx < sections.length - 1 ? `1px solid ${BORDER}` : "none",
-                        background: isDragging ? "var(--hover-bg)" : "transparent",
+                        borderBottom: idx < sections.length - 1 ? "1px solid #E5E7EB" : "none",
+                        background: isDragging ? "#F9FAFB" : "transparent",
                         cursor: "grab",
                         transition: "background 0.15s",
                       }}>
@@ -502,7 +462,7 @@ export default function CMSPageSections() {
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <button
                           onClick={() => handleToggle(section)}
-                          style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", background: section.isActive ? ACCENT : ICON_BG, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                          style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", background: section.isActive ? "#6366F1" : ICON_BG, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                           <span style={{ position: "absolute", top: 3, left: section.isActive ? "calc(100% - 19px)" : 3, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
                         </button>
                         <span style={{ fontSize: 11, color: section.isActive ? "#16C784" : TEXT2, fontWeight: 600 }}>
@@ -512,7 +472,7 @@ export default function CMSPageSections() {
 
                       {/* Actions */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <Link href={editHref} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 8px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", textDecoration: "none" }}>
+                        <Link href={editHref} style={{ background: ICON_BG, border: "1px solid #E5E7EB", borderRadius: 8, padding: "6px 8px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", textDecoration: "none" }}>
                           <Edit style={{ width: 13, height: 13 }} />
                         </Link>
                         <button
@@ -526,13 +486,13 @@ export default function CMSPageSections() {
                 })}
 
                 {/* Footer hint */}
-                <div style={{ padding: "12px 20px", borderTop: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ padding: "12px 20px", borderTop: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 12, color: TEXT2 }}>
                     Showing {sections.length} of {sections.length} sections · Drag rows to reorder
                   </span>
                   <button
                     onClick={() => setShowAdd(true)}
-                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: `1px dashed ${BORDER}`, borderRadius: 8, padding: "6px 14px", color: TEXT2, fontSize: 12, cursor: "pointer" }}>
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: `1px dashed #E5E7EB`, borderRadius: 8, padding: "6px 14px", color: TEXT2, fontSize: 12, cursor: "pointer" }}>
                     <Plus style={{ width: 12, height: 12 }} /> Add New Section
                   </button>
                 </div>
@@ -544,13 +504,13 @@ export default function CMSPageSections() {
         {/* ADD SECTION MODAL */}
         {showAdd && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 28, width: 560, maxHeight: "80vh", overflow: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.4)" }}>
+            <div style={{ background: CARD, border: "1px solid #E5E7EB", borderRadius: 20, padding: 28, width: 560, maxHeight: "80vh", overflow: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.4)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                 <div>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>Add New Section</h3>
                   <p style={{ fontSize: 12, color: TEXT2, margin: "4px 0 0" }}>Choose a section type to add to {pageLabel}.</p>
                 </div>
-                <button onClick={() => setShowAdd(false)} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: TEXT2, fontSize: 13 }}>✕</button>
+                <button onClick={() => setShowAdd(false)} style={{ background: ICON_BG, border: "1px solid #E5E7EB", borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: TEXT2, fontSize: 13 }}>✕</button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5" style={{marginBottom: 20}}>
                 {Object.entries(SECTION_META).map(([type, meta]) => {
@@ -570,8 +530,8 @@ export default function CMSPageSections() {
                 })}
               </div>
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button onClick={() => setShowAdd(false)} style={{ padding: "9px 18px", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, cursor: "pointer", fontSize: 13 }}>Cancel</button>
-                <button onClick={handleAddSection} disabled={!addType} style={{ padding: "9px 18px", background: addType ? ACCENT : ICON_BG, border: "none", borderRadius: 10, color: addType ? "#0B1320" : TEXT2, cursor: addType ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 700 }}>
+                <button onClick={() => setShowAdd(false)} style={{ padding: "9px 18px", background: ICON_BG, border: "1px solid #E5E7EB", borderRadius: 10, color: TEXT2, cursor: "pointer", fontSize: 13 }}>Cancel</button>
+                <button onClick={handleAddSection} disabled={!addType} style={{ padding: "9px 18px", background: addType ? "#6366F1" : ICON_BG, border: "none", borderRadius: 10, color: addType ? "#0B1320" : TEXT2, cursor: addType ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 700 }}>
                   Add Section
                 </button>
               </div>
@@ -581,6 +541,5 @@ export default function CMSPageSections() {
 
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
-    </div>
   );
 }

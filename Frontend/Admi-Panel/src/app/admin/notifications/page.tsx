@@ -6,12 +6,9 @@ import {
   MessageSquare, Mail, Search, Sun, Moon, Menu, ChevronDown, ChevronRight,
   Download, MoreHorizontal, BarChart3, CheckCircle,
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
-const ACCENT = "#12D6C5";
-
-function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boolean }) {
+function MiniSparkline({ color = "#6366F1", up = true }: { color?: string; up?: boolean }) {
   const data = up
     ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
     : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
@@ -31,16 +28,16 @@ function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boo
 }
 
 export default function NotificationsPage() {
-  const { isDark, toggleTheme } = useTheme();
-
-  const BG = "var(--bg-primary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const HOVER = "var(--hover-bg)";
-  const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
 
   useEffect(() => {}, []);
 
@@ -96,59 +93,31 @@ export default function NotificationsPage() {
     finally { setLoading(false); }
   };
 
-  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
-  const inputStyle = { width: "100%", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 14px", color: TEXT, fontSize: 13, outline: "none" };
+  const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
+  const inputStyle = { width: "100%", background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, padding: "10px 14px", color: TEXT, fontSize: 13, outline: "none" };
   const labelStyle = { fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase" as const, letterSpacing: "0.08em", display: "block", marginBottom: 6 };
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
 
-        {/* ── HEADER ── */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Notification Center</h1>
-          </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
-            <input placeholder="Search..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
-              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
+        {/* HEADER */}
 
-        {/* ── BODY ── */}
-        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Body */}
 
           {/* Page title + actions */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
             <div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Notification Center</h2>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
-                <span>Home</span><ChevronRight style={{ width: 13, height: 13 }} /><span style={{ color: ACCENT }}>Notifications</span>
+                <span>Home</span><ChevronRight style={{ width: 13, height: 13 }} /><span style={{ color: "#6366F1" }}>Notifications</span>
               </div>
               <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Send push, SMS, and email notifications to customers</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
                 <Download style={{ width: 15, height: 15 }} /> Export Logs
               </button>
-              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
                 <MoreHorizontal style={{ width: 16, height: 16 }} />
               </button>
             </div>
@@ -157,7 +126,7 @@ export default function NotificationsPage() {
           {/* Stat Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: "Total Sent", value: "0", change: "0.0%", up: true, color: ACCENT, icon: BarChart3 },
+              { label: "Total Sent", value: "0", change: "0.0%", up: true, color: "#6366F1", icon: BarChart3 },
               { label: "Push Notifications", value: "0", change: "0.0%", up: true, color: "#3B82F6", icon: Bell },
               { label: "SMS Messages", value: "0", change: "0.0%", up: true, color: "#8B5CF6", icon: MessageSquare },
               { label: "Emails Sent", value: "0", change: "0.0%", up: true, color: "#F59E0B", icon: Mail },
@@ -179,7 +148,7 @@ export default function NotificationsPage() {
           </div>
 
           {/* Tab nav */}
-          <div style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <div style={{ borderBottom: "1px solid #E5E7EB" }}>
             <nav style={{ display: "flex", gap: 4 }}>
               {[
                 { id: "PUSH" as const, label: "Push Notifications", icon: Bell },
@@ -187,7 +156,7 @@ export default function NotificationsPage() {
                 { id: "EMAIL" as const, label: "Email (SMTP)", icon: Mail },
               ].map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", cursor: "pointer", background: "transparent", border: "none", borderBottom: activeTab === tab.id ? `2px solid ${ACCENT}` : "2px solid transparent", color: activeTab === tab.id ? ACCENT : TEXT2, whiteSpace: "nowrap", transition: "color 0.15s" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", cursor: "pointer", background: "transparent", border: "none", borderBottom: activeTab === tab.id ? `2px solid #6366F1` : "2px solid transparent", color: activeTab === tab.id ? "#6366F1" : TEXT2, whiteSpace: "nowrap", transition: "color 0.15s" }}>
                   <tab.icon style={{ width: 14, height: 14 }} />
                   {tab.label}
                 </button>
@@ -222,7 +191,7 @@ export default function NotificationsPage() {
                     <label style={labelStyle}>Email Message</label>
                     <textarea required placeholder="Enter the email content..." rows={6} value={emailFormData.message} onChange={e => setEmailFormData({ ...emailFormData, message: e.target.value }) } style={{ ...inputStyle, resize: "none" }} />
                   </div>
-                  <button type="submit" disabled={loading} style={{ height: 52, background: ACCENT, border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.06em", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? 0.7 : 1 }}>
+                  <button type="submit" disabled={loading} style={{ height: 52, background: "#6366F1", border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.06em", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? 0.7 : 1 }}>
                     {loading ? <Loader2 style={{ width: 20, height: 20 }} /> : <Mail style={{ width: 20, height: 20 }} />}
                     {loading ? "Sending..." : "Send Test Email"}
                   </button>
@@ -248,7 +217,7 @@ export default function NotificationsPage() {
                     <label style={labelStyle}><Calendar style={{ display: "inline", width: 11, height: 11 }} /> Schedule (Optional)</label>
                     <input type="datetime-local" value={smsFormData.scheduledAt} onChange={e => setSmsFormData({ ...smsFormData, scheduledAt: e.target.value })} style={inputStyle} />
                   </div>
-                  <button type="submit" disabled={loading} style={{ height: 52, background: ACCENT, border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.06em", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? 0.7 : 1 }}>
+                  <button type="submit" disabled={loading} style={{ height: 52, background: "#6366F1", border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.06em", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? 0.7 : 1 }}>
                     {loading ? <Loader2 style={{ width: 20, height: 20 }} /> : <Send style={{ width: 20, height: 20 }} />}
                     {loading ? "Sending..." : "Send SMS"}
                   </button>
@@ -261,7 +230,7 @@ export default function NotificationsPage() {
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, minHeight: 400 }}>
                     <div style={{ width: 280, background: "#fff", borderRadius: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", border: "1px solid #f1f5f9", overflow: "hidden" }}>
                       <div style={{ padding: "14px 16px", background: "#f8fafc", borderBottom: "1px solid #f1f5f9", display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 32, height: 32, background: ACCENT, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, color: "#0B1320" }}>K</div>
+                        <div style={{ width: 32, height: 32, background: "#6366F1", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, color: "#0B1320" }}>K</div>
                         <div>
                           <div style={{ fontSize: 9, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase" }}>Kryros Mobile</div>
                           <div style={{ fontSize: 8, color: "#94a3b8" }}>Now</div>
@@ -273,7 +242,7 @@ export default function NotificationsPage() {
                       </div>
                     </div>
                     <p style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Simulated Mobile Preview</p>
-                    <button onClick={() => setShowPreview(false)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>Back to Form</button>
+                    <button onClick={() => setShowPreview(false)} style={{ background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>Back to Form</button>
                   </div>
                 ) : (
                   <form onSubmit={handleSendPush} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -293,7 +262,7 @@ export default function NotificationsPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5" style={{background: HOVER, borderRadius: 14, padding: "16px"}}>
                       <div>
-                        <label style={{ ...labelStyle, color: ACCENT, display: "flex", alignItems: "center", gap: 4 }}><Target style={{ width: 11, height: 11 }} /> Target Audience</label>
+                        <label style={{ ...labelStyle, color: "#6366F1", display: "flex", alignItems: "center", gap: 4 }}><Target style={{ width: 11, height: 11 }} /> Target Audience</label>
                         <select value={targetType} onChange={e => setTargetType(e.target.value as any)} style={{ ...inputStyle, background: CARD, appearance: "none" }}>
                           <option value="BROADCAST">All App Users (Broadcast)</option>
                           <option value="SINGLE">Specific User ID</option>
@@ -330,12 +299,12 @@ export default function NotificationsPage() {
                       )}
                     </div>
                     <div style={{ display: "flex", gap: 10 }}>
-                      <button type="submit" disabled={loading} style={{ flex: 1, height: 52, background: ACCENT, border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.06em", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? 0.7 : 1 }}>
+                      <button type="submit" disabled={loading} style={{ flex: 1, height: 52, background: "#6366F1", border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.06em", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loading ? 0.7 : 1 }}>
                         {loading ? <Loader2 style={{ width: 20, height: 20 }} /> : formData.scheduledAt ? <Calendar style={{ width: 20, height: 20 }} /> : <Send style={{ width: 20, height: 20 }} />}
                         {loading ? "Processing..." : formData.scheduledAt ? "Schedule Notification" : "Push Notification Now"}
                       </button>
                       <button type="button" onClick={() => setShowPreview(true)}
-                        style={{ width: 52, height: 52, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        style={{ width: 52, height: 52, background: CARD, border: "1px solid #E5E7EB", borderRadius: 12, color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Eye style={{ width: 18, height: 18 }} />
                       </button>
                     </div>
@@ -348,7 +317,7 @@ export default function NotificationsPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ ...card, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 800, color: TEXT, margin: "0 0 16px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <Info style={{ width: 16, height: 16, color: ACCENT }} /> Best Practices
+                  <Info style={{ width: 16, height: 16, color: "#6366F1" }} /> Best Practices
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
@@ -373,7 +342,7 @@ export default function NotificationsPage() {
                   { label: "SMS (Beem Africa)", color: "#22C55E", status: "Operational" },
                   { label: "Email (SMTP)", color: "#22C55E", status: "Operational" },
                 ].map((ch, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: i < 2 ? `1px solid ${BORDER}` : "none" }}>
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: i < 2 ? "1px solid #E5E7EB" : "none" }}>
                     <span style={{ fontSize: 12, color: TEXT }}>{ch.label}</span>
                     <span style={{ fontSize: 10, fontWeight: 700, color: ch.color, background: `${ch.color}15`, padding: "2px 8px", borderRadius: 20 }}>{ch.status}</span>
                   </div>
@@ -382,7 +351,5 @@ export default function NotificationsPage() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
   );
 }

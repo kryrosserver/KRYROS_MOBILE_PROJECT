@@ -9,8 +9,6 @@ import {
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 
-const ACCENT = "#12D6C5";
-
 export default function WholesaleDealsPage() {
   useEffect(() => {}, []);
 
@@ -52,7 +50,7 @@ export default function WholesaleDealsPage() {
   const allItems = dealSections.flatMap((s: any) => (Array.isArray(s.config?.items) ? s.config.items : []).map((it: any) => ({ ...it, _sectionId: s.id, _sectionActive: s.isActive })));
 
   const stats = [
-    { label: "Deal Sections", value: dealSections.length, color: ACCENT, bg: "rgba(18,214,197,0.12)", icon: Star },
+    { label: "Deal Sections", value: dealSections.length, color: "#6366F1", bg: "rgba(18,214,197,0.12)", icon: Star },
     { label: "Total Deals", value: allItems.length, color: "#16C784", bg: "rgba(22,199,132,0.12)", icon: Tag },
     { label: "Active Sections", value: dealSections.filter((s: any) => s.isActive).length, color: "#F59E0B", bg: "rgba(245,158,11,0.12)", icon: ToggleRight },
   ];
@@ -74,14 +72,14 @@ export default function WholesaleDealsPage() {
   };
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/wholesale" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/wholesale" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Wholesale
               </Link>
               <div>
@@ -89,8 +87,8 @@ export default function WholesaleDealsPage() {
                   <Link href="/admin/wholesale" style={{ color: "var(--text-muted)" }}>Wholesale</Link>
                   <span>/</span><span>Deals</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Wholesale Deals</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Manage featured wholesale offers shown on the storefront</p>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Wholesale Deals</h1>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Manage featured wholesale offers shown on the storefront</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -114,7 +112,7 @@ export default function WholesaleDealsPage() {
                     <s.icon className="h-5 w-5" style={{ color: s.color }} />
                   </div>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "#4B5563", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}
@@ -164,10 +162,10 @@ export default function WholesaleDealsPage() {
                         }}
                       >
                         {section.isActive
-                          ? <ToggleRight className="h-6 w-6" style={{ color: ACCENT }} />
+                          ? <ToggleRight className="h-6 w-6" style={{ color: "#6366F1" }} />
                           : <ToggleLeft className="h-6 w-6" style={{ color: "var(--text-muted)" }} />}
                       </button>
-                      <span className="text-sm font-semibold" style={{ color: section.isActive ? ACCENT : "var(--text-muted)" }}>
+                      <span className="text-sm font-semibold" style={{ color: section.isActive ? "#6366F1" : "var(--text-muted)" }}>
                         {section.isActive ? "Active on Site" : "Hidden"}
                       </span>
                     </label>
@@ -175,7 +173,7 @@ export default function WholesaleDealsPage() {
                 </div>
 
                 {/* Add New Deal Row */}
-                <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
+                <div className="rounded-xl p-4 space-y-3" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Add New Deal</p>
                   <div className="grid grid-cols-6 gap-3">
                     <input placeholder="Product Title" className="admin-input" value={newItem.title} onChange={e => setNewItem(f => ({ ...f, title: e.target.value }))} />
@@ -228,24 +226,24 @@ export default function WholesaleDealsPage() {
                             <td className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>{idx + 1}</td>
                             <td>
                               <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center" style={{ background: "var(--icon-bg)", border: "1px solid var(--card-border)" }}>
+                                <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                                   {it.image
                                     ? <img src={it.image} alt={it.title} className="h-full w-full object-cover" />
                                     : <Package className="h-4 w-4" style={{ color: "var(--text-muted)" }} />}
                                 </div>
                                 <div>
-                                  <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{it.title}</p>
+                                  <p className="font-semibold text-sm" style={{ color: "#111827" }}>{it.title}</p>
                                   {it.slug && <p className="text-xs font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>{it.slug}</p>}
                                 </div>
                               </div>
                             </td>
-                            <td className="text-sm" style={{ color: "var(--text-secondary)" }}>{it.subtitle || "—"}</td>
+                            <td className="text-sm" style={{ color: "#4B5563" }}>{it.subtitle || " "}</td>
                             <td>
-                              <span className="px-2 py-0.5 rounded-lg text-xs font-bold" style={{ background: "rgba(18,214,197,0.1)", color: ACCENT }}>
+                              <span className="px-2 py-0.5 rounded-lg text-xs font-bold" style={{ background: "rgba(18,214,197,0.1)", color: "#6366F1" }}>
                                 Min {it.minQty || 1}
                               </span>
                             </td>
-                            <td className="text-right font-bold" style={{ color: "var(--text-primary)" }}>
+                            <td className="text-right font-bold" style={{ color: "#111827" }}>
                               {formatPrice(it.price)}
                             </td>
                             <td className="text-right">

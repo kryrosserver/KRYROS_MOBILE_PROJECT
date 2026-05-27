@@ -7,10 +7,8 @@ import { Palette, Layout, Check, ChevronLeft, Save, Sun, Moon, Monitor,
 import Link from "next/link";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 
-const ACCENT = "#12D6C5";
-
 const COLORS = [
-  { label: "Kryros Teal",  hex: "#12D6C5" },
+  { label: "Kryros Teal",  hex: "#6366F1" },
   { label: "Emerald",      hex: "#10b981" },
   { label: "Blue",         hex: "#3b82f6" },
   { label: "Violet",       hex: "#8b5cf6" },
@@ -38,14 +36,14 @@ export default function AppearanceSettingsPage() {
   };
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Settings
               </Link>
               <div>
@@ -53,8 +51,8 @@ export default function AppearanceSettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Appearance</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Appearance</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Customize the look and feel of the admin dashboard</p>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Appearance</h1>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Customize the look and feel of the admin dashboard</p>
               </div>
             </div>
             <button onClick={handleSave} disabled={isSaving}
@@ -83,8 +81,8 @@ export default function AppearanceSettingsPage() {
                         onClick={() => setTheme(t.id as any)}
                         className="p-4 rounded-2xl border-2 transition-all text-center"
                         style={isSelected
-                          ? { borderColor: ACCENT, background: `${ACCENT}12` }
-                          : { borderColor: "var(--card-border)", background: "var(--hover-bg)" }
+                          ? { borderColor: "#6366F1", background: `#6366F112` }
+                          : { borderColor: "#E5E7EB", background: "#F9FAFB" }
                         }
                       >
                         <div className="h-14 rounded-xl mb-3 overflow-hidden" style={{
@@ -94,8 +92,8 @@ export default function AppearanceSettingsPage() {
                           border: "2px solid var(--card-border)"
                         }} />
                         <div className="flex items-center justify-center gap-1.5">
-                          <t.icon className="h-3.5 w-3.5" style={{ color: isSelected ? ACCENT : "var(--text-muted)" }} />
-                          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: isSelected ? ACCENT : "var(--text-muted)" }}>
+                          <t.icon className="h-3.5 w-3.5" style={{ color: isSelected ? "#6366F1" : "var(--text-muted)" }} />
+                          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: isSelected ? "#6366F1" : "var(--text-muted)" }}>
                             {t.label}
                           </span>
                         </div>
@@ -119,7 +117,7 @@ export default function AppearanceSettingsPage() {
                       className="h-12 w-12 rounded-2xl border-4 transition-all flex items-center justify-center"
                       style={{
                         background: c.hex,
-                        borderColor: accentColor === c.hex ? "var(--text-primary)" : "transparent",
+                        borderColor: accentColor === c.hex ? "#111827" : "transparent",
                         transform: accentColor === c.hex ? "scale(1.12)" : "scale(1)",
                         boxShadow: accentColor === c.hex ? `0 4px 16px ${c.hex}55` : "none",
                       }}
@@ -131,7 +129,7 @@ export default function AppearanceSettingsPage() {
                 <div className="flex items-center gap-3 mt-4 pt-4" style={{ borderTop: "1px solid var(--card-border)" }}>
                   <div className="h-8 w-8 rounded-xl" style={{ background: accentColor }} />
                   <div>
-                    <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
+                    <p className="text-xs font-bold" style={{ color: "#111827" }}>
                       {COLORS.find(c => c.hex === accentColor)?.label ?? "Custom"}
                     </p>
                     <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{accentColor}</p>
@@ -140,7 +138,7 @@ export default function AppearanceSettingsPage() {
               </div>
             </div>
 
-            {/* Right column — Live Preview */}
+            {/* Right column   Live Preview */}
             <div className="admin-card">
               <p className="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
                 <Layout className="h-3.5 w-3.5" /> Live Preview

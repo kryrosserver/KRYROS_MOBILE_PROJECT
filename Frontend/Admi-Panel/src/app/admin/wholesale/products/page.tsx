@@ -20,8 +20,6 @@ type Product = {
 };
 type Category = { id: string; name: string; slug: string };
 
-const ACCENT = "#12D6C5";
-
 const CATEGORY_ATTRIBUTES: Record<string, string[]> = {
   "mobile-phones": ["RAM", "Storage", "Battery", "Screen Size", "Processor", "Camera", "Color"],
   "laptops": ["RAM", "Storage", "Processor", "Graphics", "Display", "Operating System"],
@@ -100,7 +98,7 @@ export default function WholesaleProductsPage() {
   const currentCategoryAttributes = CATEGORY_ATTRIBUTES[form.categorySlug] || CATEGORY_ATTRIBUTES["default"];
 
   const stats = [
-    { label: "Wholesale Products", value: products.length, color: ACCENT, bg: "rgba(18,214,197,0.12)", icon: Package },
+    { label: "Wholesale Products", value: products.length, color: "#6366F1", bg: "rgba(18,214,197,0.12)", icon: Package },
     { label: "Active", value: products.filter(p => p.isActive).length, color: "#16C784", bg: "rgba(22,199,132,0.12)", icon: ShoppingCart },
     { label: "Exclusive Only", value: products.filter(p => p.isWholesaleOnly).length, color: "#F59E0B", bg: "rgba(245,158,11,0.12)", icon: Tag },
   ];
@@ -138,14 +136,14 @@ export default function WholesaleProductsPage() {
   };
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/wholesale" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/wholesale" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Wholesale
               </Link>
               <div>
@@ -153,8 +151,8 @@ export default function WholesaleProductsPage() {
                   <Link href="/admin/wholesale" style={{ color: "var(--text-muted)" }}>Wholesale</Link>
                   <span>/</span><span>Products</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Wholesale Inventory</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Products exclusively for wholesale partners</p>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Wholesale Inventory</h1>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Products exclusively for wholesale partners</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -176,7 +174,7 @@ export default function WholesaleProductsPage() {
                     <s.icon className="h-5 w-5" style={{ color: s.color }} />
                   </div>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "#4B5563", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}
@@ -184,9 +182,9 @@ export default function WholesaleProductsPage() {
 
           {/* Create Form */}
           {showCreate && (
-            <div className="admin-card space-y-6" style={{ border: `1px solid ${ACCENT}30` }}>
+            <div className="admin-card space-y-6" style={{ border: `1px solid #6366F130` }}>
               <div className="flex items-center justify-between pb-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-                <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>New Wholesale Product</p>
+                <p className="font-bold text-sm" style={{ color: "#111827" }}>New Wholesale Product</p>
                 <button onClick={() => setShowCreate(false)} className="h-7 w-7 rounded-lg flex items-center justify-center btn-secondary !px-0">
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -247,7 +245,7 @@ export default function WholesaleProductsPage() {
                     <div className="flex flex-col gap-1 mb-2">
                       {currentCategoryAttributes.map(attr => (
                         <button key={attr} onClick={() => { if (!form.specifications.find(s => s.key === attr)) setF({ specifications: [...form.specifications, { key: attr, value: "" }] }); }}
-                          className="text-left px-2 py-0.5 rounded text-xs font-semibold" style={{ color: ACCENT, background: "rgba(18,214,197,0.08)" }}>
+                          className="text-left px-2 py-0.5 rounded text-xs font-semibold" style={{ color: "#6366F1", background: "rgba(18,214,197,0.08)" }}>
                           + {attr}
                         </button>
                       ))}
@@ -270,7 +268,7 @@ export default function WholesaleProductsPage() {
                       <label className="text-xs font-bold uppercase" style={{ color: "var(--text-muted)" }}>Bulk Pricing Tiers</label>
                       <button onClick={() => setF({ wholesaleTiers: [...form.wholesaleTiers, { minQuantity: 0, price: 0 }] })} className="text-xs px-2 py-1 rounded-lg font-semibold btn-secondary">+ Add Tier</button>
                     </div>
-                    <div className="rounded-xl p-3 space-y-2" style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
+                    <div className="rounded-xl p-3 space-y-2" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                       {form.wholesaleTiers.length === 0 ? (
                         <p className="text-xs text-center py-2" style={{ color: "var(--text-muted)" }}>No bulk tiers added</p>
                       ) : form.wholesaleTiers.map((t, i) => (
@@ -287,9 +285,9 @@ export default function WholesaleProductsPage() {
                   <div>
                     <label className="block text-xs font-bold uppercase mb-1.5" style={{ color: "var(--text-muted)" }}>Product Images</label>
                     <label className="flex items-center justify-center gap-2 h-16 rounded-xl border-2 border-dashed cursor-pointer transition-all text-sm font-semibold"
-                      style={{ borderColor: "var(--card-border)", color: "var(--text-muted)" }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = ACCENT; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--card-border)"; e.currentTarget.style.color = "var(--text-muted)"; }}
+                      style={{ borderColor: "#E5E7EB", color: "var(--text-muted)" }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = "#6366F1"; e.currentTarget.style.color = "#6366F1"; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "var(--text-muted)"; }}
                     >
                       <input type="file" multiple accept="image/*" className="hidden" onChange={async e => {
                         const fs = Array.from(e.target.files || []);
@@ -320,7 +318,7 @@ export default function WholesaleProductsPage() {
                       className="h-8 px-3 rounded-lg text-xs font-semibold transition-all"
                       style={form.isActive
                         ? { background: "rgba(22,199,132,0.12)", color: "#16C784" }
-                        : { background: "var(--icon-bg)", color: "var(--text-muted)" }
+                        : { background: "#F9FAFB", color: "var(--text-muted)" }
                       }>
                       {form.isActive ? "Active" : "Inactive"}
                     </button>
@@ -361,7 +359,7 @@ export default function WholesaleProductsPage() {
                 <tbody>
                   {loading ? (
                     [...Array(rowsPerPage)].map((_, i) => (
-                      <tr key={i}><td colSpan={7}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "var(--icon-bg)" }} /></td></tr>
+                      <tr key={i}><td colSpan={7}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "#F9FAFB" }} /></td></tr>
                     ))
                   ) : paginated.length === 0 ? (
                     <tr>
@@ -371,7 +369,7 @@ export default function WholesaleProductsPage() {
                           {search ? "No products match your search" : "No wholesale products yet"}
                         </p>
                         {!search && (
-                          <button onClick={() => setShowCreate(true)} className="inline-flex items-center gap-1 text-xs font-semibold mt-2" style={{ color: ACCENT }}>
+                          <button onClick={() => setShowCreate(true)} className="inline-flex items-center gap-1 text-xs font-semibold mt-2" style={{ color: "#6366F1" }}>
                             <Plus className="h-3.5 w-3.5" /> Add your first wholesale product
                           </button>
                         )}
@@ -381,26 +379,26 @@ export default function WholesaleProductsPage() {
                     <tr key={p.id}>
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center" style={{ background: "var(--icon-bg)", border: "1px solid var(--card-border)" }}>
+                          <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                             {p.images?.[0]?.url
                               ? <img src={p.images[0].url} alt={p.name} className="h-full w-full object-cover" />
                               : <Package className="h-4 w-4" style={{ color: "var(--text-muted)" }} />}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-sm truncate max-w-[180px]" style={{ color: "var(--text-primary)" }}>{p.name}</p>
+                            <p className="font-semibold text-sm truncate max-w-[180px]" style={{ color: "#111827" }}>{p.name}</p>
                             <p className="text-xs font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>{p.sku}</p>
                           </div>
                         </div>
                       </td>
                       <td>
                         {p.category ? (
-                          <span className="px-2 py-0.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(18,214,197,0.1)", color: ACCENT }}>
+                          <span className="px-2 py-0.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(18,214,197,0.1)", color: "#6366F1" }}>
                             {p.category.name}
                           </span>
-                        ) : <span style={{ color: "var(--text-muted)" }}>—</span>}
+                        ) : <span style={{ color: "var(--text-muted)" }}> </span>}
                       </td>
                       <td>
-                        <p className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{p.unitsPerPack || 1} units/pack</p>
+                        <p className="text-xs font-semibold" style={{ color: "#4B5563" }}>{p.unitsPerPack || 1} units/pack</p>
                         <p className="text-xs mt-0.5 font-bold uppercase" style={{ color: "var(--text-muted)" }}>MOQ: {p.wholesaleMoq || 1} packs</p>
                       </td>
                       <td>
@@ -408,10 +406,10 @@ export default function WholesaleProductsPage() {
                           <span className="px-2 py-0.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#F59E0B" }}>
                             {p.wholesaleTiers.length} tier{p.wholesaleTiers.length !== 1 ? "s" : ""}
                           </span>
-                        ) : <span className="text-xs" style={{ color: "var(--text-muted)" }}>—</span>}
+                        ) : <span className="text-xs" style={{ color: "var(--text-muted)" }}> </span>}
                       </td>
                       <td>
-                        <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{formatPrice(p.wholesalePrice ?? p.price)}</p>
+                        <p className="font-bold text-sm" style={{ color: "#111827" }}>{formatPrice(p.wholesalePrice ?? p.price)}</p>
                         {p.wholesalePrice && p.price && p.wholesalePrice !== p.price && (
                           <p className="text-xs mt-0.5 line-through" style={{ color: "var(--text-muted)" }}>Retail: {formatPrice(p.price)}</p>
                         )}
@@ -463,7 +461,7 @@ export default function WholesaleProductsPage() {
                   return (
                     <button key={n} onClick={() => setPage(n)}
                       className="h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold"
-                      style={n === page ? { background: ACCENT, color: "#fff" } : { color: "var(--text-muted)" }}
+                      style={n === page ? { background: "#6366F1", color: "#fff" } : { color: "var(--text-muted)" }}
                     >{n}</button>
                   );
                 })}

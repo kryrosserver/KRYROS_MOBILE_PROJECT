@@ -10,14 +10,12 @@ import {
 import Link from "next/link";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 
-const ACCENT = "#12D6C5";
-
 function ToggleSwitch({ checked, onChange, danger }: { checked: boolean; onChange: (v: boolean) => void; danger?: boolean }) {
   return (
     <button
       onClick={() => onChange(!checked)}
       className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
-      style={{ background: checked ? (danger ? "#EF4444" : ACCENT) : "var(--icon-bg)" }}
+      style={{ background: checked ? (danger ? "#EF4444" : "#6366F1") : "#F9FAFB" }}
     >
       <span
         className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
@@ -119,14 +117,14 @@ export default function CompanySettingsPage() {
   );
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Settings
               </Link>
               <div>
@@ -134,7 +132,7 @@ export default function CompanySettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Company</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Company Profile</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Company Profile</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -226,7 +224,7 @@ export default function CompanySettingsPage() {
             <div className="mt-6 pt-6" style={{ borderTop: "1px solid var(--card-border)" }}>
               <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--text-muted)" }}>Brand Logo</p>
               <div className="flex items-center gap-6">
-                <div className="h-20 w-20 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-dashed" style={{ borderColor: "var(--card-border)", background: "var(--hover-bg)" }}>
+                <div className="h-20 w-20 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-dashed" style={{ borderColor: "#E5E7EB", background: "#F9FAFB" }}>
                   {logoDataUrl
                     ? <img src={logoDataUrl} alt="logo" className="h-full w-full object-contain p-2" />
                     : <span className="text-3xl font-black" style={{ color: "var(--text-muted)" }}>{(companyName || "K")[0]}</span>}
@@ -296,9 +294,9 @@ export default function CompanySettingsPage() {
                   {scheduledClosures.length === 0 ? (
                     <p className="text-xs text-center py-4" style={{ color: "var(--text-muted)" }}>No scheduled closures</p>
                   ) : scheduledClosures.map((c: any) => (
-                    <div key={c.id} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: "var(--hover-bg)" }}>
+                    <div key={c.id} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: "#F9FAFB" }}>
                       <div>
-                        <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{c.date}</p>
+                        <p className="text-xs font-semibold" style={{ color: "#111827" }}>{c.date}</p>
                         <p className="text-xs" style={{ color: "var(--text-muted)" }}>{c.reason}</p>
                       </div>
                       <button onClick={() => setScheduledClosures(scheduledClosures.filter((x: any) => x.id !== c.id))}

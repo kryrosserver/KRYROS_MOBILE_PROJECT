@@ -9,10 +9,7 @@ import {
   Monitor, Tablet, Smartphone, Eye, MoreVertical,
   GripVertical, CheckCircle, Settings, Layers,
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
 import { resolveImageUrl } from "@/lib/utils";
-
-const ACCENT = "#12D6C5";
 
 const PAGE_LABELS: Record<string, string> = {
   home: "Home Page", shop: "Shop Page", "product-detail": "Product Detail",
@@ -53,13 +50,22 @@ async function compressImage(file: File, maxWidth = 1920, quality = 0.85): Promi
 }
 
 export default function CMSSectionEditor() {
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
+
   const params = useParams();
   const slug = (params?.slug as string) || "home";
   const sectionKey = (params?.section as string) || "";
   const pageLabel = PAGE_LABELS[slug] || slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
   const sectionLabel = SECTION_LABELS[sectionKey] || sectionKey.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
-
-  const { isDark, toggleTheme } = useTheme();
 
   const [section, setSection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +85,6 @@ export default function CMSSectionEditor() {
     bgImage: "", items: [] as any[],
   });
 
-  useEffect(() => {}, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -256,480 +261,237 @@ export default function CMSSectionEditor() {
   const isItemsType = ["trust-badges", "wholesale-features", "get-now-features"].includes(sectionKey);
   const isTextType = ["page-content", "text-block", "custom-h-t-m-l"].includes(sectionKey);
 
-  const TEXT = "var(--text-primary)"; const TEXT2 = "var(--text-secondary)";
-  const CARD = "var(--card-bg)"; const BORDER = "var(--card-border)";
-  const BG = "var(--bg-primary)"; const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
-
-  const inputStyle: React.CSSProperties = { width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" };
+      
+  const inputStyle: React.CSSProperties = { width: "100%", background: ICON_BG, border: "1px solid #E5E7EB", borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" };
   const labelStyle: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: TEXT2, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.04em" };
-  const cardStyle: React.CSSProperties = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const cardStyle: React.CSSProperties = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
+
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-
-        {/* TOP HEADER */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16, flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Menu style={{ width: 20, height: 20 }} />
-            </button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Edit {sectionLabel}</h1>
-          </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2 }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            </span>
-            <input placeholder="Search anything..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>3</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
-            </button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
-                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
-              </div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+      {/* Page Header */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+          <Link href={`/admin/cms/${slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
+            <ArrowLeft style={{ width: 13, height: 13 }} /> Back to {pageLabel}
+          </Link>
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>{sectionLabel}</h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: "#4B5563" }}>
+              <span>CMS</span><span>›</span>
+              <span>{pageLabel}</span><span>›</span>
+              <span style={{ color: "#6366F1", fontWeight: 600 }}>{sectionLabel}</span>
             </div>
           </div>
-        </header>
+          <button onClick={handleSave} disabled={saving}
+            style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", padding: "9px 20px", color: "#fff", fontWeight: 700, fontSize: 13, cursor: saving ? "not-allowed" : "pointer", borderRadius: 10, opacity: saving ? 0.7 : 1 }}>
+            <Save style={{ width: 15, height: 15 }} /> {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </div>
 
-        {/* PAGE CONTENT */}
-        <div style={{ padding: 20, flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
+      {msg && (
+        <div style={{ background: "#D1FAE5", border: "1px solid #A7F3D0", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#065F46", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+          <CheckCircle style={{ width: 16, height: 16 }} /> {msg}
+        </div>
+      )}
 
-          {/* Breadcrumb + Title + Actions */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: TEXT2, marginBottom: 6 }}>
-                <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
-                <ChevronRight style={{ width: 12, height: 12 }} />
-                <Link href="/admin/cms" style={{ color: TEXT2, textDecoration: "none" }}>CMS &amp; Pages</Link>
-                <ChevronRight style={{ width: 12, height: 12 }} />
-                <Link href={`/admin/cms/${slug}`} style={{ color: TEXT2, textDecoration: "none" }}>{pageLabel}</Link>
-                <ChevronRight style={{ width: 12, height: 12 }} />
-                <span style={{ color: TEXT }}>Edit {sectionLabel}</span>
-              </div>
-              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Edit {sectionLabel}</h2>
-              <p style={{ fontSize: 13, color: TEXT2, margin: "4px 0 0" }}>Customize the content and display settings for this section.</p>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-              <Link
-                href={`/admin/cms/${slug}`}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
-                <ArrowLeft style={{ width: 14, height: 14 }} /> Back to {pageLabel}
-              </Link>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
-                <Save style={{ width: 14, height: 14 }} /> {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-
-          {msg && (
-            <div style={{ padding: "10px 16px", background: "rgba(22,199,132,0.1)", border: "1px solid rgba(22,199,132,0.3)", borderRadius: 10, color: "#16C784", fontSize: 13, fontWeight: 600 }}>
-              ✓ {msg}
-            </div>
-          )}
-
-          {loading ? (
-            <div style={{ textAlign: "center", padding: 60, color: TEXT2 }}>
-              <RefreshCw style={{ width: 28, height: 28, margin: "0 auto 12px", animation: "spin 1s linear infinite", display: "block" }} />
-              Loading section data...
-            </div>
-          ) : (
-
-            /* ── 2-COLUMN LAYOUT ── */
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-
-              {/* ── LEFT: Main Content Editor ── */}
-              <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-
-                {/* Section overview card */}
-                <div style={{ ...cardStyle, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(18,214,197,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Layers style={{ width: 20, height: 20, color: ACCENT }} />
+      {loading ? (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 60 }}>
+          <div style={{ fontSize: 14, color: "#9CA3AF" }}>Loading section...</div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Main Settings */}
+          <div style={{ gridColumn: "1 / 3" }}>
+            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24, marginBottom: 16 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #F3F4F6" }}>
+                Section Content
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {[
+                  { label: "Section Title", key: "sectionTitle", placeholder: "e.g. Featured Products" },
+                  { label: "Main Heading", key: "mainHeading", placeholder: "Main heading text" },
+                  { label: "Description", key: "description", placeholder: "Optional description...", type: "textarea" },
+                  { label: "Primary Button Text", key: "primaryBtnText", placeholder: "Shop Now" },
+                  { label: "Primary Button Link", key: "primaryBtnLink", placeholder: "/shop" },
+                  { label: "Secondary Button Text", key: "secondaryBtnText", placeholder: "Explore" },
+                  { label: "Secondary Button Link", key: "secondaryBtnLink", placeholder: "/categories" },
+                ].map(({ label, key, placeholder, type }) => (
+                  <div key={key}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5 }}>{label}</label>
+                    {type === "textarea" ? (
+                      <textarea value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder={placeholder} rows={3}
+                        style={{ width: "100%", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "9px 12px", color: "#111827", fontSize: 13, outline: "none", resize: "vertical", boxSizing: "border-box" }} />
+                    ) : (
+                      <input value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        style={{ width: "100%", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "9px 12px", color: "#111827", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    )}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: TEXT }}>{sectionLabel}</div>
-                    <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>
-                      {isSlidesType ? `${slides.length} slide${slides.length !== 1 ? "s" : ""} configured` : isItemsType ? `${form.items.length} item${form.items.length !== 1 ? "s" : ""} configured` : "Content configured"}
-                    </div>
+                ))}
+                {/* Background Image */}
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5 }}>Background Image</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={form.bgImage} onChange={e => setForm(f => ({ ...f, bgImage: e.target.value }))}
+                      placeholder="https://... or upload below"
+                      style={{ flex: 1, background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "9px 12px", color: "#111827", fontSize: 13, outline: "none" }} />
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 8, padding: "9px 14px", color: "#4338CA", fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
+                      <ImageIcon style={{ width: 14, height: 14 }} /> Upload
+                      <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleImageUpload(e, "bgImage")} />
+                    </label>
                   </div>
-                  <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: isActive ? "rgba(22,199,132,0.12)" : "rgba(239,68,68,0.1)", color: isActive ? "#16C784" : "#EF4444", border: `1px solid ${isActive ? "rgba(22,199,132,0.3)" : "rgba(239,68,68,0.3)"}` }}>
-                    {isActive ? "Active" : "Inactive"}
-                  </span>
+                  {form.bgImage && (
+                    <img src={form.bgImage} alt="bg preview" style={{ marginTop: 8, height: 80, borderRadius: 8, objectFit: "cover", border: "1px solid #E5E7EB" }} />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Slides Management for slider-type sections */}
+            {!isItemsType && !isTextType && (
+              <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: 0 }}>Slides / Banners ({slides.length})</h3>
+                  <button onClick={() => { setEditingSlide({ title: "", subtitle: "", image: "", link: "", isActive: true }); setEditingSlideIdx(null); }}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#6366F1", border: "none", borderRadius: 8, padding: "7px 14px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                    <Plus style={{ width: 13, height: 13 }} /> Add Slide
+                  </button>
                 </div>
 
-                {/* Slides / Items / Content editor */}
-                <div style={{ ...cardStyle, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: HEADER_BG }}>
-                    <div>
-                      <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>
-                        {isSlidesType ? "Slides" : isItemsType ? "Items" : isTextType ? "Content Editor" : "Section Data"}
-                      </h3>
-                      <p style={{ fontSize: 12, color: TEXT2, margin: "3px 0 0" }}>
-                        {isSlidesType ? `Manage the slides displayed in the ${sectionLabel.toLowerCase()}` : isItemsType ? "Manage the items in this section" : "Edit the main content for this section"}
-                      </p>
+                {editingSlide && (
+                  <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16, marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{editingSlideIdx !== null ? "Edit Slide" : "New Slide"}</span>
+                      <button onClick={() => setEditingSlide(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280" }}>
+                        <X style={{ width: 16, height: 16 }} />
+                      </button>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      {sectionKey === "hero-slider" && (
-                        <Link
-                          href="/admin/cms/homepage/edit-hero-banner"
-                          style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(18,214,197,0.1)", border: `1px solid ${ACCENT}`, borderRadius: 10, padding: "8px 14px", color: ACCENT, fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
-                          <ImageIcon style={{ width: 13, height: 13 }} /> Manage Banners
-                        </Link>
-                      )}
-                      {(isSlidesType || isItemsType) && (
-                        <button
-                          onClick={addSlide}
-                          style={{ display: "flex", alignItems: "center", gap: 6, background: ACCENT, border: "none", borderRadius: 10, padding: "8px 14px", color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                          <Plus style={{ width: 13, height: 13 }} /> Add {isSlidesType ? "Slide" : "Item"}
-                        </button>
-                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 12 }}>
+                      {[
+                        { label: "Title", key: "title", placeholder: "Slide title" },
+                        { label: "Subtitle", key: "subtitle", placeholder: "Optional subtitle" },
+                        { label: "Link URL", key: "link", placeholder: "/shop" },
+                        { label: "Button Text", key: "linkText", placeholder: "Shop Now" },
+                      ].map(f => (
+                        <div key={f.key}>
+                          <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#374151", marginBottom: 4 }}>{f.label}</label>
+                          <input value={editingSlide[f.key] || ""} onChange={e => setEditingSlide((v: any) => ({ ...v, [f.key]: e.target.value }))}
+                            placeholder={f.placeholder}
+                            style={{ width: "100%", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 7, padding: "7px 10px", color: "#111827", fontSize: 12, outline: "none", boxSizing: "border-box" }} />
+                        </div>
+                      ))}
+                      <div>
+                        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Image URL or Upload</label>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <input value={editingSlide.image || ""} onChange={e => setEditingSlide((v: any) => ({ ...v, image: e.target.value }))}
+                            placeholder="https://..."
+                            style={{ flex: 1, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 7, padding: "7px 10px", color: "#111827", fontSize: 12, outline: "none" }} />
+                          <label style={{ display: "flex", alignItems: "center", gap: 4, background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 7, padding: "7px 10px", color: "#4338CA", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                            <ImageIcon style={{ width: 13, height: 13 }} /> Upload
+                            <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleImageUpload(e, "image", editingSlideIdx ?? undefined)} />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                      <button onClick={() => setEditingSlide(null)}
+                        style={{ padding: "7px 16px", borderRadius: 7, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                        Cancel
+                      </button>
+                      <button onClick={() => {
+                        if (editingSlideIdx !== null) {
+                          const updated = [...slides]; updated[editingSlideIdx] = editingSlide;
+                          setSlides(updated);
+                        } else {
+                          setSlides(s => [...s, { ...editingSlide, id: Date.now().toString() }]);
+                        }
+                        setEditingSlide(null); setEditingSlideIdx(null);
+                      }}
+                        style={{ padding: "7px 16px", borderRadius: 7, border: "none", background: "#6366F1", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                        {editingSlideIdx !== null ? "Save" : "Add"}
+                      </button>
                     </div>
                   </div>
+                )}
 
-                  <div style={{ padding: 20 }}>
-                    {sectionKey === "hero-slider" && (
-                      <div style={{ marginBottom: 14, padding: "10px 14px", background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.25)", borderRadius: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
-                        <svg style={{ width: 15, height: 15, color: "#3B82F6", flexShrink: 0, marginTop: 1 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <div>
-                          <p style={{ fontSize: 12, fontWeight: 700, color: "#3B82F6", margin: "0 0 2px" }}>Hero banners loaded from your Banners library</p>
-                          <p style={{ fontSize: 11, color: "var(--text-secondary)", margin: 0 }}>
-                            Showing {slides.length} existing banner{slides.length !== 1 ? "s" : ""}. To add new banners or upload images, click <strong style={{ color: "var(--text-primary)" }}>"Manage Banners"</strong> in the top-right.
-                          </p>
+                {slides.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "24px 0", color: "#9CA3AF", fontSize: 13 }}>No slides yet. Click "Add Slide" to get started.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {slides.map((slide: any, idx: number) => (
+                      <div key={slide.id || idx} style={{ display: "flex", alignItems: "center", gap: 12, background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "10px 12px" }}>
+                        {slide.image && (
+                          <img src={resolveImageUrl(slide.image)} alt={slide.title} style={{ width: 64, height: 40, borderRadius: 6, objectFit: "cover", border: "1px solid #E5E7EB", flexShrink: 0 }} />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{slide.title || "Untitled"}</div>
+                          {slide.subtitle && <div style={{ fontSize: 11, color: "#6B7280" }}>{slide.subtitle}</div>}
                         </div>
-                      </div>
-                    )}
-                    {isTextType ? (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                        <div>
-                          <label style={labelStyle}>Section Title</label>
-                          <input value={form.sectionTitle} onChange={e => setForm(p => ({ ...p, sectionTitle: e.target.value }))} style={inputStyle} placeholder="Section title..." />
-                        </div>
-                        <div>
-                          <label style={labelStyle}>HTML Content</label>
-                          <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                            style={{ ...inputStyle, minHeight: 280, resize: "vertical", fontFamily: "monospace", fontSize: 12 }}
-                            placeholder="Enter your HTML content here..." />
-                        </div>
-                      </div>
-                    ) : (isSlidesType || isItemsType) ? (
-                      slides.length === 0 ? (
-                        <div style={{ textAlign: "center", padding: 60, color: TEXT2 }}>
-                          <Layers style={{ width: 40, height: 40, margin: "0 auto 14px", opacity: 0.3, display: "block" }} />
-                          <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: TEXT }}>No {isSlidesType ? "slides" : "items"} yet</p>
-                          <p style={{ margin: "6px 0 16px", fontSize: 13 }}>Click "Add {isSlidesType ? "Slide" : "Item"}" to get started.</p>
-                          <button onClick={addSlide} style={{ padding: "9px 20px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                            + Add {isSlidesType ? "Slide" : "Item"}
+                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                          <button onClick={() => { setEditingSlide({ ...slide }); setEditingSlideIdx(idx); }}
+                            style={{ background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 7, padding: "5px 10px", color: "#4338CA", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                            Edit
+                          </button>
+                          <button onClick={() => setSlides(s => s.filter((_, i) => i !== idx))}
+                            style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 7, padding: "5px 10px", color: "#DC2626", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                            Remove
                           </button>
                         </div>
-                      ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                          {slides.map((slide, idx) => (
-                            <div key={slide.id || idx} style={{ border: `1px solid ${editingSlideIdx === idx ? ACCENT : BORDER}`, borderRadius: 12, overflow: "hidden", background: editingSlideIdx === idx ? "rgba(18,214,197,0.04)" : "transparent" }}>
-
-                              {/* Slide row */}
-                              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px" }}>
-                                <span style={{ width: 28, height: 28, borderRadius: 8, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: TEXT2, flexShrink: 0 }}>
-                                  {String(idx + 1).padStart(2, "0")}
-                                </span>
-                                {slide.image ? (
-                                  <img src={resolveImageUrl(slide.image)} alt="" style={{ width: 56, height: 40, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
-                                ) : (
-                                  <div style={{ width: 56, height: 40, borderRadius: 6, background: ICON_BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                    <ImageIcon style={{ width: 14, height: 14, color: TEXT2 }} />
-                                  </div>
-                                )}
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontSize: 14, fontWeight: 600, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {slide.heading || slide.title || `Slide ${idx + 1}`}
-                                  </div>
-                                  <div style={{ fontSize: 12, color: TEXT2, marginTop: 2 }}>
-                                    {(slide.subtitle || slide.description) ? (slide.subtitle || slide.description).slice(0, 50) + ((slide.subtitle || slide.description).length > 50 ? "…" : "") : "No description"}
-                                  </div>
-                                </div>
-                                <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: slide.isActive !== false ? "rgba(22,199,132,0.1)" : "rgba(239,68,68,0.1)", color: slide.isActive !== false ? "#16C784" : "#EF4444", border: `1px solid ${slide.isActive !== false ? "rgba(22,199,132,0.3)" : "rgba(239,68,68,0.3)"}`, flexShrink: 0 }}>
-                                  {slide.isActive !== false ? "Active" : "Inactive"}
-                                </span>
-                                <button onClick={() => openEditSlide(slide, idx)} style={{ background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "7px 10px", color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 12, whiteSpace: "nowrap" }}>
-                                  <Edit style={{ width: 13, height: 13 }} /> Edit
-                                </button>
-                                <button onClick={() => deleteSlide(idx)} style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "7px 8px", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                                  <Trash2 style={{ width: 13, height: 13 }} />
-                                </button>
-                              </div>
-
-                              {/* Inline slide editor */}
-                              {editingSlideIdx === idx && editingSlide && (
-                                <div style={{ borderTop: `1px solid ${BORDER}`, padding: 16, display: "flex", flexDirection: "column", gap: 12, background: ICON_BG }}>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div>
-                                      <label style={labelStyle}>Title (Small)</label>
-                                      <input value={editingSlide.title || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, title: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
-                                    </div>
-                                    <div>
-                                      <label style={labelStyle}>Main Heading</label>
-                                      <input value={editingSlide.heading || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, heading: e.target.value }))} style={inputStyle} placeholder="Discover the best..." />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label style={labelStyle}>Description</label>
-                                    <textarea value={editingSlide.description || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 60 }} />
-                                  </div>
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                                    <div>
-                                      <label style={labelStyle}>CTA Text</label>
-                                      <input value={editingSlide.ctaText || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaText: e.target.value }))} style={inputStyle} />
-                                    </div>
-                                    <div>
-                                      <label style={labelStyle}>CTA Link</label>
-                                      <input value={editingSlide.ctaLink || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaLink: e.target.value }))} style={inputStyle} />
-                                    </div>
-                                    <div>
-                                      <label style={labelStyle}>CTA 2 Text</label>
-                                      <input value={editingSlide.ctaText2 || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaText2: e.target.value }))} style={inputStyle} />
-                                    </div>
-                                    <div>
-                                      <label style={labelStyle}>CTA 2 Link</label>
-                                      <input value={editingSlide.ctaLink2 || ""} onChange={e => setEditingSlide((p: any) => ({ ...p, ctaLink2: e.target.value }))} style={inputStyle} />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label style={labelStyle}>Slide Image</label>
-                                    <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 12, textAlign: "center", position: "relative", cursor: "pointer" }}>
-                                      {editingSlide.image ? (
-                                        <div style={{ position: "relative" }}>
-                                          <img src={resolveImageUrl(editingSlide.image)} alt="" style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 6 }} />
-                                          <button onClick={() => setEditingSlide((p: any) => ({ ...p, image: "" }))} style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-                                        </div>
-                                      ) : (
-                                        <>
-                                          <ImageIcon style={{ width: 20, height: 20, color: TEXT2, margin: "0 auto 4px", display: "block" }} />
-                                          <p style={{ fontSize: 12, color: TEXT2, margin: 0 }}>Click to upload image</p>
-                                        </>
-                                      )}
-                                      <input type="file" accept="image/*" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; const c = await compressImage(f); setEditingSlide((p: any) => ({ ...p, image: c })); }} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
-                                    </div>
-                                  </div>
-                                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                                    <button onClick={() => { setEditingSlide(null); setEditingSlideIdx(null); }} style={{ padding: "8px 16px", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, color: TEXT2, cursor: "pointer", fontSize: 13 }}>Cancel</button>
-                                    <button onClick={saveSlideEdit} style={{ padding: "8px 16px", background: ACCENT, border: "none", borderRadius: 8, color: "#0B1320", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Save Slide</button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-
-                          <div style={{ textAlign: "center", padding: "6px 0", fontSize: 12, color: TEXT2 }}>
-                            Showing 1 to {slides.length} of {slides.length} {isSlidesType ? "slides" : "items"}
-                          </div>
-                        </div>
-                      )
-                    ) : (
-                      /* Generic section — image + link + CTA */
-                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                        <div>
-                          <label style={labelStyle}>Section Title (Small)</label>
-                          <input value={form.sectionTitle} onChange={e => setForm(p => ({ ...p, sectionTitle: e.target.value }))} style={inputStyle} placeholder="Welcome to Kryros" />
-                        </div>
-                        <div>
-                          <label style={labelStyle}>Main Heading</label>
-                          <textarea value={form.mainHeading} onChange={e => setForm(p => ({ ...p, mainHeading: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 70 }} placeholder="Discover the best products..." />
-                        </div>
-                        <div>
-                          <label style={labelStyle}>Description</label>
-                          <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} placeholder="Shop from a wide range..." />
-                          <div style={{ fontSize: 10, color: TEXT2, marginTop: 4, textAlign: "right" }}>{form.description.length}/200</div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div>
-                            <label style={labelStyle}>Primary Button Text</label>
-                            <input value={form.primaryBtnText} onChange={e => setForm(p => ({ ...p, primaryBtnText: e.target.value }))} style={inputStyle} placeholder="Shop Now" />
-                          </div>
-                          <div>
-                            <label style={labelStyle}>Primary Button Link</label>
-                            <input value={form.primaryBtnLink} onChange={e => setForm(p => ({ ...p, primaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/shop" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div>
-                            <label style={labelStyle}>Secondary Button Text</label>
-                            <input value={form.secondaryBtnText} onChange={e => setForm(p => ({ ...p, secondaryBtnText: e.target.value }))} style={inputStyle} placeholder="Explore" />
-                          </div>
-                          <div>
-                            <label style={labelStyle}>Secondary Button Link</label>
-                            <input value={form.secondaryBtnLink} onChange={e => setForm(p => ({ ...p, secondaryBtnLink: e.target.value }))} style={inputStyle} placeholder="/categories" />
-                          </div>
-                        </div>
-                        <div>
-                          <label style={labelStyle}>Background / Banner Image</label>
-                          <div style={{ border: `2px dashed ${BORDER}`, borderRadius: 10, padding: 16, textAlign: "center", position: "relative" }}>
-                            {form.bgImage ? (
-                              <div style={{ position: "relative" }}>
-                                <img src={resolveImageUrl(form.bgImage)} alt="" style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 8 }} />
-                                <button onClick={() => setForm(p => ({ ...p, bgImage: "" }))} style={{ position: "absolute", top: 6, right: 6, background: "#EF4444", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-                              </div>
-                            ) : (
-                              <>
-                                <ImageIcon style={{ width: 26, height: 26, color: TEXT2, margin: "0 auto 8px", display: "block" }} />
-                                <p style={{ fontSize: 13, color: TEXT2, margin: "0 0 4px", fontWeight: 600 }}>Click to upload image</p>
-                                <p style={{ fontSize: 11, color: TEXT2, margin: 0 }}>PNG, JPG, WebP up to 5MB</p>
-                              </>
-                            )}
-                            <input type="file" accept="image/*" onChange={e => handleImageUpload(e, "bgImage")} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
-                          </div>
-                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
+            )}
+          </div>
 
-              {/* ── RIGHT: Settings Panel ── */}
-              <div style={{ width: 300, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }}>
-
-                {/* Live Preview */}
-                <div style={{ ...cardStyle, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 16px", borderBottom: `1px solid ${BORDER}`, background: HEADER_BG }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>Live Preview</h4>
-                    <p style={{ fontSize: 11, color: TEXT2, margin: "3px 0 0" }}>How this section will look on the storefront.</p>
-                  </div>
-                  <div style={{ padding: 12 }}>
-                    <div style={{ borderRadius: 8, overflow: "hidden", background: "#0B1320", aspectRatio: "16/9", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                      {(slides[0]?.image || form.bgImage) ? (
-                        <>
-                          <img src={resolveImageUrl(slides[0]?.image || form.bgImage)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7 }} />
-                          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.2))" }} />
-                          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>
-                            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.7)", margin: "0 0 2px" }}>{form.sectionTitle || sectionLabel}</p>
-                            <p style={{ fontSize: 9, fontWeight: 700, color: "#fff", margin: "0 0 4px", lineHeight: 1.2, maxWidth: 80 }}>{(slides[0]?.title || slides[0]?.heading || form.mainHeading || "Your Heading").slice(0, 30)}</p>
-                            <div style={{ display: "flex", gap: 4 }}>
-                              <span style={{ padding: "2px 5px", background: ACCENT, borderRadius: 3, fontSize: 6, color: "#0B1320", fontWeight: 700 }}>{form.primaryBtnText || "Shop Now"}</span>
-                              <span style={{ padding: "2px 5px", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 3, fontSize: 6, color: "#fff" }}>{form.secondaryBtnText || "Explore"}</span>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)" }}>
-                          <Eye style={{ width: 20, height: 20, margin: "0 auto 6px", display: "block" }} />
-                          <p style={{ fontSize: 10, margin: 0 }}>Add content to preview</p>
-                        </div>
-                      )}
-                    </div>
-                    {slides.length > 1 && (
-                      <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 8 }}>
-                        {slides.map((_, i) => <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? ACCENT : BORDER }} />)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Section Status */}
-                <div style={{ ...cardStyle, padding: 16 }}>
-                  <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 10px" }}>Section Status</h4>
-                  <p style={{ fontSize: 12, color: TEXT2, margin: "0 0 12px" }}>Enable or disable this section on {pageLabel.toLowerCase()}.</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Visible on Page</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <button
-                        onClick={() => setIsActive(!isActive)}
-                        style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: isActive ? ACCENT : ICON_BG, position: "relative", transition: "background 0.2s" }}>
-                        <span style={{ position: "absolute", top: 3, left: isActive ? "calc(100% - 21px)" : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
-                      </button>
-                      <span style={{ fontSize: 12, color: isActive ? "#16C784" : TEXT2, fontWeight: 600 }}>{isActive ? "Active" : "Inactive"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Display Settings */}
-                <div style={{ ...cardStyle, padding: 16 }}>
-                  <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 6px" }}>Display Settings</h4>
-                  <p style={{ fontSize: 11, color: TEXT2, margin: "0 0 14px" }}>Choose which devices show this section.</p>
-                  {[
-                    { key: "desktop", icon: Monitor, label: "Desktop" },
-                    { key: "tablet",  icon: Tablet,  label: "Tablet" },
-                    { key: "mobile",  icon: Smartphone, label: "Mobile" },
-                  ].map(({ key, icon: Icon, label }) => (
-                    <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: key !== "mobile" ? `1px solid ${BORDER}` : "none" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <Icon style={{ width: 15, height: 15, color: TEXT2 }} />
-                        <span style={{ fontSize: 13, color: TEXT }}>{label}</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={displaySettings[key as keyof typeof displaySettings]}
-                        onChange={e => setDisplaySettings(p => ({ ...p, [key]: e.target.checked }))}
-                        style={{ accentColor: ACCENT, width: 15, height: 15 }} />
-                    </div>
-                  ))}
-                </div>
-
-                {/* Additional Settings — slides only */}
-                {isSlidesType && (
-                  <div style={{ ...cardStyle, padding: 16 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 14px" }}>Slider Settings</h4>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                      <div>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Auto Slide</span>
-                        <p style={{ fontSize: 11, color: TEXT2, margin: "2px 0 0" }}>Auto-advance slides</p>
-                      </div>
-                      <button
-                        onClick={() => setAutoSlide(!autoSlide)}
-                        style={{ width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", background: autoSlide ? ACCENT : ICON_BG, position: "relative", transition: "background 0.2s" }}>
-                        <span style={{ position: "absolute", top: 3, left: autoSlide ? "calc(100% - 21px)" : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
-                      </button>
-                    </div>
-                    {autoSlide && (
-                      <div>
-                        <label style={labelStyle}>Interval (seconds)</label>
-                        <input
-                          type="number"
-                          min={1}
-                          max={30}
-                          value={slideInterval}
-                          onChange={e => setSlideInterval(Number(e.target.value))}
-                          style={{ ...inputStyle, width: "100%" }} />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Slides upload hint for slide-type sections */}
-                {isSlidesType && (
-                  <div style={{ ...cardStyle, padding: 16 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: "0 0 10px" }}>Quick Add</h4>
-                    <button
-                      onClick={addSlide}
-                      style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px", background: "rgba(18,214,197,0.08)", border: `1px dashed ${ACCENT}`, borderRadius: 10, color: ACCENT, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                      <Plus style={{ width: 14, height: 14 }} /> Add New Slide
-                    </button>
-                    {slides.length > 0 && (
-                      <p style={{ fontSize: 11, color: TEXT2, margin: "8px 0 0", textAlign: "center" }}>{slides.length} / 5 slides used</p>
-                    )}
-                  </div>
-                )}
+          {/* Sidebar Settings */}
+          <div>
+            {/* Visibility */}
+            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 14 }}>Visibility</h3>
+              <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ fontSize: 13, color: "#374151" }}>Section Active</span>
+                <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
+              </label>
+              <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 12 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Show On</div>
+                {([["desktop", Monitor], ["tablet", Tablet], ["mobile", Smartphone]] as const).map(([key, Icon]) => (
+                  <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, cursor: "pointer" }}>
+                    <input type="checkbox" checked={displaySettings[key]} onChange={e => setDisplaySettings(s => ({ ...s, [key]: e.target.checked }))} />
+                    <Icon style={{ width: 14, height: 14, color: "#6B7280" }} />
+                    <span style={{ fontSize: 13, color: "#374151", textTransform: "capitalize" }}>{key}</span>
+                  </label>
+                ))}
               </div>
             </div>
-          )}
-        </div>
 
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-      </div>
+            {/* Slider Settings */}
+            {!isItemsType && !isTextType && (
+              <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 20 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 14 }}>Slider Settings</h3>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <span style={{ fontSize: 13, color: "#374151" }}>Auto Slide</span>
+                  <input type="checkbox" checked={autoSlide} onChange={e => setAutoSlide(e.target.checked)} />
+                </label>
+                {autoSlide && (
+                  <div>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 5 }}>Interval (seconds)</label>
+                    <input type="number" value={slideInterval} min={1} max={30}
+                      onChange={e => setSlideInterval(Number(e.target.value))}
+                      style={{ width: "100%", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "8px 12px", color: "#111827", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

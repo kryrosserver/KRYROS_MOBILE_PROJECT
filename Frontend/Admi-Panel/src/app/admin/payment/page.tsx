@@ -31,10 +31,10 @@ export default function PaymentPage() {
   }, []);
 
   return (
-    <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)", padding: "20px" }}>
+    <div className="space-y-6 pb-20" style={{ color: "#111827", padding: "20px" }}>
       <div>
-        <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Payments</h2>
-        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Track and manage received payments</p>
+        <h2 className="text-2xl font-bold" style={{ color: "#111827" }}>Payments</h2>
+        <p className="text-sm mt-1" style={{ color: "#4B5563" }}>Track and manage received payments</p>
       </div>
 
       {loading && (
@@ -68,10 +68,10 @@ export default function PaymentPage() {
                 {payments.length > 0 ? (
                   payments.map((p) => (
                     <tr key={p.id} className="group">
-                      <td className="font-mono font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                      <td className="font-mono font-semibold text-sm" style={{ color: "#111827" }}>
                         {p.orderNumber}
                       </td>
-                      <td className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                      <td className="text-sm" style={{ color: "#4B5563" }}>
                         {p.user ? `${p.user.firstName} ${p.user.lastName}` : "Guest"}
                       </td>
                       <td className="text-sm" style={{ color: "var(--text-muted)" }}>
@@ -106,7 +106,7 @@ export default function PaymentPage() {
                           title="View"
                           className="p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                           style={{ color: "var(--text-muted)" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--hover-bg)"; }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = "#F9FAFB"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                         >
                           <Eye className="h-4 w-4" />

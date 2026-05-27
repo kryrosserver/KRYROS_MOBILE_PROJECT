@@ -7,8 +7,6 @@ import { Bell, Mail, Check, ChevronLeft, Save, ShoppingCart, CreditCard, Smartph
 import Link from "next/link";
 import { useAdminSettings } from "@/providers/AdminSettingsProvider";
 
-const ACCENT = "#12D6C5";
-
 function ToggleRow({ label, sub, icon: Icon, iconColor, iconBg, checked, onChange }: {
   label: string; sub: string; icon: any; iconColor: string; iconBg: string;
   checked: boolean; onChange: (v: boolean) => void;
@@ -16,7 +14,7 @@ function ToggleRow({ label, sub, icon: Icon, iconColor, iconBg, checked, onChang
   return (
     <div
       className="flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all"
-      style={{ background: checked ? `${iconColor}08` : "var(--hover-bg)", border: `1px solid ${checked ? `${iconColor}25` : "var(--card-border)"}` }}
+      style={{ background: checked ? `${iconColor}08` : "#F9FAFB", border: `1px solid ${checked ? `${iconColor}25` : "#E5E7EB"}` }}
       onClick={() => onChange(!checked)}
     >
       <div className="flex items-center gap-3">
@@ -24,14 +22,14 @@ function ToggleRow({ label, sub, icon: Icon, iconColor, iconBg, checked, onChang
           <Icon className="h-4 w-4" style={{ color: iconColor }} />
         </div>
         <div>
-          <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{label}</p>
+          <p className="text-sm font-semibold" style={{ color: "#111827" }}>{label}</p>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{sub}</p>
         </div>
       </div>
       <button
         onClick={e => { e.stopPropagation(); onChange(!checked); }}
         className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
-        style={{ background: checked ? ACCENT : "var(--icon-bg)" }}
+        style={{ background: checked ? "#6366F1" : "#F9FAFB" }}
       >
         <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
           style={{ transform: checked ? "translateX(1.375rem)" : "translateX(0.25rem)" }} />
@@ -56,31 +54,31 @@ export default function NotificationSettingsPage() {
   const enabledPush  = Object.values(pushSettings).filter(Boolean).length;
 
   const stats = [
-    { label: "Email Alerts Enabled", value: enabledEmail, total: 3, color: ACCENT,    bg: "rgba(18,214,197,0.12)", icon: Mail },
+    { label: "Email Alerts Enabled", value: enabledEmail, total: 3, color: "#6366F1",    bg: "rgba(18,214,197,0.12)", icon: Mail },
     { label: "Push Alerts Enabled",  value: enabledPush,  total: 2, color: "#F59E0B", bg: "rgba(245,158,11,0.12)", icon: Bell },
     { label: "Total Alert Types",    value: 5,            total: 5, color: "#16C784", bg: "rgba(22,199,132,0.12)", icon: Smartphone },
   ];
 
   const emailRows = [
-    { id: "orders",   label: "New Orders",       sub: "Receive emails for every successful purchase",           icon: ShoppingCart, iconColor: ACCENT,    iconBg: "rgba(18,214,197,0.12)" },
+    { id: "orders",   label: "New Orders",       sub: "Receive emails for every successful purchase",           icon: ShoppingCart, iconColor: "#6366F1",    iconBg: "rgba(18,214,197,0.12)" },
     { id: "payments", label: "Payment Receipts", sub: "Receive copies of customer payment receipts",            icon: CreditCard,   iconColor: "#16C784", iconBg: "rgba(22,199,132,0.12)" },
     { id: "credit",   label: "Credit Updates",   sub: "Alerts for credit applications and repayment changes",   icon: Package,      iconColor: "#F59E0B", iconBg: "rgba(245,158,11,0.12)" },
   ];
 
   const pushRows = [
-    { id: "orders",   label: "Order Pushes",     sub: "Instant desktop alerts for new sales",                  icon: ShoppingCart, iconColor: ACCENT,    iconBg: "rgba(18,214,197,0.12)" },
+    { id: "orders",   label: "Order Pushes",     sub: "Instant desktop alerts for new sales",                  icon: ShoppingCart, iconColor: "#6366F1",    iconBg: "rgba(18,214,197,0.12)" },
     { id: "payments", label: "Payment Alerts",   sub: "Instant alerts for successful transactions",             icon: CreditCard,   iconColor: "#16C784", iconBg: "rgba(22,199,132,0.12)" },
   ];
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Settings
               </Link>
               <div>
@@ -88,8 +86,8 @@ export default function NotificationSettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Notifications</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Notifications</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Control how and when you receive system alerts</p>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Notifications</h1>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Control how and when you receive system alerts</p>
               </div>
             </div>
             <button onClick={handleSave} disabled={isSaving}
@@ -110,7 +108,7 @@ export default function NotificationSettingsPage() {
                   </div>
                   <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>{s.value}/{s.total}</span>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "#4B5563", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}
@@ -123,7 +121,7 @@ export default function NotificationSettingsPage() {
                 <p className="text-xs font-bold uppercase tracking-widest flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
                   <Mail className="h-3.5 w-3.5" /> Email Notifications
                 </p>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ background: "rgba(18,214,197,0.1)", color: ACCENT }}>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ background: "rgba(18,214,197,0.1)", color: "#6366F1" }}>
                   {enabledEmail} / {emailRows.length} on
                 </span>
               </div>
@@ -165,10 +163,10 @@ export default function NotificationSettingsPage() {
               ))}
 
               {/* Note */}
-              <div className="p-4 rounded-2xl mt-2" style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
-                <p className="text-xs font-semibold mb-1" style={{ color: "var(--text-primary)" }}>Push Notification Setup</p>
+              <div className="p-4 rounded-2xl mt-2" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: "#111827" }}>Push Notification Setup</p>
                 <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                  Real-time alerts require a Firebase service account. Configure it in your environment variables as <code className="font-mono" style={{ color: ACCENT }}>FIREBASE_SERVICE_ACCOUNT_JSON</code>.
+                  Real-time alerts require a Firebase service account. Configure it in your environment variables as <code className="font-mono" style={{ color: "#6366F1" }}>FIREBASE_SERVICE_ACCOUNT_JSON</code>.
                 </p>
               </div>
             </div>

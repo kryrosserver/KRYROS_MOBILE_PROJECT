@@ -8,9 +8,6 @@ import {
   BarChart3, Star, CreditCard, ShieldCheck, Layers,
   ArrowLeft, Loader2,
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
-
-const ACCENT = "#12D6C5";
 
 const CATEGORY_ATTRIBUTES: Record<string, string[]> = {
   "mobile-phones": ["RAM", "Storage", "Battery", "Screen Size", "Processor", "Camera", "Color"],
@@ -27,18 +24,20 @@ type Brand = { id: number; name: string; slug: string };
 type ExistingImage = { url: string; id?: string };
 
 export default function EditProductPage() {
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
+
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
-  const { isDark, toggleTheme } = useTheme();
-
-  const BG = "var(--bg-primary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const HOVER = "var(--hover-bg)";
-  const HEADER_BG = "var(--bg-secondary)";
 
   useEffect(() => {}, []);
 
@@ -252,19 +251,19 @@ export default function EditProductPage() {
     } finally { setSaving(false); }
   };
 
-  const inp: React.CSSProperties = { width: "100%", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 14px", color: TEXT, fontSize: 13, outline: "none" };
+  const inp: React.CSSProperties = { width: "100%", background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, padding: "10px 14px", color: TEXT, fontSize: 13, outline: "none" };
   const lbl: React.CSSProperties = { fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 };
-  const card: React.CSSProperties = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const card: React.CSSProperties = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   const sectionHead = (title: string, icon: React.ReactNode) => (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, paddingBottom: 12, borderBottom: `1px solid ${BORDER}` }}>
-      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${ACCENT}15`, display: "flex", alignItems: "center", justifyContent: "center", color: ACCENT }}>{icon}</div>
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, paddingBottom: 12, borderBottom: "1px solid #E5E7EB" }}>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: `#6366F115`, display: "flex", alignItems: "center", justifyContent: "center", color: "#6366F1" }}>{icon}</div>
       <span style={{ fontSize: 13, fontWeight: 800, color: TEXT, textTransform: "uppercase", letterSpacing: "0.06em" }}>{title}</span>
     </div>
   );
 
   const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-    <div onClick={onChange} style={{ width: 42, height: 23, borderRadius: 12, background: checked ? ACCENT : HOVER, border: `1px solid ${BORDER}`, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+    <div onClick={onChange} style={{ width: 42, height: 23, borderRadius: 12, background: checked ? "#6366F1" : HOVER, border: "1px solid #E5E7EB", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
       <div style={{ position: "absolute", top: 3, left: checked ? 20 : 3, width: 17, height: 17, borderRadius: "50%", background: "#fff", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
     </div>
   );
@@ -273,7 +272,7 @@ export default function EditProductPage() {
   if (loadingProduct) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", flexDirection: "column", gap: 16, color: TEXT2 }}>
-        <Loader2 style={{ width: 36, height: 36, color: ACCENT, animation: "spin 1s linear infinite" }} />
+        <Loader2 style={{ width: 36, height: 36, color: "#6366F1", animation: "spin 1s linear infinite" }} />
         <span style={{ fontSize: 14, fontWeight: 600 }}>Loading product...</span>
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -288,7 +287,7 @@ export default function EditProductPage() {
           <div style={{ fontSize: 15, fontWeight: 700, color: "#EF4444", marginBottom: 8 }}>Failed to load product</div>
           <div style={{ fontSize: 13, color: TEXT2, marginBottom: 20 }}>{loadError}</div>
           <button onClick={() => router.push("/admin/products")}
-            style={{ background: ACCENT, border: "none", borderRadius: 10, padding: "10px 24px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+            style={{ background: "#6366F1", border: "none", borderRadius: 10, padding: "10px 24px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
             ← Back to Products
           </button>
         </div>
@@ -297,28 +296,9 @@ export default function EditProductPage() {
   }
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
 
         {/* HEADER */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16, flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Edit Product</h1>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
-              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2 }}>Super Admin</div></div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
 
         {/* BODY */}
         <form onSubmit={handleSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -346,16 +326,16 @@ export default function EditProductPage() {
                 <ChevronRight style={{ width: 13, height: 13 }} />
                 <span style={{ cursor: "pointer", color: TEXT2 }} onClick={() => router.push("/admin/products")}>Products</span>
                 <ChevronRight style={{ width: 13, height: 13 }} />
-                <span style={{ color: ACCENT }}>Edit</span>
+                <span style={{ color: "#6366F1" }}>Edit</span>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <button type="button" onClick={() => router.push("/admin/products")}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "10px 18px", color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: "1px solid #E5E7EB", borderRadius: 12, padding: "10px 18px", color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                 <ArrowLeft style={{ width: 15, height: 15 }} /> Cancel
               </button>
               <button type="submit" disabled={saving}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 12, padding: "10px 22px", color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", borderRadius: 12, padding: "10px 22px", color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
                 {saving ? <Loader2 style={{ width: 15, height: 15, animation: "spin 1s linear infinite" }} /> : <Save style={{ width: 15, height: 15 }} />}
                 {saving ? "Saving..." : "Save Changes"}
               </button>
@@ -445,7 +425,7 @@ export default function EditProductPage() {
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {currentCategoryAttributes.map(attr => (
                           <button key={attr} type="button" onClick={() => { if (!form.specifications.find(s => s.key === attr)) set("specifications", [...form.specifications, { key: attr, value: "" }]); }}
-                            style={{ fontSize: 10, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "3px 10px", color: TEXT2, fontWeight: 700, cursor: "pointer" }}>+ {attr}</button>
+                            style={{ fontSize: 10, background: CARD, border: "1px solid #E5E7EB", borderRadius: 6, padding: "3px 10px", color: TEXT2, fontWeight: 700, cursor: "pointer" }}>+ {attr}</button>
                         ))}
                       </div>
                     </div>
@@ -466,7 +446,7 @@ export default function EditProductPage() {
                       </div>
                     )}
                   <button type="button" onClick={addSpec}
-                    style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: ACCENT, background: "transparent", border: `1px dashed ${ACCENT}60`, borderRadius: 8, padding: "7px 14px", cursor: "pointer", width: "100%", justifyContent: "center" }}>
+                    style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "#6366F1", background: "transparent", border: `1px dashed #6366F160`, borderRadius: 8, padding: "7px 14px", cursor: "pointer", width: "100%", justifyContent: "center" }}>
                     <Plus style={{ width: 13, height: 13 }} /> Add Specification Row
                   </button>
                 </div>
@@ -477,9 +457,9 @@ export default function EditProductPage() {
                 {sectionHead("Tags", <Tag style={{ width: 16, height: 16 }} />)}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                   {form.tags.map((tag, i) => (
-                    <span key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: ACCENT, background: `${ACCENT}15`, padding: "4px 10px", borderRadius: 20 }}>
+                    <span key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "#6366F1", background: `#6366F115`, padding: "4px 10px", borderRadius: 20 }}>
                       {tag}
-                      <button type="button" onClick={() => set("tags", form.tags.filter((_, idx) => idx !== i))} style={{ background: "transparent", border: "none", cursor: "pointer", color: ACCENT, display: "flex", padding: 0 }}><X style={{ width: 10, height: 10 }} /></button>
+                      <button type="button" onClick={() => set("tags", form.tags.filter((_, idx) => idx !== i))} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6366F1", display: "flex", padding: 0 }}><X style={{ width: 10, height: 10 }} /></button>
                     </span>
                   ))}
                 </div>
@@ -488,7 +468,7 @@ export default function EditProductPage() {
                     onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); const t = tagInput.trim(); if (t && !form.tags.includes(t)) set("tags", [...form.tags, t]); setTagInput(""); } }}
                     style={{ ...inp, flex: 1 }} />
                   <button type="button" onClick={() => { const t = tagInput.trim(); if (t && !form.tags.includes(t)) set("tags", [...form.tags, t]); setTagInput(""); }}
-                    style={{ padding: "10px 14px", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Add</button>
+                    style={{ padding: "10px 14px", background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Add</button>
                 </div>
               </div>
 
@@ -515,13 +495,13 @@ export default function EditProductPage() {
                     <p style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", marginBottom: 8 }}>Current Images</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                       {existingImages.map((img, i) => (
-                        <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
+                        <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: "1px solid #E5E7EB" }}>
                           <img src={img.url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
                           <button type="button" onClick={() => removeExistingImage(i)}
                             style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff" }}>
                             <X style={{ width: 11, height: 11 }} />
                           </button>
-                          {i === 0 && <span style={{ position: "absolute", bottom: 4, left: 4, fontSize: 9, fontWeight: 800, color: "#fff", background: ACCENT, padding: "2px 6px", borderRadius: 4 }}>MAIN</span>}
+                          {i === 0 && <span style={{ position: "absolute", bottom: 4, left: 4, fontSize: 9, fontWeight: 800, color: "#fff", background: "#6366F1", padding: "2px 6px", borderRadius: 4 }}>MAIN</span>}
                         </div>
                       ))}
                     </div>
@@ -534,7 +514,7 @@ export default function EditProductPage() {
                     <p style={{ fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase", marginBottom: 8 }}>New Images to Upload</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                       {newImagePreviews.map((src, i) => (
-                        <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `2px dashed ${ACCENT}` }}>
+                        <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `2px dashed #6366F1` }}>
                           <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
                           <button type="button" onClick={() => removeNewImage(i)}
                             style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff" }}>
@@ -546,8 +526,8 @@ export default function EditProductPage() {
                   </div>
                 )}
 
-                <label style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: `2px dashed ${BORDER}`, borderRadius: 10, padding: "20px 16px", cursor: "pointer", gap: 6, transition: "border-color 0.15s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = ACCENT; }}
+                <label style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: `2px dashed #E5E7EB`, borderRadius: 10, padding: "20px 16px", cursor: "pointer", gap: 6, transition: "border-color 0.15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#6366F1"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = BORDER; }}>
                   <ImagePlus style={{ width: 22, height: 22, color: TEXT2 }} />
                   <span style={{ fontSize: 11, fontWeight: 700, color: TEXT2 }}>Add More Images</span>
@@ -562,14 +542,14 @@ export default function EditProductPage() {
                   <div>
                     <label style={lbl}>Category</label>
                     <select value={form.categorySlug} onChange={e => set("categorySlug", e.target.value)} style={{ ...inp, appearance: "none" }}>
-                      <option value="">— Select Category —</option>
+                      <option value="">  Select Category  </option>
                       {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
                     </select>
                   </div>
                   <div>
                     <label style={lbl}>Brand</label>
                     <select value={form.brandId} onChange={e => set("brandId", e.target.value)} style={{ ...inp, appearance: "none" }}>
-                      <option value="">— Select Brand —</option>
+                      <option value="">  Select Brand  </option>
                       {brands.map(b => <option key={b.id} value={String(b.id)}>{b.name}</option>)}
                     </select>
                   </div>
@@ -630,11 +610,11 @@ export default function EditProductPage() {
               {/* Bottom save */}
               <div style={{ display: "flex", gap: 10 }}>
                 <button type="button" onClick={() => router.push("/admin/products")}
-                  style={{ flex: 1, height: 48, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                  style={{ flex: 1, height: 48, background: CARD, border: "1px solid #E5E7EB", borderRadius: 12, color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={saving}
-                  style={{ flex: 2, height: 48, background: ACCENT, border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, cursor: saving ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: saving ? 0.7 : 1 }}>
+                  style={{ flex: 2, height: 48, background: "#6366F1", border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 14, cursor: saving ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: saving ? 0.7 : 1 }}>
                   {saving ? <Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} /> : <Save style={{ width: 16, height: 16 }} />}
                   {saving ? "Saving Changes..." : "Save Changes"}
                 </button>
@@ -644,6 +624,5 @@ export default function EditProductPage() {
           </div>
         </form>
       </div>
-    </div>
   );
 }

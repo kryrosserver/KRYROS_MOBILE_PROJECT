@@ -7,11 +7,9 @@ import {
   CheckCircle2, XCircle, Download, MoreHorizontal, Filter,
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { useTheme } from "@/providers/ThemeProvider";
 
-const ACCENT = "#12D6C5";
 const ROWS_PER_PAGE = 10;
-const BRAND_COLORS = ["#12D6C5", "#3B82F6", "#F59E0B", "#8B5CF6", "#EF4444", "#22C55E", "#EC4899"];
+const BRAND_COLORS = ["#6366F1", "#3B82F6", "#F59E0B", "#8B5CF6", "#EF4444", "#22C55E", "#EC4899"];
 
 type Brand = {
   id: number;
@@ -27,7 +25,7 @@ type Brand = {
 
 type Category = { id: string; name: string };
 
-function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boolean }) {
+function MiniSparkline({ color = "#6366F1", up = true }: { color?: string; up?: boolean }) {
   const data = up
     ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
     : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
@@ -47,7 +45,16 @@ function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boo
 }
 
 export default function BrandsPage() {
-  const { isDark, toggleTheme } = useTheme();
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -61,15 +68,6 @@ export default function BrandsPage() {
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", slug: "", description: "", website: "", isActive: true, categoryId: "" });
-
-  const BG = "var(--bg-primary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const HOVER = "var(--hover-bg)";
-  const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
 
   useEffect(() => {}, []);
 
@@ -150,7 +148,7 @@ export default function BrandsPage() {
   const toggleSelect = (id: string) => setSelectedIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const toggleAll = () => setSelectedIds(s => s.length === pageItems.length ? [] : pageItems.map(b => String(b.id)));
 
-  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
   const pageNums = (() => {
     const nums: (number | "...")[] = [];
     if (totalPages <= 7) for (let i = 1; i <= totalPages; i++) nums.push(i);
@@ -160,316 +158,224 @@ export default function BrandsPage() {
     return nums;
   })();
 
+
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+      {/* Page Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Brand Management</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: "#4B5563" }}>
+            <span>Home</span><span>›</span><span>Products</span><span>›</span>
+            <span style={{ color: "#6366F1", fontWeight: 600 }}>Brands</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={() => handleOpenModal()}
+            style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", padding: "10px 20px", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", borderRadius: 10 }}>
+            <Plus style={{ width: 15, height: 15 }} /> Add Brand
+          </button>
+        </div>
+      </div>
 
-        {/* ── TOP HEADER BAR ── */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Menu style={{ width: 20, height: 20 }} />
-            </button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Brand Management</h1>
-          </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
-            <input
-              placeholder="Search brands..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }}
-            />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
-            </button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} />
-              May 20 – May 26, 2025
-              <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
+      {error && (
+        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {error}
+          <button onClick={handleCleanup} style={{ border: "none", background: "transparent", color: "#EF4444", fontSize: 12, textDecoration: "underline", cursor: "pointer" }}>Run DB Maintenance</button>
+        </div>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4" style={{ marginBottom: 20 }}>
+        {[
+          { label: "Total Brands", value: brands.length, color: "#6366F1", icon: Tag },
+          { label: "Active", value: active.length, color: "#22C55E", icon: CheckCircle2 },
+          { label: "Inactive", value: inactive.length, color: "#EF4444", icon: XCircle },
+          { label: "Categories", value: categories.length, color: "#8B5CF6", icon: Tag },
+        ].map((s, i) => (
+          <div key={i} style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "16px 18px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
-                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: "#111827", marginTop: 4 }}>{s.value}</div>
               </div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
-
-        {/* ── BODY ── */}
-        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
-
-          {/* Page title + actions */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-            <div>
-              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Brand Management</h2>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
-                <span>Home</span>
-                <ChevronRight style={{ width: 13, height: 13 }} />
-                <span>Products</span>
-                <ChevronRight style={{ width: 13, height: 13 }} />
-                <span style={{ color: ACCENT }}>Brands</span>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${s.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <s.icon style={{ width: 20, height: 20, color: s.color }} />
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ display: "flex", borderRadius: 10, overflow: "hidden" }}>
-                <button onClick={() => handleOpenModal()} style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-                  <Plus style={{ width: 15, height: 15 }} /> Add New Brand
-                </button>
-                <button style={{ background: "#10C4B5", border: "none", padding: "9px 10px", color: "#0B1320", cursor: "pointer", borderLeft: "1px solid rgba(0,0,0,0.15)" }}>
-                  <ChevronDown style={{ width: 14, height: 14 }} />
-                </button>
-              </div>
-              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-                <Download style={{ width: 15, height: 15 }} /> Export <ChevronDown style={{ width: 13, height: 13 }} />
-              </button>
-              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
-                <MoreHorizontal style={{ width: 16, height: 16 }} />
-              </button>
-            </div>
           </div>
+        ))}
+      </div>
 
-          {error && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              {error}
-              <button onClick={handleCleanup} style={{ border: "none", background: "transparent", color: "#EF4444", fontSize: 12, textDecoration: "underline", cursor: "pointer", fontWeight: 600 }}>Run DB Maintenance</button>
-            </div>
-          )}
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16 }}>
+        <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
+          <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF", width: 15, height: 15 }} />
+          <input value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
+            placeholder="Search brands..."
+            style={{ width: "100%", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 12px 9px 36px", color: "#111827", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+        </div>
+        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+          style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 14px", color: "#374151", fontSize: 13, outline: "none", cursor: "pointer" }}>
+          <option value="ALL">All Status</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
+      </div>
 
-          {/* Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { label: "Total Brands", value: brands.length, change: "+12.4%", up: true, color: ACCENT, icon: Tag },
-              { label: "Active Brands", value: active.length, change: "+11.8%", up: true, color: "#22C55E", icon: CheckCircle2 },
-              { label: "Inactive Brands", value: inactive.length, change: "+2.1%", up: false, color: "#EF4444", icon: XCircle },
-              { label: "Categories", value: categories.length, change: "+8.3%", up: true, color: "#8B5CF6", icon: Tag },
-            ].map((s, i) => (
-              <div key={i} style={{ ...card, padding: "16px 18px" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `${s.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <s.icon style={{ width: 20, height: 20, color: s.color }} />
-                  </div>
-                </div>
-                <div style={{ fontSize: 11, color: TEXT2, marginBottom: 4 }}>{s.label}</div>
-                <div style={{ fontSize: 26, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>{s.value.toLocaleString()}</div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: s.up ? "#22C55E" : "#EF4444" }}>
-                  {s.up ? "▲" : "▼"} {s.change} vs last month
-                </span>
-                <div style={{ marginTop: 8 }}>
-                  <MiniSparkline color={s.color} up={s.up} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Filters */}
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <div style={{ position: "relative", flex: 1, maxWidth: 280 }}>
-              <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2 }} />
-              <input
-                placeholder="Search brands..."
-                value={searchTerm}
-                onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
-                style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px 9px 30px", color: TEXT, fontSize: 13, outline: "none" }}
-              />
-            </div>
-            <div style={{ position: "relative" }}>
-              <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-                style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 32px 9px 12px", color: TEXT2, fontSize: 13, outline: "none", appearance: "none", cursor: "pointer" }}>
-                <option value="ALL">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-              <ChevronDown style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2, pointerEvents: "none" }} />
-            </div>
-            <button style={{ display: "flex", alignItems: "center", gap: 7, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 16px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
-              <Filter style={{ width: 13, height: 13 }} /> Filters
-            </button>
-            <button onClick={loadBrands} style={{ display: "flex", alignItems: "center", gap: 6, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 14px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
-              <RefreshCcw style={{ width: 13, height: 13 }} />
-            </button>
-          </div>
-
-          {/* Table */}
-          <div style={{ ...card, overflow: "hidden" }}>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
-                    <th style={{ padding: "12px 16px", width: 40, textAlign: "left" }}>
-                      <input type="checkbox" checked={selectedIds.length === pageItems.length && pageItems.length > 0} onChange={toggleAll} style={{ accentColor: ACCENT, width: 14, height: 14 }} />
-                    </th>
-                    {["Brand", "Category", "Slug", "Website", "Status", "Actions"].map(h => (
-                      <th key={h} style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: h === "Actions" ? "right" : "left" }}>{h}</th>
+      {/* Table */}
+      <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+                <th style={{ padding: "11px 16px", textAlign: "left", fontWeight: 700, color: "#374151", whiteSpace: "nowrap" }}>
+                  <input type="checkbox" checked={selectedIds.length === pageItems.length && pageItems.length > 0}
+                    onChange={toggleAll} style={{ cursor: "pointer" }} />
+                </th>
+                {["Brand", "Slug", "Category", "Status", "Actions"].map(h => (
+                  <th key={h} style={{ padding: "11px 16px", textAlign: "left", fontWeight: 700, color: "#374151", whiteSpace: "nowrap" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #F3F4F6" }}>
+                    {[...Array(6)].map((_, j) => (
+                      <td key={j} style={{ padding: "14px 16px" }}>
+                        <div style={{ height: 14, borderRadius: 6, background: "#F3F4F6", width: j === 0 ? 20 : j === 1 ? 120 : 80 }} />
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    [...Array(8)].map((_, i) => (
-                      <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
-                        <td colSpan={7} style={{ padding: "14px 16px" }}><div style={{ height: 14, borderRadius: 6, background: HOVER }} /></td>
-                      </tr>
-                    ))
-                  ) : pageItems.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} style={{ padding: 48, textAlign: "center", fontSize: 13, color: TEXT2 }}>
-                        <Tag style={{ width: 36, height: 36, margin: "0 auto 10px", opacity: 0.3 }} />
-                        <div>No brands found</div>
-                      </td>
-                    </tr>
-                  ) : pageItems.map((brand, idx) => {
-                    const isSelected = selectedIds.includes(String(brand.id));
-                    const colorIdx = idx % BRAND_COLORS.length;
-                    return (
-                      <tr key={brand.id}
-                        style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${ACCENT}08` : "transparent" }}
-                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = HOVER; }}
-                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}>
-                        <td style={{ padding: "12px 16px" }}>
-                          <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(String(brand.id))} style={{ accentColor: ACCENT, width: 14, height: 14 }} />
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div style={{ width: 36, height: 36, borderRadius: 9, background: `${BRAND_COLORS[colorIdx]}18`, border: `1px solid ${BRAND_COLORS[colorIdx]}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <Tag style={{ width: 16, height: 16, color: BRAND_COLORS[colorIdx] }} />
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{brand.name}</div>
-                              {brand.description && <div style={{ fontSize: 11, color: TEXT2, marginTop: 2, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{brand.description}</div>}
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          {brand.category
-                            ? <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT, background: `${ACCENT}15`, padding: "3px 10px", borderRadius: 20 }}>{brand.category.name}</span>
-                            : <span style={{ fontSize: 11, fontStyle: "italic", color: TEXT2 }}>Unassigned</span>}
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          <code style={{ fontSize: 11, background: ICON_BG, color: ACCENT, padding: "3px 8px", borderRadius: 6, fontFamily: "monospace" }}>{brand.slug}</code>
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          {brand.website
-                            ? <a href={brand.website} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: ACCENT, textDecoration: "none" }}><Globe style={{ width: 13, height: 13 }} /> Visit</a>
-                            : <span style={{ fontSize: 12, color: TEXT2 }}>—</span>}
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: brand.isActive ? "#22C55E" : "#EF4444", background: brand.isActive ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)", padding: "4px 10px", borderRadius: 20 }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: brand.isActive ? "#22C55E" : "#EF4444", flexShrink: 0 }} />
-                            {brand.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td style={{ padding: "12px 16px", textAlign: "right" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 4 }}>
-                            {[
-                              { Icon: Edit, onClick: () => handleOpenModal(brand), hc: "#3B82F6", hb: "rgba(59,130,246,0.1)" },
-                              { Icon: Trash2, onClick: () => handleDelete(brand.id), hc: "#EF4444", hb: "rgba(239,68,68,0.1)" },
-                            ].map(({ Icon, onClick, hc, hb }, ii) => (
-                              <button key={ii} onClick={onClick}
-                                style={{ padding: 8, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", color: TEXT2, display: "flex" }}
-                                onMouseEnter={e => { e.currentTarget.style.color = hc; e.currentTarget.style.background = hb; }}
-                                onMouseLeave={e => { e.currentTarget.style.color = TEXT2; e.currentTarget.style.background = "transparent"; }}>
-                                <Icon style={{ width: 15, height: 15 }} />
-                              </button>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {/* Pagination */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderTop: `1px solid ${BORDER}` }}>
-              <span style={{ fontSize: 12, color: TEXT2 }}>
-                Showing {filtered.length === 0 ? 0 : (page - 1) * ROWS_PER_PAGE + 1}–{Math.min(page * ROWS_PER_PAGE, filtered.length)} of {filtered.length} brands
-              </span>
-              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                  style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: page === 1 ? "not-allowed" : "pointer", opacity: page === 1 ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>‹</button>
-                {pageNums.map((n, i) => (
-                  <button key={i} onClick={() => typeof n === "number" && setPage(n)} disabled={n === "..."}
-                    style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${BORDER}`, background: n === page ? ACCENT : CARD, color: n === page ? "#0B1320" : TEXT2, fontWeight: n === page ? 800 : 400, cursor: n === "..." ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>{n}</button>
-                ))}
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                  style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, cursor: page === totalPages ? "not-allowed" : "pointer", opacity: page === totalPages ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>›</button>
-              </div>
-            </div>
-          </div>
-
+                ))
+              ) : pageItems.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "#9CA3AF" }}>
+                    No brands found.
+                  </td>
+                </tr>
+              ) : pageItems.map((brand, idx) => (
+                <tr key={brand.id} style={{ borderBottom: "1px solid #F3F4F6", background: selectedIds.includes(String(brand.id)) ? "#EEF2FF" : idx % 2 === 0 ? "#fff" : "#FAFAFA" }}>
+                  <td style={{ padding: "12px 16px" }}>
+                    <input type="checkbox" checked={selectedIds.includes(String(brand.id))}
+                      onChange={() => toggleSelect(String(brand.id))} style={{ cursor: "pointer" }} />
+                  </td>
+                  <td style={{ padding: "12px 16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 8, background: "#EEF2FF", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#6366F1" }}>
+                        {brand.name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 600, color: "#111827" }}>{brand.name}</div>
+                        {brand.website && <div style={{ fontSize: 11, color: "#9CA3AF" }}>{brand.website}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: "12px 16px", color: "#6B7280", fontFamily: "monospace", fontSize: 12 }}>{brand.slug}</td>
+                  <td style={{ padding: "12px 16px", color: "#6B7280" }}>
+                    {categories.find(c => c.id === brand.categoryId)?.name || "—"}
+                  </td>
+                  <td style={{ padding: "12px 16px" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: brand.isActive ? "#D1FAE5" : "#FEE2E2", color: brand.isActive ? "#065F46" : "#991B1B" }}>
+                      {brand.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+                  <td style={{ padding: "12px 16px" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => handleOpenModal(brand)}
+                        style={{ display: "flex", alignItems: "center", gap: 4, background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 7, padding: "5px 10px", color: "#4338CA", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                        <Edit style={{ width: 13, height: 13 }} /> Edit
+                      </button>
+                      <button onClick={() => handleDelete(brand.id)}
+                        style={{ display: "flex", alignItems: "center", gap: 4, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 7, padding: "5px 10px", color: "#DC2626", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                        <Trash2 style={{ width: 13, height: 13 }} /> Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        {/* Pagination */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderTop: "1px solid #E5E7EB" }}>
+          <span style={{ fontSize: 12, color: "#6B7280" }}>
+            {filtered.length === 0 ? "0" : `${(page-1)*ROWS_PER_PAGE+1}–${Math.min(page*ROWS_PER_PAGE,filtered.length)}`} of {filtered.length}
+          </span>
+          <div style={{ display: "flex", gap: 4 }}>
+            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1}
+              style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", cursor: page===1?"not-allowed":"pointer", opacity: page===1?0.4:1, fontSize: 13 }}>‹</button>
+            {pageNums.map((n, i) => (
+              <button key={i} onClick={() => typeof n === "number" && setPage(n)} disabled={n === "..."}
+                style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid #E5E7EB", background: n===page?"#6366F1":"#fff", color: n===page?"#fff":"#374151", fontWeight: n===page?700:400, cursor: n==="..."?"default":"pointer", fontSize: 13, minWidth: 32 }}>
+                {n}
+              </button>
+            ))}
+            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages}
+              style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", cursor: page===totalPages?"not-allowed":"pointer", opacity: page===totalPages?0.4:1, fontSize: 13 }}>›</button>
+          </div>
+        </div>
+      </div>
 
-        {/* ── ADD / EDIT MODAL ── */}
-        {showModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "var(--modal-overlay)", backdropFilter: "blur(4px)" }}>
-            <div style={{ ...card, width: "100%", maxWidth: 480, maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 25px 50px rgba(0,0,0,0.4)" }}>
-              <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>{editingBrand ? "Edit Brand" : "Add New Brand"}</h3>
-                <button onClick={() => setShowModal(false)}
-                  style={{ width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", color: TEXT2, display: "flex", alignItems: "center", justifyContent: "center" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = HOVER)}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                  <X style={{ width: 16, height: 16 }} />
-                </button>
-              </div>
-              <div style={{ padding: "20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 14 }}>
-                {[
-                  { label: "Brand Name *", key: "name", placeholder: "e.g. Apple, Samsung, HP", type: "input" },
-                  { label: "Slug (auto-generated if empty)", key: "slug", placeholder: "e.g. apple", type: "input" },
-                  { label: "Website URL", key: "website", placeholder: "https://www.example.com", type: "input" },
-                  { label: "Description", key: "description", placeholder: "Brief brand overview...", type: "textarea" },
-                ].map(({ label, key, placeholder, type }) => (
-                  <div key={key}>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: TEXT2, marginBottom: 6 }}>{label}</label>
-                    {type === "textarea" ? (
-                      <textarea value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
-                        style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 14px", color: TEXT, fontSize: 13, outline: "none", resize: "vertical", minHeight: 72, boxSizing: "border-box" }} />
-                    ) : (
-                      <input value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
-                        style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 14px", color: TEXT, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
-                    )}
-                  </div>
-                ))}
-                <div>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: TEXT2, marginBottom: 6 }}>Category</label>
-                  <div style={{ position: "relative" }}>
-                    <select value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}
-                      style={{ width: "100%", background: ICON_BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 36px 10px 14px", color: TEXT, fontSize: 13, outline: "none", appearance: "none", cursor: "pointer", boxSizing: "border-box" }}>
-                      <option value="">-- Select Category --</option>
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                    <ChevronDown style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: TEXT2, pointerEvents: "none" }} />
-                  </div>
-                  <p style={{ fontSize: 11, color: TEXT2, marginTop: 5 }}>Brands under this category will show up in the Mega Menu</p>
+      {/* Add/Edit Modal */}
+      {showModal && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
+          <div style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 480, maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 25px 50px rgba(0,0,0,0.3)" }}>
+            <div style={{ padding: "18px 22px", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>
+                {editingBrand ? "Edit Brand" : "Add New Brand"}
+              </h3>
+              <button onClick={() => setShowModal(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280", padding: 4 }}>
+                <X style={{ width: 18, height: 18 }} />
+              </button>
+            </div>
+            <div style={{ padding: "20px 22px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 14 }}>
+              {[
+                { label: "Brand Name *", key: "name", placeholder: "e.g. Nike" },
+                { label: "Slug", key: "slug", placeholder: "auto-generated" },
+                { label: "Website URL", key: "website", placeholder: "https://..." },
+                { label: "Description", key: "description", placeholder: "Brief description...", type: "textarea" },
+              ].map(({ label, key, placeholder, type }) => (
+                <div key={key}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>{label}</label>
+                  {type === "textarea" ? (
+                    <textarea value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                      placeholder={placeholder} rows={3}
+                      style={{ width: "100%", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "9px 12px", color: "#111827", fontSize: 13, outline: "none", resize: "vertical", boxSizing: "border-box" }} />
+                  ) : (
+                    <input value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      style={{ width: "100%", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "9px 12px", color: "#111827", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  )}
                 </div>
-                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-                  <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))} style={{ accentColor: ACCENT, width: 15, height: 15 }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT2 }}>Active and visible in shop</span>
-                </label>
+              ))}
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Category</label>
+                <select value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}
+                  style={{ width: "100%", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "9px 12px", color: "#111827", fontSize: 13, outline: "none" }}>
+                  <option value="">-- Select Category --</option>
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
               </div>
-              <div style={{ padding: "16px 24px", borderTop: `1px solid ${BORDER}`, display: "flex", justifyContent: "flex-end", gap: 10, flexShrink: 0 }}>
-                <button onClick={() => setShowModal(false)}
-                  style={{ padding: "9px 20px", borderRadius: 10, border: `1px solid ${BORDER}`, background: CARD, color: TEXT2, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-                <button onClick={handleSave} disabled={saving}
-                  style={{ padding: "9px 24px", borderRadius: 10, border: "none", background: ACCENT, color: "#0B1320", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
-                  {saving ? "Saving..." : editingBrand ? "Save Changes" : "Add Brand"}
-                </button>
-              </div>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Active</span>
+              </label>
+            </div>
+            <div style={{ padding: "16px 22px", borderTop: "1px solid #E5E7EB", display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowModal(false)}
+                style={{ padding: "9px 20px", borderRadius: 9, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button onClick={handleSave} disabled={saving}
+                style={{ padding: "9px 24px", borderRadius: 9, border: "none", background: "#6366F1", color: "#fff", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
+                {saving ? "Saving..." : editingBrand ? "Save Changes" : "Add Brand"}
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

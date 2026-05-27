@@ -6,7 +6,7 @@ import { Plus, Edit, Trash2, Search, RefreshCw, Map as MapIcon, ChevronLeft, X, 
 } from "lucide-react";
 import Link from "next/link";
 
-const ACCENT = "#3B82F6";
+const ACCENT = "#6366F1";
 
 function Label({ children }: { children: React.ReactNode }) {
   return <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>{children}</label>;
@@ -15,9 +15,9 @@ function Label({ children }: { children: React.ReactNode }) {
 function DarkModal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}>
-      <div className="w-full max-w-md rounded-2xl overflow-hidden" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)", boxShadow: "0 25px 50px rgba(0,0,0,0.5)" }}>
+      <div className="w-full max-w-md rounded-2xl overflow-hidden" style={{ background: "#FFFFFF", border: "1px solid var(--card-border)", boxShadow: "0 25px 50px rgba(0,0,0,0.5)" }}>
         <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-          <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>{title}</h2>
+          <h2 className="text-base font-bold" style={{ color: "#111827" }}>{title}</h2>
           <button onClick={onClose} className="h-8 w-8 rounded-lg flex items-center justify-center btn-secondary !px-0"><X className="h-4 w-4" /></button>
         </div>
         <div className="p-6">{children}</div>
@@ -82,25 +82,25 @@ export default function StatesPage() {
 
   const countriesCount = new Set(data.map(d => d.countryId || d.country?.id)).size;
   const stats = [
-    { label: "Total States",    value: data.length,                           color: ACCENT,    bg: "rgba(59,130,246,0.12)",  icon: MapIcon },
+    { label: "Total States",    value: data.length,                           color: "#6366F1",    bg: "rgba(59,130,246,0.12)",  icon: MapIcon },
     { label: "Active",          value: data.filter(d => d.isActive).length,   color: "#16C784", bg: "rgba(22,199,132,0.12)",  icon: MapIcon },
-    { label: "Countries Covered", value: countriesCount,                      color: "#12D6C5", bg: "rgba(18,214,197,0.12)",  icon: Globe },
+    { label: "Countries Covered", value: countriesCount,                      color: "#6366F1", bg: "rgba(18,214,197,0.12)",  icon: Globe },
   ];
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/locations-shipping" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}><ArrowLeft style={{ width: 13, height: 13 }} /> Back to Locations</Link>
+              <Link href="/admin/locations-shipping" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}><ArrowLeft style={{ width: 13, height: 13 }} /> Back to Locations</Link>
               <div>
                 <div className="flex items-center gap-2 text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
                   <Link href="/admin/locations-shipping" style={{ color: "var(--text-muted)" }}>Locations & Shipping</Link><span>/</span><span>States</span>
                 </div>
                 <h1 className="text-2xl font-bold whitespace-nowrap">States / Provinces</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Manage administrative regions for each country</p>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Manage administrative regions for each country</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function StatesPage() {
             {stats.map(s => (
               <div key={s.label} className="admin-card !p-5">
                 <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ background: s.bg }}><s.icon className="h-5 w-5" style={{ color: s.color }} /></div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "#4B5563", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}
@@ -140,7 +140,7 @@ export default function StatesPage() {
                 <thead><tr><th>State / Province</th><th>Code</th><th>Country</th><th>Status</th><th className="text-right">Actions</th></tr></thead>
                 <tbody>
                   {loading ? (
-                    [...Array(6)].map((_, i) => <tr key={i}><td colSpan={5}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "var(--icon-bg)" }} /></td></tr>)
+                    [...Array(6)].map((_, i) => <tr key={i}><td colSpan={5}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "#F9FAFB" }} /></td></tr>)
                   ) : paginated.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-14">
                       <MapIcon className="h-10 w-10 mx-auto mb-3 opacity-30" style={{ color: "var(--text-muted)" }} />
@@ -148,17 +148,17 @@ export default function StatesPage() {
                     </td></tr>
                   ) : paginated.map(item => (
                     <tr key={item.id}>
-                      <td><p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{item.name}</p></td>
-                      <td><p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{item.code || "—"}</p></td>
+                      <td><p className="font-semibold text-sm" style={{ color: "#111827" }}>{item.name}</p></td>
+                      <td><p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{item.code || " "}</p></td>
                       <td>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{item.country?.flag || "🏳️"}</span>
-                          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{item.country?.name || "—"}</p>
+                          <p className="text-sm" style={{ color: "#4B5563" }}>{item.country?.name || " "}</p>
                         </div>
                       </td>
                       <td>
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold"
-                          style={item.isActive ? { background: "rgba(22,199,132,0.12)", color: "#16C784" } : { background: "var(--icon-bg)", color: "var(--text-muted)" }}>
+                          style={item.isActive ? { background: "rgba(22,199,132,0.12)", color: "#16C784" } : { background: "#F9FAFB", color: "var(--text-muted)" }}>
                           {item.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
@@ -182,7 +182,7 @@ export default function StatesPage() {
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>{filtered.length === 0 ? "0" : `${(page - 1) * rowsPerPage + 1}–${Math.min(page * rowsPerPage, filtered.length)}`} of {filtered.length}</span>
               <div className="flex items-center gap-1">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="h-8 w-8 rounded-lg flex items-center justify-center btn-secondary !px-0 disabled:opacity-40"><ChevronLeft className="h-4 w-4" /></button>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const n = totalPages <= 5 ? i + 1 : page <= 3 ? i + 1 : page >= totalPages - 2 ? totalPages - 4 + i : page - 2 + i; return <button key={n} onClick={() => setPage(n)} className="h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold" style={n === page ? { background: ACCENT, color: "#fff" } : { color: "var(--text-muted)" }}>{n}</button>; })}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const n = totalPages <= 5 ? i + 1 : page <= 3 ? i + 1 : page >= totalPages - 2 ? totalPages - 4 + i : page - 2 + i; return <button key={n} onClick={() => setPage(n)} className="h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold" style={n === page ? { background: "#6366F1", color: "#fff" } : { color: "var(--text-muted)" }}>{n}</button>; })}
                 <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="h-8 w-8 rounded-lg flex items-center justify-center btn-secondary !px-0 disabled:opacity-40"><ChevronRight className="h-4 w-4" /></button>
               </div>
             </div>
@@ -203,10 +203,10 @@ export default function StatesPage() {
             <div><Label>State Code (Optional)</Label><input value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value }))} className="admin-input w-full" placeholder="e.g. LSK" /></div>
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <div onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className="h-5 w-5 rounded flex items-center justify-center cursor-pointer"
-                style={{ background: form.isActive ? "#12D6C5" : "var(--icon-bg)", border: `2px solid ${form.isActive ? "#12D6C5" : "var(--card-border)"}` }}>
+                style={{ background: form.isActive ? "#6366F1" : "#F9FAFB", border: `2px solid ${form.isActive ? "#6366F1" : "#E5E7EB"}` }}>
                 {form.isActive && <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
               </div>
-              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>Active</span>
+              <span className="text-xs font-semibold" style={{ color: "#4B5563" }}>Active</span>
             </label>
             <button disabled={saving} className="w-full btn-primary h-11 mt-2 disabled:opacity-50">{saving ? "Saving…" : "Confirm & Save"}</button>
           </form>

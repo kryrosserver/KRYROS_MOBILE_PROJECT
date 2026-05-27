@@ -8,8 +8,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const ACCENT = "#12D6C5";
-
 const GATEWAYS = [
   {
     id: "paystack", label: "Paystack", initial: "P",
@@ -35,20 +33,20 @@ export default function PaymentSettingsPage() {
   };
 
   const stats = [
-    { label: "Online Gateways", value: GATEWAYS.length, color: ACCENT,     bg: "rgba(18,214,197,0.12)", icon: CreditCard },
+    { label: "Online Gateways", value: GATEWAYS.length, color: "#6366F1",     bg: "rgba(18,214,197,0.12)", icon: CreditCard },
     { label: "Connected",       value: GATEWAYS.length, color: "#16C784",  bg: "rgba(22,199,132,0.12)", icon: Link2 },
     { label: "Bank Accounts",   value: 1,               color: "#F59E0B",  bg: "rgba(245,158,11,0.12)", icon: Building2 },
   ];
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/settings" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Settings
               </Link>
               <div>
@@ -56,8 +54,8 @@ export default function PaymentSettingsPage() {
                   <Link href="/admin/settings" style={{ color: "var(--text-muted)" }}>Settings</Link>
                   <span>/</span><span>Payment</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Payment Gateways</h1>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Configure how you receive money from customers</p>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Payment Gateways</h1>
+                <p className="text-sm mt-0.5" style={{ color: "#4B5563" }}>Configure how you receive money from customers</p>
               </div>
             </div>
             <button onClick={handleSave} disabled={isSaving}
@@ -77,7 +75,7 @@ export default function PaymentSettingsPage() {
                     <s.icon className="h-5 w-5" style={{ color: s.color }} />
                   </div>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "#4B5563", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}
@@ -91,14 +89,14 @@ export default function PaymentSettingsPage() {
               </p>
 
               {GATEWAYS.map(gw => (
-                <div key={gw.id} className="rounded-2xl p-5 space-y-4" style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
+                <div key={gw.id} className="rounded-2xl p-5 space-y-4" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-xl flex items-center justify-center font-black text-white text-sm" style={{ background: gw.color }}>
                         {gw.initial}
                       </div>
                       <div>
-                        <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{gw.label}</p>
+                        <p className="text-sm font-bold" style={{ color: "#111827" }}>{gw.label}</p>
                         <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "#16C784" }}>
                           <Link2 className="h-3 w-3" /> {gw.status}
                         </p>
@@ -158,12 +156,12 @@ export default function PaymentSettingsPage() {
               {/* Wallet payment toggle */}
               <div className="pt-4" style={{ borderTop: "1px solid var(--card-border)" }}>
                 <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>In-App Wallet</p>
-                <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: "var(--hover-bg)", border: "1px solid var(--card-border)" }}>
+                <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: "#F9FAFB", border: "1px solid var(--card-border)" }}>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Wallet Payments</p>
+                    <p className="text-sm font-semibold" style={{ color: "#111827" }}>Wallet Payments</p>
                     <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Allow customers to pay using their wallet balance</p>
                   </div>
-                  <div className="h-6 w-11 rounded-full relative" style={{ background: ACCENT }}>
+                  <div className="h-6 w-11 rounded-full relative" style={{ background: "#6366F1" }}>
                     <span className="inline-block h-4 w-4 bg-white rounded-full absolute top-1 right-1" />
                   </div>
                 </div>

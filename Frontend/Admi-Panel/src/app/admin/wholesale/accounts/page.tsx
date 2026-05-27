@@ -23,8 +23,6 @@ type WholesaleAccount = {
   user: { firstName: string; lastName: string; email: string };
 };
 
-const ACCENT = "#12D6C5";
-
 function StatusBadge({ status }: { status: WholesaleAccount["status"] }) {
   const map = {
     APPROVED:  { bg: "rgba(22,199,132,0.12)",  color: "#16C784", icon: CheckCircle },
@@ -94,7 +92,7 @@ export default function WholesaleAccountsPage() {
   const paginated = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   const stats = [
-    { label: "Total Accounts", value: accounts.length, color: ACCENT, icon: Users, bg: "rgba(18,214,197,0.12)" },
+    { label: "Total Accounts", value: accounts.length, color: "#6366F1", icon: Users, bg: "rgba(18,214,197,0.12)" },
     { label: "Pending Review", value: accounts.filter(a => a.status === "PENDING").length, color: "#F59E0B", icon: Clock, bg: "rgba(245,158,11,0.12)" },
     { label: "Approved", value: accounts.filter(a => a.status === "APPROVED").length, color: "#16C784", icon: CheckCircle, bg: "rgba(22,199,132,0.12)" },
     { label: "Suspended / Rejected", value: accounts.filter(a => a.status === "SUSPENDED" || a.status === "REJECTED").length, color: "#EF4444", icon: Shield, bg: "rgba(239,68,68,0.1)" },
@@ -106,14 +104,14 @@ export default function WholesaleAccountsPage() {
   };
 
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", padding: "24px" }}>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+        <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href="/admin/wholesale" style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "var(--text-secondary)", fontSize: 12, textDecoration: "none" }}>
+              <Link href="/admin/wholesale" style={{ display: "flex", alignItems: "center", gap: 6, background: "#FFFFFF", border: "1px solid var(--card-border)", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
                 <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Wholesale
               </Link>
               <div>
@@ -121,7 +119,7 @@ export default function WholesaleAccountsPage() {
                   <Link href="/admin/wholesale" style={{ color: "var(--text-muted)" }}>Wholesale</Link>
                   <span>/</span><span>Accounts</span>
                 </div>
-                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Wholesale Accounts</h1>
+                <h1 className="text-2xl font-bold whitespace-nowrap" style={{ color: "#111827" }}>Wholesale Accounts</h1>
               </div>
             </div>
             <button onClick={handleRefresh} className="btn-secondary !h-10 !w-10 !px-0 flex items-center justify-center">
@@ -138,7 +136,7 @@ export default function WholesaleAccountsPage() {
                     <s.icon className="h-5 w-5" style={{ color: s.color }} />
                   </div>
                 </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)", minHeight: "2.5rem" }}>{s.label}</p>
+                <p className="text-sm" style={{ color: "#4B5563", minHeight: "2.5rem" }}>{s.label}</p>
                 <p className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
               </div>
             ))}
@@ -176,7 +174,7 @@ export default function WholesaleAccountsPage() {
                     <th className="!px-4 !py-3 w-10">
                       <button onClick={handleSelectAll}>
                         {selected.size === paginated.length && paginated.length > 0
-                          ? <CheckSquare className="h-4 w-4" style={{ color: ACCENT }} />
+                          ? <CheckSquare className="h-4 w-4" style={{ color: "#6366F1" }} />
                           : <Square className="h-4 w-4" style={{ color: "var(--text-muted)" }} />}
                       </button>
                     </th>
@@ -192,7 +190,7 @@ export default function WholesaleAccountsPage() {
                 <tbody>
                   {loading ? (
                     [...Array(rowsPerPage)].map((_, i) => (
-                      <tr key={i}><td colSpan={8}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "var(--icon-bg)" }} /></td></tr>
+                      <tr key={i}><td colSpan={8}><div className="h-5 rounded animate-pulse my-1 mx-2" style={{ background: "#F9FAFB" }} /></td></tr>
                     ))
                   ) : paginated.length === 0 ? (
                     <tr>
@@ -206,17 +204,17 @@ export default function WholesaleAccountsPage() {
                       <td className="!px-4">
                         <button onClick={() => { const n = new Set(selected); n.has(acc.id) ? n.delete(acc.id) : n.add(acc.id); setSelected(n); }}>
                           {selected.has(acc.id)
-                            ? <CheckSquare className="h-4 w-4" style={{ color: ACCENT }} />
+                            ? <CheckSquare className="h-4 w-4" style={{ color: "#6366F1" }} />
                             : <Square className="h-4 w-4" style={{ color: "var(--text-muted)" }} />}
                         </button>
                       </td>
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--icon-bg)" }}>
+                          <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#F9FAFB" }}>
                             <Building2 className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-sm truncate max-w-[180px]" style={{ color: "var(--text-primary)" }}>{acc.companyName}</p>
+                            <p className="font-semibold text-sm truncate max-w-[180px]" style={{ color: "#111827" }}>{acc.companyName}</p>
                             <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--text-muted)" }}>
                               <Mail className="h-3 w-3" /> {acc.user.email}
                             </p>
@@ -224,11 +222,11 @@ export default function WholesaleAccountsPage() {
                         </div>
                       </td>
                       <td>
-                        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{acc.contactPerson}</p>
+                        <p className="text-sm font-semibold" style={{ color: "#111827" }}>{acc.contactPerson}</p>
                         <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{acc.user.firstName} {acc.user.lastName}</p>
                       </td>
                       <td>
-                        <p className="text-xs font-mono flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+                        <p className="text-xs font-mono flex items-center gap-1" style={{ color: "#4B5563" }}>
                           <FileText className="h-3 w-3 shrink-0" /> {acc.taxId || "N/A"}
                         </p>
                         <p className="text-xs mt-1 truncate max-w-[180px] italic" style={{ color: "var(--text-muted)" }}>
@@ -236,13 +234,13 @@ export default function WholesaleAccountsPage() {
                         </p>
                       </td>
                       <td>
-                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background: "rgba(18,214,197,0.1)", color: ACCENT }}>
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background: "rgba(18,214,197,0.1)", color: "#6366F1" }}>
                           Tier {acc.discountTier || 0}
                         </span>
                       </td>
                       <td><StatusBadge status={acc.status} /></td>
                       <td className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        {acc.createdAt ? new Date(acc.createdAt).toLocaleDateString() : "—"}
+                        {acc.createdAt ? new Date(acc.createdAt).toLocaleDateString() : " "}
                       </td>
                       <td className="text-right">
                         <div className="flex items-center justify-end gap-1.5">
@@ -273,7 +271,7 @@ export default function WholesaleAccountsPage() {
                               onClick={() => updateStatus(acc.id, "APPROVED")}
                               disabled={updatingId === acc.id}
                               className="px-3 h-8 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
-                              style={{ background: "rgba(18,214,197,0.12)", color: ACCENT }}
+                              style={{ background: "rgba(18,214,197,0.12)", color: "#6366F1" }}
                             >Re-activate</button>
                           )}
                         </div>
@@ -298,7 +296,7 @@ export default function WholesaleAccountsPage() {
                   return (
                     <button key={n} onClick={() => setPage(n)}
                       className="h-8 w-8 rounded-lg flex items-center justify-center text-xs font-semibold"
-                      style={n === page ? { background: ACCENT, color: "#fff" } : { color: "var(--text-muted)" }}
+                      style={n === page ? { background: "#6366F1", color: "#fff" } : { color: "var(--text-muted)" }}
                     >{n}</button>
                   );
                 })}

@@ -11,9 +11,6 @@ import {
   Bell, Calendar, Sun, Moon, Menu, ChevronDown,
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { useTheme } from "@/providers/ThemeProvider";
-
-const ACCENT = "#12D6C5";
 
 type CMSPage = {
   id: string; title: string; slug: string; content?: string;
@@ -30,14 +27,14 @@ const PAGE_ICONS: Record<string, any> = {
 };
 const PAGE_COLORS: Record<string, { color: string; bg: string }> = {
   home:               { color: "#3B82F6", bg: "rgba(59,130,246,0.15)" },
-  shop:               { color: "#12D6C5", bg: "rgba(18,214,197,0.15)" },
-  "about-us":         { color: "#12D6C5", bg: "rgba(18,214,197,0.15)" },
+  shop:               { color: "#6366F1", bg: "rgba(18,214,197,0.15)" },
+  "about-us":         { color: "#6366F1", bg: "rgba(18,214,197,0.15)" },
   "terms-conditions": { color: "#64748B", bg: "rgba(100,116,139,0.15)" },
   "privacy-policy":   { color: "#3B82F6", bg: "rgba(59,130,246,0.15)" },
   "refund-policy":    { color: "#F97316", bg: "rgba(249,115,22,0.15)" },
   "shipping-policy":  { color: "#0EA5E9", bg: "rgba(14,165,233,0.15)" },
   faq:                { color: "#8B5CF6", bg: "rgba(139,92,246,0.15)" },
-  "contact-us":       { color: "#12D6C5", bg: "rgba(18,214,197,0.15)" },
+  "contact-us":       { color: "#6366F1", bg: "rgba(18,214,197,0.15)" },
   "how-it-works":     { color: "#6366F1", bg: "rgba(99,102,241,0.15)" },
   wholesale:          { color: "#8B5CF6", bg: "rgba(139,92,246,0.15)" },
   "get-now":          { color: "#FACC15", bg: "rgba(250,204,21,0.15)" },
@@ -73,7 +70,7 @@ function getPageIcon(slug: string) { return PAGE_ICONS[slug] || FileText; }
 function getPageColor(slug: string) { return PAGE_COLORS[slug] || { color: "#64748B", bg: "rgba(100,116,139,0.15)" }; }
 function getPageType(slug: string) {
   if (SYSTEM_SLUGS.includes(slug)) return { label: "System", color: "#3B82F6", bg: "rgba(59,130,246,0.12)" };
-  return { label: "Static Page", color: ACCENT, bg: "rgba(18,214,197,0.12)" };
+  return { label: "Static Page", color: "#6366F1", bg: "rgba(18,214,197,0.12)" };
 }
 function getPageStatus(p: CMSPage): "published" | "draft" | "trash" {
   if (TRASH_SLUGS.includes(p.slug)) return "trash";
@@ -122,12 +119,12 @@ function DonutChart({ published, draft, trash }: { published: number; draft: num
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
       <svg width={100} height={100} viewBox="0 0 100 100">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--icon-bg)" strokeWidth="10" />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#F9FAFB" strokeWidth="10" />
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#16C784" strokeWidth="10" strokeDasharray={`${pDash} ${circ}`} strokeDashoffset={0} strokeLinecap="round" transform={`rotate(-90 ${cx} ${cy})`} />
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#F59E0B" strokeWidth="10" strokeDasharray={`${dDash} ${circ}`} strokeDashoffset={-pDash} strokeLinecap="round" transform={`rotate(-90 ${cx} ${cy})`} />
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#EF4444" strokeWidth="10" strokeDasharray={`${tDash} ${circ}`} strokeDashoffset={-(pDash + dDash)} strokeLinecap="round" transform={`rotate(-90 ${cx} ${cy})`} />
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="13" fontWeight="700" fill="var(--text-primary)">{total}</text>
-        <text x={cx} y={cy + 12} textAnchor="middle" fontSize="8" fill="var(--text-secondary)">Total</text>
+        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="13" fontWeight="700" fill="#111827">{total}</text>
+        <text x={cx} y={cy + 12} textAnchor="middle" fontSize="8" fill="#4B5563">Total</text>
       </svg>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 11 }}>
         {[
@@ -137,8 +134,8 @@ function DonutChart({ published, draft, trash }: { published: number; draft: num
         ].map(row => (
           <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: row.color, flexShrink: 0 }} />
-            <span style={{ color: "var(--text-secondary)" }}>{row.label}</span>
-            <span style={{ fontWeight: 700, color: "var(--text-primary)", marginLeft: "auto", paddingLeft: 10 }}>{row.val} ({Math.round((row.val / total) * 100)}%)</span>
+            <span style={{ color: "#4B5563" }}>{row.label}</span>
+            <span style={{ fontWeight: 700, color: "#111827", marginLeft: "auto", paddingLeft: 10 }}>{row.val} ({Math.round((row.val / total) * 100)}%)</span>
           </div>
         ))}
       </div>
@@ -165,14 +162,13 @@ export default function CMSPagesManager() {
   const [syncMsg, setSyncMsg]           = useState<string | null>(null);
   const [openMenu, setOpenMenu]         = useState<string | null>(null);
   const menuRef   = useRef<HTMLDivElement>(null);
-  const { isDark, toggleTheme } = useTheme();
 
-  const BG      = "var(--bg-primary)";
-  const CARD    = "var(--card-bg)";
-  const BORDER  = "var(--card-border)";
-  const TEXT    = "var(--text-primary)";
-  const TEXT2   = "var(--text-secondary)";
-  const HOVER   = "var(--hover-bg)";
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const HOVER = "#F9FAFB";
 
   const [form, setForm] = useState({
     title: "", slug: "", content: "", metaTitle: "", metaDescription: "", isActive: true,
@@ -204,7 +200,6 @@ export default function CMSPagesManager() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  useEffect(() => {}, []);
 
   const filtered = pages.filter(p => {
     const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.slug.toLowerCase().includes(search.toLowerCase());
@@ -218,13 +213,19 @@ export default function CMSPagesManager() {
     return sortDir === "asc" ? diff : -diff;
   });
   const totalPages = Math.ceil(sorted.length / rowsPerPage);
+  const pageNums = (() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (page <= 3) return [1, 2, 3, 4, "...", totalPages];
+    if (page >= totalPages - 2) return [1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, "...", page - 1, page, page + 1, "...", totalPages];
+  })();
   const paginated  = sorted.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const published  = pages.filter(p => getPageStatus(p) === "published").length;
   const draft      = pages.filter(p => getPageStatus(p) === "draft").length;
   const trash      = pages.filter(p => getPageStatus(p) === "trash").length;
 
   const statCards = [
-    { label: "Total Pages",     value: pages.length, color: ACCENT,    iconBg: `${ACCENT}15`,          icon: LayoutGrid,   trend: 14.2, up: true,  spark: [20,28,22,35,30,40, pages.length] },
+    { label: "Total Pages",     value: pages.length, color: "#6366F1",    iconBg: `#6366F115`,          icon: LayoutGrid,   trend: 14.2, up: true,  spark: [20,28,22,35,30,40, pages.length] },
     { label: "Published Pages", value: published,    color: "#16C784", iconBg: "rgba(22,199,132,0.12)", icon: CheckCircle2, trend: 11.8, up: true,  spark: [15,20,18,25,22,30, published] },
     { label: "Draft Pages",     value: draft,        color: "#F59E0B", iconBg: "rgba(245,158,11,0.12)", icon: Clock,        trend: 20.0, up: false, spark: [2,3,2,4,3,3, draft] },
     { label: "Trash Pages",     value: trash,        color: "#EF4444", iconBg: "rgba(239,68,68,0.12)",  icon: Trash2,       trend: 33.3, up: false, spark: [1,0,1,0,1,0, trash] },
@@ -282,436 +283,172 @@ export default function CMSPagesManager() {
   };
 
   const formatDate = (iso: string) => {
-    if (!iso) return "—";
+    if (!iso) return " ";
     const d = new Date(iso);
     return { date: d.toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" }), time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) };
   };
 
-  const inp: React.CSSProperties = { background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 14px", color: TEXT, fontSize: 13, outline: "none", height: 36 };
-  const sideCard: React.CSSProperties = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px" };
+  const inp: React.CSSProperties = { background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, padding: "8px 14px", color: TEXT, fontSize: 13, outline: "none", height: 36 };
+  const sideCard: React.CSSProperties = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14, padding: "20px" };
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Content Management</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", margin: "4px 0 0" }}>Manage pages, sections, and site content</p>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={handleSyncAllPages} disabled={syncingPages}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 16px", color: "#374151", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            <RefreshCw style={{ width: 14, height: 14 }} /> {syncingPages ? "Syncing..." : "Sync Pages"}
+          </button>
+          <button onClick={() => { setEditingPage(null); setShowModal(true); }}
+            style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", borderRadius: 10, padding: "9px 18px", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+            <Plus style={{ width: 15, height: 15 }} /> New Page
+          </button>
+        </div>
+      </div>
 
-        {/* HEADER */}
-        <header style={{ background: "var(--bg-secondary)", borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16, flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>CMS & Pages</h1>
+      {syncMsg && (
+        <div style={{ background: "#D1FAE5", border: "1px solid #A7F3D0", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#065F46", marginBottom: 16 }}>{syncMsg}</div>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4" style={{ marginBottom: 20 }}>
+        {[
+          { label: "Total Pages", value: pages.length, color: "#6366F1" },
+          { label: "Published", value: pages.filter(p => p.isActive && !TRASH_SLUGS.includes(p.slug)).length, color: "#22C55E" },
+          { label: "Drafts", value: pages.filter(p => !p.isActive && !TRASH_SLUGS.includes(p.slug)).length, color: "#F59E0B" },
+          { label: "System", value: pages.filter(p => SYSTEM_SLUGS.includes(p.slug)).length, color: "#3B82F6" },
+        ].map((s, i) => (
+          <div key={i} style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "16px 18px" }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: "#111827", marginTop: 4 }}>{s.value}</div>
           </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
-            <input placeholder="Search pages..." style={{ ...inp, width: "100%", paddingLeft: 36, paddingRight: 40, boxSizing: "border-box" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: HOVER, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
-              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
+        ))}
+      </div>
 
-        {/* BODY */}
-        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: 200, maxWidth: 320 }}>
+          <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF", width: 15, height: 15 }} />
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search pages..."
+            style={{ width: "100%", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 12px 9px 36px", color: "#111827", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+        </div>
+        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+          style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 14px", color: "#374151", fontSize: 13, outline: "none", cursor: "pointer" }}>
+          <option value="all">All Status</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="trash">Trash</option>
+        </select>
+        <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); }}
+          style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 14px", color: "#374151", fontSize: 13, outline: "none", cursor: "pointer" }}>
+          <option value="all">All Types</option>
+          <option value="system">System</option>
+          <option value="static">Static</option>
+        </select>
+      </div>
 
-          {/* Page title + actions */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: TEXT2, marginBottom: 6 }}>
-                <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
-                <span>/</span>
-                <span style={{ color: TEXT2 }}>CMS & Pages</span>
-              </div>
-              <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>CMS & Pages</h2>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {syncMsg && (
-                <span style={{ fontSize: 12, color: syncMsg.startsWith("✓") ? "#16C784" : "#EF4444", fontWeight: 600, maxWidth: 260 }}>{syncMsg}</span>
-              )}
-              <button
-                onClick={handleSyncAllPages}
-                disabled={syncingPages}
-                title="Sync all platform pages into the CMS database so each page can have sections managed under it"
-                style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(18,214,197,0.12)", border: "1px solid rgba(18,214,197,0.3)", borderRadius: 10, padding: "9px 16px", color: "#12D6C5", fontWeight: 700, fontSize: 13, cursor: syncingPages ? "not-allowed" : "pointer", opacity: syncingPages ? 0.6 : 1 }}>
-                <RefreshCw style={{ width: 14, height: 14, ...(syncingPages ? { animation: "spin 1s linear infinite" } : {}) }} />
-                {syncingPages ? "Syncing..." : "Sync All Pages"}
-              </button>
-              <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
-                <Plus style={{ width: 15, height: 15 }} /> Add New Page
-              </button>
-              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 14px", color: TEXT2, fontSize: 13, cursor: "pointer" }}>
-                <SortAsc style={{ width: 15, height: 15 }} /> Reorder
-              </button>
-              <button style={{ width: 38, height: 38, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <MoreVertical style={{ width: 15, height: 15 }} />
-              </button>
-            </div>
-          </div>
-
-          {/* ── STAT CARDS ── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-            {statCards.map((c, i) => (
-              <div key={i} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 10, background: c.iconBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <c.icon style={{ width: 18, height: 18, color: c.color }} />
-                  </div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: TEXT2, lineHeight: 1.3 }}>{c.label}</p>
-                </div>
-                <p style={{ fontSize: 28, fontWeight: 800, color: c.color, margin: 0 }}>{c.value}</p>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 11, color: TEXT2 }}>
-                    <span style={{ color: c.up ? "#16C784" : "#EF4444" }}>{c.up ? "↑" : "↓"} {c.trend}%</span> vs last month
-                  </span>
-                  <MiniSparkline values={c.spark} color={c.color} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ── MAIN CONTENT + SIDEBAR ── */}
-          <div style={{ display: "flex", gap: 16, alignItems: "start" }}>
-
-            {/* Main Content */}
-            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-
-              {/* Filter Bar */}
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flex: 1, position: "relative", minWidth: 220 }}>
-                  <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: TEXT2 }} />
-                  <input placeholder="Search pages..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
-                    style={{ ...inp, width: "100%", paddingLeft: 32, boxSizing: "border-box" }} />
-                </div>
-                <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} style={{ ...inp, minWidth: 120 }}>
-                  <option value="all">All Status</option>
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                  <option value="trash">Trash</option>
-                </select>
-                <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); }} style={{ ...inp, minWidth: 140 }}>
-                  <option value="all">All Page Types</option>
-                  <option value="system">System</option>
-                  <option value="static">Static Page</option>
-                </select>
-                <button style={{ ...inp, display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", cursor: "pointer" }}>
-                  <Filter style={{ width: 13, height: 13 }} /> Filters
-                </button>
-              </div>
-
-              {/* Table */}
-              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, overflow: "hidden" }}>
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                        {["", "Page Title", "Page Type", "Status", "Last Updated", "Order", "Actions"].map((h, i) => (
-                          <th key={i}
-                            onClick={h === "Last Updated" ? () => setSortDir(d => d === "asc" ? "desc" : "asc") : undefined}
-                            style={{ padding: "12px 14px", textAlign: (i === 5 ? "center" : i === 6 ? "right" : "left") as "center" | "left" | "right", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase" as const, letterSpacing: "0.06em", whiteSpace: "nowrap" as const, background: CARD, cursor: h === "Last Updated" ? "pointer" : "default" }}>
-                            {h === "Last Updated" ? (
-                              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                Last Updated {sortDir === "asc" ? <SortAsc style={{ width: 12, height: 12 }} /> : <SortDesc style={{ width: 12, height: 12 }} />}
-                              </div>
-                            ) : (
-                              i === 0 ? (
-                                <button onClick={handleSelectAll} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, display: "flex" }}>
-                                  {selected.size === paginated.length && paginated.length > 0
-                                    ? <CheckSquare style={{ width: 14, height: 14, color: ACCENT }} />
-                                    : <Square style={{ width: 14, height: 14 }} />}
-                                </button>
-                              ) : h
-                            )}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loading ? (
-                        [...Array(6)].map((_, i) => (
-                          <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
-                            {[...Array(7)].map((_, j) => (
-                              <td key={j} style={{ padding: "12px 14px" }}>
-                                <div style={{ height: 14, borderRadius: 6, background: HOVER, animation: "pulse 1.5s infinite" }} />
-                              </td>
-                            ))}
-                          </tr>
-                        ))
-                      ) : paginated.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} style={{ padding: "60px 14px", textAlign: "center" }}>
-                            <FileText style={{ width: 36, height: 36, color: TEXT2, opacity: 0.2, margin: "0 auto 10px" }} />
-                            <p style={{ fontSize: 13, fontWeight: 700, color: TEXT2 }}>No pages found</p>
-                            <button onClick={openAdd} style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: ACCENT, background: "transparent", border: "none", cursor: "pointer", textDecoration: "underline" }}>Add your first page</button>
-                          </td>
-                        </tr>
-                      ) : paginated.map((p, idx) => {
-                        const PageIcon  = getPageIcon(p.slug);
-                        const pageColor = getPageColor(p.slug);
-                        const type      = getPageType(p.slug);
-                        const status    = getPageStatus(p);
-                        const isSelected = selected.has(p.id);
-                        const dateInfo   = formatDate(p.updatedAt);
-                        return (
-                          <tr key={p.id} style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? `${ACCENT}08` : "transparent", transition: "background 0.1s" }}
-                            onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = HOVER; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isSelected ? `${ACCENT}08` : "transparent"; }}>
-                            <td style={{ padding: "12px 14px", width: 40 }}>
-                              <button onClick={() => handleSelect(p.id)} style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex" }}>
-                                {isSelected ? <CheckSquare style={{ width: 14, height: 14, color: ACCENT }} /> : <Square style={{ width: 14, height: 14, color: TEXT2 }} />}
-                              </button>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <div style={{ width: 32, height: 32, borderRadius: 8, background: pageColor.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                  <PageIcon style={{ width: 14, height: 14, color: pageColor.color }} />
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                  <p style={{ fontSize: 13, fontWeight: 700, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</p>
-                                  <p style={{ fontSize: 11, color: TEXT2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>/{p.slug}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 8, background: type.bg, color: type.color }}>{type.label}</span>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}><StatusBadge status={status} /></td>
-                            <td style={{ padding: "12px 14px", fontSize: 11, color: TEXT2 }}>
-                              <p>{typeof dateInfo === "object" ? dateInfo.date : dateInfo}</p>
-                              <p style={{ fontSize: 10, marginTop: 2 }}>{typeof dateInfo === "object" ? dateInfo.time : ""} Admin</p>
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "center", fontSize: 12, fontWeight: 700, color: TEXT2 }}>
-                              {(page - 1) * rowsPerPage + idx + 1}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2 }}>
-                                <a href={`/${p.slug}`} target="_blank" rel="noreferrer"
-                                  style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: TEXT2, textDecoration: "none", transition: "background 0.1s" }}
-                                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = HOVER; (e.currentTarget as HTMLElement).style.color = TEXT; }}
-                                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = TEXT2; }}>
-                                  <Eye style={{ width: 14, height: 14 }} />
-                                </a>
-                                <Link href={`/admin/cms/${p.slug}`}
-                                  style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: TEXT2, textDecoration: "none", transition: "background 0.1s" }}
-                                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = HOVER; (e.currentTarget as HTMLElement).style.color = ACCENT; }}
-                                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = TEXT2; }}>
-                                  <Edit style={{ width: 14, height: 14 }} />
-                                </Link>
-                                <div style={{ position: "relative" }} ref={openMenu === p.id ? menuRef : undefined}>
-                                  <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)}
-                                    style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: TEXT2, background: "transparent", border: "none", cursor: "pointer", transition: "background 0.1s" }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = HOVER; e.currentTarget.style.color = TEXT; }}
-                                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = TEXT2; }}>
-                                    <MoreVertical style={{ width: 14, height: 14 }} />
-                                  </button>
-                                  {openMenu === p.id && (
-                                    <div style={{ position: "absolute", right: 0, top: "100%", marginTop: 4, width: 170, borderRadius: 12, overflow: "hidden", zIndex: 50, boxShadow: "0 20px 60px rgba(0,0,0,0.25)", background: CARD, border: `1px solid ${BORDER}` }}>
-                                      {[
-                                        { label: p.isActive ? "Set as Draft" : "Publish", action: () => handleToggleStatus(p), color: p.isActive ? "#F59E0B" : "#16C784" },
-                                        { label: "Edit Page",   action: () => openEdit(p),       color: TEXT },
-                                        { label: "Delete Page", action: () => handleDelete(p.id), color: "#EF4444" },
-                                      ].map(item => (
-                                        <button key={item.label} onClick={item.action}
-                                          style={{ width: "100%", textAlign: "left", padding: "10px 16px", fontSize: 13, color: item.color, background: "transparent", border: "none", cursor: "pointer", transition: "background 0.1s" }}
-                                          onMouseEnter={e => { e.currentTarget.style.background = HOVER; }}
-                                          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
-                                          {item.label}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination */}
-                {!loading && sorted.length > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderTop: `1px solid ${BORDER}` }}>
-                    <p style={{ fontSize: 11, color: TEXT2 }}>
-                      Showing {Math.min((page - 1) * rowsPerPage + 1, sorted.length)} to {Math.min(page * rowsPerPage, sorted.length)} of {sorted.length} pages
-                    </p>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                        style={{ width: 30, height: 30, borderRadius: 8, background: "transparent", border: "none", cursor: page === 1 ? "default" : "pointer", color: TEXT2, display: "flex", alignItems: "center", justifyContent: "center", opacity: page === 1 ? 0.4 : 1 }}>
-                        <ChevronLeft style={{ width: 14, height: 14 }} />
-                      </button>
-                      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map(n => (
-                        <button key={n} onClick={() => setPage(n)}
-                          style={{ width: 30, height: 30, borderRadius: 8, fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", background: page === n ? ACCENT : "transparent", color: page === n ? "#fff" : TEXT2, transition: "background 0.1s" }}>
-                          {n}
-                        </button>
-                      ))}
-                      {totalPages > 5 && <span style={{ fontSize: 11, color: TEXT2, padding: "0 4px" }}>...</span>}
-                      {totalPages > 5 && (
-                        <button onClick={() => setPage(totalPages)}
-                          style={{ width: 30, height: 30, borderRadius: 8, fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", background: "transparent", color: TEXT2 }}>
-                          {totalPages}
-                        </button>
-                      )}
-                      <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
-                        style={{ width: 30, height: 30, borderRadius: 8, background: "transparent", border: "none", cursor: page >= totalPages ? "default" : "pointer", color: TEXT2, display: "flex", alignItems: "center", justifyContent: "center", opacity: page >= totalPages ? 0.4 : 1 }}>
-                        <ChevronRight style={{ width: 14, height: 14 }} />
-                      </button>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 11, color: TEXT2 }}>Rows per page:</span>
-                      <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} style={{ ...inp, height: 28, fontSize: 12, padding: "2px 8px" }}>
-                        {ROW_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ── SIDEBAR ── */}
-            <div style={{ width: 280, display: "flex", flexDirection: "column", gap: 12, flexShrink: 0 }}>
-
-              <div style={sideCard}>
-                <h3 style={{ fontSize: 12, fontWeight: 800, color: TEXT, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>Page Overview</h3>
-                <DonutChart published={published} draft={draft} trash={trash} />
-              </div>
-
-              <div style={sideCard}>
-                <h3 style={{ fontSize: 12, fontWeight: 800, color: TEXT, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Quick Actions</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {[
-                    { label: "Add New Page",      icon: Plus,     action: openAdd },
-                    { label: "Bulk Import Pages", icon: Upload,   action: () => {} },
-                    { label: "Export Pages",      icon: Download, action: () => {} },
-                    { label: "Page Settings",     icon: Settings, action: () => {} },
-                    { label: "Reorder Pages",     icon: SortAsc,  action: () => {} },
-                  ].map(item => (
-                    <button key={item.label} onClick={item.action}
-                      style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 10, fontSize: 12, fontWeight: 700, color: TEXT2, background: "transparent", border: "none", cursor: "pointer", textAlign: "left", transition: "background 0.1s" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = HOVER; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
-                      <item.icon style={{ width: 14, height: 14, flexShrink: 0 }} />
-                      {item.label}
-                      <ChevronRight style={{ width: 12, height: 12, marginLeft: "auto", opacity: 0.4 }} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {topPages.length > 0 && (
-                <div style={sideCard}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                    <h3 style={{ fontSize: 12, fontWeight: 800, color: TEXT, textTransform: "uppercase", letterSpacing: "0.06em" }}>Top Pages</h3>
-                    <button style={{ fontSize: 11, fontWeight: 700, color: ACCENT, background: "transparent", border: "none", cursor: "pointer" }}>View All</button>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {topPages.map(p => {
-                      const PageIcon  = getPageIcon(p.slug);
-                      const pageColor = getPageColor(p.slug);
-                      return (
-                        <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <div style={{ width: 32, height: 32, borderRadius: 8, background: pageColor.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <PageIcon style={{ width: 12, height: 12, color: pageColor.color }} />
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 12, fontWeight: 700, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</p>
-                            <p style={{ fontSize: 10, color: TEXT2 }}>/{p.slug}</p>
-                          </div>
-                          <div style={{ textAlign: "right", flexShrink: 0 }}>
-                            <p style={{ fontSize: 12, fontWeight: 700, color: TEXT }}>{p.views.toLocaleString()}</p>
-                            <p style={{ fontSize: 10, color: TEXT2 }}>views</p>
-                          </div>
+      {/* Table */}
+      <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+                <th style={{ padding: "11px 16px", textAlign: "left" }}><input type="checkbox" onChange={e => {
+                  if (e.target.checked) setSelected(new Set(paginated.map(p => p.id)));
+                  else setSelected(new Set());
+                }} checked={paginated.length > 0 && paginated.every(p => selected.has(p.id))} /></th>
+                {["Page", "Type", "Status", "Last Updated", "Actions"].map(h => (
+                  <th key={h} style={{ padding: "11px 16px", textAlign: "left", fontWeight: 700, color: "#374151", whiteSpace: "nowrap" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #F3F4F6" }}>
+                    {[...Array(5)].map((_, j) => (
+                      <td key={j} style={{ padding: "14px 16px" }}><div style={{ height: 14, borderRadius: 6, background: "#F3F4F6", width: j === 0 ? 20 : j === 1 ? 140 : 80 }} /></td>
+                    ))}
+                  </tr>
+                ))
+              ) : paginated.length === 0 ? (
+                <tr><td colSpan={5} style={{ padding: 40, textAlign: "center", color: "#9CA3AF" }}>No pages found.</td></tr>
+              ) : paginated.map((p, idx) => {
+                const status = getPageStatus(p);
+                const typeInfo = getPageType(p.slug);
+                return (
+                  <tr key={p.id} style={{ borderBottom: "1px solid #F3F4F6", background: selected.has(p.id) ? "#EEF2FF" : idx % 2 === 0 ? "#fff" : "#FAFAFA" }}>
+                    <td style={{ padding: "12px 16px" }}>
+                      <input type="checkbox" checked={selected.has(p.id)} onChange={() => {
+                        const next = new Set(selected);
+                        next.has(p.id) ? next.delete(p.id) : next.add(p.id);
+                        setSelected(next);
+                      }} />
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: getPageColor(p.slug).bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <FileText style={{ width: 18, height: 18, color: getPageColor(p.slug).color }} />
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── MODAL ── */}
-          {showModal && (
-            <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
-              <div className="w-full max-w-[640px]" style={{ maxHeight: "90vh", overflowY: "auto", borderRadius: 20, background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 40px 100px rgba(0,0,0,0.4)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: `1px solid ${BORDER}` }}>
-                  <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{editingPage ? "Edit Page" : "Add New Page"}</h2>
-                  <button onClick={() => setShowModal(false)}
-                    style={{ width: 34, height: 34, borderRadius: 10, background: "transparent", border: "none", cursor: "pointer", color: TEXT2, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.1s" }}
-                    onMouseEnter={e => { e.currentTarget.style.background = HOVER; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
-                    <X style={{ width: 16, height: 16 }} />
-                  </button>
-                </div>
-                <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                    <div>
-                      <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Page Title *</label>
-                      <input value={form.title} onChange={e => { const title = e.target.value; const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); setForm(f => ({ ...f, title, ...(!editingPage ? { slug } : {}) })); }}
-                        style={{ ...inp, width: "100%", height: 40, boxSizing: "border-box" }} placeholder="About Us" />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Slug *</label>
-                      <div style={{ position: "relative" }}>
-                        <Globe style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 12, height: 12, color: TEXT2 }} />
-                        <input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-                          style={{ ...inp, width: "100%", height: 40, paddingLeft: 28, boxSizing: "border-box", fontFamily: "monospace", fontSize: 12 }} placeholder="about-us" />
+                        <div>
+                          <div style={{ fontWeight: 600, color: "#111827" }}>{p.title}</div>
+                          <div style={{ fontSize: 11, color: "#9CA3AF" }}>/{p.slug}</div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Page Content</label>
-                    <textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                      rows={6} style={{ ...inp, height: "auto", width: "100%", resize: "none", boxSizing: "border-box" }} placeholder="Write your page content here..." />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                    <div>
-                      <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Meta Title</label>
-                      <input value={form.metaTitle} onChange={e => setForm(f => ({ ...f, metaTitle: e.target.value }))} style={{ ...inp, width: "100%", height: 40, boxSizing: "border-box" }} placeholder="SEO title" />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Meta Description</label>
-                      <input value={form.metaDescription} onChange={e => setForm(f => ({ ...f, metaDescription: e.target.value }))} style={{ ...inp, width: "100%", height: 40, boxSizing: "border-box" }} placeholder="SEO description" />
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 12, background: HOVER }}>
-                    <div onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
-                      style={{ width: 42, height: 23, borderRadius: 12, background: form.isActive ? ACCENT : HOVER, border: `1px solid ${BORDER}`, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
-                      <div style={{ position: "absolute", top: 3, left: form.isActive ? 20 : 3, width: 17, height: 17, borderRadius: "50%", background: "#fff", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{form.isActive ? "Published" : "Draft"}</p>
-                      <p style={{ fontSize: 11, color: TEXT2 }}>{form.isActive ? "Page is live on the website" : "Page is hidden from public view"}</p>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, padding: "16px 24px", borderTop: `1px solid ${BORDER}` }}>
-                  <button onClick={() => setShowModal(false)}
-                    style={{ height: 40, padding: "0 20px", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                    Cancel
-                  </button>
-                  <button onClick={handleSave} disabled={saving}
-                    style={{ height: 40, padding: "0 20px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: saving ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, opacity: saving ? 0.7 : 1 }}>
-                    <Save style={{ width: 14, height: 14 }} />
-                    {saving ? "Saving..." : editingPage ? "Save Changes" : "Create Page"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span style={{ display: "inline-flex", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: typeInfo.bg, color: typeInfo.color }}>{typeInfo.label}</span>
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span style={{ display: "inline-flex", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: status === "published" ? "#D1FAE5" : status === "draft" ? "#FEF3C7" : "#FEE2E2", color: status === "published" ? "#065F46" : status === "draft" ? "#92400E" : "#991B1B" }}>
+                        {status}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px", color: "#6B7280", fontSize: 12 }}>
+                      {p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "—"}
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <Link href={`/admin/cms/${p.slug}`} style={{ display: "flex", alignItems: "center", gap: 4, background: "#EEF2FF", border: "1px solid #C7D2FE", borderRadius: 7, padding: "5px 10px", color: "#4338CA", fontSize: 12, fontWeight: 600, textDecoration: "none", cursor: "pointer" }}>
+                          <Edit style={{ width: 13, height: 13 }} /> Edit
+                        </Link>
+                        <button onClick={() => handleToggleStatus(p)}
+                          style={{ display: "flex", alignItems: "center", gap: 4, background: p.isActive ? "#FEF2F2" : "#D1FAE5", border: "1px solid " + (p.isActive ? "#FECACA" : "#A7F3D0"), borderRadius: 7, padding: "5px 10px", color: p.isActive ? "#DC2626" : "#065F46", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                          {p.isActive ? "Disable" : "Enable"}
+                        </button>
+                        <button onClick={() => handleDelete(p.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 4, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 7, padding: "5px 10px", color: "#DC2626", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                          <Trash2 style={{ width: 13, height: 13 }} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        {/* Pagination */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderTop: "1px solid #E5E7EB" }}>
+          <span style={{ fontSize: 12, color: "#6B7280" }}>
+            {paginated.length === 0 ? "0" : `${(page-1)*rowsPerPage+1}–${Math.min(page*rowsPerPage, filtered.length)}`} of {filtered.length}
+          </span>
+          <div style={{ display: "flex", gap: 4 }}>
+            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1}
+              style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", cursor: page===1?"not-allowed":"pointer", opacity: page===1?0.4:1, fontSize: 13 }}>&#8249;</button>
+            {pageNums.map((n, i) => (
+              <button key={i} onClick={() => typeof n === "number" && setPage(n)} disabled={n === "..."}
+                style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid #E5E7EB", background: n===page?"#6366F1":"#fff", color: n===page?"#fff":"#374151", fontWeight: n===page?700:400, cursor: n==="..."?"default":"pointer", fontSize: 13, minWidth: 32 }}>
+                {n}
+              </button>
+            ))}
+            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages}
+              style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", cursor: page===totalPages?"not-allowed":"pointer", opacity: page===totalPages?0.4:1, fontSize: 13 }}>&#8250;</button>
+          </div>
         </div>
       </div>
     </div>

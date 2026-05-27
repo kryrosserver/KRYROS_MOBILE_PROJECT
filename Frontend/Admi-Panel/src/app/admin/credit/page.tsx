@@ -8,12 +8,9 @@ import {
   Download, MoreHorizontal, CreditCard,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
-import { useTheme } from "@/providers/ThemeProvider";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
-const ACCENT = "#12D6C5";
-
-function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boolean }) {
+function MiniSparkline({ color = "#6366F1", up = true }: { color?: string; up?: boolean }) {
   const data = up
     ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
     : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
@@ -33,16 +30,16 @@ function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boo
 }
 
 export default function CreditPage() {
-  const { isDark, toggleTheme } = useTheme();
-
-  const BG = "var(--bg-primary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const HOVER = "var(--hover-bg)";
-  const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
 
   useEffect(() => {}, []);
 
@@ -163,14 +160,14 @@ export default function CreditPage() {
   };
 
   const inpStyle = (bg = CARD): React.CSSProperties => ({
-    width: "100%", background: bg, border: `1px solid ${BORDER}`, borderRadius: 10,
+    width: "100%", background: bg, border: "1px solid #E5E7EB", borderRadius: 10,
     padding: "9px 12px", color: TEXT, fontSize: 13, outline: "none",
   });
   const labelStyle: React.CSSProperties = {
     fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: "uppercase",
     letterSpacing: "0.08em", display: "block", marginBottom: 6,
   };
-  const card: React.CSSProperties = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const card: React.CSSProperties = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   const tabs = [
     { id: "requests" as const, label: "Applications", count: accounts.length },
@@ -184,55 +181,27 @@ export default function CreditPage() {
   });
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
 
-        {/* ── HEADER ── */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Credit Management</h1>
-          </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
-            <input placeholder="Search users or email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
-              <div><div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div></div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
+        {/* HEADER */}
 
-        {/* ── BODY ── */}
-        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Body */}
 
           {/* Page title + actions */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
             <div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: 0 }}>Credit Management</h2>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
-                <span>Home</span><ChevronRight style={{ width: 13, height: 13 }} /><span style={{ color: ACCENT }}>Credit</span>
+                <span>Home</span><ChevronRight style={{ width: 13, height: 13 }} /><span style={{ color: "#6366F1" }}>Credit</span>
               </div>
               <p style={{ fontSize: 12, color: TEXT2, marginTop: 4 }}>Manage applications and rules for installments</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+              <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 18px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
                 <Download style={{ width: 15, height: 15 }} /> Export
               </button>
-              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
+              <button style={{ display: "flex", alignItems: "center", justifyContent: "center", background: CARD, border: "1px solid #E5E7EB", borderRadius: 10, padding: "9px 12px", color: TEXT2, cursor: "pointer" }}>
                 <MoreHorizontal style={{ width: 16, height: 16 }} />
               </button>
             </div>
@@ -242,7 +211,7 @@ export default function CreditPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: "Active Accounts", value: summaryData?.credit?.activeAccounts || 0, change: "+6.2%", up: true, color: "#3B82F6", icon: CreditCard },
-              { label: "Total Outstanding", value: formatPrice(summaryData?.credit?.totalOutstanding || 0), change: "+14.5%", up: true, color: ACCENT, icon: DollarSign },
+              { label: "Total Outstanding", value: formatPrice(summaryData?.credit?.totalOutstanding || 0), change: "+14.5%", up: true, color: "#6366F1", icon: DollarSign },
               { label: "Repayment Rate", value: `${summaryData?.credit?.repaymentRate || 0}%`, change: "+2.1%", up: true, color: "#22C55E", icon: TrendingUp },
               { label: "Default Rate", value: `${summaryData?.credit?.defaultRate || 0}%`, change: "-0.8%", up: false, color: "#EF4444", icon: TrendingUp },
             ].map((s, i) => (
@@ -261,11 +230,11 @@ export default function CreditPage() {
           </div>
 
           {/* Tab nav */}
-          <div style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <div style={{ borderBottom: "1px solid #E5E7EB" }}>
             <nav style={{ display: "flex", gap: 4 }}>
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", background: "transparent", border: "none", borderBottom: activeTab === tab.id ? `2px solid ${ACCENT}` : "2px solid transparent", color: activeTab === tab.id ? ACCENT : TEXT2, whiteSpace: "nowrap", transition: "color 0.15s" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", background: "transparent", border: "none", borderBottom: activeTab === tab.id ? `2px solid #6366F1` : "2px solid transparent", color: activeTab === tab.id ? "#6366F1" : TEXT2, whiteSpace: "nowrap", transition: "color 0.15s" }}>
                   {tab.label}
                   <span style={{ fontSize: 10, fontWeight: 700, background: HOVER, color: TEXT2, padding: "1px 7px", borderRadius: 20, marginLeft: 2 }}>{tab.count}</span>
                 </button>
@@ -273,21 +242,21 @@ export default function CreditPage() {
             </nav>
           </div>
 
-          {/* ── REQUESTS TAB ── */}
+          {/* REQUESTS TAB */}
           {activeTab === "requests" && (
             <div style={{ ...card, overflow: "hidden" }}>
-              <div style={{ padding: "16px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ padding: "16px 20px", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 800, color: TEXT, margin: 0 }}>All Credit Applications</h3>
                 <div style={{ position: "relative" }}>
                   <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: TEXT2 }} />
                   <input type="text" placeholder="Search user or email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    style={{ background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 12px 8px 30px", color: TEXT, fontSize: 12, outline: "none", width: 240 }} />
+                    style={{ background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, padding: "8px 12px 8px 30px", color: TEXT, fontSize: 12, outline: "none", width: 240 }} />
                 </div>
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
-                    <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
+                    <tr style={{ borderBottom: "1px solid #E5E7EB", background: HOVER }}>
                       {["User", "Product", "Plan", "Amount", "Status", "Actions"].map((h, i) => (
                         <th key={h} style={{ padding: "12px 16px", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: i >= 5 ? "right" : "left" }}>{h}</th>
                       ))}
@@ -299,7 +268,7 @@ export default function CreditPage() {
                     ) : filteredAccounts.map(acc => {
                       const [sc, sb] = getStatusColor(acc.status);
                       return (
-                        <tr key={acc.id} style={{ borderBottom: `1px solid ${BORDER}` }}
+                        <tr key={acc.id} style={{ borderBottom: "1px solid #E5E7EB" }}
                           onMouseEnter={e => { e.currentTarget.style.background = HOVER; }}
                           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
                           <td style={{ padding: "13px 16px" }}>
@@ -322,7 +291,7 @@ export default function CreditPage() {
                           </td>
                           <td style={{ padding: "13px 16px", textAlign: "right" }}>
                             <select value={acc.status} onChange={e => handleStatusUpdate(acc.id, e.target.value)}
-                              style={{ fontSize: 11, background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "4px 8px", color: TEXT, outline: "none", cursor: "pointer" }}>
+                              style={{ fontSize: 11, background: HOVER, border: "1px solid #E5E7EB", borderRadius: 8, padding: "4px 8px", color: TEXT, outline: "none", cursor: "pointer" }}>
                               <option value="ACTIVE">Active</option>
                               <option value="COMPLETED">Completed</option>
                               <option value="DEFAULTED">Defaulted</option>
@@ -338,19 +307,19 @@ export default function CreditPage() {
             </div>
           )}
 
-          {/* ── PRODUCTS TAB ── */}
+          {/* PRODUCTS TAB */}
           {activeTab === "products" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>Installment Product Inventory</h3>
                 <button onClick={() => setShowCreate(!showCreate)}
-                  style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                   <Plus style={{ width: 15, height: 15 }} /> {showCreate ? "Close Form" : "Add Credit Product"}
                 </button>
               </div>
 
               {showCreate && (
-                <div style={{ ...card, padding: "24px", border: `2px solid ${ACCENT}30` }}>
+                <div style={{ ...card, padding: "24px", border: `2px solid #6366F130` }}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left column */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -372,7 +341,7 @@ export default function CreditPage() {
                       <div><label style={labelStyle}>Credit Policy/Message</label><textarea value={form.creditMessage} onChange={e => setForm({ ...form, creditMessage: e.target.value })} rows={3} style={{ ...inpStyle(HOVER), resize: "none" }} placeholder="e.g. Pay 20% deposit and split the rest over 6 months..." /></div>
 
                       {/* Dynamic Specs */}
-                      <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
+                      <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 14 }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                           <label style={labelStyle}>Dynamic Specifications</label>
                           <button onClick={() => setForm({ ...form, specifications: [...form.specifications, { key: "", value: "" }] })}
@@ -385,7 +354,7 @@ export default function CreditPage() {
                               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                                 {currentCategoryAttributes.map(attr => (
                                   <button key={attr} onClick={() => { if (!form.specifications.find(s => s.key === attr)) setForm({ ...form, specifications: [...form.specifications, { key: attr, value: "" }] }); }}
-                                    style={{ fontSize: 9, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "2px 8px", color: TEXT2, fontWeight: 700, cursor: "pointer" }}>+ {attr}</button>
+                                    style={{ fontSize: 9, background: CARD, border: "1px solid #E5E7EB", borderRadius: 6, padding: "2px 8px", color: TEXT2, fontWeight: 700, cursor: "pointer" }}>+ {attr}</button>
                                 ))}
                               </div>
                             </div>
@@ -420,7 +389,7 @@ export default function CreditPage() {
                       </div>
                     </div>
 
-                    {/* Right column — images */}
+                    {/* Right column   images */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                       <div>
                         <label style={labelStyle}>Product Images</label>
@@ -432,7 +401,7 @@ export default function CreditPage() {
                         }} style={{ fontSize: 12, color: TEXT2, marginBottom: 10 }} />
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           {form.images.map((src, i) => (
-                            <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
+                            <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: "1px solid #E5E7EB" }}>
                               <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                               <button onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
                                 style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff" }}>
@@ -442,8 +411,8 @@ export default function CreditPage() {
                           ))}
                         </div>
                       </div>
-                      <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 14, borderTop: `1px solid ${BORDER}` }}>
-                        <button onClick={() => setShowCreate(false)} style={{ flex: 1, padding: "10px", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cancel</button>
+                      <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 14, borderTop: "1px solid #E5E7EB" }}>
+                        <button onClick={() => setShowCreate(false)} style={{ flex: 1, padding: "10px", background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cancel</button>
                         <button disabled={creating} onClick={async () => {
                           setCreating(true);
                           try {
@@ -465,7 +434,7 @@ export default function CreditPage() {
                             setShowCreate(false); setFiles([]); setForm({ name: "", sku: "", price: "", description: "", categorySlug: "", brandId: "", allowCredit: true, creditMinimum: "", creditMessage: "", isActive: true, hasFiveYearGuarantee: true, fiveYearGuaranteeText: "5 Year Guarantee", hasFreeReturns: true, freeReturnsText: "Free Returns", hasInstallmentOptions: true, installmentOptionsText: "Installment Options", images: [], specifications: [] });
                             loadData();
                           } catch (e: any) { alert(e.message); } finally { setCreating(false); }
-                        }} style={{ flex: 2, padding: "10px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: creating ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.06em", opacity: creating ? 0.7 : 1 }}>
+                        }} style={{ flex: 2, padding: "10px", background: "#6366F1", border: "none", borderRadius: 10, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: creating ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.06em", opacity: creating ? 0.7 : 1 }}>
                           {creating ? "Creating..." : "Create Product"}
                         </button>
                       </div>
@@ -479,7 +448,7 @@ export default function CreditPage() {
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
-                      <tr style={{ borderBottom: `1px solid ${BORDER}`, background: HOVER }}>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB", background: HOVER }}>
                         {["Product", "Cash Price", "Min Deposit", "Status", "Actions"].map((h, i) => (
                           <th key={h} style={{ padding: "12px 16px", fontSize: 10, fontWeight: 800, color: TEXT2, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: i >= 4 ? "right" : "left" }}>{h}</th>
                         ))}
@@ -487,12 +456,12 @@ export default function CreditPage() {
                     </thead>
                     <tbody>
                       {products.map(p => (
-                        <tr key={p.id} style={{ borderBottom: `1px solid ${BORDER}` }}
+                        <tr key={p.id} style={{ borderBottom: "1px solid #E5E7EB" }}
                           onMouseEnter={e => { e.currentTarget.style.background = HOVER; }}
                           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
                           <td style={{ padding: "13px 16px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <div style={{ width: 44, height: 44, borderRadius: 10, background: HOVER, border: `1px solid ${BORDER}`, overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <div style={{ width: 44, height: 44, borderRadius: 10, background: HOVER, border: "1px solid #E5E7EB", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 {p.images?.[0] ? <img src={p.images[0].url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Package style={{ width: 20, height: 20, color: TEXT2 }} />}
                               </div>
                               <div>
@@ -502,7 +471,7 @@ export default function CreditPage() {
                             </div>
                           </td>
                           <td style={{ padding: "13px 16px", fontWeight: 800, color: TEXT, fontSize: 14 }}>{formatPrice(p.price)}</td>
-                          <td style={{ padding: "13px 16px", fontWeight: 800, color: "#22C55E", fontSize: 14 }}>{p.creditMinimum ? formatPrice(Number(p.creditMinimum)) : "—"}</td>
+                          <td style={{ padding: "13px 16px", fontWeight: 800, color: "#22C55E", fontSize: 14 }}>{p.creditMinimum ? formatPrice(Number(p.creditMinimum)) : " "}</td>
                           <td style={{ padding: "13px 16px" }}>
                             <span style={{ fontSize: 10, fontWeight: 800, color: p.isActive ? "#22C55E" : TEXT2, background: p.isActive ? "rgba(34,197,94,0.12)" : HOVER, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase" }}>{p.isActive ? "Active" : "Hidden"}</span>
                           </td>
@@ -533,19 +502,19 @@ export default function CreditPage() {
             </div>
           )}
 
-          {/* ── PLANS TAB ── */}
+          {/* PLANS TAB */}
           {activeTab === "plans" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>Available Installment Plans</h3>
                 <button onClick={() => { setEditingPlan(null); setPlanModalForm({ name: "", duration: 6, interestRate: 10, minimumAmount: 500, maximumAmount: 10000, targetBrandId: "", targetCategoryId: "", isActive: true }); setIsPlanModalOpen(true); }}
-                  style={{ display: "flex", alignItems: "center", gap: 8, background: ACCENT, border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 8, background: "#6366F1", border: "none", borderRadius: 10, padding: "9px 18px", color: "#0B1320", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                   <Plus style={{ width: 15, height: 15 }} /> Create New Plan
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 {plans.map(plan => (
-                  <div key={plan.id} style={{ ...card, padding: "20px", borderTop: `4px solid ${ACCENT}` }}>
+                  <div key={plan.id} style={{ ...card, padding: "20px", borderTop: `4px solid #6366F1` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                       <div>
                         <h4 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: "0 0 2px" }}>{plan.name}</h4>
@@ -565,7 +534,7 @@ export default function CreditPage() {
                           <span style={{ fontWeight: 700, color: r.color }}>{r.val}</span>
                         </div>
                       ))}
-                      <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 10 }}>
+                      <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 10 }}>
                         <p style={{ fontSize: 9, fontWeight: 800, color: TEXT2, textTransform: "uppercase", marginBottom: 6 }}>Applicable To</p>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                           {!plan.targetBrandId && !plan.targetCategoryId && <span style={{ fontSize: 9, fontWeight: 800, color: "#3B82F6", background: "rgba(59,130,246,0.1)", padding: "2px 8px", borderRadius: 20 }}>ALL PRODUCTS</span>}
@@ -575,7 +544,7 @@ export default function CreditPage() {
                       </div>
                     </div>
                     <button onClick={() => { setEditingPlan(plan); setPlanModalForm({ name: plan.name, duration: plan.duration, interestRate: Number(plan.interestRate), minimumAmount: Number(plan.minimumAmount), maximumAmount: Number(plan.maximumAmount), targetBrandId: plan.targetBrandId || "", targetCategoryId: plan.targetCategoryId || "", isActive: plan.isActive }); setIsPlanModalOpen(true); }}
-                      style={{ width: "100%", padding: "8px", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                      style={{ width: "100%", padding: "8px", background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, color: TEXT2, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                       Edit Plan
                     </button>
                   </div>
@@ -585,11 +554,11 @@ export default function CreditPage() {
           )}
         </div>
 
-        {/* ── PLAN MODAL ── */}
+        {/* PLAN MODAL */}
         {isPlanModalOpen && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
             <div className="max-w-lg w-full mx-auto" style={{ background: CARD, borderRadius: 20, boxShadow: "0 25px 60px rgba(0,0,0,0.25)", width: "100%", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
-              <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: HOVER }}>
+              <div style={{ padding: "20px 24px", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center", background: HOVER }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{editingPlan ? "Edit Credit Plan" : "Create New Credit Plan"}</h3>
                 <button onClick={() => setIsPlanModalOpen(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 20, height: 20 }} /></button>
               </div>
@@ -625,9 +594,9 @@ export default function CreditPage() {
                   Plan is Active and Visible to Users
                 </label>
               </div>
-              <div style={{ padding: "16px 24px", borderTop: `1px solid ${BORDER}`, background: HOVER, display: "flex", gap: 10 }}>
+              <div style={{ padding: "16px 24px", borderTop: "1px solid #E5E7EB", background: HOVER, display: "flex", gap: 10 }}>
                 <button onClick={() => setIsPlanModalOpen(false)} style={{ flex: 1, padding: "11px", background: "transparent", border: "none", color: TEXT2, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Cancel</button>
-                <button onClick={handleSavePlan} style={{ flex: 2, padding: "11px", background: ACCENT, border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
+                <button onClick={handleSavePlan} style={{ flex: 2, padding: "11px", background: "#6366F1", border: "none", borderRadius: 12, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
                   {editingPlan ? "Update Plan Settings" : "Create Credit Plan"}
                 </button>
               </div>
@@ -635,11 +604,11 @@ export default function CreditPage() {
           </div>
         )}
 
-        {/* ── EDIT PRODUCT MODAL ── */}
+        {/* EDIT PRODUCT MODAL */}
         {editItem && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
             <div className="w-full md:max-w-4xl" style={{ background: CARD, borderRadius: 20, boxShadow: "0 25px 60px rgba(0,0,0,0.25)", width: "100%", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
-              <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: HOVER }}>
+              <div style={{ padding: "20px 24px", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center", background: HOVER }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>Edit Installment Product</h3>
                 <button onClick={() => setEditItem(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 20, height: 20 }} /></button>
               </div>
@@ -657,7 +626,7 @@ export default function CreditPage() {
                   </div>
                   <div><label style={labelStyle}>Policy Message</label><textarea value={editForm.creditMessage} onChange={e => setEditForm({ ...editForm, creditMessage: e.target.value })} rows={3} style={{ ...inpStyle(HOVER), resize: "none" }} /></div>
                   {/* Specs */}
-                  <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 12 }}>
+                  <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 12 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                       <label style={labelStyle}>Dynamic Specifications</label>
                       <button onClick={() => setEditForm({ ...editForm, specifications: [...editForm.specifications, { key: "", value: "" }] })} style={{ fontSize: 10, background: TEXT, color: CARD, padding: "3px 8px", borderRadius: 6, border: "none", fontWeight: 700, cursor: "pointer" }}>+ Add Spec</button>
@@ -668,7 +637,7 @@ export default function CreditPage() {
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {currentEditCategoryAttributes.map(attr => (
                               <button key={attr} onClick={() => { if (!editForm.specifications.find(s => s.key === attr)) setEditForm({ ...editForm, specifications: [...editForm.specifications, { key: attr, value: "" }] }); }}
-                                style={{ fontSize: 9, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "2px 7px", color: TEXT2, fontWeight: 700, cursor: "pointer" }}>+ {attr}</button>
+                                style={{ fontSize: 9, background: CARD, border: "1px solid #E5E7EB", borderRadius: 6, padding: "2px 7px", color: TEXT2, fontWeight: 700, cursor: "pointer" }}>+ {attr}</button>
                             ))}
                           </div>
                         </div>
@@ -699,25 +668,25 @@ export default function CreditPage() {
                     ))}
                   </div>
                 </div>
-                {/* Right — images */}
+                {/* Right   images */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
                     <label style={labelStyle}>Product Images</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3" style={{ gap: 8, marginBottom: 10 }}>
                       {editForm.images.map((src, i) => (
-                        <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
+                        <div key={i} style={{ position: "relative", aspectRatio: "1", borderRadius: 10, overflow: "hidden", border: "1px solid #E5E7EB" }}>
                           <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                           <button onClick={() => setEditForm({ ...editForm, images: editForm.images.filter((_, idx) => idx !== i) })} style={{ position: "absolute", top: 4, right: 4, background: "#EF4444", border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff" }}><X style={{ width: 10, height: 10 }} /></button>
                         </div>
                       ))}
-                      <label style={{ aspectRatio: "1", border: `2px dashed ${BORDER}`, borderRadius: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                      <label style={{ aspectRatio: "1", border: `2px dashed #E5E7EB`, borderRadius: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                         <PlusCircle style={{ width: 20, height: 20, color: TEXT2 }} />
                         <input type="file" multiple accept="image/*" style={{ display: "none" }} onChange={async e => { const fl = Array.from(e.target.files || []); const pv = await Promise.all(fl.map(f => compressImage(f, 1200, 0.85))); setEditForm({ ...editForm, images: [...editForm.images, ...pv] }); setEditFiles(prev => [...prev, ...fl]); }} />
                       </label>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 14, borderTop: `1px solid ${BORDER}` }}>
-                    <button onClick={() => setEditItem(null)} style={{ flex: 1, padding: "11px", background: HOVER, border: `1px solid ${BORDER}`, borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cancel</button>
+                  <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 14, borderTop: "1px solid #E5E7EB" }}>
+                    <button onClick={() => setEditItem(null)} style={{ flex: 1, padding: "11px", background: HOVER, border: "1px solid #E5E7EB", borderRadius: 10, color: TEXT2, fontWeight: 700, fontSize: 12, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cancel</button>
                     <button disabled={creating} onClick={async () => {
                       setCreating(true);
                       try {
@@ -738,7 +707,7 @@ export default function CreditPage() {
                         if (!res.ok) throw new Error("Update failed");
                         setEditItem(null); loadData();
                       } catch (e: any) { alert(e.message); } finally { setCreating(false); }
-                    }} style={{ flex: 2, padding: "11px", background: ACCENT, border: "none", borderRadius: 10, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.7 : 1 }}>
+                    }} style={{ flex: 2, padding: "11px", background: "#6366F1", border: "none", borderRadius: 10, color: "#0B1320", fontWeight: 800, fontSize: 13, cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.7 : 1 }}>
                       {creating ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
@@ -747,8 +716,6 @@ export default function CreditPage() {
             </div>
           </div>
         )}
-
-      </div>
-    </div>
+    </>
   );
 }

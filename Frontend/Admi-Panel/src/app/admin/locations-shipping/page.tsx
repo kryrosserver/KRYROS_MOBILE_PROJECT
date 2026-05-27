@@ -18,10 +18,8 @@ import {
   Menu,
   ChevronDown
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
 
 export default function ShippingDashboardPage() {
-  useEffect(() => {}, []);
   const [counts, setCounts] = useState({ countries: 0, states: 0, cities: 0, zones: 0, methods: 0 });
   const [isEnabled, setIsEnabled] = useState(false);
 
@@ -49,7 +47,7 @@ export default function ShippingDashboardPage() {
     {
       id: "countries", label: "Countries",          icon: Globe,     count: counts.countries,
       href: "/admin/locations-shipping/countries",  description: "Manage supported nations and their currencies.",
-      iconBg: "rgba(18,214,197,0.12)", iconColor: "#12D6C5",
+      iconBg: "rgba(18,214,197,0.12)", iconColor: "#6366F1",
     },
     {
       id: "states",    label: "States / Provinces", icon: MapIcon,   count: counts.states,
@@ -73,104 +71,34 @@ export default function ShippingDashboardPage() {
     },
   ];
 
-  const { isDark, toggleTheme } = useTheme();
-
   return (
-    <div style={{ overflow: "hidden", background: "var(--bg-primary)", margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: "var(--bg-primary)", color: "var(--text-primary)", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <header style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--card-border)", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}><Menu style={{ width: 20, height: 20 }} /></button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", margin: 0 }}>Locations & Shipping</h1>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Shipping & Locations</h2>
+          <p style={{ fontSize: 13, color: "#6B7280", margin: "4px 0 0" }}>Manage shipping settings and delivery locations</p>
+        </div>
+        <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "8px 16px" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Shipping Enabled</span>
+          <input type="checkbox" checked={isEnabled} onChange={e => setIsEnabled(e.target.checked)} />
+        </label>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4" style={{ marginBottom: 20 }}>
+        {[
+          { label: "Countries", value: counts.countries, color: "#6366F1", icon: "MapPin" },
+          { label: "States", value: counts.states, color: "#22C55E", icon: "Map" },
+          { label: "Cities", value: counts.cities, color: "#F59E0B", icon: "Building" },
+          { label: "Zones", value: counts.zones, color: "#8B5CF6", icon: "Layers" },
+          { label: "Methods", value: counts.methods, color: "#EC4899", icon: "Truck" },
+        ].map((s, i) => (
+          <div key={i} style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "16px 18px" }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: "#111827", marginTop: 4 }}>{s.value}</div>
           </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)", width: 15, height: 15 }} />
-            <input placeholder="Search locations..." style={{ width: "100%", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "8px 40px 8px 36px", color: "var(--text-primary)", fontSize: 13, outline: "none" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: "var(--text-secondary)", background: "var(--icon-bg)", padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4 }}>{isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}</button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: 10, padding: "7px 14px", color: "var(--text-secondary)", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} /> May 20 – May 26, 2025 <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#12D6C5", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320" }}>K</div>
-              <div><div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>Admin</div><div style={{ fontSize: 10, color: "var(--text-secondary)", marginTop: 1 }}>Super Admin</div></div>
-              <ChevronDown style={{ width: 14, height: 14, color: "var(--text-secondary)" }} />
-            </div>
-          </div>
-        </header>
-        <div className="space-y-6 pb-20" style={{ color: "var(--text-primary)", padding: "20px" }}>
-          <div className="flex flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(18,214,197,0.12)" }}>
-                <MapPin className="h-5 w-5" style={{ color: "#12D6C5" }} />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold whitespace-nowrap" style={{ color: "var(--text-primary)" }}>Locations & Shipping</h2>
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Configure where you ship and how much it costs</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest"
-              style={isEnabled ? { background: "rgba(22,199,132,0.12)", color: "#16C784", border: "1px solid rgba(22,199,132,0.25)" } : { background: "var(--icon-bg)", color: "var(--text-muted)", border: "1px solid var(--card-border)" }}>
-              <div className="h-2.5 w-2.5 rounded-full" style={{ background: isEnabled ? "#16C784" : "var(--text-muted)" }} />
-              System: {isEnabled ? "Location Based" : "Global Only"}
-            </div>
-          </div>
-
-      {/* Section Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        {sections.map((section) => (
-          <Link
-            key={section.id}
-            href={section.href}
-            className="group admin-card flex flex-col gap-4 transition-all duration-200"
-            style={{ textDecoration: "none" }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = section.iconColor;
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = "var(--card-border)";
-              e.currentTarget.style.transform = "none";
-            }}
-          >
-            <div className="flex items-start justify-between">
-              <div
-                className="p-3 rounded-xl"
-                style={{ background: section.iconBg }}
-              >
-                <section.icon className="h-5 w-5" style={{ color: section.iconColor }} />
-              </div>
-              <span
-                className="text-xs font-bold px-2.5 py-1 rounded-full"
-                style={{ background: section.iconBg, color: section.iconColor }}
-              >
-                {section.count} Items
-              </span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-base" style={{ color: "var(--text-primary)" }}>
-                {section.label}
-              </h3>
-              <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                {section.description}
-              </p>
-            </div>
-            <div
-              className="flex items-center text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ color: section.iconColor }}
-            >
-              Configure <ChevronRight className="h-3.5 w-3.5 ml-1" />
-            </div>
-          </Link>
         ))}
       </div>
-    </div>
+      <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 40, textAlign: "center" }}>
+        <p style={{ color: "#9CA3AF", fontSize: 13 }}>Shipping location management coming soon.</p>
       </div>
     </div>
   );

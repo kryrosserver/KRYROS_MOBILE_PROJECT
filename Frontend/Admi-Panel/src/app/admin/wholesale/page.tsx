@@ -6,21 +6,18 @@ import {
   Users, Star, Package, Store, ChevronRight,
   Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search,
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
-
-const ACCENT = "#12D6C5";
 
 export default function WholesaleDashboardPage() {
-  const { isDark, toggleTheme } = useTheme();
-
-  const BG = "var(--bg-primary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const HOVER = "var(--hover-bg)";
-  const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
+  const BG = "#F8F9FA";
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#4B5563";
+  const TEXT3 = "#9CA3AF";
+  const HOVER = "#F9FAFB";
+  const HEADER_BG = "#FFFFFF";
+  const ICON_BG = "#F9FAFB";
+  const ACCENT = "#6366F1";
 
   useEffect(() => {}, []);
 
@@ -54,56 +51,17 @@ export default function WholesaleDashboardPage() {
   }, []);
 
   const sections = [
-    { id: "accounts", label: "Wholesale Accounts", icon: Users, count: counts.accounts, href: "/admin/wholesale/accounts", description: "Manage applications and approved wholesale partners.", iconColor: ACCENT, iconBg: "rgba(18,214,197,0.12)" },
+    { id: "accounts", label: "Wholesale Accounts", icon: Users, count: counts.accounts, href: "/admin/wholesale/accounts", description: "Manage applications and approved wholesale partners.", iconColor: "#6366F1", iconBg: "rgba(18,214,197,0.12)" },
     { id: "deals",    label: "Featured Deals",      icon: Star,  count: counts.deals,    href: "/admin/wholesale/deals",    description: "Customize the wholesale offers shown on the storefront.", iconColor: "#F59E0B", iconBg: "rgba(245,158,11,0.12)" },
     { id: "products", label: "Wholesale Inventory", icon: Package, count: counts.products, href: "/admin/wholesale/products", description: "Exclusive products only available to wholesale buyers.", iconColor: "#3B82F6", iconBg: "rgba(59,130,246,0.12)" },
   ];
 
-  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ overflow: "hidden", background: BG, margin: "-24px", width: "calc(100% + 48px)" }}>
-      <div style={{ background: BG, color: TEXT, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
 
-        {/* ── TOP HEADER BAR ── */}
-        <header style={{ background: HEADER_BG, borderBottom: `1px solid ${BORDER}`, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Menu style={{ width: 20, height: 20 }} />
-            </button>
-            <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, whiteSpace: "nowrap", margin: 0 }}>Wholesale Hub</h1>
-          </div>
-          <div style={{ flex: 1, maxWidth: 340, position: "relative" }}>
-            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: TEXT2, width: 15, height: 15 }} />
-            <input placeholder="Search wholesale..." style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 40px 8px 36px", color: TEXT, fontSize: 13, outline: "none" }} />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: TEXT2, background: ICON_BG, padding: "2px 5px", borderRadius: 4 }}>⌘K</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ position: "relative", background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              <Bell style={{ width: 20, height: 20 }} />
-              <span style={{ position: "absolute", top: 0, right: 0, background: "#EF4444", borderRadius: "50%", width: 16, height: 16, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 }}>1</span>
-            </button>
-            <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2, padding: 4 }}>
-              {isDark ? <Sun style={{ width: 20, height: 20 }} /> : <Moon style={{ width: 20, height: 20 }} />}
-            </button>
-            <button style={{ display: "flex", alignItems: "center", gap: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "7px 14px", color: TEXT2, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-              <Calendar style={{ width: 14, height: 14 }} />
-              May 20 – May 26, 2025
-              <ChevronDown style={{ width: 13, height: 13 }} />
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#0B1320", flexShrink: 0 }}>K</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1 }}>Admin</div>
-                <div style={{ fontSize: 10, color: TEXT2, marginTop: 1 }}>Super Admin</div>
-              </div>
-              <ChevronDown style={{ width: 14, height: 14, color: TEXT2 }} />
-            </div>
-          </div>
-        </header>
-
-        {/* ── BODY ── */}
-        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Body */}
 
           {/* Page title */}
           <div>
@@ -113,7 +71,7 @@ export default function WholesaleDashboardPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: TEXT2 }}>
               <Link href="/admin" style={{ color: TEXT2, textDecoration: "none" }}>Home</Link>
               <ChevronRight style={{ width: 13, height: 13 }} />
-              <span style={{ color: ACCENT }}>Wholesale</span>
+              <span style={{ color: "#6366F1" }}>Wholesale</span>
             </div>
             <p style={{ fontSize: 12, color: TEXT2, marginTop: 6 }}>Manage your B2B operations and inventory</p>
           </div>
@@ -121,7 +79,7 @@ export default function WholesaleDashboardPage() {
           {/* Summary stat strip */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {[
-              { label: "Active Accounts",    value: counts.accounts, color: ACCENT },
+              { label: "Active Accounts",    value: counts.accounts, color: "#6366F1" },
               { label: "Active Deals",        value: counts.deals,    color: "#F59E0B" },
               { label: "Wholesale Products",  value: counts.products, color: "#3B82F6" },
             ].map((s, i) => (
@@ -152,7 +110,7 @@ export default function WholesaleDashboardPage() {
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>{section.label}</h3>
                   <p style={{ fontSize: 12, color: TEXT2, marginTop: 6, lineHeight: 1.5 }}>{section.description}</p>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", fontSize: 12, fontWeight: 700, color: ACCENT }}>
+                <div style={{ display: "flex", alignItems: "center", fontSize: 12, fontWeight: 700, color: "#6366F1" }}>
                   Open Section <ChevronRight style={{ width: 13, height: 13, marginLeft: 4 }} />
                 </div>
               </Link>
@@ -160,7 +118,5 @@ export default function WholesaleDashboardPage() {
           </div>
 
         </div>
-      </div>
-    </div>
   );
 }
