@@ -15,7 +15,7 @@ const DEFAULT_ITEMS = [
 ];
 
 export default function TrustBadgesPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -52,7 +52,7 @@ export default function TrustBadgesPage() {
   const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
           <div style={{ marginBottom: 8 }}>

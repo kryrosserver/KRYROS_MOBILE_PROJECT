@@ -185,8 +185,8 @@ export default function HomePageCMS() {
   const lastPublished = sections.find(s => s.updatedAt) || sections[0];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
-      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
+      <div style={{ background: "#F5F6FA", padding: "24px" }}>
     <div style={{ color: "#111827", display: "flex", flexDirection: "column", gap: 16, paddingBottom: 80 }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>

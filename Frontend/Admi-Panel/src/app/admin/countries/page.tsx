@@ -197,7 +197,7 @@ export default function CountriesPage() {
   );
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
         <div className="space-y-6" style={{ color: "#111827", padding: "20px" }}>
           <div className="flex items-center justify-between">
             <div>

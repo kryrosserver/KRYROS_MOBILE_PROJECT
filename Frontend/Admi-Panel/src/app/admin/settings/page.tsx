@@ -69,7 +69,7 @@ export default function SettingsDashboardPage() {
   ];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
         <div className="space-y-6 pb-20" style={{ color: "#111827", padding: "20px" }}>
           <div>
             <h2 className="text-2xl font-bold flex whitespace-nowrap items-center gap-3" style={{ color: "#111827" }}>

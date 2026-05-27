@@ -14,7 +14,7 @@ const DEFAULT = {
 };
 
 export default function WholesaleCMSPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -50,7 +50,7 @@ export default function WholesaleCMSPage() {
   const tabs = [{ id: "hero", label: "Hero Section" }, { id: "steps", label: "Steps" }, { id: "features", label: "Features" }, { id: "quote", label: "Quote CTA" }];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

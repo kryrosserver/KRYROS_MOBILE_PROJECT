@@ -7,7 +7,7 @@ import { useEffect, useState, useRef } from "react";
 import { MessageSquare, Plus, Edit, Trash2, X, RefreshCw, Star, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
 
 export default function TestimonialsPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -61,7 +61,7 @@ export default function TestimonialsPage() {
   const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
           <div style={{ marginBottom: 8 }}>
@@ -79,7 +79,7 @@ export default function TestimonialsPage() {
       </div>
       {error && <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#EF4444", marginBottom: 16 }}>{error}</div>}
       {showAdd && (
-        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24, marginBottom: 20 }}>
+        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "20px 24px 40px", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>{editingItem ? "Edit Testimonial" : "New Testimonial"}</h3>
             <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280" }}><X style={{ width: 18, height: 18 }} /></button>

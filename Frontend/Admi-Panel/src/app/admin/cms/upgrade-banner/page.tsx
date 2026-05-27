@@ -9,7 +9,7 @@ import { RefreshCw, Save, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search }
 const DEFAULT = { heading: "Upgrade Your Tech Game", subtitle: "Unbeatable performance. Unmatched style.", ctaText: "Shop Now", ctaLink: "/shop", discountText: "30%", discountSubtext: "OFF", bgImage: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=85" };
 
 export default function UpgradeBannerPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -49,7 +49,7 @@ export default function UpgradeBannerPage() {
   ];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

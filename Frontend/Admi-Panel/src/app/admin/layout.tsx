@@ -25,12 +25,23 @@ const SIDEBAR_BG = "#12172B";
 const ACCENT = "#6366F1";
 const ORANGE = "#F97316";
 const PINK = "#EC4899";
+const MOBILE_BP = 860;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [openSubs, setOpenSubs] = useState<Record<string, boolean>>({});
 
+  /* Detect mobile via JS — avoids CSS specificity conflicts with inline styles */
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= MOBILE_BP);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  /* Close sidebar on route change */
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const toggleSub = (key: string) => {
@@ -81,7 +92,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const content = (
       <>
-        {/* Active left accent bar */}
         {isActive && (
           <span style={{
             position: "absolute", left: 0, top: "22%", bottom: "22%",
@@ -120,23 +130,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return base;
   };
 
+  /* Sidebar style: on mobile it floats fixed over content so main area gets 100% width */
+  const sidebarStyle: React.CSSProperties = isMobile
+    ? {
+        position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 400,
+        width: SIDEBAR_W, background: SIDEBAR_BG,
+        display: "flex", flexDirection: "column", height: "100vh",
+        overflow: "hidden",
+        transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+        transition: "transform .25s cubic-bezier(.4,0,.2,1)",
+        boxShadow: mobileOpen ? "4px 0 32px rgba(0,0,0,.45)" : "none",
+      }
+    : {
+        width: SIDEBAR_W, flexShrink: 0, background: SIDEBAR_BG,
+        display: "flex", flexDirection: "column", height: "100%",
+        overflow: "hidden", zIndex: 10,
+        transition: "transform .25s cubic-bezier(.4,0,.2,1)",
+      };
+
   return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", position: "relative", fontFamily: "'Inter', sans-serif" }}>
-      {/* Mobile overlay */}
-      {mobileOpen && (
+    <div style={{
+      display: "flex", height: "100vh", width: "100%",
+      overflow: "hidden", position: "relative",
+      fontFamily: "'Inter', sans-serif",
+    }}>
+
+      {/* Single mobile overlay — only rendered when sidebar is open on mobile */}
+      {isMobile && mobileOpen && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 200 }}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,.5)",
+            zIndex: 399,
+          }}
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside style={{
-        width: SIDEBAR_W, flexShrink: 0, background: SIDEBAR_BG,
-        display: "flex", flexDirection: "column", height: "100%",
-        overflow: "hidden", position: "relative", zIndex: 300,
-        transition: "transform .25s cubic-bezier(.4,0,.2,1)",
-      }} className={`sidebar-aside${mobileOpen ? " open" : ""}`}>
+      <aside style={sidebarStyle}>
         {/* Logo */}
         <div style={{
           display: "flex", alignItems: "center", gap: 10,
@@ -148,31 +179,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: 800, fontSize: 15, color: "#fff", flexShrink: 0,
           }}>K</div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: "#fff", letterSpacing: "-.2px" }}>KRY<span style={{ color: ORANGE, fontStyle: "normal" }}>ROS</span></div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#fff", letterSpacing: "-.2px" }}>
+            KRY<span style={{ color: ORANGE }}>ROS</span>
+          </div>
         </div>
 
         {/* Scrollable nav */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 8px 0", scrollbarWidth: "thin" }}>
-
-          <NavItem href="/admin"         icon={I(LayoutDashboard)}   label="Dashboard" />
-          <NavItem href="/admin/users"   icon={I(Users)}             label="Users & Roles" />
-          <NavItem href="/admin/orders"  icon={I(Package)}            label="Orders" />
-          <NavItem href="/admin/categories" icon={I(LayoutGrid)}     label="Categories" />
-          <NavItem href="/admin/brands"  icon={I(Tag)}               label="Brands" />
-          <NavItem href="/admin/reviews" icon={I(MessageSquare)}     label="Reviews" />
-          <NavItem href="/admin/products" icon={I(Box)}             label="Products" />
-          <NavItem href="/admin/wholesale" icon={I(Store)}            label="Wholesale" />
-          <NavItem href="/admin/credit"  icon={I(CreditCard)}        label="Credit System" />
-          <NavItem href="/admin/wallet"  icon={I(Wallet)}            label="Wallet & Payments" />
-          <NavItem href="/admin/countries" icon={I(Globe)}            label="Countries / Currencies" />
-          <NavItem href="/admin/locations-shipping" icon={I(MapPin)}  label="Locations & Shipping" />
-          <NavItem href="/admin/services" icon={I(Wrench)}           label="Services" />
-          <NavItem href="/admin/invoice" icon={I(FileText)}          label="Invoicing" />
-          <NavItem href="/admin/cms"     icon={I(FileCode)}          label="CMS & Pages" />
-          <NavItem href="/admin/notifications" icon={I(Bell)}      label="Notifications" />
-          <NavItem href="/admin/reports" icon={I(BarChart3)}        label="Reports" />
-          <NavItem href="/admin/settings" icon={I(Settings)}          label="Settings" />
-
+          <NavItem href="/admin"                    icon={I(LayoutDashboard)} label="Dashboard" />
+          <NavItem href="/admin/users"              icon={I(Users)}           label="Users & Roles" />
+          <NavItem href="/admin/orders"             icon={I(Package)}         label="Orders" />
+          <NavItem href="/admin/categories"         icon={I(LayoutGrid)}      label="Categories" />
+          <NavItem href="/admin/brands"             icon={I(Tag)}             label="Brands" />
+          <NavItem href="/admin/reviews"            icon={I(MessageSquare)}   label="Reviews" />
+          <NavItem href="/admin/products"           icon={I(Box)}             label="Products" />
+          <NavItem href="/admin/wholesale"          icon={I(Store)}           label="Wholesale" />
+          <NavItem href="/admin/credit"             icon={I(CreditCard)}      label="Credit System" />
+          <NavItem href="/admin/wallet"             icon={I(Wallet)}          label="Wallet & Payments" />
+          <NavItem href="/admin/countries"          icon={I(Globe)}           label="Countries / Currencies" />
+          <NavItem href="/admin/locations-shipping" icon={I(MapPin)}          label="Locations & Shipping" />
+          <NavItem href="/admin/services"           icon={I(Wrench)}          label="Services" />
+          <NavItem href="/admin/invoice"            icon={I(FileText)}        label="Invoicing" />
+          <NavItem href="/admin/cms"                icon={I(FileCode)}        label="CMS & Pages" />
+          <NavItem href="/admin/notifications"      icon={I(Bell)}            label="Notifications" />
+          <NavItem href="/admin/reports"            icon={I(BarChart3)}       label="Reports" />
+          <NavItem href="/admin/settings"           icon={I(Settings)}        label="Settings" />
           <div style={{ height: 12 }} />
         </div>
 
@@ -188,67 +219,80 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             fontWeight: 700, fontSize: 12, color: "#fff", flexShrink: 0,
           }}>K</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Admin</div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Admin User</div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 1 }}>Super Admin</div>
           </div>
           <LogOut size={14} color="rgba(255,255,255,.3)" style={{ cursor: "pointer" }} />
         </div>
       </aside>
 
-      {/* Main */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden", background: "#F5F6FA" }}>
+      {/* Main — always gets full remaining width; on mobile sidebar is fixed so this = 100% */}
+      <div style={{
+        flex: 1, minWidth: 0, display: "flex", flexDirection: "column",
+        overflow: "hidden", background: "#F5F6FA",
+      }}>
         {/* Topbar */}
         <div style={{
-          height: 60, flexShrink: 0, background: "#fff", borderBottom: "1px solid #E5E7EB",
-          display: "flex", alignItems: "center", padding: "0 20px", gap: 10,
+          height: 60, flexShrink: 0, background: "#fff",
+          borderBottom: "1px solid #E5E7EB",
+          display: "flex", alignItems: "center",
+          padding: isMobile ? "0 14px" : "0 20px", gap: 10,
         }}>
-          {/* Hamburger (mobile) */}
-          <button
-            onClick={() => setMobileOpen(true)}
-            style={{
-              display: "none", width: 36, height: 36, borderRadius: 9,
-              background: "#F5F6FA", border: "1px solid #E5E7EB",
-              alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0,
-            }}
-            className="tb-ham-btn"
-          >
-            <Menu size={16} color="#4B5563" />
-          </button>
-
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>Dashboard</div>
-
-          {/* Search */}
-          <div style={{ position: "relative", flex: 1, maxWidth: 260, marginLeft: 8 }} className="tb-search-wrap">
-            <Search size={13} color="#9CA3AF" style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)" }} />
-            <input
-              placeholder="Search orders, customers…"
+          {/* Hamburger — mobile only */}
+          {isMobile && (
+            <button
+              onClick={() => setMobileOpen(true)}
               style={{
-                width: "100%", background: "#F5F6FA", border: "1px solid #E5E7EB",
-                borderRadius: 9, padding: "7px 10px 7px 30px",
-                fontSize: 12, fontFamily: "inherit", color: "#111827", outline: "none",
+                width: 36, height: 36, borderRadius: 9,
+                background: "#F5F6FA", border: "1px solid #E5E7EB",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", flexShrink: 0,
               }}
-            />
+            >
+              <Menu size={16} color="#4B5563" />
+            </button>
+          )}
+
+          <div style={{ fontSize: isMobile ? 13 : 15, fontWeight: 700, color: "#111827" }}>
+            KRYROS Admin
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-            {/* Period buttons */}
-            <div style={{ display: "flex", background: "#F5F6FA", border: "1px solid #E5E7EB", borderRadius: 9, overflow: "hidden" }} className="period-wrap">
-              {["Week", "Month", "Year"].map((p, i) => (
-                <button key={p} style={{
-                  background: i === 1 ? ACCENT : "none", border: "none",
-                  padding: "6px 12px", fontSize: 11.5, fontWeight: 500,
-                  color: i === 1 ? "#fff" : "#9CA3AF", cursor: "pointer",
-                  fontFamily: "inherit", transition: "all .13s",
-                  borderRadius: i === 1 ? 7 : 0, margin: i === 1 ? 2 : 0,
-                }}>{p}</button>
-              ))}
+          {/* Search — desktop only */}
+          {!isMobile && (
+            <div style={{ position: "relative", flex: 1, maxWidth: 260, marginLeft: 8 }}>
+              <Search size={13} color="#9CA3AF" style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)" }} />
+              <input
+                placeholder="Search orders, customers…"
+                style={{
+                  width: "100%", background: "#F5F6FA", border: "1px solid #E5E7EB",
+                  borderRadius: 9, padding: "7px 10px 7px 30px",
+                  fontSize: 12, fontFamily: "inherit", color: "#111827", outline: "none",
+                }}
+              />
             </div>
+          )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
+            {/* Period selector — desktop only */}
+            {!isMobile && (
+              <div style={{ display: "flex", background: "#F5F6FA", border: "1px solid #E5E7EB", borderRadius: 9, overflow: "hidden" }}>
+                {["Week", "Month", "Year"].map((p, i) => (
+                  <button key={p} style={{
+                    background: i === 1 ? ACCENT : "none", border: "none",
+                    padding: "6px 12px", fontSize: 11.5, fontWeight: 500,
+                    color: i === 1 ? "#fff" : "#9CA3AF", cursor: "pointer",
+                    fontFamily: "inherit", transition: "all .13s",
+                    borderRadius: i === 1 ? 7 : 0, margin: i === 1 ? 2 : 0,
+                  }}>{p}</button>
+                ))}
+              </div>
+            )}
 
             {/* Bell */}
             <button style={{
               width: 34, height: 34, borderRadius: 9, background: "#F5F6FA",
-              border: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", position: "relative",
+              border: "1px solid #E5E7EB", display: "flex", alignItems: "center",
+              justifyContent: "center", cursor: "pointer", position: "relative",
             }}>
               <Bell size={15} color="#4B5563" />
               <span style={{
@@ -267,49 +311,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        {/* Page content — allow full-width, no clipping */}
+        {/* Page content */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minWidth: 0 }}>
           <AdminSettingsProvider>
             {children}
           </AdminSettingsProvider>
         </div>
       </div>
-
-      {/* Mobile sidebar overlay backdrop */}
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          style={{
-            position: "fixed", inset: 0, zIndex: 299,
-            background: "rgba(0,0,0,.45)",
-          }}
-        />
-      )}
-
-      <style jsx global>{`
-        @media (max-width: 860px) {
-          .sidebar-aside {
-            position: fixed !important;
-            left: 0; top: 0; bottom: 0;
-            transform: translateX(-100%) !important;
-            box-shadow: 4px 0 24px rgba(0,0,0,.35);
-            z-index: 300 !important;
-            height: 100vh !important;
-          }
-          .sidebar-aside.open {
-            transform: translateX(0) !important;
-          }
-          .tb-ham-btn {
-            display: flex !important;
-          }
-          .tb-search-wrap {
-            display: none !important;
-          }
-          .period-wrap {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

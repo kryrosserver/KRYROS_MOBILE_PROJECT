@@ -50,7 +50,7 @@ async function compressImage(file: File, maxWidth = 1920, quality = 0.85): Promi
 }
 
 export default function CMSSectionEditor() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -268,7 +268,7 @@ export default function CMSSectionEditor() {
 
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       {/* Page Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
@@ -306,7 +306,7 @@ export default function CMSSectionEditor() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Main Settings */}
           <div style={{ gridColumn: "1 / 3" }}>
-            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24, marginBottom: 16 }}>
+            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "20px 24px 40px", marginBottom: 16 }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #F3F4F6" }}>
                 Section Content
               </h3>

@@ -144,7 +144,7 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div style={{ background: "#F5F6FA", minHeight: "100vh", padding: "20px 16px 40px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "20px 16px 40px" }}>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSave} initial={editing} />
 
       <div className="max-w-full mx-auto space-y-5">

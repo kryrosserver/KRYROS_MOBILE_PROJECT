@@ -9,7 +9,7 @@ import { Save, Plus, Trash2, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Searc
 const DEFAULT = { logoText: "KRYROS", announcementEnabled: true, announcementText: "Free Delivery on all orders over $100", announcementCta: "Track Order", announcementCtaLink: "/track", navLinks: [{ label: "Home", href: "/", isActive: true }, { label: "Shop", href: "/shop", isActive: true }, { label: "Get Now", href: "/get-now", isActive: true }, { label: "Wholesale", href: "/wholesale", isActive: true }] };
 
 export default function HeaderCMSPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -45,7 +45,7 @@ export default function HeaderCMSPage() {
   const tabs = [{ id: "announcement", label: "Announcement" }, { id: "nav", label: "Navigation" }];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

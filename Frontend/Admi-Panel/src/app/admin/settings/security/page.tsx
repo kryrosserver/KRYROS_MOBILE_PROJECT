@@ -96,8 +96,8 @@ export default function SecuritySettingsPage() {
   );
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
-      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
+      <div style={{ background: "#F5F6FA", padding: "24px" }}>
         <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}
@@ -246,7 +246,7 @@ export default function SecuritySettingsPage() {
                       <img src={qrCode} alt="2FA QR" className="w-36 h-36 rounded-xl p-2 bg-white" />
                     </div>
                     <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Or enter this key manually:</p>
-                    <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#F8F9FA", border: "1px solid var(--card-border)" }}>
+                    <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#F5F6FA", border: "1px solid var(--card-border)" }}>
                       <code className="text-xs font-bold flex-1 text-left tracking-wider break-all" style={{ color: "#111827" }}>{secret}</code>
                       <button onClick={() => { navigator.clipboard.writeText(secret); setSecretCopied(true); setTimeout(() => setSecretCopied(false), 2000); }}
                         style={{ color: secretCopied ? "#16C784" : "var(--text-muted)" }}>

@@ -94,7 +94,7 @@ const stepBg: Record<string, string> = {
 };
 
 export default function OrderDetailsPage({ params }: { params: { id: string } }) {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -164,7 +164,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
   const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ marginBottom: 8 }}>
         <Link href="/admin/orders" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 8, padding: "5px 12px", color: "#4B5563", fontSize: 12, textDecoration: "none" }}>
           <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Orders

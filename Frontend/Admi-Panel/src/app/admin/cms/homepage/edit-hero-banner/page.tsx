@@ -157,8 +157,8 @@ export default function EditHeroBannerPage() {
   const previewSlide = activeSlide || slides[0];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
-      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
+      <div style={{ background: "#F5F6FA", padding: "24px" }}>
     <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -293,7 +293,7 @@ export default function EditHeroBannerPage() {
                 <label className="block text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Banner Image / Slider</label>
                 <div
                   className="rounded-xl p-3 flex items-center gap-3"
-                  style={{ border: "1px solid var(--card-border)", background: "#F8F9FA" }}
+                  style={{ border: "1px solid var(--card-border)", background: "#F5F6FA" }}
                 >
                   <div className="h-14 w-20 rounded-lg overflow-hidden shrink-0" style={{ background: "#F9FAFB" }}>
                     {bannerImage ? (

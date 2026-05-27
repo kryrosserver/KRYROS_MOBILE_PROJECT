@@ -8,29 +8,26 @@ import {
   Download, MoreHorizontal, CreditCard,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
+/* Pure SVG sparkline — no recharts, no SSR risk */
 function MiniSparkline({ color = "#6366F1", up = true }: { color?: string; up?: boolean }) {
-  const data = up
-    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
-    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
+  const pts = up ? "0,28 14,20 28,24 42,10 56,16 70,4 84,8" : "0,4 14,8 28,6 42,16 56,12 70,22 84,26";
   return (
-    <ResponsiveContainer width="100%" height={32}>
-      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={`sgcr${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sgcr${color.replace("#","")})`} dot={false} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <svg width="100%" height="32" viewBox="0 0 84 32" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`sg${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3}/>
+          <stop offset="100%" stopColor={color} stopOpacity={0}/>
+        </linearGradient>
+      </defs>
+      <polygon points={`${pts} 84,32 0,32`} fill={`url(#sg${color.replace("#","")})`}/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round"/>
+    </svg>
   );
 }
 
 export default function CreditPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -182,7 +179,7 @@ export default function CreditPage() {
 
   return (
     <>
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         {/* HEADER */}
 
@@ -319,7 +316,7 @@ export default function CreditPage() {
               </div>
 
               {showCreate && (
-                <div style={{ ...card, padding: "24px", border: `2px solid #6366F130` }}>
+                <div style={{ ...card, padding: "20px 24px 40px", border: `2px solid #6366F130` }}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left column */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -562,7 +559,7 @@ export default function CreditPage() {
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{editingPlan ? "Edit Credit Plan" : "Create New Credit Plan"}</h3>
                 <button onClick={() => setIsPlanModalOpen(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 20, height: 20 }} /></button>
               </div>
-              <div style={{ padding: 24, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ padding: "20px 24px 40px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
                 <div><label style={labelStyle}>Plan Name</label><input placeholder="e.g. Standard 6-Month Plan" style={inpStyle(HOVER)} value={planForm.name} onChange={e => setPlanModalForm({ ...planForm, name: e.target.value })} /></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div><label style={labelStyle}>Duration (Months)</label><input type="number" style={inpStyle(HOVER)} value={planForm.duration} onChange={e => setPlanModalForm({ ...planForm, duration: Number(e.target.value) })} /></div>
@@ -612,7 +609,7 @@ export default function CreditPage() {
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>Edit Installment Product</h3>
                 <button onClick={() => setEditItem(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT2 }}><X style={{ width: 20, height: 20 }} /></button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{padding: 24, overflowY: "auto"}}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{padding: "20px 24px 40px", overflowY: "auto"}}>
                 {/* Left */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div><label style={labelStyle}>Product Name</label><input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} style={inpStyle(HOVER)} /></div>

@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
-  Bell, Calendar, Sun, Moon, Menu, ChevronDown, ChevronRight,
+  ChevronRight,
   Search, Plus, Edit, Trash2, Tag, Globe, RefreshCcw, X,
-  CheckCircle2, XCircle, Download, MoreHorizontal, Filter,
+  CheckCircle2, XCircle,
 } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
+
 
 const ROWS_PER_PAGE = 10;
 const BRAND_COLORS = ["#6366F1", "#3B82F6", "#F59E0B", "#8B5CF6", "#EF4444", "#22C55E", "#EC4899"];
@@ -25,27 +25,8 @@ type Brand = {
 
 type Category = { id: string; name: string };
 
-function MiniSparkline({ color = "#6366F1", up = true }: { color?: string; up?: boolean }) {
-  const data = up
-    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
-    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
-  return (
-    <ResponsiveContainer width="100%" height={32}>
-      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={`sgb${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sgb${color.replace("#", "")})`} dot={false} />
-      </AreaChart>
-    </ResponsiveContainer>
-  );
-}
-
 export default function BrandsPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -160,7 +141,7 @@ export default function BrandsPage() {
 
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       {/* Page Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>

@@ -24,7 +24,7 @@ type Brand = { id: number; name: string; slug: string };
 type ExistingImage = { url: string; id?: string };
 
 export default function EditProductPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -296,7 +296,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         {/* HEADER */}
 

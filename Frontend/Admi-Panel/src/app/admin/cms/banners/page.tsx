@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 export default function BannersPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -71,7 +71,7 @@ export default function BannersPage() {
 
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
@@ -99,7 +99,7 @@ export default function BannersPage() {
 
       {/* Add/Edit Form */}
       {showAdd && (
-        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24, marginBottom: 20 }}>
+        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "20px 24px 40px", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>{editingBanner ? "Edit Banner" : "New Banner"}</h3>
             <button onClick={() => setShowAdd(false)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280" }}>

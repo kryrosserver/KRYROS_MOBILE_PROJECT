@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3, TrendingUp, TrendingDown, DollarSign, ShoppingCart,
-  Users, CreditCard, Download, Calendar, ArrowUpRight, Package,
-  RefreshCw, Bell, Search, Sun, Moon, Menu, ChevronDown, ChevronRight,
-  MoreHorizontal,
+  Users, CreditCard, RefreshCw,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
-import { useTheme } from "@/providers/ThemeProvider";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
-const ACCENT = "#12D6C5";
+const ACCENT = "#6366F1";
 
 type Summary = {
   stats: { totalRevenue: number; totalOrders: number; activeUsers: number; creditDisbursed: number };
@@ -22,43 +18,34 @@ type Summary = {
   salesByCategory: { name: string; value: number }[];
 };
 
+/* Pure SVG sparkline — no recharts, no SSR risk */
 function MiniSparkline({ color = ACCENT, up = true }: { color?: string; up?: boolean }) {
-  const data = up
-    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
-    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
+  const pts = up ? "0,28 14,20 28,24 42,10 56,16 70,4 84,8" : "0,4 14,8 28,6 42,16 56,12 70,22 84,26";
   return (
-    <ResponsiveContainer width="100%" height={32}>
-      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={`sgrp${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sgrp${color.replace("#", "")})`} dot={false} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <svg width="100%" height="32" viewBox="0 0 84 32" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`sg${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3}/>
+          <stop offset="100%" stopColor={color} stopOpacity={0}/>
+        </linearGradient>
+      </defs>
+      <polygon points={`${pts} 84,32 0,32`} fill={`url(#sg${color.replace("#","")})`}/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round"/>
+    </svg>
   );
 }
 
 export default function ReportsPage() {
-
-  const BG = "var(--bg-primary)";
-  const CARD = "var(--card-bg)";
-  const BORDER = "var(--card-border)";
-  const TEXT = "var(--text-primary)";
-  const TEXT2 = "var(--text-secondary)";
-  const HOVER = "var(--hover-bg)";
-  const HEADER_BG = "var(--bg-secondary)";
-  const ICON_BG = "var(--icon-bg)";
-
+  const CARD = "#FFFFFF";
+  const BORDER = "#E5E7EB";
+  const TEXT = "#111827";
+  const TEXT2 = "#6B7280";
 
   const [dateRange, setDateRange] = useState("year");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { isDark, toggleTheme } = useTheme();
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -100,10 +87,10 @@ export default function ReportsPage() {
   const credit = data?.credit;
   const categories = data?.salesByCategory || [];
 
-  const card = { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14 };
+  const card = { background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Reports & Analytics</h2>

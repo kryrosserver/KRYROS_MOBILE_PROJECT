@@ -10,7 +10,7 @@ type BrandBanner = { id?: string; brandSlug: string; brandName: string; tagline?
 const EMPTY: BrandBanner = { brandSlug: "", brandName: "", tagline: "", description: "", bgColor: "#050F1A", bgGradient: "", imageUrl: "", ctaText: "Shop Now", ctaLink: "/shop", isActive: true };
 
 export default function BrandBannersPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -59,7 +59,7 @@ export default function BrandBannersPage() {
 
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
           <div style={{ marginBottom: 8 }}>
@@ -79,7 +79,7 @@ export default function BrandBannersPage() {
       {msg && <div style={{ background: "#D1FAE5", border: "1px solid #A7F3D0", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#065F46", marginBottom: 16 }}>{msg}</div>}
 
       {editing && (
-        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24, marginBottom: 20 }}>
+        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "20px 24px 40px", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>{editing.id ? "Edit Banner" : "New Banner"}</h3>
             <button onClick={() => setEditing(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280" }}>

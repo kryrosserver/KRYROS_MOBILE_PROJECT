@@ -42,7 +42,7 @@ export default function NewsletterPage() {
   ];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>Newsletter Subscribers</h2>

@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 
 export default function NewsletterPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -51,7 +51,7 @@ export default function NewsletterPage() {
   const card: React.CSSProperties = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 16, padding: "24px" };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: 24 }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
           <div style={{ marginBottom: 8 }}>
@@ -106,7 +106,7 @@ export default function NewsletterPage() {
           </div>
           <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: 24 }}>
             <div style={{ paddingBottom: 14, borderBottom: "1px solid #E5E7EB", marginBottom: 18 }}><span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>Live Preview</span></div>
-            <div style={{ background: "#F9FAFB", borderRadius: 12, padding: 24, border: "2px dashed #E5E7EB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 380 }}>
+            <div style={{ background: "#F9FAFB", borderRadius: 12, padding: "20px 24px 40px", border: "2px dashed #E5E7EB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 380 }}>
               {!config.newsletterPopupEnabled ? (
                 <p style={{ color: "#6B7280", fontWeight: 600, fontSize: 13 }}>Newsletter Popup is Hidden</p>
               ) : (
@@ -114,7 +114,7 @@ export default function NewsletterPage() {
                   <div style={{ height: 120, background: "#F9FAFB", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {config.newsletterPopupImage ? <img src={config.newsletterPopupImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="Popup" /> : <ImageIcon style={{ width: 36, height: 36, color: "#9CA3AF" }} />}
                   </div>
-                  <div style={{ padding: 24, textAlign: "center", display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ padding: "20px 24px 40px", textAlign: "center", display: "flex", flexDirection: "column", gap: 12 }}>
                     <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>{config.newsletterPopupTitle || "Popup Title"}</h3>
                     <p style={{ fontSize: 12, color: "#6B7280", margin: 0 }}>{config.newsletterPopupSubtitle || "Popup subtitle text goes here."}</p>
                     <input type="email" disabled placeholder="Enter your email" style={{ width: "100%", height: 36, borderRadius: 8, border: "1px solid #E5E7EB", background: "#F9FAFB", fontSize: 12, paddingLeft: 12, color: "#6B7280", boxSizing: "border-box" }} />

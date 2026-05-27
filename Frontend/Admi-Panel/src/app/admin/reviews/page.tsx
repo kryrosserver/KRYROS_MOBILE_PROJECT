@@ -3,10 +3,10 @@
 import { useEffect, useState, useRef } from "react";
 import {
   Star, MessageCircle, CheckCircle, Home, Trash2, Loader2,
-  Search, User, Bell, Calendar, Sun, Moon, Menu, ChevronDown,
+  Search, User, ChevronDown,
   ChevronRight, Download, MoreHorizontal, ThumbsUp, Filter,
 } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
+
 
 type Review = {
   id: string;
@@ -21,27 +21,25 @@ type Review = {
   product: { name: string; images: { url: string }[] };
 };
 
+/* Pure CSS sparkline — no recharts, no SSR risk */
 function MiniSparkline({ color = "#6366F1", up = true }: { color?: string; up?: boolean }) {
-  const data = up
-    ? [{ v: 1 }, { v: 2 }, { v: 1.5 }, { v: 3 }, { v: 2.5 }, { v: 4 }, { v: 3.8 }]
-    : [{ v: 4 }, { v: 3 }, { v: 3.5 }, { v: 2 }, { v: 2.5 }, { v: 1.5 }, { v: 1.2 }];
+  const pts = up ? "0,28 14,20 28,24 42,10 56,16 70,4 84,8" : "0,4 14,8 28,6 42,16 56,12 70,22 84,26";
   return (
-    <ResponsiveContainer width="100%" height={32}>
-      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={`sgr${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#sgr${color.replace("#", "")})`} dot={false} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <svg width="100%" height="32" viewBox="0 0 84 32" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`sg${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3}/>
+          <stop offset="100%" stopColor={color} stopOpacity={0}/>
+        </linearGradient>
+      </defs>
+      <polygon points={`${pts} 84,32 0,32`} fill={`url(#sg${color.replace("#","")})`}/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round"/>
+    </svg>
   );
 }
 
 export default function ReviewsPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -104,7 +102,7 @@ export default function ReviewsPage() {
   const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         {/* HEADER */}
 

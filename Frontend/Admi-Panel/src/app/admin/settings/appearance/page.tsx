@@ -36,8 +36,8 @@ export default function AppearanceSettingsPage() {
   };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
-      <div style={{ background: "#F8F9FA", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
+      <div style={{ background: "#F5F6FA", padding: "24px" }}>
         <div className="space-y-6 pb-20" style={{ color: "#111827" }}>
 
           {/* Header */}

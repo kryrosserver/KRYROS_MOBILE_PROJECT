@@ -110,7 +110,7 @@ export default function UsersPage() {
   ];
 
   return (
-    <div style={{ background: "#F5F6FA", minHeight: "100vh", padding: "20px 16px 40px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "20px 16px 40px" }}>
       <div className="max-w-full mx-auto space-y-5">
 
         {/* Page Header */}

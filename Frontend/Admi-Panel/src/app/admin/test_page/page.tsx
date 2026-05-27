@@ -9,7 +9,7 @@ export default function TestPage() {
   const items = [1,2,3];
   
   return (
-    <div style={{ background: "#F8F9FA" }}>
+    <div style={{ background: "#F5F6FA" }}>
       <div style={{ display: "flex" }}>
         <div>content</div>
       </div>

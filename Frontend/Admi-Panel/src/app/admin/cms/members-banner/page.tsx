@@ -9,7 +9,7 @@ import { Save, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "luci
 const DEFAULT = { title: "KRYROS Members", subtitle: "Join and get exclusive discounts on every order", discount: "5%", ctaText: "Join Now", ctaLink: "/signup", bgColor: "#050F1A" };
 
 export default function MembersBannerPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -48,7 +48,7 @@ export default function MembersBannerPage() {
   ];
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

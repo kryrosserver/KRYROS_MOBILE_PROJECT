@@ -7,7 +7,7 @@ import { useEffect, useState, useRef } from "react";
 import { Megaphone, RefreshCw, Layout, Type, Palette, Link as LinkIcon, Bell, Calendar, Sun, Moon, Menu, ChevronDown, Search } from "lucide-react";
 
 export default function AnnouncementPage() {
-  const BG = "#F8F9FA";
+  const BG = "#F5F6FA";
   const CARD = "#FFFFFF";
   const BORDER = "#E5E7EB";
   const TEXT = "#111827";
@@ -46,7 +46,7 @@ export default function AnnouncementPage() {
   const card = { background: CARD, border: "1px solid #E5E7EB", borderRadius: 14 };
 
   return (
-    <div style={{ background: "#F8F9FA", minHeight: "100vh", padding: "24px" }}>
+    <div style={{ background: "#F5F6FA", minHeight: "100%", padding: "24px" }}>
 
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -102,7 +102,7 @@ export default function AnnouncementPage() {
               </div>
               <div style={{ ...card, padding: 24 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Live Preview</div>
-                <div style={{ background: HOVER, borderRadius: 12, padding: 24, border: `2px dashed #E5E7EB`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 180 }}>
+                <div style={{ background: HOVER, borderRadius: 12, padding: "20px 24px 40px", border: `2px dashed #E5E7EB`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 180 }}>
                   {!config.announcementBarEnabled ? (
                     <p style={{ fontSize: 12, color: TEXT2, fontStyle: "italic" }}>Announcement Bar is Hidden</p>
                   ) : (
