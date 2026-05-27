@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { AdminSettingsProvider } from "@/providers/AdminSettingsProvider";
+import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard, Users, Package, LayoutGrid, Tag,
   MessageSquare, Box, Store, CreditCard, Wallet,
@@ -12,9 +13,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-/* ── small wrapper so every icon is a () => ReactElement ── */
-const I = (IconComp: React.ComponentType<{ size?: number; strokeWidth?: number }>) =>
-  () => <IconComp size={16} strokeWidth={1.8} />;
+/* ── wrapper so every icon is a () => ReactElement ── */
+const I = (IconComp: LucideIcon) => {
+  const C = () => <IconComp size={16} strokeWidth={1.8} />;
+  return C;
+};
 
 /* ── Constants ── */
 const SIDEBAR_W = 230;
