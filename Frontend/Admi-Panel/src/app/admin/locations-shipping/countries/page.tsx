@@ -121,7 +121,7 @@ export default function CountriesPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map(s => (
               <div key={s.label} className="admin-card !p-5">
                 <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ background: s.bg }}>

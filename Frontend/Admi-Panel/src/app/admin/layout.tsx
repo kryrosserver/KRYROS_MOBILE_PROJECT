@@ -267,21 +267,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        {/* Page content */}
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+        {/* Page content — allow full-width, no clipping */}
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minWidth: 0 }}>
           <AdminSettingsProvider>
             {children}
           </AdminSettingsProvider>
         </div>
       </div>
 
+      {/* Mobile sidebar overlay backdrop */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 299,
+            background: "rgba(0,0,0,.45)",
+          }}
+        />
+      )}
+
       <style jsx global>{`
         @media (max-width: 860px) {
           .sidebar-aside {
             position: fixed !important;
-            left: 0; top: 0;
+            left: 0; top: 0; bottom: 0;
             transform: translateX(-100%) !important;
             box-shadow: 4px 0 24px rgba(0,0,0,.35);
+            z-index: 300 !important;
+            height: 100vh !important;
           }
           .sidebar-aside.open {
             transform: translateX(0) !important;
