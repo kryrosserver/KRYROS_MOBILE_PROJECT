@@ -4,24 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { AdminSettingsProvider } from "@/providers/AdminSettingsProvider";
+import {
+  LayoutDashboard, Users, Package, LayoutGrid, Tag,
+  MessageSquare, Box, Store, CreditCard, Wallet,
+  Globe, MapPin, Wrench, FileText, FileCode,
+  Bell, BarChart3, Settings, Search, LogOut, Menu,
+  ChevronRight,
+} from "lucide-react";
 
-/* ── Inline SVG icons matching the HTML design ── */
-const IconDashboard = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>;
-const IconOrders = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>;
-const IconProducts = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>;
-const IconCustomers = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>;
-const IconPayments = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>;
-const IconReports = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
-const IconNotif = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>;
-const IconCMS = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>;
-const IconWholesale = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
-const IconDelivery = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const IconSettings = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 20.1 8"/></svg>;
-const IconArr = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>;
-const IconSearch = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-const IconBell = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>;
-const IconLogout = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
-const IconHam = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
+/* ── small wrapper so every icon is a () => ReactElement ── */
+const I = (IconComp: React.ComponentType<{ size?: number; strokeWidth?: number }>) =>
+  () => <IconComp size={16} strokeWidth={1.8} />;
 
 /* ── Constants ── */
 const SIDEBAR_W = 230;
@@ -98,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span style={{ background: ORANGE, color: "#fff", fontSize: 9.5, fontWeight: 700, padding: "2px 6px", borderRadius: 99 }}>{badge}</span>
         )}
         {hasSub && (
-          <span style={{ width: 12, height: 12, flexShrink: 0, opacity: subKey && openSubs[subKey] ? .7 : .35, transition: "transform .2s", transform: subKey && openSubs[subKey] ? "rotate(90deg)" : "none" }}><IconArr /></span>
+          <ChevronRight size={12} color="rgba(255,255,255,.35)" style={{ flexShrink: 0, opacity: subKey && openSubs[subKey] ? .7 : .35, transition: "transform .2s", transform: subKey && openSubs[subKey] ? "rotate(90deg)" : "none" }} />
         )}
       </>
     );
@@ -157,37 +150,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Scrollable nav */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 8px 0", scrollbarWidth: "thin" }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "rgba(255,255,255,.22)", padding: "12px 8px 5px" }}>Main</div>
 
-          <NavItem href="/admin" icon={IconDashboard} label="Dashboard" />
-
-          <NavItem icon={IconOrders} label="Orders" badge={8} hasSub subKey="orders" />
-          <SubMenu items={["All Orders", "Pending", "Completed", "Cancelled"]} keyName="orders" activeIdx={0} />
-
-          <NavItem icon={IconProducts} label="Products" hasSub subKey="products" />
-          <SubMenu items={["All Products", "Categories", "Inventory"]} keyName="products" />
-
-          <NavItem href="/admin/contacts" icon={IconCustomers} label="Customers" />
-
-          <NavItem icon={IconPayments} label="Payments" hasSub subKey="payments" />
-          <SubMenu items={["Transactions", "Invoices", "Expenses", "Estimates"]} keyName="payments" />
-
-          <NavItem href="/admin/reports" icon={IconReports} label="Reports" />
-
-          <NavItem icon={IconNotif} label="Notifications" badge={3} hasSub subKey="notifications" />
-          <SubMenu items={["Push Notification", "SMS", "SMTP / Email"]} keyName="notifications" />
-
-          <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "rgba(255,255,255,.22)", padding: "12px 8px 5px" }}>Store</div>
-
-          <NavItem icon={IconCMS} label="CMS & Pages" hasSub subKey="cms" />
-          <SubMenu items={["Home Page", "Shop Page", "Banners"]} keyName="cms" />
-
-          <NavItem href="/admin/wholesale" icon={IconWholesale} label="Wholesale" />
-          <NavItem href="/admin/locations-shipping" icon={IconDelivery} label="Delivery Zones" />
-
-          <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "rgba(255,255,255,.22)", padding: "12px 8px 5px" }}>System</div>
-
-          <NavItem href="/admin/settings" icon={IconSettings} label="Settings" />
+          <NavItem href="/admin"         icon={I(LayoutDashboard)}   label="Dashboard" />
+          <NavItem href="/admin/users"   icon={I(Users)}             label="Users & Roles" />
+          <NavItem href="/admin/orders"  icon={I(Package)}            label="Orders" />
+          <NavItem href="/admin/categories" icon={I(LayoutGrid)}     label="Categories" />
+          <NavItem href="/admin/brands"  icon={I(Tag)}               label="Brands" />
+          <NavItem href="/admin/reviews" icon={I(MessageSquare)}     label="Reviews" />
+          <NavItem href="/admin/products" icon={I(Box)}             label="Products" />
+          <NavItem href="/admin/wholesale" icon={I(Store)}            label="Wholesale" />
+          <NavItem href="/admin/credit"  icon={I(CreditCard)}        label="Credit System" />
+          <NavItem href="/admin/wallet"  icon={I(Wallet)}            label="Wallet & Payments" />
+          <NavItem href="/admin/countries" icon={I(Globe)}            label="Countries / Currencies" />
+          <NavItem href="/admin/locations-shipping" icon={I(MapPin)}  label="Locations & Shipping" />
+          <NavItem href="/admin/services" icon={I(Wrench)}           label="Services" />
+          <NavItem href="/admin/invoice" icon={I(FileText)}          label="Invoicing" />
+          <NavItem href="/admin/cms"     icon={I(FileCode)}          label="CMS & Pages" />
+          <NavItem href="/admin/notifications" icon={I(Bell)}      label="Notifications" />
+          <NavItem href="/admin/reports" icon={I(BarChart3)}        label="Reports" />
+          <NavItem href="/admin/settings" icon={I(Settings)}          label="Settings" />
 
           <div style={{ height: 12 }} />
         </div>
@@ -207,7 +188,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div style={{ fontSize: 11.5, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Admin</div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 1 }}>Super Admin</div>
           </div>
-          <span style={{ width: 14, height: 14, color: "rgba(255,255,255,.3)", cursor: "pointer", flexShrink: 0 }}><IconLogout /></span>
+          <LogOut size={14} color="rgba(255,255,255,.3)" style={{ cursor: "pointer" }} />
         </div>
       </aside>
 
@@ -228,14 +209,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }}
             className="tb-ham-btn"
           >
-            <span style={{ width: 16, height: 16, color: "#4B5563" }}><IconHam /></span>
+            <Menu size={16} color="#4B5563" />
           </button>
 
           <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>Dashboard</div>
 
           {/* Search */}
           <div style={{ position: "relative", flex: 1, maxWidth: 260, marginLeft: 8 }} className="tb-search-wrap">
-            <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", width: 13, height: 13, color: "#9CA3AF" }}><IconSearch /></span>
+            <Search size={13} color="#9CA3AF" style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)" }} />
             <input
               placeholder="Search orders, customers…"
               style={{
@@ -266,7 +247,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               border: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", position: "relative",
             }}>
-              <span style={{ width: 15, height: 15, color: "#4B5563" }}><IconBell /></span>
+              <Bell size={15} color="#4B5563" />
               <span style={{
                 position: "absolute", top: 6, right: 6, width: 7, height: 7,
                 borderRadius: "50%", background: ORANGE, border: "1.5px solid #fff",
