@@ -1,0 +1,255 @@
+'use client';
+import { useState } from 'react';
+import AdminShell from '@/components/admin/admin-shell';
+import DataTable, { Column } from '@/components/admin/data-table';
+import PageHeader from '@/components/admin/page-header';
+import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
+import { useTheme } from '@/contexts/theme-context';
+import { Package } from 'lucide-react';
+import { createProduct, updateProduct, deleteProduct } from '@/lib/api';
+import toast from 'react-hot-toast';
+
+type Product = {
+  id: string; name: string; slug: string; sku: string; description: string;
+  category: string; brand: string; price: string; salePrice: string;
+  stock: number; weight: string; sold: number; status: string;
+  featured: boolean; wholesaleOnly: boolean; allowInstallments: boolean;
+  showGuaranteeBadge: boolean; showReturnsBadge: boolean; showInstallmentBadge: boolean;
+  tags: string; metaTitle: string; metaDescription: string; imageUrl: string; specifications: string;
+};
+
+const INITIAL: Product[] = [
+  { id: 'PRD001', name: 'iPhone 15 Pro Max', slug: 'iphone-15-pro-max', sku: 'APL-IP15PM', description: 'Apple iPhone 15 Pro Max with A17 Pro chip, titanium design and 48MP camera.', category: 'Electronics', brand: 'Apple', price: '$1,099', salePrice: '', stock: 45, weight: '0.221', sold: 245, status: 'Active', featured: true, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: true, tags: 'apple, iphone, smartphone', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Storage: 256GB | Color: Natural Titanium | Display: 6.7 inch' },
+  { id: 'PRD002', name: 'MacBook Air M2', slug: 'macbook-air-m2', sku: 'APL-MBA-M2', description: 'Supercharged by the Apple M2 chip, with 18-hour battery life.', category: 'Electronics', brand: 'Apple', price: '$1,249', salePrice: '$1,199', stock: 12, weight: '1.24', sold: 186, status: 'Active', featured: false, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: false, showInstallmentBadge: true, tags: 'apple, macbook, laptop', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'RAM: 8GB | Storage: 256GB | Color: Midnight' },
+  { id: 'PRD003', name: 'Sony WH-1000XM5', slug: 'sony-wh-1000xm5', sku: 'SNY-WH1000', description: 'Industry-leading noise cancellation with 30 hours battery life.', category: 'Audio', brand: 'Sony', price: '$348', salePrice: '$299', stock: 30, weight: '0.25', sold: 163, status: 'Active', featured: false, wholesaleOnly: false, allowInstallments: false, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: false, tags: 'sony, headphones, noise-cancelling', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Type: Over-ear | Connectivity: Bluetooth 5.2 | Color: Black' },
+  { id: 'PRD004', name: 'Apple Watch Series 9', slug: 'apple-watch-series-9', sku: 'APL-AW9', description: 'The most advanced Apple Watch yet with S9 chip and Double Tap gesture.', category: 'Wearables', brand: 'Apple', price: '$399', salePrice: '', stock: 0, weight: '0.051', sold: 151, status: 'Out of Stock', featured: false, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: true, tags: 'apple, smartwatch, wearable', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Case: 45mm | GPS: Yes | Color: Midnight' },
+  { id: 'PRD005', name: 'Samsung Galaxy S24 Ultra', slug: 'samsung-galaxy-s24-ultra', sku: 'SAM-GS24U', description: 'Galaxy AI built in — the most powerful Galaxy smartphone.', category: 'Electronics', brand: 'Samsung', price: '$1,199', salePrice: '$1,099', stock: 8, weight: '0.232', sold: 128, status: 'Low Stock', featured: true, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: true, tags: 'samsung, android, flagship', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'RAM: 12GB | Storage: 256GB | S Pen: Yes' },
+  { id: 'PRD006', name: 'iPad Pro 13"', slug: 'ipad-pro-13', sku: 'APL-IPP13', description: 'Ultra-thin, powerful iPad Pro with M4 chip and stunning XDR display.', category: 'Electronics', brand: 'Apple', price: '$1,299', salePrice: '', stock: 20, weight: '0.579', sold: 95, status: 'Active', featured: false, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: false, showInstallmentBadge: true, tags: 'apple, ipad, tablet', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Display: 13 inch | Storage: 256GB | WiFi: Yes' },
+  { id: 'PRD007', name: 'AirPods Pro 2', slug: 'airpods-pro-2', sku: 'APL-APP2', description: 'Active Noise Cancellation, Adaptive Transparency and Personalized Spatial Audio.', category: 'Audio', brand: 'Apple', price: '$249', salePrice: '', stock: 55, weight: '0.061', sold: 210, status: 'Active', featured: true, wholesaleOnly: false, allowInstallments: false, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: false, tags: 'apple, airpods, wireless', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Type: In-ear | Noise Cancellation: Yes | Battery: 6hrs' },
+  { id: 'PRD008', name: 'Beats Studio Pro', slug: 'beats-studio-pro', sku: 'BTS-SP', description: 'Professional sound tuning, personalized ANC, and up to 40 hours battery.', category: 'Audio', brand: 'Beats', price: '$349', salePrice: '$299', stock: 0, weight: '0.26', sold: 42, status: 'Out of Stock', featured: false, wholesaleOnly: false, allowInstallments: false, showGuaranteeBadge: false, showReturnsBadge: true, showInstallmentBadge: false, tags: 'beats, headphones, premium', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Type: Over-ear | Battery: 40hrs | Color: Black' },
+];
+
+const CATEGORIES = ['Electronics', 'Audio', 'Wearables', 'Clothing', 'Food & Beverages', 'Sports'];
+const BRANDS = ['Apple', 'Samsung', 'Sony', 'Beats', 'Bose', 'Dell', 'LG', 'Huawei', 'Other'];
+const STATUSES = ['Active', 'Inactive', 'Low Stock', 'Out of Stock'];
+const BOOL_OPTS = ['No', 'Yes'];
+const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const EMPTY_FORM = {
+  name: '', slug: '', sku: '', description: '', category: 'Electronics', brand: 'Apple',
+  price: '', salePrice: '', stock: '0', weight: '', status: 'Active',
+  featured: 'No', wholesaleOnly: 'No', allowInstallments: 'No',
+  showGuaranteeBadge: 'No', showReturnsBadge: 'No', showInstallmentBadge: 'No',
+  tags: '', metaTitle: '', metaDescription: '', imageUrl: '', specifications: '',
+};
+
+function ProductsContent() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const card = isDark ? '#0D1523' : '#FFFFFF'; const border = isDark ? '#1E293B' : '#E2E8F0';
+  const textMain = isDark ? '#FFFFFF' : '#0F172A'; const textMuted = isDark ? '#8E9AAF' : '#64748B';
+  const surface = isDark ? '#101826' : '#F1F5F9';
+
+  const [data, setData] = useState<Product[]>(INITIAL);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editRow, setEditRow] = useState<Product | null>(null);
+  const [deleteRow, setDeleteRow] = useState<Product | null>(null);
+  const [viewRow, setViewRow] = useState<Product | null>(null);
+  const [form, setForm] = useState({ ...EMPTY_FORM });
+  const [loading, setLoading] = useState(false);
+
+  const fp = (k: string) => (v: string) => setForm(f => {
+    const updated = { ...f, [k]: v };
+    if (k === 'name') updated.slug = toSlug(v);
+    return updated;
+  });
+
+  const boolToStr = (v: boolean) => v ? 'Yes' : 'No';
+
+  const openAdd = () => { setForm({ ...EMPTY_FORM }); setAddOpen(true); };
+  const openEdit = (row: Record<string, unknown>) => {
+    const r = row as unknown as Product;
+    setForm({
+      name: r.name, slug: r.slug || toSlug(r.name), sku: r.sku, description: r.description || '',
+      category: r.category, brand: r.brand || 'Apple', price: r.price, salePrice: r.salePrice || '',
+      stock: String(r.stock), weight: r.weight || '', status: r.status,
+      featured: boolToStr(r.featured), wholesaleOnly: boolToStr(r.wholesaleOnly),
+      allowInstallments: boolToStr(r.allowInstallments), showGuaranteeBadge: boolToStr(r.showGuaranteeBadge),
+      showReturnsBadge: boolToStr(r.showReturnsBadge), showInstallmentBadge: boolToStr(r.showInstallmentBadge),
+      tags: r.tags || '', metaTitle: r.metaTitle || '', metaDescription: r.metaDescription || '',
+      imageUrl: r.imageUrl || '', specifications: r.specifications || '',
+    });
+    setEditRow(r);
+  };
+  const openDelete = (row: Record<string, unknown>) => setDeleteRow(row as unknown as Product);
+  const openView = (row: Record<string, unknown>) => setViewRow(row as unknown as Product);
+
+  const strToBool = (v: string) => v === 'Yes';
+
+  const handleAdd = async () => {
+    if (!form.name.trim() || !form.sku.trim()) { toast.error('Name and SKU are required'); return; }
+    setLoading(true);
+    try {
+      await createProduct({ ...form, stock: Number(form.stock) });
+      const newItem: Product = {
+        id: `PRD${String(Date.now()).slice(-3)}`, ...form, stock: Number(form.stock), sold: 0,
+        featured: strToBool(form.featured), wholesaleOnly: strToBool(form.wholesaleOnly),
+        allowInstallments: strToBool(form.allowInstallments), showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
+        showReturnsBadge: strToBool(form.showReturnsBadge), showInstallmentBadge: strToBool(form.showInstallmentBadge),
+      };
+      setData(d => [...d, newItem]);
+      toast.success('Product added'); setAddOpen(false);
+    } catch { toast.error('Failed to add product — check your API connection'); }
+    setLoading(false);
+  };
+
+  const handleEdit = async () => {
+    if (!editRow) return;
+    setLoading(true);
+    try {
+      await updateProduct(editRow.id, { ...form, stock: Number(form.stock) });
+      setData(d => d.map(p => p.id === editRow.id ? {
+        ...p, ...form, stock: Number(form.stock),
+        featured: strToBool(form.featured), wholesaleOnly: strToBool(form.wholesaleOnly),
+        allowInstallments: strToBool(form.allowInstallments), showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
+        showReturnsBadge: strToBool(form.showReturnsBadge), showInstallmentBadge: strToBool(form.showInstallmentBadge),
+      } : p));
+      toast.success('Product updated'); setEditRow(null);
+    } catch { toast.error('Failed to update product — check your API connection'); }
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteRow) return;
+    setLoading(true);
+    try {
+      await deleteProduct(deleteRow.id);
+      setData(d => d.filter(p => p.id !== deleteRow.id));
+      toast.success('Product deleted'); setDeleteRow(null);
+    } catch { toast.error('Failed to delete product — check your API connection'); }
+    setLoading(false);
+  };
+
+  const statusBadge = (status: string) => {
+    const map: Record<string, { bg: string; color: string }> = {
+      Active: { bg: 'rgba(31,168,154,0.12)', color: '#1FA89A' },
+      Inactive: { bg: 'rgba(100,116,139,0.1)', color: '#8E9AAF' },
+      'Low Stock': { bg: 'rgba(255,193,7,0.12)', color: '#FFC107' },
+      'Out of Stock': { bg: 'rgba(239,68,68,0.12)', color: '#ef4444' },
+    };
+    const s = map[status] || map.Inactive;
+    return <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: s.bg, color: s.color }}>{status}</span>;
+  };
+
+  const columns: Column[] = [
+    { key: 'id', label: 'ID', width: '90px' },
+    { key: 'name', label: 'Product', render: (v, row) => (
+      <div>
+        <div style={{ fontWeight: 600, color: textMain }}>{String(v)}</div>
+        <div style={{ fontSize: '11px', color: textMuted, marginTop: '2px' }}>{String((row as unknown as Product).sku)} · {String((row as unknown as Product).brand)}</div>
+      </div>
+    )},
+    { key: 'category', label: 'Category' },
+    { key: 'price', label: 'Price', render: (v, row) => {
+      const r = row as unknown as Product;
+      return (
+        <div>
+          <div style={{ fontWeight: 700, color: textMain }}>{String(v)}</div>
+          {r.salePrice && <div style={{ fontSize: '11px', color: '#1FA89A', marginTop: '1px' }}>Sale: {r.salePrice}</div>}
+        </div>
+      );
+    }},
+    { key: 'stock', label: 'Stock', render: (v) => <span style={{ fontWeight: 700, color: Number(v) === 0 ? '#ef4444' : Number(v) < 10 ? '#FFC107' : '#1FA89A' }}>{String(v)}</span> },
+    { key: 'featured', label: 'Featured', render: (v) => <span style={{ padding: '2px 7px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: v ? 'rgba(99,102,241,0.12)' : 'rgba(100,116,139,0.08)', color: v ? '#6366f1' : '#8E9AAF' }}>{v ? 'Yes' : 'No'}</span> },
+    { key: 'status', label: 'Status', render: (v) => statusBadge(String(v)) },
+  ];
+
+  const sectionLabel = (label: string) => (
+    <div style={{ fontSize: '11px', fontWeight: 700, color: textMuted, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '12px 0 4px', borderBottom: `1px solid ${border}`, marginBottom: '12px' }}>{label}</div>
+  );
+
+  const formFields = (
+    <>
+      {sectionLabel('Basic Information')}
+      <FormField label="Product Name *" value={form.name} onChange={fp('name')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Samsung Galaxy S24 Ultra" />
+      <FormField label="URL Slug" value={form.slug} onChange={fp('slug')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="auto-generated from name" />
+      <FormField label="SKU / Product Code *" value={form.sku} onChange={fp('sku')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. SAM-S24U-BLK" />
+      <FormField label="Description" value={form.description} onChange={fp('description')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Describe this product in detail — features, what's in the box, warranty info..." type="textarea" />
+
+      {sectionLabel('Pricing & Inventory')}
+      <FormField label="Price (USD) *" value={form.price} onChange={fp('price')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="0.00" />
+      <FormField label="Sale Price (optional)" value={form.salePrice} onChange={fp('salePrice')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Optional — leave blank if no sale" />
+      <FormField label="Stock Qty" value={form.stock} onChange={fp('stock')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="0" />
+      <FormField label="Weight (KG)" value={form.weight} onChange={fp('weight')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. 0.5" />
+      <FormField label="Wholesale Only" value={form.wholesaleOnly} onChange={fp('wholesaleOnly')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+
+      {sectionLabel('Categorization')}
+      <FormField label="Category" value={form.category} onChange={fp('category')} options={CATEGORIES} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+      <FormField label="Brand" value={form.brand} onChange={fp('brand')} options={BRANDS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+
+      {sectionLabel('Product Images')}
+      <FormField label="Image URL (main product image)" value={form.imageUrl} onChange={fp('imageUrl')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="https://... (JPG, PNG, WebP)" />
+
+      {sectionLabel('Specifications')}
+      <FormField label="Specifications" value={form.specifications} onChange={fp('specifications')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Color: Black | RAM: 8GB | Storage: 256GB | Screen: 6.7 inch" type="textarea" />
+
+      {sectionLabel('Tags')}
+      <FormField label="Tags (comma-separated)" value={form.tags} onChange={fp('tags')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. apple, iphone, smartphone, 5G" />
+
+      {sectionLabel('SEO Meta')}
+      <FormField label="Meta Title" value={form.metaTitle} onChange={fp('metaTitle')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Leave blank to use product name" />
+      <FormField label="Meta Description" value={form.metaDescription} onChange={fp('metaDescription')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Short description for search engines (max 160 chars)" type="textarea" />
+
+      {sectionLabel('Visibility & Status')}
+      <FormField label="Status" value={form.status} onChange={fp('status')} options={STATUSES} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+      <FormField label="Featured on Homepage" value={form.featured} onChange={fp('featured')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+
+      {sectionLabel('Installment / Credit')}
+      <FormField label="Allow Installments" value={form.allowInstallments} onChange={fp('allowInstallments')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+
+      {sectionLabel('Trust & Guarantee Badges')}
+      <FormField label="Show Guarantee Badge" value={form.showGuaranteeBadge} onChange={fp('showGuaranteeBadge')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+      <FormField label="Show Free Returns Badge" value={form.showReturnsBadge} onChange={fp('showReturnsBadge')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+      <FormField label="Show Installment Badge" value={form.showInstallmentBadge} onChange={fp('showInstallmentBadge')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+    </>
+  );
+
+  return (
+    <div>
+      <PageHeader title="Products" subtitle="Manage your product catalogue" icon={Package} onAdd={openAdd} addLabel="Add Product" />
+      <DataTable columns={columns} data={data as unknown as Record<string, unknown>[]} searchPlaceholder="Search products..." onEdit={openEdit} onDelete={openDelete} onView={openView} />
+
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add New Product">
+        {formFields}
+        <ModalFooter onClose={() => setAddOpen(false)} onSubmit={handleAdd} loading={loading} submitLabel="Create Product" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+
+      <Modal open={!!editRow} onClose={() => setEditRow(null)} title={`Edit: ${editRow?.name ?? ''}`}>
+        {formFields}
+        <ModalFooter onClose={() => setEditRow(null)} onSubmit={handleEdit} loading={loading} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+
+      {viewRow && (
+        <Modal open={!!viewRow} onClose={() => setViewRow(null)} title="Product Details">
+          <FormField label="Name" value={viewRow.name} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="SKU" value={viewRow.sku} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Brand" value={viewRow.brand} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Category" value={viewRow.category} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Price" value={viewRow.price} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Sale Price" value={viewRow.salePrice || '—'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Stock" value={String(viewRow.stock)} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Weight (KG)" value={viewRow.weight || '—'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Description" value={viewRow.description || '—'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Specifications" value={viewRow.specifications || '—'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Tags" value={viewRow.tags || '—'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Status" value={viewRow.status} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <button onClick={() => setViewRow(null)} style={{ width: '100%', padding: '10px', borderRadius: '9px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, color: textMain, fontSize: '13.5px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter)', marginTop: '8px' }}>Close</button>
+        </Modal>
+      )}
+
+      <ConfirmDialog open={!!deleteRow} onClose={() => setDeleteRow(null)} onConfirm={handleDelete} loading={loading} title="Delete Product" message={`Delete "${deleteRow?.name}" permanently?`} />
+    </div>
+  );
+}
+
+export default function ProductsPage() { return <AdminShell><ProductsContent /></AdminShell>; }

@@ -1,0 +1,206 @@
+'use client';
+import { useState } from 'react';
+import AdminShell from '@/components/admin/admin-shell';
+import DataTable, { Column } from '@/components/admin/data-table';
+import PageHeader from '@/components/admin/page-header';
+import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
+import { useTheme } from '@/contexts/theme-context';
+import { Users } from 'lucide-react';
+import { createUser, updateUser, deleteUser } from '@/lib/api';
+import toast from 'react-hot-toast';
+
+type User = { id: string; name: string; email: string; role: string; status: string; joined: string; orders: number };
+
+const INITIAL: User[] = [
+  { id: 'USR001', name: 'Bwalya Chileshe', email: 'bwalya@example.com', role: 'Customer', status: 'Active', joined: '2025-05-26', orders: 12 },
+  { id: 'USR002', name: 'Mulenga Schone', email: 'mulenga@example.com', role: 'Customer', status: 'Active', joined: '2025-05-25', orders: 8 },
+  { id: 'USR003', name: 'Chansa Mumba', email: 'chansa@example.com', role: 'Wholesale', status: 'Active', joined: '2025-05-24', orders: 34 },
+  { id: 'USR004', name: 'Admin User', email: 'admin@kryros.com', role: 'Admin', status: 'Active', joined: '2025-01-01', orders: 0 },
+  { id: 'USR005', name: 'John Banda', email: 'john@example.com', role: 'Customer', status: 'Inactive', joined: '2025-04-10', orders: 3 },
+  { id: 'USR006', name: 'Mary Phiri', email: 'mary@example.com', role: 'Customer', status: 'Active', joined: '2025-05-20', orders: 7 },
+  { id: 'USR007', name: 'Peter Zulu', email: 'peter@example.com', role: 'Wholesale', status: 'Active', joined: '2025-03-15', orders: 22 },
+  { id: 'USR008', name: 'Grace Tembo', email: 'grace@example.com', role: 'Customer', status: 'Blocked', joined: '2025-02-28', orders: 1 },
+];
+
+const roles = [
+  { name: 'Super Admin', permissions: 'Full Access', users: 1, color: '#ef4444' },
+  { name: 'Admin', permissions: 'Dashboard, Orders, Products, Users', users: 3, color: '#f59e0b' },
+  { name: 'Wholesale', permissions: 'Wholesale Orders, Products', users: 2, color: '#6366f1' },
+  { name: 'Customer', permissions: 'View Products, Place Orders', users: 150, color: '#1FA89A' },
+];
+
+const EMPTY_FORM = { name: '', email: '', role: 'Customer', status: 'Active' };
+
+function UsersContent() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const card = isDark ? '#0D1523' : '#FFFFFF';
+  const border = isDark ? '#1E293B' : '#E2E8F0';
+  const textMain = isDark ? '#FFFFFF' : '#0F172A';
+  const textMuted = isDark ? '#8E9AAF' : '#64748B';
+  const surface = isDark ? '#101826' : '#F1F5F9';
+
+  const [data, setData] = useState<User[]>(INITIAL);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editRow, setEditRow] = useState<User | null>(null);
+  const [deleteRow, setDeleteRow] = useState<User | null>(null);
+  const [viewRow, setViewRow] = useState<User | null>(null);
+  const [form, setForm] = useState({ ...EMPTY_FORM });
+  const [loading, setLoading] = useState(false);
+
+  const fp = (k: string) => (v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const openAdd = () => { setForm({ ...EMPTY_FORM }); setAddOpen(true); };
+  const openEdit = (row: Record<string, unknown>) => { const r = row as unknown as User; setForm({ name: r.name, email: r.email, role: r.role, status: r.status }); setEditRow(r); };
+  const openDelete = (row: Record<string, unknown>) => setDeleteRow(row as unknown as User);
+  const openView = (row: Record<string, unknown>) => setViewRow(row as unknown as User);
+
+  const handleAdd = async () => {
+    if (!form.name.trim() || !form.email.trim()) { toast.error('Name and email are required'); return; }
+    setLoading(true);
+    try {
+      await createUser(form);
+      const newItem: User = { id: `USR${String(Date.now()).slice(-3)}`, ...form, joined: new Date().toISOString().split('T')[0], orders: 0 };
+      setData(d => [...d, newItem]);
+      toast.success('User added');
+      setAddOpen(false);
+    } catch { toast.error('Failed to add user — check your API connection'); }
+    setLoading(false);
+  };
+
+  const handleEdit = async () => {
+    if (!editRow) return;
+    setLoading(true);
+    try {
+      await updateUser(editRow.id, form);
+      setData(d => d.map(u => u.id === editRow.id ? { ...u, ...form } : u));
+      toast.success('User updated');
+      setEditRow(null);
+    } catch { toast.error('Failed to update user — check your API connection'); }
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteRow) return;
+    setLoading(true);
+    try {
+      await deleteUser(deleteRow.id);
+      setData(d => d.filter(u => u.id !== deleteRow.id));
+      toast.success('User deleted');
+      setDeleteRow(null);
+    } catch { toast.error('Failed to delete user — check your API connection'); }
+    setLoading(false);
+  };
+
+  const statusBadge = (status: string) => {
+    const map: Record<string, { bg: string; color: string }> = {
+      Active: { bg: 'rgba(31,168,154,0.12)', color: '#1FA89A' },
+      Inactive: { bg: 'rgba(100,116,139,0.12)', color: '#64748b' },
+      Blocked: { bg: 'rgba(185,28,28,0.12)', color: '#ef4444' },
+    };
+    const s = map[status] || map.Inactive;
+    return <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 600, background: s.bg, color: s.color }}>{status}</span>;
+  };
+
+  const roleBadge = (role: string) => {
+    const map: Record<string, string> = { Admin: '#ef4444', 'Super Admin': '#ef4444', Wholesale: '#6366f1', Customer: '#1FA89A' };
+    const color = map[role] || '#64748b';
+    return <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 600, background: `${color}15`, color }}>{role}</span>;
+  };
+
+  const columns: Column[] = [
+    { key: 'id', label: 'ID', width: '90px' },
+    { key: 'name', label: 'Name', render: (v, row) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(31,168,154,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#1FA89A', flexShrink: 0 }}>
+          {String(v).charAt(0)}
+        </div>
+        <div>
+          <div style={{ fontSize: '13.5px', fontWeight: 600, color: textMain }}>{String(v)}</div>
+          <div style={{ fontSize: '11.5px', color: textMuted }}>{String(row.email)}</div>
+        </div>
+      </div>
+    )},
+    { key: 'role', label: 'Role', render: (v) => roleBadge(String(v)) },
+    { key: 'status', label: 'Status', render: (v) => statusBadge(String(v)) },
+    { key: 'orders', label: 'Orders', render: (v) => <span style={{ fontWeight: 700, color: textMain }}>{String(v)}</span> },
+    { key: 'joined', label: 'Joined' },
+  ];
+
+  const modalFields = (
+    <>
+      <FormField label="Full Name" value={form.name} onChange={fp('name')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. John Banda" />
+      <FormField label="Email Address" value={form.email} onChange={fp('email')} type="email" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="john@example.com" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <FormField label="Role" value={form.role} onChange={fp('role')} options={['Customer', 'Wholesale', 'Admin', 'Super Admin']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+        <FormField label="Status" value={form.status} onChange={fp('status')} options={['Active', 'Inactive', 'Blocked']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+      </div>
+    </>
+  );
+
+  return (
+    <div>
+      <PageHeader title="Users & Roles" subtitle="Manage users and their permissions" icon={Users} onAdd={openAdd} addLabel="Add User" />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }} className="stats-grid">
+        {[{ label: 'Total Users', val: String(data.length), color: '#1FA89A' }, { label: 'Active', val: String(data.filter(u=>u.status==='Active').length), color: '#1FA89A' }, { label: 'Inactive', val: String(data.filter(u=>u.status==='Inactive').length), color: '#64748b' }, { label: 'Blocked', val: String(data.filter(u=>u.status==='Blocked').length), color: '#ef4444' }].map((s) => (
+          <div key={s.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '16px' }}>
+            <div style={{ fontSize: '12px', color: textMuted, marginBottom: '6px' }}>{s.label}</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: s.color }}>{s.val}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '18px', marginBottom: '20px' }}>
+        <div style={{ fontSize: '14px', fontWeight: 700, color: textMain, marginBottom: '14px' }}>Roles Overview</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }} className="roles-grid">
+          {roles.map((r) => (
+            <div key={r.name} style={{ background: surface, border: `1px solid ${border}`, borderRadius: '10px', padding: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: textMain }}>{r.name}</span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: r.color }}>{r.users} users</span>
+              </div>
+              <div style={{ fontSize: '11.5px', color: textMuted }}>{r.permissions}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <DataTable columns={columns} data={data as unknown as Record<string, unknown>[]} searchPlaceholder="Search users..." onEdit={openEdit} onDelete={openDelete} onView={openView} />
+
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add New User">
+        {modalFields}
+        <ModalFooter onClose={() => setAddOpen(false)} onSubmit={handleAdd} loading={loading} submitLabel="Add User" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+
+      <Modal open={!!editRow} onClose={() => setEditRow(null)} title={`Edit: ${editRow?.name ?? ''}`}>
+        {modalFields}
+        <ModalFooter onClose={() => setEditRow(null)} onSubmit={handleEdit} loading={loading} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+
+      <Modal open={!!viewRow} onClose={() => setViewRow(null)} title="User Details">
+        {viewRow && <>
+          <FormField label="Full Name" value={viewRow.name} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Email" value={viewRow.email} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <FormField label="Role" value={viewRow.role} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+            <FormField label="Status" value={viewRow.status} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <FormField label="Joined" value={viewRow.joined} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+            <FormField label="Total Orders" value={String(viewRow.orders)} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          </div>
+          <div style={{ marginTop: '6px' }}><button onClick={() => setViewRow(null)} style={{ width: '100%', padding: '10px', borderRadius: '9px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, color: textMain, fontSize: '13.5px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>Close</button></div>
+        </>}
+      </Modal>
+
+      <ConfirmDialog open={!!deleteRow} onClose={() => setDeleteRow(null)} onConfirm={handleDelete} loading={loading} title="Delete User" message={`Are you sure you want to delete "${deleteRow?.name}"? This cannot be undone.`} />
+
+      <style>{`@media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr !important; } .roles-grid { grid-template-columns: 1fr 1fr !important; } }`}</style>
+    </div>
+  );
+}
+
+export default function UsersPage() {
+  return <AdminShell><UsersContent /></AdminShell>;
+}
