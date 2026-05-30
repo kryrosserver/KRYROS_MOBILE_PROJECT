@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import { getWholesaleOrders } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────
-type Wholesale = { id:string; company:string; contact:string; email:string; orders:number; total:string; status:string; tier:string };
+type Wholesale = { id:string; name:string; contact:string; phone:string; city:string; tier:string; credit:string; orders:number; totalSpent:string; status:string; joined:string };
 type Deal = { id:string; title:string; description:string; discount:string; minOrder:string; validUntil:string; status:string };
 type WholesaleProduct = { id:string; name:string; sku:string; price:string; moq:string; category:string; status:string };
 
@@ -58,7 +58,7 @@ function WholesaleContent() {
   const [editPartner, setEditPartner] = useState<Wholesale|null>(null);
   const [deletePartner, setDeletePartner] = useState<Wholesale|null>(null);
   const [viewPartner, setViewPartner] = useState<Wholesale|null>(null);
-  const [pForm, setPForm] = useState({ company:'', contact:'', email:'', status:'Active', tier:'Bronze' });
+  const [pForm, setPForm] = useState({ name:'', contact:'', status:'Active', tier:'Bronze' });
   const pfp = (k:string) => (v:string) => setPForm(f=>({...f,[k]:v}));
 
   // Deals state
@@ -97,8 +97,8 @@ function WholesaleContent() {
 
   // ── Partner handlers ──
   const handleAddPartner = () => {
-    if (!pForm.company.trim()) { toast.error('Company name required'); return; }
-    const w: Wholesale = { id:`WHL${String(Date.now()).slice(-3)}`, ...pForm, orders:0, total:'$0' };
+    if (!pForm.name.trim()) { toast.error('Company name required'); return; }
+    const w: Wholesale = { id:`WHL${String(Date.now()).slice(-3)}`, ...pForm, orders:0, totalSpent:'K0', phone:'', city:'', credit:'K0', joined:'' };
     setPartners(d=>[...d,w]); toast.success('Partner added'); setAddPartnerOpen(false);
   };
   const handleEditPartner = () => {
@@ -149,13 +149,11 @@ function WholesaleContent() {
   // ── Columns ──
   const partnerCols: Column[] = [
     { key:'id', label:'ID', width:'90px' },
-    { key:'company', label:'Company', render:(v,row)=>(
-      <div><div style={{fontWeight:700,color:textMain}}>{String(v)}</div><div style={{fontSize:'11.5px',color:textMuted}}>{String(row.email)}</div></div>
-    )},
+    { key:'name', label:'Company', render:(v)=><span style={{fontWeight:700,color:textMain}}>{String(v)}</span> },
     { key:'contact', label:'Contact' },
     { key:'tier', label:'Tier', render:(v)=>{ const c=tierColor(String(v)); return <span style={{padding:'3px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:600,background:c.bg,color:c.color}}>{String(v)}</span>; }},
     { key:'orders', label:'Orders', render:(v)=><span style={{fontWeight:700,color:'#6366f1'}}>{String(v)}</span> },
-    { key:'total', label:'Total Value', render:(v)=><span style={{fontWeight:700,color:textMain}}>{String(v)}</span> },
+    { key:'totalSpent', label:'Total Spent', render:(v)=><span style={{fontWeight:700,color:textMain}}>{String(v)}</span> },
     { key:'status', label:'Status', render:(v)=>statusBadge(String(v)) },
   ];
   const dealCols: Column[] = [
@@ -177,9 +175,8 @@ function WholesaleContent() {
 
   const partnerForm = (
     <>
-      <FormField label="Company Name *" value={pForm.company} onChange={pfp('company')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. TechHub Zambia" />
-      <FormField label="Contact Person" value={pForm.contact} onChange={pfp('contact')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Full name" />
-      <FormField label="Email" value={pForm.email} onChange={pfp('email')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="email@company.com" />
+      <FormField label="Company Name *" value={pForm.name} onChange={pfp('name')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. TechHub Zambia" />
+      <FormField label="Contact / Email" value={pForm.contact} onChange={pfp('contact')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="contact@company.com" />
       <FormField label="Tier" value={pForm.tier} onChange={pfp('tier')} options={TIERS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       <FormField label="Status" value={pForm.status} onChange={pfp('status')} options={PARTNER_STATUSES} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
     </>
@@ -314,7 +311,7 @@ function WholesaleContent() {
         subtitle={sectionSubs[section!]}
         icon={section==='accounts'?Truck:section==='deals'?Star:Package}
         onAdd={()=>{
-          if (section==='accounts') { setPForm({company:'',contact:'',email:'',status:'Active',tier:'Bronze'}); setAddPartnerOpen(true); }
+          if (section==='accounts') { setPForm({name:'',contact:'',status:'Active',tier:'Bronze'}); setAddPartnerOpen(true); }
           if (section==='deals') { setDForm({title:'',description:'',discount:'',minOrder:'',validUntil:'',status:'Active'}); setAddDealOpen(true); }
           if (section==='inventory') { setIForm({name:'',sku:'',price:'',moq:'',category:'Electronics',status:'Active'}); setAddInvOpen(true); }
         }}
@@ -323,7 +320,7 @@ function WholesaleContent() {
 
       {section === 'accounts' && (
         <DataTable columns={partnerCols} data={partners as unknown as Record<string,unknown>[]} searchPlaceholder="Search partners..."
-          onEdit={row=>{ const r=row as unknown as Wholesale; setPForm({company:r.company,contact:r.contact,email:r.email,status:r.status,tier:r.tier}); setEditPartner(r); }}
+          onEdit={row=>{ const r=row as unknown as Wholesale; setPForm({name:r.name,contact:r.contact,status:r.status,tier:r.tier}); setEditPartner(r); }}
           onDelete={row=>setDeletePartner(row as unknown as Wholesale)}
           onView={row=>setViewPartner(row as unknown as Wholesale)}
         />
@@ -343,20 +340,21 @@ function WholesaleContent() {
 
       {/* Partner Modals */}
       <Modal open={addPartnerOpen} onClose={()=>setAddPartnerOpen(false)} title="Add Wholesale Partner">{partnerForm}<ModalFooter onClose={()=>setAddPartnerOpen(false)} onSubmit={handleAddPartner} loading={false} submitLabel="Add Partner" isDark={isDark} border={border} textMain={textMain} /></Modal>
-      {editPartner && <Modal open={!!editPartner} onClose={()=>setEditPartner(null)} title={`Edit: ${editPartner.company}`}>{partnerForm}<ModalFooter onClose={()=>setEditPartner(null)} onSubmit={handleEditPartner} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} /></Modal>}
+      {editPartner && <Modal open={!!editPartner} onClose={()=>setEditPartner(null)} title={`Edit: ${editPartner.name}`}>{partnerForm}<ModalFooter onClose={()=>setEditPartner(null)} onSubmit={handleEditPartner} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} /></Modal>}
       {viewPartner && (
         <Modal open={!!viewPartner} onClose={()=>setViewPartner(null)} title="Partner Details">
-          <FormField label="Company" value={viewPartner.company} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Company" value={viewPartner.name} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <FormField label="Contact" value={viewPartner.contact} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Email" value={viewPartner.email} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <FormField label="Tier" value={viewPartner.tier} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Credit Limit" value={viewPartner.credit} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <FormField label="Orders" value={String(viewPartner.orders)} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Total Value" value={viewPartner.total} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Total Spent" value={viewPartner.totalSpent} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Joined" value={viewPartner.joined} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <FormField label="Status" value={viewPartner.status} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <button onClick={()=>setViewPartner(null)} style={{width:'100%',padding:'10px',borderRadius:'9px',background:isDark?'#1E293B':'#F1F5F9',border:`1px solid ${border}`,color:textMain,fontSize:'13.5px',fontWeight:600,cursor:'pointer',fontFamily:'var(--font-inter)'}}>Close</button>
         </Modal>
       )}
-      <ConfirmDialog open={!!deletePartner} onClose={()=>setDeletePartner(null)} onConfirm={handleDeletePartner} loading={false} title="Remove Partner" message={`Remove "${deletePartner?.company}" from wholesale?`} />
+      <ConfirmDialog open={!!deletePartner} onClose={()=>setDeletePartner(null)} onConfirm={handleDeletePartner} loading={false} title="Remove Partner" message={`Remove "${deletePartner?.name}" from wholesale?`} />
 
       {/* Deal Modals */}
       <Modal open={addDealOpen} onClose={()=>setAddDealOpen(false)} title="Add Featured Deal">{dealForm}<ModalFooter onClose={()=>setAddDealOpen(false)} onSubmit={handleAddDeal} loading={false} submitLabel="Add Deal" isDark={isDark} border={border} textMain={textMain} /></Modal>
