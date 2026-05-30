@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
@@ -7,6 +7,7 @@ import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin
 import { useTheme } from '@/contexts/theme-context';
 import { Truck, Users, Star, Package, ChevronRight, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getWholesaleOrders } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────
 type Wholesale = { id:string; company:string; contact:string; email:string; orders:number; total:string; status:string; tier:string };
@@ -14,18 +15,9 @@ type Deal = { id:string; title:string; description:string; discount:string; minO
 type WholesaleProduct = { id:string; name:string; sku:string; price:string; moq:string; category:string; status:string };
 
 // ─── Initial Data ─────────────────────────────────────────
-const INIT_PARTNERS: Wholesale[] = [
-  { id:'WHL001', company:'TechHub Zambia', contact:'James Mwale', email:'james@techhub.zm', orders:12, total:'$45,200', status:'Active', tier:'Gold' },
-  { id:'WHL002', company:'Digital World', contact:'Sarah Banda', email:'sarah@dworld.zm', orders:8, total:'$28,500', status:'Active', tier:'Silver' },
-  { id:'WHL003', company:'Electronics Plus', contact:'Paul Tembo', email:'paul@eplus.zm', orders:20, total:'$92,000', status:'Active', tier:'Platinum' },
-  { id:'WHL004', company:'Mobile Zone', contact:'Lucy Phiri', email:'lucy@mzone.zm', orders:5, total:'$15,300', status:'Pending', tier:'Bronze' },
-  { id:'WHL005', company:'Smart Gadgets', contact:'Mike Zulu', email:'mike@sgadgets.zm', orders:3, total:'$8,900', status:'Inactive', tier:'Bronze' },
-];
-const INIT_DEALS: Deal[] = [
-  { id:'DEL001', title:'Bulk Electronics — 15% Off', description:'15% discount on all electronics orders above $5,000', discount:'15%', minOrder:'$5,000', validUntil:'2025-06-30', status:'Active' },
-  { id:'DEL002', title:'Audio Bundle — Buy 10 Get 2 Free', description:'Purchase 10 audio products and get 2 free', discount:'Buy 10+2', minOrder:'$2,000', validUntil:'2025-07-31', status:'Active' },
-];
-const INIT_PRODUCTS: WholesaleProduct[] = [];
+// Partners loaded from API
+// Deals loaded from API
+// Products loaded from API
 const TIERS = ['Bronze','Silver','Gold','Platinum'];
 const PARTNER_STATUSES = ['Active','Inactive','Pending','Suspended'];
 
@@ -42,7 +34,26 @@ function WholesaleContent() {
   const [section, setSection] = useState<Section>(null);
 
   // Partners state
-  const [partners, setPartners] = useState<Wholesale[]>(INIT_PARTNERS);
+  const [partners, setPartners] = useState<Wholesale[]>([]);
+  useEffect(() => {
+    getWholesaleOrders({ limit: 200 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Wholesale[] = raw.map((w: any) => ({
+        id: w.id || '',
+        name: w.businessName || w.name || (w.user ? [w.user.firstName, w.user.lastName].filter(Boolean).join(' ') : 'Partner'),
+        contact: w.user?.email || w.contact || '',
+        phone: w.user?.phone || w.phone || '',
+        city: w.city || '',
+        tier: w.tier || w.wholesaleLevel || 'Bronze',
+        credit: w.creditLimit ? `K${Number(w.creditLimit).toLocaleString()}` : 'K0',
+        orders: w._count?.orders ?? w.totalOrders ?? 0,
+        totalSpent: w.totalPurchases ? `K${Number(w.totalPurchases).toLocaleString()}` : 'K0',
+        status: w.isActive !== false ? 'Active' : 'Inactive',
+        joined: w.createdAt ? w.createdAt.split('T')[0] : '',
+      }));
+      setPartners(normalized);
+    }).catch(() => {});
+  }, []);
   const [addPartnerOpen, setAddPartnerOpen] = useState(false);
   const [editPartner, setEditPartner] = useState<Wholesale|null>(null);
   const [deletePartner, setDeletePartner] = useState<Wholesale|null>(null);
@@ -51,7 +62,7 @@ function WholesaleContent() {
   const pfp = (k:string) => (v:string) => setPForm(f=>({...f,[k]:v}));
 
   // Deals state
-  const [deals, setDeals] = useState<Deal[]>(INIT_DEALS);
+  const [deals, setDeals] = useState<Deal[]>([]);
   const [addDealOpen, setAddDealOpen] = useState(false);
   const [editDeal, setEditDeal] = useState<Deal|null>(null);
   const [deleteDeal, setDeleteDeal] = useState<Deal|null>(null);
@@ -59,7 +70,7 @@ function WholesaleContent() {
   const dfp = (k:string) => (v:string) => setDForm(f=>({...f,[k]:v}));
 
   // Inventory state
-  const [inventory, setInventory] = useState<WholesaleProduct[]>(INIT_PRODUCTS);
+  const [inventory, setInventory] = useState<WholesaleProduct[]>([]);
   const [addInvOpen, setAddInvOpen] = useState(false);
   const [editInv, setEditInv] = useState<WholesaleProduct|null>(null);
   const [deleteInv, setDeleteInv] = useState<WholesaleProduct|null>(null);
