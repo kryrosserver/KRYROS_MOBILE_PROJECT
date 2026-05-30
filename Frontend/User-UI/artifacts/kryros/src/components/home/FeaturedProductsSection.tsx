@@ -47,7 +47,7 @@ function FeaturedCard({ product }: { product: Product }) {
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-2"
             onError={() => setImgErr(true)}
           />
         ) : (
