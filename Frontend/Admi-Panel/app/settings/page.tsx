@@ -3,7 +3,9 @@ import AdminShell from '@/components/admin/admin-shell';
 import PageHeader from '@/components/admin/page-header';
 import { useTheme } from '@/contexts/theme-context';
 import { Settings, Store, Bell, Shield, Globe, CreditCard, Palette, Save } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getSettings, updateSettings } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 type Tab = 'general'|'store'|'notifications'|'security'|'payments'|'appearance';
 
@@ -35,6 +37,32 @@ function SettingsContent() {
   const [orderNotif, setOrderNotif] = useState(true);
   const [twoFA, setTwoFA] = useState(false);
   const [sessionTimeout, setSessionTimeout] = useState('30');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getSettings().then((r: any) => {
+      const s = r.data;
+      if (!s) return;
+      if (s.storeName) setStoreName(s.storeName);
+      if (s.email || s.storeEmail) setStoreEmail(s.email || s.storeEmail);
+      if (s.phone || s.storePhone) setStorePhone(s.phone || s.storePhone);
+      if (s.currency) setCurrency(s.currency);
+      if (s.timezone) setTimezone(s.timezone);
+      if (s.emailNotifications !== undefined) setEmailNotif(Boolean(s.emailNotifications));
+      if (s.pushNotifications !== undefined) setPushNotif(Boolean(s.pushNotifications));
+      if (s.orderNotifications !== undefined) setOrderNotif(Boolean(s.orderNotifications));
+      if (s.twoFactorEnabled !== undefined) setTwoFA(Boolean(s.twoFactorEnabled));
+    }).catch(() => {});
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateSettings({ storeName, storeEmail, storePhone, currency, timezone, emailNotifications: emailNotif, pushNotifications: pushNotif, orderNotifications: orderNotif, twoFactorEnabled: twoFA });
+      toast.success('Settings saved successfully');
+    } catch { toast.error('Failed to save settings — check connection'); }
+    setSaving(false);
+  };
 
   const inputStyle = { width:'100%', background:surface, border:`1px solid ${border}`, borderRadius:'9px', color:textMain, fontSize:'13.5px', fontFamily:'var(--font-inter)', outline:'none', padding:'10px 14px' };
   const labelStyle = { fontSize:'12.5px', fontWeight:600, color:textMuted, display:'block' as const, marginBottom:'6px' };
@@ -199,7 +227,7 @@ function SettingsContent() {
           <div style={{ marginTop:'24px', paddingTop:'16px', borderTop:`1px solid ${border}`, display:'flex', justifyContent:'flex-end', gap:'8px' }}>
             <button style={{ padding:'10px 20px', background:surface, border:`1px solid ${border}`, borderRadius:'9px', color:textMuted, fontSize:'13.5px', fontWeight:500, cursor:'pointer', fontFamily:'var(--font-inter)' }}>Cancel</button>
             <button style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 20px', background:'linear-gradient(135deg,#1FA89A,#27B9AF)', border:'none', borderRadius:'9px', color:'white', fontSize:'13.5px', fontWeight:600, cursor:'pointer', fontFamily:'var(--font-inter)', boxShadow:'0 4px 12px rgba(31,168,154,0.25)' }}>
-              <Save size={14} /> Save Changes
+              <Save size={14} /> {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>
