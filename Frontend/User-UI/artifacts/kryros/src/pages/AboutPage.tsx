@@ -9,16 +9,8 @@ export default function AboutPage() {
           <h1 className="text-2xl font-black text-foreground">About Us</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Your Trusted Shopping Partner</p>
         </div>
-        <div className="relative w-32 h-24 flex-shrink-0 ml-2">
-          <div className="absolute right-0 top-0 w-20 h-22 bg-primary rounded-2xl flex items-end justify-center pb-2 shadow-lg" style={{ height: 88 }}>
-            <span className="text-[10px] font-black text-white">KRYROS</span>
-          </div>
-          <div className="absolute left-0 bottom-0 w-12 h-12 rounded-xl overflow-hidden bg-white shadow-md border border-border">
-            <img src="https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&q=80" alt="product" className="w-full h-full object-cover" />
-          </div>
-          <div className="absolute left-8 bottom-0 w-10 h-10 rounded-xl overflow-hidden bg-white shadow-md border border-border">
-            <img src="https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=100&q=80" alt="product" className="w-full h-full object-cover" />
-          </div>
+        <div className="flex-shrink-0 ml-2">
+          <img src="/kryros-logo.svg" alt="KRYROS" className="w-20 h-20 rounded-2xl shadow-lg" />
         </div>
       </div>
 
@@ -63,8 +55,8 @@ export default function AboutPage() {
           {[
             { label: "Registered", value: "KRYROS MOBILE TECH LIMITED" },
             { label: "Address", value: "West Sussex, Burgess Hill, United Kingdom" },
-            { label: "Email", value: "support@kryros.com" },
-            { label: "Phone", value: "+1(800) 123-4567" },
+            { label: "Email", value: "kryrosmobile@gmail.com" },
+            { label: "Phone", value: "(+260) 966-423-719" },
           ].map(({ label, value }) => (
             <div key={label} className="flex gap-3 text-xs">
               <span className="font-semibold text-foreground w-20 flex-shrink-0">{label}</span>
