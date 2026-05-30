@@ -40,7 +40,7 @@ function CategoriesContent() {
         status: c.isActive !== false ? 'Active' : 'Inactive',
         description: c.description || '',
         imageUrl: c.image || c.imageUrl || '',
-        showOnHome: c.showOnHome ? 'Yes' : 'No',
+        showOnHome: Boolean(c.showOnHome),
         products: c._count?.products ?? 0,
       }));
       setData(normalized);
