@@ -23,7 +23,7 @@ const DEFAULT_WHOLESALE = {
     { title: "Secure Payments", desc: "Safe & encrypted transactions" },
     { title: "Dedicated Support", desc: "24/7 priority customer support" },
   ],
-  quoteCta: { title: "Want Better Prices?", subtitle: "Request a custom quote for bulk orders and get the best deals curated for your business.", ctaText: "Request a Quote", ctaLink: "/contact" },
+  quoteCta: { title: "Want Better Prices?", subtitle: "Request a custom quote for bulk orders and get the best deals curated for your business.", ctaText: "Request a Quote", ctaLink: "https://wa.me/260966423719" },
 };
 
 export default function WholesalePage() {
@@ -233,7 +233,7 @@ export default function WholesalePage() {
           <p className="text-xs font-bold text-foreground mb-1">{cms.quoteCta.title}</p>
           <p className="text-[9px] text-muted-foreground leading-snug">{cms.quoteCta.subtitle}</p>
         </div>
-        <Link href={cms.quoteCta.ctaLink || "/contact"}>
+        <Link href={cms.quoteCta.ctaLink || "https://wa.me/260966423719"}>
           <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl text-[10px] font-bold hover:bg-primary/90 transition-all flex-shrink-0 whitespace-nowrap">
             {cms.quoteCta.ctaText} <ArrowRight className="w-3 h-3" />
           </button>
