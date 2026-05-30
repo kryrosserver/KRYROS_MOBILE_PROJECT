@@ -1,33 +1,24 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Package } from 'lucide-react';
-import { createProduct, updateProduct, deleteProduct } from '@/lib/api';
+import { createProduct, updateProduct, deleteProduct, getProducts } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 type Product = {
   id: string; name: string; slug: string; sku: string; description: string;
   category: string; brand: string; price: string; salePrice: string;
   stock: number; weight: string; sold: number; status: string;
-  featured: boolean; wholesaleOnly: boolean; allowInstallments: boolean;
-  showGuaranteeBadge: boolean; showReturnsBadge: boolean; showInstallmentBadge: boolean;
+  featured: boolean;
+  showGuaranteeBadge: boolean; showReturnsBadge: boolean;
   tags: string; metaTitle: string; metaDescription: string; imageUrl: string; specifications: string;
 };
 
-const INITIAL: Product[] = [
-  { id: 'PRD001', name: 'iPhone 15 Pro Max', slug: 'iphone-15-pro-max', sku: 'APL-IP15PM', description: 'Apple iPhone 15 Pro Max with A17 Pro chip, titanium design and 48MP camera.', category: 'Electronics', brand: 'Apple', price: '$1,099', salePrice: '', stock: 45, weight: '0.221', sold: 245, status: 'Active', featured: true, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: true, tags: 'apple, iphone, smartphone', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Storage: 256GB | Color: Natural Titanium | Display: 6.7 inch' },
-  { id: 'PRD002', name: 'MacBook Air M2', slug: 'macbook-air-m2', sku: 'APL-MBA-M2', description: 'Supercharged by the Apple M2 chip, with 18-hour battery life.', category: 'Electronics', brand: 'Apple', price: '$1,249', salePrice: '$1,199', stock: 12, weight: '1.24', sold: 186, status: 'Active', featured: false, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: false, showInstallmentBadge: true, tags: 'apple, macbook, laptop', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'RAM: 8GB | Storage: 256GB | Color: Midnight' },
-  { id: 'PRD003', name: 'Sony WH-1000XM5', slug: 'sony-wh-1000xm5', sku: 'SNY-WH1000', description: 'Industry-leading noise cancellation with 30 hours battery life.', category: 'Audio', brand: 'Sony', price: '$348', salePrice: '$299', stock: 30, weight: '0.25', sold: 163, status: 'Active', featured: false, wholesaleOnly: false, allowInstallments: false, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: false, tags: 'sony, headphones, noise-cancelling', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Type: Over-ear | Connectivity: Bluetooth 5.2 | Color: Black' },
-  { id: 'PRD004', name: 'Apple Watch Series 9', slug: 'apple-watch-series-9', sku: 'APL-AW9', description: 'The most advanced Apple Watch yet with S9 chip and Double Tap gesture.', category: 'Wearables', brand: 'Apple', price: '$399', salePrice: '', stock: 0, weight: '0.051', sold: 151, status: 'Out of Stock', featured: false, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: true, tags: 'apple, smartwatch, wearable', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Case: 45mm | GPS: Yes | Color: Midnight' },
-  { id: 'PRD005', name: 'Samsung Galaxy S24 Ultra', slug: 'samsung-galaxy-s24-ultra', sku: 'SAM-GS24U', description: 'Galaxy AI built in — the most powerful Galaxy smartphone.', category: 'Electronics', brand: 'Samsung', price: '$1,199', salePrice: '$1,099', stock: 8, weight: '0.232', sold: 128, status: 'Low Stock', featured: true, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: true, tags: 'samsung, android, flagship', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'RAM: 12GB | Storage: 256GB | S Pen: Yes' },
-  { id: 'PRD006', name: 'iPad Pro 13"', slug: 'ipad-pro-13', sku: 'APL-IPP13', description: 'Ultra-thin, powerful iPad Pro with M4 chip and stunning XDR display.', category: 'Electronics', brand: 'Apple', price: '$1,299', salePrice: '', stock: 20, weight: '0.579', sold: 95, status: 'Active', featured: false, wholesaleOnly: false, allowInstallments: true, showGuaranteeBadge: true, showReturnsBadge: false, showInstallmentBadge: true, tags: 'apple, ipad, tablet', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Display: 13 inch | Storage: 256GB | WiFi: Yes' },
-  { id: 'PRD007', name: 'AirPods Pro 2', slug: 'airpods-pro-2', sku: 'APL-APP2', description: 'Active Noise Cancellation, Adaptive Transparency and Personalized Spatial Audio.', category: 'Audio', brand: 'Apple', price: '$249', salePrice: '', stock: 55, weight: '0.061', sold: 210, status: 'Active', featured: true, wholesaleOnly: false, allowInstallments: false, showGuaranteeBadge: true, showReturnsBadge: true, showInstallmentBadge: false, tags: 'apple, airpods, wireless', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Type: In-ear | Noise Cancellation: Yes | Battery: 6hrs' },
-  { id: 'PRD008', name: 'Beats Studio Pro', slug: 'beats-studio-pro', sku: 'BTS-SP', description: 'Professional sound tuning, personalized ANC, and up to 40 hours battery.', category: 'Audio', brand: 'Beats', price: '$349', salePrice: '$299', stock: 0, weight: '0.26', sold: 42, status: 'Out of Stock', featured: false, wholesaleOnly: false, allowInstallments: false, showGuaranteeBadge: false, showReturnsBadge: true, showInstallmentBadge: false, tags: 'beats, headphones, premium', metaTitle: '', metaDescription: '', imageUrl: '', specifications: 'Type: Over-ear | Battery: 40hrs | Color: Black' },
-];
+// Products loaded from API
 
 const CATEGORIES = ['Electronics', 'Audio', 'Wearables', 'Clothing', 'Food & Beverages', 'Sports'];
 const BRANDS = ['Apple', 'Samsung', 'Sony', 'Beats', 'Bose', 'Dell', 'LG', 'Huawei', 'Other'];
@@ -38,8 +29,8 @@ const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replac
 const EMPTY_FORM = {
   name: '', slug: '', sku: '', description: '', category: 'Electronics', brand: 'Apple',
   price: '', salePrice: '', stock: '0', weight: '', status: 'Active',
-  featured: 'No', wholesaleOnly: 'No', allowInstallments: 'No',
-  showGuaranteeBadge: 'No', showReturnsBadge: 'No', showInstallmentBadge: 'No',
+  featured: 'No',
+  showGuaranteeBadge: 'No', showReturnsBadge: 'No',
   tags: '', metaTitle: '', metaDescription: '', imageUrl: '', specifications: '',
 };
 
@@ -50,7 +41,38 @@ function ProductsContent() {
   const textMain = isDark ? '#FFFFFF' : '#0F172A'; const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<Product[]>(INITIAL);
+  const [data, setData] = useState<Product[]>([]);
+
+  // Load real products from API on mount
+  useEffect(() => {
+    getProducts({ limit: 200 }).then(r => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Product[] = raw.map((p: any) => ({
+        id: p.id || '',
+        name: p.name || '',
+        slug: p.slug || '',
+        sku: p.sku || '',
+        description: p.description || '',
+        category: p.category?.name || '',
+        brand: p.brand?.name || '',
+        price: p.price != null ? String(Number(p.price)) : '',
+        salePrice: p.salePrice != null && p.salePrice !== 0 ? String(Number(p.salePrice)) : '',
+        stock: p.inventory?.quantity ?? p.stock ?? 0,
+        weight: String(p.weight || ''),
+        sold: p._count?.orderItems ?? 0,
+        status: p.status === 'ACTIVE' ? 'Active' : p.status === 'OUT_OF_STOCK' ? 'Out of Stock' : p.status === 'INACTIVE' ? 'Inactive' : p.status === 'LOW_STOCK' ? 'Low Stock' : (p.status || 'Active'),
+        featured: !!p.isFeatured,
+        showGuaranteeBadge: !!p.showGuaranteeBadge,
+        showReturnsBadge: !!p.showReturnsBadge,
+        tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
+        metaTitle: p.metaTitle || '',
+        metaDescription: p.metaDescription || '',
+        imageUrl: p.images?.[0]?.url || p.images?.[0] || '',
+        specifications: p.specifications || '',
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Product | null>(null);
   const [deleteRow, setDeleteRow] = useState<Product | null>(null);
@@ -73,9 +95,9 @@ function ProductsContent() {
       name: r.name, slug: r.slug || toSlug(r.name), sku: r.sku, description: r.description || '',
       category: r.category, brand: r.brand || 'Apple', price: r.price, salePrice: r.salePrice || '',
       stock: String(r.stock), weight: r.weight || '', status: r.status,
-      featured: boolToStr(r.featured), wholesaleOnly: boolToStr(r.wholesaleOnly),
-      allowInstallments: boolToStr(r.allowInstallments), showGuaranteeBadge: boolToStr(r.showGuaranteeBadge),
-      showReturnsBadge: boolToStr(r.showReturnsBadge), showInstallmentBadge: boolToStr(r.showInstallmentBadge),
+      featured: boolToStr(r.featured),
+      showGuaranteeBadge: boolToStr(r.showGuaranteeBadge),
+      showReturnsBadge: boolToStr(r.showReturnsBadge),
       tags: r.tags || '', metaTitle: r.metaTitle || '', metaDescription: r.metaDescription || '',
       imageUrl: r.imageUrl || '', specifications: r.specifications || '',
     });
@@ -93,9 +115,9 @@ function ProductsContent() {
       await createProduct({ ...form, stock: Number(form.stock) });
       const newItem: Product = {
         id: `PRD${String(Date.now()).slice(-3)}`, ...form, stock: Number(form.stock), sold: 0,
-        featured: strToBool(form.featured), wholesaleOnly: strToBool(form.wholesaleOnly),
-        allowInstallments: strToBool(form.allowInstallments), showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
-        showReturnsBadge: strToBool(form.showReturnsBadge), showInstallmentBadge: strToBool(form.showInstallmentBadge),
+        featured: strToBool(form.featured),
+        showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
+        showReturnsBadge: strToBool(form.showReturnsBadge),
       };
       setData(d => [...d, newItem]);
       toast.success('Product added'); setAddOpen(false);
@@ -110,9 +132,9 @@ function ProductsContent() {
       await updateProduct(editRow.id, { ...form, stock: Number(form.stock) });
       setData(d => d.map(p => p.id === editRow.id ? {
         ...p, ...form, stock: Number(form.stock),
-        featured: strToBool(form.featured), wholesaleOnly: strToBool(form.wholesaleOnly),
-        allowInstallments: strToBool(form.allowInstallments), showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
-        showReturnsBadge: strToBool(form.showReturnsBadge), showInstallmentBadge: strToBool(form.showInstallmentBadge),
+        featured: strToBool(form.featured),
+        showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
+        showReturnsBadge: strToBool(form.showReturnsBadge),
       } : p));
       toast.success('Product updated'); setEditRow(null);
     } catch { toast.error('Failed to update product — check your API connection'); }
@@ -181,7 +203,6 @@ function ProductsContent() {
       <FormField label="Sale Price (optional)" value={form.salePrice} onChange={fp('salePrice')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Optional — leave blank if no sale" />
       <FormField label="Stock Qty" value={form.stock} onChange={fp('stock')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="0" />
       <FormField label="Weight (KG)" value={form.weight} onChange={fp('weight')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. 0.5" />
-      <FormField label="Wholesale Only" value={form.wholesaleOnly} onChange={fp('wholesaleOnly')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
 
       {sectionLabel('Categorization')}
       <FormField label="Category" value={form.category} onChange={fp('category')} options={CATEGORIES} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
@@ -204,13 +225,10 @@ function ProductsContent() {
       <FormField label="Status" value={form.status} onChange={fp('status')} options={STATUSES} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       <FormField label="Featured on Homepage" value={form.featured} onChange={fp('featured')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
 
-      {sectionLabel('Installment / Credit')}
-      <FormField label="Allow Installments" value={form.allowInstallments} onChange={fp('allowInstallments')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
 
       {sectionLabel('Trust & Guarantee Badges')}
       <FormField label="Show Guarantee Badge" value={form.showGuaranteeBadge} onChange={fp('showGuaranteeBadge')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       <FormField label="Show Free Returns Badge" value={form.showReturnsBadge} onChange={fp('showReturnsBadge')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-      <FormField label="Show Installment Badge" value={form.showInstallmentBadge} onChange={fp('showInstallmentBadge')} options={BOOL_OPTS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
     </>
   );
 
