@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import { getCreditAccounts } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────
-type Credit = { id:string; user:string; email:string; balance:number; earned:number; spent:number; status:string; lastActivity:string };
+type Credit = { id:string; customer:string; phone:string; limit:string; used:string; available:string; due:string; status:string; plan:string; outstanding:string };
 type Application = { id:string; user:string; email:string; product:string; plan:string; amount:string; status:string; date:string };
 type Plan = { id:string; name:string; months:number; interest:string; minAmount:string; maxAmount:string; status:string };
 type InstProduct = { id:string; name:string; sku:string; price:string; plans:string; status:string };
@@ -58,7 +58,7 @@ function CreditContent() {
   }, []);
   const [viewCredit, setViewCredit] = useState<Credit|null>(null);
   const [editCredit, setEditCredit] = useState<Credit|null>(null);
-  const [creditForm, setCreditForm] = useState({ balance:'', status:'Active' });
+  const [creditForm, setCreditForm] = useState({ status:'Active' });
 
   // Applications state
   const [applications, setApplications] = useState<Application[]>([]);
@@ -79,7 +79,7 @@ function CreditContent() {
   // ── Handlers ──
   const handleEditCredit = () => {
     if (!editCredit) return;
-    setCredits(d => d.map(c => c.id===editCredit.id ? {...c, balance:Number(creditForm.balance), status:creditForm.status} : c));
+    setCredits(d => d.map(c => c.id===editCredit.id ? {...c, status:creditForm.status} : c));
     toast.success('Credit account updated'); setEditCredit(null);
   };
   const handleEditApp = () => {
@@ -156,13 +156,13 @@ function CreditContent() {
   ];
   const creditCols: Column[] = [
     { key:'id', label:'ID', width:'90px' },
-    { key:'user', label:'User', render:(v,row)=>(
-      <div><div style={{fontWeight:600,color:textMain,fontSize:'13.5px'}}>{String(v)}</div><div style={{fontSize:'11.5px',color:textMuted}}>{String(row.email)}</div></div>
-    )},
-    { key:'balance', label:'Balance', render:(v)=><span style={{fontWeight:800,fontSize:'14px',color:'#1FA89A'}}>{Number(v).toLocaleString()} pts</span> },
-    { key:'earned', label:'Total Earned', render:(v)=><span style={{color:'#6366f1',fontWeight:600}}>{Number(v).toLocaleString()} pts</span> },
-    { key:'spent', label:'Spent', render:(v)=><span style={{color:'#FFC107',fontWeight:600}}>{Number(v).toLocaleString()} pts</span> },
-    { key:'lastActivity', label:'Last Activity' },
+    { key:'customer', label:'Customer', render:(v)=><span style={{fontWeight:600,color:textMain,fontSize:'13.5px'}}>{String(v)}</span> },
+    { key:'phone', label:'Phone', render:(v)=><span style={{fontSize:'12px',color:textMuted}}>{String(v)}</span> },
+    { key:'plan', label:'Plan', render:(v)=><span style={{fontSize:'12px',color:'#6366f1',background:'rgba(99,102,241,0.1)',padding:'2px 8px',borderRadius:'8px',fontWeight:600}}>{String(v)}</span> },
+    { key:'limit', label:'Limit', render:(v)=><span style={{fontWeight:700,color:textMain}}>{String(v)}</span> },
+    { key:'used', label:'Used', render:(v)=><span style={{color:'#FFC107',fontWeight:600}}>{String(v)}</span> },
+    { key:'outstanding', label:'Outstanding', render:(v)=><span style={{fontWeight:700,color:'#ef4444'}}>{String(v)}</span> },
+    { key:'due', label:'Due Date' },
     { key:'status', label:'Status', render:(v)=>statusBadge(String(v)) },
   ];
 
@@ -257,7 +257,7 @@ function CreditContent() {
           columns={creditCols}
           data={credits as unknown as Record<string,unknown>[]}
           searchPlaceholder="Search users..."
-          onEdit={row=>{ const r=row as unknown as Credit; setCreditForm({balance:String(r.balance),status:r.status}); setEditCredit(r); }}
+          onEdit={row=>{ const r=row as unknown as Credit; setCreditForm({status:r.status}); setEditCredit(r); }}
           onView={row=>setViewCredit(row as unknown as Credit)}
         />
       )}
@@ -301,19 +301,21 @@ function CreditContent() {
       {/* ── Modals: Credit Accounts ── */}
       {editCredit && (
         <Modal open={!!editCredit} onClose={()=>setEditCredit(null)} title="Edit Credit Account">
-          <FormField label="User" value={editCredit.user} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Balance (pts)" value={creditForm.balance} onChange={v=>setCreditForm(f=>({...f,balance:v}))} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="0" />
-          <FormField label="Status" value={creditForm.status} onChange={v=>setCreditForm(f=>({...f,status:v}))} options={['Active','Inactive']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Customer" value={editCredit.customer} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Plan" value={editCredit.plan} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Status" value={creditForm.status} onChange={v=>setCreditForm(f=>({...f,status:v}))} options={['Active','Inactive','Defaulted','Paid']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <ModalFooter onClose={()=>setEditCredit(null)} onSubmit={handleEditCredit} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} />
         </Modal>
       )}
       {viewCredit && (
         <Modal open={!!viewCredit} onClose={()=>setViewCredit(null)} title="Credit Account Details">
-          <FormField label="User" value={viewCredit.user} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Email" value={viewCredit.email} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Balance" value={viewCredit.balance.toLocaleString() + ' pts'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Total Earned" value={viewCredit.earned.toLocaleString() + ' pts'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-          <FormField label="Total Spent" value={viewCredit.spent.toLocaleString() + ' pts'} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Customer" value={viewCredit.customer} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Phone" value={viewCredit.phone} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Plan" value={viewCredit.plan} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Credit Limit" value={viewCredit.limit} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Used" value={viewCredit.used} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Outstanding" value={viewCredit.outstanding} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Due Date" value={viewCredit.due} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <FormField label="Status" value={viewCredit.status} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
           <button onClick={()=>setViewCredit(null)} style={{width:'100%',padding:'10px',borderRadius:'9px',background:isDark?'#1E293B':'#F1F5F9',border:`1px solid ${border}`,color:textMain,fontSize:'13.5px',fontWeight:600,cursor:'pointer',fontFamily:'var(--font-inter)'}}>Close</button>
         </Modal>
