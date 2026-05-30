@@ -3,21 +3,40 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-rwb2.onrender.com";
+    // Strip trailing /api to prevent double /api/api/... paths
+    const backendUrl = (
+      process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-rwb2.onrender.com"
+    ).replace(/\/api$/, "");
+
+    const proxy = (seg: string) => [
+      { source: `/api/${seg}`, destination: `${backendUrl}/api/${seg}` },
+      { source: `/api/${seg}/:rest*`, destination: `${backendUrl}/api/${seg}/:rest*` },
+    ];
+
     return [
-      { source: "/api/auth/:path*", destination: `${backendUrl}/api/auth/:path*` },
-      { source: "/api/orders", destination: `${backendUrl}/api/orders` },
-      { source: "/api/orders/:path*", destination: `${backendUrl}/api/orders/:path*` },
-      { source: "/api/products", destination: `${backendUrl}/api/products` },
-      { source: "/api/products/:path*", destination: `${backendUrl}/api/products/:path*` },
-      { source: "/api/users", destination: `${backendUrl}/api/users` },
-      { source: "/api/users/:path*", destination: `${backendUrl}/api/users/:path*` },
-      { source: "/api/categories", destination: `${backendUrl}/api/categories` },
-      { source: "/api/categories/:path*", destination: `${backendUrl}/api/categories/:path*` },
-      { source: "/api/brands", destination: `${backendUrl}/api/brands` },
-      { source: "/api/brands/:path*", destination: `${backendUrl}/api/brands/:path*` },
-      { source: "/api/reviews", destination: `${backendUrl}/api/reviews` },
-      { source: "/api/reviews/:path*", destination: `${backendUrl}/api/reviews/:path*` },
+      ...proxy("auth"),
+      ...proxy("orders"),
+      ...proxy("products"),
+      ...proxy("users"),
+      ...proxy("categories"),
+      ...proxy("brands"),
+      ...proxy("reviews"),
+      ...proxy("reports"),
+      ...proxy("cms"),
+      ...proxy("services"),
+      ...proxy("settings"),
+      ...proxy("shipping"),
+      ...proxy("shipping-zones"),
+      ...proxy("countries"),
+      ...proxy("states"),
+      ...proxy("cities"),
+      ...proxy("credit"),
+      ...proxy("wallet"),
+      ...proxy("wholesale"),
+      ...proxy("wishlist"),
+      ...proxy("notifications"),
+      ...proxy("newsletter"),
+      ...proxy("payments"),
     ];
   },
 };
