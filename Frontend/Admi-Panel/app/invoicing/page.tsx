@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { FileText } from 'lucide-react';
+import { getOrders } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 type Invoice = { id:string; client:string; amount:string; tax:string; total:string; date:string; due:string; status:string };
@@ -29,6 +30,30 @@ function InvoicingContent() {
   const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
   const [data, setData] = useState<Invoice[]>(INITIAL);
+  useEffect(() => {
+    getOrders({ limit: 200 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      if (raw.length === 0) return;
+      const normalized: Invoice[] = raw.map((o: any) => {
+        const amt = Number(o.total ?? o.subtotal ?? o.amount ?? 0);
+        const tax = Number(o.tax ?? o.taxAmount ?? 0);
+        const total = amt + tax;
+        const d = o.createdAt ? o.createdAt.split('T')[0] : '';
+        const due = o.createdAt ? new Date(new Date(o.createdAt).getTime() + 30*24*60*60*1000).toISOString().split('T')[0] : '';
+        return {
+          id: `INV-${(o.orderNumber || o.id || '').toString().slice(-8)}`,
+          client: o.user ? (`${o.user.firstName||''} ${o.user.lastName||''}`.trim() || o.user.email || 'Customer') : 'Customer',
+          amount: `K${amt.toLocaleString()}`,
+          tax: `K${tax.toLocaleString()}`,
+          total: `K${total.toLocaleString()}`,
+          date: d,
+          due: due,
+          status: o.paymentStatus==='PAID'||o.status==='DELIVERED' ? 'Paid' : o.paymentStatus==='PENDING' ? 'Unpaid' : o.status==='CANCELLED' ? 'Draft' : 'Unpaid',
+        };
+      });
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [addOpen, setAddOpen] = useState(false);
   const [viewRow, setViewRow] = useState<Invoice|null>(null);
   const [editRow, setEditRow] = useState<Invoice|null>(null);
