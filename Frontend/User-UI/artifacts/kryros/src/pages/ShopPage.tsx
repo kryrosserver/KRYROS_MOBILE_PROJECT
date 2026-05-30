@@ -28,7 +28,7 @@ function ShopCard({ product }: { product: Product }) {
 
   return (
     <div
-      className="flex-shrink-0 w-44 bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+      className="w-full bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
       onClick={() => (window.location.href = `/product/${product.id}`)}
     >
       <div className="relative bg-[#f0f0f0] dark:bg-muted" style={{ height: 130 }}>
@@ -132,11 +132,7 @@ function BrandProductSection({ title, brandName, categoryName }: { title: string
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-3 px-4 pb-4">
-        {products.map((p) => (
-          <div key={p.id} className="w-full min-w-0">
-            <ShopCard product={p} />
-          </div>
-        ))}
+        {products.map((p) => <ShopCard key={p.id} product={p} />)}
       </div>
     </div>
   );
@@ -326,7 +322,7 @@ export default function ShopPage() {
             </h2>
             <span className="text-xs text-muted-foreground">{filteredProducts.length} items</span>
           </div>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+          <div className="grid grid-cols-2 gap-3 px-4 pb-4">
             {filteredProducts.map((p) => <ShopCard key={p.id} product={p} />)}
           </div>
         </div>
