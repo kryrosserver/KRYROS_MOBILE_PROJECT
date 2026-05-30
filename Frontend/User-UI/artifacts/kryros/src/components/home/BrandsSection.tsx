@@ -57,11 +57,8 @@ export default function BrandsSection() {
         <div className="flex items-center gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {brands.map((brand) => (
             <Link key={brand.id} href={`/shop?brand=${encodeURIComponent(brand.name)}`}>
-              <div className="flex-shrink-0 bg-card border border-border rounded-xl flex items-center gap-2 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-3 py-2.5 min-w-[90px]">
-                <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center">
-                  <BrandLogo brand={brand} />
-                </div>
-                <span className="text-[10px] font-bold text-foreground leading-tight truncate max-w-[64px]">{brand.name}</span>
+              <div className="flex-shrink-0 bg-card border border-border rounded-xl flex items-center justify-center hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-4 py-2.5">
+                <span className="text-xs font-bold text-foreground leading-tight whitespace-nowrap">{brand.name}</span>
               </div>
             </Link>
           ))}
@@ -70,11 +67,8 @@ export default function BrandsSection() {
         <div className="hidden md:flex flex-wrap gap-3 mt-1">
           {brands.map((brand) => (
             <Link key={brand.id} href={`/shop?brand=${encodeURIComponent(brand.name)}`}>
-              <div className="bg-card border border-border rounded-xl flex items-center gap-2 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-3 py-2.5 min-w-[100px]">
-                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
-                  <BrandLogo brand={brand} />
-                </div>
-                <span className="text-[11px] font-bold text-foreground leading-tight truncate max-w-[72px]">{brand.name}</span>
+              <div className="bg-card border border-border rounded-xl flex items-center justify-center hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-4 py-2.5">
+                <span className="text-sm font-bold text-foreground leading-tight whitespace-nowrap">{brand.name}</span>
               </div>
             </Link>
           ))}
