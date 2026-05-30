@@ -57,8 +57,11 @@ export default function BrandsSection() {
         <div className="flex items-center gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {brands.map((brand) => (
             <Link key={brand.id} href={`/shop?brand=${encodeURIComponent(brand.name)}`}>
-              <div className="flex-shrink-0 w-[72px] h-[56px] bg-card border border-border rounded-xl flex items-center justify-center hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-2">
-                <BrandLogo brand={brand} />
+              <div className="flex-shrink-0 bg-card border border-border rounded-xl flex items-center gap-2 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-3 py-2.5 min-w-[90px]">
+                <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center">
+                  <BrandLogo brand={brand} />
+                </div>
+                <span className="text-[10px] font-bold text-foreground leading-tight truncate max-w-[64px]">{brand.name}</span>
               </div>
             </Link>
           ))}
@@ -67,8 +70,11 @@ export default function BrandsSection() {
         <div className="hidden md:flex flex-wrap gap-3 mt-1">
           {brands.map((brand) => (
             <Link key={brand.id} href={`/shop?brand=${encodeURIComponent(brand.name)}`}>
-              <div className="w-[88px] h-[60px] bg-card border border-border rounded-xl flex items-center justify-center hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-2">
-                <BrandLogo brand={brand} />
+              <div className="bg-card border border-border rounded-xl flex items-center gap-2 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer px-3 py-2.5 min-w-[100px]">
+                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                  <BrandLogo brand={brand} />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight truncate max-w-[72px]">{brand.name}</span>
               </div>
             </Link>
           ))}
