@@ -36,7 +36,7 @@ function ShopCard({ product }: { product: Product }) {
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain p-2"
+            className="w-full h-full object-contain"
             onError={() => setImgErr(true)}
           />
         ) : (
