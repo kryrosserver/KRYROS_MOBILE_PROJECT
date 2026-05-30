@@ -25,7 +25,7 @@ const DEFAULT_NAV = [
 
 const DEFAULT_HEADER = {
   announcementEnabled: true,
-  announcementText: "Free Delivery on all orders over $100",
+  announcementText: "Free Delivery on all orders over $500",
   announcementCta: "Track Order",
   announcementCtaLink: "/track",
   navLinks: DEFAULT_NAV,
@@ -65,22 +65,22 @@ export default function Header() {
     <>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
-        {/* Announcement bar */}
-        {headerCfg.announcementEnabled !== false && (
-          <div className="bg-foreground text-background text-[10px] md:text-xs flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
-            <span>
-              <span className="text-primary font-semibold">Free Delivery</span>{" "}
-              {headerCfg.announcementText}
+      {/* Announcement bar - scrolls away with page */}
+      {headerCfg.announcementEnabled !== false && (
+        <div className="bg-foreground text-background text-[10px] md:text-xs flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
+          <span>
+            <span className="text-primary font-semibold">Free Delivery</span>{" "}
+            {headerCfg.announcementText}
+          </span>
+          <Link href={headerCfg.announcementCtaLink || "/track"}>
+            <span className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity font-medium">
+              {headerCfg.announcementCta || "Track Order"} <span className="text-[10px]">&rsaquo;</span>
             </span>
-            <Link href={headerCfg.announcementCtaLink || "/track"}>
-              <span className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity font-medium">
-                {headerCfg.announcementCta || "Track Order"} <span className="text-[10px]">&rsaquo;</span>
-              </span>
-            </Link>
-          </div>
-        )}
+          </Link>
+        </div>
+      )}
 
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
         {/* Main header row */}
         <div className="flex items-center gap-2 px-3 md:px-6 h-[52px] md:h-[68px]">
           {/* Hamburger */}
