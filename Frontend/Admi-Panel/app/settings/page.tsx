@@ -2,7 +2,8 @@
 import AdminShell from '@/components/admin/admin-shell';
 import PageHeader from '@/components/admin/page-header';
 import { useTheme } from '@/contexts/theme-context';
-import { Settings, Store, Bell, Shield, Globe, CreditCard, Palette, Save } from 'lucide-react';
+import { Settings, Store, Bell, Shield, Globe, CreditCard, Palette, Save, Mail, MessageSquare, Smartphone, Send, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import api from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -38,6 +39,42 @@ function SettingsContent() {
   const [twoFA, setTwoFA] = useState(false);
   const [sessionTimeout, setSessionTimeout] = useState('30');
   const [saving, setSaving] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [testEmailSending, setTestEmailSending] = useState(false);
+  const [testBroadcastSubject, setTestBroadcastSubject] = useState('');
+  const [testBroadcastMsg, setTestBroadcastMsg] = useState('');
+  const [broadcastSending, setBroadcastSending] = useState(false);
+
+  const handleTestEmail = async () => {
+    if (!testEmail.trim()) { toast.error('Enter an email address'); return; }
+    setTestEmailSending(true);
+    try {
+      await api.post('/api/notifications/email/test', { email: testEmail, firstName: 'Admin' });
+      toast.success('Test email sent! Check your inbox.');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'SMTP not configured or send failed');
+    }
+    setTestEmailSending(false);
+  };
+
+  const handleBroadcast = async () => {
+    if (!testBroadcastSubject.trim() || !testBroadcastMsg.trim()) { toast.error('Subject and message are required'); return; }
+    setBroadcastSending(true);
+    try {
+      const res: any = await api.post('/api/notifications/email/broadcast', {
+        sendToAll: true,
+        subject: testBroadcastSubject,
+        headline: testBroadcastSubject,
+        message: testBroadcastMsg,
+      });
+      toast.success(`Broadcast sent to ${res.data?.sent || '?'} users!`);
+      setTestBroadcastSubject('');
+      setTestBroadcastMsg('');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Broadcast failed');
+    }
+    setBroadcastSending(false);
+  };
 
   useEffect(() => {
     getSettings().then((r: any) => {
@@ -140,14 +177,93 @@ function SettingsContent() {
         </div>
       );
       case 'notifications': return (
-        <div>
-          <SectionTitle title="Notification Settings" sub="Configure when and how you receive notifications" />
-          <Row label="Email Notifications" sub="Receive order and activity emails"><ToggleSwitch value={emailNotif} onChange={()=>setEmailNotif(!emailNotif)} /></Row>
-          <Row label="Push Notifications" sub="Browser push notifications"><ToggleSwitch value={pushNotif} onChange={()=>setPushNotif(!pushNotif)} /></Row>
-          <Row label="New Order Alerts" sub="Notify when a new order is placed"><ToggleSwitch value={orderNotif} onChange={()=>setOrderNotif(!orderNotif)} /></Row>
-          <Row label="Low Stock Alerts" sub="Alert when product stock is below 10"><ToggleSwitch value={true} onChange={()=>{}} /></Row>
-          <Row label="New Review Alerts" sub="Notify when a customer leaves a review"><ToggleSwitch value={false} onChange={()=>{}} /></Row>
-          <Row label="Withdrawal Requests" sub="Alert on new withdrawal requests"><ToggleSwitch value={true} onChange={()=>{}} /></Row>
+        <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+          <SectionTitle title="Notifications & Email" sub="SMTP, SMS and push notification configuration" />
+
+          {/* Channel Status */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'12px'}} className="fg">
+            {[
+              {icon:Mail, label:'Email (SMTP)', sub:'Gmail • Configured', color:'#1FA89A', status:'Active'},
+              {icon:MessageSquare, label:'SMS (Beem Africa)', sub:'Zambia + International', color:'#6366f1', status:'Active'},
+              {icon:Smartphone, label:'Push (Firebase)', sub:'Configure FCM to enable', color:'#FFC107', status:'Pending'},
+            ].map(c=>(
+              <div key={c.label} style={{background:surface,border:`1px solid ${border}`,borderRadius:'10px',padding:'14px 16px',display:'flex',gap:'12px',alignItems:'flex-start'}}>
+                <div style={{width:36,height:36,borderRadius:'9px',background:`${c.color}18`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                  <c.icon size={16} color={c.color} />
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'13px',fontWeight:700,color:textMain}}>{c.label}</div>
+                  <div style={{fontSize:'11.5px',color:textMuted}}>{c.sub}</div>
+                  <span style={{display:'inline-block',marginTop:'6px',padding:'2px 8px',borderRadius:'10px',fontSize:'10.5px',fontWeight:700,
+                    background:c.status==='Active'?'rgba(31,168,154,0.12)':'rgba(255,193,7,0.12)',
+                    color:c.status==='Active'?'#1FA89A':'#FFC107'}}>
+                    {c.status==='Active'?'✓ Active':'⏳ '+c.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Order Notification Settings */}
+          <div>
+            <div style={{fontSize:'13.5px',fontWeight:700,color:textMain,marginBottom:'12px'}}>Order Notification Triggers</div>
+            <div style={{background:surface,border:`1px solid ${border}`,borderRadius:'10px',overflow:'hidden'}}>
+              {[
+                {label:'Order Placed',sub:'Email + SMS + Push when customer places order',on:true},
+                {label:'Order Confirmed',sub:'Email + SMS when admin confirms order',on:true},
+                {label:'Order Shipped',sub:'Email + SMS when order ships',on:true},
+                {label:'Order Delivered',sub:'Email + SMS when delivered',on:true},
+                {label:'Order Cancelled',sub:'Email + SMS when order is cancelled',on:true},
+                {label:'Low Stock Alert',sub:'Admin email when stock drops below threshold',on:true},
+              ].map((row,idx)=>(
+                <div key={row.label} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',borderBottom:`1px solid ${border}`,opacity:idx>=5?0.6:1}}>
+                  <div>
+                    <div style={{fontSize:'13px',fontWeight:600,color:textMain}}>{row.label}</div>
+                    <div style={{fontSize:'11.5px',color:textMuted}}>{row.sub}</div>
+                  </div>
+                  <span style={{padding:'2px 10px',borderRadius:'10px',fontSize:'11px',fontWeight:600,background:'rgba(31,168,154,0.1)',color:'#1FA89A'}}>Auto</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Test Email */}
+          <div>
+            <div style={{fontSize:'13.5px',fontWeight:700,color:textMain,marginBottom:'12px'}}>Test SMTP Connection</div>
+            <div style={{display:'flex',gap:'10px',flexWrap:'wrap'}}>
+              <input
+                type="email" value={testEmail} onChange={e=>setTestEmail(e.target.value)}
+                placeholder="Enter email to test (e.g. kryrosmobile@gmail.com)"
+                style={{...inputStyle,flex:'1 1 240px'}}
+              />
+              <button onClick={handleTestEmail} disabled={testEmailSending} style={{padding:'10px 20px',background:testEmailSending?'rgba(31,168,154,0.5)':'linear-gradient(135deg,#1FA89A,#27B9AF)',border:'none',borderRadius:'9px',color:'white',fontSize:'13.5px',fontWeight:600,cursor:testEmailSending?'not-allowed':'pointer',fontFamily:'var(--font-inter)',display:'flex',alignItems:'center',gap:'6px',whiteSpace:'nowrap'}}>
+                <Send size={13}/> {testEmailSending ? 'Sending...' : 'Send Test Email'}
+              </button>
+            </div>
+            <div style={{fontSize:'11.5px',color:textMuted,marginTop:'6px'}}>Sends a branded KRYROS HTML email using your configured Gmail SMTP credentials.</div>
+          </div>
+
+          {/* Email Broadcast */}
+          <div>
+            <div style={{fontSize:'13.5px',fontWeight:700,color:textMain,marginBottom:'12px'}}>Email Broadcast (All Users)</div>
+            <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+              <input type="text" value={testBroadcastSubject} onChange={e=>setTestBroadcastSubject(e.target.value)} placeholder="Subject / Headline..." style={inputStyle} />
+              <textarea value={testBroadcastMsg} onChange={e=>setTestBroadcastMsg(e.target.value)} placeholder="Write your announcement or promotional message..." rows={3} style={{...inputStyle,resize:'none'}} />
+              <div style={{display:'flex',justifyContent:'flex-end'}}>
+                <button onClick={handleBroadcast} disabled={broadcastSending} style={{padding:'10px 20px',background:broadcastSending?'rgba(31,168,154,0.5)':'linear-gradient(135deg,#1FA89A,#27B9AF)',border:'none',borderRadius:'9px',color:'white',fontSize:'13.5px',fontWeight:600,cursor:broadcastSending?'not-allowed':'pointer',fontFamily:'var(--font-inter)',display:'flex',alignItems:'center',gap:'6px'}}>
+                  <Send size={13}/> {broadcastSending ? 'Sending...' : 'Send to All Users'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Toggle settings */}
+          <div>
+            <div style={{fontSize:'13.5px',fontWeight:700,color:textMain,marginBottom:'12px'}}>Admin Alert Preferences</div>
+            <Row label="Email Notifications" sub="Receive order and activity emails"><ToggleSwitch value={emailNotif} onChange={()=>setEmailNotif(!emailNotif)} /></Row>
+            <Row label="New Order Alerts" sub="Notify admin when a new order is placed"><ToggleSwitch value={orderNotif} onChange={()=>setOrderNotif(!orderNotif)} /></Row>
+            <Row label="Push Notifications" sub="Browser push (requires Firebase setup)"><ToggleSwitch value={pushNotif} onChange={()=>setPushNotif(!pushNotif)} /></Row>
+          </div>
         </div>
       );
       case 'security': return (
