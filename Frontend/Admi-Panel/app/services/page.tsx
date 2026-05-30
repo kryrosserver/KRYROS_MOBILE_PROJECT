@@ -32,11 +32,10 @@ function ServicesContent() {
   const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<Service[]>(INITIAL);
+  const [data, setData] = useState<Service[]>([]);
   useEffect(() => {
     getServices({ limit: 200 }).then((r: any) => {
       const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
-      if (raw.length === 0) return;
       const normalized: Service[] = raw.map((s: any) => ({
         id: s.id || '',
         name: s.name || '',
