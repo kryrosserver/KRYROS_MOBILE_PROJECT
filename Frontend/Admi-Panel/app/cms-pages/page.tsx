@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
@@ -10,6 +10,11 @@ import {
   ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import {
+  getCmsPages, getCmsBanners, getCmsHomepageSections, getCmsSections,
+  createCmsBanner, updateCmsBanner, deleteCmsBanner,
+  updateCmsHomepageSection, updateCmsSection, createCmsSection, deleteCmsSection,
+} from '@/lib/api';
 
 const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; options?: string[]; icon?: string }>> = {
   'Hero Banner': [
@@ -302,6 +307,89 @@ function CMSContent() {
 
   const [data, setData] = useState<CmsPage[]>(INITIAL_PAGES);
   type View = 'pages' | 'sections' | 'items';
+
+  // ── Load real data from API on mount ─────────────────────────────────
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [pagesRes, bannersRes, hpRes] = await Promise.all([
+          getCmsPages().catch(() => ({ data: [] })),
+          getCmsBanners().catch(() => ({ data: [] })),
+          getCmsHomepageSections().catch(() => ({ data: [] })),
+        ]);
+        const apiPages: any[] = Array.isArray(pagesRes.data) ? pagesRes.data : Array.isArray((pagesRes.data as any)?.data) ? (pagesRes.data as any).data : [];
+        const banners: any[] = Array.isArray(bannersRes.data) ? bannersRes.data : Array.isArray((bannersRes.data as any)?.data) ? (bannersRes.data as any).data : [];
+        const hpSecs: any[] = Array.isArray(hpRes.data) ? hpRes.data : Array.isArray((hpRes.data as any)?.data) ? (hpRes.data as any).data : [];
+        if (apiPages.length === 0 && banners.length === 0 && hpSecs.length === 0) return;
+        const HP_NAME: Record<string, string> = {
+          HeroSlider: 'Hero Slider', Brands: 'Featured Brands', TrustBadges: 'Trust Badges',
+          CategorySection: 'Category Section', FeaturedProducts: 'Featured Products',
+          FlashSale: 'Flash Sale', PromoBanners: 'Promo Banners',
+          CategoryPromoBanners: 'Category Promo Banners', ProductSection: 'Products Section',
+          RecentlyViewed: 'Recently Viewed', UpgradeBanner: 'Upgrade Banner',
+        };
+        const cmsPages: CmsPage[] = await Promise.all(apiPages.map(async (p: any) => {
+          const isHome = p.slug === '/' || p.slug === 'home';
+          const secs: Section[] = [];
+          if (isHome) {
+            if (banners.length > 0) {
+              secs.push({ name: 'Hero Banner', items: banners.map((b: any) => ({ id: b.id, content: { title: b.title || '', subtitle: b.subtitle || '', description: '', button_text: b.linkText || '', button_link: b.link || '', media: b.image || '' }, status: b.isActive ? 'Active' : 'Inactive', mediaUrl: b.image })) });
+            }
+            [...hpSecs].sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).forEach((sec: any) => {
+              secs.push({ name: HP_NAME[sec.type] || sec.type || 'Section', items: [{ id: sec.id, content: Object.fromEntries(Object.entries(sec.config || {}).map(([k, v]) => [k, String(v)])), status: sec.isActive ? 'Active' : 'Inactive' }] });
+            });
+          } else {
+            try {
+              const sr = await getCmsSections(p.slug).catch(() => ({ data: [] }));
+              const ss: any[] = Array.isArray(sr.data) ? sr.data : Array.isArray((sr.data as any)?.data) ? (sr.data as any).data : [];
+              const g: Record<string, SectionItem[]> = {};
+              ss.forEach((s: any) => {
+                const nm = s.name || s.type || 'Section';
+                if (!g[nm]) g[nm] = [];
+                g[nm].push({ id: s.id, content: Object.fromEntries(Object.entries((s.content || s.config || {})).map(([k, v]) => [k, String(v)])), status: s.isActive ? 'Active' : 'Inactive' });
+              });
+              Object.entries(g).forEach(([name, items]) => secs.push({ name, items }));
+            } catch {}
+          }
+          return { id: p.id, title: p.title || p.slug, slug: p.slug, lastEdited: p.updatedAt ? String(p.updatedAt).split('T')[0] : '', status: p.status || 'Published', sections: secs };
+        }));
+        if (cmsPages.length > 0) setData(cmsPages);
+      } catch {}
+    };
+    load();
+  }, []);
+
+  // ── API helpers (fire-and-forget, local state stays snappy) ──────────
+  const _getPageSlug = (pageId: string) => data.find(p => p.id === pageId)?.slug || '/';
+  const _isHome = (pageId: string) => { const s = _getPageSlug(pageId); return s === '/' || s === 'home'; };
+  const _apiSave = (itemId: string, pageId: string, secName: string, content: SectionData, mediaUrl?: string) => {
+    if (_isHome(pageId)) {
+      if (secName === 'Hero Banner') {
+        updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media || content.image, link: content.button_link, linkText: content.button_text }).catch(() => {});
+      } else {
+        updateCmsHomepageSection(itemId, { config: content as any, isActive: true }).catch(() => {});
+      }
+    } else {
+      updateCmsSection(itemId, { content: content as any, isActive: true }).catch(() => {});
+    }
+  };
+  const _apiCreate = (pageId: string, secName: string, content: SectionData, mediaUrl?: string) => {
+    if (_isHome(pageId) && secName === 'Hero Banner') {
+      createCmsBanner({ title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media, link: content.button_link, linkText: content.button_text, isActive: true }).catch(() => {});
+    } else if (!_isHome(pageId)) {
+      createCmsSection({ name: secName, pageSlug: _getPageSlug(pageId), content: content as any, isActive: true }).catch(() => {});
+    }
+  };
+  const _apiDelete = (itemId: string, pageId: string, secName: string) => {
+    if (_isHome(pageId) && secName === 'Hero Banner') { deleteCmsBanner(itemId).catch(() => {}); }
+    else if (!_isHome(pageId)) { deleteCmsSection(itemId).catch(() => {}); }
+  };
+  const _apiToggle = (itemId: string, pageId: string, secName: string, active: boolean) => {
+    if (_isHome(pageId)) {
+      if (secName === 'Hero Banner') { updateCmsBanner(itemId, { isActive: active }).catch(() => {}); }
+      else { updateCmsHomepageSection(itemId, { isActive: active }).catch(() => {}); }
+    } else { updateCmsSection(itemId, { isActive: active }).catch(() => {}); }
+  };
   const [view, setView] = useState<View>('pages');
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [selectedSectionName, setSelectedSectionName] = useState<string | null>(null);
@@ -364,13 +452,16 @@ function CMSContent() {
     if (!selectedPageId || !selectedSectionName) return;
     const item: SectionItem = { id: 'item_' + Date.now(), content, status: 'Active', mediaUrl };
     setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: [...s.items, item] }) }));
+    _apiCreate(selectedPageId, selectedSectionName, content, mediaUrl);
   };
   const handleSaveItem = (content: SectionData, mediaUrl?: string) => {
     if (!selectedPageId || !selectedSectionName || !editingItem) return;
     setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.map(i => i.id !== editingItem.id ? i : { ...i, content, mediaUrl: mediaUrl || i.mediaUrl }) }) }));
+    _apiSave(editingItem.id, selectedPageId, selectedSectionName, content, mediaUrl);
   };
   const handleDeleteItem = () => {
     if (!deletingItem || !selectedPageId || !selectedSectionName) return;
+    _apiDelete(deletingItem.id, selectedPageId, selectedSectionName);
     setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.filter(i => i.id !== deletingItem.id) }) }));
     toast.success('Deleted'); setDeletingItem(null);
   };
@@ -379,6 +470,7 @@ function CMSContent() {
     const ns = cur === 'Active' ? 'Inactive' : 'Active';
     setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.map(i => i.id !== itemId ? i : { ...i, status: ns }) }) }));
     toast.success('Set to ' + ns);
+    _apiToggle(itemId, selectedPageId, selectedSectionName, ns === 'Active');
   };
 
   const Breadcrumb = () => (
