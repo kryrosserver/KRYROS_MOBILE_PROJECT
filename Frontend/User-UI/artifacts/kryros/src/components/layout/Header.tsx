@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown, LogOut, LayoutDashboard,
+  ShoppingBag, Heart, User, Sun, Moon, Globe, Menu, Mic, ChevronDown, LogOut, LayoutDashboard, X,
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
@@ -36,24 +36,12 @@ export default function Header() {
   const [announceHidden, setAnnounceHidden] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(52);
   const headerRef = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/cms/site-config/header`, { cache: "no-store" })
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.value) setHeaderCfg({ ...DEFAULT_HEADER, ...d.value }); })
       .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (y < 40) setAnnounceHidden(false);
-      else if (y > lastScrollY.current) setAnnounceHidden(true);
-      lastScrollY.current = y;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -90,22 +78,28 @@ export default function Header() {
 
       {/* FIXED header wrapper — always at top of viewport */}
       <div ref={headerRef} className="fixed top-0 left-0 right-0 z-40">
-        {/* Announcement bar — slides away when user scrolls down */}
-        {headerCfg.announcementEnabled !== false && (
-          <div
-            className="bg-foreground text-background text-[10px] md:text-xs overflow-hidden transition-all duration-300"
-            style={{ maxHeight: announceHidden ? "0px" : "40px", opacity: announceHidden ? 0 : 1 }}
-          >
+        {/* Announcement bar — always visible, dismissible with X */}
+        {headerCfg.announcementEnabled !== false && !announceHidden && (
+          <div className="bg-foreground text-background text-[10px] md:text-xs">
             <div className="flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
               <span>
                 <span className="text-primary font-semibold">Free Delivery</span>{" "}
                 {headerCfg.announcementText}
               </span>
-              <Link href={headerCfg.announcementCtaLink || "/track"}>
-                <span className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity font-medium">
-                  {headerCfg.announcementCta || "Track Order"} <span className="text-[10px]">&rsaquo;</span>
-                </span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href={headerCfg.announcementCtaLink || "/track"}>
+                  <span className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity font-medium">
+                    {headerCfg.announcementCta || "Track Order"} <span className="text-[10px]">&rsaquo;</span>
+                  </span>
+                </Link>
+                <button
+                  onClick={() => setAnnounceHidden(true)}
+                  className="p-0.5 rounded hover:bg-white/20 transition-colors ml-1 flex-shrink-0"
+                  aria-label="Dismiss announcement"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           </div>
         )}
