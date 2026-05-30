@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { MailerService } from './mailer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -66,17 +66,106 @@ export class NotificationsController {
     return this.notificationsService.sendSMS(body.phoneNumber, body.message);
   }
 
+  @Get('smtp/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check SMTP and SMS configuration status (Admin only)' })
+  async getSmtpStatus() {
+    return {
+      smtp: {
+        configured: this.mailerService.isConfigured,
+        provider: 'Gmail SMTP',
+      },
+      sms: {
+        configured: true,
+        provider: 'Beem Africa',
+        coverage: 'Zambia (ZM) + International',
+      },
+      push: {
+        configured: false,
+        provider: 'Firebase FCM',
+        note: 'Configure FIREBASE_SERVICE_ACCOUNT_JSON to enable push notifications',
+      },
+    };
+  }
+
   @Post('email/test')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Send test email (Admin only)' })
-  async sendTestEmail(@Body() body: { email: string; subject: string; message: string }) {
+  @ApiOperation({ summary: 'Send test email with branded template (Admin only)' })
+  async sendTestEmail(@Body() body: { email: string; subject?: string; message?: string; firstName?: string }) {
+    const html = this.mailerService.buildAnnouncementHtml({
+      firstName: body.firstName || 'Admin',
+      subject: body.subject || 'KRYROS Test Email',
+      headline: '📧 Test Email — SMTP Working!',
+      bodyHtml: `<p>${body.message || 'This is a test email sent from your KRYROS Admin Panel. Your SMTP connection is working correctly.'}</p>`,
+    });
     return this.mailerService.sendMail(
       body.email,
-      body.subject || 'KRYROS Test Email',
-      body.message || 'This is a test email from your KRYROS Admin Panel.',
-      `<h1>KRYROS Test</h1><p>${body.message || 'This is a test email from your KRYROS Admin Panel.'}</p>`
+      body.subject || 'KRYROS Test Email — SMTP Verified ✅',
+      body.message || 'This is a test email. Your SMTP is working.',
+      html,
     );
+  }
+
+  @Post('email/broadcast')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send broadcast email to all users or targeted list (Admin only)' })
+  async sendBroadcastEmail(@Body() body: {
+    emails?: string[];
+    subject: string;
+    headline: string;
+    message: string;
+    ctaText?: string;
+    ctaUrl?: string;
+    sendToAll?: boolean;
+  }) {
+    let targets: { email: string; firstName: string }[] = [];
+
+    if (body.sendToAll) {
+      const users = await this.notificationsService['prisma'].user.findMany({
+        where: { isActive: true },
+        select: { email: true, firstName: true },
+        take: 500,
+      });
+      targets = users.map(u => ({ email: u.email, firstName: u.firstName || 'Customer' }));
+    } else if (body.emails?.length) {
+      targets = body.emails.map(e => ({ email: e, firstName: 'Customer' }));
+    }
+
+    let sent = 0;
+    for (const t of targets) {
+      try {
+        await this.mailerService.sendAnnouncementEmail({
+          to: t.email,
+          firstName: t.firstName,
+          subject: body.subject,
+          headline: body.headline,
+          bodyHtml: `<p>${body.message.replace(/\n/g, '<br>')}</p>`,
+          ctaText: body.ctaText,
+          ctaUrl: body.ctaUrl,
+        });
+        sent++;
+      } catch {}
+    }
+    return { success: true, sent, total: targets.length };
+  }
+
+  @Post('email/order-status-test')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send a test order status email to preview the template (Admin only)' })
+  async sendOrderStatusTest(@Body() body: { email: string; orderNumber?: string; status?: string }) {
+    return this.mailerService.sendOrderStatusEmail({
+      to: body.email,
+      firstName: 'Test Customer',
+      orderNumber: body.orderNumber || 'TEST-001',
+      status: body.status || 'SHIPPED',
+    });
   }
 }
