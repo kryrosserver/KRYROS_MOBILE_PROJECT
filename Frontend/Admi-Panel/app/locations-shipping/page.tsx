@@ -44,26 +44,51 @@ function ShippingContent() {
   const [editRow, setEditRow] = useState<Zone|null>(null);
   const [deleteRow, setDeleteRow] = useState<Zone|null>(null);
   const [form, setForm] = useState({...EMPTY});
+  const [loading, setLoading] = useState(false);
   const fp = (k:string) => (v:string) => setForm(f=>({...f,[k]:v}));
 
   const openAdd = () => { setForm({...EMPTY}); setAddOpen(true); };
   const openEdit = (row:Record<string,unknown>) => { const r=row as unknown as Zone; setForm({name:r.name,region:r.region,countries:r.countries,method:r.method,rate:r.rate,minOrder:r.minOrder,days:r.days,status:r.status}); setEditRow(r); };
   const openDelete = (row:Record<string,unknown>) => setDeleteRow(row as unknown as Zone);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.name.trim()) { toast.error('Zone name required'); return; }
-    const z: Zone = { id:`SZ${String(Date.now()).slice(-3)}`, ...form };
-    setData(d=>[...d,z]); toast.success('Zone added'); setAddOpen(false);
+    setLoading(true);
+    try {
+      const res = await createShippingZone({
+        name: form.name, region: form.region, countries: form.countries,
+        shippingMethod: form.method, rate: Number(form.rate), minOrder: Number(form.minOrder),
+        estimatedDays: form.days, isActive: form.status === 'Active',
+      });
+      const id = (res as any)?.data?.id || `SZ${String(Date.now()).slice(-3)}`;
+      setData(d=>[...d, { id, ...form }]);
+      toast.success('Zone added'); setAddOpen(false);
+    } catch { toast.error('Failed to add zone — check API connection'); }
+    setLoading(false);
   };
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!editRow) return;
-    setData(d=>d.map(z=>z.id===editRow.id?{...z,...form}:z));
-    toast.success('Zone updated'); setEditRow(null);
+    setLoading(true);
+    try {
+      await updateShippingZone(editRow.id, {
+        name: form.name, region: form.region, countries: form.countries,
+        shippingMethod: form.method, rate: Number(form.rate), minOrder: Number(form.minOrder),
+        estimatedDays: form.days, isActive: form.status === 'Active',
+      });
+      setData(d=>d.map(z=>z.id===editRow.id?{...z,...form}:z));
+      toast.success('Zone updated'); setEditRow(null);
+    } catch { toast.error('Failed to update zone — check API connection'); }
+    setLoading(false);
   };
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteRow) return;
-    setData(d=>d.filter(z=>z.id!==deleteRow.id));
-    toast.success('Zone deleted'); setDeleteRow(null);
+    setLoading(true);
+    try {
+      await deleteShippingZone(deleteRow.id);
+      setData(d=>d.filter(z=>z.id!==deleteRow.id));
+      toast.success('Zone deleted'); setDeleteRow(null);
+    } catch { toast.error('Failed to delete zone — check API connection'); }
+    setLoading(false);
   };
 
   const methodColor = (m:string) => ({Express:'#1FA89A',Standard:'#6366f1',International:'#f59e0b',Free:'#FFC107'}[m]||'#64748b');
@@ -110,8 +135,8 @@ function ShippingContent() {
         ))}
       </div>
       <DataTable columns={columns} data={data as unknown as Record<string,unknown>[]} searchPlaceholder="Search zones..." onEdit={openEdit} onDelete={openDelete} />
-      <Modal open={addOpen} onClose={()=>setAddOpen(false)} title="Add Shipping Zone">{modalFields}<ModalFooter onClose={()=>setAddOpen(false)} onSubmit={handleAdd} loading={false} submitLabel="Add Zone" isDark={isDark} border={border} textMain={textMain} /></Modal>
-      <Modal open={!!editRow} onClose={()=>setEditRow(null)} title={`Edit: ${editRow?.name??''}`}>{modalFields}<ModalFooter onClose={()=>setEditRow(null)} onSubmit={handleEdit} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} /></Modal>
+      <Modal open={addOpen} onClose={()=>setAddOpen(false)} title="Add Shipping Zone">{modalFields}<ModalFooter onClose={()=>setAddOpen(false)} onSubmit={handleAdd} loading={false} submitLabel="Add Zone" isDark={isDark} border={border} textMain={textMain} loading={loading} /></Modal>
+      <Modal open={!!editRow} onClose={()=>setEditRow(null)} title={`Edit: ${editRow?.name??''}`}>{modalFields}<ModalFooter onClose={()=>setEditRow(null)} onSubmit={handleEdit} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} loading={loading} /></Modal>
       <ConfirmDialog open={!!deleteRow} onClose={()=>setDeleteRow(null)} onConfirm={handleDelete} loading={false} title="Delete Zone" message={`Delete zone "${deleteRow?.name}"?`} />
       <style>{`.sg{} @media(max-width:768px){.sg{grid-template-columns:1fr!important;}}`}</style>
     </div>
