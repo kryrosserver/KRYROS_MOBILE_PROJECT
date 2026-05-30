@@ -157,7 +157,7 @@ export default function WishlistPage() {
                       <img
                         src={img}
                         alt={product.name}
-                        className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-40 object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                       />
                     </Link>
                     {discount && (
