@@ -104,6 +104,16 @@ function CategoriesContent() {
 
   const columns: Column[] = [
     { key: 'id', label: 'ID', width: '90px' },
+    { key: 'imageUrl', label: 'Image', width: '64px', render: (v) => {
+      const url = String(v || '');
+      return url ? (
+        <img src={url} alt="" style={{width:38,height:38,borderRadius:'7px',objectFit:'cover',border:`1px solid ${border}`,display:'block'}} onError={(e:any)=>{e.target.style.opacity='0.3';}} />
+      ) : (
+        <div style={{width:38,height:38,borderRadius:'7px',background:surface,border:`1px solid ${border}`,display:'flex',alignItems:'center',justifyContent:'center',color:textMuted,fontSize:'18px'}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+        </div>
+      );
+    }},
     { key: 'name', label: 'Category', render: (v) => <span style={{ fontWeight: 600, color: textMain }}>{String(v)}</span> },
     { key: 'slug', label: 'Slug', render: (v) => <code style={{ fontSize: '12px', color: '#1FA89A', background: 'rgba(31,168,154,0.1)', padding: '2px 6px', borderRadius: '4px' }}>{String(v)}</code> },
     { key: 'parent', label: 'Parent' },
@@ -119,7 +129,31 @@ function CategoriesContent() {
       <FormField label="Slug (auto-generated)" value={form.slug} onChange={fp('slug')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="auto-generated" />
       <FormField label="Description" value={form.description} onChange={fp('description')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Brief description of this category..." type="textarea" />
       <FormField label="Parent Category" value={form.parent} onChange={fp('parent')} options={PARENT_OPTIONS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
-      <FormField label="Image URL" value={form.imageUrl} onChange={fp('imageUrl')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="https://..." />
+      <div style={{marginBottom:'10px'}}>
+        <div style={{fontSize:'12px',color:textMuted,fontWeight:500,marginBottom:'6px'}}>Category Image</div>
+        {form.imageUrl && (
+          <div style={{position:'relative',marginBottom:'8px'}}>
+            <img src={form.imageUrl} alt="" style={{width:'100%',maxHeight:'150px',objectFit:'cover',borderRadius:'8px',border:`1px solid ${border}`,display:'block'}} onError={(e:any)=>{e.target.style.opacity='0.3';}} />
+            <button type="button" onClick={()=>fp('imageUrl')('')} style={{position:'absolute',top:'6px',right:'6px',width:'22px',height:'22px',borderRadius:'50%',background:'rgba(239,68,68,0.9)',border:'none',color:'white',cursor:'pointer',fontSize:'13px',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',padding:0}}>×</button>
+          </div>
+        )}
+        <label style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 14px',borderRadius:'8px',background:surface,border:`1px dashed ${border}`,color:'#1FA89A',fontSize:'12px',fontWeight:600,cursor:'pointer',marginBottom:'6px',userSelect:'none'}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Image
+          <input type="file" accept="image/*" style={{display:'none'}} onChange={(e:any)=>{
+            const file=e.target.files?.[0]; if(!file) return;
+            const reader=new FileReader();
+            reader.onload=()=>{ fp('imageUrl')(reader.result as string); };
+            reader.readAsDataURL(file); e.target.value='';
+          }} />
+        </label>
+        <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+          <div style={{flex:1,height:'1px',background:border}}/>
+          <span style={{fontSize:'10px',color:textMuted,fontWeight:500}}>OR PASTE URL</span>
+          <div style={{flex:1,height:'1px',background:border}}/>
+        </div>
+        <input type="text" value={form.imageUrl.startsWith('data:') ? '' : form.imageUrl} onChange={(e:any)=>fp('imageUrl')(e.target.value)} placeholder="https://example.com/image.jpg" style={{width:'100%',padding:'8px 10px',borderRadius:'7px',background:surface,border:`1px solid ${border}`,color:textMain,fontSize:'12px',outline:'none',fontFamily:'inherit',marginTop:'6px',boxSizing:'border-box'}} />
+      </div>
       <FormField label="Show on Homepage" value={form.showOnHome} onChange={fp('showOnHome')} options={['Yes', 'No']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       <FormField label="Status" value={form.status} onChange={fp('status')} options={['Active', 'Inactive']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
     </>
