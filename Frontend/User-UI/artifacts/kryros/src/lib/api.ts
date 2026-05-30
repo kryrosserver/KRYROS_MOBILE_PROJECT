@@ -159,6 +159,8 @@ export async function fetchProducts(
     featured?: boolean;
     isFlashSale?: boolean;
     popularity?: "trending" | "bestseller" | "new" | "hot" | "sale";
+    allowCredit?: boolean;
+    isWholesaleOnly?: boolean;
   } = {}
 ): Promise<Product[]> {
   const qs = new URLSearchParams();
@@ -170,6 +172,9 @@ export async function fetchProducts(
   if (params.featured !== undefined) qs.set("featured", String(params.featured));
   if (params.isFlashSale !== undefined) qs.set("isFlashSale", String(params.isFlashSale));
   if (params.popularity) qs.set("popularity", params.popularity);
+  if (params.allowCredit !== undefined) qs.set("allowCredit", String(params.allowCredit));
+  // Default: exclude wholesale-only products from regular listings unless caller explicitly sets isWholesaleOnly
+  qs.set("isWholesaleOnly", params.isWholesaleOnly !== undefined ? String(params.isWholesaleOnly) : "false");
 
   const result = await apiFetch<{ data: any[]; meta: any }>(`/api/products?${qs.toString()}`);
   if (!result?.data) return [];
