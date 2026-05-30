@@ -195,45 +195,72 @@ function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, tex
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<{ name: string; type: string; url: string } | null>(null);
+  const [urlInput, setUrlInput] = useState('');
+
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const isVideo = file.type.startsWith('video/');
-    const url = URL.createObjectURL(file);
-    setPreview({ name: file.name, type: isVideo ? 'video' : 'image', url });
-    onChange(file.name, file.name);
-    onUrlChange?.(url);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setPreview({ name: file.name, type: isVideo ? 'video' : 'image', url: dataUrl });
+      onChange(dataUrl, file.name);
+      onUrlChange?.(dataUrl);
+      setUrlInput('');
+    };
+    reader.readAsDataURL(file);
     toast.success(file.name + ' selected');
   };
+
+  const handleUrlChange = (url: string) => {
+    setUrlInput(url);
+    if (!url.trim()) { setPreview(null); onChange('', ''); onUrlChange?.(''); return; }
+    const isVideo = /\.(mp4|mov|webm|ogg)(\?.*)?$/i.test(url);
+    setPreview({ name: url, type: isVideo ? 'video' : 'image', url });
+    onChange(url, url);
+    onUrlChange?.(url);
+  };
+
+  const clearAll = () => { setPreview(null); setUrlInput(''); onChange('', ''); onUrlChange?.(''); };
+
   return (
     <div>
       {preview ? (
         <div style={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px', border: `1px solid ${border}` }}>
-          {preview.type === 'image' ? <img src={preview.url} alt={preview.name} style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} />
+          {preview.type === 'image' ? <img src={preview.url} alt="" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} onError={(e:any)=>{e.target.style.opacity='0.3';}} />
             : <video src={preview.url} controls style={{ width: '100%', maxHeight: '180px', display: 'block' }} />}
           <div style={{ position: 'absolute', top: 8, right: 8 }}>
-            <button onClick={() => { setPreview(null); onChange('', ''); onUrlChange?.(''); }} style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={clearAll} style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={13} color="white" />
             </button>
           </div>
           <div style={{ padding: '6px 10px', background: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.9)', fontSize: '11px', color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {preview.type === 'video' ? <Video size={11} /> : <ImageIcon size={11} />} {preview.name}
+            {preview.type === 'video' ? <Video size={11} /> : <ImageIcon size={11} />}
+            {preview.name.startsWith('data:') ? 'Uploaded file' : preview.name.length > 50 ? preview.name.slice(0,50)+'...' : preview.name}
           </div>
         </div>
       ) : value ? (
         <div style={{ padding: '10px 12px', background: surface, border: `1px solid ${border}`, borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: textMuted }}>
-          <ImageIcon size={14} /> {value}
-          <button onClick={() => { onChange('', ''); onUrlChange?.(''); }} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex' }}><X size={13} /></button>
+          <ImageIcon size={14} /> {value.startsWith('data:') ? 'Uploaded file' : value.slice(0,60)}
+          <button onClick={clearAll} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex' }}><X size={13} /></button>
         </div>
       ) : null}
-      <div onClick={() => inputRef.current?.click()} style={{ border: `2px dashed ${border}`, borderRadius: '10px', padding: '20px', textAlign: 'center', cursor: 'pointer', background: surface, transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#1FA89A'} onMouseLeave={e => e.currentTarget.style.borderColor = border}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Upload size={18} color="#1FA89A" /></div>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Video size={18} color="#6366f1" /></div>
+      <div onClick={() => inputRef.current?.click()} style={{ border: `2px dashed ${border}`, borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: 'pointer', background: surface, transition: 'border-color 0.15s', marginBottom:'8px' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#1FA89A'} onMouseLeave={e => e.currentTarget.style.borderColor = border}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Upload size={16} color="#1FA89A" /></div>
+          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Video size={16} color="#6366f1" /></div>
         </div>
-        <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 4px' }}><span style={{ color: '#1FA89A', fontWeight: 600 }}>Click to upload</span> image or video</p>
+        <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 2px' }}><span style={{ color: '#1FA89A', fontWeight: 600 }}>Click to upload</span> image or video</p>
         <p style={{ fontSize: '11px', color: textMuted, margin: 0 }}>PNG, JPG, GIF, MP4, MOV — max 50MB</p>
       </div>
+      <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
+        <div style={{ flex:1, height:'1px', background:border }} />
+        <span style={{ fontSize:'10px', color:textMuted, fontWeight:500, whiteSpace:'nowrap' }}>OR PASTE URL</span>
+        <div style={{ flex:1, height:'1px', background:border }} />
+      </div>
+      <input type="text" value={urlInput} onChange={e => handleUrlChange(e.target.value)} placeholder="https://example.com/image.jpg or video.mp4"
+        style={{ width:'100%', padding:'8px 10px', borderRadius:'7px', background:surface, border:`1px solid ${border}`, color:textMuted, fontSize:'12px', outline:'none', fontFamily:'inherit', boxSizing:'border-box' as const }} />
       <input ref={inputRef} type="file" accept="image/*,video/*" onChange={handleFile} style={{ display: 'none' }} />
     </div>
   );
