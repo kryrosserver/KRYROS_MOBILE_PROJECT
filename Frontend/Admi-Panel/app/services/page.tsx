@@ -1,12 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Wrench } from 'lucide-react';
-import { createService, updateService, deleteService } from '@/lib/api';
+import { getServices, createService, updateService, deleteService } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 type Service = { id: string; name: string; category: string; price: string; duration: string; provider: string; bookings: number; status: string };
@@ -33,6 +33,23 @@ function ServicesContent() {
   const surface = isDark ? '#101826' : '#F1F5F9';
 
   const [data, setData] = useState<Service[]>(INITIAL);
+  useEffect(() => {
+    getServices({ limit: 200 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      if (raw.length === 0) return;
+      const normalized: Service[] = raw.map((s: any) => ({
+        id: s.id || '',
+        name: s.name || '',
+        category: s.category || s.serviceType || 'Repair',
+        price: s.price ? `K${Number(s.price).toLocaleString()}` : 'K0',
+        duration: s.duration || s.estimatedTime || '',
+        provider: s.provider || s.providerName || 'Kryros',
+        bookings: s._count?.orders ?? s.bookings ?? 0,
+        status: s.isActive !== false ? 'Active' : 'Inactive',
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Service | null>(null);
   const [deleteRow, setDeleteRow] = useState<Service | null>(null);
