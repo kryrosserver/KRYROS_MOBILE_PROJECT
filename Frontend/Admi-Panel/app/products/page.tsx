@@ -16,6 +16,7 @@ type Product = {
   featured: boolean;
   showGuaranteeBadge: boolean; showReturnsBadge: boolean;
   tags: string; metaTitle: string; metaDescription: string; imageUrl: string; specifications: string;
+  images: string[];
 };
 
 // Products loaded from API
@@ -68,6 +69,7 @@ function ProductsContent() {
         metaTitle: p.metaTitle || '',
         metaDescription: p.metaDescription || '',
         imageUrl: p.images?.[0]?.url || p.images?.[0] || '',
+        images: Array.isArray(p.images) ? p.images.map((img: any) => img?.url || img || '').filter(Boolean) : [],
         specifications: p.specifications || '',
       }));
       setData(normalized);
@@ -79,6 +81,7 @@ function ProductsContent() {
   const [viewRow, setViewRow] = useState<Product | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [loading, setLoading] = useState(false);
+  const [productImages, setProductImages] = useState<string[]>([]);
 
   const fp = (k: string) => (v: string) => setForm(f => {
     const updated = { ...f, [k]: v };
@@ -88,7 +91,7 @@ function ProductsContent() {
 
   const boolToStr = (v: boolean) => v ? 'Yes' : 'No';
 
-  const openAdd = () => { setForm({ ...EMPTY_FORM }); setAddOpen(true); };
+  const openAdd = () => { setForm({ ...EMPTY_FORM }); setProductImages([]); setAddOpen(true); };
   const openEdit = (row: Record<string, unknown>) => {
     const r = row as unknown as Product;
     setForm({
@@ -101,6 +104,7 @@ function ProductsContent() {
       tags: r.tags || '', metaTitle: r.metaTitle || '', metaDescription: r.metaDescription || '',
       imageUrl: r.imageUrl || '', specifications: r.specifications || '',
     });
+    setProductImages(r.images && r.images.length > 0 ? r.images : r.imageUrl ? [r.imageUrl] : []);
     setEditRow(r);
   };
   const openDelete = (row: Record<string, unknown>) => setDeleteRow(row as unknown as Product);
@@ -112,9 +116,12 @@ function ProductsContent() {
     if (!form.name.trim() || !form.sku.trim()) { toast.error('Name and SKU are required'); return; }
     setLoading(true);
     try {
-      await createProduct({ ...form, stock: Number(form.stock) });
+      await createProduct({ ...form, stock: Number(form.stock), images: productImages.map((url, i) => ({ url, isPrimary: i === 0, sortOrder: i, alt: form.name })) });
       const newItem: Product = {
-        id: `PRD${String(Date.now()).slice(-3)}`, ...form, stock: Number(form.stock), sold: 0,
+        id: `PRD${String(Date.now()).slice(-3)}`, ...form,
+        imageUrl: productImages[0] || '',
+        images: productImages,
+        stock: Number(form.stock), sold: 0,
         featured: strToBool(form.featured),
         showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
         showReturnsBadge: strToBool(form.showReturnsBadge),
@@ -129,9 +136,12 @@ function ProductsContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateProduct(editRow.id, { ...form, stock: Number(form.stock) });
+      await updateProduct(editRow.id, { ...form, stock: Number(form.stock), images: productImages.map((url, i) => ({ url, isPrimary: i === 0, sortOrder: i, alt: form.name })) });
       setData(d => d.map(p => p.id === editRow.id ? {
-        ...p, ...form, stock: Number(form.stock),
+        ...p, ...form,
+        imageUrl: productImages[0] || p.imageUrl,
+        images: productImages,
+        stock: Number(form.stock),
         featured: strToBool(form.featured),
         showGuaranteeBadge: strToBool(form.showGuaranteeBadge),
         showReturnsBadge: strToBool(form.showReturnsBadge),
@@ -165,6 +175,16 @@ function ProductsContent() {
 
   const columns: Column[] = [
     { key: 'id', label: 'ID', width: '90px' },
+    { key: 'imageUrl', label: 'Image', width: '60px', render: (v) => {
+      const url = String(v || '');
+      return url ? (
+        <img src={url} alt="" style={{width:42,height:42,borderRadius:'8px',objectFit:'cover',border:`1px solid ${border}`,display:'block'}} onError={(e:any)=>{e.target.style.opacity='0.2';}} />
+      ) : (
+        <div style={{width:42,height:42,borderRadius:'8px',background:surface,border:`1px solid ${border}`,display:'flex',alignItems:'center',justifyContent:'center',color:textMuted}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+        </div>
+      );
+    }},
     { key: 'name', label: 'Product', render: (v, row) => (
       <div>
         <div style={{ fontWeight: 600, color: textMain }}>{String(v)}</div>
@@ -209,7 +229,33 @@ function ProductsContent() {
       <FormField label="Brand" value={form.brand} onChange={fp('brand')} options={BRANDS} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
 
       {sectionLabel('Product Images')}
-      <FormField label="Image URL (main product image)" value={form.imageUrl} onChange={fp('imageUrl')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="https://... (JPG, PNG, WebP)" />
+      <div>
+        {productImages.length > 0 && (
+          <div style={{display:'flex',gap:'8px',flexWrap:'wrap',marginBottom:'12px'}}>
+            {productImages.map((img, idx) => (
+              <div key={idx} style={{position:'relative',width:'80px',height:'80px',flexShrink:0}}>
+                <img src={img} alt="" style={{width:'80px',height:'80px',objectFit:'cover',borderRadius:'8px',border:idx===0?'2px solid #1FA89A':`1px solid ${border}`}} onError={(e:any)=>{e.target.style.opacity='0.3';}} />
+                {idx===0 && <span style={{position:'absolute',bottom:'3px',left:'3px',background:'#1FA89A',color:'white',fontSize:'8px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',letterSpacing:'0.3px'}}>MAIN</span>}
+                <button type="button" onClick={()=>setProductImages(imgs=>imgs.filter((_,i)=>i!==idx))} style={{position:'absolute',top:'3px',right:'3px',width:'18px',height:'18px',borderRadius:'50%',background:'rgba(239,68,68,0.9)',border:'none',color:'white',cursor:'pointer',fontSize:'12px',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',padding:0,lineHeight:1}}>×</button>
+              </div>
+            ))}
+          </div>
+        )}
+        <label style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 16px',borderRadius:'8px',background:surface,border:`1px dashed ${border}`,color:'#1FA89A',fontSize:'12px',fontWeight:600,cursor:'pointer',marginBottom:'6px',userSelect:'none'}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Images (select multiple)
+          <input type="file" accept="image/*" multiple style={{display:'none'}} onChange={(e:any)=>{
+            const files=Array.from(e.target.files||[]) as File[];
+            files.forEach(file=>{
+              const reader=new FileReader();
+              reader.onload=()=>setProductImages(imgs=>[...imgs, reader.result as string]);
+              reader.readAsDataURL(file);
+            });
+            e.target.value='';
+          }} />
+        </label>
+        <div style={{fontSize:'11px',color:textMuted}}>First image = main listing image (marked MAIN). Click × to remove. Drag to reorder coming soon.</div>
+      </div>
 
       {sectionLabel('Specifications')}
       <FormField label="Specifications" value={form.specifications} onChange={fp('specifications')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Color: Black | RAM: 8GB | Storage: 256GB | Screen: 6.7 inch" type="textarea" />
