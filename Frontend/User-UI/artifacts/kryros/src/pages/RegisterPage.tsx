@@ -101,7 +101,7 @@ export default function RegisterPage() {
                   <ArrowLeft className="w-4 h-4 text-foreground" />
                 </button>
               </Link>
-              <span className="text-lg font-black text-foreground">KRY<span className="text-primary">ROS</span></span>
+              <img src="/kryros-logo.svg" alt="KRYROS" className="h-10 w-10" />
               <Link href="/login">
                 <span className="text-sm text-primary font-semibold cursor-pointer hover:underline">Login</span>
               </Link>
