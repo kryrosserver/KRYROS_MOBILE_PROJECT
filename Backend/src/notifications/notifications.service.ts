@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { MailerService } from './mailer.service';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import * as admin from 'firebase-admin';
@@ -13,6 +14,7 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private mailerService: MailerService,
   ) {}
 
   onModuleInit() {
@@ -346,7 +348,10 @@ export class NotificationsService implements OnModuleInit {
   async sendOrderStatusNotification(orderId: string, status: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { user: true },
+      include: {
+        user: true,
+        shippingAddress: true,
+      } as any,
     });
 
     if (!order || !order.userId) return;
@@ -367,6 +372,10 @@ export class NotificationsService implements OnModuleInit {
         title = 'Order Shipped! 🚚';
         body = `Great news! Your order ${order.orderNumber} is on its way. Track it in the app.`;
         break;
+      case 'OUT_FOR_DELIVERY':
+        title = 'Out for Delivery 🏃';
+        body = `Your order ${order.orderNumber} is out for delivery today!`;
+        break;
       case 'DELIVERED':
         title = 'Order Delivered! 🏠';
         body = `Your order ${order.orderNumber} has been successfully delivered. Enjoy your purchase!`;
@@ -375,12 +384,100 @@ export class NotificationsService implements OnModuleInit {
         title = 'Order Cancelled';
         body = `Your order ${order.orderNumber} has been cancelled. If you have questions, please contact support.`;
         break;
+      case 'REFUNDED':
+        title = 'Refund Processed 💰';
+        body = `Your refund for order ${order.orderNumber} has been processed.`;
+        break;
     }
 
-    await this.sendToUser(order.userId, title, body, { 
-      orderId, 
-      status, 
-      url: `/dashboard/orders/${orderId}` 
-    });
+    // ── 1. Push notification (non-blocking) ──────────────────────────────
+    this.sendToUser(order.userId, title, body, {
+      orderId,
+      status,
+      url: `/dashboard/orders/${orderId}`,
+    }).catch(e => this.logger.warn(`Push notification failed for order ${order.orderNumber}: ${e.message}`));
+
+    // ── 2. Email notification ─────────────────────────────────────────────
+    const userEmail = (order as any).user?.email || (order as any).shippingAddress?.email;
+    const firstName = (order as any).user?.firstName || (order as any).shippingAddress?.firstName || 'Valued Customer';
+    if (userEmail) {
+      this.mailerService.sendOrderStatusEmail({
+        to: userEmail,
+        firstName,
+        orderNumber: order.orderNumber,
+        status,
+        trackingUrl: `${this.configService.get('FRONTEND_URL') || 'https://kryros-interface.onrender.com'}/orders/${orderId}`,
+      }).catch(e => this.logger.warn(`Email notification failed for order ${order.orderNumber}: ${e.message}`));
+    }
+
+    // ── 3. SMS notification (Zambia for now, non-blocking) ────────────────
+    const smsPhone = (order as any).shippingAddress?.phone || (order as any).user?.phone;
+    if (smsPhone) {
+      this.sendSMS(smsPhone, `KRYROS: ${title} - ${body}`)
+        .catch(e => this.logger.warn(`SMS notification failed for order ${order.orderNumber}: ${e.message}`));
+    }
+  }
+
+  // ─── New: Send order placed notification (push + email + SMS) ────────────
+  async sendOrderPlacedNotification(orderId: string) {
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          user: true,
+          shippingAddress: true,
+          items: {
+            include: { product: { select: { name: true } } },
+            take: 5,
+          },
+        } as any,
+      });
+
+      if (!order) return;
+
+      const firstName = (order as any).user?.firstName || (order as any).shippingAddress?.firstName || 'Valued Customer';
+      const userEmail = (order as any).user?.email || (order as any).shippingAddress?.email;
+      const total = order.totalZMW ? `K${Number(order.totalZMW).toLocaleString()}` : `${order.currencyCode} ${order.total}`;
+      const currency = order.currencyCode || 'ZMW';
+
+      const address = (order as any).shippingAddress;
+      const shippingAddr = address
+        ? [address.street, address.city, address.state, address.country].filter(Boolean).join(', ')
+        : undefined;
+
+      // ── 1. Push ──────────────────────────────────────────────────────────
+      if (order.userId) {
+        this.sendToUser(
+          order.userId,
+          'Order Placed! 🛍️',
+          `Your order #${order.orderNumber} has been received. Total: ${total}`,
+          { orderId, type: 'ORDER_PLACED' },
+        ).catch(e => this.logger.warn(`Push failed for new order ${order.orderNumber}: ${e.message}`));
+      }
+
+      // ── 2. Email confirmation ────────────────────────────────────────────
+      if (userEmail) {
+        this.mailerService.sendOrderConfirmationEmail({
+          to: userEmail,
+          firstName,
+          orderNumber: order.orderNumber,
+          total,
+          currency,
+          paymentMethod: (order.paymentMethod || 'Standard').replace(/_/g, ' '),
+          shippingAddress: shippingAddr,
+          trackingUrl: `${this.configService.get('FRONTEND_URL') || 'https://kryros-interface.onrender.com'}/orders/${orderId}`,
+        }).catch(e => this.logger.warn(`Order confirmation email failed for ${order.orderNumber}: ${e.message}`));
+      }
+
+      // ── 3. SMS ───────────────────────────────────────────────────────────
+      const smsPhone = address?.phone || (order as any).user?.phone;
+      if (smsPhone) {
+        this.sendSMS(smsPhone, `KRYROS: Order #${order.orderNumber} received! Total: ${total}. We'll confirm shortly.`)
+          .catch(e => this.logger.warn(`Order SMS failed for ${order.orderNumber}: ${e.message}`));
+      }
+
+    } catch (error) {
+      this.logger.error(`sendOrderPlacedNotification failed for ${orderId}`, error.message);
+    }
   }
 }
