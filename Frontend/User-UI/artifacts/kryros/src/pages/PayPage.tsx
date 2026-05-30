@@ -295,10 +295,17 @@ export default function PayPage() {
   const [, navigate] = useLocation();
   const [step, setStep] = useState<1 | 2>(1);
 
-  const [rawAmount, setRawAmount] = useState("");
-  const [currency, setCurrency] = useState("ZMW");
+  // ── Read URL query params (from admin payment link generator) ──
+  const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const urlAmount = urlParams.get("amount") || "";
+  const urlCurrency = urlParams.get("currency") || "ZMW";
+  const urlNote = urlParams.get("note") || "";
+  const isLinkedPayment = !!urlAmount;
+
+  const [rawAmount, setRawAmount] = useState(urlAmount);
+  const [currency, setCurrency] = useState(urlCurrency);
   const [showCurrencyDrop, setShowCurrencyDrop] = useState(false);
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(urlNote);
 
   const [openMethod, setOpenMethod] = useState<string | null>(null);
 
@@ -553,6 +560,12 @@ export default function PayPage() {
             <h2 className="text-xl font-black text-foreground">Make a Payment</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Send money securely to KRYROS</p>
           </div>
+          {isLinkedPayment && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+              <span className="font-bold">Payment Link</span> — Amount pre-filled: <strong>{currency} {rawAmount}</strong>
+              {urlNote ? <span className="text-muted-foreground ml-1">· {urlNote}</span> : null}
+            </div>
+          )}
 
           {/* Amount input */}
           <div className="border border-border rounded-xl px-4 py-2.5 bg-background focus-within:border-primary/60 transition-colors flex items-center gap-3">
@@ -561,10 +574,11 @@ export default function PayPage() {
             </span>
             <input
               value={rawAmount}
-              onChange={(e) => setRawAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+              onChange={(e) => { if (!isLinkedPayment) setRawAmount(e.target.value.replace(/[^0-9.]/g, "")); }}
+              readOnly={isLinkedPayment}
               placeholder="Enter Amount"
               inputMode="decimal"
-              className="flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1"
+              className={`flex-1 text-sm font-semibold text-foreground outline-none bg-transparent placeholder:text-muted-foreground/50 py-1 ${isLinkedPayment ? "cursor-default select-none" : ""}`}
             />
           </div>
 
