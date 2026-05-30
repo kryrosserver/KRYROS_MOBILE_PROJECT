@@ -1,728 +1,662 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import AdminShell from "@/components/admin/admin-shell";
-import { useTheme } from "@/contexts/theme-context";
+'use client';
+import { useState, useRef } from 'react';
+import AdminShell from '@/components/admin/admin-shell';
+import PageHeader from '@/components/admin/page-header';
+import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
+import { useTheme } from '@/contexts/theme-context';
 import {
-  Layout, Edit, Trash2, Plus, Image as ImageIcon, RefreshCw,
-  ChevronDown, ChevronRight, Eye, EyeOff, Check, X, Loader2,
-  Globe, FileText, Home, ShoppingBag, User, HelpCircle, Shield,
-  Layers, ToggleLeft, ToggleRight, Upload,
-} from "lucide-react";
-import toast from "react-hot-toast";
-import {
-  getCmsPages, getCmsBanners, getCmsHomepageSections, getCmsSections,
-  createCmsBanner, updateCmsBanner, deleteCmsBanner,
-  updateCmsHomepageSection, createCmsHomepageSection, deleteCmsHomepageSection,
-  updateCmsSection, createCmsSection, deleteCmsSection,
-  seedAllCmsPages, resetSeedCmsHomepageSections, resetSeedCmsSections,
-} from "@/lib/api";
+  Layout, Edit, Eye, Plus, ChevronDown, Trash2, Upload, X,
+  Image as ImageIcon, Video, Link2, Type, AlignLeft, MousePointer,
+  ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
-// ── Page icon map ──────────────────────────────────────────
-const PAGE_ICON: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
-  home: Home, shop: ShoppingBag, about: Globe, contact: FileText,
-  faq: HelpCircle, help: HelpCircle, privacy: Shield, terms: Shield,
-  refund: Shield, returns: Shield, shipping: Globe, security: Shield,
-  wholesale: ShoppingBag, login: User, register: User,
+const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; options?: string[]; icon?: string }>> = {
+  'Hero Banner': [
+    { key: 'title', label: 'Banner Title', type: 'text', icon: 'type' },
+    { key: 'subtitle', label: 'Subtitle', type: 'text', icon: 'type' },
+    { key: 'description', label: 'Description', type: 'textarea', icon: 'align' },
+    { key: 'button_text', label: 'Button Text', type: 'text', icon: 'mouse' },
+    { key: 'button_link', label: 'Button Link (URL)', type: 'text', icon: 'link' },
+    { key: 'media', label: 'Banner Image or Video', type: 'file' },
+  ],
+  'Sale Banner': [
+    { key: 'title', label: 'Banner Title', type: 'text', icon: 'type' },
+    { key: 'subtitle', label: 'Subtitle', type: 'text', icon: 'type' },
+    { key: 'discount_text', label: 'Discount Badge (e.g. 50% OFF)', type: 'text', icon: 'type' },
+    { key: 'button_text', label: 'Button Text', type: 'text', icon: 'mouse' },
+    { key: 'button_link', label: 'Button Link (URL)', type: 'text', icon: 'link' },
+    { key: 'media', label: 'Banner Image', type: 'file' },
+  ],
+  'Featured Products': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'subheading', label: 'Subheading', type: 'text', icon: 'type' },
+    { key: 'product_limit', label: 'Number of Products to Show', type: 'text', icon: 'type' },
+    { key: 'sort_by', label: 'Sort By', type: 'select', options: ['Featured', 'Newest', 'Best Selling', 'On Sale'] },
+  ],
+  'Promotions': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'promo_title', label: 'Promotion Title', type: 'text', icon: 'type' },
+    { key: 'promo_text', label: 'Promotion Description', type: 'textarea', icon: 'align' },
+    { key: 'button_text', label: 'Button Text', type: 'text', icon: 'mouse' },
+    { key: 'button_link', label: 'Button Link (URL)', type: 'text', icon: 'link' },
+    { key: 'media', label: 'Promotion Image', type: 'file' },
+  ],
+  'Newsletter': [
+    { key: 'heading', label: 'Heading', type: 'text', icon: 'type' },
+    { key: 'subheading', label: 'Subheading', type: 'text', icon: 'type' },
+    { key: 'placeholder', label: 'Email Placeholder', type: 'text', icon: 'type' },
+    { key: 'button_text', label: 'Subscribe Button Text', type: 'text', icon: 'mouse' },
+  ],
+  'Company Story': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'content', label: 'Story Content', type: 'textarea', icon: 'align' },
+    { key: 'media', label: 'Section Image', type: 'file' },
+    { key: 'button_text', label: 'Learn More Button Text', type: 'text', icon: 'mouse' },
+    { key: 'button_link', label: 'Button Link (URL)', type: 'text', icon: 'link' },
+  ],
+  'Team': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'subheading', label: 'Subheading', type: 'text', icon: 'type' },
+    { key: 'media', label: 'Team Photo', type: 'file' },
+  ],
+  'Mission & Vision': [
+    { key: 'mission_title', label: 'Mission Title', type: 'text', icon: 'type' },
+    { key: 'mission_text', label: 'Mission Statement', type: 'textarea', icon: 'align' },
+    { key: 'vision_title', label: 'Vision Title', type: 'text', icon: 'type' },
+    { key: 'vision_text', label: 'Vision Statement', type: 'textarea', icon: 'align' },
+    { key: 'media', label: 'Section Image', type: 'file' },
+  ],
+  'Contact Form': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'subheading', label: 'Subheading', type: 'text', icon: 'type' },
+    { key: 'email', label: 'Contact Email', type: 'text', icon: 'link' },
+    { key: 'phone', label: 'Phone Number', type: 'text', icon: 'type' },
+    { key: 'address', label: 'Address', type: 'textarea', icon: 'align' },
+  ],
+  'Location Map': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'address', label: 'Full Address', type: 'textarea', icon: 'align' },
+    { key: 'map_embed_url', label: 'Google Maps Embed URL', type: 'text', icon: 'link' },
+  ],
+  'Business Hours': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'mon_fri', label: 'Monday – Friday Hours', type: 'text', icon: 'type' },
+    { key: 'saturday', label: 'Saturday Hours', type: 'text', icon: 'type' },
+    { key: 'sunday', label: 'Sunday / Public Holidays', type: 'text', icon: 'type' },
+  ],
+  'Terms Text': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'content', label: 'Terms & Conditions Content', type: 'textarea', icon: 'align' },
+    { key: 'last_updated', label: 'Last Updated Date', type: 'text', icon: 'type' },
+  ],
+  'Policy Text': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'content', label: 'Privacy Policy Content', type: 'textarea', icon: 'align' },
+    { key: 'last_updated', label: 'Last Updated Date', type: 'text', icon: 'type' },
+  ],
+  'Products Grid': [
+    { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+    { key: 'product_limit', label: 'Products to Show', type: 'text', icon: 'type' },
+    { key: 'filter_by', label: 'Filter By', type: 'select', options: ['All Products', 'Sale Items', 'Featured', 'New Arrivals'] },
+    { key: 'button_text', label: 'View All Button Text', type: 'text', icon: 'mouse' },
+    { key: 'button_link', label: 'View All Link', type: 'text', icon: 'link' },
+  ],
 };
-function PageIcon({ slug, size = 14, color }: { slug: string; size?: number; color?: string }) {
-  const Ic = PAGE_ICON[slug] || Layers;
-  return <Ic size={size} color={color} />;
+const DEFAULT_FIELDS = [
+  { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
+  { key: 'subtitle', label: 'Subtitle', type: 'text', icon: 'type' },
+  { key: 'content', label: 'Content / Description', type: 'textarea', icon: 'align' },
+  { key: 'button_text', label: 'Button Text', type: 'text', icon: 'mouse' },
+  { key: 'button_link', label: 'Button Link (URL)', type: 'text', icon: 'link' },
+  { key: 'media', label: 'Image / Video Upload', type: 'file' },
+];
+
+type SectionData = Record<string, string>;
+type SectionItem = { id: string; content: SectionData; status: string; mediaUrl?: string };
+type Section = { name: string; items: SectionItem[] };
+type CmsPage = { id: string; title: string; slug: string; sections: Section[]; lastEdited: string; status: string };
+
+function getItemPreview(sectionName: string, content: SectionData): string {
+  const keys = ['title', 'promo_title', 'heading', 'mission_title', 'content'];
+  for (const k of keys) { if (content[k]) return content[k]; }
+  return sectionName + ' Item';
+}
+function getItemSub(content: SectionData): string {
+  if (content.button_text && content.button_link) return content.button_text + ' • ' + content.button_link;
+  if (content.button_text) return content.button_text;
+  if (content.subheading) return content.subheading;
+  if (content.subtitle) return content.subtitle;
+  return '';
+}
+function getSectionIconType(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('banner') || n.includes('hero')) return 'image';
+  if (n.includes('product')) return 'tag';
+  if (n.includes('promo')) return 'promo';
+  if (n.includes('news') || n.includes('contact') || n.includes('form')) return 'mail';
+  if (n.includes('map') || n.includes('location')) return 'map';
+  if (n.includes('hour') || n.includes('time')) return 'clock';
+  return 'text';
+}
+function sectionHasMedia(name: string): boolean {
+  const fields = SECTION_FIELDS[name] || DEFAULT_FIELDS;
+  return fields.some(f => f.type === 'file');
 }
 
-// ── Homepage section type labels ───────────────────────────
-const HP_TYPE_LABELS: Record<string, string> = {
-  HeroSlider: "Hero Banner Slider",
-  Brands: "Brands Section",
-  TrustBadges: "Trust Badges",
-  CategorySection: "Category Section",
-  FeaturedProducts: "Featured Products",
-  FlashSale: "Flash Sale",
-  PromoBanners: "Promo Banners",
-  CategoryPromoBanners: "Category Promo Banners",
-  ProductSection: "Products Section",
-  RecentlyViewed: "Recently Viewed",
-  UpgradeBanner: "Upgrade / Promo Banner",
-  Newsletter: "Newsletter Section",
-};
-
-// ── Banner form fields ─────────────────────────────────────
-const BANNER_FIELDS = [
-  { key: "title",    label: "Title",       type: "text" },
-  { key: "subtitle", label: "Subtitle",    type: "text" },
-  { key: "image",    label: "Image URL",   type: "text" },
-  { key: "link",     label: "Button Link", type: "text" },
-  { key: "linkText", label: "Button Text", type: "text" },
-  { key: "badge",    label: "Badge Text",  type: "text" },
-  { key: "tag",      label: "Tag Label",   type: "text" },
+const INITIAL_PAGES: CmsPage[] = [
+  { id: 'PG001', title: 'Home', slug: '/', lastEdited: '2025-05-25', status: 'Published',
+    sections: [
+      { name: 'Hero Banner', items: [{ id: 'i1a', content: { title: 'Welcome to KRYROS', subtitle: 'Premium Tech Products in Zambia', description: 'Discover the latest smartphones, laptops and accessories.', button_text: 'Shop Now', button_link: '/products', media: '' }, status: 'Active' }] },
+      { name: 'Featured Products', items: [{ id: 'i2a', content: { heading: 'Featured Products', subheading: 'Hand-picked just for you', product_limit: '8', sort_by: 'Featured' }, status: 'Active' }] },
+      { name: 'Promotions', items: [{ id: 'i3a', content: { heading: 'Special Offers', promo_title: 'Flash Sale', promo_text: 'Up to 40% off selected items', button_text: 'See All Deals', button_link: '/promotions', media: '' }, status: 'Active' }] },
+      { name: 'Newsletter', items: [{ id: 'i4a', content: { heading: 'Stay Updated', subheading: 'Get deals and new arrivals straight to your inbox', placeholder: 'Enter your email', button_text: 'Subscribe' }, status: 'Active' }] },
+    ],
+  },
+  { id: 'PG002', title: 'About Us', slug: '/about', lastEdited: '2025-04-10', status: 'Published',
+    sections: [
+      { name: 'Company Story', items: [{ id: 'i5a', content: { heading: 'Our Story', content: 'KRYROS Mobile Tech was founded in 2020 with a mission to make premium technology accessible to everyone in Zambia.', button_text: 'Learn More', button_link: '/about', media: '' }, status: 'Active' }] },
+      { name: 'Team', items: [{ id: 'i6a', content: { heading: 'Meet Our Team', subheading: 'The people behind KRYROS', media: '' }, status: 'Active' }] },
+      { name: 'Mission & Vision', items: [{ id: 'i7a', content: { mission_title: 'Our Mission', mission_text: 'To provide the best tech products and services at fair prices.', vision_title: 'Our Vision', vision_text: 'To be the leading tech retailer in Southern Africa.', media: '' }, status: 'Active' }] },
+    ],
+  },
+  { id: 'PG003', title: 'Contact', slug: '/contact', lastEdited: '2025-03-20', status: 'Published',
+    sections: [
+      { name: 'Contact Form', items: [{ id: 'i8a', content: { heading: 'Get in Touch', subheading: "We'd love to hear from you", email: 'info@kryros.com', phone: '+260 97X XXX XXX', address: 'Lusaka, Zambia' }, status: 'Active' }] },
+      { name: 'Location Map', items: [{ id: 'i9a', content: { heading: 'Find Us', address: 'Lusaka, Zambia', map_embed_url: '' }, status: 'Active' }] },
+      { name: 'Business Hours', items: [{ id: 'i10a', content: { heading: 'Business Hours', mon_fri: '08:00 AM – 06:00 PM', saturday: '09:00 AM – 04:00 PM', sunday: 'Closed' }, status: 'Active' }] },
+    ],
+  },
+  { id: 'PG004', title: 'Terms & Conditions', slug: '/terms', lastEdited: '2025-01-15', status: 'Published',
+    sections: [{ name: 'Terms Text', items: [{ id: 'i11a', content: { heading: 'Terms & Conditions', content: 'By using our website you agree to these terms...', last_updated: '2025-01-15' }, status: 'Active' }] }],
+  },
+  { id: 'PG005', title: 'Privacy Policy', slug: '/privacy', lastEdited: '2025-01-15', status: 'Published',
+    sections: [{ name: 'Policy Text', items: [{ id: 'i12a', content: { heading: 'Privacy Policy', content: 'We respect your privacy and are committed to protecting your data...', last_updated: '2025-01-15' }, status: 'Active' }] }],
+  },
+  { id: 'PG006', title: 'Flash Sale', slug: '/flash-sale', lastEdited: '2025-05-20', status: 'Draft',
+    sections: [
+      { name: 'Sale Banner', items: [{ id: 'i13a', content: { title: 'Flash Sale', subtitle: 'Limited Time Only', discount_text: '50% OFF', button_text: 'Shop Now', button_link: '/products', media: '' }, status: 'Active' }] },
+      { name: 'Products Grid', items: [{ id: 'i14a', content: { heading: 'Sale Items', product_limit: '12', filter_by: 'Sale Items', button_text: 'View All Sale Items', button_link: '/products?sale=true' }, status: 'Active' }] },
+    ],
+  },
 ];
 
-// ── Section content fields per section name ────────────────
-const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string }>> = {
-  "Hero Banner": [
-    { key: "title", label: "Banner Title", type: "text" },
-    { key: "subtitle", label: "Subtitle", type: "text" },
-    { key: "description", label: "Description", type: "textarea" },
-    { key: "button_text", label: "Button Text", type: "text" },
-    { key: "button_link", label: "Button Link", type: "text" },
-    { key: "image", label: "Image URL", type: "text" },
-  ],
-  "Featured Products": [
-    { key: "heading", label: "Section Heading", type: "text" },
-    { key: "subheading", label: "Subheading", type: "text" },
-    { key: "product_limit", label: "Products to Show", type: "text" },
-  ],
-  "Newsletter": [
-    { key: "heading", label: "Heading", type: "text" },
-    { key: "subheading", label: "Subheading", type: "text" },
-    { key: "button_text", label: "Button Text", type: "text" },
-  ],
-  "Contact Form": [
-    { key: "heading", label: "Section Heading", type: "text" },
-    { key: "email", label: "Contact Email", type: "text" },
-    { key: "phone", label: "Phone", type: "text" },
-    { key: "address", label: "Address", type: "textarea" },
-  ],
-  "Company Story": [
-    { key: "heading", label: "Heading", type: "text" },
-    { key: "content", label: "Story Content", type: "textarea" },
-    { key: "button_text", label: "Button Text", type: "text" },
-    { key: "button_link", label: "Button Link", type: "text" },
-  ],
-  "Terms Text": [
-    { key: "heading", label: "Heading", type: "text" },
-    { key: "content", label: "Terms Content", type: "textarea" },
-    { key: "last_updated", label: "Last Updated", type: "text" },
-  ],
-  "Policy Text": [
-    { key: "heading", label: "Heading", type: "text" },
-    { key: "content", label: "Policy Content", type: "textarea" },
-    { key: "last_updated", label: "Last Updated", type: "text" },
-  ],
-};
-const DEFAULT_SECTION_FIELDS = [
-  { key: "heading", label: "Section Heading", type: "text" },
-  { key: "subtitle", label: "Subtitle", type: "text" },
-  { key: "content", label: "Content", type: "textarea" },
-  { key: "button_text", label: "Button Text", type: "text" },
-  { key: "button_link", label: "Button Link", type: "text" },
-];
+const EMPTY_PAGE_FORM = { title: '', slug: '', status: 'Published' };
+const ADD_SECTION_NAMES = ['Hero Banner','Featured Products','Promotions','Newsletter','Company Story','Team','Mission & Vision','Contact Form','Location Map','Business Hours','Terms Text','Policy Text','Products Grid','Sale Banner','Custom Section'];
 
-type FormData = Record<string, string>;
-
-function CmsContent() {
-  const { theme } = useTheme();
-  const D          = theme === "dark";
-  const bg         = D ? "#080E1A" : "#F1F5F9";
-  const card       = D ? "#0D1523" : "#FFFFFF";
-  const border     = D ? "#1E293B" : "#E2E8F0";
-  const textMain   = D ? "#FFFFFF" : "#0F172A";
-  const textMuted  = D ? "#8E9AAF" : "#64748B";
-  const surface    = D ? "#101826" : "#F8FAFC";
-  const inputBg    = D ? "#060D18" : "#F8FAFC";
-
-  // ── State ──────────────────────────────────────────────────
-  const [pages, setPages]               = useState<any[]>([]);
-  const [selectedSlug, setSelectedSlug] = useState("home");
-  const [banners, setBanners]           = useState<any[]>([]);
-  const [hpSections, setHpSections]     = useState<any[]>([]);
-  const [pageSections, setPageSections] = useState<any[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [saving, setSaving]             = useState(false);
-  const [seedingPages, setSeedingPages] = useState(false);
-
-  // Banner edit modal
-  const [editingBanner, setEditingBanner] = useState<any | null>(null);
-  const [bannerForm, setBannerForm]       = useState<FormData>({});
-  const [showBannerModal, setShowBannerModal] = useState(false);
-
-  // Section edit modal
-  const [editingSection, setEditingSection] = useState<any | null>(null);
-  const [sectionForm, setSectionForm]       = useState<FormData>({});
-  const [showSectionModal, setShowSectionModal] = useState(false);
-  const [modalSectionName, setModalSectionName] = useState("");
-
-  // Expanded accordion sections
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(["banners", "hp-sections"]));
-
-  // ── Load on mount ──────────────────────────────────────────
-  useEffect(() => {
-    loadAll();
-  }, []);
-
-  useEffect(() => {
-    if (selectedSlug && selectedSlug !== "home") {
-      loadPageSections(selectedSlug);
-    }
-  }, [selectedSlug]);
-
-  async function loadAll() {
-    setLoading(true);
-    try {
-      const [pagesRes, bannersRes, hpRes] = await Promise.all([
-        getCmsPages().catch(() => ({ data: [] })),
-        getCmsBanners().catch(() => ({ data: [] })),
-        getCmsHomepageSections().catch(() => ({ data: [] })),
-      ]);
-      const pagesArr = Array.isArray(pagesRes.data) ? pagesRes.data
-        : Array.isArray(pagesRes.data?.data) ? pagesRes.data.data : [];
-      const bannersArr = Array.isArray(bannersRes.data) ? bannersRes.data
-        : Array.isArray(bannersRes.data?.data) ? bannersRes.data.data : [];
-      const hpArr = Array.isArray(hpRes.data) ? hpRes.data
-        : Array.isArray(hpRes.data?.data) ? hpRes.data.data : [];
-      setPages(pagesArr);
-      setBanners(bannersArr);
-      setHpSections(hpArr);
-    } catch {
-      toast.error("Failed to load CMS data");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function loadPageSections(slug: string) {
-    try {
-      const res = await getCmsSections(slug).catch(() => ({ data: [] }));
-      const arr = Array.isArray(res.data) ? res.data
-        : Array.isArray(res.data?.data) ? res.data.data : [];
-      setPageSections(arr);
-    } catch {}
-  }
-
-  // ── Banner CRUD ────────────────────────────────────────────
-  function openBannerEdit(banner: any) {
-    setEditingBanner(banner);
-    setBannerForm(banner || {});
-    setShowBannerModal(true);
-  }
-  function openBannerCreate() {
-    setEditingBanner(null);
-    setBannerForm({ title: "", subtitle: "", image: "", link: "", linkText: "", badge: "", tag: "" });
-    setShowBannerModal(true);
-  }
-  async function saveBanner() {
-    setSaving(true);
-    try {
-      const payload: any = { ...bannerForm };
-      if (editingBanner?.id) {
-        await updateCmsBanner(editingBanner.id, payload);
-        setBanners(prev => prev.map(b => b.id === editingBanner.id ? { ...b, ...payload } : b));
-        toast.success("Banner updated!");
-      } else {
-        const res = await createCmsBanner({ ...payload, isActive: true });
-        setBanners(prev => [...prev, res.data]);
-        toast.success("Banner created!");
-      }
-      setShowBannerModal(false);
-    } catch {
-      toast.error("Failed to save banner");
-    } finally {
-      setSaving(false);
-    }
-  }
-  async function deleteBannerById(id: string) {
-    if (!confirm("Delete this banner?")) return;
-    try {
-      await deleteCmsBanner(id);
-      setBanners(prev => prev.filter(b => b.id !== id));
-      toast.success("Banner deleted");
-    } catch {
-      toast.error("Failed to delete banner");
-    }
-  }
-  async function toggleBannerActive(banner: any) {
-    try {
-      await updateCmsBanner(banner.id, { isActive: !banner.isActive });
-      setBanners(prev => prev.map(b => b.id === banner.id ? { ...b, isActive: !b.isActive } : b));
-    } catch {
-      toast.error("Failed to update banner");
-    }
-  }
-
-  // ── Homepage sections CRUD ────────────────────────────────
-  async function toggleHpSection(sec: any) {
-    try {
-      await updateCmsHomepageSection(sec.id, { isActive: !sec.isActive });
-      setHpSections(prev => prev.map(s => s.id === sec.id ? { ...s, isActive: !s.isActive } : s));
-      toast.success(`${sec.type} ${!sec.isActive ? "enabled" : "disabled"}`);
-    } catch {
-      toast.error("Failed to update section");
-    }
-  }
-
-  // ── Page sections CRUD ────────────────────────────────────
-  function openSectionEdit(sec: any, sectionName: string) {
-    setEditingSection(sec);
-    setModalSectionName(sectionName);
-    setSectionForm(sec ? { ...((sec.content || sec.config) || {}) } : {});
-    setShowSectionModal(true);
-  }
-  function openSectionCreate(sectionName: string) {
-    setEditingSection(null);
-    setModalSectionName(sectionName);
-    setSectionForm({});
-    setShowSectionModal(true);
-  }
-  async function saveSection() {
-    setSaving(true);
-    try {
-      const payload: any = { content: sectionForm, name: modalSectionName, pageSlug: selectedSlug, isActive: true };
-      if (editingSection?.id) {
-        await updateCmsSection(editingSection.id, payload);
-        setPageSections(prev => prev.map(s => s.id === editingSection.id ? { ...s, content: sectionForm } : s));
-        toast.success("Section updated!");
-      } else {
-        const res = await createCmsSection(payload);
-        setPageSections(prev => [...prev, res.data]);
-        toast.success("Section created!");
-      }
-      setShowSectionModal(false);
-    } catch {
-      toast.error("Failed to save section");
-    } finally {
-      setSaving(false);
-    }
-  }
-  async function deleteSectionById(id: string) {
-    if (!confirm("Delete this section?")) return;
-    try {
-      await deleteCmsSection(id);
-      setPageSections(prev => prev.filter(s => s.id !== id));
-      toast.success("Section deleted");
-    } catch {
-      toast.error("Failed to delete");
-    }
-  }
-  async function toggleSectionActive(sec: any) {
-    try {
-      await updateCmsSection(sec.id, { isActive: !sec.isActive });
-      setPageSections(prev => prev.map(s => s.id === sec.id ? { ...s, isActive: !s.isActive } : s));
-    } catch {}
-  }
-
-  // ── Seed / Reset ──────────────────────────────────────────
-  async function handleSeedAllPages() {
-    setSeedingPages(true);
-    try {
-      await seedAllCmsPages();
-      await loadAll();
-      toast.success("All pages seeded!");
-    } catch {
-      toast.error("Failed to seed pages");
-    } finally {
-      setSeedingPages(false);
-    }
-  }
-  async function handleResetHomepageSections() {
-    if (!confirm("This will wipe and re-seed homepage section configs. Your uploaded banners are safe. Continue?")) return;
-    setSaving(true);
-    try {
-      await resetSeedCmsHomepageSections();
-      const res = await getCmsHomepageSections();
-      const arr = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
-      setHpSections(arr);
-      toast.success("Homepage sections re-seeded!");
-    } catch {
-      toast.error("Reset failed");
-    } finally {
-      setSaving(false);
-    }
-  }
-  async function handleResetPageSections(slug: string) {
-    if (!confirm(`Reset sections for "${slug}"? Old section data will be wiped and re-seeded. Continue?`)) return;
-    setSaving(true);
-    try {
-      await resetSeedCmsSections(slug);
-      await loadPageSections(slug);
-      toast.success(`Sections for "${slug}" re-seeded!`);
-    } catch {
-      toast.error("Reset failed");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  // ── Helper styles ──────────────────────────────────────────
-  const cardSt = (extra?: React.CSSProperties): React.CSSProperties => ({
-    background: card, border: `1px solid ${border}`, borderRadius: 12, ...extra,
-  });
-  const btnSm = (color = "#1FA89A", bg = "transparent"): React.CSSProperties => ({
-    display: "flex", alignItems: "center", gap: 5, padding: "5px 10px",
-    borderRadius: 7, border: `1px solid ${color}`, background: bg,
-    color, cursor: "pointer", fontSize: 11.5, fontWeight: 600,
-  });
-
-  // ── Accordion toggle ───────────────────────────────────────
-  function toggleExpand(key: string) {
-    setExpanded(prev => {
-      const n = new Set(prev);
-      n.has(key) ? n.delete(key) : n.add(key);
-      return n;
-    });
-  }
-
-  // ── Group page sections by name ────────────────────────────
-  const sectionGroups = pageSections.reduce((acc: Record<string, any[]>, s) => {
-    const name = s.name || s.type || "Section";
-    if (!acc[name]) acc[name] = [];
-    acc[name].push(s);
-    return acc;
-  }, {});
-
-  if (loading) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>
-        <Loader2 size={28} color="#1FA89A" style={{ animation: "spin 1s linear infinite" }} />
-        <span style={{ marginLeft: 12, color: textMuted }}>Loading CMS data…</span>
-        <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
-      </div>
-    );
-  }
-
-  // ── Derived page list ──────────────────────────────────────
-  const USER_UI_PAGES = [
-    { slug: "home",            title: "Home" },
-    { slug: "shop",            title: "Shop" },
-    { slug: "about",           title: "About Us" },
-    { slug: "contact",         title: "Contact" },
-    { slug: "faq",             title: "FAQ" },
-    { slug: "help",            title: "Help Center" },
-    { slug: "wholesale",       title: "Wholesale" },
-    { slug: "get-now",         title: "Get Now (BNPL)" },
-    { slug: "track-order",     title: "Track Order" },
-    { slug: "pickup-stations", title: "Pickup Stations" },
-    { slug: "privacy",         title: "Privacy Policy" },
-    { slug: "terms",           title: "Terms & Conditions" },
-    { slug: "refund",          title: "Refund Policy" },
-    { slug: "returns",         title: "Returns" },
-    { slug: "shipping",        title: "Shipping Info" },
-    { slug: "security",        title: "Security" },
-    { slug: "login",           title: "Login" },
-    { slug: "register",        title: "Register" },
-  ];
-
-  const displayPages = pages.length > 0
-    ? pages.map(p => ({ slug: p.slug, title: p.title || p.slug }))
-    : USER_UI_PAGES;
-
-  const selectedPage = displayPages.find(p => p.slug === selectedSlug) || displayPages[0];
-
+function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, textMuted }: {
+  value: string; onChange: (v: string, name: string) => void; onUrlChange?: (url: string) => void;
+  isDark: boolean; border: string; surface: string; textMuted: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<{ name: string; type: string; url: string } | null>(null);
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isVideo = file.type.startsWith('video/');
+    const url = URL.createObjectURL(file);
+    setPreview({ name: file.name, type: isVideo ? 'video' : 'image', url });
+    onChange(file.name, file.name);
+    onUrlChange?.(url);
+    toast.success(file.name + ' selected');
+  };
   return (
-    <div style={{ display: "flex", height: "calc(100vh - 80px)", overflow: "hidden" }}>
-
-      {/* ── LEFT SIDEBAR: Page List ── */}
-      <div style={{ width: 230, flexShrink: 0, background: card, borderRight: `1px solid ${border}`, overflowY: "auto", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "14px 12px 10px", borderBottom: `1px solid ${border}` }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: textMuted, letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 10 }}>Pages</div>
-          <button
-            onClick={handleSeedAllPages}
-            disabled={seedingPages}
-            style={{ display: "flex", alignItems: "center", gap: 5, width: "100%", padding: "7px 10px", borderRadius: 7, border: `1px solid #1FA89A`, background: "rgba(31,168,154,0.08)", color: "#1FA89A", cursor: "pointer", fontSize: 11, fontWeight: 600 }}
-          >
-            {seedingPages ? <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={11} />}
-            Seed All Pages
-          </button>
-        </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px 8px" }}>
-          {displayPages.map(page => {
-            const isSelected = page.slug === selectedSlug;
-            return (
-              <button
-                key={page.slug}
-                onClick={() => setSelectedSlug(page.slug)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 8, width: "100%",
-                  padding: "8px 10px", borderRadius: 8, marginBottom: 2,
-                  border: "none", textAlign: "left", cursor: "pointer",
-                  background: isSelected ? "rgba(31,168,154,0.12)" : "transparent",
-                  color: isSelected ? "#1FA89A" : textMuted,
-                  fontWeight: isSelected ? 600 : 400, fontSize: 12.5,
-                }}
-              >
-                <PageIcon slug={page.slug} size={13} color={isSelected ? "#1FA89A" : textMuted} />
-                {page.title}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── MAIN AREA: Sections ── */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 20, background: bg }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-          <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: textMain, margin: 0 }}>
-              <PageIcon slug={selectedSlug} size={16} color={textMain} />
-              {" "}{selectedPage?.title || selectedSlug}
-            </h2>
-            <div style={{ fontSize: 12, color: textMuted, marginTop: 2 }}>/{selectedSlug}</div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {selectedSlug === "home" && (
-              <button onClick={handleResetHomepageSections} disabled={saving} style={btnSm("#f59e0b", "rgba(245,158,11,0.08)")}>
-                <RefreshCw size={11} /> Reset Home Sections
-              </button>
-            )}
-            {selectedSlug !== "home" && (
-              <button onClick={() => handleResetPageSections(selectedSlug)} disabled={saving} style={btnSm("#6366f1", "rgba(99,102,241,0.08)")}>
-                <RefreshCw size={11} /> Reset Sections
-              </button>
-            )}
-            <button onClick={() => loadAll()} style={btnSm("#1FA89A", "rgba(31,168,154,0.08)")}>
-              <RefreshCw size={11} /> Refresh
+    <div>
+      {preview ? (
+        <div style={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px', border: `1px solid ${border}` }}>
+          {preview.type === 'image' ? <img src={preview.url} alt={preview.name} style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} />
+            : <video src={preview.url} controls style={{ width: '100%', maxHeight: '180px', display: 'block' }} />}
+          <div style={{ position: 'absolute', top: 8, right: 8 }}>
+            <button onClick={() => { setPreview(null); onChange('', ''); onUrlChange?.(''); }} style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={13} color="white" />
             </button>
           </div>
-        </div>
-
-        {/* ── HOME PAGE: Banners + HP Sections ── */}
-        {selectedSlug === "home" && (
-          <>
-            {/* Hero Banners */}
-            <div style={cardSt({ marginBottom: 14 })}>
-              <button
-                onClick={() => toggleExpand("banners")}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", background: "transparent", border: "none", cursor: "pointer" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(31,168,154,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <ImageIcon size={14} color="#1FA89A" />
-                  </div>
-                  <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: textMain }}>Hero Banners</div>
-                    <div style={{ fontSize: 11, color: textMuted }}>{banners.length} banner{banners.length !== 1 ? "s" : ""} · Slides in the hero carousel</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <button onClick={e => { e.stopPropagation(); openBannerCreate(); }} style={btnSm("#1FA89A", "rgba(31,168,154,0.08)")}>
-                    <Plus size={11} /> Add Banner
-                  </button>
-                  {expanded.has("banners") ? <ChevronDown size={16} color={textMuted} /> : <ChevronRight size={16} color={textMuted} />}
-                </div>
-              </button>
-              {expanded.has("banners") && (
-                <div style={{ borderTop: `1px solid ${border}`, padding: "12px 18px" }}>
-                  {banners.length === 0 ? (
-                    <div style={{ fontSize: 12, color: textMuted, textAlign: "center", padding: "20px 0" }}>No banners yet. Add your first banner above.</div>
-                  ) : banners.map(b => (
-                    <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${border}` }}>
-                      {b.image ? (
-                        <img src={b.image} alt={b.title} style={{ width: 64, height: 42, objectFit: "cover", borderRadius: 6, flexShrink: 0, border: `1px solid ${border}` }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                      ) : (
-                        <div style={{ width: 64, height: 42, borderRadius: 6, background: surface, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `1px solid ${border}` }}>
-                          <ImageIcon size={18} color={textMuted} />
-                        </div>
-                      )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: textMain, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.title || "Untitled Banner"}</div>
-                        {b.subtitle && <div style={{ fontSize: 11, color: textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.subtitle}</div>}
-                        {b.link && <div style={{ fontSize: 10.5, color: "#1FA89A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.link}</div>}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        <button onClick={() => toggleBannerActive(b)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                          {b.isActive ? <ToggleRight size={20} color="#1FA89A" /> : <ToggleLeft size={20} color={textMuted} />}
-                        </button>
-                        <button onClick={() => openBannerEdit(b)} style={btnSm("#6366f1")}>
-                          <Edit size={10} /> Edit
-                        </button>
-                        <button onClick={() => deleteBannerById(b.id)} style={btnSm("#ef4444")}>
-                          <Trash2 size={10} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Homepage Sections */}
-            <div style={cardSt({ marginBottom: 14 })}>
-              <button
-                onClick={() => toggleExpand("hp-sections")}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", background: "transparent", border: "none", cursor: "pointer" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(99,102,241,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Layers size={14} color="#6366f1" />
-                  </div>
-                  <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: textMain }}>Homepage Sections</div>
-                    <div style={{ fontSize: 11, color: textMuted }}>{hpSections.length} sections · Toggle visibility below</div>
-                  </div>
-                </div>
-                {expanded.has("hp-sections") ? <ChevronDown size={16} color={textMuted} /> : <ChevronRight size={16} color={textMuted} />}
-              </button>
-              {expanded.has("hp-sections") && (
-                <div style={{ borderTop: `1px solid ${border}`, padding: "12px 18px" }}>
-                  {hpSections.length === 0 ? (
-                    <div style={{ fontSize: 12, color: textMuted, textAlign: "center", padding: "20px 0" }}>
-                      No sections seeded yet.{" "}
-                      <button onClick={handleResetHomepageSections} style={{ background: "none", border: "none", color: "#1FA89A", cursor: "pointer", fontSize: 12 }}>Click here to seed them.</button>
-                    </div>
-                  ) : hpSections.sort((a, b) => (a.order || 0) - (b.order || 0)).map(sec => (
-                    <div key={sec.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${border}` }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: sec.isActive ? "#1FA89A" : textMuted, flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 500, color: textMain }}>{HP_TYPE_LABELS[sec.type] || sec.type || sec.title || "Section"}</div>
-                        <div style={{ fontSize: 10.5, color: textMuted }}>Type: {sec.type} · Order: {sec.order ?? "–"}</div>
-                      </div>
-                      <span style={{
-                        fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 10,
-                        background: sec.isActive ? "rgba(31,168,154,0.12)" : "rgba(100,116,139,0.12)",
-                        color: sec.isActive ? "#1FA89A" : textMuted,
-                      }}>{sec.isActive ? "Active" : "Hidden"}</span>
-                      <button onClick={() => toggleHpSection(sec)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                        {sec.isActive ? <ToggleRight size={20} color="#1FA89A" /> : <ToggleLeft size={20} color={textMuted} />}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* ── OTHER PAGES: Page-specific sections ── */}
-        {selectedSlug !== "home" && (
-          <div style={cardSt()}>
-            <div style={{ padding: "14px 18px", borderBottom: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: textMain }}>Page Sections</div>
-              <button onClick={() => openSectionCreate("Custom Section")} style={btnSm("#1FA89A", "rgba(31,168,154,0.08)")}>
-                <Plus size={11} /> Add Section
-              </button>
-            </div>
-            <div style={{ padding: "12px 18px" }}>
-              {pageSections.length === 0 ? (
-                <div style={{ fontSize: 12, color: textMuted, textAlign: "center", padding: "30px 0" }}>
-                  No sections for this page yet.{" "}
-                  <button onClick={() => handleResetPageSections(selectedSlug)} style={{ background: "none", border: "none", color: "#1FA89A", cursor: "pointer", fontSize: 12 }}>
-                    Seed default sections
-                  </button>
-                </div>
-              ) : Object.entries(sectionGroups).map(([groupName, items]) => (
-                <div key={groupName} style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: textMuted, textTransform: "uppercase", letterSpacing: "0.7px", marginBottom: 8 }}>{groupName}</div>
-                  {(items as any[]).map(sec => (
-                    <div key={sec.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: surface, borderRadius: 8, marginBottom: 6, border: `1px solid ${border}` }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 500, color: textMain }}>
-                          {(sec.content || sec.config)?.heading || (sec.content || sec.config)?.title || groupName}
-                        </div>
-                        <div style={{ fontSize: 10.5, color: textMuted }}>Order: {sec.order ?? "–"} · {sec.isActive ? "Active" : "Hidden"}</div>
-                      </div>
-                      <button onClick={() => toggleSectionActive(sec)} style={{ background: "none", border: "none", cursor: "pointer" }}>
-                        {sec.isActive ? <ToggleRight size={18} color="#1FA89A" /> : <ToggleLeft size={18} color={textMuted} />}
-                      </button>
-                      <button onClick={() => openSectionEdit(sec, groupName)} style={btnSm("#6366f1")}>
-                        <Edit size={10} /> Edit
-                      </button>
-                      <button onClick={() => deleteSectionById(sec.id)} style={btnSm("#ef4444")}>
-                        <Trash2 size={10} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+          <div style={{ padding: '6px 10px', background: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.9)', fontSize: '11px', color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {preview.type === 'video' ? <Video size={11} /> : <ImageIcon size={11} />} {preview.name}
           </div>
-        )}
+        </div>
+      ) : value ? (
+        <div style={{ padding: '10px 12px', background: surface, border: `1px solid ${border}`, borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: textMuted }}>
+          <ImageIcon size={14} /> {value}
+          <button onClick={() => { onChange('', ''); onUrlChange?.(''); }} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex' }}><X size={13} /></button>
+        </div>
+      ) : null}
+      <div onClick={() => inputRef.current?.click()} style={{ border: `2px dashed ${border}`, borderRadius: '10px', padding: '20px', textAlign: 'center', cursor: 'pointer', background: surface, transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#1FA89A'} onMouseLeave={e => e.currentTarget.style.borderColor = border}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Upload size={18} color="#1FA89A" /></div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Video size={18} color="#6366f1" /></div>
+        </div>
+        <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 4px' }}><span style={{ color: '#1FA89A', fontWeight: 600 }}>Click to upload</span> image or video</p>
+        <p style={{ fontSize: '11px', color: textMuted, margin: 0 }}>PNG, JPG, GIF, MP4, MOV — max 50MB</p>
       </div>
-
-      {/* ── BANNER EDIT MODAL ── */}
-      {showBannerModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: card, borderRadius: 14, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", border: `1px solid ${border}` }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: `1px solid ${border}` }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: textMain }}>{editingBanner ? "Edit Banner" : "Add New Banner"}</div>
-              <button onClick={() => setShowBannerModal(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={18} color={textMuted} /></button>
-            </div>
-            <div style={{ padding: "16px 20px" }}>
-              {BANNER_FIELDS.map(f => (
-                <div key={f.key} style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 600, color: textMuted, marginBottom: 5 }}>{f.label}</label>
-                  <input
-                    type="text"
-                    value={bannerForm[f.key] || ""}
-                    onChange={e => setBannerForm(p => ({ ...p, [f.key]: e.target.value }))}
-                    placeholder={f.label}
-                    style={{ width: "100%", padding: "9px 12px", background: inputBg, border: `1px solid ${border}`, borderRadius: 8, color: textMain, fontSize: 13 }}
-                  />
-                </div>
-              ))}
-              {bannerForm.image && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11.5, fontWeight: 600, color: textMuted, marginBottom: 5 }}>Preview</div>
-                  <img src={bannerForm.image} alt="preview" style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 8, border: `1px solid ${border}` }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                </div>
-              )}
-            </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", padding: "14px 20px", borderTop: `1px solid ${border}` }}>
-              <button onClick={() => setShowBannerModal(false)} style={btnSm(textMuted)}>Cancel</button>
-              <button onClick={saveBanner} disabled={saving} style={{ ...btnSm("#fff", "#1FA89A"), border: "none" }}>
-                {saving ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Check size={12} />}
-                {saving ? "Saving…" : "Save Banner"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── SECTION EDIT MODAL ── */}
-      {showSectionModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: card, borderRadius: 14, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", border: `1px solid ${border}` }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: `1px solid ${border}` }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: textMain }}>{editingSection ? "Edit" : "Add"} · {modalSectionName}</div>
-              <button onClick={() => setShowSectionModal(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={18} color={textMuted} /></button>
-            </div>
-            <div style={{ padding: "16px 20px" }}>
-              {(SECTION_FIELDS[modalSectionName] || DEFAULT_SECTION_FIELDS).map(f => (
-                <div key={f.key} style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 600, color: textMuted, marginBottom: 5 }}>{f.label}</label>
-                  {f.type === "textarea" ? (
-                    <textarea
-                      value={sectionForm[f.key] || ""}
-                      onChange={e => setSectionForm(p => ({ ...p, [f.key]: e.target.value }))}
-                      placeholder={f.label}
-                      rows={4}
-                      style={{ width: "100%", padding: "9px 12px", background: inputBg, border: `1px solid ${border}`, borderRadius: 8, color: textMain, fontSize: 13, resize: "vertical" }}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={sectionForm[f.key] || ""}
-                      onChange={e => setSectionForm(p => ({ ...p, [f.key]: e.target.value }))}
-                      placeholder={f.label}
-                      style={{ width: "100%", padding: "9px 12px", background: inputBg, border: `1px solid ${border}`, borderRadius: 8, color: textMain, fontSize: 13 }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", padding: "14px 20px", borderTop: `1px solid ${border}` }}>
-              <button onClick={() => setShowSectionModal(false)} style={btnSm(textMuted)}>Cancel</button>
-              <button onClick={saveSection} disabled={saving} style={{ ...btnSm("#fff", "#1FA89A"), border: "none" }}>
-                {saving ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Check size={12} />}
-                {saving ? "Saving…" : "Save Section"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        button { font-family: inherit; }
-        input, textarea { font-family: inherit; outline: none; }
-        input:focus, textarea:focus { border-color: #1FA89A !important; }
-      `}</style>
+      <input ref={inputRef} type="file" accept="image/*,video/*" onChange={handleFile} style={{ display: 'none' }} />
     </div>
   );
 }
 
-export default function CmsPagesPage() {
+function ItemFormModal({ sectionName, pageTitle, initialValues, onClose, onSave, isDark, border, textMain, textMuted, surface, isEdit }: {
+  sectionName: string; pageTitle: string; initialValues: SectionData;
+  onClose: () => void; onSave: (content: SectionData, mediaUrl?: string) => void;
+  isDark: boolean; border: string; textMain: string; textMuted: string; surface: string; isEdit: boolean;
+}) {
+  const fields = SECTION_FIELDS[sectionName] || DEFAULT_FIELDS;
+  const [values, setValues] = useState<SectionData>({ ...initialValues });
+  const [mediaUrl, setMediaUrl] = useState('');
+  const set = (k: string) => (v: string) => setValues(prev => ({ ...prev, [k]: v }));
+  const bg = isDark ? '#0D1523' : '#FFFFFF';
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: '8px', background: surface, border: `1px solid ${border}`, color: textMain, fontSize: '13.5px', outline: 'none', fontFamily: 'var(--font-inter)', boxSizing: 'border-box' };
   return (
-    <AdminShell noPadding>
-      <CmsContent />
-    </AdminShell>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(3px)' }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: '16px', width: '100%', maxWidth: '560px', maxHeight: '92vh', overflow: 'auto', boxShadow: '0 30px 60px rgba(0,0,0,0.45)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px 14px', borderBottom: `1px solid ${border}` }}>
+          <div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: textMain }}>{isEdit ? 'Edit' : 'Add New'} {sectionName}</div>
+            <div style={{ fontSize: '11.5px', color: textMuted, marginTop: '2px' }}>{pageTitle} → {sectionName}</div>
+          </div>
+          <button onClick={onClose} style={{ width: '28px', height: '28px', borderRadius: '7px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} color={textMuted} /></button>
+        </div>
+        <div style={{ padding: '20px 24px' }}>
+          {fields.map(field => (
+            <div key={field.key} style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 600, color: textMuted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                {field.icon === 'type' && <Type size={10} />}{field.icon === 'align' && <AlignLeft size={10} />}{field.icon === 'mouse' && <MousePointer size={10} />}{field.icon === 'link' && <Link2 size={10} />}
+                {field.label}
+              </label>
+              {field.type === 'file' ? (
+                <FileUpload value={values[field.key] || ''} onChange={(v) => set(field.key)(v)} onUrlChange={setMediaUrl} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
+              ) : field.type === 'textarea' ? (
+                <textarea value={values[field.key] || ''} onChange={e => set(field.key)(e.target.value)} rows={4} placeholder={'Enter ' + field.label.toLowerCase() + '...'} style={{ ...inputStyle, resize: 'vertical' }} />
+              ) : field.type === 'select' ? (
+                <div style={{ position: 'relative' }}>
+                  <select value={values[field.key] || (field.options?.[0] || '')} onChange={e => set(field.key)(e.target.value)} style={{ ...inputStyle, appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', paddingRight: '32px' }}>
+                    {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><ChevronDown size={13} color={textMuted} /></div>
+                </div>
+              ) : (
+                <input type="text" value={values[field.key] || ''} onChange={e => set(field.key)(e.target.value)} placeholder={'Enter ' + field.label.toLowerCase() + '...'} style={inputStyle} />
+              )}
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: `1px solid ${border}` }}>
+            <button onClick={onClose} style={{ padding: '10px 20px', borderRadius: '9px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, color: textMain, fontSize: '13.5px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>Cancel</button>
+            <button onClick={() => { onSave(values, mediaUrl || undefined); onClose(); toast.success((isEdit ? 'Saved: ' : 'Added: ') + sectionName); }} style={{ padding: '10px 20px', borderRadius: '9px', background: 'linear-gradient(135deg,#1FA89A,#27B9AF)', border: 'none', color: 'white', fontSize: '13.5px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {isEdit ? 'Save Changes' : <><Plus size={14} /> Add {sectionName}</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
+
+function CMSContent() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const card = isDark ? '#0D1523' : '#FFFFFF';
+  const border = isDark ? '#1E293B' : '#E2E8F0';
+  const textMain = isDark ? '#FFFFFF' : '#0F172A';
+  const textMuted = isDark ? '#8E9AAF' : '#64748B';
+  const surface = isDark ? '#101826' : '#F1F5F9';
+  const accent = '#1FA89A';
+
+  const [data, setData] = useState<CmsPage[]>(INITIAL_PAGES);
+  type View = 'pages' | 'sections' | 'items';
+  const [view, setView] = useState<View>('pages');
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [selectedSectionName, setSelectedSectionName] = useState<string | null>(null);
+
+  const selectedPage = selectedPageId ? data.find(p => p.id === selectedPageId) ?? null : null;
+  const selectedSection = selectedPage && selectedSectionName
+    ? selectedPage.sections.find(s => s.name === selectedSectionName) ?? null : null;
+
+  const openPage = (pageId: string) => { setSelectedPageId(pageId); setView('sections'); };
+  const openSection = (sectionName: string) => { setSelectedSectionName(sectionName); setView('items'); };
+  const goBack = () => {
+    if (view === 'items') { setView('sections'); setSelectedSectionName(null); }
+    else if (view === 'sections') { setView('pages'); setSelectedPageId(null); }
+  };
+
+  const [addPageOpen, setAddPageOpen] = useState(false);
+  const [editPage, setEditPage] = useState<CmsPage | null>(null);
+  const [viewPage, setViewPage] = useState<CmsPage | null>(null);
+  const [deletePage, setDeletePage] = useState<CmsPage | null>(null);
+  const [pageForm, setPageForm] = useState({ ...EMPTY_PAGE_FORM });
+  const pfp = (k: string) => (v: string) => setPageForm(f => ({ ...f, [k]: v }));
+
+  const [addSectionPage, setAddSectionPage] = useState<string | null>(null);
+  const [newSectionName, setNewSectionName] = useState('Hero Banner');
+  const [customSectionName, setCustomSectionName] = useState('');
+
+  const [addingItem, setAddingItem] = useState(false);
+  const [editingItem, setEditingItem] = useState<SectionItem | null>(null);
+  const [deletingItem, setDeletingItem] = useState<SectionItem | null>(null);
+
+  const handleAddPage = () => {
+    if (!pageForm.title.trim()) { toast.error('Title required'); return; }
+    const p: CmsPage = { id: 'PG' + String(Date.now()).slice(-4), ...pageForm, sections: [], lastEdited: new Date().toISOString().split('T')[0] };
+    setData(d => [...d, p]); toast.success('Page added'); setAddPageOpen(false);
+  };
+  const handleEditPage = () => {
+    if (!editPage) return;
+    setData(d => d.map(p => p.id === editPage.id ? { ...p, ...pageForm, lastEdited: new Date().toISOString().split('T')[0] } : p));
+    toast.success('Page updated'); setEditPage(null);
+  };
+  const handleDeletePage = () => {
+    if (!deletePage) return;
+    setData(d => d.filter(p => p.id !== deletePage.id));
+    toast.success('Page deleted'); setDeletePage(null);
+    if (selectedPageId === deletePage.id) { setView('pages'); setSelectedPageId(null); }
+  };
+  const handleAddSection = () => {
+    if (!addSectionPage) return;
+    const name = newSectionName === 'Custom Section' ? customSectionName.trim() : newSectionName;
+    if (!name) { toast.error('Section name required'); return; }
+    setData(d => d.map(p => p.id === addSectionPage ? { ...p, sections: [...p.sections, { name, items: [] }], lastEdited: new Date().toISOString().split('T')[0] } : p));
+    toast.success('"' + name + '" added'); setAddSectionPage(null); setCustomSectionName('');
+  };
+  const handleDeleteSection = (pageId: string, sectionName: string) => {
+    setData(d => d.map(p => p.id !== pageId ? p : { ...p, sections: p.sections.filter(s => s.name !== sectionName), lastEdited: new Date().toISOString().split('T')[0] }));
+    toast.success('Section removed');
+    if (selectedSectionName === sectionName) { setView('sections'); setSelectedSectionName(null); }
+  };
+  const handleAddItem = (content: SectionData, mediaUrl?: string) => {
+    if (!selectedPageId || !selectedSectionName) return;
+    const item: SectionItem = { id: 'item_' + Date.now(), content, status: 'Active', mediaUrl };
+    setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: [...s.items, item] }) }));
+  };
+  const handleSaveItem = (content: SectionData, mediaUrl?: string) => {
+    if (!selectedPageId || !selectedSectionName || !editingItem) return;
+    setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.map(i => i.id !== editingItem.id ? i : { ...i, content, mediaUrl: mediaUrl || i.mediaUrl }) }) }));
+  };
+  const handleDeleteItem = () => {
+    if (!deletingItem || !selectedPageId || !selectedSectionName) return;
+    setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.filter(i => i.id !== deletingItem.id) }) }));
+    toast.success('Deleted'); setDeletingItem(null);
+  };
+  const handleToggleItem = (itemId: string, cur: string) => {
+    if (!selectedPageId || !selectedSectionName) return;
+    const ns = cur === 'Active' ? 'Inactive' : 'Active';
+    setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.map(i => i.id !== itemId ? i : { ...i, status: ns }) }) }));
+    toast.success('Set to ' + ns);
+  };
+
+  const Breadcrumb = () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <button onClick={() => { setView('pages'); setSelectedPageId(null); setSelectedSectionName(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: view === 'pages' ? textMain : textMuted, fontSize: '13px', fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-inter)' }}>
+        <Layout size={14} /> CMS & Pages
+      </button>
+      {selectedPage && <><ChevronRight size={13} color={textMuted} />
+        <button onClick={() => { if (view === 'items') { setView('sections'); setSelectedSectionName(null); } }} style={{ background: 'none', border: 'none', cursor: view === 'items' ? 'pointer' : 'default', color: view === 'items' ? textMuted : textMain, fontSize: '13px', fontWeight: 600, padding: 0, fontFamily: 'var(--font-inter)' }}>
+          {selectedPage.title}
+        </button>
+      </>}
+      {selectedSection && <><ChevronRight size={13} color={textMuted} /><span style={{ fontSize: '13px', fontWeight: 600, color: textMain }}>{selectedSection.name}</span></>}
+    </div>
+  );
+
+  const iconMap = (type: string) => {
+    const map: Record<string, React.ReactNode> = {
+      image: <ImageIcon size={18} color={accent} />, tag: <Tag size={18} color="#6366f1" />,
+      mail: <Mail size={18} color="#FFC107" />, map: <MapPin size={18} color="#f59e0b" />,
+      clock: <Clock size={18} color="#8b5cf6" />, text: <FileText size={18} color="#64748b" />, promo: <Eye size={18} color="#ec4899" />,
+    };
+    return map[type] || map.text;
+  };
+
+  const pageModalFields = (
+    <>
+      <FormField label="Page Title" value={pageForm.title} onChange={pfp('title')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. About Us" />
+      <FormField label="Slug / URL" value={pageForm.slug} onChange={pfp('slug')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. /about" />
+      <FormField label="Status" value={pageForm.status} onChange={pfp('status')} options={['Published', 'Draft']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+    </>
+  );
+
+  return (
+    <div>
+      {/* ── PAGES VIEW ── */}
+      {view === 'pages' && (
+        <div>
+          <PageHeader title="CMS & Pages" subtitle="Manage your website pages and content" icon={Layout} onAdd={() => { setPageForm({ ...EMPTY_PAGE_FORM }); setAddPageOpen(true); }} addLabel="New Page" />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', marginBottom: '24px' }} className="sg">
+            {[{ label: 'Total Pages', val: String(data.length), color: accent },
+              { label: 'Published', val: String(data.filter(p => p.status === 'Published').length), color: accent },
+              { label: 'Total Items', val: String(data.reduce((a, p) => a + p.sections.reduce((b, s) => b + s.items.length, 0), 0)), color: '#6366f1' }
+            ].map(s => (
+              <div key={s.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '16px' }}>
+                <div style={{ fontSize: '12px', color: textMuted, marginBottom: '6px' }}>{s.label}</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: s.color }}>{s.val}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {data.map(page => (
+              <div key={page.id} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '14px 16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                onClick={() => openPage(page.id)} onMouseEnter={e => (e.currentTarget.style.borderColor = accent)} onMouseLeave={e => (e.currentTarget.style.borderColor = border)}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                    <Layout size={17} color={accent} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 700, color: textMain, fontSize: '14.5px' }}>{page.title}</span>
+                      <span style={{ padding: '2px 9px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, background: page.status === 'Published' ? 'rgba(31,168,154,0.12)' : 'rgba(255,193,7,0.12)', color: page.status === 'Published' ? accent : '#FFC107' }}>{page.status}</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: textMuted, display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                      <code style={{ fontSize: '11px', color: accent, background: 'rgba(31,168,154,0.1)', padding: '1px 6px', borderRadius: '4px' }}>{page.slug}</code>
+                      <span>{page.sections.length} sections</span>
+                      <span>Edited {page.lastEdited}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }} onClick={e => e.stopPropagation()}>
+                      <button onClick={e => { e.stopPropagation(); setPageForm({ title: page.title, slug: page.slug, status: page.status }); setEditPage(page); }} style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '28px', paddingInline: '10px', borderRadius: '7px', background: 'rgba(31,168,154,0.1)', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontWeight: 600, color: accent, fontFamily: 'var(--font-inter)' }}>
+                        <Edit size={11} /> Edit
+                      </button>
+                      <button onClick={e => { e.stopPropagation(); setViewPage(page); }} style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '28px', paddingInline: '10px', borderRadius: '7px', background: 'rgba(99,102,241,0.1)', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontWeight: 600, color: '#6366f1', fontFamily: 'var(--font-inter)' }}>
+                        <Eye size={11} /> View
+                      </button>
+                      <button onClick={e => { e.stopPropagation(); setDeletePage(page); }} style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '28px', paddingInline: '10px', borderRadius: '7px', background: 'rgba(239,68,68,0.1)', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontWeight: 600, color: '#ef4444', fontFamily: 'var(--font-inter)' }}>
+                        <Trash2 size={11} /> Delete
+                      </button>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} color={textMuted} style={{ flexShrink: 0, marginTop: '10px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── SECTIONS VIEW ── */}
+      {view === 'sections' && selectedPage && (
+        <div>
+          <Breadcrumb />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', color: textMain, fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-inter)', marginBottom: '10px' }}>
+                <ChevronLeft size={14} /> Back to Pages
+              </button>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: textMain, margin: 0 }}>{selectedPage.title}</h2>
+              <p style={{ fontSize: '13px', color: textMuted, margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <code style={{ fontSize: '11px', color: accent, background: 'rgba(31,168,154,0.1)', padding: '1px 7px', borderRadius: '4px' }}>{selectedPage.slug}</code>
+                <span>{selectedPage.sections.length} sections</span>
+              </p>
+            </div>
+            <button onClick={() => { setAddSectionPage(selectedPage.id); setNewSectionName('Hero Banner'); setCustomSectionName(''); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,#1FA89A,#27B9AF)', border: 'none', borderRadius: '9px', color: 'white', fontSize: '13.5px', fontWeight: 600, padding: '9px 16px', cursor: 'pointer', fontFamily: 'var(--font-inter)', boxShadow: '0 4px 12px rgba(31,168,154,0.25)' }}>
+              <Plus size={15} /> Add Section
+            </button>
+          </div>
+          {selectedPage.sections.length === 0 ? (
+            <div style={{ padding: '48px 20px', background: card, border: `1px dashed ${border}`, borderRadius: '12px', textAlign: 'center', color: textMuted }}>
+              <Layout size={32} color={textMuted} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
+              <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>No sections yet</div>
+              <div style={{ fontSize: '12.5px' }}>Click &quot;Add Section&quot; to start building this page.</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {selectedPage.sections.map((sec, idx) => {
+                const active = sec.items.filter(i => i.status === 'Active').length;
+                return (
+                  <div key={idx} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                    onClick={() => openSection(sec.name)} onMouseEnter={e => (e.currentTarget.style.borderColor = accent)} onMouseLeave={e => (e.currentTarget.style.borderColor = border)}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '11px', background: 'rgba(31,168,154,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {iconMap(getSectionIconType(sec.name))}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, color: textMain, fontSize: '14px' }}>{sec.name}</div>
+                      <div style={{ fontSize: '12px', color: textMuted, marginTop: '3px', display: 'flex', gap: '10px' }}>
+                        <span>{sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}</span>
+                        {sec.items.length > 0 && <span style={{ color: accent, fontWeight: 600 }}>{active} active</span>}
+                        {sectionHasMedia(sec.name) && <span style={{ color: '#6366f1' }}>has media</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                      <button onClick={e => { e.stopPropagation(); if (confirm('Remove "' + sec.name + '" section?')) handleDeleteSection(selectedPage.id, sec.name); }} style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <Trash2 size={12} color="#ef4444" />
+                      </button>
+                      <ChevronRight size={16} color={textMuted} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── ITEMS VIEW ── */}
+      {view === 'items' && selectedPage && selectedSection && (
+        <div>
+          <Breadcrumb />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', color: textMain, fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-inter)', marginBottom: '10px' }}>
+                <ChevronLeft size={14} /> Back to Sections
+              </button>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: textMain, margin: 0 }}>{selectedSection.name}</h2>
+              <p style={{ fontSize: '13px', color: textMuted, margin: '3px 0 0' }}>{selectedPage.title} — {selectedSection.items.length} {selectedSection.items.length === 1 ? 'item' : 'items'}</p>
+            </div>
+            <button onClick={() => setAddingItem(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,#1FA89A,#27B9AF)', border: 'none', borderRadius: '9px', color: 'white', fontSize: '13.5px', fontWeight: 600, padding: '9px 16px', cursor: 'pointer', fontFamily: 'var(--font-inter)', boxShadow: '0 4px 12px rgba(31,168,154,0.25)' }}>
+              <Plus size={15} /> Add New {selectedSection.name}
+            </button>
+          </div>
+          {selectedSection.items.length === 0 ? (
+            <div style={{ padding: '48px 20px', background: card, border: `1px dashed ${border}`, borderRadius: '12px', textAlign: 'center', color: textMuted }}>
+              <ImageIcon size={32} color={textMuted} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
+              <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>No items yet</div>
+              <div style={{ fontSize: '12.5px' }}>Click &quot;Add New {selectedSection.name}&quot; to upload your first item.</div>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '14px' }} className="items-grid">
+              {selectedSection.items.map(item => {
+                const hasMedia = sectionHasMedia(selectedSection.name);
+                return (
+                  <div key={item.id} style={{ background: card, border: `1px solid ${border}`, borderRadius: '14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    {hasMedia && (
+                      <div style={{ height: '160px', background: surface, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                        {item.mediaUrl ? (
+                          item.content.media?.match(/\.(mp4|mov|avi|webm)$/i) ? (
+                            <video src={item.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <img src={item.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          )
+                        ) : item.content.media ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '16px', textAlign: 'center' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ImageIcon size={22} color={accent} />
+                            </div>
+                            <span style={{ fontSize: '11px', color: textMuted, wordBreak: 'break-all' }}>{item.content.media}</span>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', opacity: 0.3 }}>
+                            <ImageIcon size={36} color={textMuted} />
+                            <span style={{ fontSize: '11.5px', color: textMuted }}>No image uploaded</span>
+                          </div>
+                        )}
+                        <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                          <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: item.status === 'Active' ? 'rgba(31,168,154,0.9)' : 'rgba(100,116,139,0.85)', color: 'white' }}>
+                            {item.status}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ padding: '12px 14px', flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: textMain, lineHeight: 1.3, marginBottom: '4px' }}>
+                        {getItemPreview(selectedSection.name, item.content)}
+                      </div>
+                      {getItemSub(item.content) && (
+                        <div style={{ fontSize: '12px', color: textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {getItemSub(item.content)}
+                        </div>
+                      )}
+                      {!hasMedia && (
+                        <span style={{ display: 'inline-block', marginTop: '6px', padding: '3px 9px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, background: item.status === 'Active' ? 'rgba(31,168,154,0.12)' : 'rgba(100,116,139,0.12)', color: item.status === 'Active' ? accent : '#8E9AAF' }}>
+                          {item.status}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', padding: '0 14px 14px' }}>
+                      <button onClick={() => setEditingItem(item)} style={{ flex: 1, height: '34px', borderRadius: '8px', background: 'rgba(31,168,154,0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 600, color: accent, fontFamily: 'var(--font-inter)' }}>
+                        <Edit size={13} /> Edit
+                      </button>
+                      <button onClick={() => handleToggleItem(item.id, item.status)} style={{ flex: 1, height: '34px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '11.5px', fontWeight: 600, fontFamily: 'var(--font-inter)', background: item.status === 'Active' ? 'rgba(100,116,139,0.1)' : 'rgba(31,168,154,0.1)', color: item.status === 'Active' ? '#8E9AAF' : accent }}>
+                        {item.status === 'Active' ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button onClick={() => setDeletingItem(item)} style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                        <Trash2 size={13} color="#ef4444" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Modals ── */}
+      <Modal open={addPageOpen} onClose={() => setAddPageOpen(false)} title="Add New Page">
+        {pageModalFields}
+        <ModalFooter onClose={() => setAddPageOpen(false)} onSubmit={handleAddPage} loading={false} submitLabel="Add Page" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+      <Modal open={!!editPage} onClose={() => setEditPage(null)} title={'Edit: ' + (editPage?.title ?? '')}>
+        {pageModalFields}
+        <ModalFooter onClose={() => setEditPage(null)} onSubmit={handleEditPage} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+      <Modal open={!!viewPage} onClose={() => setViewPage(null)} title="Page Details">
+        {viewPage && <>
+          <FormField label="Title" value={viewPage.title} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Slug" value={viewPage.slug} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Status" value={viewPage.status} readOnly isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <button onClick={() => setViewPage(null)} style={{ width: '100%', padding: '10px', borderRadius: '9px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, color: textMain, fontSize: '13.5px', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>Close</button>
+        </>}
+      </Modal>
+      <ConfirmDialog open={!!deletePage} onClose={() => setDeletePage(null)} onConfirm={handleDeletePage} loading={false} title="Delete Page" message={'Delete "' + deletePage?.title + '" permanently?'} />
+      <Modal open={!!addSectionPage} onClose={() => setAddSectionPage(null)} title="Add Section">
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, color: textMuted, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Section Type</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {ADD_SECTION_NAMES.map(name => (
+              <button key={name} onClick={() => setNewSectionName(name)} style={{ padding: '7px 12px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-inter)', background: newSectionName === name ? accent : surface, border: `1px solid ${newSectionName === name ? accent : border}`, color: newSectionName === name ? 'white' : textMuted }}>{name}</button>
+            ))}
+          </div>
+        </div>
+        {newSectionName === 'Custom Section' && (
+          <FormField label="Custom Section Name" value={customSectionName} onChange={setCustomSectionName} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Testimonials" />
+        )}
+        <ModalFooter onClose={() => setAddSectionPage(null)} onSubmit={handleAddSection} loading={false} submitLabel="Add Section" isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+      {addingItem && selectedSection && selectedPage && (
+        <ItemFormModal sectionName={selectedSection.name} pageTitle={selectedPage.title} initialValues={{}} onClose={() => setAddingItem(false)} onSave={handleAddItem} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} isEdit={false} />
+      )}
+      {editingItem && selectedSection && selectedPage && (
+        <ItemFormModal sectionName={selectedSection.name} pageTitle={selectedPage.title} initialValues={editingItem.content} onClose={() => setEditingItem(null)} onSave={handleSaveItem} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} isEdit={true} />
+      )}
+      <ConfirmDialog open={!!deletingItem} onClose={() => setDeletingItem(null)} onConfirm={handleDeleteItem} loading={false} title="Delete Item" message={'Delete "' + (deletingItem ? getItemPreview(selectedSection?.name || '', deletingItem.content) : '') + '" permanently?'} />
+      <style>{`.sg{} @media(max-width:768px){.sg{grid-template-columns:1fr!important;}.items-grid{grid-template-columns:1fr!important;}}`}</style>
+    </div>
+  );
+}
+
+export default function CMSPagesPage() { return <AdminShell><CMSContent /></AdminShell>; }
+
