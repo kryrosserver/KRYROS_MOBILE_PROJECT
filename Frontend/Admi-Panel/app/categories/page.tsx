@@ -1,12 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Tag } from 'lucide-react';
-import { createCategory, updateCategory, deleteCategory } from '@/lib/api';
+import { createCategory, updateCategory, deleteCategory, getCategories } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 type Category = {
@@ -14,16 +14,7 @@ type Category = {
   description: string; imageUrl: string; showOnHome: boolean;
 };
 
-const INITIAL: Category[] = [
-  { id: 'CAT001', name: 'Electronics', slug: 'electronics', products: 45, status: 'Active', parent: '-', description: 'Smartphones, laptops, gadgets and more.', imageUrl: '', showOnHome: true },
-  { id: 'CAT002', name: 'Audio', slug: 'audio', products: 18, status: 'Active', parent: 'Electronics', description: 'Headphones, speakers, earbuds.', imageUrl: '', showOnHome: false },
-  { id: 'CAT003', name: 'Wearables', slug: 'wearables', products: 12, status: 'Active', parent: 'Electronics', description: 'Smartwatches and fitness trackers.', imageUrl: '', showOnHome: false },
-  { id: 'CAT004', name: 'Clothing', slug: 'clothing', products: 30, status: 'Active', parent: '-', description: 'Fashion and apparel for all.', imageUrl: '', showOnHome: true },
-  { id: 'CAT005', name: "Men's Wear", slug: 'mens-wear', products: 15, status: 'Active', parent: 'Clothing', description: "Men's clothing and accessories.", imageUrl: '', showOnHome: false },
-  { id: 'CAT006', name: "Women's Wear", slug: 'womens-wear', products: 15, status: 'Active', parent: 'Clothing', description: "Women's clothing and accessories.", imageUrl: '', showOnHome: false },
-  { id: 'CAT007', name: 'Food & Beverages', slug: 'food-beverages', products: 22, status: 'Active', parent: '-', description: 'Fresh food, drinks and snacks.', imageUrl: '', showOnHome: true },
-  { id: 'CAT008', name: 'Sports', slug: 'sports', products: 8, status: 'Inactive', parent: '-', description: 'Sports equipment and activewear.', imageUrl: '', showOnHome: false },
-];
+// Category data loaded from API
 
 const PARENT_OPTIONS = ['-', 'Electronics', 'Clothing', 'Food & Beverages', 'Sports'];
 const EMPTY_FORM = { name: '', slug: '', parent: '-', status: 'Active', description: '', imageUrl: '', showOnHome: 'No' };
@@ -37,7 +28,24 @@ function CategoriesContent() {
   const textMain = isDark ? '#FFFFFF' : '#0F172A'; const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<Category[]>(INITIAL);
+  const [data, setData] = useState<Category[]>([]);
+  useEffect(() => {
+    getCategories({ limit: 500 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Category[] = raw.map((c: any) => ({
+        id: c.id || '',
+        name: c.name || '',
+        slug: c.slug || '',
+        parent: c.parent?.name || c.parentId || '-',
+        status: c.isActive !== false ? 'Active' : 'Inactive',
+        description: c.description || '',
+        imageUrl: c.image || c.imageUrl || '',
+        showOnHome: c.showOnHome ? 'Yes' : 'No',
+        products: c._count?.products ?? 0,
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Category | null>(null);
   const [deleteRow, setDeleteRow] = useState<Category | null>(null);
