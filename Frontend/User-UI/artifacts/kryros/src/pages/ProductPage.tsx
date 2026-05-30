@@ -103,7 +103,7 @@ export default function ProductPage() {
       {/* Hero image */}
       <div className="relative mx-3 mt-3 rounded-3xl overflow-hidden bg-[#EFEFEF] dark:bg-muted" style={{ aspectRatio: "1/1" }}>
         {thumbImages[activeImg] ? (
-          <img src={thumbImages[activeImg]} alt={product.name} className="w-full h-full object-cover" />
+          <img src={thumbImages[activeImg]} alt={product.name} className="w-full h-full object-contain p-4" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">No image</div>
         )}
@@ -137,7 +137,7 @@ export default function ProductPage() {
         <div className="flex items-center gap-2 px-3 mt-3">
           {thumbImages.slice(0, 4).map((img, i) => (
             <button key={i} onClick={() => setActiveImg(i)} className={`w-14 h-14 rounded-2xl overflow-hidden border-2 bg-[#F5F5F5] dark:bg-muted flex-shrink-0 transition-all ${i === activeImg ? "border-primary" : "border-transparent"}`}>
-              <img src={img} alt="" className="w-full h-full object-cover" />
+              <img src={img} alt="" className="w-full h-full object-contain p-1" />
             </button>
           ))}
         </div>
@@ -276,7 +276,7 @@ export default function ProductPage() {
                   <div className="cursor-pointer group">
                     <div className="relative rounded-2xl overflow-hidden bg-[#F5F5F5] dark:bg-muted aspect-square mb-1.5">
                       {p.image ? (
-                        <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full bg-muted" />
                       )}
