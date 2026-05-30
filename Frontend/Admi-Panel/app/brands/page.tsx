@@ -1,12 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Award } from 'lucide-react';
-import { createBrand, updateBrand, deleteBrand } from '@/lib/api';
+import { createBrand, updateBrand, deleteBrand, getBrands } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 type Brand = {
@@ -14,16 +14,7 @@ type Brand = {
   website: string; description: string; logoUrl: string;
 };
 
-const INITIAL: Brand[] = [
-  { id: 'BRD001', name: 'Apple', slug: 'apple', products: 28, country: 'USA', status: 'Active', website: 'https://apple.com', description: 'Consumer electronics and software.', logoUrl: '' },
-  { id: 'BRD002', name: 'Samsung', slug: 'samsung', products: 22, country: 'South Korea', status: 'Active', website: 'https://samsung.com', description: 'Electronics, semiconductors and more.', logoUrl: '' },
-  { id: 'BRD003', name: 'Sony', slug: 'sony', products: 15, country: 'Japan', status: 'Active', website: 'https://sony.com', description: 'Audio, cameras and entertainment.', logoUrl: '' },
-  { id: 'BRD004', name: 'Beats', slug: 'beats', products: 8, country: 'USA', status: 'Active', website: 'https://beatsbydre.com', description: 'Premium audio equipment.', logoUrl: '' },
-  { id: 'BRD005', name: 'Bose', slug: 'bose', products: 6, country: 'USA', status: 'Active', website: 'https://bose.com', description: 'High-fidelity audio products.', logoUrl: '' },
-  { id: 'BRD006', name: 'Dell', slug: 'dell', products: 10, country: 'USA', status: 'Inactive', website: 'https://dell.com', description: 'Computers and peripherals.', logoUrl: '' },
-  { id: 'BRD007', name: 'LG', slug: 'lg', products: 12, country: 'South Korea', status: 'Active', website: 'https://lg.com', description: 'Home appliances and electronics.', logoUrl: '' },
-  { id: 'BRD008', name: 'Huawei', slug: 'huawei', products: 5, country: 'China', status: 'Active', website: 'https://huawei.com', description: 'Smartphones and telecommunications.', logoUrl: '' },
-];
+// Brand data loaded from API
 
 const EMPTY_FORM = { name: '', slug: '', country: '', status: 'Active', website: '', description: '', logoUrl: '' };
 const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -35,7 +26,24 @@ function BrandsContent() {
   const textMain = isDark ? '#FFFFFF' : '#0F172A'; const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<Brand[]>(INITIAL);
+  const [data, setData] = useState<Brand[]>([]);
+  useEffect(() => {
+    getBrands({ limit: 200 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Brand[] = raw.map((b: any) => ({
+        id: b.id || '',
+        name: b.name || '',
+        slug: b.slug || '',
+        country: b.country || '',
+        status: b.isActive !== false ? 'Active' : 'Inactive',
+        website: b.website || '',
+        description: b.description || '',
+        logoUrl: b.logo || b.logoUrl || b.imageUrl || '',
+        products: b._count?.products ?? 0,
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Brand | null>(null);
   const [deleteRow, setDeleteRow] = useState<Brand | null>(null);
