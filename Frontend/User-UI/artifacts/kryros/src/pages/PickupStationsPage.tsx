@@ -99,15 +99,38 @@ export default function PickupStationsPage() {
         </button>
       </div>
 
-      {/* Map placeholder */}
-      {/* Real Map - OpenStreetMap */}
+      {/* Map - Lusaka, Zambia (Leaflet via srcdoc, no X-Frame-Options block) */}
       <div className="rounded-2xl overflow-hidden mb-5 border border-border" style={{ height: 220 }}>
         <iframe
           title="KRYROS Pickup Stations Map"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=27.8,-16.0,28.5,-15.3&layer=mapnik&marker=-15.4167,28.2833"
+          srcDoc={`<!DOCTYPE html>
+<html>
+<head>
+<meta charset=\"utf-8\" />
+<style>
+  body{margin:0;padding:0;overflow:hidden;}
+  #map{width:100%;height:220px;}
+</style>
+<link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />
+<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>
+</head>
+<body>
+<div id=\"map\"></div>
+<script>
+  var map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([-15.4167, 28.2833], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  var icon = L.divIcon({
+    html: '<div style=\"background:#0ea5e9;width:14px;height:14px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);\"></div>',
+    iconSize: [14, 14], iconAnchor: [7, 7]
+  });
+  L.marker([-15.4167, 28.2833], { icon: icon }).addTo(map).bindPopup('<b>KRYROS Pickup Station</b><br>Lusaka, Zambia').openPopup();
+</script>
+</body>
+</html>`}
           style={{ width: "100%", height: "100%", border: "none" }}
           loading="lazy"
-          allowFullScreen
         />
       </div>
 
