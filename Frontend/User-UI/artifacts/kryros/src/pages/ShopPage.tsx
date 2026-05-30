@@ -101,8 +101,6 @@ function ShopCard({ product }: { product: Product }) {
           </button>
         </div>
       </div>
-      </></>
-    )}
     </div>
   );
 }
