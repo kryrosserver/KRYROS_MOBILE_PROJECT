@@ -233,11 +233,11 @@ export default function WholesalePage() {
           <p className="text-xs font-bold text-foreground mb-1">{cms.quoteCta.title}</p>
           <p className="text-[9px] text-muted-foreground leading-snug">{cms.quoteCta.subtitle}</p>
         </div>
-        <Link href={cms.quoteCta.ctaLink || "https://wa.me/260966423719"}>
+        <a href={cms.quoteCta.ctaLink || "https://wa.me/260966423719"} target="_blank" rel="noopener noreferrer">
           <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl text-[10px] font-bold hover:bg-primary/90 transition-all flex-shrink-0 whitespace-nowrap">
             {cms.quoteCta.ctaText} <ArrowRight className="w-3 h-3" />
           </button>
-        </Link>
+        </a>
       </div>
 
       {/* How Wholesale Works */}
