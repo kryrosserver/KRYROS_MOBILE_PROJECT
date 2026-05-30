@@ -105,7 +105,7 @@ function WalletContent() {
 
   type Tab = 'transactions' | 'links' | 'methods';
   const [activeTab, setActiveTab] = useState<Tab>('transactions');
-  const [txData, setTxData] = useState<Tx[]>(mockTx);
+  const [txData, setTxData] = useState<Tx[]>([]);
   useEffect(() => {
     Promise.all([
       getWalletTransactions({ limit: 200 }).catch(() => ({ data: [] })),
@@ -137,7 +137,7 @@ function WalletContent() {
           ref: p.reference || p.id || '',
         })),
       ];
-      if (combined.length > 0) setTxData(combined);
+      setTxData(combined);
     }).catch(() => {});
   }, []);
 
