@@ -40,11 +40,12 @@ export default function MobileBottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-300"
       style={{
-        paddingBottom: "env(safe-area-inset-bottom)",
         transform: visible && !sidebarOpen ? "translateY(0)" : "translateY(110%)",
       }}
     >
-      <div className="mx-3 mb-3 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl">
+      <div className="bg-card/97 backdrop-blur-xl border-t border-border shadow-2xl"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="flex items-center justify-around py-2">
           {navItems.map(({ label, icon: Icon, href, badge }) => {
             const isActive = location === href || (href !== "/" && location.startsWith(href));
