@@ -101,6 +101,8 @@ function ShopCard({ product }: { product: Product }) {
           </button>
         </div>
       </div>
+      </></>
+    )}
     </div>
   );
 }
@@ -184,7 +186,37 @@ export default function ShopPage() {
 
   return (
     <div className="pb-24 md:pb-10">
-      <div className="text-center pt-4 pb-3 px-4">
+
+      {/* ── Search Results Section ── */}
+      {searchParam && (
+        <div className="px-4 pt-4 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-base font-black text-foreground">
+                Results for &ldquo;{searchParam}&rdquo;
+              </h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {searchResults.length} product{searchResults.length !== 1 ? "s" : ""} found
+              </p>
+            </div>
+            <a href="/shop" className="text-xs text-primary font-semibold hover:underline">Clear ✕</a>
+          </div>
+          {searchResults.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              {searchResults.map((p) => <ShopCard key={p.id} product={p} />)}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-sm font-semibold">No products found</p>
+              <p className="text-xs mt-1">Try a different search term</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Normal Shop (hidden when search active) ── */}
+      {!searchParam && (
+      <><div className="text-center pt-4 pb-3 px-4">
         <h2 className="text-base font-black text-foreground tracking-tight">Shop All Products</h2>
         <p className="text-[11px] text-muted-foreground mt-0.5">Browse our full collection by category</p>
       </div>
