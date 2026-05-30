@@ -100,34 +100,15 @@ export default function PickupStationsPage() {
       </div>
 
       {/* Map placeholder */}
-      <div className="relative rounded-2xl overflow-hidden mb-5" style={{ height: 200, background: "linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #e8f5e9 100%)" }}>
-        <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
-          <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#4CAF50" strokeWidth="0.5"/></pattern></defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="100" x2="100%" y2="100" stroke="white" strokeWidth="8" opacity="0.7" />
-          <line x1="0" y1="140" x2="100%" y2="140" stroke="white" strokeWidth="4" opacity="0.5" />
-          <line x1="200" y1="0" x2="200" y2="100%" stroke="white" strokeWidth="6" opacity="0.6" />
-          <line x1="320" y1="0" x2="320" y2="100%" stroke="white" strokeWidth="4" opacity="0.5" />
-        </svg>
-        {[{ x: "28%", y: "35%", primary: false }, { x: "50%", y: "28%", primary: false }, { x: "66%", y: "55%", primary: true }, { x: "78%", y: "32%", primary: false }].map((pin, i) => (
-          <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: pin.x, top: pin.y }}>
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg ${pin.primary ? "bg-primary" : "bg-foreground"}`}>
-              <MapPin className="w-3.5 h-3.5 text-white" />
-            </div>
-          </div>
-        ))}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative">
-            <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-md z-10 relative" />
-            <div className="absolute inset-0 w-4 h-4 rounded-full bg-blue-400/40 animate-ping" />
-          </div>
-        </div>
-        <button className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-xl text-xs font-bold shadow-lg hover:opacity-90 transition-opacity whitespace-nowrap">
-          <Navigation className="w-3.5 h-3.5" />
-          Use My Location
-        </button>
+      {/* Real Map - OpenStreetMap */}
+      <div className="rounded-2xl overflow-hidden mb-5 border border-border" style={{ height: 220 }}>
+        <iframe
+          title="KRYROS Pickup Stations Map"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=27.8,-16.0,28.5,-15.3&layer=mapnik&marker=-15.4167,28.2833"
+          style={{ width: "100%", height: "100%", border: "none" }}
+          loading="lazy"
+          allowFullScreen
+        />
       </div>
 
       {/* Nearby stations */}
