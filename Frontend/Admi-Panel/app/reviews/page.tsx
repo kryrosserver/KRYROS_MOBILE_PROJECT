@@ -1,25 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Star } from 'lucide-react';
-import { updateReview, deleteReview } from '@/lib/api';
+import { updateReview, deleteReview, getReviews } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 type Review = { id: string; product: string; customer: string; rating: number; comment: string; date: string; status: string };
 
-const INITIAL: Review[] = [
-  { id: 'REV001', product: 'iPhone 15 Pro Max', customer: 'Bwalya Chileshe', rating: 5, comment: 'Excellent phone, very fast!', date: '2025-05-26', status: 'Published' },
-  { id: 'REV002', product: 'MacBook Air M2', customer: 'Mulenga Schone', rating: 4, comment: 'Great laptop, battery life amazing.', date: '2025-05-25', status: 'Published' },
-  { id: 'REV003', product: 'Sony WH-1000XM5', customer: 'Chansa Mumba', rating: 5, comment: 'Best noise cancelling headphones!', date: '2025-05-24', status: 'Published' },
-  { id: 'REV004', product: 'Samsung Galaxy S24', customer: 'John Banda', rating: 2, comment: 'Disappointed with camera quality.', date: '2025-05-23', status: 'Pending' },
-  { id: 'REV005', product: 'AirPods Pro 2', customer: 'Mary Phiri', rating: 5, comment: 'Worth every penny!', date: '2025-05-22', status: 'Published' },
-  { id: 'REV006', product: 'iPad Pro', customer: 'Peter Zulu', rating: 3, comment: 'Good but too expensive.', date: '2025-05-21', status: 'Pending' },
-  { id: 'REV007', product: 'Beats Studio Pro', customer: 'Grace Tembo', rating: 1, comment: 'Poor sound quality. Returning it.', date: '2025-05-20', status: 'Rejected' },
-];
+// Review data loaded from API
 
 function ReviewsContent() {
   const { theme } = useTheme();
@@ -30,7 +22,22 @@ function ReviewsContent() {
   const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<Review[]>(INITIAL);
+  const [data, setData] = useState<Review[]>([]);
+  useEffect(() => {
+    getReviews({ limit: 500 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Review[] = raw.map((r: any) => ({
+        id: r.id || '',
+        product: r.product?.name || r.productId || '',
+        customer: r.user ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ') || r.user.email : 'Customer',
+        rating: Number(r.rating || 0),
+        comment: r.comment || r.body || '',
+        date: r.createdAt ? r.createdAt.split('T')[0] : '',
+        status: r.isApproved ? 'Approved' : r.status || 'Pending',
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [viewRow, setViewRow] = useState<Review | null>(null);
   const [editRow, setEditRow] = useState<Review | null>(null);
   const [editStatus, setEditStatus] = useState('');
