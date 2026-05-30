@@ -525,7 +525,7 @@ export default function CheckoutPage() {
               <label className="block text-[10px] font-semibold text-muted-foreground mb-1.5">Phone Number</label>
               <div className="flex items-center gap-2 border border-border rounded-xl px-3 py-2.5 bg-background focus-within:ring-2 focus-within:ring-primary/30">
                 <Phone className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+233 24 123 4567" type="tel"
+                <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +260 97 000 0000" type="tel"
                   className="flex-1 text-sm text-foreground outline-none bg-transparent" />
               </div>
             </div>
