@@ -191,40 +191,6 @@ export default function ProductPage() {
               <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg">Save {product.discount}%</span>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Price includes VAT ⓘ</p>
-        </div>
-
-        {/* Flexible Monthly Payment */}
-        <div className="border border-border rounded-2xl p-3.5 bg-card">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground">Flexible Monthly Payment</p>
-                <p className="text-sm font-black text-foreground">From <span className="text-primary">{format(monthly)}</span>/month</p>
-              </div>
-            </div>
-            <Link href="/get-now">
-              <button className="text-[11px] font-bold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl transition-colors">Get Now</button>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2 text-center mb-3 border-t border-border pt-3">
-            {[["Upfront", format(upfront)], ["Duration", "6 Months"], ["Total Payable", format(totalPayable)]].map(([label, val]) => (
-              <div key={label} className="flex-1 border-r border-border last:border-0">
-                <p className="text-[9px] text-muted-foreground mb-0.5">{label}</p>
-                <p className="text-xs font-bold text-foreground">{val}</p>
-              </div>
-            ))}
-          </div>
-          <Link href="/get-now">
-            <button className="w-full py-2.5 bg-primary text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors">
-              Choose Payment Plan <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </Link>
         </div>
 
         {/* Quantity + Wishlist + Compare */}
