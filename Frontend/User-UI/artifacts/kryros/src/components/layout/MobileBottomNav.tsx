@@ -32,7 +32,7 @@ export default function MobileBottomNav() {
     { label: "Home", icon: Home, href: "/" },
     { label: "Shop", icon: Grid2x2, href: "/shop" },
     { label: "Pay", icon: CreditCard, href: "/pay" },
-    { label: "Track Order", icon: PackageSearch, href: "/track" },
+    { label: "Track", icon: PackageSearch, href: "/track" },
     { label: "Cart", icon: ShoppingCart, href: "/cart", badge: cartCount },
   ];
 
