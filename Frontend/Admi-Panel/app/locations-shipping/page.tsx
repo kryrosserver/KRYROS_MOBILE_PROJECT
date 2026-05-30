@@ -135,8 +135,8 @@ function ShippingContent() {
         ))}
       </div>
       <DataTable columns={columns} data={data as unknown as Record<string,unknown>[]} searchPlaceholder="Search zones..." onEdit={openEdit} onDelete={openDelete} />
-      <Modal open={addOpen} onClose={()=>setAddOpen(false)} title="Add Shipping Zone">{modalFields}<ModalFooter onClose={()=>setAddOpen(false)} onSubmit={handleAdd} loading={false} submitLabel="Add Zone" isDark={isDark} border={border} textMain={textMain} loading={loading} /></Modal>
-      <Modal open={!!editRow} onClose={()=>setEditRow(null)} title={`Edit: ${editRow?.name??''}`}>{modalFields}<ModalFooter onClose={()=>setEditRow(null)} onSubmit={handleEdit} loading={false} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} loading={loading} /></Modal>
+      <Modal open={addOpen} onClose={()=>setAddOpen(false)} title="Add Shipping Zone">{modalFields}<ModalFooter onClose={()=>setAddOpen(false)} onSubmit={handleAdd} submitLabel="Add Zone" isDark={isDark} border={border} textMain={textMain} loading={loading} /></Modal>
+      <Modal open={!!editRow} onClose={()=>setEditRow(null)} title={`Edit: ${editRow?.name??''}`}>{modalFields}<ModalFooter onClose={()=>setEditRow(null)} onSubmit={handleEdit} submitLabel="Save Changes" isDark={isDark} border={border} textMain={textMain} loading={loading} /></Modal>
       <ConfirmDialog open={!!deleteRow} onClose={()=>setDeleteRow(null)} onConfirm={handleDelete} loading={false} title="Delete Zone" message={`Delete zone "${deleteRow?.name}"?`} />
       <style>{`.sg{} @media(max-width:768px){.sg{grid-template-columns:1fr!important;}}`}</style>
     </div>
