@@ -117,9 +117,9 @@ export default function PickupStationsPage() {
 <body>
 <div id=\"map\"></div>
 <script>
-  var map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([-15.4167, 28.2833], 12);
+  var map = L.map('map', { zoomControl: true, scrollWheelZoom: false, attributionControl: false }).setView([-15.4167, 28.2833], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+    attribution: ''
   }).addTo(map);
   var icon = L.divIcon({
     html: '<div style=\"background:#0ea5e9;width:14px;height:14px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);\"></div>',
