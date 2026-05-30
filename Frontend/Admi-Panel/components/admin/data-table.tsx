@@ -19,10 +19,11 @@ interface DataTableProps {
   onView?: (row: Record<string, unknown>) => void;
   pageSize?: number;
   filterNode?: React.ReactNode;
+  actionNode?: React.ReactNode;
 }
 
 export default function DataTable({
-  columns, data, searchPlaceholder = 'Search...', onEdit, onDelete, onView, pageSize = 10, filterNode
+  columns, data, searchPlaceholder = 'Search...', onEdit, onDelete, onView, pageSize = 10, filterNode, actionNode
 }: DataTableProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -58,6 +59,7 @@ export default function DataTable({
           />
         </div>
         {filterNode}
+        {actionNode && <div style={{ marginLeft: 'auto' }}>{actionNode}</div>}
         <div style={{ marginLeft: 'auto', fontSize: '12.5px', color: textMuted }}>
           {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
         </div>
