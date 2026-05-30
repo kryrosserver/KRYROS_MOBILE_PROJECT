@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/admin/sidebar";
 import Topbar from "@/components/admin/topbar";
 
-function AdminShellInner({ children }: { children: React.ReactNode }) {
+function AdminShellInner({ children, noPadding }: { children: React.ReactNode; noPadding?: boolean }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : true);
@@ -72,19 +72,17 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
         transition: "margin-left 0.25s ease",
         overflow: "hidden",
       }}>
-        <div style={{ padding: isMobile ? "12px 16px" : "24px" }}>
-          {children}
-        </div>
+        {noPadding ? children : <div style={{ padding: isMobile ? "12px 16px" : "24px" }}>{children}</div>}
       </main>
     </div>
   );
 }
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+export default function AdminShell({ children, noPadding }: { children: React.ReactNode; noPadding?: boolean }) {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AdminShellInner>{children}</AdminShellInner>
+        <AdminShellInner noPadding={noPadding}>{children}</AdminShellInner>
       </AuthProvider>
     </ThemeProvider>
   );
