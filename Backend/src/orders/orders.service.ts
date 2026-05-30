@@ -459,15 +459,9 @@ export class OrdersService {
       return createdOrder;
     });
 
-    // Send "Order Placed" Notification
-    if (userId) {
-      this.notificationsService.sendToUser(
-        userId,
-        'Order Placed!',
-        `Your order #${order.orderNumber} has been received and is pending confirmation.`,
-        { orderId: order.id, type: 'ORDER_STATUS' }
-      );
-    }
+    // Send "Order Placed" Notification (push + email + SMS — all non-blocking)
+    this.notificationsService.sendOrderPlacedNotification(order.id)
+      .catch(e => console.warn('Order placed notification failed:', e?.message));
 
     // If payment method is MOBILE_MONEY, initiate payment push
     if (paymentMethodEnum === 'MOBILE_MONEY' && data.paymentPhone && order.totalZMW) {
