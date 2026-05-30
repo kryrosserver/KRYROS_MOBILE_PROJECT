@@ -226,7 +226,7 @@ function SettingsContent() {
           {renderTab()}
           <div style={{ marginTop:'24px', paddingTop:'16px', borderTop:`1px solid ${border}`, display:'flex', justifyContent:'flex-end', gap:'8px' }}>
             <button style={{ padding:'10px 20px', background:surface, border:`1px solid ${border}`, borderRadius:'9px', color:textMuted, fontSize:'13.5px', fontWeight:500, cursor:'pointer', fontFamily:'var(--font-inter)' }}>Cancel</button>
-            <button style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 20px', background:'linear-gradient(135deg,#1FA89A,#27B9AF)', border:'none', borderRadius:'9px', color:'white', fontSize:'13.5px', fontWeight:600, cursor:'pointer', fontFamily:'var(--font-inter)', boxShadow:'0 4px 12px rgba(31,168,154,0.25)' }}>
+            <button onClick={handleSave} disabled={saving} style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 20px', background:'linear-gradient(135deg,#1FA89A,#27B9AF)', border:'none', borderRadius:'9px', color:'white', fontSize:'13.5px', fontWeight:600, cursor:saving?'not-allowed':'pointer', fontFamily:'var(--font-inter)', boxShadow:'0 4px 12px rgba(31,168,154,0.25)', opacity:saving?0.7:1 }}>
               <Save size={14} /> {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
