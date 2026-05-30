@@ -322,7 +322,7 @@ export default function ShopPage() {
             </h2>
             <span className="text-xs text-muted-foreground">{filteredProducts.length} items</span>
           </div>
-          <div className="grid grid-cols-2 gap-3 px-4 pb-4">
+          <div className="grid grid-cols-2 gap-3 pb-4">
             {filteredProducts.map((p) => <ShopCard key={p.id} product={p} />)}
           </div>
         </div>
