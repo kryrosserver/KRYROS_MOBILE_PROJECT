@@ -547,7 +547,7 @@ export default function PayPage() {
             <span className="text-muted-foreground/50">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             </span>
-            <span className="flex-1 text-sm font-semibold text-foreground">{currencyObj.flag} {currency}</span>
+            <span className="flex-1 text-sm font-semibold text-foreground">{currency} · {currencyObj.label}</span>
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ${showCurrencyDrop ? "rotate-180" : ""}`} />
           </button>
 
@@ -560,8 +560,8 @@ export default function PayPage() {
                   onClick={() => { setCurrency(c.code); setShowCurrencyDrop(false); }}
                   className={`w-full flex items-center gap-2.5 px-4 py-3 text-left hover:bg-muted transition-colors text-sm ${currency === c.code ? "bg-primary/5 font-bold text-primary" : "text-foreground"}`}
                 >
-                  <span className="text-base">{c.flag}</span>
                   <span className="font-semibold">{c.code}</span>
+                  <span className="text-xs text-muted-foreground">{c.label}</span>
                   {currency === c.code && <span className="ml-auto text-primary text-xs">✓</span>}
                 </button>
               ))}
