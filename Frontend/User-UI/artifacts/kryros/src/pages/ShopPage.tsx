@@ -28,7 +28,7 @@ function ShopCard({ product }: { product: Product }) {
 
   return (
     <div
-      className="flex-shrink-0 w-44 bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+      className="w-full bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow"
       onClick={() => (window.location.href = `/product/${product.id}`)}
     >
       <div className="relative bg-[#f0f0f0] dark:bg-muted" style={{ height: 130 }}>
@@ -122,8 +122,8 @@ function BrandProductSection({ title, brandName, categoryName }: { title: string
   if (products.length === 0) return null;
 
   return (
-    <div className="mb-5">
-      <div className="flex items-center justify-between mb-3 px-4">
+    <div className="mb-5 mx-4 bg-card border border-border/50 rounded-2xl shadow-md overflow-hidden">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <h2 className="text-base font-black text-foreground">{title}</h2>
         <Link href="/shop">
           <span className="text-xs font-semibold text-teal-600 flex items-center gap-0.5 cursor-pointer">
@@ -131,7 +131,7 @@ function BrandProductSection({ title, brandName, categoryName }: { title: string
           </span>
         </Link>
       </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1">
+      <div className="grid grid-cols-2 gap-3 px-4 pb-4">
         {products.map((p) => <ShopCard key={p.id} product={p} />)}
       </div>
     </div>
@@ -146,6 +146,11 @@ export default function ShopPage() {
   const [brands, setBrands] = useState<ApiBrand[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
 
+  // Read search query from URL (?search=...)
+  const searchParam = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("search") || ""
+    : "";
+
   useEffect(() => {
     fetchCategories().then((cats) => {
       setCategories(cats.filter((c: any) => c.isActive !== false));
@@ -154,7 +159,9 @@ export default function ShopPage() {
       setBrands(bs);
       if (bs.length > 0) setSelectedBrand(bs[0].name);
     });
-    fetchProducts({ take: 20 }).then(setAllProducts);
+    // If search param exists, fetch with search query; otherwise fetch all
+    const searchQ = new URLSearchParams(window.location.search).get("search") || "";
+    fetchProducts({ take: 50, search: searchQ || undefined }).then(setAllProducts);
   }, []);
 
   const hero = HERO_DATA[selectedBrand];
@@ -162,6 +169,16 @@ export default function ShopPage() {
   const filteredProducts = selectedCat === "All"
     ? allProducts
     : allProducts.filter((p) => p.category === selectedCat || p.categoryId === selectedCat);
+
+  // Client-side search filter for search results
+  const searchResults = searchParam
+    ? allProducts.filter((p) =>
+        p.name?.toLowerCase().includes(searchParam.toLowerCase()) ||
+        p.brand?.toLowerCase().includes(searchParam.toLowerCase()) ||
+        p.category?.toLowerCase().includes(searchParam.toLowerCase()) ||
+        p.specs?.toLowerCase().includes(searchParam.toLowerCase())
+      )
+    : [];
 
   const uniqueBrands = Array.from(new Set(allProducts.map((p) => p.brand).filter(Boolean)));
 
