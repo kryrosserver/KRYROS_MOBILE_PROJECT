@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
@@ -7,15 +7,10 @@ import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin
 import { useTheme } from '@/contexts/theme-context';
 import { MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getShippingZones, createShippingZone, updateShippingZone, deleteShippingZone } from '@/lib/api';
 
 type Zone = { id:string; name:string; region:string; countries:string; method:string; rate:string; minOrder:string; days:string; status:string };
-const INITIAL: Zone[] = [
-  { id:'SZ001', name:'Lusaka City', region:'Lusaka', countries:'Zambia', method:'Express', rate:'$5.00', minOrder:'$20', days:'1-2', status:'Active' },
-  { id:'SZ002', name:'Copperbelt', region:'Copperbelt', countries:'Zambia', method:'Standard', rate:'$8.00', minOrder:'$30', days:'2-3', status:'Active' },
-  { id:'SZ003', name:'Southern Africa', region:'International', countries:'ZA, ZW, TZ', method:'International', rate:'$25.00', minOrder:'$100', days:'5-7', status:'Active' },
-  { id:'SZ004', name:'Free Shipping', region:'All', countries:'Zambia', method:'Free', rate:'$0.00', minOrder:'$200', days:'3-5', status:'Active' },
-  { id:'SZ005', name:'Rest of World', region:'International', countries:'All Others', method:'International', rate:'$45.00', minOrder:'$150', days:'10-14', status:'Inactive' },
-];
+// Zones loaded from API
 const METHODS = ['Express','Standard','International','Free'];
 const EMPTY = { name:'', region:'', countries:'', method:'Express', rate:'', minOrder:'', days:'', status:'Active' };
 
@@ -27,7 +22,24 @@ function ShippingContent() {
   const textMain = isDark ? '#FFFFFF' : '#0F172A';
   const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
-  const [data, setData] = useState<Zone[]>(INITIAL);
+  const [data, setData] = useState<Zone[]>([]);
+  useEffect(() => {
+    getShippingZones({ limit: 200 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Zone[] = raw.map((z: any) => ({
+        id: z.id || '',
+        name: z.name || '',
+        region: z.region || z.type || '',
+        countries: Array.isArray(z.countries) ? z.countries.join(', ') : (z.countries || ''),
+        method: z.shippingMethod || z.method || 'Standard',
+        rate: z.rate ? String(z.rate) : '0',
+        minOrder: z.minOrder ? String(z.minOrder) : '0',
+        days: z.estimatedDays ? String(z.estimatedDays) : z.days || '',
+        status: z.isActive !== false ? 'Active' : 'Inactive',
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Zone|null>(null);
   const [deleteRow, setDeleteRow] = useState<Zone|null>(null);
