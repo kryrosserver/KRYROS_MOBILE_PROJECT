@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
@@ -7,6 +7,7 @@ import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin
 import { useTheme } from '@/contexts/theme-context';
 import { CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getCreditAccounts } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────
 type Credit = { id:string; user:string; email:string; balance:number; earned:number; spent:number; status:string; lastActivity:string };
@@ -15,32 +16,10 @@ type Plan = { id:string; name:string; months:number; interest:string; minAmount:
 type InstProduct = { id:string; name:string; sku:string; price:string; plans:string; status:string };
 
 // ─── Initial Data ─────────────────────────────────────────
-const INIT_CREDITS: Credit[] = [
-  { id:'CRD001', user:'Bwalya Chileshe', email:'bwalya@example.com', balance:1500, earned:2000, spent:500, status:'Active', lastActivity:'2025-05-26' },
-  { id:'CRD002', user:'Mulenga Schone', email:'mulenga@example.com', balance:750, earned:900, spent:150, status:'Active', lastActivity:'2025-05-25' },
-  { id:'CRD003', user:'Chansa Mumba', email:'chansa@example.com', balance:3200, earned:4000, spent:800, status:'Active', lastActivity:'2025-05-24' },
-  { id:'CRD004', user:'John Banda', email:'john@example.com', balance:0, earned:100, spent:100, status:'Inactive', lastActivity:'2025-04-10' },
-  { id:'CRD005', user:'Mary Phiri', email:'mary@example.com', balance:450, earned:500, spent:50, status:'Active', lastActivity:'2025-05-20' },
-];
-const INIT_APPLICATIONS: Application[] = [
-  { id:'APP001', user:'Bwalya Chileshe', email:'bwalya@example.com', product:'iPhone 15 Pro Max', plan:'Pay in 3', amount:'$1,099', status:'Approved', date:'2025-05-26' },
-  { id:'APP002', user:'Mulenga Schone', email:'mulenga@example.com', product:'MacBook Air M2', plan:'Pay in 12', amount:'$1,249', status:'Pending', date:'2025-05-25' },
-  { id:'APP003', user:'Chansa Mumba', email:'chansa@example.com', product:'Samsung Galaxy S24', plan:'Pay in 6', amount:'$1,199', status:'Approved', date:'2025-05-24' },
-  { id:'APP004', user:'John Banda', email:'john@example.com', product:'iPad Pro 13"', plan:'Pay in 3', amount:'$1,299', status:'Rejected', date:'2025-05-20' },
-  { id:'APP005', user:'Mary Phiri', email:'mary@example.com', product:'Apple Watch Series 9', plan:'Pay in 6', amount:'$399', status:'Pending', date:'2025-05-18' },
-];
-const INIT_PLANS: Plan[] = [
-  { id:'PLN001', name:'Pay in 3', months:3, interest:'0%', minAmount:'$100', maxAmount:'$500', status:'Active' },
-  { id:'PLN002', name:'Pay in 6', months:6, interest:'2.5%', minAmount:'$200', maxAmount:'$1,500', status:'Active' },
-  { id:'PLN003', name:'Pay in 12', months:12, interest:'5%', minAmount:'$500', maxAmount:'$5,000', status:'Active' },
-  { id:'PLN004', name:'Pay in 24', months:24, interest:'8%', minAmount:'$1,000', maxAmount:'$10,000', status:'Inactive' },
-];
-const INIT_INST_PRODUCTS: InstProduct[] = [
-  { id:'PRD001', name:'iPhone 15 Pro Max', sku:'APL-IP15PM', price:'$1,099', plans:'Pay in 3, Pay in 6, Pay in 12', status:'Active' },
-  { id:'PRD002', name:'MacBook Air M2', sku:'APL-MBA-M2', price:'$1,249', plans:'Pay in 6, Pay in 12', status:'Active' },
-  { id:'PRD003', name:'Samsung Galaxy S24 Ultra', sku:'SAM-GS24U', price:'$1,199', plans:'Pay in 3, Pay in 6, Pay in 12', status:'Active' },
-  { id:'PRD004', name:'iPad Pro 13"', sku:'APL-IPP13', price:'$1,299', plans:'Pay in 12', status:'Active' },
-];
+// Credits loaded from API
+// Applications loaded from API
+// Plans loaded from API
+// InstProducts loaded from API
 
 const APP_STATUSES = ['Pending', 'Approved', 'Rejected'];
 const PLAN_STATUSES = ['Active', 'Inactive'];
@@ -58,26 +37,44 @@ function CreditContent() {
   const [activeTab, setActiveTab] = useState<Tab>('applications');
 
   // Credit Accounts state
-  const [credits, setCredits] = useState<Credit[]>(INIT_CREDITS);
+  const [credits, setCredits] = useState<Credit[]>([]);
+  useEffect(() => {
+    getCreditAccounts({ limit: 200 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Credit[] = raw.map((c: any) => ({
+        id: c.id || '',
+        customer: c.user ? [c.user.firstName, c.user.lastName].filter(Boolean).join(' ') || c.user.email : 'Customer',
+        phone: c.user?.phone || '',
+        limit: c.amount ? `K${Number(c.amount).toLocaleString()}` : 'K0',
+        used: c.usedAmount ? `K${Number(c.usedAmount).toLocaleString()}` : 'K0',
+        available: c.remainingAmount ? `K${Number(c.remainingAmount).toLocaleString()}` : 'K0',
+        due: c.dueDate ? c.dueDate.split('T')[0] : '',
+        status: c.status === 'ACTIVE' ? 'Active' : c.status === 'DEFAULTED' ? 'Defaulted' : c.status === 'PAID' ? 'Paid' : (c.status || 'Active'),
+        plan: c.plan?.name || c.planName || '',
+        outstanding: c.remainingAmount ? `K${Number(c.remainingAmount).toLocaleString()}` : 'K0',
+      }));
+      setCredits(normalized);
+    }).catch(() => {});
+  }, []);
   const [viewCredit, setViewCredit] = useState<Credit|null>(null);
   const [editCredit, setEditCredit] = useState<Credit|null>(null);
   const [creditForm, setCreditForm] = useState({ balance:'', status:'Active' });
 
   // Applications state
-  const [applications, setApplications] = useState<Application[]>(INIT_APPLICATIONS);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [viewApp, setViewApp] = useState<Application|null>(null);
   const [editApp, setEditApp] = useState<Application|null>(null);
   const [appStatus, setAppStatus] = useState('Pending');
 
   // Plans state
-  const [plans, setPlans] = useState<Plan[]>(INIT_PLANS);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [addPlanOpen, setAddPlanOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<Plan|null>(null);
   const [deletePlan, setDeletePlan] = useState<Plan|null>(null);
   const [planForm, setPlanForm] = useState({ name:'', months:'3', interest:'0%', minAmount:'', maxAmount:'', status:'Active' });
 
   // Installment Products state
-  const [instProducts] = useState<InstProduct[]>(INIT_INST_PRODUCTS);
+  const [instProducts] = useState<InstProduct[]>([]);
 
   // ── Handlers ──
   const handleEditCredit = () => {
