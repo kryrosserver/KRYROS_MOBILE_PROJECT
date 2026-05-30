@@ -45,7 +45,7 @@ export default function GetNowPage() {
       try {
         const [plansRes, prods] = await Promise.all([
           fetch(`${API_BASE}/api/credit/plans`).then((r) => r.ok ? r.json() : []),
-          fetchProducts({ take: 8 }),
+          fetchProducts({ take: 8, allowCredit: true }),
         ]);
         const activePlans: CreditPlan[] = Array.isArray(plansRes)
           ? plansRes.filter((p: CreditPlan) => p.isActive)
