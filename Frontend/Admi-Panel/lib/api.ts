@@ -264,3 +264,7 @@ export const getPayments = (params?: Record<string, unknown>) =>
   api.get("/api/payments", { params });
 export const getPayment = (id: string) =>
   api.get(`/api/payments/${id}`);
+export const updateCountry = (id: string, data: Record<string, unknown>) =>
+  api.put(`/api/countries/${id}`, data);
+export const createCountry = (data: Record<string, unknown>) =>
+  api.post("/api/countries", data);
