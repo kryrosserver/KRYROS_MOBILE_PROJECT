@@ -52,8 +52,8 @@ export default function ContactPage() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-foreground">Head Office</p>
-            <p className="text-xs text-muted-foreground">123 Business Avenue,</p>
-            <p className="text-xs text-muted-foreground">New York, NY 10001, USA</p>
+            <p className="text-xs text-muted-foreground">Victoria Way,</p>
+            <p className="text-xs text-muted-foreground">Burgess Hill, UK</p>
           </div>
         </div>
       </div>
