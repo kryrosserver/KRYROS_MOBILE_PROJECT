@@ -121,12 +121,12 @@ function ReportsContent() {
           <div style={{fontSize:'14px',fontWeight:700,color:textMain,marginBottom:'16px'}}>Sales by Category</div>
           <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
             <PieChart width={130} height={130}>
-              <Pie data={categoryData} cx={65} cy={65} innerRadius={40} outerRadius={65} dataKey="value" stroke="none">
-                {categoryData.map((e,i)=><Cell key={i} fill={e.color} />)}
+              <Pie data={catData} cx={65} cy={65} innerRadius={40} outerRadius={65} dataKey="value" stroke="none">
+                {catData.map((e,i)=><Cell key={i} fill={e.color} />)}
               </Pie>
             </PieChart>
             <div style={{flex:1}}>
-              {categoryData.map(c=>(
+              {catData.map(c=>(
                 <div key={c.name} style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}}>
                   <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
                     <div style={{width:'8px',height:'8px',borderRadius:'50%',background:c.color}} />
@@ -144,7 +144,7 @@ function ReportsContent() {
       <div style={{background:card,border:`1px solid ${border}`,borderRadius:'12px',padding:'20px',marginBottom:'20px'}}>
         <div style={{fontSize:'14px',fontWeight:700,color:textMain,marginBottom:'16px'}}>Orders & Customers Trend</div>
         <ResponsiveContainer width="100%" height={180}>
-          <LineChart data={monthlyData} margin={{left:-20}}>
+          <LineChart data={chartData} margin={{left:-20}}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis dataKey="month" tick={{fontSize:11,fill:textMuted}} axisLine={false} tickLine={false} />
             <YAxis tick={{fontSize:11,fill:textMuted}} axisLine={false} tickLine={false} />
