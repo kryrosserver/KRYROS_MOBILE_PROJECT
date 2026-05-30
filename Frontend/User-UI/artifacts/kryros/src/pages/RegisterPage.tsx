@@ -101,7 +101,7 @@ export default function RegisterPage() {
                   <ArrowLeft className="w-4 h-4 text-foreground" />
                 </button>
               </Link>
-              <img src="/kryros-logo.svg" alt="KRYROS" className="h-10 w-10" />
+              <span className="text-lg font-black text-foreground">KRY<span className="text-primary">ROS</span></span>
               <Link href="/login">
                 <span className="text-sm text-primary font-semibold cursor-pointer hover:underline">Login</span>
               </Link>
@@ -111,13 +111,8 @@ export default function RegisterPage() {
                 <h1 className="text-2xl font-black text-foreground mb-1">Create Account</h1>
                 <p className="text-xs text-muted-foreground leading-snug">Join KRYROS and enjoy premium shopping experience</p>
               </div>
-              <div className="w-20 h-20 flex-shrink-0 ml-2 relative">
-                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-2xl font-black text-white">K</span>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-amber-100 dark:bg-amber-900 rounded-xl border-2 border-border flex items-center justify-center shadow-sm">
-                  <span className="text-xs font-black text-amber-700 dark:text-amber-300">K</span>
-                </div>
+              <div className="flex-shrink-0 ml-2">
+                <img src="/kryros-logo.svg" alt="KRYROS" className="w-16 h-16 rounded-2xl shadow-lg" />
               </div>
             </div>
           </div>
