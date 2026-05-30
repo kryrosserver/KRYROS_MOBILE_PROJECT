@@ -232,30 +232,7 @@ export default function ProductPage() {
           ))}
         </div>
 
-        {/* Payment Methods */}
-        <div>
-          <div className="flex items-center justify-between mb-2.5">
-            <p className="text-sm font-bold text-foreground">Payment Methods</p>
-            <button className="text-xs text-primary font-semibold">View all</button>
-          </div>
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            {[
-              { label: "Card", icon: CreditCard },
-              { label: "Mobile Money", icon: Smartphone },
-              { label: "Bank Transfer", icon: Building2 },
-              { label: "WhatsApp Pay", icon: MessageCircle },
-              { label: "Apple Pay", icon: Shield },
-              { label: "Google Pay", icon: Zap },
-            ].map(({ label, icon: Icon }) => (
-              <div key={label} className="flex flex-col items-center gap-1 flex-shrink-0">
-                <div className="w-10 h-10 border border-border rounded-xl flex items-center justify-center bg-muted/30">
-                  <Icon className="w-4 h-4 text-muted-foreground" />
-                </div>
-                <span className="text-[9px] text-muted-foreground text-center leading-tight max-w-[44px]">{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        
 
         {/* Expandable sections */}
         <div className="border border-border rounded-2xl overflow-hidden divide-y divide-border">
