@@ -1,12 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { ShoppingCart, ChevronLeft, MapPin, User, CreditCard, Package, CheckCircle } from 'lucide-react';
-import { updateOrder } from '@/lib/api';
+import { updateOrder, getOrders } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 // ─── Types ────────────────────────────────────────────────
@@ -34,97 +34,7 @@ type Order = {
   deliveryNotes: string;
 };
 
-// ─── Data ─────────────────────────────────────────────────
-const INITIAL: Order[] = [
-  {
-    id: '#KRY123456', customer: 'Bwalya Chileshe', email: 'bwalya@example.com', phone: '+260 977 123 456',
-    date: '2025-05-26', total: '$1,099.00', subtotal: '$1,099.00', shippingCost: '$0.00', discount: '$0.00',
-    status: 'Completed', paymentStatus: 'Paid', items: 1, payment: 'Credit Card',
-    address: '15 Cairo Road, Flat 3B', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: 'Please call before delivery.',
-    itemsList: [{ id: 'i1', name: 'iPhone 15 Pro Max', sku: 'APL-IP15PM', qty: 1, price: '$1,099.00', subtotal: '$1,099.00' }],
-  },
-  {
-    id: '#KRY123455', customer: 'Mulenga Schone', email: 'mulenga@example.com', phone: '+260 966 234 567',
-    date: '2025-05-26', total: '$349.00', subtotal: '$339.00', shippingCost: '$10.00', discount: '$0.00',
-    status: 'Processing', paymentStatus: 'Paid', items: 2, payment: 'Mobile Money',
-    address: '42 Independence Avenue', city: 'Ndola', province: 'Copperbelt', country: 'Zambia', deliveryNotes: '',
-    itemsList: [
-      { id: 'i1', name: 'Sony WH-1000XM5', sku: 'SNY-WH1000', qty: 1, price: '$299.00', subtotal: '$299.00' },
-      { id: 'i2', name: 'Phone Case', sku: 'ACC-PC001', qty: 2, price: '$20.00', subtotal: '$40.00' },
-    ],
-  },
-  {
-    id: '#KRY123454', customer: 'Chansa Kapwepwe', email: 'chansa@example.com', phone: '+260 955 345 678',
-    date: '2025-05-26', total: '$2,499.00', subtotal: '$2,499.00', shippingCost: '$0.00', discount: '$0.00',
-    status: 'Completed', paymentStatus: 'Paid', items: 1, payment: 'Bank Transfer',
-    address: '8 Nangwenya Road', city: 'Kitwe', province: 'Copperbelt', country: 'Zambia', deliveryNotes: 'Leave with security.',
-    itemsList: [{ id: 'i1', name: 'MacBook Air M2', sku: 'APL-MBA-M2', qty: 1, price: '$2,499.00', subtotal: '$2,499.00' }],
-  },
-  {
-    id: '#KRY123453', customer: 'Chanda Kapwepwe', email: 'chanda@example.com', phone: '+260 975 456 789',
-    date: '2025-05-25', total: '$129.00', subtotal: '$119.00', shippingCost: '$10.00', discount: '$0.00',
-    status: 'Pending', paymentStatus: 'Pending', items: 3, payment: 'Cash',
-    address: '5 Freedom Way', city: 'Livingstone', province: 'Southern', country: 'Zambia', deliveryNotes: '',
-    itemsList: [
-      { id: 'i1', name: 'Phone Screen Protector', sku: 'ACC-SP001', qty: 2, price: '$15.00', subtotal: '$30.00' },
-      { id: 'i2', name: 'USB-C Cable', sku: 'ACC-USB-C', qty: 3, price: '$12.00', subtotal: '$36.00' },
-      { id: 'i3', name: 'Power Bank 20000mAh', sku: 'ACC-PB20K', qty: 1, price: '$53.00', subtotal: '$53.00' },
-    ],
-  },
-  {
-    id: '#KRY123452', customer: 'Chansa Mumba', email: 'chansa.m@example.com', phone: '+260 960 567 890',
-    date: '2025-05-25', total: '$899.00', subtotal: '$899.00', shippingCost: '$0.00', discount: '$0.00',
-    status: 'Completed', paymentStatus: 'Paid', items: 1, payment: 'Credit Card',
-    address: '22 Kabulonga Road', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: '',
-    itemsList: [{ id: 'i1', name: 'Samsung Galaxy S24 Ultra', sku: 'SAM-GS24U', qty: 1, price: '$899.00', subtotal: '$899.00' }],
-  },
-  {
-    id: '#KRY123451', customer: 'John Banda', email: 'john@example.com', phone: '+260 977 678 901',
-    date: '2025-05-24', total: '$45.00', subtotal: '$35.00', shippingCost: '$10.00', discount: '$0.00',
-    status: 'Cancelled', paymentStatus: 'Refunded', items: 1, payment: 'Mobile Money',
-    address: '3 Kamwala Road', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: '',
-    itemsList: [{ id: 'i1', name: 'Phone Case Premium', sku: 'ACC-PC002', qty: 1, price: '$35.00', subtotal: '$35.00' }],
-  },
-  {
-    id: '#KRY123450', customer: 'Mary Phiri', email: 'mary@example.com', phone: '+260 966 789 012',
-    date: '2025-05-24', total: '$780.00', subtotal: '$770.00', shippingCost: '$10.00', discount: '$0.00',
-    status: 'Shipped', paymentStatus: 'Paid', items: 2, payment: 'Credit Card',
-    address: '17 Munali Road', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: 'Ring the doorbell twice.',
-    itemsList: [
-      { id: 'i1', name: 'AirPods Pro 2', sku: 'APL-APP2', qty: 1, price: '$249.00', subtotal: '$249.00' },
-      { id: 'i2', name: 'Apple Watch Series 9', sku: 'APL-AW9', qty: 1, price: '$521.00', subtotal: '$521.00' },
-    ],
-  },
-  {
-    id: '#KRY123449', customer: 'Peter Zulu', email: 'peter@example.com', phone: '+260 955 890 123',
-    date: '2025-05-23', total: '$3,200.00', subtotal: '$3,200.00', shippingCost: '$0.00', discount: '$0.00',
-    status: 'Completed', paymentStatus: 'Paid', items: 4, payment: 'Bank Transfer',
-    address: '6 Great East Road', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: '',
-    itemsList: [
-      { id: 'i1', name: 'iPad Pro 13"', sku: 'APL-IPP13', qty: 1, price: '$1,299.00', subtotal: '$1,299.00' },
-      { id: 'i2', name: 'Apple Pencil', sku: 'APL-PEN2', qty: 1, price: '$129.00', subtotal: '$129.00' },
-      { id: 'i3', name: 'Magic Keyboard', sku: 'APL-MKBD', qty: 1, price: '$299.00', subtotal: '$299.00' },
-      { id: 'i4', name: 'MacBook Air M2', sku: 'APL-MBA-M2', qty: 1, price: '$1,473.00', subtotal: '$1,473.00' },
-    ],
-  },
-  {
-    id: '#KRY123448', customer: 'Grace Tembo', email: 'grace@example.com', phone: '+260 975 901 234',
-    date: '2025-05-22', total: '$65.00', subtotal: '$55.00', shippingCost: '$10.00', discount: '$0.00',
-    status: 'Refunded', paymentStatus: 'Refunded', items: 1, payment: 'Cash',
-    address: '9 Chilenje Road', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: '',
-    itemsList: [{ id: 'i1', name: 'Beats Studio Pro', sku: 'BTS-SP', qty: 1, price: '$55.00', subtotal: '$55.00' }],
-  },
-  {
-    id: '#KRY123447', customer: 'David Mwale', email: 'david@example.com', phone: '+260 960 012 345',
-    date: '2025-05-21', total: '$450.00', subtotal: '$440.00', shippingCost: '$10.00', discount: '$0.00',
-    status: 'Processing', paymentStatus: 'Paid', items: 2, payment: 'Credit Card',
-    address: '31 Longacres Road', city: 'Lusaka', province: 'Lusaka', country: 'Zambia', deliveryNotes: 'Office delivery, ask for David.',
-    itemsList: [
-      { id: 'i1', name: 'Sony WH-1000XM5', sku: 'SNY-WH1000', qty: 1, price: '$299.00', subtotal: '$299.00' },
-      { id: 'i2', name: 'Phone Stand', sku: 'ACC-STD01', qty: 1, price: '$141.00', subtotal: '$141.00' },
-    ],
-  },
-];
+// Orders loaded from API
 
 const ORDER_STATUSES = ['Pending', 'Processing', 'Shipped', 'Completed', 'Cancelled', 'Refunded'];
 
@@ -137,7 +47,42 @@ function OrdersContent() {
   const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<Order[]>(INITIAL);
+  const [data, setData] = useState<Order[]>([]);
+  useEffect(() => {
+    getOrders({ limit: 200, skip: 0 }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: Order[] = raw.map((o: any) => ({
+        id: o.orderNumber || o.id || '',
+        customer: o.user ? [o.user.firstName, o.user.lastName].filter(Boolean).join(' ') || o.user.email : 'Guest',
+        email: o.user?.email || '',
+        phone: o.user?.phone || o.shippingAddress?.phone || '',
+        date: o.createdAt ? o.createdAt.split('T')[0] : '',
+        total: o.total ? `$${Number(o.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '$0.00',
+        subtotal: o.subtotal ? `$${Number(o.subtotal).toFixed(2)}` : '$0.00',
+        shippingCost: o.shippingCost ? `$${Number(o.shippingCost).toFixed(2)}` : '$0.00',
+        discount: o.discount ? `$${Number(o.discount).toFixed(2)}` : '$0.00',
+        status: o.status ? (o.status.charAt(0) + o.status.slice(1).toLowerCase()) : 'Pending',
+        paymentStatus: o.paymentStatus ? (o.paymentStatus.charAt(0) + o.paymentStatus.slice(1).toLowerCase()) : 'Unpaid',
+        items: o.items?.length || o._count?.items || 0,
+        payment: o.paymentMethod || 'N/A',
+        address: o.shippingAddress?.address || o.shippingAddress?.street || '',
+        city: o.shippingAddress?.city || '',
+        province: o.shippingAddress?.state || o.shippingAddress?.province || '',
+        country: o.shippingAddress?.country || 'Zambia',
+        deliveryNotes: o.deliveryNotes || o.notes || '',
+        itemsList: (o.items || []).map((it: any) => ({
+          id: it.id || '',
+          name: it.product?.name || it.name || '',
+          sku: it.product?.sku || '',
+          qty: it.quantity || 1,
+          price: it.price ? `$${Number(it.price).toFixed(2)}` : '$0.00',
+          subtotal: it.total ? `$${Number(it.total).toFixed(2)}` : '$0.00',
+        })),
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [editRow, setEditRow] = useState<Order | null>(null);
   const [editStatus, setEditStatus] = useState('');
