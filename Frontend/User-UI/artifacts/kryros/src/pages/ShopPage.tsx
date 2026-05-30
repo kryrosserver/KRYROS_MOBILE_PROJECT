@@ -360,6 +360,8 @@ export default function ShopPage() {
       {brands.slice(0, 2).map((brand) => (
         <BrandProductSection key={brand.id} title={brand.name} brandName={brand.name} />
       ))}
+      </>
+      )}
     </div>
   );
 }
