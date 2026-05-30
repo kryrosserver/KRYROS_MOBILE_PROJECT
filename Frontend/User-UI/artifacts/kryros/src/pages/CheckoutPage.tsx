@@ -18,17 +18,17 @@ const SHIPPING_OPTIONS = [
 ];
 
 const MobileMoneyCombinedIcon = () => (
-  <div className="flex items-center -space-x-2">
-    <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
-    <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
-    <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover border-2 border-background" />
+  <div className="flex items-center gap-1">
+    <span className="text-[9px] font-bold text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30 px-1.5 py-0.5 rounded">MTN</span>
+    <span className="text-[9px] font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-1.5 py-0.5 rounded">Airtel</span>
+    <span className="text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded">Zamtel</span>
   </div>
 );
 
 function ProviderLogo({ provider }: { provider: string }) {
-  if (provider.startsWith("Airtel")) return <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover" />;
-  if (provider.startsWith("Zamtel")) return <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover" />;
-  return <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover" />;
+  if (provider.startsWith("Airtel")) return <span className="text-xs font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-lg">Airtel</span>;
+  if (provider.startsWith("Zamtel")) return <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-lg">Zamtel</span>;
+  return <span className="text-xs font-bold text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 rounded-lg">MTN</span>;
 }
 
 const CHECKOUT_METHODS = [
