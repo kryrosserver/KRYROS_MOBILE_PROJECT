@@ -9,13 +9,13 @@ import { fetchProducts, fetchFlashSaleProducts } from "@/lib/api";
 import type { Product } from "@/lib/api";
 
 const TABS = [
-  { id: "flash",      label: "Flash Deals" },
-  { id: "trending",   label: "Trending" },
-  { id: "bestseller", label: "Best Sellers" },
-  { id: "new",        label: "New Arrivals" },
+  { id: "flash",      label: "Flash Deals",  badge: "⚡ Flash",   badgeColor: "bg-red-500" },
+  { id: "trending",   label: "Trending",     badge: "🔥 Hot",     badgeColor: "bg-orange-500" },
+  { id: "bestseller", label: "Best Sellers", badge: "⭐ Top Pick", badgeColor: "bg-yellow-500" },
+  { id: "new",        label: "New Arrivals", badge: "✨ New",      badgeColor: "bg-primary" },
 ];
 
-function FeaturedCard({ product }: { product: Product }) {
+function FeaturedCard({ product, activeTab = "flash" }: { product: Product; activeTab?: string }) {
   const [imgErr, setImgErr] = useState(false);
   const addToCart = useCartStore((s) => s.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
@@ -56,6 +56,14 @@ function FeaturedCard({ product }: { product: Product }) {
         {product.discount > 0 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-lg z-10">
             -{product.discount}%
+          </span>
+        )}
+        {/* Tab category badge */}
+        {activeTab !== "flash" && (
+          <span className={`absolute bottom-2 left-2 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-lg z-10 ${
+            activeTab === "trending" ? "bg-orange-500" : activeTab === "bestseller" ? "bg-yellow-500" : "bg-primary"
+          }`}>
+            {activeTab === "trending" ? "🔥 Trending" : activeTab === "bestseller" ? "⭐ Best Seller" : "✨ New"}
           </span>
         )}
         <button
@@ -186,7 +194,7 @@ export default function FeaturedProductsSection() {
 
       <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
         {products.map((p) => (
-          <FeaturedCard key={p.id} product={p} />
+          <FeaturedCard key={p.id} product={p} activeTab={activeTab} />
         ))}
       </div>
     </section>
