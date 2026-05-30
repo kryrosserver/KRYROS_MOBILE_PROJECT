@@ -23,7 +23,7 @@ interface DataTableProps {
 }
 
 export default function DataTable({
-  columns, data, searchPlaceholder = 'Search...', onEdit, onDelete, onView, pageSize = 10, filterNode, actionNode
+  columns, data, searchPlaceholder = 'Search...', onEdit, onDelete, onView, pageSize = 10, filterNode, actionNode, actionNode
 }: DataTableProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
