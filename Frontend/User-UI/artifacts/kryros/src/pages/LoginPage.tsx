@@ -65,7 +65,7 @@ export default function LoginPage() {
 
           <div className="relative bg-card px-6 pt-6 pb-5 overflow-hidden border-b border-border">
             <Link href="/">
-              <span className="text-xl font-black tracking-tight text-foreground cursor-pointer">KRY<span className="text-primary">ROS</span></span>
+              <img src="/kryros-logo.svg" alt="KRYROS" className="h-12 w-12 cursor-pointer" />
             </Link>
             <h1 className="text-2xl font-black text-foreground mt-4 mb-1 whitespace-nowrap">Welcome Back</h1>
             <p className="text-xs text-muted-foreground">Login to continue shopping with KRYROS</p>
@@ -136,24 +136,6 @@ export default function LoginPage() {
               )}
             </button>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">or continue with</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "Google", color: "text-red-500" },
-                { label: "Apple", color: "text-foreground" },
-                { label: "Facebook", color: "text-blue-500" },
-              ].map(({ label, color }) => (
-                <button key={label} type="button" className="flex items-center justify-center gap-1.5 py-2.5 bg-background border border-border rounded-xl text-xs font-semibold text-foreground hover:bg-muted transition-colors opacity-50 cursor-not-allowed" disabled>
-                  <span className={`font-black text-sm ${color}`}>{label === "Google" ? "G" : label === "Apple" ? "" : "f"}</span>
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
 
             <p className="text-center text-xs text-muted-foreground pb-1">
               Don't have an account?{" "}
