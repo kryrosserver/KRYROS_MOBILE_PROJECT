@@ -121,20 +121,20 @@ function DashboardContent() {
   const CHART_COLORS = ["#1FA89A","#6366f1","#FFC107","#f59e0b","#64748b","#ec4899"];
 
   // Sales area chart data — real monthly series from reports
-  const salesData = report?.revenueSeries?.length > 0
-    ? report.revenueSeries.map((s: any) => ({ date: s.label, sales: Number(s.revenue || 0) }))
+  const salesData: Array<{ date: string; sales: number }> = report?.revenueSeries?.length > 0
+    ? report.revenueSeries.map((s: any) => ({ date: String(s.label), sales: Number(s.revenue || 0) }))
     : [{ date: "Jan", sales: 0 }, { date: "Feb", sales: 0 }, { date: "Mar", sales: 0 },
        { date: "Apr", sales: 0 }, { date: "May", sales: 0 }, { date: "Jun", sales: 0 }];
 
   // Pie chart data — real sales by category
-  const channelData = report?.salesByCategory?.length > 0
+  const channelData: Array<{ name: string; value: number; amount: number; color: string }> = report?.salesByCategory?.length > 0
     ? report.salesByCategory.slice(0, 5).map((cat: any, i: number) => ({
         name: cat.name, value: Number(cat.value || 0), amount: 0, color: CHART_COLORS[i % CHART_COLORS.length],
       }))
     : [{ name: "No sales yet", value: 100, amount: 0, color: "#64748b" }];
 
   // Activity feed — real recent transactions
-  const activities = report?.recentTransactions?.length > 0
+  const activities: Array<{ text: string; time: string; color: string; icon: string }> = report?.recentTransactions?.length > 0
     ? report.recentTransactions.slice(0, 5).map((tx: any) => ({
         text: `${tx.id ? `Order ${tx.id}` : "Transaction"}  ·  ${tx.customer || "Customer"}  ·  ${fmt(tx.amount)}`,
         time: tx.date ? new Date(tx.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "",
