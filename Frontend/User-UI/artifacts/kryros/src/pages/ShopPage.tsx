@@ -77,7 +77,14 @@ function ShopCard({ product }: { product: Product }) {
           )}
         </div>
 
-        <p className="text-[10px] font-semibold text-teal-600 mb-2">Get Now from {monthly}/mo</p>
+        {/* Stock status */}
+        <div className="mb-2">
+          {product.stock > 0 ? (
+            <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">In Stock</span>
+          ) : (
+            <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">Out of Stock</span>
+          )}
+        </div>
 
         <div className="flex items-center gap-1.5">
           <button
