@@ -38,7 +38,7 @@ export default function WholesalePage() {
     setLoading(true);
     Promise.all([
       fetchCategories().then((cats) => setCategories(cats.filter((c: any) => c.isActive !== false).slice(0, 5))),
-      fetchProducts({ take: 8 }).then((prods) => setWholesaleProducts(prods.slice(0, 4))),
+      fetchProducts({ take: 8, isWholesaleOnly: true }).then((prods) => setWholesaleProducts(prods)),
     ]).finally(() => setLoading(false));
 
     fetch(`${API_BASE}/api/cms/site-config/wholesale`, { cache: "no-store" })
