@@ -52,7 +52,7 @@ services:
     startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://kryrosbackend-rwb2.onrender.com/api
+        value: https://kryrosbackend-rwb2.onrender.com
       - key: JWT_SECRET
         sync: false
       - key: NODE_ENV
