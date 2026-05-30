@@ -268,3 +268,15 @@ export const getPayments = (params?: Record<string, unknown>) =>
   api.get("/api/payments", { params });
 export const getPayment = (id: string) =>
   api.get(`/api/payments/${id}`);
+
+// ── Payment Links ──────────────────────────────────────────
+export const createPaymentLink = (data: Record<string, unknown>) =>
+  api.post("/api/pay-links", data);
+export const getPaymentLinks = (params?: Record<string, unknown>) =>
+  api.get("/api/pay-links", { params });
+export const deletePaymentLink = (id: string) =>
+  api.delete(`/api/pay-links/${id}`);
+
+// ── Direct Payment ─────────────────────────────────────────
+export const initiateDirectPayment = (data: Record<string, unknown>) =>
+  api.post("/api/payments/direct", data);
