@@ -1,26 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Users } from 'lucide-react';
-import { createUser, updateUser, deleteUser } from '@/lib/api';
+import { createUser, updateUser, deleteUser, getUsers } from '@/lib/api';
+import { useAuth } from '@/contexts/auth-context';
 import toast from 'react-hot-toast';
 
 type User = { id: string; name: string; email: string; role: string; status: string; joined: string; orders: number };
-
-const INITIAL: User[] = [
-  { id: 'USR001', name: 'Bwalya Chileshe', email: 'bwalya@example.com', role: 'Customer', status: 'Active', joined: '2025-05-26', orders: 12 },
-  { id: 'USR002', name: 'Mulenga Schone', email: 'mulenga@example.com', role: 'Customer', status: 'Active', joined: '2025-05-25', orders: 8 },
-  { id: 'USR003', name: 'Chansa Mumba', email: 'chansa@example.com', role: 'Wholesale', status: 'Active', joined: '2025-05-24', orders: 34 },
-  { id: 'USR004', name: 'Admin User', email: 'admin@kryros.com', role: 'Admin', status: 'Active', joined: '2025-01-01', orders: 0 },
-  { id: 'USR005', name: 'John Banda', email: 'john@example.com', role: 'Customer', status: 'Inactive', joined: '2025-04-10', orders: 3 },
-  { id: 'USR006', name: 'Mary Phiri', email: 'mary@example.com', role: 'Customer', status: 'Active', joined: '2025-05-20', orders: 7 },
-  { id: 'USR007', name: 'Peter Zulu', email: 'peter@example.com', role: 'Wholesale', status: 'Active', joined: '2025-03-15', orders: 22 },
-  { id: 'USR008', name: 'Grace Tembo', email: 'grace@example.com', role: 'Customer', status: 'Blocked', joined: '2025-02-28', orders: 1 },
-];
 
 const roles = [
   { name: 'Super Admin', permissions: 'Full Access', users: 1, color: '#ef4444' },
@@ -40,7 +30,28 @@ function UsersContent() {
   const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
-  const [data, setData] = useState<User[]>(INITIAL);
+  const { user: currentUser } = useAuth();
+  const isSuperAdmin = currentUser?.role === 'Super Admin';
+
+  const [data, setData] = useState<User[]>([]);
+
+  // Load real users from API on mount
+  useEffect(() => {
+    getUsers({ limit: 500 }).then(r => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      const normalized: User[] = raw.map((u: any) => ({
+        id: u.id || '',
+        name: [u.firstName, u.lastName].filter(Boolean).join(' ') || u.name || u.email || '',
+        email: u.email || '',
+        role: u.role === 'SUPER_ADMIN' ? 'Super Admin' : u.role === 'ADMIN' ? 'Admin' : u.role === 'MANAGER' ? 'Manager' : u.role === 'WHOLESALE' ? 'Wholesale' : 'Customer',
+        status: u.status === 'ACTIVE' ? 'Active' : u.status === 'INACTIVE' ? 'Inactive' : u.status === 'BLOCKED' ? 'Blocked' : (u.status || 'Active'),
+        joined: u.createdAt ? u.createdAt.split('T')[0] : '',
+        orders: u._count?.orders ?? 0,
+      }));
+      setData(normalized);
+    }).catch(() => {});
+  }, []);
+
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<User | null>(null);
   const [deleteRow, setDeleteRow] = useState<User | null>(null);
@@ -52,7 +63,12 @@ function UsersContent() {
 
   const openAdd = () => { setForm({ ...EMPTY_FORM }); setAddOpen(true); };
   const openEdit = (row: Record<string, unknown>) => { const r = row as unknown as User; setForm({ name: r.name, email: r.email, role: r.role, status: r.status }); setEditRow(r); };
-  const openDelete = (row: Record<string, unknown>) => setDeleteRow(row as unknown as User);
+  const openDelete = (row: Record<string, unknown>) => {
+    const r = row as unknown as User;
+    if (!isSuperAdmin) { toast.error('Only Super Admin can delete users'); return; }
+    if (r.role === 'Admin' || r.role === 'Super Admin') { toast.error('Admin accounts cannot be deleted'); return; }
+    setDeleteRow(r);
+  };
   const openView = (row: Record<string, unknown>) => setViewRow(row as unknown as User);
 
   const handleAdd = async () => {
@@ -81,14 +97,17 @@ function UsersContent() {
   };
 
   const handleDelete = async () => {
-    if (!deleteRow) return;
+    if (!deleteRow || !isSuperAdmin) return;
+    if (deleteRow.role === 'Admin' || deleteRow.role === 'Super Admin') {
+      toast.error('Admin accounts cannot be deleted'); setDeleteRow(null); return;
+    }
     setLoading(true);
     try {
       await deleteUser(deleteRow.id);
       setData(d => d.filter(u => u.id !== deleteRow.id));
       toast.success('User deleted');
       setDeleteRow(null);
-    } catch { toast.error('Failed to delete user — check your API connection'); }
+    } catch { toast.error('Failed to delete user'); }
     setLoading(false);
   };
 
@@ -132,7 +151,7 @@ function UsersContent() {
       <FormField label="Full Name" value={form.name} onChange={fp('name')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. John Banda" />
       <FormField label="Email Address" value={form.email} onChange={fp('email')} type="email" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="john@example.com" />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-        <FormField label="Role" value={form.role} onChange={fp('role')} options={['Customer', 'Wholesale', 'Admin', 'Super Admin']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+        <FormField label="Role" value={form.role} onChange={fp('role')} options={isSuperAdmin ? ['Customer', 'Wholesale', 'Manager', 'Admin'] : ['Customer', 'Wholesale']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
         <FormField label="Status" value={form.status} onChange={fp('status')} options={['Active', 'Inactive', 'Blocked']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       </div>
     </>
@@ -154,7 +173,12 @@ function UsersContent() {
       <div style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '18px', marginBottom: '20px' }}>
         <div style={{ fontSize: '14px', fontWeight: 700, color: textMain, marginBottom: '14px' }}>Roles Overview</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }} className="roles-grid">
-          {roles.map((r) => (
+          {[
+            { name: 'Super Admin', permissions: 'Full Access', users: data.filter(u=>u.role==='Super Admin').length, color: '#ef4444' },
+            { name: 'Admin', permissions: 'Dashboard, Orders, Products, Users', users: data.filter(u=>u.role==='Admin').length, color: '#f59e0b' },
+            { name: 'Wholesale', permissions: 'Wholesale Orders, Products', users: data.filter(u=>u.role==='Wholesale').length, color: '#6366f1' },
+            { name: 'Customer', permissions: 'View Products, Place Orders', users: data.filter(u=>u.role==='Customer').length, color: '#1FA89A' },
+          ].map((r) => (
             <div key={r.name} style={{ background: surface, border: `1px solid ${border}`, borderRadius: '10px', padding: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 700, color: textMain }}>{r.name}</span>
@@ -194,7 +218,7 @@ function UsersContent() {
         </>}
       </Modal>
 
-      <ConfirmDialog open={!!deleteRow} onClose={() => setDeleteRow(null)} onConfirm={handleDelete} loading={loading} title="Delete User" message={`Are you sure you want to delete "${deleteRow?.name}"? This cannot be undone.`} />
+      <ConfirmDialog open={!!deleteRow} onClose={() => setDeleteRow(null)} onConfirm={handleDelete} loading={loading} title="Delete User (Super Admin Action)" message={`You are about to permanently delete "${deleteRow?.name}" (${deleteRow?.email}). This action cannot be undone and requires Super Admin authority.`} />
 
       <style>{`@media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr !important; } .roles-grid { grid-template-columns: 1fr 1fr !important; } }`}</style>
     </div>
