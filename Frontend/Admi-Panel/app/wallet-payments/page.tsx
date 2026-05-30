@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, FormField } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
 import { Wallet, Link2, CreditCard, TrendingUp, ChevronDown } from 'lucide-react';
+import { getWalletTransactions, getPayments } from '@/lib/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Tx = { id:string; user:string; type:string; method:string; amount:string; fee:string; date:string; status:string; ref:string };
@@ -104,6 +105,41 @@ function WalletContent() {
 
   type Tab = 'transactions' | 'links' | 'methods';
   const [activeTab, setActiveTab] = useState<Tab>('transactions');
+  const [txData, setTxData] = useState<Tx[]>(mockTx);
+  useEffect(() => {
+    Promise.all([
+      getWalletTransactions({ limit: 200 }).catch(() => ({ data: [] })),
+      getPayments({ limit: 200 }).catch(() => ({ data: [] })),
+    ]).then(([wRes, pRes]: any[]) => {
+      const wRaw: any[] = Array.isArray(wRes.data?.data) ? wRes.data.data : Array.isArray(wRes.data) ? wRes.data : [];
+      const pRaw: any[] = Array.isArray(pRes.data?.data) ? pRes.data.data : Array.isArray(pRes.data) ? pRes.data : [];
+      const combined: Tx[] = [
+        ...wRaw.map((t: any) => ({
+          id: t.id?.slice(-8) || `W${Date.now().toString().slice(-5)}`,
+          user: t.user ? (`${t.user.firstName||''} ${t.user.lastName||''}`.trim() || t.user.email || 'Customer') : 'Customer',
+          type: t.type || 'Wallet',
+          method: t.paymentMethod || t.method || 'Wallet',
+          amount: t.amount ? `K${Number(t.amount).toLocaleString()}` : 'K0',
+          fee: t.fee ? `K${Number(t.fee).toLocaleString()}` : 'K0',
+          date: t.createdAt ? t.createdAt.split('T')[0] : '',
+          status: t.status==='COMPLETED'||t.status==='SUCCESS' ? 'Completed' : t.status==='PENDING' ? 'Pending' : t.status==='FAILED' ? 'Failed' : (t.status||'Completed'),
+          ref: t.reference || t.id || '',
+        })),
+        ...pRaw.map((p: any) => ({
+          id: p.id?.slice(-8) || `P${Date.now().toString().slice(-5)}`,
+          user: p.user ? (`${p.user.firstName||''} ${p.user.lastName||''}`.trim() || p.user.email || 'Customer') : 'Customer',
+          type: 'Payment',
+          method: p.provider || p.method || 'Payment',
+          amount: p.amount ? `K${Number(p.amount).toLocaleString()}` : 'K0',
+          fee: 'K0',
+          date: p.createdAt ? p.createdAt.split('T')[0] : '',
+          status: p.status==='PAID'||p.status==='COMPLETED' ? 'Completed' : p.status==='PENDING' ? 'Pending' : p.status==='FAILED' ? 'Failed' : (p.status||'Pending'),
+          ref: p.reference || p.id || '',
+        })),
+      ];
+      if (combined.length > 0) setTxData(combined);
+    }).catch(() => {});
+  }, []);
 
   // Tx filters
   const [methodFilter, setMethodFilter]  = useState('');
@@ -126,7 +162,7 @@ function WalletContent() {
     { key:'date',   label:'Date' },
   ];
 
-  const txFiltered = mockTx.filter(r =>
+  const txFiltered = txData.filter(r =>
     (!methodFilter || r.method === methodFilter) &&
     (!statusFilter || r.status === statusFilter)
   );
