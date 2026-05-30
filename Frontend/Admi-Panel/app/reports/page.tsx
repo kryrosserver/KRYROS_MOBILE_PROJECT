@@ -1,8 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import PageHeader from '@/components/admin/page-header';
 import { useTheme } from '@/contexts/theme-context';
 import { BarChart3, TrendingUp, TrendingDown, Download } from 'lucide-react';
+import { getReportsSummary, getProducts } from '@/lib/api';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const monthlyData = [
@@ -38,12 +40,45 @@ function ReportsContent() {
   const surface = isDark ? '#101826' : '#F1F5F9';
   const gridColor = isDark ? '#1E293B' : '#E2E8F0';
 
-  const kpis = [
-    { label: 'Total Revenue', val: '$97,400', change: '+28.4%', up: true },
-    { label: 'Total Orders', val: '341', change: '+18.7%', up: true },
-    { label: 'New Customers', val: '224', change: '+22.1%', up: true },
-    { label: 'Avg Order Value', val: '$285.63', change: '-2.3%', up: false },
-  ];
+  const [chartData, setChartData] = useState(monthlyData);
+  const [catData, setCatData] = useState(categoryData);
+  const [prodData, setProdData] = useState(topProducts);
+  const [kpis, setKpis] = useState([
+    { label: 'Total Revenue', val: 'Loading...', change: '—', up: true },
+    { label: 'Total Orders', val: '—', change: '—', up: true },
+    { label: 'New Customers', val: '—', change: '—', up: true },
+    { label: 'Avg Order Value', val: '—', change: '—', up: false },
+  ]);
+
+  useEffect(() => {
+    getReportsSummary('year').then((r: any) => {
+      const d = r.data;
+      if (!d) return;
+      setKpis([
+        { label: 'Total Revenue', val: d.totalRevenue ? `K${Number(d.totalRevenue).toLocaleString()}` : 'K0', change: d.revenueGrowth ? `${d.revenueGrowth>0?'+':''}${d.revenueGrowth}%` : '0%', up: (d.revenueGrowth||0)>=0 },
+        { label: 'Total Orders', val: String(d.totalOrders||0), change: d.ordersGrowth ? `${d.ordersGrowth>0?'+':''}${d.ordersGrowth}%` : '0%', up: (d.ordersGrowth||0)>=0 },
+        { label: 'New Customers', val: String(d.newCustomers||d.totalCustomers||0), change: d.customersGrowth ? `${d.customersGrowth>0?'+':''}${d.customersGrowth}%` : '0%', up: true },
+        { label: 'Avg Order Value', val: d.averageOrderValue ? `K${Number(d.averageOrderValue).toFixed(0)}` : 'K0', change: '0%', up: false },
+      ]);
+      if (Array.isArray(d.monthly) && d.monthly.length > 0) {
+        setChartData(d.monthly.map((m: any) => ({ month: m.month||m.name, revenue: Number(m.revenue||0), orders: Number(m.orders||0), customers: Number(m.customers||0) })));
+      }
+      if (Array.isArray(d.categories) && d.categories.length > 0) {
+        const colors = ['#1FA89A','#6366f1','#FFC107','#ef4444','#64748b'];
+        setCatData(d.categories.map((c: any, i: number) => ({ name: c.name||c.category, value: Number(c.value||c.percentage||0), color: colors[i%colors.length] })));
+      }
+    }).catch(() => {});
+    getProducts({ limit: 10, sortBy: 'bestSelling' }).then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      if (raw.length === 0) return;
+      setProdData(raw.map((p: any, i: number) => ({
+        rank: i+1, name: p.name||'Unknown',
+        revenue: p.price ? `K${Number(p.price).toLocaleString()}` : 'K0',
+        units: p._count?.orderItems ?? p.sold ?? 0,
+        growth: '+0%', up: true,
+      })));
+    }).catch(() => {});
+  }, []);
 
   return (
     <div>
@@ -73,7 +108,7 @@ function ReportsContent() {
         <div style={{background:card,border:`1px solid ${border}`,borderRadius:'12px',padding:'20px'}}>
           <div style={{fontSize:'14px',fontWeight:700,color:textMain,marginBottom:'16px'}}>Monthly Revenue</div>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={monthlyData} margin={{left:-20}}>
+            <BarChart data={chartData} margin={{left:-20}}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis dataKey="month" tick={{fontSize:11,fill:textMuted}} axisLine={false} tickLine={false} />
               <YAxis tick={{fontSize:11,fill:textMuted}} axisLine={false} tickLine={false} tickFormatter={v=>`$${(v/1000).toFixed(0)}k`} />
@@ -128,7 +163,7 @@ function ReportsContent() {
             {['Rank','Product','Revenue','Units','Growth'].map(h=><th key={h} style={{padding:'10px 16px',textAlign:'left',fontSize:'11.5px',fontWeight:700,color:textMuted,textTransform:'uppercase',letterSpacing:'0.4px'}}>{h}</th>)}
           </tr></thead>
           <tbody>
-            {topProducts.map(p=>(
+            {prodData.map(p=>(
               <tr key={p.rank} style={{borderTop:`1px solid ${border}`}}>
                 <td style={{padding:'12px 16px'}}><span style={{width:'26px',height:'26px',borderRadius:'50%',background:'rgba(31,168,154,0.12)',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:700,color:'#1FA89A'}}>{p.rank}</span></td>
                 <td style={{padding:'12px 16px',fontWeight:600,color:textMain,fontSize:'13.5px'}}>{p.name}</td>
