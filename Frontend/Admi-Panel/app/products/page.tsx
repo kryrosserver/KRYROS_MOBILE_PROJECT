@@ -112,11 +112,61 @@ function ProductsContent() {
 
   const strToBool = (v: string) => v === 'Yes';
 
+
+  // Build backend-compatible specifications array from textarea text
+  const buildSpecsPayload = (specsStr: string): { key: string; value: string }[] | undefined => {
+    if (!specsStr || !specsStr.trim()) return undefined;
+    try {
+      const parsed = JSON.parse(specsStr);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    // Parse "Key: Value" lines
+    const lines = specsStr.split('\n').filter(l => l.trim());
+    const pairs = lines
+      .filter(l => l.includes(':'))
+      .map(l => {
+        const ci = l.indexOf(':');
+        return { key: l.substring(0, ci).trim(), value: l.substring(ci + 1).trim() };
+      })
+      .filter(s => s.key && s.value);
+    if (pairs.length > 0) return pairs;
+    return [{ key: 'Specifications', value: specsStr.trim() }];
+  };
+
+  // Build the payload that matches the backend UpdateProductDto / CreateProductDto
+  const buildProductPayload = (productImages: string[]) => {
+    const payload: Record<string, unknown> = {
+      name: form.name,
+      slug: form.slug || undefined,
+      sku: form.sku || undefined,
+      description: form.description || undefined,
+      price: form.price ? Number(form.price) : undefined,
+      salePrice: form.salePrice ? Number(form.salePrice) : undefined,
+      weight: form.weight || undefined,
+      stockTotal: Number(form.stock),
+      isActive: form.status === 'Active',
+      isFeatured: strToBool(form.featured),
+      hasFiveYearGuarantee: strToBool(form.showGuaranteeBadge),
+      hasFreeReturns: strToBool(form.showReturnsBadge),
+      categorySlug: toSlug(form.category),
+      brandSlug: toSlug(form.brand),
+      metaTitle: form.metaTitle || undefined,
+      metaDescription: form.metaDescription || undefined,
+    };
+    if (productImages.length > 0) {
+      payload.imageDataUrls = productImages;
+      payload.replaceImages = true;
+    }
+    const specs = buildSpecsPayload(form.specifications);
+    if (specs) payload.specifications = specs;
+    return payload;
+  };
+
   const handleAdd = async () => {
     if (!form.name.trim() || !form.sku.trim()) { toast.error('Name and SKU are required'); return; }
     setLoading(true);
     try {
-      await createProduct({ ...form, stock: Number(form.stock), images: productImages.map((url, i) => ({ url, isPrimary: i === 0, sortOrder: i, alt: form.name })) });
+      await createProduct(buildProductPayload(productImages));
       const newItem: Product = {
         id: `PRD${String(Date.now()).slice(-3)}`, ...form,
         imageUrl: productImages[0] || '',
@@ -128,7 +178,11 @@ function ProductsContent() {
       };
       setData(d => [...d, newItem]);
       toast.success('Product added'); setAddOpen(false);
-    } catch { toast.error('Failed to add product — check your API connection'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg || 'check your API connection');
+      toast.error(`Failed to add product — ${detail}`);
+    }
     setLoading(false);
   };
 
@@ -136,7 +190,7 @@ function ProductsContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateProduct(editRow.id, { ...form, stock: Number(form.stock), images: productImages.map((url, i) => ({ url, isPrimary: i === 0, sortOrder: i, alt: form.name })) });
+      await updateProduct(editRow.id, buildProductPayload(productImages));
       setData(d => d.map(p => p.id === editRow.id ? {
         ...p, ...form,
         imageUrl: productImages[0] || p.imageUrl,
@@ -147,7 +201,11 @@ function ProductsContent() {
         showReturnsBadge: strToBool(form.showReturnsBadge),
       } : p));
       toast.success('Product updated'); setEditRow(null);
-    } catch { toast.error('Failed to update product — check your API connection'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg || 'check your API connection');
+      toast.error(`Failed to update product — ${detail}`);
+    }
     setLoading(false);
   };
 
@@ -258,7 +316,7 @@ function ProductsContent() {
       </div>
 
       {sectionLabel('Specifications')}
-      <FormField label="Specifications" value={form.specifications} onChange={fp('specifications')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Color: Black | RAM: 8GB | Storage: 256GB | Screen: 6.7 inch" type="textarea" />
+      <FormField label="Specifications" placeholder="One per line: Key: Value\nExample:\nRAM: 8GB\nStorage: 256GB\nBattery: 5000mAh\n\nFor clothes:\nMaterial: Cotton\nSize: XL" value={form.specifications} onChange={fp('specifications')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Color: Black | RAM: 8GB | Storage: 256GB | Screen: 6.7 inch" type="textarea" />
 
       {sectionLabel('Tags')}
       <FormField label="Tags (comma-separated)" value={form.tags} onChange={fp('tags')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. apple, iphone, smartphone, 5G" />
