@@ -92,8 +92,20 @@ export class ShippingZonesService implements OnModuleInit {
   }
 
   async create(createShippingZoneDto: CreateShippingZoneDto) {
+    const { name, countryId, stateId, cityId, priority, region, shippingMethod, rate, minOrder, isActive } = createShippingZoneDto;
     return this.prisma.shippingZone.create({
-      data: createShippingZoneDto,
+      data: {
+        name,
+        countryId: countryId || null,
+        stateId: stateId || null,
+        cityId: cityId || null,
+        priority: priority ?? 0,
+        region: region || null,
+        shippingMethod: shippingMethod || null,
+        rate: rate != null ? rate : null,
+        minOrder: minOrder != null ? minOrder : null,
+        isActive: isActive ?? true,
+      },
     });
   }
 
@@ -128,9 +140,21 @@ export class ShippingZonesService implements OnModuleInit {
   }
 
   async update(id: string, updateShippingZoneDto: UpdateShippingZoneDto) {
+    const { name, countryId, stateId, cityId, priority, region, shippingMethod, rate, minOrder, isActive } = updateShippingZoneDto;
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (countryId !== undefined) updateData.countryId = countryId || null;
+    if (stateId !== undefined) updateData.stateId = stateId || null;
+    if (cityId !== undefined) updateData.cityId = cityId || null;
+    if (priority !== undefined) updateData.priority = priority;
+    if (region !== undefined) updateData.region = region || null;
+    if (shippingMethod !== undefined) updateData.shippingMethod = shippingMethod || null;
+    if (rate !== undefined) updateData.rate = rate != null ? rate : null;
+    if (minOrder !== undefined) updateData.minOrder = minOrder != null ? minOrder : null;
+    if (isActive !== undefined) updateData.isActive = isActive;
     return this.prisma.shippingZone.update({
       where: { id },
-      data: updateShippingZoneDto,
+      data: updateData,
     });
   }
 
