@@ -84,7 +84,7 @@ export default function ProductSection({
               <UnifiedProductCard
                 key={p.id}
                 product={p}
-                className="flex-shrink-0 w-44"
+                className="flex-shrink-0 w-[calc(50vw-14px)] max-w-[180px]"
               />
             ))}
           </div>
