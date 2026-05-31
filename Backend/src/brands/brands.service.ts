@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
+import { compressImage } from '../common/utils/image.util';
 
 @Injectable()
 export class BrandsService {
@@ -25,11 +26,15 @@ export class BrandsService {
     }
 
     try {
+      let logoData = dto.logo || null;
+      if (logoData && logoData.startsWith('data:image')) {
+        logoData = await compressImage(logoData, 300, 120, 80);
+      }
       return await this.prisma.brand.create({
         data: {
           name: dto.name,
           slug,
-          logo: dto.logo || null,
+          logo: logoData,
           description: dto.description || null,
           website: dto.website || null,
           isActive: dto.isActive !== undefined ? dto.isActive : true,
@@ -71,6 +76,9 @@ export class BrandsService {
     const data: any = { ...dto };
     if (dto.name && !dto.slug) {
       data.slug = this.slugify(dto.name);
+    }
+    if (data.logo && data.logo.startsWith('data:image')) {
+      data.logo = await compressImage(data.logo, 300, 120, 80);
     }
 
     return this.prisma.brand.update({ where: { id }, data });
