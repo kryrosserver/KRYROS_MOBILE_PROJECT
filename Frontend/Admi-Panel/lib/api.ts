@@ -280,3 +280,34 @@ export const deletePaymentLink = (id: string) =>
 // ── Direct Payment ─────────────────────────────────────────
 export const initiateDirectPayment = (data: Record<string, unknown>) =>
   api.post("/api/payments/direct", data);
+
+
+// ── Payment Config ──────────────────────────────────────────────────────────
+export const getPaymentMethods = () =>
+  api.get('/api/payment-config/methods');
+export const createPaymentMethod = (data: Record<string, unknown>) =>
+  api.post('/api/payment-config/methods', data);
+export const updatePaymentMethod = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/api/payment-config/methods/${id}`, data);
+export const deletePaymentMethod = (id: string) =>
+  api.delete(`/api/payment-config/methods/${id}`);
+export const reorderPaymentMethods = (orders: { id: string; sortOrder: number }[]) =>
+  api.patch('/api/payment-config/methods/reorder', { orders });
+
+export const getPaymentProviders = (methodId: string) =>
+  api.get(`/api/payment-config/providers/${methodId}`);
+export const createPaymentProvider = (data: Record<string, unknown>) =>
+  api.post('/api/payment-config/providers', data);
+export const updatePaymentProvider = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/api/payment-config/providers/${id}`, data);
+export const deletePaymentProvider = (id: string) =>
+  api.delete(`/api/payment-config/providers/${id}`);
+
+export const getPaymentNetworks = (providerId: string) =>
+  api.get(`/api/payment-config/networks/${providerId}`);
+export const createPaymentNetwork = (data: Record<string, unknown>) =>
+  api.post('/api/payment-config/networks', data);
+export const updatePaymentNetwork = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/api/payment-config/networks/${id}`, data);
+export const deletePaymentNetwork = (id: string) =>
+  api.delete(`/api/payment-config/networks/${id}`);
