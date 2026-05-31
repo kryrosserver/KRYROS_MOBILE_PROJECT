@@ -5,6 +5,7 @@ import { ArrowRight, Tag, Truck, ShieldCheck, Headphones, ShoppingCart, ChevronR
 import { fetchProducts, fetchCategories, API_BASE } from "@/lib/api";
 import type { Product, ApiCategory } from "@/lib/api";
 import { useCurrencyStore } from "@/store/currencyStore";
+import UnifiedProductCard from "@/components/UnifiedProductCard";
 
 const STEP_ICONS = [Search, ClipboardList, SendHorizonal, CheckCircle2];
 const FEATURE_ICONS = [Tag, Truck, ShieldCheck, Headphones];
@@ -179,49 +180,8 @@ export default function WholesalePage() {
           <p className="text-sm text-muted-foreground text-center py-8">No products available yet.</p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {wholesaleProducts.map((p, i) => (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07 }}
-              >
-                <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                  <div className="relative">
-                    {p.discount > 0 && (
-                      <span className="absolute top-2 left-2 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
-                        Save {p.discount}%
-                      </span>
-                    )}
-                    <button
-                      onClick={() => setLiked((l) => ({ ...l, [p.id]: !l[p.id] }))}
-                      className="absolute top-2 right-2 z-10 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm"
-                    >
-                      <Heart className={`w-3 h-3 ${liked[p.id] ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                    </button>
-                    {p.image ? (
-                      <img src={p.image} alt={p.name} className="w-full aspect-square object-cover bg-muted" />
-                    ) : (
-                      <div className="w-full aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">No image</div>
-                    )}
-                  </div>
-                  <div className="p-2.5">
-                    <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5 line-clamp-2">{p.name}</p>
-                    <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
-                    <p className="text-sm font-black text-foreground leading-tight">
-                      {format(p.price)}<span className="text-[9px] text-muted-foreground font-normal"> /unit</span>
-                    </p>
-                    <p className="text-[9px] text-muted-foreground mb-2">Min. Order: 5 units</p>
-                    <Link href={`/product/${p.id}`}>
-                      <button className="w-full flex items-center justify-center gap-1 py-1.5 border border-border rounded-lg text-[9px] font-bold text-foreground hover:bg-muted transition-all">
-                        <ShoppingCart className="w-3 h-3" />
-                        Add to Quote
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
+            {wholesaleProducts.map((p) => (
+              <UnifiedProductCard key={p.id} product={p} className="w-full" />
             ))}
           </div>
         )}
