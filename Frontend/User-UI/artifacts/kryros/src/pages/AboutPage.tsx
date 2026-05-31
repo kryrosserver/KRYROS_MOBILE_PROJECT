@@ -10,7 +10,7 @@ export default function AboutPage() {
           <p className="text-xs text-muted-foreground mt-0.5">Your Trusted Shopping Partner</p>
         </div>
         <div className="flex-shrink-0 ml-2">
-          <img src="/kryros-logo.svg" alt="KRYROS" className="w-20 h-20 rounded-2xl shadow-lg" />
+          <img src="/kryros-logo.png" alt="KRYROS" className="w-20 h-20 rounded-2xl shadow-lg" />
         </div>
       </div>
 
