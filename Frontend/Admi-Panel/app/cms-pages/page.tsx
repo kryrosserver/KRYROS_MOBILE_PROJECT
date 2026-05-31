@@ -787,7 +787,6 @@ function CMSContent() {
                   <ChevronRight size={16} color={textMuted} />
                 </div>
               )}
-              )}
             </div>
           )}
         </div>
