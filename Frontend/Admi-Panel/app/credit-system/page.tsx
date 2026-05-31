@@ -7,7 +7,7 @@ import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin
 import { useTheme } from '@/contexts/theme-context';
 import { CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getCreditAccounts } from '@/lib/api';
+import { getCreditAccounts, getCreditPlans, createCreditPlan, updateCreditPlan, deleteCreditPlan } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────
 type Credit = { id:string; customer:string; phone:string; limit:string; used:string; available:string; due:string; status:string; plan:string; outstanding:string };
@@ -68,6 +68,22 @@ function CreditContent() {
 
   // Plans state
   const [plans, setPlans] = useState<Plan[]>([]);
+
+  // Load credit plans from API
+  useEffect(() => {
+    getCreditPlans().then(r => {
+      const raw = Array.isArray(r.data) ? r.data : (r.data?.data || []);
+      setPlans(raw.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        months: p.duration,
+        interest: `${p.interestRate}%`,
+        minAmount: String(p.minimumAmount),
+        maxAmount: String(p.maximumAmount),
+        status: p.isActive !== false ? 'Active' : 'Inactive',
+      })));
+    }).catch(() => {});
+  }, []);
   const [addPlanOpen, setAddPlanOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<Plan|null>(null);
   const [deletePlan, setDeletePlan] = useState<Plan|null>(null);
@@ -87,15 +103,44 @@ function CreditContent() {
     setApplications(d => d.map(a => a.id===editApp.id ? {...a, status:appStatus} : a));
     toast.success('Application updated'); setEditApp(null);
   };
-  const handleAddPlan = () => {
+  const handleAddPlan = async () => {
     if (!planForm.name.trim()) { toast.error('Plan name required'); return; }
-    const p: Plan = { id:`PLN${String(Date.now()).slice(-3)}`, ...planForm, months:Number(planForm.months) };
-    setPlans(d => [...d, p]); toast.success('Plan added'); setAddPlanOpen(false);
+    try {
+      const interestVal = parseFloat(String(planForm.interest).replace('%', '')) || 0;
+      const resp = await createCreditPlan({
+        name: planForm.name,
+        duration: Number(planForm.months),
+        interestRate: interestVal,
+        minimumAmount: Number(planForm.minAmount) || 0,
+        maximumAmount: Number(planForm.maxAmount) || 999999,
+        isActive: planForm.status === 'Active',
+      });
+      const p: Plan = { id: resp.data?.id || `PLN${Date.now()}`, ...planForm, months: Number(planForm.months) };
+      setPlans(d => [...d, p]);
+      toast.success('Plan added'); setAddPlanOpen(false);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join(', ') : (msg || 'Failed to add plan'));
+    }
   };
-  const handleEditPlan = () => {
+  const handleEditPlan = async () => {
     if (!editPlan) return;
-    setPlans(d => d.map(p => p.id===editPlan.id ? {...p, ...planForm, months:Number(planForm.months)} : p));
-    toast.success('Plan updated'); setEditPlan(null);
+    try {
+      const interestVal = parseFloat(String(planForm.interest).replace('%', '')) || 0;
+      await updateCreditPlan(editPlan.id, {
+        name: planForm.name,
+        duration: Number(planForm.months),
+        interestRate: interestVal,
+        minimumAmount: Number(planForm.minAmount) || 0,
+        maximumAmount: Number(planForm.maxAmount) || 999999,
+        isActive: planForm.status === 'Active',
+      });
+      setPlans(d => d.map(p => p.id===editPlan.id ? {...p, ...planForm, months:Number(planForm.months)} : p));
+      toast.success('Plan updated'); setEditPlan(null);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join(', ') : (msg || 'Failed to update plan'));
+    }
   };
   const handleDeletePlan = () => {
     if (!deletePlan) return;
