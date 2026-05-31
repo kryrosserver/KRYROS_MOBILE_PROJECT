@@ -34,12 +34,12 @@ export default function UnifiedProductCard({
       onClick={() => (window.location.href = `/product/${product.id}`)}
     >
       {/* Image area */}
-      <div className="relative bg-[#f0f0f0] dark:bg-muted" style={{ height: 130 }}>
+      <div className="relative bg-[#f5f5f5] dark:bg-muted aspect-square overflow-hidden">
         {!imgErr && product.image ? (
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain p-[10%]"
             onError={() => setImgErr(true)}
           />
         ) : (
