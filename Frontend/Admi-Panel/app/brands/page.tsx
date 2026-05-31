@@ -139,12 +139,15 @@ function BrandsContent() {
         name: form.name,
         slug: form.slug || toSlug(form.name),
         logo: form.logoUrl || undefined,
+        country: form.country || undefined,
         description: form.description || undefined,
         website: form.website || undefined,
         isActive: form.status === 'Active',
       });
-      const newItem: Brand = { id: `BRD${String(Date.now()).slice(-3)}`, ...form, products: 0 };
-      setData(d => [...d, newItem]);
+      // Reload from API to get real numeric ID from backend
+      const refreshed = await getBrands({ limit: 200 });
+      const raw2: any[] = Array.isArray(refreshed.data?.data) ? refreshed.data.data : Array.isArray(refreshed.data) ? refreshed.data : [];
+      setData(raw2.map((b: any) => ({ id: String(b.id || ''), name: b.name || '', slug: b.slug || '', country: b.country || '', status: b.isActive !== false ? 'Active' : 'Inactive', website: b.website || '', description: b.description || '', logoUrl: b.logo || b.logoUrl || '', products: b._count?.products ?? 0 })));
       toast.success('Brand added'); setAddOpen(false);
     } catch (err: any) {
       const msg = err?.response?.data?.message;
@@ -157,10 +160,11 @@ function BrandsContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateBrand(editRow.id, {
+      await updateBrand(String(editRow.id), {
         name: form.name,
         slug: form.slug || undefined,
         logo: form.logoUrl || undefined,
+        country: form.country || undefined,
         description: form.description || undefined,
         website: form.website || undefined,
         isActive: form.status === 'Active',
@@ -217,6 +221,7 @@ function BrandsContent() {
       <FormField label="Slug (auto-generated)" value={form.slug} onChange={fp('slug')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="auto-generated" />
       <FormField label="Description" value={form.description} onChange={fp('description')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Brief description of this brand..." type="textarea" />
       <FormField label="Website URL" value={form.website} onChange={fp('website')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="https://..." />
+      <FormField label="Country of Origin" value={form.country} onChange={fp('country')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. USA, Germany, Japan" />
       <LogoUpload value={form.logoUrl} onChange={fp('logoUrl')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       <FormField label="Status" value={form.status} onChange={fp('status')} options={['Active', 'Inactive']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
     </>
