@@ -164,6 +164,7 @@ model Brand {
   description String?
   website     String?
   isActive    Boolean      @default(true)
+  country     String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   id          Int          @id @default(autoincrement())
@@ -425,12 +426,17 @@ model WholesaleAccount {
   address       String?
   contactPerson String?
   discountTier  Int              @default(1)
+  tierName      String?
+  city          String?
+  phone         String?
+  creditLimit   Decimal?         @db.Decimal(10, 2)
   status        WholesaleStatus  @default(PENDING)
   notes         String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   prices        WholesalePrice[]
+  deals         WholesaleDeal[]
 
   @@map("wholesale_accounts")
 }
@@ -871,12 +877,13 @@ model Country {
   lastRateUpdate DateTime?
   flag           String?
   status         Boolean                @default(true)
-  isDefault      Boolean                @default(false)
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
-  paymentMethods CountryPaymentMethod[]
-  shippingZones  ShippingZone[]
-  states         State[]
+  isDefault        Boolean                @default(false)
+  shippingEnabled  Boolean                @default(true)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  paymentMethods   CountryPaymentMethod[]
+  shippingZones    ShippingZone[]
+  states           State[]
 
   @@map("countries")
 }
@@ -918,6 +925,10 @@ model ShippingZone {
   stateId         String?
   cityId          String?
   priority        Int                      @default(0)
+  region          String?
+  shippingMethod  String?
+  rate            Decimal?                 @db.Decimal(10, 2)
+  minOrder        Decimal?                 @db.Decimal(10, 2)
   isActive        Boolean                  @default(true)
   createdAt       DateTime                 @default(now())
   updatedAt       DateTime                 @updatedAt
@@ -977,6 +988,43 @@ model PaymentMethod {
   countryMethods CountryPaymentMethod[]
 
   @@map("payment_methods")
+}
+
+
+model PickupStation {
+  id           String   @id @default(uuid())
+  name         String
+  address      String
+  city         String
+  state        String?
+  country      String   @default("Zambia")
+  latitude     Float?
+  longitude    Float?
+  phone        String?
+  email        String?
+  openingHours String?
+  description  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("pickup_stations")
+}
+
+model WholesaleDeal {
+  id          String            @id @default(uuid())
+  accountId   String?
+  title       String
+  description String?
+  discount    Decimal?          @db.Decimal(5, 2)
+  minOrder    Decimal?          @db.Decimal(10, 2)
+  validUntil  DateTime?
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  account     WholesaleAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@map("wholesale_deals")
 }
 
 enum UserRole {
