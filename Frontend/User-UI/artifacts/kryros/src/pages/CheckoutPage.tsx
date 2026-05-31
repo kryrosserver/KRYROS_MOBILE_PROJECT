@@ -96,6 +96,20 @@ export default function CheckoutPage() {
   const allCurrencies = useCurrencyStore((s) => s.currencies);
 
   const [step, setStep] = useState(1);
+  // ── Dynamic bank accounts from admin config ─────────────────────────────
+  const [bankProviders, setBankProviders] = useState<{ name:string; config?:{ accountName?:string; accountNumber?:string } }[]>([]);
+  useEffect(() => {
+    fetch(`${API_BASE}/api/payment-config/public`)
+      .then(r => r.json())
+      .then((data: any) => {
+        const arr: any[] = Array.isArray(data) ? data : (data?.data ?? []);
+        const bankMethod = arr.find((m: any) => m.type === "bank");
+        if (bankMethod?.providers) {
+          setBankProviders(bankMethod.providers.filter((p: any) => p.isEnabled));
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [ordered, setOrdered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -886,9 +900,18 @@ export default function CheckoutPage() {
                   </div>
                   <div className="space-y-3">
                     {[
-                      { label: "Bank Name", val: "Stanbic Bank Zambia" },
-                      { label: "Account Name", val: "KRYROS LIMITED" },
-                      { label: "Account Number", val: "91200012345667" },
+                      ...( bankProviders.length > 0
+                        ? bankProviders.flatMap((acc) => [
+                            { label: "Bank Name",      val: acc.name },
+                            { label: "Account Name",   val: acc.config?.accountName   || "" },
+                            { label: "Account Number", val: acc.config?.accountNumber || "" },
+                          ])
+                        : [
+                            { label: "Bank Name",      val: "Stanbic Bank Zambia" },
+                            { label: "Account Name",   val: "KRYROS LIMITED"      },
+                            { label: "Account Number", val: "91200012345667"      },
+                          ]
+                      ),
                       { label: "Reference", val: "#KRY-2024-00012345" },
                     ].map(({ label, val }) => (
                       <div key={label} className="flex items-center justify-between py-2 border-b border-border last:border-0">
