@@ -114,9 +114,10 @@ export default function BrandsPage() {
       <div style={{ padding: '24px', background: bg, minHeight: '100vh' }}>
         <PageHeader
           title="Brands"
-          description="Manage brands for product organisation and shop navigation"
-          icon={<Award size={20} color={accent} />}
-          action={{ label: 'Add Brand', onClick: openAdd }}
+          subtitle="Manage brands for product organisation and shop navigation"
+          icon={Award}
+          onAdd={openAdd}
+          addLabel="Add Brand"
         />
 
         <DataTable
