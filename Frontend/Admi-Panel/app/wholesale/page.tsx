@@ -107,11 +107,15 @@ function WholesaleContent() {
       await updateWholesaleAccount(editPartner.id, { tierName: pForm.tier, discountTier: tierNum, status: pForm.status==='Active'?'ACTIVE':pForm.status==='Pending'?'PENDING':'INACTIVE' });
       setPartners(d=>d.map(p=>p.id===editPartner.id?{...p,...pForm}:p));
       toast.success('Partner updated'); setEditPartner(null);
+    } catch { toast.error('Failed to update partner'); }
   };
-  const handleDeletePartner = () => {
+  const handleDeletePartner = async () => {
     if (!deletePartner) return;
-    setPartners(d=>d.filter(p=>p.id!==deletePartner.id));
-    toast.success('Partner removed'); setDeletePartner(null);
+    try {
+      await deleteWholesaleAccount(deletePartner.id);
+      setPartners(d=>d.filter(p=>p.id!==deletePartner.id));
+      toast.success('Partner removed'); setDeletePartner(null);
+    } catch { toast.error('Failed to delete partner'); }
   };
 
   // ── Deal handlers ──
