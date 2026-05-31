@@ -72,7 +72,15 @@ function CategoriesContent() {
     if (!form.name.trim()) { toast.error('Category name is required'); return; }
     setLoading(true);
     try {
-      await createCategory(form);
+      await createCategory({
+        name: form.name,
+        slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        description: (form as any).description || undefined,
+        image: (form as any).imageUrl || undefined,
+        parentId: (form as any).parent && (form as any).parent !== '-' ? (form as any).parent : undefined,
+        isActive: (form as any).status === 'Active',
+        showOnHomepage: (form as any).showOnHome === 'Yes',
+      });
       const newItem: Category = { id: `CAT${String(Date.now()).slice(-3)}`, ...form, products: 0, showOnHome: form.showOnHome === 'Yes' };
       setData(d => [...d, newItem]);
       toast.success('Category added'); setAddOpen(false);
@@ -84,7 +92,15 @@ function CategoriesContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateCategory(editRow.id, form);
+      await updateCategory(editRow.id, {
+        name: form.name,
+        slug: form.slug || undefined,
+        description: (form as any).description || undefined,
+        image: (form as any).imageUrl || undefined,
+        parentId: (form as any).parent && (form as any).parent !== '-' ? (form as any).parent : undefined,
+        isActive: (form as any).status === 'Active',
+        showOnHomepage: (form as any).showOnHome === 'Yes',
+      });
       setData(d => d.map(c => c.id === editRow.id ? { ...c, ...form, showOnHome: form.showOnHome === 'Yes' } : c));
       toast.success('Category updated'); setEditRow(null);
     } catch { toast.error('Failed to update category — check your API connection'); }
