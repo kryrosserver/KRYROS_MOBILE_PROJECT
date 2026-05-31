@@ -142,10 +142,15 @@ function CreditContent() {
       toast.error(Array.isArray(msg) ? msg.join(', ') : (msg || 'Failed to update plan'));
     }
   };
-  const handleDeletePlan = () => {
+  const handleDeletePlan = async () => {
     if (!deletePlan) return;
-    setPlans(d => d.filter(p => p.id!==deletePlan.id));
-    toast.success('Plan deleted'); setDeletePlan(null);
+    try {
+      await deleteCreditPlan(deletePlan.id);
+      setPlans(d => d.filter(p => p.id!==deletePlan.id));
+      toast.success('Plan deleted'); setDeletePlan(null);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to delete plan');
+    }
   };
 
   // ── Status badge helpers ──
