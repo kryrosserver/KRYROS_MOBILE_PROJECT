@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
       <h1 className="text-2xl font-black text-foreground mb-0.5">Privacy Policy</h1>
-      <p className="text-xs text-muted-foreground mb-3">Last updated: May 20, 2024</p>
+      <p className="text-xs text-muted-foreground mb-3">Last updated: May 20, 2026</p>
       <p className="text-xs text-muted-foreground leading-relaxed mb-5">
         At KRYROS, we respect your privacy and are committed to protecting your personal data.
       </p>
