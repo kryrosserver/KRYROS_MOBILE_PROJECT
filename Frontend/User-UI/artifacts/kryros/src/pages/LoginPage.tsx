@@ -65,7 +65,7 @@ export default function LoginPage() {
 
           <div className="relative bg-card px-6 pt-6 pb-5 overflow-hidden border-b border-border">
             <Link href="/">
-              <img src="/kryros-logo.svg" alt="KRYROS" className="h-12 w-12 cursor-pointer" />
+              <img src="/kryros-logo.png" alt="KRYROS" className="h-12 w-12 cursor-pointer" />
             </Link>
             <h1 className="text-2xl font-black text-foreground mt-4 mb-1 whitespace-nowrap">Welcome Back</h1>
             <p className="text-xs text-muted-foreground">Login to continue shopping with KRYROS</p>
