@@ -316,7 +316,7 @@ function ProductsContent() {
       </div>
 
       {sectionLabel('Specifications')}
-      <FormField label="Specifications" placeholder="One per line: Key: Value\nExample:\nRAM: 8GB\nStorage: 256GB\nBattery: 5000mAh\n\nFor clothes:\nMaterial: Cotton\nSize: XL" value={form.specifications} onChange={fp('specifications')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Color: Black | RAM: 8GB | Storage: 256GB | Screen: 6.7 inch" type="textarea" />
+      <FormField label="Specifications" value={form.specifications} onChange={fp('specifications')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Color: Black | RAM: 8GB | Storage: 256GB | Screen: 6.7 inch" type="textarea" />
 
       {sectionLabel('Tags')}
       <FormField label="Tags (comma-separated)" value={form.tags} onChange={fp('tags')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. apple, iphone, smartphone, 5G" />
