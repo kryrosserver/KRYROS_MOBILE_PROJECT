@@ -110,7 +110,7 @@ export default function CheckoutPage() {
   const [firstName, setFirstName] = useState(authUser?.firstName ?? "");
   const [lastName, setLastName] = useState(authUser?.lastName ?? "");
   const [email, setEmail] = useState(authUser?.email ?? "");
-  const [phone, setPhone] = useState(authUser?.phone ?? "");
+  const [phone, setPhone] = useState("");
 
   const [country, setCountry] = useState("Zambia");
   const [state, setState] = useState("");
@@ -802,7 +802,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center gap-2 border border-border rounded-2xl px-3.5 py-3 bg-background focus-within:ring-2 focus-within:ring-primary/30">
                       <Smartphone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <input value={mmPhone} onChange={(e) => setMmPhone(e.target.value)}
-                        placeholder="+260 97 123 4567" type="tel"
+                        placeholder="e.g. +260 97 000 0000" type="tel"
                         className="flex-1 text-sm text-foreground outline-none bg-transparent" />
                     </div>
                   </div>
