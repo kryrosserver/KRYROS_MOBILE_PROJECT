@@ -16,6 +16,7 @@ import {
   createCmsHomepageSection, updateCmsHomepageSection, deleteCmsHomepageSection,
   updateCmsSection, createCmsSection, deleteCmsSection,
   getCmsSiteConfigs, upsertCmsSiteConfig,
+  getBrands,
 } from '@/lib/api';
 
 const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; options?: string[]; icon?: string }>> = {
@@ -398,14 +399,22 @@ function CMSContent() {
           return { id: p.id, title: p.title || p.slug, slug: p.slug, lastEdited: p.updatedAt ? String(p.updatedAt).split('T')[0] : '', status: p.status || 'Published', sections: secs };
         }));
         if (cmsPages.length > 0) setData(cmsPages);
-        // Load trusted brands from site-config
+        // Load trusted brands from site-config; auto-seed from brands API on first run
         try {
           const cfgRes: any = await getCmsSiteConfigs().catch(() => ({ data: [] }));
           const configs: any[] = Array.isArray(cfgRes.data) ? cfgRes.data : Array.isArray(cfgRes?.data?.data) ? cfgRes.data.data : [];
           const tb = configs.find((c: any) => c.key === 'trusted-brands');
           if (tb?.value) {
             const parsed = typeof tb.value === 'string' ? JSON.parse(tb.value) : tb.value;
-            if (Array.isArray(parsed)) setTrustedBrands(parsed);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setTrustedBrands(parsed);
+            } else {
+              // Key exists but empty — try seeding from brands API
+              await seedTrustedBrandsFromAPI();
+            }
+          } else {
+            // Key doesn't exist yet — auto-seed from brands API
+            await seedTrustedBrandsFromAPI();
           }
         } catch {}
       } catch {}
@@ -506,6 +515,32 @@ function CMSContent() {
   const [tbSaving, setTbSaving] = useState(false);
   const [tbDeleteIdx, setTbDeleteIdx] = useState<number | null>(null);
   const toTbSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  // ── Seed trusted brands from existing brands API ────────────────────────────
+  const seedTrustedBrandsFromAPI = async () => {
+    try {
+      const res: any = await getBrands().catch(() => null);
+      if (!res) return;
+      const brandsData: any[] = Array.isArray(res.data) ? res.data
+        : Array.isArray(res?.data?.data) ? res.data.data
+        : Array.isArray(res) ? res : [];
+      if (brandsData.length === 0) return;
+      const seeded = brandsData
+        .filter((b: any) => b.isActive !== false)
+        .map((b: any) => ({
+          id: 'tb-' + String(b.id ?? b._id ?? Date.now()),
+          name: String(b.name ?? ''),
+          logo: String(b.logo ?? b.imageUrl ?? b.image ?? ''),
+          slug: String(b.slug ?? ''),
+        }));
+      if (seeded.length > 0) {
+        // Save to CMS site-config so it persists
+        await upsertCmsSiteConfig('trusted-brands', seeded);
+        setTrustedBrands(seeded);
+        toast.success(`Imported ${seeded.length} brands to Trusted Brands`);
+      }
+    } catch { /* silent — user can add manually */ }
+  };
 
   // ── Trusted Brands handlers ──────────────────────────────────────────────────────────────────────────
   const saveTrustedBrands = async (brands: TrustedBrand[]) => {
