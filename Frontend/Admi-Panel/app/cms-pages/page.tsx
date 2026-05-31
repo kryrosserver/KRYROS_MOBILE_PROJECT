@@ -346,7 +346,7 @@ function CMSContent() {
   const accent = '#1FA89A';
 
   const [data, setData] = useState<CmsPage[]>(INITIAL_PAGES);
-  type View = 'pages' | 'sections' | 'items';
+  type View = 'pages' | 'sections' | 'items' | 'trusted-brands';
 
   // ── Load real data from API on mount ─────────────────────────────────
   useEffect(() => {
@@ -487,7 +487,8 @@ function CMSContent() {
   const openPage = (pageId: string) => { setSelectedPageId(pageId); setView('sections'); };
   const openSection = (sectionName: string) => { setSelectedSectionName(sectionName); setView('items'); };
   const goBack = () => {
-    if (view === 'items') { setView('sections'); setSelectedSectionName(null); }
+    if (view === 'trusted-brands') { setView('sections'); }
+    else if (view === 'items') { setView('sections'); setSelectedSectionName(null); }
     else if (view === 'sections') { setView('pages'); setSelectedPageId(null); }
   };
 
@@ -514,7 +515,6 @@ function CMSContent() {
   const [tbForm, setTbForm] = useState({ name: '', logo: '', slug: '' });
   const [tbSaving, setTbSaving] = useState(false);
   const [tbDeleteIdx, setTbDeleteIdx] = useState<number | null>(null);
-  const [tbExpanded, setTbExpanded] = useState(false);
   const toTbSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   // ── Seed trusted brands from existing brands API ────────────────────────────
@@ -769,58 +769,78 @@ function CMSContent() {
               })}
               {/* ── Trusted Brands Section Card (homepage only) ── */}
               {_isHome(selectedPage.id) && (
-                <div style={{ background: card, border: `1px solid ${tbExpanded ? accent : border}`, borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.15s' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', cursor: 'pointer' }}
-                    onClick={() => setTbExpanded(e => !e)}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = accent)}
-                    onMouseLeave={e => (e.currentTarget.style.borderColor = tbExpanded ? accent : border)}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '11px', background: 'rgba(31,168,154,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Award size={18} color={accent} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: textMain, fontSize: '14px' }}>Trusted Brands</div>
-                      <div style={{ fontSize: '12px', color: textMuted, marginTop: '3px', display: 'flex', gap: '10px' }}>
-                        <span>{trustedBrands.length} {trustedBrands.length === 1 ? 'item' : 'items'}</span>
-                        {trustedBrands.length > 0 && <span style={{ color: accent, fontWeight: 600 }}>{trustedBrands.length} active</span>}
-                        {trustedBrands.length > 0 && <span style={{ color: '#6366f1' }}>has logo</span>}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                      <button onClick={e => { e.stopPropagation(); setTbForm({ name: '', logo: '', slug: '' }); setTbEditIdx(null); setTbOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', paddingInline: '10px', borderRadius: '7px', background: accent, border: 'none', cursor: 'pointer', fontSize: '11.5px', fontWeight: 600, color: 'white', fontFamily: 'var(--font-inter)' }}>
-                        <Plus size={11} /> Add
-                      </button>
-                      <ChevronDown size={16} color={textMuted} style={{ transform: tbExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                <div style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                  onClick={() => setView('trusted-brands')}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = accent)}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = border)}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '11px', background: 'rgba(31,168,154,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Award size={18} color={accent} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, color: textMain, fontSize: '14px' }}>Trusted Brands</div>
+                    <div style={{ fontSize: '12px', color: textMuted, marginTop: '3px', display: 'flex', gap: '10px' }}>
+                      <span>{trustedBrands.length} {trustedBrands.length === 1 ? 'item' : 'items'}</span>
+                      {trustedBrands.length > 0 && <span style={{ color: accent, fontWeight: 600 }}>{trustedBrands.length} active</span>}
+                      {trustedBrands.length > 0 && <span style={{ color: '#6366f1' }}>has logo</span>}
                     </div>
                   </div>
-                  {tbExpanded && (
-                    <div style={{ borderTop: `1px solid ${border}`, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {trustedBrands.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '16px', color: textMuted, fontSize: '12px' }}>No trusted brands yet. Click &quot;Add&quot; above to add homepage logo entries.</div>
-                      ) : (
-                        trustedBrands.map((brand, idx) => (
-                          <div key={brand.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: surface, border: `1px solid ${border}`, borderRadius: '9px', padding: '10px 12px' }}>
-                            <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: isDark ? '#1e2a35' : '#f0f9ff', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                              {brand.logo ? <img src={brand.logo} alt={brand.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} onError={(e: any) => { e.target.style.display = 'none'; }} /> : <Award size={14} color={accent} />}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, fontSize: '13px', color: textMain }}>{brand.name}</div>
-                              <div style={{ fontSize: '11px', color: accent, fontFamily: 'monospace' }}>/shop#brand-{brand.slug}</div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                              <button onClick={() => { setTbForm({ name: brand.name, logo: brand.logo, slug: brand.slug }); setTbEditIdx(idx); setTbOpen(true); }} style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(31,168,154,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Edit size={12} color={accent} />
-                              </button>
-                              <button onClick={() => setTbDeleteIdx(idx)} style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(239,68,68,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Trash2 size={12} color='#ef4444' />
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
+                  <ChevronRight size={16} color={textMuted} />
                 </div>
               )}
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── TRUSTED BRANDS VIEW ── */}
+      {view === 'trusted-brands' && selectedPage && (
+        <div>
+          <Breadcrumb />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', color: textMain, fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-inter)', marginBottom: '10px' }}>
+                <ChevronLeft size={14} /> Back to {selectedPage.title}
+              </button>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: textMain, margin: 0 }}>Trusted Brands</h2>
+              <p style={{ fontSize: '13px', color: textMuted, margin: '3px 0 0' }}>Homepage logo section — {trustedBrands.length} brand{trustedBrands.length !== 1 ? 's' : ''}</p>
+            </div>
+            <button onClick={() => { setTbForm({ name: '', logo: '', slug: '' }); setTbEditIdx(null); setTbOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,#1FA89A,#27B9AF)', border: 'none', borderRadius: '9px', color: 'white', fontSize: '13.5px', fontWeight: 600, padding: '9px 16px', cursor: 'pointer', fontFamily: 'var(--font-inter)', boxShadow: '0 4px 12px rgba(31,168,154,0.25)' }}>
+              <Plus size={15} /> Add Brand
+            </button>
+          </div>
+          {trustedBrands.length === 0 ? (
+            <div style={{ padding: '48px 20px', background: card, border: `1px dashed ${border}`, borderRadius: '12px', textAlign: 'center', color: textMuted }}>
+              <Award size={32} color={textMuted} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
+              <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>No trusted brands yet</div>
+              <div style={{ fontSize: '12.5px' }}>Click &quot;Add Brand&quot; to add homepage logo entries.</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {trustedBrands.map((brand, idx) => (
+                <div key={brand.id} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', transition: 'border-color 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = accent)}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = border)}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: isDark ? '#1e2a35' : '#f0f9ff', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                    {brand.logo ? <img src={brand.logo} alt={brand.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} onError={(e: any) => { e.target.style.display = 'none'; }} /> : <Award size={18} color={accent} />}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, color: textMain, fontSize: '14px' }}>{brand.name}</div>
+                    <div style={{ fontSize: '12px', color: textMuted, marginTop: '3px', display: 'flex', gap: '10px' }}>
+                      <code style={{ fontSize: '11px', color: accent, background: 'rgba(31,168,154,0.1)', padding: '1px 6px', borderRadius: '4px' }}>/shop#brand-{brand.slug}</code>
+                      <span style={{ color: '#6366f1' }}>has logo</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    <button onClick={() => { setTbForm({ name: brand.name, logo: brand.logo, slug: brand.slug }); setTbEditIdx(idx); setTbOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '28px', paddingInline: '10px', borderRadius: '7px', background: 'rgba(31,168,154,0.1)', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontWeight: 600, color: accent, fontFamily: 'var(--font-inter)' }}>
+                      <Edit size={11} /> Edit
+                    </button>
+                    <button onClick={() => setTbDeleteIdx(idx)} style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(239,68,68,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trash2 size={12} color='#ef4444' />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
