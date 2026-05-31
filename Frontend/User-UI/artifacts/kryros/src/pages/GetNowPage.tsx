@@ -171,7 +171,7 @@ export default function GetNowPage() {
             <span className="text-xs text-primary font-semibold cursor-pointer">View All</span>
           </Link>
         </div>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 px-3">
           {loading
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex-shrink-0 w-[148px] bg-card border border-border rounded-2xl overflow-hidden animate-pulse">
@@ -187,7 +187,7 @@ export default function GetNowPage() {
                 <UnifiedProductCard
                   key={p.id}
                   product={p}
-                  className="flex-shrink-0 w-[calc(50vw-14px)] max-w-[180px]"
+                  className="flex-shrink-0 w-[calc(50vw-16px)]"
                 />
               ))}
         </div>
