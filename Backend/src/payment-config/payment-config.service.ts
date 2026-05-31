@@ -79,7 +79,7 @@ export class PaymentConfigService {
     paymentMethodId: string;
     name: string;
     description?: string;
-    config?: Record<string, unknown>;
+    config?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   }) {
     const last = await this.prisma.checkoutProvider.findFirst({
       where: { checkoutMethodId: data.paymentMethodId },
@@ -90,7 +90,7 @@ export class PaymentConfigService {
         checkoutMethodId: data.paymentMethodId,
         name: data.name,
         description: data.description,
-        config: data.config,
+        config: data.config as any,
         sortOrder: (last?.sortOrder ?? -1) + 1,
       },
       include: { networks: true },
@@ -102,14 +102,14 @@ export class PaymentConfigService {
     data: Partial<{
       name: string;
       description: string;
-      config: Record<string, unknown>;
+      config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
       sortOrder: number;
       isEnabled: boolean;
     }>,
   ) {
     return this.prisma.checkoutProvider.update({
       where: { id },
-      data,
+      data: { ...data, config: data.config as any },
       include: { networks: true },
     });
   }
