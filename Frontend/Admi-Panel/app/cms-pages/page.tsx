@@ -655,82 +655,27 @@ function CMSContent() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {selectedPage.sections.map((sec, idx) => {
-                const isExp = expandedSections.has(sec.name);
                 const active = sec.items.filter(i => i.status === 'Active').length;
-                const hasMedia = sectionHasMedia(sec.name);
                 return (
-                  <div key={idx} style={{ background: card, border: `1px solid ${isExp ? accent + '70' : border}`, borderRadius: '14px', overflow: 'hidden', transition: 'border-color 0.2s' }}>
-                    {/* Header — click to expand/collapse */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', cursor: 'pointer' }}
-                      onClick={() => toggleSection(sec.name)}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: isExp ? 'rgba(31,168,154,0.15)' : 'rgba(31,168,154,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {iconMap(getSectionIconType(sec.name))}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, color: textMain, fontSize: '14px' }}>{sec.name}</div>
-                        <div style={{ fontSize: '12px', color: textMuted, marginTop: '2px', display: 'flex', gap: '10px' }}>
-                          <span>{sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}</span>
-                          {sec.items.length > 0 && <span style={{ color: accent, fontWeight: 600 }}>{active} active</span>}
-                          {hasMedia && <span style={{ color: '#6366f1' }}>has media</span>}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                        <button onClick={() => { setSelectedSectionName(sec.name); setAddingItem(true); }}
-                          style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '26px', paddingInline: '9px', borderRadius: '7px', background: 'rgba(31,168,154,0.1)', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: accent, fontFamily: 'var(--font-inter)' }}>
-                          <Plus size={10} /> Add
-                        </button>
-                        <button onClick={() => { if (confirm('Remove "' + sec.name + '" section?')) handleDeleteSection(selectedPage.id, sec.name); }}
-                          style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                          <Trash2 size={11} color='#ef4444' />
-                        </button>
-                        <ChevronDown size={15} color={textMuted} style={{ transition: 'transform 0.2s', transform: isExp ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                  <div key={idx} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                    onClick={() => openSection(sec.name)} onMouseEnter={e => (e.currentTarget.style.borderColor = accent)} onMouseLeave={e => (e.currentTarget.style.borderColor = border)}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '11px', background: 'rgba(31,168,154,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {iconMap(getSectionIconType(sec.name))}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, color: textMain, fontSize: '14px' }}>{sec.name}</div>
+                      <div style={{ fontSize: '12px', color: textMuted, marginTop: '3px', display: 'flex', gap: '10px' }}>
+                        <span>{sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}</span>
+                        {sec.items.length > 0 && <span style={{ color: accent, fontWeight: 600 }}>{active} active</span>}
+                        {sectionHasMedia(sec.name) && <span style={{ color: '#6366f1' }}>has media</span>}
                       </div>
                     </div>
-                    {/* Inline items when expanded */}
-                    {isExp && (
-                      <div style={{ borderTop: `1px solid ${border}`, padding: '12px 14px' }}>
-                        {sec.items.length === 0 ? (
-                          <div style={{ textAlign: 'center', padding: '20px', color: textMuted, fontSize: '13px' }}>
-                            No items yet — click <strong>Add</strong> above.
-                          </div>
-                        ) : (
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '10px' }}>
-                            {sec.items.map(item => (
-                              <div key={item.id} style={{ background: surface, border: `1px solid ${border}`, borderRadius: '11px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                                {hasMedia && (
-                                  <div style={{ height: '110px', background: isDark ? '#101826' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                                    {item.mediaUrl
-                                      ? <img src={item.mediaUrl} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                                      : <ImageIcon size={22} color={textMuted} style={{ opacity: 0.3 }} />
-                                    }
-                                    <span style={{ position: 'absolute', top: 5, right: 5, padding: '2px 6px', borderRadius: '20px', fontSize: '10px', fontWeight: 700, background: item.status === 'Active' ? 'rgba(31,168,154,0.9)' : 'rgba(100,116,139,0.85)', color: 'white' }}>{item.status}</span>
-                                  </div>
-                                )}
-                                <div style={{ padding: '8px 10px', flex: 1 }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 700, color: textMain, lineHeight: 1.3 }}>{getItemPreview(sec.name, item.content)}</div>
-                                  {getItemSub(item.content) && <div style={{ fontSize: '11px', color: textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getItemSub(item.content)}</div>}
-                                  {!hasMedia && <span style={{ display: 'inline-block', marginTop: '4px', padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, background: item.status === 'Active' ? 'rgba(31,168,154,0.12)' : 'rgba(100,116,139,0.12)', color: item.status === 'Active' ? accent : '#8E9AAF' }}>{item.status}</span>}
-                                </div>
-                                <div style={{ display: 'flex', gap: '5px', padding: '0 9px 9px' }}>
-                                  <button onClick={() => { setSelectedSectionName(sec.name); setEditingItem(item); }}
-                                    style={{ flex: 1, height: '27px', borderRadius: '7px', background: 'rgba(31,168,154,0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: accent, fontFamily: 'var(--font-inter)' }}>
-                                    <Edit size={11} /> Edit
-                                  </button>
-                                  <button onClick={() => handleToggleItem(item.id, item.status, sec.name, selectedPageId || undefined)}
-                                    style={{ flex: 1, height: '27px', borderRadius: '7px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-inter)', background: item.status === 'Active' ? 'rgba(100,116,139,0.1)' : 'rgba(31,168,154,0.1)', color: item.status === 'Active' ? '#8E9AAF' : accent }}>
-                                    {item.status === 'Active' ? 'Deactivate' : 'Activate'}
-                                  </button>
-                                  <button onClick={() => { setSelectedSectionName(sec.name); setDeletingItem(item); }}
-                                    style={{ width: '27px', height: '27px', borderRadius: '7px', background: 'rgba(239,68,68,0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-                                    <Trash2 size={11} color='#ef4444' />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                      <button onClick={e => { e.stopPropagation(); if (confirm('Remove "' + sec.name + '" section?')) handleDeleteSection(selectedPage.id, sec.name); }} style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <Trash2 size={12} color="#ef4444" />
+                      </button>
+                      <ChevronRight size={16} color={textMuted} />
+                    </div>
                   </div>
                 );
               })}
