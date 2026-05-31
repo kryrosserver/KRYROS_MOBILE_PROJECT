@@ -309,7 +309,7 @@ export default function DashboardPage() {
               <p className="px-3 py-1 text-[10px] text-muted-foreground hover:text-primary cursor-pointer transition-colors">{label}</p>
             </Link>
           ))}
-          <p className="px-3 pt-1 text-[9px] text-muted-foreground/60">&copy; {new Date().getFullYear()} KRYROS. All rights reserved.</p>
+          <p className="px-3 pt-1 text-[9px] text-muted-foreground/60">© 2026 KRYROS. All Rights Reserved.</p>
         </div>
       </div>
     </div>
