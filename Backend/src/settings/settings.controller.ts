@@ -26,11 +26,23 @@ export class SettingsController {
     return this.settingsService.getShippingConfig();
   }
 
+  @Put()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Bulk update settings (Admin only)' })
+  async updateBulk(@Body() data: Record<string, string>) {
+    await Promise.all(
+      Object.entries(data).map(([key, value]) => this.settingsService.update(key, String(value)))
+    );
+    return { success: true, message: 'Settings updated' };
+  }
+
   @Put(':key')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a setting (Admin only)' })
+  @ApiOperation({ summary: 'Update a setting by key (Admin only)' })
   update(@Param('key') key: string, @Body('value') value: string) {
     return this.settingsService.update(key, value);
   }
