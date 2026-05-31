@@ -278,6 +278,21 @@ export default function PayPage() {
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "260969597029";
   const [showProviderDrop, setShowProviderDrop] = useState(false);
   const [payRef, setPayRef] = useState(() => "PAY-" + Date.now().toString(36).toUpperCase().slice(-8));
+  // ── Dynamic payment config ──────────────────────────────────────────────
+  const [bankProviders, setBankProviders] = useState<{ name:string; config?:{ accountName?:string; accountNumber?:string } }[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/payment-config/public`)
+      .then(r => r.json())
+      .then((data: any) => {
+        const arr: any[] = Array.isArray(data) ? data : (data?.data ?? []);
+        const bankMethod = arr.find((m: any) => m.type === "bank");
+        if (bankMethod?.providers) {
+          setBankProviders(bankMethod.providers.filter((p: any) => p.isEnabled));
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [payError, setPayError] = useState<string | null>(null);
   const [payLoading, setPayLoading] = useState(false);
   const [payStatus, setPayStatus] = useState<"idle" | "sending" | "waiting" | "paid" | "failed">("idle");
@@ -785,9 +800,18 @@ export default function PayPage() {
                   </div>
                   <div className="space-y-3">
                     {[
-                      { label: "Bank Name", val: "Stanbic Bank Zambia" },
-                      { label: "Account Name", val: "KRYROS LIMITED" },
-                      { label: "Account Number", val: "91200012345667" },
+                      ...( bankProviders.length > 0
+                        ? bankProviders.flatMap((acc) => [
+                            { label: "Bank Name",      val: acc.name },
+                            { label: "Account Name",   val: acc.config?.accountName   || "" },
+                            { label: "Account Number", val: acc.config?.accountNumber || "" },
+                          ])
+                        : [
+                            { label: "Bank Name",      val: "Stanbic Bank Zambia" },
+                            { label: "Account Name",   val: "KRYROS LIMITED"       },
+                            { label: "Account Number", val: "91200012345667"       },
+                          ]
+                      ),
                       { label: "Reference", val: payRef },
                     ].map(({ label, val }) => (
                       <div key={label} className="flex items-center justify-between py-2 border-b border-border last:border-0">
