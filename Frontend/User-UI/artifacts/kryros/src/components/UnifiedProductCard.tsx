@@ -14,6 +14,22 @@ interface UnifiedProductCardProps {
   badge?: string;
 }
 
+/** Strip specs that are empty JSON artifacts like "[]" or blank strings */
+function validSpecs(specs: string | undefined | null): string {
+  if (!specs) return "";
+  const t = specs.trim();
+  if (t === "" || t === "[]" || t === "{}" || t === "null") return "";
+  return t;
+}
+
+/** Only show description if it has real content */
+function validDescription(desc: string | undefined | null): string {
+  if (!desc) return "";
+  const t = desc.trim();
+  if (t === "" || t === "[]" || t === "null") return "";
+  return t;
+}
+
 export default function UnifiedProductCard({
   product,
   className = "w-full",
@@ -26,13 +42,15 @@ export default function UnifiedProductCard({
   const wishlisted = isWishlisted(product.id);
 
   const monthlyText = product.creditMessage || `${format(product.price / 12)}/mo`;
+  const specs = validSpecs(product.specs);
+  const description = validDescription(product.description);
 
   return (
     <div
       className={`${className} bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow flex flex-col`}
       onClick={() => (window.location.href = `/product/${product.id}`)}
     >
-      {/* ── Image: aspect-[4/3] keeps cards shorter & wider ── */}
+      {/* ── Image ── */}
       <div className="relative bg-[#f5f5f5] dark:bg-muted aspect-[4/3] overflow-hidden">
         {!imgErr && product.image ? (
           <img
@@ -47,28 +65,21 @@ export default function UnifiedProductCard({
           </div>
         )}
 
-        {/* Discount badge */}
         {product.discount > 0 && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-lg z-10">
             -{product.discount}%
           </span>
         )}
-
-        {/* Wholesale badge */}
         {product.isWholesaleOnly && (
           <span className="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-lg z-10">
             Wholesale
           </span>
         )}
-
-        {/* Section badge */}
         {badge && (
           <span className="absolute bottom-2 left-2 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-lg z-10">
             {badge}
           </span>
         )}
-
-        {/* Wishlist */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -84,15 +95,15 @@ export default function UnifiedProductCard({
       {/* ── Info: flex-col flex-1 so buttons always pin to bottom ── */}
       <div className="p-2.5 flex flex-col flex-1">
 
-        {/* Name — min-h-[2rem] reserves 2-line height for equal spacing */}
-        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 min-h-[2rem] mb-0.5">
+        {/* Name — NO min-h, just natural height */}
+        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 mb-0.5">
           {product.name}
         </h3>
 
-        {/* Specs — always rendered to keep consistent height */}
-        <p className="text-[10px] text-muted-foreground truncate mb-1 min-h-[0.875rem]">
-          {product.specs || ""}
-        </p>
+        {/* Specs — only rendered if real data exists (filters out "[]" etc.) */}
+        {specs && (
+          <p className="text-[10px] text-muted-foreground truncate mb-1">{specs}</p>
+        )}
 
         {/* Price + old price */}
         <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0 mb-1">
@@ -102,13 +113,8 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* ── Rating + Stock on SAME ROW — stars IN FRONT of badge ──
-            [⭐⭐⭐⭐⭐ (1)]  [Out of Stock / In Stock]
-            min-h keeps this row consistent even with no rating
-        ─────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-1 mb-1.5 min-h-[1.25rem]">
-
-          {/* Stars — only if rating exists, always BEFORE the badge */}
+        {/* Rating + Stock — stars IN FRONT of badge, only if rating exists */}
+        <div className="flex items-center gap-1 mb-1.5">
           {product.rating > 0 && !product.isWholesaleOnly && (
             <div className="flex items-center gap-0.5 flex-shrink-0">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -128,7 +134,6 @@ export default function UnifiedProductCard({
             </div>
           )}
 
-          {/* Stock badge — normal & credit products */}
           {!product.isWholesaleOnly && (
             product.stock > 0 ? (
               <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
@@ -140,15 +145,11 @@ export default function UnifiedProductCard({
               </span>
             )
           )}
-
-          {/* Credit monthly price */}
           {product.allowCredit && (
             <span className="text-[10px] text-primary font-bold whitespace-nowrap truncate">
               {monthlyText}
             </span>
           )}
-
-          {/* Wholesale price + min order */}
           {product.isWholesaleOnly && (
             <>
               {product.wholesalePrice && (
@@ -164,16 +165,15 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* ── Description — fills the empty space between stock row and buttons.
-            Always rendered with min-h so all cards stay the same height.
-            Shows up to 2 lines of product description text.
-        ─────────────────────────────────────────────────────── */}
-        <p className="text-[10px] text-muted-foreground leading-snug line-clamp-2 min-h-[2rem] mb-1">
-          {product.description || ""}
-        </p>
+        {/* Description — only shown if real content exists, NO reserved space */}
+        {description && (
+          <p className="text-[10px] text-muted-foreground leading-snug line-clamp-2 mb-1">
+            {description}
+          </p>
+        )}
 
-        {/* ── Buttons — mt-auto pins them to bottom, no dead space below ── */}
-        <div className="flex items-center gap-1.5 mt-auto">
+        {/* Buttons — mt-auto pins to bottom, handles height differences cleanly */}
+        <div className="flex items-center gap-1.5 mt-auto pt-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
