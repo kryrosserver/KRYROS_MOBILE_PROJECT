@@ -52,7 +52,15 @@ function ReviewsContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateReview(editRow.id, { status: editStatus });
+      // Map admin status labels to backend DTO fields
+      const statusMap: Record<string, { isApproved?: boolean; isFeatured?: boolean }> = {
+        'Approved': { isApproved: true },
+        'Rejected': { isApproved: false },
+        'Featured': { isApproved: true, isFeatured: true },
+        'Pending': { isApproved: false, isFeatured: false },
+      };
+      const payload = statusMap[editStatus] ?? { isApproved: editStatus !== 'Rejected' };
+      await updateReview(editRow.id, payload);
       setData(d => d.map(r => r.id === editRow.id ? { ...r, status: editStatus } : r));
       toast.success('Review status updated');
       setEditRow(null);
