@@ -28,6 +28,7 @@ import { ShippingZonesModule } from './shipping-zones/shipping-zones.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
+import { PaymentConfigModule } from './payment-config/payment-config.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { NewsletterModule } from './newsletter/newsletter.module';
     NotificationsModule,
     ReviewsModule,
     NewsletterModule,
+    PaymentConfigModule,
   ],
   providers: [
     {
