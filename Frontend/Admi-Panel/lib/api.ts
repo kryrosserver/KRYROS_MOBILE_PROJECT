@@ -228,10 +228,6 @@ export const updateCountry = (id: string, data: Record<string, unknown>) =>
   api.put(`/api/countries/${id}`, data);
 export const createCountry = (data: Record<string, unknown>) =>
   api.post("/api/countries", data);
-export const getStates = (countryId?: string) =>
-  api.get(`/api/states${countryId ? `?countryId=${countryId}` : ""}`);
-export const getCities = (stateId?: string) =>
-  api.get(`/api/cities${stateId ? `?stateId=${stateId}` : ""}`);
 
 // ── Credit ────────────────────────────────────────────────
 export const getCreditAccounts = (params?: Record<string, unknown>) =>
