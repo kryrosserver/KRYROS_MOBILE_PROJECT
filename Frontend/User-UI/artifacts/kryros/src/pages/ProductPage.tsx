@@ -271,7 +271,7 @@ export default function ProductPage() {
               <h2 className="text-sm font-bold text-foreground">You May Also Like</h2>
               <Link href="/shop"><span className="text-xs text-primary font-semibold">View all</span></Link>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {related.map((p) => (
                 <UnifiedProductCard key={p.id} product={p} className="w-full" />
               ))}
