@@ -95,7 +95,17 @@ function SettingsContent() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateSettings({ storeName, storeEmail, storePhone, currency, timezone, emailNotifications: emailNotif, pushNotifications: pushNotif, orderNotifications: orderNotif, twoFactorEnabled: twoFA });
+      await updateSettings({
+        store_name: storeName,
+        store_email: storeEmail,
+        store_phone: storePhone,
+        currency: currency,
+        timezone: timezone,
+        email_notifications: String(emailNotif),
+        push_notifications: String(pushNotif),
+        order_notifications: String(orderNotif),
+        two_factor_enabled: String(twoFA),
+      });
       toast.success('Settings saved successfully');
     } catch { toast.error('Failed to save settings — check connection'); }
     setSaving(false);
