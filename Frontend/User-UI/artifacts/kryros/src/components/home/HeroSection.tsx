@@ -12,6 +12,10 @@ const OVERLAY_COLORS = [
   { from: "rgba(10,25,15,0.82)", to: "rgba(10,25,15,0.08)" },
 ];
 
+function isVideoUrl(url: string): boolean {
+  return /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(url) || url.startsWith("data:video/");
+}
+
 export default function HeroSection() {
   const [banners, setBanners] = useState<ApiBanner[]>([]);
   const [current, setCurrent] = useState(0);
@@ -33,22 +37,49 @@ export default function HeroSection() {
   const banner = banners[current];
   const overlay = OVERLAY_COLORS[current % OVERLAY_COLORS.length];
 
+  // Determine if current banner is a video
+  const isVideo =
+    banner.mediaType === "video" ||
+    (banner.videoUrl ? isVideoUrl(banner.videoUrl) : false) ||
+    (banner.image ? isVideoUrl(banner.image) : false);
+
+  // Pick the media URL
+  const mediaUrl = isVideo
+    ? (banner.videoUrl || banner.image || "")
+    : (banner.image || "");
+
   return (
     <section
       className="relative overflow-hidden"
       style={{ height: "clamp(280px, 46vw, 500px)" }}
     >
       <AnimatePresence mode="wait">
-        <motion.img
-          key={banner.id + "-img"}
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.55 }}
-          src={banner.image || ""}
-          alt={banner.title}
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+        {isVideo ? (
+          <motion.video
+            key={banner.id + "-video"}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55 }}
+            src={mediaUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        ) : (
+          <motion.img
+            key={banner.id + "-img"}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55 }}
+            src={mediaUrl}
+            alt={banner.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        )}
       </AnimatePresence>
 
       <div
