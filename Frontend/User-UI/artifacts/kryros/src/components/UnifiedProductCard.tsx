@@ -29,11 +29,11 @@ export default function UnifiedProductCard({
 
   return (
     <div
-      className={`${className} bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow flex flex-col`}
+      className={`${className} bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow`}
       onClick={() => (window.location.href = `/product/${product.id}`)}
     >
-      {/* ── Image ───────────────────────────────────────────── */}
-      <div className="relative bg-[#f5f5f5] dark:bg-muted aspect-square overflow-hidden">
+      {/* ── Image: aspect-[4/3] makes cards shorter & wider ── */}
+      <div className="relative bg-[#f5f5f5] dark:bg-muted aspect-[4/3] overflow-hidden">
         {!imgErr && product.image ? (
           <img
             src={product.image}
@@ -81,20 +81,20 @@ export default function UnifiedProductCard({
         </button>
       </div>
 
-      {/* ── Info ────────────────────────────────────────────── */}
-      <div className="p-2.5 flex flex-col flex-1">
+      {/* ── Info ── */}
+      <div className="p-2.5">
 
-        {/* Name */}
-        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 mb-0.5">
+        {/* Name — min-h keeps all cards same height even with 1-line names */}
+        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 min-h-[2rem] mb-0.5">
           {product.name}
         </h3>
 
-        {/* Specs */}
-        {product.specs && (
-          <p className="text-[10px] text-muted-foreground truncate mb-1">{product.specs}</p>
-        )}
+        {/* Specs — always rendered so height stays consistent */}
+        <p className="text-[10px] text-muted-foreground truncate mb-1 min-h-[0.875rem]">
+          {product.specs || ""}
+        </p>
 
-        {/* Price + old price on same row */}
+        {/* Price + old price */}
         <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0 mb-1">
           <span className="text-sm font-bold text-foreground">{format(product.price)}</span>
           {product.oldPrice > product.price && (
@@ -102,19 +102,19 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* ── Stock badge row: [⭐ Rating (count)]  [In Stock / Out of Stock]
-            Reviews appear IN FRONT OF (before) the stock badge on the same row.
-            Wholesale: [W: price]  [Min X units]
-        ─────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+        {/* ── Rating + Stock on SAME ROW — stars IN FRONT of badge, no wrap ──
+            [⭐⭐⭐⭐⭐ (1)]  [Out of Stock]
+            min-h keeps equal height even when no rating exists
+        ──────────────────────────────────────────────────────── */}
+        <div className="flex items-center gap-1 mb-2 min-h-[1.25rem]">
 
-          {/* ── Rating stars — shown IN FRONT OF stock badge ── */}
+          {/* Stars — only if rating exists, always before the badge */}
           {product.rating > 0 && !product.isWholesaleOnly && (
             <div className="flex items-center gap-0.5 flex-shrink-0">
               {[1, 2, 3, 4, 5].map((star) => (
                 <svg
                   key={star}
-                  className={`w-2.5 h-2.5 flex-shrink-0 ${
+                  className={`w-2 h-2 flex-shrink-0 ${
                     star <= Math.round(product.rating)
                       ? "fill-yellow-400 text-yellow-400"
                       : "fill-gray-300 text-gray-300"
@@ -128,27 +128,27 @@ export default function UnifiedProductCard({
             </div>
           )}
 
-          {/* Stock status for normal + credit products */}
+          {/* Stock badge — normal & credit products */}
           {!product.isWholesaleOnly && (
             product.stock > 0 ? (
-              <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                 In Stock
               </span>
             ) : (
-              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                 Out of Stock
               </span>
             )
           )}
 
-          {/* Credit monthly price — INLINE with stock badge */}
+          {/* Credit monthly price */}
           {product.allowCredit && (
-            <span className="text-[10px] text-primary font-bold whitespace-nowrap">
+            <span className="text-[10px] text-primary font-bold whitespace-nowrap truncate">
               {monthlyText}
             </span>
           )}
 
-          {/* Wholesale price + min order — all on same row */}
+          {/* Wholesale price + min order */}
           {product.isWholesaleOnly && (
             <>
               {product.wholesalePrice && (
@@ -164,8 +164,8 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* ── Buttons — mt-auto pins them to the bottom so all cards are equal height ── */}
-        <div className="flex items-center gap-1.5 mt-auto pt-1">
+        {/* ── Buttons ── */}
+        <div className="flex items-center gap-1.5">
           <button
             onClick={(e) => {
               e.stopPropagation();
