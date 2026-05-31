@@ -131,7 +131,27 @@ function normalizeProduct(p: any): Product {
     rating: Number(p.rating || 0),
     reviewCount: Number(p.reviewCount || p._count?.reviews || 0),
     stock: p.inventory?.quantity ?? p.stock ?? 0,
-    specs: p.specs || p.description || "",
+    specs: (() => {
+      // Prefer structured specifications array from backend
+      if (Array.isArray(p.specifications) && p.specifications.length > 0) {
+        return p.specifications
+          .map((s: any) => `${s.key}: ${s.value}`)
+          .join(' · ');
+      }
+      // Try to parse specifications JSON string
+      if (typeof p.specifications === 'string' && p.specifications.trim()) {
+        try {
+          const parsed = JSON.parse(p.specifications);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map((s: any) => `${s.key}: ${s.value}`).join(' · ');
+          }
+        } catch {}
+        // Plain string specs
+        return p.specifications;
+      }
+      // No specs — show nothing (description is only on product detail page)
+      return '';
+    })(),
     image: mainImage,
     images: imageList,
     badge: discount > 0 ? `-${discount}%` : undefined,
