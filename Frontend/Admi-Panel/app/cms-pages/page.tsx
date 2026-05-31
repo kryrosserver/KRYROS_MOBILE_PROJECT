@@ -213,11 +213,15 @@ function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, tex
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const isVideo = file.type.startsWith('video/');
+    if (file.type.startsWith('video/')) {
+      toast.error('Video files are too large to upload directly. Please paste a hosted video URL (e.g. from Cloudinary, S3, or a direct .mp4 link).');
+      e.target.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      setPreview({ name: file.name, type: isVideo ? 'video' : 'image', url: dataUrl });
+      setPreview({ name: file.name, type: 'image', url: dataUrl });
       onChange(dataUrl, file.name);
       onUrlChange?.(dataUrl);
       setUrlInput('');
@@ -428,7 +432,9 @@ function CMSContent() {
   const _apiSave = (itemId: string, pageId: string, secName: string, content: SectionData, mediaUrl?: string) => {
     if (_isHome(pageId)) {
       if (secName === 'Hero Banner') {
-        updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media || content.image, link: content.button_link, linkText: content.button_text }).catch(() => {});
+        const _mUrl = mediaUrl || content.media || content.image || '';
+        const _isVid = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrl) || _mUrl.startsWith('data:video/');
+        updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, ...(_isVid ? { videoUrl: _mUrl, mediaType: 'video' } : { image: _mUrl, mediaType: 'image' }), link: content.button_link, linkText: content.button_text }).catch(() => {});
       } else {
         updateCmsHomepageSection(itemId, { config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) } as any, isActive: true }).catch(() => {});
       }
@@ -446,7 +452,9 @@ function CMSContent() {
   const _apiCreate = (pageId: string, secName: string, content: SectionData, mediaUrl?: string) => {
     if (_isHome(pageId)) {
       if (secName === 'Hero Banner') {
-        createCmsBanner({ title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media, link: content.button_link, linkText: content.button_text, isActive: true }).catch(() => {});
+        const _mUrlC = mediaUrl || content.media || '';
+        const _isVidC = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrlC) || _mUrlC.startsWith('data:video/');
+        createCmsBanner({ title: content.title, subtitle: content.subtitle, ...(_isVidC ? { videoUrl: _mUrlC, mediaType: 'video' } : { image: _mUrlC, mediaType: 'image' }), link: content.button_link, linkText: content.button_text, isActive: true }).catch(() => {});
       } else {
         const type = HP_SECTION_TYPE[secName] || secName;
         createCmsHomepageSection({ type, config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) }, isActive: true }).catch(() => {});
