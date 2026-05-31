@@ -65,7 +65,15 @@ function ServicesContent() {
     if (!form.name.trim()) { toast.error('Service name is required'); return; }
     setLoading(true);
     try {
-      await createService(form);
+      const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      await createService({
+        name: form.name,
+        slug: toSlug(form.name),
+        category: form.category,
+        price: Number(form.price) || 0,
+        duration: form.duration,
+        isActive: form.status === 'Active',
+      });
       const newItem: Service = { id: `SRV${String(Date.now()).slice(-3)}`, ...form, bookings: 0 };
       setData(d => [...d, newItem]);
       toast.success('Service added');
@@ -78,7 +86,13 @@ function ServicesContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateService(editRow.id, form);
+      await updateService(editRow.id, {
+        name: form.name,
+        category: form.category,
+        price: Number(form.price) || 0,
+        duration: form.duration,
+        isActive: form.status === 'Active',
+      });
       setData(d => d.map(s => s.id === editRow.id ? { ...s, ...form } : s));
       toast.success('Service updated');
       setEditRow(null);
