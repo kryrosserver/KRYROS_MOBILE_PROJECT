@@ -173,7 +173,7 @@ export default function WishlistPage() {
                     </button>
                   </div>
 
-                  <div className="p-3 flex flex-col flex-1 gap-2">
+                  <div className="p-2.5 flex flex-col flex-1 gap-1.5">
                     <Link href={`/product/${product.id}`}>
                       <p className="text-xs font-semibold text-foreground line-clamp-2 hover:text-primary transition-colors cursor-pointer leading-snug">
                         {product.name}
@@ -190,7 +190,7 @@ export default function WishlistPage() {
                       </div>
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full py-2 bg-primary/10 text-primary rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-primary hover:text-white transition-all"
+                        className="flex-1 h-7 bg-teal-600 text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 hover:bg-primary hover:text-white transition-all"
                       >
                         <ShoppingCart className="w-3.5 h-3.5" />
                         Add to Cart
