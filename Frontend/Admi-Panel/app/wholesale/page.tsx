@@ -7,7 +7,7 @@ import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin
 import { useTheme } from '@/contexts/theme-context';
 import { Truck, Users, Star, Package, ChevronRight, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getWholesaleOrders } from '@/lib/api';
+import { getWholesaleAccounts, updateWholesaleAccountStatus, deleteWholesaleAccount, updateWholesaleAccount, getWholesaleDeals, createWholesaleDeal, updateWholesaleDeal, deleteWholesaleDeal } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────
 type Wholesale = { id:string; name:string; contact:string; phone:string; city:string; tier:string; credit:string; orders:number; totalSpent:string; status:string; joined:string };
@@ -36,19 +36,19 @@ function WholesaleContent() {
   // Partners state
   const [partners, setPartners] = useState<Wholesale[]>([]);
   useEffect(() => {
-    getWholesaleOrders({ limit: 200 }).then((r: any) => {
+    getWholesaleAccounts({ limit: 200 }).then((r: any) => {
       const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
       const normalized: Wholesale[] = raw.map((w: any) => ({
         id: w.id || '',
-        name: w.businessName || w.name || (w.user ? [w.user.firstName, w.user.lastName].filter(Boolean).join(' ') : 'Partner'),
+        name: w.companyName || w.businessName || (w.user ? [w.user.firstName, w.user.lastName].filter(Boolean).join(' ') : 'Partner'),
         contact: w.user?.email || w.contact || '',
         phone: w.user?.phone || w.phone || '',
         city: w.city || '',
-        tier: w.tier || w.wholesaleLevel || 'Bronze',
+        tier: w.tierName || (w.discountTier===1?'Bronze':w.discountTier===2?'Silver':w.discountTier===3?'Gold':'Platinum') || 'Bronze',
         credit: w.creditLimit ? `K${Number(w.creditLimit).toLocaleString()}` : 'K0',
-        orders: w._count?.orders ?? w.totalOrders ?? 0,
-        totalSpent: w.totalPurchases ? `K${Number(w.totalPurchases).toLocaleString()}` : 'K0',
-        status: w.isActive !== false ? 'Active' : 'Inactive',
+        orders: w._count?.orders ?? 0,
+        totalSpent: 'K0',
+        status: w.status === 'ACTIVE' || w.status === 'APPROVED' ? 'Active' : w.status === 'PENDING' ? 'Pending' : 'Inactive',
         joined: w.createdAt ? w.createdAt.split('T')[0] : '',
       }));
       setPartners(normalized);
@@ -97,14 +97,16 @@ function WholesaleContent() {
 
   // ── Partner handlers ──
   const handleAddPartner = () => {
-    if (!pForm.name.trim()) { toast.error('Company name required'); return; }
-    const w: Wholesale = { id:`WHL${String(Date.now()).slice(-3)}`, ...pForm, orders:0, totalSpent:'K0', phone:'', city:'', credit:'K0', joined:'' };
-    setPartners(d=>[...d,w]); toast.success('Partner added'); setAddPartnerOpen(false);
+    // Wholesale accounts are created by users applying — admin manages status
+    toast.error('Partners are created when users apply for wholesale. Use the Status update to approve/reject.');
   };
-  const handleEditPartner = () => {
+  const handleEditPartner = async () => {
     if (!editPartner) return;
-    setPartners(d=>d.map(p=>p.id===editPartner.id?{...p,...pForm}:p));
-    toast.success('Partner updated'); setEditPartner(null);
+    try {
+      const tierNum = pForm.tier==='Bronze'?1:pForm.tier==='Silver'?2:pForm.tier==='Gold'?3:4;
+      await updateWholesaleAccount(editPartner.id, { tierName: pForm.tier, discountTier: tierNum, status: pForm.status==='Active'?'ACTIVE':pForm.status==='Pending'?'PENDING':'INACTIVE' });
+      setPartners(d=>d.map(p=>p.id===editPartner.id?{...p,...pForm}:p));
+      toast.success('Partner updated'); setEditPartner(null);
   };
   const handleDeletePartner = () => {
     if (!deletePartner) return;
