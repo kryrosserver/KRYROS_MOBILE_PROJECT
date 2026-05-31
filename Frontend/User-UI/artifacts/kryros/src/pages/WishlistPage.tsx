@@ -112,7 +112,7 @@ export default function WishlistPage() {
         </div>
 
         {showSkeleton ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="rounded-2xl bg-muted animate-pulse h-64" />
             ))}
@@ -133,13 +133,13 @@ export default function WishlistPage() {
             </Link>
           </div>
         ) : loading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {(activeIds.length > 0 ? activeIds : [1, 2]).map((id) => (
               <div key={id} className="rounded-2xl bg-muted animate-pulse h-64" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {products.map((product) => {
               const img = getImage(product);
               const discount =
@@ -157,7 +157,7 @@ export default function WishlistPage() {
                       <img
                         src={img}
                         alt={product.name}
-                        className="w-full h-40 object-contain group-hover:scale-105 transition-transform duration-300"
+                        className="w-full aspect-square object-contain group-hover:scale-105 transition-transform duration-300"
                       />
                     </Link>
                     {discount && (
