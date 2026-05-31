@@ -17,6 +17,12 @@ export class BrandsService {
       .replace(/--+/g, '-');
   }
 
+  private resolveLogo(dto: CreateBrandDto | UpdateBrandDto): string | null | undefined {
+    // Accept either logo or logoUrl — frontend may send either
+    const raw = (dto as any).logoUrl || (dto as any).logo;
+    return raw || null;
+  }
+
   async create(dto: CreateBrandDto) {
     const slug = dto.slug || this.slugify(dto.name);
 
@@ -26,7 +32,7 @@ export class BrandsService {
     }
 
     try {
-      let logoData = dto.logo || null;
+      let logoData = this.resolveLogo(dto);
       if (logoData && logoData.startsWith('data:image')) {
         logoData = await compressImage(logoData, 300, 120, 80);
       }
@@ -34,9 +40,10 @@ export class BrandsService {
         data: {
           name: dto.name,
           slug,
-          logo: logoData,
+          logo: logoData ?? null,
           description: dto.description || null,
           website: dto.website || null,
+          country: dto.country || null,
           isActive: dto.isActive !== undefined ? dto.isActive : true,
           categoryId: dto.categoryId || null,
         },
@@ -73,15 +80,30 @@ export class BrandsService {
   async update(id: number, dto: UpdateBrandDto) {
     await this.findOne(id);
 
-    const data: any = { ...dto };
-    if (dto.name && !dto.slug) {
-      data.slug = this.slugify(dto.name);
+    // Build explicit update payload — never spread dto directly to avoid unknown Prisma fields
+    const updateData: any = {};
+    if (dto.name !== undefined) {
+      updateData.name = dto.name;
+      if (!dto.slug) updateData.slug = this.slugify(dto.name);
     }
-    if (data.logo && data.logo.startsWith('data:image')) {
-      data.logo = await compressImage(data.logo, 300, 120, 80);
+    if (dto.slug !== undefined) updateData.slug = dto.slug;
+    if (dto.description !== undefined) updateData.description = dto.description;
+    if (dto.website !== undefined) updateData.website = dto.website;
+    if (dto.country !== undefined) updateData.country = dto.country;
+    if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
+    if (dto.categoryId !== undefined) updateData.categoryId = dto.categoryId;
+
+    // Handle logo — accept both logo and logoUrl
+    const logoRaw = this.resolveLogo(dto);
+    if (logoRaw !== undefined) {
+      if (logoRaw && logoRaw.startsWith('data:image')) {
+        updateData.logo = await compressImage(logoRaw, 300, 120, 80);
+      } else {
+        updateData.logo = logoRaw;
+      }
     }
 
-    return this.prisma.brand.update({ where: { id }, data });
+    return this.prisma.brand.update({ where: { id }, data: updateData });
   }
 
   async remove(id: number) {
