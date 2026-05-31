@@ -19,7 +19,7 @@ const roles = [
   { name: 'Customer', permissions: 'View Products, Place Orders', users: 150, color: '#1FA89A' },
 ];
 
-const EMPTY_FORM = { name: '', email: '', role: 'Customer', status: 'Active' };
+const EMPTY_FORM = { name: '', email: '', role: 'Customer', status: 'Active', password: '' };
 
 function UsersContent() {
   const { theme } = useTheme();
@@ -73,14 +73,29 @@ function UsersContent() {
 
   const handleAdd = async () => {
     if (!form.name.trim() || !form.email.trim()) { toast.error('Name and email are required'); return; }
+    if (!(form as any).password?.trim()) { toast.error('Password is required'); return; }
     setLoading(true);
     try {
-      await createUser(form);
+      const nameParts = form.name.trim().split(' ');
+      const firstName = nameParts[0] || form.name;
+      const lastName = nameParts.slice(1).join(' ') || '-';
+      const roleMap: Record<string, string> = { 'Customer': 'CUSTOMER', 'Admin': 'ADMIN', 'Manager': 'MANAGER', 'Super Admin': 'SUPER_ADMIN' };
+      await createUser({
+        firstName,
+        lastName,
+        email: form.email,
+        password: (form as any).password,
+        role: roleMap[form.role] || 'CUSTOMER',
+      });
       const newItem: User = { id: `USR${String(Date.now()).slice(-3)}`, ...form, joined: new Date().toISOString().split('T')[0], orders: 0 };
       setData(d => [...d, newItem]);
       toast.success('User added');
       setAddOpen(false);
-    } catch { toast.error('Failed to add user — check your API connection'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg || 'check your API connection');
+      toast.error(`Failed to add user — ${detail}`);
+    }
     setLoading(false);
   };
 
@@ -88,11 +103,29 @@ function UsersContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateUser(editRow.id, form);
+      const nameParts = form.name.trim().split(' ');
+      const firstName = nameParts[0] || form.name;
+      const lastName = nameParts.slice(1).join(' ') || '-';
+      const roleMap: Record<string, string> = { 'Customer': 'CUSTOMER', 'Admin': 'ADMIN', 'Manager': 'MANAGER', 'Super Admin': 'SUPER_ADMIN' };
+      const payload: Record<string, unknown> = {
+        firstName,
+        lastName,
+        email: form.email,
+        role: roleMap[form.role] || 'CUSTOMER',
+      };
+      // Only include password if provided
+      if ((form as any).password?.trim()) {
+        payload.password = (form as any).password;
+      }
+      await updateUser(editRow.id, payload);
       setData(d => d.map(u => u.id === editRow.id ? { ...u, ...form } : u));
       toast.success('User updated');
       setEditRow(null);
-    } catch { toast.error('Failed to update user — check your API connection'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg || 'check your API connection');
+      toast.error(`Failed to update user — ${detail}`);
+    }
     setLoading(false);
   };
 
