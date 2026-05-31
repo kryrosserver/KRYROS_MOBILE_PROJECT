@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
@@ -12,13 +12,29 @@ const OVERLAY_COLORS = [
   { from: "rgba(10,25,15,0.82)", to: "rgba(10,25,15,0.08)" },
 ];
 
+const DEFAULT_DURATION_MS = 5500; // fallback if no duration set
+
 function isVideoUrl(url: string): boolean {
   return /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(url) || url.startsWith("data:video/");
+}
+
+function formatCountdown(ms: number): string {
+  const totalSec = Math.ceil(ms / 1000);
+  if (totalSec >= 60) {
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  }
+  return `${totalSec}s`;
 }
 
 export default function HeroSection() {
   const [banners, setBanners] = useState<ApiBanner[]>([]);
   const [current, setCurrent] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION_MS);
+  const [totalDuration, setTotalDuration] = useState(DEFAULT_DURATION_MS);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startRef = useRef<number>(Date.now());
 
   useEffect(() => {
     fetchBanners().then((data) => {
@@ -26,16 +42,40 @@ export default function HeroSection() {
     });
   }, []);
 
+  // Reset and start countdown whenever banner changes
   useEffect(() => {
-    if (banners.length <= 1) return;
-    const t = setInterval(() => setCurrent((c) => (c + 1) % banners.length), 5500);
-    return () => clearInterval(t);
-  }, [banners.length]);
+    if (banners.length === 0) return;
+
+    const banner = banners[current];
+    const duration = banner.duration ? banner.duration * 1000 : DEFAULT_DURATION_MS;
+
+    setTotalDuration(duration);
+    setTimeLeft(duration);
+    startRef.current = Date.now();
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startRef.current;
+      const remaining = Math.max(0, duration - elapsed);
+      setTimeLeft(remaining);
+
+      if (remaining === 0) {
+        clearInterval(timerRef.current!);
+        setCurrent((c) => (c + 1) % banners.length);
+      }
+    }, 100);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [current, banners]);
 
   if (banners.length === 0) return null;
 
   const banner = banners[current];
   const overlay = OVERLAY_COLORS[current % OVERLAY_COLORS.length];
+  const progressPct = totalDuration > 0 ? (timeLeft / totalDuration) * 100 : 0;
 
   // Determine if current banner is a video
   const isVideo =
@@ -43,7 +83,6 @@ export default function HeroSection() {
     (banner.videoUrl ? isVideoUrl(banner.videoUrl) : false) ||
     (banner.image ? isVideoUrl(banner.image) : false);
 
-  // Pick the media URL
   const mediaUrl = isVideo
     ? (banner.videoUrl || banner.image || "")
     : (banner.image || "");
@@ -53,6 +92,7 @@ export default function HeroSection() {
       className="relative overflow-hidden"
       style={{ height: "clamp(280px, 46vw, 500px)" }}
     >
+      {/* Media layer */}
       <AnimatePresence mode="wait">
         {isVideo ? (
           <motion.video
@@ -82,6 +122,7 @@ export default function HeroSection() {
         )}
       </AnimatePresence>
 
+      {/* Overlay gradient */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -90,6 +131,7 @@ export default function HeroSection() {
         }}
       />
 
+      {/* Text content */}
       <AnimatePresence mode="wait">
         <motion.div
           key={banner.id + "-text"}
@@ -137,21 +179,65 @@ export default function HeroSection() {
         </motion.div>
       </AnimatePresence>
 
-      {banners.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-          {banners.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === current
-                  ? "w-5 h-2 bg-[#1FA89A]"
-                  : "w-2 h-2 bg-white/40 hover:bg-white/60"
-              }`}
+      {/* Bottom bar: dots + countdown badge */}
+      <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-3 z-10 px-4">
+        {/* Dot indicators */}
+        {banners.length > 1 && (
+          <div className="flex items-center gap-1.5">
+            {banners.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`rounded-full transition-all duration-300 ${
+                  i === current
+                    ? "w-5 h-2 bg-[#1FA89A]"
+                    : "w-2 h-2 bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Countdown badge */}
+        <div
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-1"
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+        >
+          {/* Circular progress ring */}
+          <svg width="16" height="16" viewBox="0 0 16 16" className="shrink-0">
+            <circle cx="8" cy="8" r="6" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+            <circle
+              cx="8" cy="8" r="6"
+              fill="none"
+              stroke="#1FA89A"
+              strokeWidth="2"
+              strokeDasharray={`${2 * Math.PI * 6}`}
+              strokeDashoffset={`${2 * Math.PI * 6 * (1 - progressPct / 100)}`}
+              strokeLinecap="round"
+              transform="rotate(-90 8 8)"
+              style={{ transition: "stroke-dashoffset 0.1s linear" }}
             />
-          ))}
+          </svg>
+          <span
+            className="text-white font-semibold tabular-nums"
+            style={{ fontSize: "11px", minWidth: "24px" }}
+          >
+            {formatCountdown(timeLeft)}
+          </span>
         </div>
-      )}
+      </div>
+
+      {/* Bottom progress bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] z-10" style={{ background: "rgba(255,255,255,0.12)" }}>
+        <div
+          className="h-full"
+          style={{
+            width: `${progressPct}%`,
+            background: "#1FA89A",
+            transition: "width 0.1s linear",
+          }}
+        />
+      </div>
     </section>
   );
 }
