@@ -31,7 +31,7 @@ function ProviderLogo({ provider }: { provider: string }) {
   return <span className="text-xs font-bold text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 rounded-lg">MTN</span>;
 }
 
-const CHECKOUT_METHODS = [
+const DEFAULT_CHECKOUT_METHODS = [
   {
     id: "mobile", label: "Mobile Money", sub: "MTN, Airtel, Zamtel",
     iconBg: "bg-yellow-50 dark:bg-yellow-900/20",
@@ -96,20 +96,58 @@ export default function CheckoutPage() {
   const allCurrencies = useCurrencyStore((s) => s.currencies);
 
   const [step, setStep] = useState(1);
-  // ── Dynamic bank accounts from admin config ─────────────────────────────
+  // ── Dynamic payment config from admin panel ─────────────────────────────
   const [bankProviders, setBankProviders] = useState<{ name:string; config?:{ accountName?:string; accountNumber?:string } }[]>([]);
+  const [mobileNetworks, setMobileNetworks] = useState<string[]>(["MTN Mobile Money", "Airtel Money", "Zamtel Money", "M-Pesa"]);
+  const [apiMethodTypes, setApiMethodTypes] = useState<string[]>([]);
+
   useEffect(() => {
     fetch(`${API_BASE}/api/payment-config/public`)
       .then(r => r.json())
       .then((data: any) => {
         const arr: any[] = Array.isArray(data) ? data : (data?.data ?? []);
+
+        // Bank accounts
         const bankMethod = arr.find((m: any) => m.type === "bank");
         if (bankMethod?.providers) {
           setBankProviders(bankMethod.providers.filter((p: any) => p.isEnabled));
         }
+
+        // Mobile money networks
+        const mobileMethod = arr.find((m: any) => m.type === "mobile_wallet");
+        if (mobileMethod?.providers?.length > 0) {
+          const nets: string[] = mobileMethod.providers
+            .filter((p: any) => p.isEnabled)
+            .flatMap((p: any) =>
+              (p.networks || [])
+                .filter((n: any) => n.isEnabled)
+                .map((n: any) => {
+                  if (n.name === "MTN")    return "MTN Mobile Money";
+                  if (n.name === "Airtel") return "Airtel Money";
+                  if (n.name === "Zamtel") return "Zamtel Money";
+                  return `${n.name} Mobile Money`;
+                })
+            );
+          if (nets.length > 0) setMobileNetworks(nets);
+        }
+
+        // Enabled method types in admin order
+        const enabledTypes = arr.filter((m: any) => m.isEnabled).map((m: any) => m.type as string);
+        setApiMethodTypes(enabledTypes);
       })
       .catch(() => {});
   }, []);
+
+  // Build active methods from API data, preserving existing icon/panel logic
+  const TYPE_TO_ID: Record<string, string> = {
+    mobile_wallet: "mobile", card: "card", bank: "bank",
+    cash: "cod", digital_wallet: "whatsapp",
+  };
+  const activeCheckoutMethods = apiMethodTypes.length > 0
+    ? (apiMethodTypes
+        .map((t) => DEFAULT_CHECKOUT_METHODS.find((m) => m.id === (TYPE_TO_ID[t] ?? t)))
+        .filter(Boolean) as typeof DEFAULT_CHECKOUT_METHODS)
+    : DEFAULT_CHECKOUT_METHODS;
   const [ordered, setOrdered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -398,7 +436,7 @@ export default function CheckoutPage() {
   }
 
   if (ordered) {
-    const methodLabel = CHECKOUT_METHODS.find((m) => m.id === openMethod)?.label ?? "Card";
+    const methodLabel = activeCheckoutMethods.find((m) => m.id === openMethod)?.label ?? "Card";
     const isManual = openMethod === "bank" || openMethod === "whatsapp";
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-background">
@@ -727,7 +765,7 @@ export default function CheckoutPage() {
           <div>
             <p className="text-sm font-bold text-foreground mb-3">Choose payment method</p>
             <div className="space-y-2">
-              {CHECKOUT_METHODS.map((m) => {
+              {activeCheckoutMethods.map((m) => {
                 const Icon = m.icon;
                 return (
                   <button
@@ -777,7 +815,7 @@ export default function CheckoutPage() {
               {/* Sheet header */}
               <div className="flex items-center justify-between pt-1 pb-2">
                 {(() => {
-                  const m = CHECKOUT_METHODS.find((x) => x.id === openMethod)!;
+                  const m = activeCheckoutMethods.find((x) => x.id === openMethod)!;
                   const Icon = m.icon;
                   return (
                     <div className="flex items-center gap-2.5">
@@ -803,10 +841,9 @@ export default function CheckoutPage() {
                       <ProviderLogo provider={mmProvider} />
                       <select value={mmProvider} onChange={(e) => setMmProvider(e.target.value)}
                         className="flex-1 text-sm text-foreground outline-none bg-transparent">
-                        <option>MTN Mobile Money</option>
-                        <option>Airtel Money</option>
-                        <option>Zamtel Money</option>
-                        <option>M-Pesa</option>
+                        {mobileNetworks.map((net) => (
+                          <option key={net}>{net}</option>
+                        ))}
                       </select>
                       <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     </div>
