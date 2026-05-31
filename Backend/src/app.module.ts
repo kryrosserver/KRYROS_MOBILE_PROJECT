@@ -18,6 +18,7 @@ import { CMSModule } from './cms/cms.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReportsModule } from './reports/reports.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { PickupStationsModule } from './pickup-stations/pickup-stations.module';
 import { SettingsModule } from './settings/settings.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { BrandsModule } from './brands/brands.module';
@@ -63,6 +64,7 @@ import { PaymentConfigModule } from './payment-config/payment-config.module';
     PaymentsModule,
     ReportsModule,
     WishlistModule,
+    PickupStationsModule,
     SettingsModule,
     ShippingModule,
     BrandsModule,
