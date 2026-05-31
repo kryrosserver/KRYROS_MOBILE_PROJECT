@@ -321,3 +321,73 @@ export const updateCreditPlan = (id: string, data: Record<string, unknown>) =>
   api.put(`/api/credit/plans/${id}`, data);
 export const deleteCreditPlan = (id: string) =>
   api.delete(`/api/credit/plans/${id}`);
+
+// ── Shipping Methods (Global) ─────────────────────────────
+export const getShippingMethods = (params?: Record<string, unknown>) =>
+  api.get('/api/shipping', { params });
+export const createShippingMethod = (data: Record<string, unknown>) =>
+  api.post('/api/shipping', data);
+export const updateShippingMethod = (id: string, data: Record<string, unknown>) =>
+  api.put(`/api/shipping/${id}`, data);
+export const deleteShippingMethod = (id: string) =>
+  api.delete(`/api/shipping/${id}`);
+
+// ── States ────────────────────────────────────────────────
+export const getStates = (countryId?: string) =>
+  api.get('/api/states', { params: countryId ? { countryId } : {} });
+export const createState = (data: Record<string, unknown>) =>
+  api.post('/api/states', data);
+export const updateState = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/api/states/${id}`, data);
+export const deleteState = (id: string) =>
+  api.delete(`/api/states/${id}`);
+
+// ── Cities ────────────────────────────────────────────────
+export const getCities = (stateId?: string) =>
+  api.get('/api/cities', { params: stateId ? { stateId } : {} });
+export const createCity = (data: Record<string, unknown>) =>
+  api.post('/api/cities', data);
+export const updateCity = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/api/cities/${id}`, data);
+export const deleteCity = (id: string) =>
+  api.delete(`/api/cities/${id}`);
+
+// ── Pickup Stations ───────────────────────────────────────
+export const getPickupStations = (params?: Record<string, unknown>) =>
+  api.get('/api/pickup-stations', { params });
+export const createPickupStation = (data: Record<string, unknown>) =>
+  api.post('/api/pickup-stations', data);
+export const updatePickupStation = (id: string, data: Record<string, unknown>) =>
+  api.put(`/api/pickup-stations/${id}`, data);
+export const togglePickupStation = (id: string, isActive: boolean) =>
+  api.patch(`/api/pickup-stations/${id}/status`, { isActive });
+export const deletePickupStation = (id: string) =>
+  api.delete(`/api/pickup-stations/${id}`);
+
+// ── Wholesale Accounts (Admin) ────────────────────────────
+export const getWholesaleAccounts = (params?: Record<string, unknown>) =>
+  api.get('/api/wholesale/accounts', { params });
+export const updateWholesaleAccount = (id: string, data: Record<string, unknown>) =>
+  api.put(`/api/wholesale/accounts/${id}`, data);
+export const updateWholesaleAccountStatus = (id: string, status: string, notes?: string) =>
+  api.put(`/api/wholesale/accounts/${id}/status`, { status, notes });
+export const deleteWholesaleAccount = (id: string) =>
+  api.delete(`/api/wholesale/accounts/${id}`);
+
+// ── Wholesale Deals ───────────────────────────────────────
+export const getWholesaleDeals = (params?: Record<string, unknown>) =>
+  api.get('/api/wholesale/deals', { params });
+export const createWholesaleDeal = (data: Record<string, unknown>) =>
+  api.post('/api/wholesale/deals', data);
+export const updateWholesaleDeal = (id: string, data: Record<string, unknown>) =>
+  api.put(`/api/wholesale/deals/${id}`, data);
+export const deleteWholesaleDeal = (id: string) =>
+  api.delete(`/api/wholesale/deals/${id}`);
+
+// ── Country Payment Methods ───────────────────────────────
+export const addCountryPaymentMethod = (countryId: string, data: Record<string, unknown>) =>
+  api.post(`/api/countries/${countryId}/payment-methods`, data);
+export const updateCountryPaymentMethod = (methodId: string, data: Record<string, unknown>) =>
+  api.patch(`/api/countries/payment-methods/${methodId}`, data);
+export const removeCountryPaymentMethod = (methodId: string) =>
+  api.delete(`/api/countries/payment-methods/${methodId}`);
