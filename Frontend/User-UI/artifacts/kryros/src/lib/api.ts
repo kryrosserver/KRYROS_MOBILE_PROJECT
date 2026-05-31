@@ -55,6 +55,8 @@ export interface ApiBanner {
   title: string;
   subtitle?: string;
   image?: string;
+  videoUrl?: string;
+  mediaType?: string;
   link?: string;
   linkText?: string;
   badge?: string;
