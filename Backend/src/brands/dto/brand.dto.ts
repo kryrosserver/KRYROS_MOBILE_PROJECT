@@ -20,12 +20,22 @@ export class CreateBrandDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
+  logoUrl?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   website?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  country?: string;
 
   @ApiProperty({ default: true })
   @IsBoolean()
@@ -57,12 +67,22 @@ export class UpdateBrandDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
+  logoUrl?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   website?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  country?: string;
 
   @ApiProperty({ required: false })
   @IsBoolean()
