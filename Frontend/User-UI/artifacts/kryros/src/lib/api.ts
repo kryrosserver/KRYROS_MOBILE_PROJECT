@@ -16,6 +16,7 @@ export interface Product {
   reviewCount: number;
   stock: number;
   specs: string;
+  description: string;
   image: string;
   images: string[];
   badge?: string;
@@ -131,6 +132,7 @@ function normalizeProduct(p: any): Product {
     rating: Number(p.rating || 0),
     reviewCount: Number(p.reviewCount || p._count?.reviews || 0),
     stock: p.inventory?.quantity ?? p.stock ?? 0,
+    description: p.description || '',
     specs: (() => {
       // Prefer structured specifications array from backend
       if (Array.isArray(p.specifications) && p.specifications.length > 0) {
