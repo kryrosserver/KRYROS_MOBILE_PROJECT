@@ -122,7 +122,7 @@ export default function UnifiedProductCard({
         )}
 
         {/* Price row */}
-        <div className="flex items-center gap-1.5 mb-0.5">
+        <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5 mb-0.5">
           <span className="text-sm font-bold text-foreground">{format(product.price)}</span>
           {product.oldPrice > product.price && (
             <span className="text-[10px] text-muted-foreground line-through">
