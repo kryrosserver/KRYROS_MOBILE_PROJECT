@@ -60,6 +60,10 @@ export class CreateCountryDto {
   @IsOptional()
   isDefault?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  shippingEnabled?: boolean;
+
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
