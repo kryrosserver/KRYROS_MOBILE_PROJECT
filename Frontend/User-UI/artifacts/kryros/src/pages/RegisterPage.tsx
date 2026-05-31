@@ -112,7 +112,7 @@ export default function RegisterPage() {
                 <p className="text-xs text-muted-foreground leading-snug">Join KRYROS and enjoy premium shopping experience</p>
               </div>
               <div className="flex-shrink-0 ml-2">
-                <img src="/kryros-logo.png" alt="KRYROS" className="w-16 h-16 rounded-2xl shadow-lg" />
+                <img src="/kryros-logo.png" alt="KRYROS" className="w-16 h-16 rounded-2xl shadow-lg" onError={(e) => { (e.target as HTMLImageElement).src = '/kryros-logo.svg'; }} />
               </div>
             </div>
           </div>
