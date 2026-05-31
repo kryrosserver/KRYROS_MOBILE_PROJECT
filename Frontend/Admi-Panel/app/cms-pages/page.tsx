@@ -100,6 +100,16 @@ const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: s
     { key: 'content', label: 'Privacy Policy Content', type: 'textarea', icon: 'align' },
     { key: 'last_updated', label: 'Last Updated Date', type: 'text', icon: 'type' },
   ],
+  'Promo Banner': [
+    { key: 'tag', label: 'Tag Badge (e.g. "UP TO 50% OFF")', type: 'text', icon: 'tag' },
+    { key: 'title', label: 'Banner Title', type: 'text', icon: 'type' },
+    { key: 'subtitle', label: 'Subtitle Text', type: 'text', icon: 'type' },
+    { key: 'description', label: 'Description', type: 'textarea', icon: 'align' },
+    { key: 'href', label: 'Button Link (URL)', type: 'text', icon: 'link' },
+    { key: 'emoji', label: 'Emoji Icon (e.g. 🛒) — used if no image', type: 'text', icon: 'type' },
+    { key: 'color_theme', label: 'Color Theme (used if no image)', type: 'select', options: ['Green/Teal', 'Blue', 'Purple', 'Red'] },
+    { key: 'image', label: 'Background Image (overrides color)', type: 'file' },
+  ],
   'Products Grid': [
     { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
     { key: 'product_limit', label: 'Products to Show', type: 'text', icon: 'type' },
@@ -187,7 +197,7 @@ const INITIAL_PAGES: CmsPage[] = [
 ];
 
 const EMPTY_PAGE_FORM = { title: '', slug: '', status: 'Published' };
-const ADD_SECTION_NAMES = ['Hero Banner','Featured Products','Promotions','Newsletter','Company Story','Team','Mission & Vision','Contact Form','Location Map','Business Hours','Terms Text','Policy Text','Products Grid','Sale Banner','Custom Section'];
+const ADD_SECTION_NAMES = ['Hero Banner','Promo Banner','Featured Products','Promotions','Newsletter','Company Story','Team','Mission & Vision','Contact Form','Location Map','Business Hours','Terms Text','Policy Text','Products Grid','Sale Banner','Custom Section'];
 
 function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, textMuted }: {
   value: string; onChange: (v: string, name: string) => void; onUrlChange?: (url: string) => void;
@@ -352,6 +362,7 @@ function CMSContent() {
           HeroSlider: 'Hero Slider', Brands: 'Featured Brands', TrustBadges: 'Trust Badges',
           CategorySection: 'Category Section', FeaturedProducts: 'Featured Products',
           FlashSale: 'Flash Sale', PromoBanners: 'Promo Banners',
+            promo_banners: 'Promo Banner',
           CategoryPromoBanners: 'Category Promo Banners', ProductSection: 'Products Section',
           RecentlyViewed: 'Recently Viewed', UpgradeBanner: 'Upgrade Banner',
         };
