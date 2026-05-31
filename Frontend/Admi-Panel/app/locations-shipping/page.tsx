@@ -55,10 +55,10 @@ function ShippingContent() {
     if (!form.name.trim()) { toast.error('Zone name required'); return; }
     setLoading(true);
     try {
+      // Backend ShippingZone only stores name + isActive (geographic filtering via countryId/stateId)
       const res = await createShippingZone({
-        name: form.name, region: form.region, countries: form.countries,
-        shippingMethod: form.method, rate: Number(form.rate), minOrder: Number(form.minOrder),
-        estimatedDays: form.days, isActive: form.status === 'Active',
+        name: form.name,
+        isActive: form.status === 'Active',
       });
       const id = (res as any)?.data?.id || `SZ${String(Date.now()).slice(-3)}`;
       setData(d=>[...d, { id, ...form }]);
@@ -71,9 +71,8 @@ function ShippingContent() {
     setLoading(true);
     try {
       await updateShippingZone(editRow.id, {
-        name: form.name, region: form.region, countries: form.countries,
-        shippingMethod: form.method, rate: Number(form.rate), minOrder: Number(form.minOrder),
-        estimatedDays: form.days, isActive: form.status === 'Active',
+        name: form.name,
+        isActive: form.status === 'Active',
       });
       setData(d=>d.map(z=>z.id===editRow.id?{...z,...form}:z));
       toast.success('Zone updated'); setEditRow(null);
