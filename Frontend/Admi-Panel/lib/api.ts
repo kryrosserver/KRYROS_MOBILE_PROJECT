@@ -99,7 +99,7 @@ export const deleteBrand = (id: string) =>
 export const getReviews = (params?: Record<string, unknown>) =>
   api.get("/api/reviews", { params });
 export const updateReview = (id: string, data: Record<string, unknown>) =>
-  api.put(`/api/reviews/${id}`, data);
+  api.patch(`/api/reviews/${id}/status`, data);
 export const deleteReview = (id: string) =>
   api.delete(`/api/reviews/${id}`);
 
