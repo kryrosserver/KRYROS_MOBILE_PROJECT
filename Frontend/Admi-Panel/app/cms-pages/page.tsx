@@ -374,7 +374,11 @@ function CMSContent() {
               secs.push({ name: 'Hero Banner', items: banners.map((b: any) => ({ id: b.id, content: { title: b.title || '', subtitle: b.subtitle || '', description: '', button_text: b.linkText || '', button_link: b.link || '', media: b.image || '' }, status: b.isActive ? 'Active' : 'Inactive', mediaUrl: b.image })) });
             }
             [...hpSecs].sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).forEach((sec: any) => {
-              secs.push({ name: HP_NAME[sec.type] || sec.type || 'Section', items: [{ id: sec.id, content: Object.fromEntries(Object.entries(sec.config || {}).map(([k, v]) => [k, String(v)])), status: sec.isActive ? 'Active' : 'Inactive' }] });
+              const nm = HP_NAME[sec.type] || sec.type || 'Section';
+              const newItem = { id: sec.id, content: Object.fromEntries(Object.entries(sec.config || {}).map(([k, v]) => [k, String(v)])), status: sec.isActive ? 'Active' : 'Inactive' };
+              const existing = secs.find(s => s.name === nm);
+              if (existing) { existing.items.push(newItem); }
+              else { secs.push({ name: nm, items: [newItem] }); }
             });
           } else {
             try {
