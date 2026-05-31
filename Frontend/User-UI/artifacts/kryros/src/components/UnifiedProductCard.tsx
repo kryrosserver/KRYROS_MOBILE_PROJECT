@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, ShoppingCart, Star, Zap } from "lucide-react";
+import { Heart, ShoppingCart, Star, Zap, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
@@ -24,6 +24,9 @@ export default function UnifiedProductCard({
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const format = useCurrencyStore((s) => s.format);
   const wishlisted = isWishlisted(product.id);
+
+  // Monthly payment: use creditMessage from admin or calculate price/12
+  const monthlyText = product.creditMessage || `${format(product.price / 12)}/mo`;
 
   return (
     <div
@@ -52,7 +55,14 @@ export default function UnifiedProductCard({
           </span>
         )}
 
-        {/* Optional extra badge (trending, flash, new) */}
+        {/* Wholesale badge */}
+        {product.isWholesaleOnly && (
+          <span className="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-lg z-10">
+            Wholesale
+          </span>
+        )}
+
+        {/* Optional section badge (Trending, New, etc.) */}
         {badge && (
           <span className="absolute bottom-2 left-2 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-lg z-10">
             {badge}
@@ -85,12 +95,12 @@ export default function UnifiedProductCard({
           {product.name}
         </h3>
         {product.specs && (
-          <p className="text-[10px] text-muted-foreground truncate mb-1.5">{product.specs}</p>
+          <p className="text-[10px] text-muted-foreground truncate mb-1">{product.specs}</p>
         )}
 
         {/* Rating */}
         {product.rating > 0 && (
-          <div className="flex items-center gap-1 mb-1.5">
+          <div className="flex items-center gap-1 mb-1">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -111,8 +121,8 @@ export default function UnifiedProductCard({
           </div>
         )}
 
-        {/* Price */}
-        <div className="flex items-center gap-1.5 mb-1">
+        {/* Price row */}
+        <div className="flex items-center gap-1.5 mb-0.5">
           <span className="text-sm font-bold text-foreground">{format(product.price)}</span>
           {product.oldPrice > product.price && (
             <span className="text-[10px] text-muted-foreground line-through">
@@ -121,18 +131,42 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* Stock status */}
-        <div className="mb-2">
-          {product.stock > 0 ? (
-            <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-              In Stock
-            </span>
-          ) : (
-            <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
-              Out of Stock
-            </span>
-          )}
-        </div>
+        {/* ── CREDIT PRODUCTS: "Get Now from $X/mo" ── */}
+        {product.allowCredit && (
+          <p className="text-[10px] text-primary font-semibold mb-1">
+            Get Now from {monthlyText}
+          </p>
+        )}
+
+        {/* ── WHOLESALE PRODUCTS: wholesale price + min order ── */}
+        {product.isWholesaleOnly && (
+          <div className="mb-1">
+            {product.wholesalePrice && (
+              <p className="text-[10px] text-blue-600 font-semibold">
+                Wholesale: {format(product.wholesalePrice)}
+              </p>
+            )}
+            <p className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+              <Package className="w-2.5 h-2.5" />
+              Min. Order: {product.wholesaleMoq || 1} unit{(product.wholesaleMoq || 1) > 1 ? "s" : ""}
+            </p>
+          </div>
+        )}
+
+        {/* Stock status — only for non-wholesale */}
+        {!product.isWholesaleOnly && (
+          <div className="mb-2">
+            {product.stock > 0 ? (
+              <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                In Stock
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                Out of Stock
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Buttons */}
         <div className="flex items-center gap-1.5">
@@ -159,7 +193,8 @@ export default function UnifiedProductCard({
             }}
             className="flex-1 h-7 bg-teal-600 text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-teal-700 transition-colors"
           >
-            <Zap className="w-3 h-3" /> Buy Now
+            <Zap className="w-3 h-3" />
+            {product.allowCredit ? "Get Now" : "Buy Now"}
           </button>
         </div>
       </div>
