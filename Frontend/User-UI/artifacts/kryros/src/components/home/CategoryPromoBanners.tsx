@@ -11,7 +11,15 @@ interface PromoCard {
   href: string;
   gradient: string;
   emoji: string;
+  image?: string; // optional background image — overrides gradient
 }
+
+const COLOR_THEMES: Record<string, string> = {
+  "Green/Teal": "linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #0d9488 100%)",
+  "Blue": "linear-gradient(135deg, #1a3a5c 0%, #1e5f8c 50%, #0ea5c9 100%)",
+  "Purple": "linear-gradient(135deg, #3b1f6b 0%, #5c2fa0 50%, #7c3aed 100%)",
+  "Red": "linear-gradient(135deg, #7c1d1d 0%, #b91c1c 50%, #ef4444 100%)",
+};
 
 const GRADIENTS = [
   "linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #0d9488 100%)",
@@ -24,15 +32,22 @@ const EMOJIS = ["🛒", "🎁", "🚚", "⚡"];
 
 function sectionToCard(s: ApiHomepageSection, index: number): PromoCard {
   const cfg = s.config as any;
+  // Resolve gradient: explicit gradient > color_theme name > default by index
+  const gradient =
+    cfg?.gradient ||
+    COLOR_THEMES[cfg?.color_theme] ||
+    GRADIENTS[index % GRADIENTS.length];
+
   return {
     id: s.id,
     tag: cfg?.tag || s.title || "OFFER",
     title: cfg?.title || s.title || "Special Offer",
     sub: cfg?.subtitle || cfg?.sub || "",
     desc: cfg?.description || cfg?.desc || "",
-    href: cfg?.link || cfg?.href || "/shop",
-    gradient: cfg?.gradient || GRADIENTS[index % GRADIENTS.length],
+    href: cfg?.href || cfg?.link || "/shop",
+    gradient,
     emoji: cfg?.emoji || EMOJIS[index % EMOJIS.length],
+    image: cfg?.image || undefined, // background image overrides gradient
   };
 }
 
@@ -66,7 +81,7 @@ export default function CategoryPromoBanners() {
     );
   }
 
-  // Hide completely if no CMS data — admin controls visibility
+  // Hide completely if no CMS data
   if (cards.length === 0) return null;
 
   return (
@@ -80,14 +95,35 @@ export default function CategoryPromoBanners() {
             <div
               className="relative flex-shrink-0 overflow-hidden cursor-pointer group hover:shadow-xl transition-shadow duration-300"
               style={{
-                background: b.gradient,
                 borderRadius: 14,
                 width: "min(86vw, 360px)",
                 height: 165,
                 scrollSnapAlign: "start",
+                // Use gradient as base — image overlays on top
+                background: b.gradient,
               }}
             >
-              <div className="absolute inset-0 flex flex-col justify-between p-4 pr-[44%]">
+              {/* Background image layer (if uploaded) */}
+              {b.image && (
+                <img
+                  src={b.image}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+
+              {/* Dark overlay — stronger on image, subtle on gradient */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: b.image
+                    ? "linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.1) 100%)"
+                    : "transparent",
+                }}
+              />
+
+              {/* Text content */}
+              <div className="absolute inset-0 flex flex-col justify-between p-4 pr-[44%] z-10">
                 <span
                   className="self-start text-[9px] font-black tracking-wider px-2 py-0.5 rounded-full"
                   style={{ background: "rgba(255,255,255,0.22)", color: "#fff" }}
@@ -95,9 +131,15 @@ export default function CategoryPromoBanners() {
                   {b.tag}
                 </span>
                 <div>
-                  <h3 className="text-white font-black text-[17px] leading-tight">{b.title}</h3>
-                  <p className="text-white/80 font-medium text-[11px] leading-tight mt-0.5">{b.sub}</p>
-                  <p className="text-white/55 text-[9px] leading-tight mt-1 line-clamp-2">{b.desc}</p>
+                  <h3 className="text-white font-black text-[17px] leading-tight drop-shadow-sm">
+                    {b.title}
+                  </h3>
+                  <p className="text-white/85 font-medium text-[11px] leading-tight mt-0.5">
+                    {b.sub}
+                  </p>
+                  <p className="text-white/60 text-[9px] leading-tight mt-1 line-clamp-2">
+                    {b.desc}
+                  </p>
                 </div>
                 <button
                   className="self-start text-[10px] font-bold px-3 py-1 rounded-full mt-1 transition-all group-hover:scale-105"
@@ -106,11 +148,26 @@ export default function CategoryPromoBanners() {
                   Learn more
                 </button>
               </div>
-              <div className="absolute right-0 top-0 bottom-0" style={{ width: "44%" }}>
-                <div className="relative w-full h-full flex items-center justify-center">
+
+              {/* Right side: emoji (only shown if no image, or always as accent) */}
+              {!b.image && (
+                <div
+                  className="absolute right-0 top-0 bottom-0 flex items-center justify-center z-10"
+                  style={{ width: "44%" }}
+                >
                   <div className="text-6xl select-none">{b.emoji}</div>
                 </div>
-              </div>
+              )}
+
+              {/* Right side image accent when background image is present */}
+              {b.image && (
+                <div
+                  className="absolute right-3 top-0 bottom-0 flex items-center justify-center z-10 opacity-60"
+                  style={{ width: "40%" }}
+                >
+                  <div className="text-5xl select-none">{b.emoji}</div>
+                </div>
+              )}
             </div>
           </Link>
         ))}
