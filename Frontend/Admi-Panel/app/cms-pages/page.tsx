@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/theme-context';
 import {
   Layout, Edit, Eye, Plus, ChevronDown, Trash2, Upload, X,
   Image as ImageIcon, Video, Link2, Type, AlignLeft, MousePointer,
-  ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag
+  ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag, Award
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -15,6 +15,7 @@ import {
   createCmsBanner, updateCmsBanner, deleteCmsBanner,
   createCmsHomepageSection, updateCmsHomepageSection, deleteCmsHomepageSection,
   updateCmsSection, createCmsSection, deleteCmsSection,
+  getCmsSiteConfigs, upsertCmsSiteConfig,
 } from '@/lib/api';
 
 const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; options?: string[]; icon?: string }>> = {
@@ -397,6 +398,16 @@ function CMSContent() {
           return { id: p.id, title: p.title || p.slug, slug: p.slug, lastEdited: p.updatedAt ? String(p.updatedAt).split('T')[0] : '', status: p.status || 'Published', sections: secs };
         }));
         if (cmsPages.length > 0) setData(cmsPages);
+        // Load trusted brands from site-config
+        try {
+          const cfgRes: any = await getCmsSiteConfigs().catch(() => ({ data: [] }));
+          const configs: any[] = Array.isArray(cfgRes.data) ? cfgRes.data : Array.isArray(cfgRes?.data?.data) ? cfgRes.data.data : [];
+          const tb = configs.find((c: any) => c.key === 'trusted-brands');
+          if (tb?.value) {
+            const parsed = typeof tb.value === 'string' ? JSON.parse(tb.value) : tb.value;
+            if (Array.isArray(parsed)) setTrustedBrands(parsed);
+          }
+        } catch {}
       } catch {}
     };
     load();
@@ -485,6 +496,46 @@ function CMSContent() {
   const [addingItem, setAddingItem] = useState(false);
   const [editingItem, setEditingItem] = useState<SectionItem | null>(null);
   const [deletingItem, setDeletingItem] = useState<SectionItem | null>(null);
+
+  // ── Trusted Brands ──────────────────────────────────────────────────────────────────────
+  type TrustedBrand = { id: string; name: string; logo: string; slug: string };
+  const [trustedBrands, setTrustedBrands] = useState<TrustedBrand[]>([]);
+  const [tbOpen, setTbOpen] = useState(false);
+  const [tbEditIdx, setTbEditIdx] = useState<number | null>(null);
+  const [tbForm, setTbForm] = useState({ name: '', logo: '', slug: '' });
+  const [tbSaving, setTbSaving] = useState(false);
+  const [tbDeleteIdx, setTbDeleteIdx] = useState<number | null>(null);
+  const toTbSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  // ── Trusted Brands handlers ──────────────────────────────────────────────────────────────────────────
+  const saveTrustedBrands = async (brands: TrustedBrand[]) => {
+    setTbSaving(true);
+    try {
+      await upsertCmsSiteConfig('trusted-brands', brands);
+      setTrustedBrands(brands);
+      toast.success('Trusted brands saved');
+    } catch { toast.error('Failed to save trusted brands'); }
+    setTbSaving(false);
+  };
+  const handleTbSave = () => {
+    if (!tbForm.name.trim()) { toast.error('Brand name required'); return; }
+    const brand: TrustedBrand = {
+      id: tbEditIdx !== null ? trustedBrands[tbEditIdx].id : 'tb-' + Date.now(),
+      name: tbForm.name.trim(),
+      logo: tbForm.logo,
+      slug: tbForm.slug || toTbSlug(tbForm.name),
+    };
+    const updated = tbEditIdx !== null
+      ? trustedBrands.map((b, i) => i === tbEditIdx ? brand : b)
+      : [...trustedBrands, brand];
+    saveTrustedBrands(updated);
+    setTbOpen(false); setTbEditIdx(null); setTbForm({ name: '', logo: '', slug: '' });
+  };
+  const handleTbDelete = () => {
+    if (tbDeleteIdx === null) return;
+    saveTrustedBrands(trustedBrands.filter((_, i) => i !== tbDeleteIdx));
+    setTbDeleteIdx(null);
+  };
 
   const handleAddPage = () => {
     if (!pageForm.title.trim()) { toast.error('Title required'); return; }
@@ -589,6 +640,49 @@ function CMSContent() {
               </div>
             ))}
           </div>
+          {/* ── Trusted Brands Panel ── */}
+          <div style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: trustedBrands.length > 0 ? '12px' : '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Award size={17} color={accent} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '14px', color: textMain }}>Trusted Brands</div>
+                  <div style={{ fontSize: '11px', color: textMuted }}>Homepage logo section — {trustedBrands.length} brand{trustedBrands.length !== 1 ? 's' : ''}</div>
+                </div>
+              </div>
+              <button onClick={() => { setTbForm({ name: '', logo: '', slug: '' }); setTbEditIdx(null); setTbOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '32px', paddingInline: '12px', borderRadius: '8px', background: accent, border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'white', fontFamily: 'var(--font-inter)' }}>
+                <Plus size={13} /> Add Brand
+              </button>
+            </div>
+            {trustedBrands.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '12px 0 4px', color: textMuted, fontSize: '12px' }}>No trusted brands yet. Click &quot;Add Brand&quot; to add homepage logo entries.</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {trustedBrands.map((brand, idx) => (
+                  <div key={brand.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: surface, border: `1px solid ${border}`, borderRadius: '9px', padding: '10px 12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: isDark ? '#1e2a35' : '#f0f9ff', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                      {brand.logo ? <img src={brand.logo} alt={brand.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} onError={(e: any) => { e.target.style.display = 'none'; }} /> : <Award size={16} color={accent} />}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '13px', color: textMain }}>{brand.name}</div>
+                      <div style={{ fontSize: '11px', color: accent, fontFamily: 'monospace' }}>/shop#brand-{brand.slug}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                      <button onClick={() => { setTbForm({ name: brand.name, logo: brand.logo, slug: brand.slug }); setTbEditIdx(idx); setTbOpen(true); }} style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(31,168,154,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Edit size={12} color={accent} />
+                      </button>
+                      <button onClick={() => setTbDeleteIdx(idx)} style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(239,68,68,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trash2 size={12} color='#ef4444' />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {data.map(page => (
               <div key={page.id} style={{ background: card, border: `1px solid ${border}`, borderRadius: '12px', padding: '14px 16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
@@ -813,6 +907,21 @@ function CMSContent() {
         <ItemFormModal sectionName={selectedSection.name} pageTitle={selectedPage.title} initialValues={editingItem.content} onClose={() => setEditingItem(null)} onSave={handleSaveItem} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} isEdit={true} />
       )}
       <ConfirmDialog open={!!deletingItem} onClose={() => setDeletingItem(null)} onConfirm={handleDeleteItem} loading={false} title="Delete Item" message={'Delete "' + (deletingItem ? getItemPreview(selectedSection?.name || '', deletingItem.content) : '') + '" permanently?'} />
+      {/* ── Trusted Brands Modal ── */}
+      <Modal open={tbOpen} onClose={() => { setTbOpen(false); setTbEditIdx(null); }} title={tbEditIdx !== null ? 'Edit Brand' : 'Add Trusted Brand'}>
+        <FormField label="Brand Name *" value={tbForm.name} onChange={(v) => setTbForm(f => ({ ...f, name: v, ...(tbEditIdx === null ? { slug: toTbSlug(v) } : {}) }))} placeholder="e.g. Samsung" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, color: textMuted, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Brand Logo</label>
+          <FileUpload value={tbForm.logo} onChange={(v) => setTbForm(f => ({ ...f, logo: v }))} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
+        </div>
+        <div style={{ marginBottom: '14px' }}>
+          <FormField label="Shop Scroll Anchor" value={tbForm.slug} onChange={(v) => setTbForm(f => ({ ...f, slug: v }))} placeholder="e.g. samsung" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <p style={{ fontSize: '11px', color: textMuted, marginTop: '4px', marginBottom: 0 }}>When clicked on homepage → auto-scrolls to /shop#brand-{tbForm.slug || '...'}</p>
+        </div>
+        <ModalFooter onClose={() => { setTbOpen(false); setTbEditIdx(null); }} onSubmit={handleTbSave} loading={tbSaving} submitLabel={tbEditIdx !== null ? 'Save Changes' : 'Add Brand'} isDark={isDark} border={border} textMain={textMain} />
+      </Modal>
+      <ConfirmDialog open={tbDeleteIdx !== null} onClose={() => setTbDeleteIdx(null)} onConfirm={handleTbDelete} loading={tbSaving} title="Delete Brand" message={tbDeleteIdx !== null ? `Delete "${trustedBrands[tbDeleteIdx]?.name}" from trusted brands?` : 'Delete this brand?'} />
+
       <style>{`.sg{} @media(max-width:768px){.sg{grid-template-columns:1fr!important;}.items-grid{grid-template-columns:1fr!important;}}`}</style>
     </div>
   );
