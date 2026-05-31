@@ -26,7 +26,8 @@ const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: s
     { key: 'description', label: 'Description', type: 'textarea', icon: 'align' },
     { key: 'button_text', label: 'Button Text', type: 'text', icon: 'mouse' },
     { key: 'button_link', label: 'Button Link (URL)', type: 'text', icon: 'link' },
-    { key: 'media', label: 'Banner Image or Video', type: 'file' },
+    { key: 'duration', label: 'Display Duration (seconds) — e.g. 10, 30, 60', type: 'text', icon: 'type' },
+    { key: 'media', label: 'Banner Image or Video URL', type: 'file' },
   ],
   'Sale Banner': [
     { key: 'title', label: 'Banner Title', type: 'text', icon: 'type' },
@@ -378,7 +379,7 @@ function CMSContent() {
           const secs: Section[] = [];
           if (isHome) {
             if (banners.length > 0) {
-              secs.push({ name: 'Hero Banner', items: banners.map((b: any) => ({ id: b.id, content: { title: b.title || '', subtitle: b.subtitle || '', description: '', button_text: b.linkText || '', button_link: b.link || '', media: b.videoUrl || b.image || '' }, status: b.isActive ? 'Active' : 'Inactive', mediaUrl: b.videoUrl || b.image })) });
+              secs.push({ name: 'Hero Banner', items: banners.map((b: any) => ({ id: b.id, content: { title: b.title || '', subtitle: b.subtitle || '', description: '', button_text: b.linkText || '', button_link: b.link || '', media: b.videoUrl || b.image || '', duration: b.duration ? String(b.duration) : '' }, status: b.isActive ? 'Active' : 'Inactive', mediaUrl: b.videoUrl || b.image })) });
             }
             [...hpSecs].sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).forEach((sec: any) => {
               const nm = HP_NAME[sec.type] || sec.type || 'Section';
@@ -434,7 +435,8 @@ function CMSContent() {
       if (secName === 'Hero Banner') {
         const _mUrl = mediaUrl || content.media || content.image || '';
         const _isVid = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrl) || _mUrl.startsWith('data:video/');
-        updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, ...(_isVid ? { videoUrl: _mUrl, mediaType: 'video' } : { image: _mUrl, mediaType: 'image' }), link: content.button_link, linkText: content.button_text }).catch(() => {});
+        const _dur = content.duration ? parseInt(content.duration) : undefined;
+        updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, ...(_isVid ? { videoUrl: _mUrl, mediaType: 'video' } : { image: _mUrl, mediaType: 'image' }), link: content.button_link, linkText: content.button_text, ...(_dur ? { duration: _dur } : {}) }).catch(() => {});
       } else {
         updateCmsHomepageSection(itemId, { config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) } as any, isActive: true }).catch(() => {});
       }
@@ -454,7 +456,8 @@ function CMSContent() {
       if (secName === 'Hero Banner') {
         const _mUrlC = mediaUrl || content.media || '';
         const _isVidC = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrlC) || _mUrlC.startsWith('data:video/');
-        createCmsBanner({ title: content.title, subtitle: content.subtitle, ...(_isVidC ? { videoUrl: _mUrlC, mediaType: 'video' } : { image: _mUrlC, mediaType: 'image' }), link: content.button_link, linkText: content.button_text, isActive: true }).catch(() => {});
+        const _durC = content.duration ? parseInt(content.duration) : undefined;
+        createCmsBanner({ title: content.title, subtitle: content.subtitle, ...(_isVidC ? { videoUrl: _mUrlC, mediaType: 'video' } : { image: _mUrlC, mediaType: 'image' }), link: content.button_link, linkText: content.button_text, isActive: true, ...(_durC ? { duration: _durC } : {}) }).catch(() => {});
       } else {
         const type = HP_SECTION_TYPE[secName] || secName;
         createCmsHomepageSection({ type, config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) }, isActive: true }).catch(() => {});
