@@ -8,6 +8,7 @@ import { useCurrencyStore } from "@/store/currencyStore";
 import { useRecentlyViewedStore } from "@/store/recentlyViewedStore";
 import { fetchProductById, fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
+import UnifiedProductCard from "@/components/UnifiedProductCard";
 
 interface CreditPlan {
   id: string;
@@ -270,30 +271,9 @@ export default function ProductPage() {
               <h2 className="text-sm font-bold text-foreground">You May Also Like</h2>
               <Link href="/shop"><span className="text-xs text-primary font-semibold">View all</span></Link>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {related.map((p) => (
-                <Link key={p.id} href={`/product/${p.id}`}>
-                  <div className="cursor-pointer group">
-                    <div className="relative rounded-2xl overflow-hidden bg-[#F5F5F5] dark:bg-muted aspect-square mb-1.5">
-                      {p.image ? (
-                        <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <div className="w-full h-full bg-muted" />
-                      )}
-                      <button onClick={(e) => { e.preventDefault(); toggleWishlist(p.id); }} className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
-                        <Heart className={`w-3 h-3 ${isWishlisted(p.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                      </button>
-                      {p.discount > 0 && (
-                        <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-bold px-1 py-0.5 rounded">-{p.discount}%</span>
-                      )}
-                    </div>
-                    <p className="text-[10px] font-semibold text-foreground truncate">{p.name}</p>
-                    <div className="flex items-center gap-1 flex-wrap">
-                      <span className="text-[10px] font-black text-primary">{format(p.price)}</span>
-                      {p.oldPrice > p.price && <span className="text-[9px] text-muted-foreground line-through">{format(p.oldPrice)}</span>}
-                    </div>
-                  </div>
-                </Link>
+                <UnifiedProductCard key={p.id} product={p} className="w-full" />
               ))}
             </div>
           </div>
