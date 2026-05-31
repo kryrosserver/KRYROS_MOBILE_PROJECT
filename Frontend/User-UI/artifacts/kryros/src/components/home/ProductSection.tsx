@@ -90,7 +90,7 @@ export default function ProductSection({
           </div>
         ) : (
           /* Grid layout: 2-col on mobile, more on desktop */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
             {products.map((p) => (
               <UnifiedProductCard
                 key={p.id}
