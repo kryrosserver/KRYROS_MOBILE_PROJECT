@@ -1,7 +1,7 @@
--- Migration: Add Payment Config Tables
--- Run this manually on your PostgreSQL database
+-- Migration: Add Checkout Payment Configuration Tables
+-- Run this on your PostgreSQL database (Render/Neon/Supabase etc.)
 
-CREATE TABLE IF NOT EXISTS "payment_methods" (
+CREATE TABLE IF NOT EXISTS "checkout_methods" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
@@ -10,12 +10,12 @@ CREATE TABLE IF NOT EXISTS "payment_methods" (
     "isEnabled" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "payment_methods_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "checkout_methods_pkey" PRIMARY KEY ("id")
 );
 
-CREATE TABLE IF NOT EXISTS "payment_providers" (
+CREATE TABLE IF NOT EXISTS "checkout_providers" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
-    "paymentMethodId" TEXT NOT NULL,
+    "checkoutMethodId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
@@ -23,12 +23,12 @@ CREATE TABLE IF NOT EXISTS "payment_providers" (
     "config" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "payment_providers_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "payment_providers_methodId_fkey" FOREIGN KEY ("paymentMethodId")
-        REFERENCES "payment_methods"("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "checkout_providers_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "checkout_providers_methodId_fkey" FOREIGN KEY ("checkoutMethodId")
+        REFERENCES "checkout_methods"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS "payment_networks" (
+CREATE TABLE IF NOT EXISTS "checkout_networks" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
     "providerId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -36,28 +36,46 @@ CREATE TABLE IF NOT EXISTS "payment_networks" (
     "isEnabled" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "payment_networks_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "payment_networks_providerId_fkey" FOREIGN KEY ("providerId")
-        REFERENCES "payment_providers"("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "checkout_networks_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "checkout_networks_providerId_fkey" FOREIGN KEY ("providerId")
+        REFERENCES "checkout_providers"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Seed default payment methods (idempotent)
-INSERT INTO "payment_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
+-- Seed default checkout methods (idempotent)
+INSERT INTO "checkout_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
 SELECT gen_random_uuid()::text,'Mobile Money','mobile_wallet',0,true,CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM "payment_methods" WHERE "name"='Mobile Money');
+WHERE NOT EXISTS (SELECT 1 FROM "checkout_methods" WHERE "name"='Mobile Money');
 
-INSERT INTO "payment_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
+INSERT INTO "checkout_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
 SELECT gen_random_uuid()::text,'Credit/Debit Card','card',1,true,CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM "payment_methods" WHERE "name"='Credit/Debit Card');
+WHERE NOT EXISTS (SELECT 1 FROM "checkout_methods" WHERE "name"='Credit/Debit Card');
 
-INSERT INTO "payment_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
+INSERT INTO "checkout_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
 SELECT gen_random_uuid()::text,'Bank Transfer','bank',2,true,CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM "payment_methods" WHERE "name"='Bank Transfer');
+WHERE NOT EXISTS (SELECT 1 FROM "checkout_methods" WHERE "name"='Bank Transfer');
 
-INSERT INTO "payment_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
+INSERT INTO "checkout_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
 SELECT gen_random_uuid()::text,'Cash on Delivery','cash',3,true,CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM "payment_methods" WHERE "name"='Cash on Delivery');
+WHERE NOT EXISTS (SELECT 1 FROM "checkout_methods" WHERE "name"='Cash on Delivery');
 
-INSERT INTO "payment_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
+INSERT INTO "checkout_methods" ("id","name","type","sortOrder","isEnabled","updatedAt")
 SELECT gen_random_uuid()::text,'PayPal','digital_wallet',4,false,CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM "payment_methods" WHERE "name"='PayPal');
+WHERE NOT EXISTS (SELECT 1 FROM "checkout_methods" WHERE "name"='PayPal');
+
+-- Seed Bank Transfer with default Stanbic Bank account
+-- Run AFTER inserting checkout_methods
+DO $$
+DECLARE
+  bank_id TEXT;
+BEGIN
+  SELECT id INTO bank_id FROM "checkout_methods" WHERE "name" = 'Bank Transfer' LIMIT 1;
+  IF bank_id IS NOT NULL THEN
+    INSERT INTO "checkout_providers" ("id","checkoutMethodId","name","config","isEnabled","updatedAt")
+    SELECT gen_random_uuid()::text, bank_id, 'Stanbic Bank Zambia',
+           '{"accountName":"KRYROS LIMITED","accountNumber":"91200012345667"}'::jsonb,
+           true, CURRENT_TIMESTAMP
+    WHERE NOT EXISTS (
+      SELECT 1 FROM "checkout_providers" WHERE "checkoutMethodId" = bank_id
+    );
+  END IF;
+END $$;
