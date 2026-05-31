@@ -13,49 +13,6 @@ interface PromoCard {
   emoji: string;
 }
 
-const FALLBACK_CARDS: PromoCard[] = [
-  {
-    id: "b1",
-    tag: "UP TO 50% OFF",
-    title: "Mega Deal",
-    sub: "On Selected Items",
-    desc: "Get the biggest discounts on top electronics and accessories",
-    href: "/shop",
-    gradient: "linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #0d9488 100%)",
-    emoji: "🛒",
-  },
-  {
-    id: "b2",
-    tag: "EARN REWARDS",
-    title: "Refer & Earn",
-    sub: "Invite Friends & Get Rewards",
-    desc: "Share with friends and earn credit per referral",
-    href: "/dashboard",
-    gradient: "linear-gradient(135deg, #1a3a5c 0%, #1e5f8c 50%, #0ea5c9 100%)",
-    emoji: "🎁",
-  },
-  {
-    id: "b3",
-    tag: "FREE DELIVERY",
-    title: "Ship For Free",
-    sub: "On Orders Over K500",
-    desc: "Fast delivery to your doorstep at no extra cost nationwide",
-    href: "/shop",
-    gradient: "linear-gradient(135deg, #3b1f6b 0%, #5c2fa0 50%, #7c3aed 100%)",
-    emoji: "🚚",
-  },
-  {
-    id: "b4",
-    tag: "LIMITED TIME",
-    title: "Flash Sale",
-    sub: "Today's Hot Deals",
-    desc: "Grab the best prices before they're gone — limited stock only",
-    href: "/shop",
-    gradient: "linear-gradient(135deg, #7c1d1d 0%, #b91c1c 50%, #ef4444 100%)",
-    emoji: "⚡",
-  },
-];
-
 const GRADIENTS = [
   "linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #0d9488 100%)",
   "linear-gradient(135deg, #1a3a5c 0%, #1e5f8c 50%, #0ea5c9 100%)",
@@ -80,17 +37,37 @@ function sectionToCard(s: ApiHomepageSection, index: number): PromoCard {
 }
 
 export default function CategoryPromoBanners() {
-  const [cards, setCards] = useState<PromoCard[]>(FALLBACK_CARDS);
+  const [cards, setCards] = useState<PromoCard[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchHomepageSections("promo_banners")
       .then((sections) => {
-        if (sections.length >= 1) {
-          setCards(sections.slice(0, 4).map(sectionToCard));
-        }
+        setCards(sections.slice(0, 4).map(sectionToCard));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 md:px-6 mb-8">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 rounded-2xl animate-pulse bg-muted"
+              style={{ width: "min(86vw, 360px)", height: 165 }}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // Hide completely if no CMS data — admin controls visibility
+  if (cards.length === 0) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-6 mb-8">
