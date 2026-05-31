@@ -62,7 +62,7 @@ function UsersContent() {
   const fp = (k: string) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const openAdd = () => { setForm({ ...EMPTY_FORM }); setAddOpen(true); };
-  const openEdit = (row: Record<string, unknown>) => { const r = row as unknown as User; setForm({ name: r.name, email: r.email, role: r.role, status: r.status }); setEditRow(r); };
+  const openEdit = (row: Record<string, unknown>) => { const r = row as unknown as User; setForm({ name: r.name, email: r.email, role: r.role, status: r.status, password: '' }); setEditRow(r); };
   const openDelete = (row: Record<string, unknown>) => {
     const r = row as unknown as User;
     if (!isSuperAdmin) { toast.error('Only Super Admin can delete users'); return; }
