@@ -38,7 +38,7 @@ function BrandProductSection({ title, brandName, categoryName }: { title: string
   if (products.length === 0) return null;
 
   return (
-    <div className="mb-5 mx-4 bg-card border border-border/50 rounded-2xl shadow-md overflow-hidden">
+    <div className="mb-5 mx-2 bg-card border border-border/50 rounded-2xl shadow-md overflow-hidden">
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <h2 className="text-base font-black text-foreground">{title}</h2>
         <Link href="/shop">
@@ -47,7 +47,7 @@ function BrandProductSection({ title, brandName, categoryName }: { title: string
           </span>
         </Link>
       </div>
-      <div className="grid grid-cols-2 gap-3 px-4 pb-4">
+      <div className="grid grid-cols-2 gap-2 px-2 pb-3">
         {products.map((p) => <UnifiedProductCard key={p.id} product={p} />)}
       </div>
     </div>
@@ -103,7 +103,7 @@ export default function ShopPage() {
 
       {/* ── Search Results Section ── */}
       {searchParam && (
-        <div className="px-4 pt-4 pb-2">
+        <div className="px-3 pt-4 pb-2">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h2 className="text-base font-black text-foreground">
@@ -116,7 +116,7 @@ export default function ShopPage() {
             <a href="/shop" className="text-xs text-primary font-semibold hover:underline">Clear ✕</a>
           </div>
           {searchResults.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {searchResults.map((p) => <UnifiedProductCard key={p.id} product={p} />)}
             </div>
           ) : (
@@ -231,14 +231,14 @@ export default function ShopPage() {
 
       {/* Products grid / scroll */}
       {filteredProducts.length > 0 ? (
-        <div className="px-4 mb-5">
+        <div className="px-3 mb-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-black text-foreground">
               {selectedCat === "All" ? "All Products" : selectedCat}
             </h2>
             <span className="text-xs text-muted-foreground">{filteredProducts.length} items</span>
           </div>
-          <div className="grid grid-cols-2 gap-3 pb-4">
+          <div className="grid grid-cols-2 gap-2 pb-4">
             {filteredProducts.map((p) => <UnifiedProductCard key={p.id} product={p} />)}
           </div>
         </div>
