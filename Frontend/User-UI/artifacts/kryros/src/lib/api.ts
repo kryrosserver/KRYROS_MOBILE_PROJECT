@@ -24,6 +24,13 @@ export interface Product {
   isBestSeller?: boolean;
   isFeatured?: boolean;
   isFlashSale?: boolean;
+  // Credit / Get Now
+  allowCredit?: boolean;
+  creditMessage?: string | null;
+  // Wholesale
+  isWholesaleOnly?: boolean;
+  wholesalePrice?: number | null;
+  wholesaleMoq?: number;
 }
 
 export interface ApiBrand {
@@ -133,6 +140,13 @@ function normalizeProduct(p: any): Product {
     isBestSeller: !!(p.isBestSeller),
     isFeatured: !!(p.isFeatured),
     isFlashSale: !!(p.isFlashSale),
+    // Credit
+    allowCredit: !!(p.allowCredit),
+    creditMessage: p.creditMessage ?? null,
+    // Wholesale
+    isWholesaleOnly: !!(p.isWholesaleOnly),
+    wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
+    wholesaleMoq: p.wholesaleMoq ? Number(p.wholesaleMoq) : 1,
   };
 }
 
