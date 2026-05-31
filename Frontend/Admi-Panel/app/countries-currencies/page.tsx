@@ -86,7 +86,7 @@ function CountriesContent() {
     if (!editCountry) return;
     setLoading(true);
     try {
-      await updateCountry(editCountry.id, { exchangeRate: Number(cForm.rate), shippingEnabled: cForm.shipping === 'true', isActive: cForm.status === 'Active' });
+      await updateCountry(editCountry.id, { exchangeRate: Number(cForm.rate), status: cForm.status === 'Active' });
       setCountries(d => d.map(c => c.id===editCountry.id ? {...c, rate:Number(cForm.rate), shipping:cForm.shipping==='true', status:cForm.status} : c));
       toast.success('Country updated');
       setEditCountry(null);
@@ -105,11 +105,10 @@ function CountriesContent() {
       await createCountry({
         name: addCForm.name,
         code: addCForm.code.toUpperCase(),
-        currency: addCForm.currency.toUpperCase(),
+        currencyCode: addCForm.currency.toUpperCase(),
         currencySymbol: addCForm.symbol,
         exchangeRate: Number(addCForm.rate) || 1,
-        shippingEnabled: addCForm.shipping === 'true',
-        isActive: addCForm.status === 'Active',
+        status: addCForm.status === 'Active',
       });
       toast.success('Country added successfully');
       setAddCountryOpen(false);
