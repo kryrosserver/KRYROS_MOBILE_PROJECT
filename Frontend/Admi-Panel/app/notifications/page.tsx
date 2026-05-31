@@ -62,12 +62,30 @@ function NotificationsContent() {
 
     setSending(true);
     try {
-      // Try real API first
-      const payload: any = { title, message, target, channel };
-      if (recipientEmail) payload.email = recipientEmail;
-      if (recipientPhone) payload.phone = recipientPhone;
-      if (bulkList) payload.recipients = bulkList.split(',').map((s: string) => s.trim()).filter(Boolean);
-      await api.post('/api/notifications/send', payload);
+      // Map admin UI fields to backend SendNotificationDto
+      const targetTypeMap: Record<string, string> = {
+        'All Users': 'BULK',
+        'Bulk': 'BULK',
+        'Specific User': 'SINGLE',
+        'Status Based': 'STATUS_BASED',
+        'All Customers': 'BULK',
+      };
+      const targetType = targetTypeMap[target] || 'BULK';
+      const payload: any = {
+        title,
+        body: message,   // backend expects 'body' not 'message'
+        targetType,
+      };
+      if (targetType === 'SINGLE' && recipientEmail) payload.userId = recipientEmail;
+      if (bulkList) payload.data = { recipients: bulkList.split(',').map((s: string) => s.trim()).filter(Boolean) };
+      // For email/SMS channels, use the appropriate endpoint
+      if (channel === 'Email' && recipientEmail) {
+        await api.post('/api/notifications/send', { title, body: message, targetType, userId: recipientEmail });
+      } else if (channel === 'SMS' && recipientPhone) {
+        await api.post('/api/notifications/sms/send', { phoneNumber: recipientPhone, message });
+      } else {
+        await api.post('/api/notifications/send', payload);
+      }
       toast.success(`Notification sent via ${channel}`);
     } catch {
       // Fallback: local record only
