@@ -41,7 +41,7 @@ export default function FlashSaleSection() {
         </Link>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
         {/* Countdown timer card */}
         <div className="flex-shrink-0 w-[140px] md:w-[155px] bg-card border border-border rounded-2xl flex flex-col items-center justify-center p-4 gap-2">
           <p className="text-[10px] text-muted-foreground font-medium">Ends In</p>
@@ -73,7 +73,7 @@ export default function FlashSaleSection() {
           <UnifiedProductCard
             key={p.id}
             product={p}
-            className="flex-shrink-0 w-[calc(50vw-14px)] max-w-[180px]"
+            className="flex-shrink-0 w-[calc(50vw-16px)]"
           />
         ))}
       </div>
