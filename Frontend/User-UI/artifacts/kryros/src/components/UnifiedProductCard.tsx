@@ -39,7 +39,7 @@ export default function UnifiedProductCard({
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain p-[10%]"
+            className="w-full h-full object-contain"
             onError={() => setImgErr(true)}
           />
         ) : (
