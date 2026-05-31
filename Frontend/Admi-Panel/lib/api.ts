@@ -311,3 +311,13 @@ export const updatePaymentNetwork = (id: string, data: Record<string, unknown>) 
   api.patch(`/api/payment-config/networks/${id}`, data);
 export const deletePaymentNetwork = (id: string) =>
   api.delete(`/api/payment-config/networks/${id}`);
+
+// ── Credit Plans ──────────────────────────────────────────
+export const getCreditPlans = () =>
+  api.get('/api/credit/plans');
+export const createCreditPlan = (data: Record<string, unknown>) =>
+  api.post('/api/credit/plans', data);
+export const updateCreditPlan = (id: string, data: Record<string, unknown>) =>
+  api.put(`/api/credit/plans/${id}`, data);
+export const deleteCreditPlan = (id: string) =>
+  api.delete(`/api/credit/plans/${id}`);
