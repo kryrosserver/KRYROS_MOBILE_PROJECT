@@ -446,7 +446,7 @@ function CMSContent() {
     if (_isHome(pageId)) {
       if (secName === 'Hero Banner') {
         const _mUrl = mediaUrl || content.media || content.image || '';
-        const _isVid = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrl) || _mUrl.startsWith('data:video/');
+        const _isVid = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrl) || _mUrl.startsWith('data:video/') || /youtu\.?be/.test(_mUrl);
         const _dur = content.duration ? parseInt(content.duration) : undefined;
         updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, ...(_isVid ? { videoUrl: _mUrl, mediaType: 'video' } : { image: _mUrl, mediaType: 'image' }), link: content.button_link, linkText: content.button_text, ...(_dur ? { duration: _dur } : {}) }).catch(() => {});
       } else {
@@ -467,7 +467,7 @@ function CMSContent() {
     if (_isHome(pageId)) {
       if (secName === 'Hero Banner') {
         const _mUrlC = mediaUrl || content.media || '';
-        const _isVidC = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrlC) || _mUrlC.startsWith('data:video/');
+        const _isVidC = /\.(mp4|mov|webm|ogg|m4v)(\?.*)?$/i.test(_mUrlC) || _mUrlC.startsWith('data:video/') || /youtu\.?be/.test(_mUrlC);
         const _durC = content.duration ? parseInt(content.duration) : undefined;
         createCmsBanner({ title: content.title, subtitle: content.subtitle, ...(_isVidC ? { videoUrl: _mUrlC, mediaType: 'video' } : { image: _mUrlC, mediaType: 'image' }), link: content.button_link, linkText: content.button_text, isActive: true, ...(_durC ? { duration: _durC } : {}) }).catch(() => {});
       } else {
