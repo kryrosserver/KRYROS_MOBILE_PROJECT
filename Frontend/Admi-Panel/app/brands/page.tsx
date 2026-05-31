@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AdminShell from '@/components/admin/admin-shell';
 import DataTable, { Column } from '@/components/admin/data-table';
 import PageHeader from '@/components/admin/page-header';
 import { Modal, ConfirmDialog, FormField, ModalFooter } from '@/components/admin/modal';
 import { useTheme } from '@/contexts/theme-context';
-import { Award } from 'lucide-react';
+import { Award, Upload, X } from 'lucide-react';
 import { createBrand, updateBrand, deleteBrand, getBrands } from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -14,10 +14,76 @@ type Brand = {
   website: string; description: string; logoUrl: string;
 };
 
-// Brand data loaded from API
-
 const EMPTY_FORM = { name: '', slug: '', country: '', status: 'Active', website: '', description: '', logoUrl: '' };
 const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+/** Inline logo upload component — file picker + base64 + URL fallback */
+function LogoUpload({
+  value, onChange, isDark, border, textMain, textMuted, surface,
+}: {
+  value: string; onChange: (v: string) => void;
+  isDark: boolean; border: string; textMain: string; textMuted: string; surface: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error('Logo must be under 2 MB'); return; }
+    const reader = new FileReader();
+    reader.onload = () => onChange(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <div style={{ fontSize: '12px', fontWeight: 600, color: textMuted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Brand Logo
+      </div>
+
+      {/* Preview + Remove */}
+      {value ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', background: surface, border: `1px solid ${border}`, borderRadius: '10px', marginBottom: '10px' }}>
+          <div style={{ width: '80px', height: '44px', background: isDark ? '#1a2535' : '#f8fafc', border: `1px solid ${border}`, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+            <img src={value} alt="logo preview" style={{ maxWidth: '72px', maxHeight: '38px', objectFit: 'contain' }} onError={() => {}} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ color: textMain, fontSize: '12px', fontWeight: 600 }}>Logo preview</div>
+            <div style={{ color: textMuted, fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
+              {value.startsWith('data:') ? 'Uploaded image' : value}
+            </div>
+          </div>
+          <button onClick={() => { onChange(''); if (inputRef.current) inputRef.current.value = ''; }}
+            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', color: '#ef4444', fontSize: '11px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <X size={11} /> Remove
+          </button>
+        </div>
+      ) : null}
+
+      {/* Upload button */}
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: 'rgba(31,168,154,0.1)', border: '1px solid rgba(31,168,154,0.4)', borderRadius: '8px', cursor: 'pointer', color: '#1FA89A', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+          <Upload size={13} /> Upload Image
+        </button>
+        <span style={{ color: textMuted, fontSize: '11px' }}>or</span>
+        <input
+          value={value.startsWith('data:') ? '' : value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="Paste image URL..."
+          style={{ flex: 1, padding: '8px 10px', background: surface, border: `1px solid ${border}`, borderRadius: '8px', color: textMain, fontSize: '12px', outline: 'none' }}
+        />
+      </div>
+      <div style={{ fontSize: '11px', color: textMuted, marginTop: '5px' }}>
+        JPG / PNG / WebP · max 2 MB. This logo shows on the homepage brands section.
+      </div>
+
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" style={{ display: 'none' }} onChange={handleFile} />
+    </div>
+  );
+}
 
 function BrandsContent() {
   const { theme } = useTheme();
@@ -44,6 +110,7 @@ function BrandsContent() {
       setData(normalized);
     }).catch(() => {});
   }, []);
+
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Brand | null>(null);
   const [deleteRow, setDeleteRow] = useState<Brand | null>(null);
@@ -70,16 +137,19 @@ function BrandsContent() {
     try {
       await createBrand({
         name: form.name,
-        slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-        logo: (form as any).logoUrl || undefined,
-        description: (form as any).description || undefined,
-        website: (form as any).website || undefined,
-        isActive: (form as any).status === 'Active',
+        slug: form.slug || toSlug(form.name),
+        logo: form.logoUrl || undefined,
+        description: form.description || undefined,
+        website: form.website || undefined,
+        isActive: form.status === 'Active',
       });
       const newItem: Brand = { id: `BRD${String(Date.now()).slice(-3)}`, ...form, products: 0 };
       setData(d => [...d, newItem]);
       toast.success('Brand added'); setAddOpen(false);
-    } catch { toast.error('Failed to add brand — check your API connection'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join(', ') : (msg || 'Failed to add brand'));
+    }
     setLoading(false);
   };
 
@@ -90,14 +160,17 @@ function BrandsContent() {
       await updateBrand(editRow.id, {
         name: form.name,
         slug: form.slug || undefined,
-        logo: (form as any).logoUrl || undefined,
-        description: (form as any).description || undefined,
-        website: (form as any).website || undefined,
-        isActive: (form as any).status === 'Active',
+        logo: form.logoUrl || undefined,
+        description: form.description || undefined,
+        website: form.website || undefined,
+        isActive: form.status === 'Active',
       });
       setData(d => d.map(b => b.id === editRow.id ? { ...b, ...form } : b));
       toast.success('Brand updated'); setEditRow(null);
-    } catch { toast.error('Failed to update brand — check your API connection'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join(', ') : (msg || 'Failed to update brand'));
+    }
     setLoading(false);
   };
 
@@ -114,16 +187,26 @@ function BrandsContent() {
 
   const columns: Column[] = [
     { key: 'id', label: 'ID', width: '90px' },
-    { key: 'name', label: 'Brand', render: (v) => (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: '#1FA89A' }}>{String(v).charAt(0)}</div>
-        <span style={{ fontWeight: 600, color: textMain }}>{String(v)}</span>
-      </div>
-    )},
+    { key: 'name', label: 'Brand', render: (v, row) => {
+      const brand = row as unknown as Brand;
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {brand.logoUrl ? (
+            <div style={{ width: '44px', height: '32px', borderRadius: '6px', background: isDark ? '#1a2535' : '#f1f5f9', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+              <img src={brand.logoUrl} alt={brand.name} style={{ maxWidth: '40px', maxHeight: '28px', objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            </div>
+          ) : (
+            <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: '#1FA89A', flexShrink: 0 }}>
+              {String(v).charAt(0)}
+            </div>
+          )}
+          <span style={{ fontWeight: 600, color: textMain }}>{String(v)}</span>
+        </div>
+      );
+    }},
     { key: 'slug', label: 'Slug', render: (v) => <code style={{ fontSize: '12px', color: '#1FA89A', background: 'rgba(31,168,154,0.1)', padding: '2px 6px', borderRadius: '4px' }}>{String(v)}</code> },
-    { key: 'country', label: 'Country' },
-    { key: 'description', label: 'Description', render: (v) => <span style={{ color: textMuted, fontSize: '12px' }}>{String(v).slice(0, 40)}{String(v).length > 40 ? '...' : ''}</span> },
-    { key: 'website', label: 'Website', render: (v) => v ? <a href={String(v)} target="_blank" rel="noreferrer" style={{ color: '#6366f1', fontSize: '12px' }}>{String(v).replace('https://', '')}</a> : <span style={{ color: textMuted }}>—</span> },
+    { key: 'description', label: 'Description', render: (v) => <span style={{ color: textMuted, fontSize: '12px' }}>{String(v).slice(0, 45)}{String(v).length > 45 ? '...' : ''}</span> },
+    { key: 'website', label: 'Website', render: (v) => v ? <a href={String(v)} target="_blank" rel="noreferrer" style={{ color: '#6366f1', fontSize: '12px' }}>{String(v).replace('https://', '').replace('http://', '')}</a> : <span style={{ color: textMuted }}>—</span> },
     { key: 'products', label: 'Products', render: (v) => <span style={{ fontWeight: 700, color: '#6366f1' }}>{String(v)}</span> },
     { key: 'status', label: 'Status', render: (v) => <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: v === 'Active' ? 'rgba(31,168,154,0.12)' : 'rgba(100,116,139,0.1)', color: v === 'Active' ? '#1FA89A' : '#8E9AAF' }}>{String(v)}</span> },
   ];
@@ -133,9 +216,8 @@ function BrandsContent() {
       <FormField label="Brand Name *" value={form.name} onChange={fp('name')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. Nike" />
       <FormField label="Slug (auto-generated)" value={form.slug} onChange={fp('slug')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="auto-generated" />
       <FormField label="Description" value={form.description} onChange={fp('description')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Brief description of this brand..." type="textarea" />
-      <FormField label="Country" value={form.country} onChange={fp('country')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. USA" />
       <FormField label="Website URL" value={form.website} onChange={fp('website')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="https://..." />
-      <FormField label="Logo Image URL" value={form.logoUrl} onChange={fp('logoUrl')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="https://... (logo image link)" />
+      <LogoUpload value={form.logoUrl} onChange={fp('logoUrl')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
       <FormField label="Status" value={form.status} onChange={fp('status')} options={['Active', 'Inactive']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
     </>
   );
