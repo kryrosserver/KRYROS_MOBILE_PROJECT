@@ -105,6 +105,7 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
             </Link>
           ))}
           <p className="px-3 pt-1 text-[9px] text-muted-foreground/60">© 2026 KRYROS. All Rights Reserved.</p>
+          <p className="px-3 pb-1 text-[9px] text-muted-foreground/40">Designed &amp; built for worldwide.</p>
         </div>
       </div>
     </div>
