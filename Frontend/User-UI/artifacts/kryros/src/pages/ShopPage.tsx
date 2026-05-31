@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import {
   Heart, ShoppingCart, Star, ChevronRight, Zap, Headphones,
@@ -19,21 +19,23 @@ const HERO_DATA: Record<string, { pre: string; brand: string; sub: string; bg: s
   Sony:    { pre: "Premium by",     brand: "Sony.",    sub: "World-class audio.\nFeel every detail.",         bg: "#f0f0f0",  brandColor: "#1a1a1a" },
 };
 
+/** Convert brand name to a safe anchor slug */
+function toAnchor(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 
-
-function BrandProductSection({ title, brandName, categoryName }: { title: string; brandName?: string; categoryName?: string }) {
+function BrandProductSection({ title, brandName }: { title: string; brandName?: string }) {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     fetchProducts({ take: 8 }).then((all) => {
       const filtered = all.filter((p) => {
         if (brandName && p.brand !== brandName) return false;
-        if (categoryName && p.category !== categoryName) return false;
         return true;
       });
       setProducts(filtered);
     });
-  }, [brandName, categoryName]);
+  }, [brandName]);
 
   if (products.length === 0) return null;
 
@@ -75,10 +77,30 @@ export default function ShopPage() {
       setBrands(bs);
       if (bs.length > 0) setSelectedBrand(bs[0].name);
     });
-    // If search param exists, fetch with search query; otherwise fetch all
     const searchQ = new URLSearchParams(window.location.search).get("search") || "";
     fetchProducts({ take: 50, search: searchQ || undefined }).then(setAllProducts);
   }, []);
+
+  // Auto-scroll to brand anchor when URL has #brand-{slug} hash
+  useEffect(() => {
+    if (brands.length === 0) return;
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (hash && hash.startsWith("#brand-")) {
+      // Wait for brand sections to render then scroll
+      setTimeout(() => {
+        const el = document.getElementById(hash.slice(1));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 600);
+    }
+  }, [brands]);
+
+  const scrollToBrand = (brandName: string) => {
+    const slug = toAnchor(brandName);
+    const el = document.getElementById(`brand-${slug}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const hero = HERO_DATA[selectedBrand];
 
@@ -206,7 +228,7 @@ export default function ShopPage() {
 
       <div className="mx-4 mb-4 border-t border-border" />
 
-      {/* Shop by Brand */}
+      {/* Shop by Brand — text only, click scrolls to that brand section */}
       {uniqueBrands.length > 0 && (
         <div className="px-4 mb-5">
           <p className="text-sm font-bold text-foreground mb-2.5">Shop by Brand</p>
@@ -216,7 +238,11 @@ export default function ShopPage() {
               return (
                 <button
                   key={name}
-                  onClick={() => { setSelectedBrand(name); setHeroDot(0); }}
+                  onClick={() => {
+                    setSelectedBrand(name);
+                    setHeroDot(0);
+                    scrollToBrand(name);
+                  }}
                   className={`flex-shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold transition-all ${active ? "bg-foreground text-background border-foreground" : "bg-card border-border text-foreground hover:border-teal-600/50"}`}
                 >
                   {name}
@@ -272,9 +298,11 @@ export default function ShopPage() {
         </div>
       </div>
 
-      {/* Dynamic brand/category sections */}
-      {brands.slice(0, 2).map((brand) => (
-        <BrandProductSection key={brand.id} title={brand.name} brandName={brand.name} />
+      {/* Dynamic brand sections — each has id="brand-{slug}" for auto-scroll */}
+      {brands.map((brand) => (
+        <div key={brand.id} id={`brand-${toAnchor(brand.name)}`} className="scroll-mt-20">
+          <BrandProductSection title={brand.name} brandName={brand.name} />
+        </div>
       ))}
       </>
       )}
