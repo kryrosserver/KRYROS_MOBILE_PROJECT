@@ -68,7 +68,14 @@ function BrandsContent() {
     if (!form.name.trim()) { toast.error('Brand name is required'); return; }
     setLoading(true);
     try {
-      await createBrand(form);
+      await createBrand({
+        name: form.name,
+        slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        logo: (form as any).logoUrl || undefined,
+        description: (form as any).description || undefined,
+        website: (form as any).website || undefined,
+        isActive: (form as any).status === 'Active',
+      });
       const newItem: Brand = { id: `BRD${String(Date.now()).slice(-3)}`, ...form, products: 0 };
       setData(d => [...d, newItem]);
       toast.success('Brand added'); setAddOpen(false);
@@ -80,7 +87,14 @@ function BrandsContent() {
     if (!editRow) return;
     setLoading(true);
     try {
-      await updateBrand(editRow.id, form);
+      await updateBrand(editRow.id, {
+        name: form.name,
+        slug: form.slug || undefined,
+        logo: (form as any).logoUrl || undefined,
+        description: (form as any).description || undefined,
+        website: (form as any).website || undefined,
+        isActive: (form as any).status === 'Active',
+      });
       setData(d => d.map(b => b.id === editRow.id ? { ...b, ...form } : b));
       toast.success('Brand updated'); setEditRow(null);
     } catch { toast.error('Failed to update brand — check your API connection'); }
