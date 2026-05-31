@@ -36,8 +36,9 @@ export default function BrandsPage() {
   const [form,      setForm]     = useState({ ...EMPTY_FORM });
 
   const load = () => {
-    getBrands().then((data: any) => {
-      setBrands((data || []).map((b: any) => ({
+    getBrands().then((r: any) => {
+      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+      setBrands(raw.map((b: any) => ({
         id: String(b.id ?? b._id ?? ''),
         name: b.name ?? '',
         slug: b.slug ?? '',
