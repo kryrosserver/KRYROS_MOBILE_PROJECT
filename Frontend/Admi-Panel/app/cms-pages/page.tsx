@@ -13,7 +13,8 @@ import toast from 'react-hot-toast';
 import {
   getCmsPages, getCmsBanners, getCmsHomepageSections, getCmsSections,
   createCmsBanner, updateCmsBanner, deleteCmsBanner,
-  updateCmsHomepageSection, updateCmsSection, createCmsSection, deleteCmsSection,
+  createCmsHomepageSection, updateCmsHomepageSection, deleteCmsHomepageSection,
+  updateCmsSection, createCmsSection, deleteCmsSection,
 } from '@/lib/api';
 
 const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; options?: string[]; icon?: string }>> = {
@@ -409,22 +410,36 @@ function CMSContent() {
       if (secName === 'Hero Banner') {
         updateCmsBanner(itemId, { title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media || content.image, link: content.button_link, linkText: content.button_text }).catch(() => {});
       } else {
-        updateCmsHomepageSection(itemId, { config: content as any, isActive: true }).catch(() => {});
+        updateCmsHomepageSection(itemId, { config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) } as any, isActive: true }).catch(() => {});
       }
     } else {
       updateCmsSection(itemId, { content: content as any, isActive: true }).catch(() => {});
     }
   };
+  const HP_SECTION_TYPE: Record<string, string> = {
+    'Hero Slider': 'HeroSlider', 'Featured Brands': 'Brands', 'Trust Badges': 'TrustBadges',
+    'Category Section': 'CategorySection', 'Featured Products': 'FeaturedProducts',
+    'Flash Sale': 'FlashSale', 'Promo Banners': 'PromoBanners', 'Promo Banner': 'promo_banners',
+    'Category Promo Banners': 'CategoryPromoBanners', 'Products Section': 'ProductSection',
+    'Recently Viewed': 'RecentlyViewed', 'Upgrade Banner': 'UpgradeBanner',
+  };
   const _apiCreate = (pageId: string, secName: string, content: SectionData, mediaUrl?: string) => {
-    if (_isHome(pageId) && secName === 'Hero Banner') {
-      createCmsBanner({ title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media, link: content.button_link, linkText: content.button_text, isActive: true }).catch(() => {});
-    } else if (!_isHome(pageId)) {
+    if (_isHome(pageId)) {
+      if (secName === 'Hero Banner') {
+        createCmsBanner({ title: content.title, subtitle: content.subtitle, image: mediaUrl || content.media, link: content.button_link, linkText: content.button_text, isActive: true }).catch(() => {});
+      } else {
+        const type = HP_SECTION_TYPE[secName] || secName;
+        createCmsHomepageSection({ type, config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) }, isActive: true }).catch(() => {});
+      }
+    } else {
       createCmsSection({ name: secName, pageSlug: _getPageSlug(pageId), content: content as any, isActive: true }).catch(() => {});
     }
   };
   const _apiDelete = (itemId: string, pageId: string, secName: string) => {
-    if (_isHome(pageId) && secName === 'Hero Banner') { deleteCmsBanner(itemId).catch(() => {}); }
-    else if (!_isHome(pageId)) { deleteCmsSection(itemId).catch(() => {}); }
+    if (_isHome(pageId)) {
+      if (secName === 'Hero Banner') { deleteCmsBanner(itemId).catch(() => {}); }
+      else { deleteCmsHomepageSection(itemId).catch(() => {}); }
+    } else { deleteCmsSection(itemId).catch(() => {}); }
   };
   const _apiToggle = (itemId: string, pageId: string, secName: string, active: boolean) => {
     if (_isHome(pageId)) {
