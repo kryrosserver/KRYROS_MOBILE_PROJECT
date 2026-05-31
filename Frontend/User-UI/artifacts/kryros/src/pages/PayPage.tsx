@@ -268,7 +268,7 @@ export default function PayPage() {
   const currencyObj = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
 
   // Mobile money
-  const [mmProvider, setMmProvider] = useState("MTN Mobile Money");
+  const [mmProvider, setMmProvider] = useState("MTN");
   const [mmPhone, setMmPhone] = useState("");
 
   // Bank proof file
@@ -280,7 +280,7 @@ export default function PayPage() {
   const [payRef, setPayRef] = useState(() => "PAY-" + Date.now().toString(36).toUpperCase().slice(-8));
   // ── Dynamic payment config (from admin panel) ─────────────────────────
   const [bankProviders, setBankProviders] = useState<{ name:string; config?:{ accountName?:string; accountNumber?:string } }[]>([]);
-  const [mobileNetworks, setMobileNetworks] = useState<string[]>(["MTN Mobile Money", "Airtel Money", "Zamtel Money"]);
+  const [mobileNetworks, setMobileNetworks] = useState<string[]>(["MTN", "Airtel", "Zamtel"]);
   const [apiMethodTypes, setApiMethodTypes] = useState<string[]>([]);
 
   useEffect(() => {
@@ -304,10 +304,7 @@ export default function PayPage() {
               (p.networks || [])
                 .filter((n: any) => n.isEnabled)
                 .map((n: any) => {
-                  if (n.name === "MTN")    return "MTN Mobile Money";
-                  if (n.name === "Airtel") return "Airtel Money";
-                  if (n.name === "Zamtel") return "Zamtel Money";
-                  return `${n.name} Mobile Money`;
+                  return n.name; // Just the network name: MTN, Airtel, Zamtel
                 })
             );
           if (nets.length > 0) {
@@ -789,7 +786,7 @@ export default function PayPage() {
                       <input
                         value={mmPhone}
                         onChange={(e) => setMmPhone(e.target.value)}
-                        placeholder="e.g. +260 97 000 0000"
+                        placeholder="+XXX XXXXXXXXX"
                         type="tel"
                         className="flex-1 text-sm text-foreground outline-none bg-transparent"
                       />
