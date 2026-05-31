@@ -7,7 +7,7 @@ export class PaymentConfigService {
 
   // ── All methods (admin) ─────────────────────────────────────────────────
   async getMethods() {
-    return this.prisma.paymentMethod.findMany({
+    return this.prisma.checkoutMethod.findMany({
       orderBy: { sortOrder: 'asc' },
       include: {
         providers: {
@@ -20,7 +20,7 @@ export class PaymentConfigService {
 
   // ── Enabled methods only (public – customer frontend) ──────────────────
   async getEnabledMethods() {
-    return this.prisma.paymentMethod.findMany({
+    return this.prisma.checkoutMethod.findMany({
       where: { isEnabled: true },
       orderBy: { sortOrder: 'asc' },
       include: {
@@ -38,35 +38,38 @@ export class PaymentConfigService {
     });
   }
 
-  // ── Payment Method CRUD ─────────────────────────────────────────────────
+  // ── CheckoutMethod CRUD ─────────────────────────────────────────────────
   async createMethod(data: { name: string; type: string; icon?: string }) {
-    const last = await this.prisma.paymentMethod.findFirst({ orderBy: { sortOrder: 'desc' } });
-    return this.prisma.paymentMethod.create({
+    const last = await this.prisma.checkoutMethod.findFirst({ orderBy: { sortOrder: 'desc' } });
+    return this.prisma.checkoutMethod.create({
       data: { ...data, sortOrder: (last?.sortOrder ?? -1) + 1 },
     });
   }
 
-  async updateMethod(id: string, data: Partial<{ name: string; type: string; icon: string; sortOrder: number; isEnabled: boolean }>) {
-    return this.prisma.paymentMethod.update({ where: { id }, data });
+  async updateMethod(
+    id: string,
+    data: Partial<{ name: string; type: string; icon: string; sortOrder: number; isEnabled: boolean }>,
+  ) {
+    return this.prisma.checkoutMethod.update({ where: { id }, data });
   }
 
   async deleteMethod(id: string) {
-    return this.prisma.paymentMethod.delete({ where: { id } });
+    return this.prisma.checkoutMethod.delete({ where: { id } });
   }
 
   async reorderMethods(orders: { id: string; sortOrder: number }[]) {
     await Promise.all(
       orders.map(({ id, sortOrder }) =>
-        this.prisma.paymentMethod.update({ where: { id }, data: { sortOrder } }),
+        this.prisma.checkoutMethod.update({ where: { id }, data: { sortOrder } }),
       ),
     );
     return { success: true };
   }
 
-  // ── Provider CRUD ───────────────────────────────────────────────────────
+  // ── CheckoutProvider CRUD ───────────────────────────────────────────────
   async getProviders(methodId: string) {
-    return this.prisma.paymentProvider.findMany({
-      where: { paymentMethodId: methodId },
+    return this.prisma.checkoutProvider.findMany({
+      where: { checkoutMethodId: methodId },
       orderBy: { sortOrder: 'asc' },
       include: { networks: { orderBy: { sortOrder: 'asc' } } },
     });
@@ -78,12 +81,18 @@ export class PaymentConfigService {
     description?: string;
     config?: Record<string, unknown>;
   }) {
-    const last = await this.prisma.paymentProvider.findFirst({
-      where: { paymentMethodId: data.paymentMethodId },
+    const last = await this.prisma.checkoutProvider.findFirst({
+      where: { checkoutMethodId: data.paymentMethodId },
       orderBy: { sortOrder: 'desc' },
     });
-    return this.prisma.paymentProvider.create({
-      data: { ...data, sortOrder: (last?.sortOrder ?? -1) + 1 },
+    return this.prisma.checkoutProvider.create({
+      data: {
+        checkoutMethodId: data.paymentMethodId,
+        name: data.name,
+        description: data.description,
+        config: data.config,
+        sortOrder: (last?.sortOrder ?? -1) + 1,
+      },
       include: { networks: true },
     });
   }
@@ -98,7 +107,7 @@ export class PaymentConfigService {
       isEnabled: boolean;
     }>,
   ) {
-    return this.prisma.paymentProvider.update({
+    return this.prisma.checkoutProvider.update({
       where: { id },
       data,
       include: { networks: true },
@@ -106,32 +115,32 @@ export class PaymentConfigService {
   }
 
   async deleteProvider(id: string) {
-    return this.prisma.paymentProvider.delete({ where: { id } });
+    return this.prisma.checkoutProvider.delete({ where: { id } });
   }
 
-  // ── Network CRUD ────────────────────────────────────────────────────────
+  // ── CheckoutNetwork CRUD ────────────────────────────────────────────────
   async getNetworks(providerId: string) {
-    return this.prisma.paymentNetwork.findMany({
+    return this.prisma.checkoutNetwork.findMany({
       where: { providerId },
       orderBy: { sortOrder: 'asc' },
     });
   }
 
   async createNetwork(data: { providerId: string; name: string }) {
-    const last = await this.prisma.paymentNetwork.findFirst({
+    const last = await this.prisma.checkoutNetwork.findFirst({
       where: { providerId: data.providerId },
       orderBy: { sortOrder: 'desc' },
     });
-    return this.prisma.paymentNetwork.create({
+    return this.prisma.checkoutNetwork.create({
       data: { ...data, sortOrder: (last?.sortOrder ?? -1) + 1 },
     });
   }
 
   async updateNetwork(id: string, data: Partial<{ name: string; sortOrder: number; isEnabled: boolean }>) {
-    return this.prisma.paymentNetwork.update({ where: { id }, data });
+    return this.prisma.checkoutNetwork.update({ where: { id }, data });
   }
 
   async deleteNetwork(id: string) {
-    return this.prisma.paymentNetwork.delete({ where: { id } });
+    return this.prisma.checkoutNetwork.delete({ where: { id } });
   }
 }
