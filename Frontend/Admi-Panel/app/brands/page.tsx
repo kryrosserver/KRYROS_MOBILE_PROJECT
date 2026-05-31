@@ -18,8 +18,14 @@ const EMPTY_FORM = { name: '', slug: '', country: '', status: 'Active', website:
 const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 export default function BrandsPage() {
-  const { isDark, colors } = useTheme();
-  const { bg, surface, border, textMain, textMuted, accent } = colors;
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const bg = isDark ? '#070E1A' : '#F8FAFC';
+  const surface = isDark ? '#101826' : '#F1F5F9';
+  const border = isDark ? '#1E293B' : '#E2E8F0';
+  const textMain = isDark ? '#FFFFFF' : '#0F172A';
+  const textMuted = isDark ? '#8E9AAF' : '#64748B';
+  const accent = '#1FA89A';
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +58,11 @@ export default function BrandsPage() {
   useEffect(load, []);
 
   const openAdd = () => { setForm({ ...EMPTY_FORM }); setEditRow(null); setModalOpen(true); };
-  const openEdit = (row: Brand) => { setForm({ name: row.name, slug: row.slug, country: row.country, status: row.status, website: row.website, description: row.description }); setEditRow(row); setModalOpen(true); };
+  const openEdit = (row: Brand) => {
+    setForm({ name: row.name, slug: row.slug, country: row.country, status: row.status, website: row.website, description: row.description });
+    setEditRow(row);
+    setModalOpen(true);
+  };
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error('Brand name is required'); return; }
@@ -77,8 +87,12 @@ export default function BrandsPage() {
   const handleDelete = async () => {
     if (!deleteRow) return;
     setDeleting(true);
-    try { await deleteBrand(deleteRow.id); toast.success('Brand deleted'); setDeleteRow(null); load(); }
-    catch (e: any) { toast.error(e?.message ?? 'Delete failed'); }
+    try {
+      await deleteBrand(deleteRow.id);
+      toast.success('Brand deleted');
+      setDeleteRow(null);
+      load();
+    } catch (e: any) { toast.error(e?.message ?? 'Delete failed'); }
     setDeleting(false);
   };
 
@@ -91,10 +105,10 @@ export default function BrandsPage() {
   };
 
   const COLS: Column<Brand>[] = [
-    { key: 'name', label: 'Brand Name', render: (v, row) => (
+    { key: 'name', label: 'Brand Name', render: (_v, row) => (
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{ width: '32px', height: '32px', background: isDark ? '#1e2a35' : '#f0f9ff', border: `1px solid ${border}`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Award size={14} style={{ color: accent }} />
+          <Award size={14} color={accent} />
         </div>
         <div>
           <div style={{ fontWeight: 600, fontSize: '13px', color: textMain }}>{row.name}</div>
@@ -120,7 +134,7 @@ export default function BrandsPage() {
         <PageHeader
           title="Brands"
           description="Manage brands for product organisation and shop navigation"
-          icon={<Award size={20} style={{ color: accent }} />}
+          icon={<Award size={20} color={accent} />}
           action={{ label: 'Add Brand', onClick: openAdd }}
         />
 
@@ -133,26 +147,28 @@ export default function BrandsPage() {
           emptyMessage="No brands yet. Add your first brand."
         />
 
-        {/* Add / Edit Modal */}
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editRow ? 'Edit Brand' : 'Add Brand'}>
-          <FormField label="Brand Name *" value={form.name} onChange={(v) => f('name', v)} placeholder="e.g. Samsung" />
-          <FormField
-            label="Shop Scroll Anchor (auto-generated from name)"
-            value={form.slug}
-            onChange={(v) => f('slug', v)}
-            placeholder="e.g. samsung"
-            hint="Used to auto-scroll to this brand section in the shop when clicked"
-          />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <FormField label="Country" value={form.country} onChange={(v) => f('country', v)} placeholder="e.g. South Korea" />
-            <FormField label="Status" type="select" value={form.status} onChange={(v) => f('status', v)} options={['Active', 'Inactive']} />
+          <FormField label="Brand Name *" value={form.name} onChange={(v) => f('name', v)} placeholder="e.g. Samsung" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <div style={{ marginBottom: '14px' }}>
+            <FormField
+              label="Shop Scroll Anchor"
+              value={form.slug}
+              onChange={(v) => f('slug', v)}
+              placeholder="e.g. samsung"
+              isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface}
+            />
+            <p style={{ fontSize: '11px', color: textMuted, marginTop: '4px', marginBottom: 0 }}>Auto-generated from name — used to auto-scroll to this brand section in the shop.</p>
           </div>
-          <FormField label="Website" value={form.website} onChange={(v) => f('website', v)} placeholder="https://samsung.com" />
-          <FormField label="Description" type="textarea" value={form.description} onChange={(v) => f('description', v)} placeholder="Short description of this brand" />
-          <ModalFooter onCancel={() => setModalOpen(false)} onSave={handleSave} saving={saving} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <FormField label="Country" value={form.country} onChange={(v) => f('country', v)} placeholder="e.g. South Korea" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+            <FormField label="Status" type="select" value={form.status} onChange={(v) => f('status', v)} options={['Active', 'Inactive']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          </div>
+          <FormField label="Website" value={form.website} onChange={(v) => f('website', v)} placeholder="https://samsung.com" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <FormField label="Description" type="textarea" value={form.description} onChange={(v) => f('description', v)} placeholder="Short description of this brand" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
+          <ModalFooter onClose={() => setModalOpen(false)} onSubmit={handleSave} loading={saving} submitLabel={editRow ? 'Save Changes' : 'Add Brand'} isDark={isDark} border={border} textMain={textMain} />
         </Modal>
 
-        <ConfirmDialog open={!!deleteRow} onCancel={() => setDeleteRow(null)} onConfirm={handleDelete} loading={deleting} title="Delete Brand" message={`Delete "${deleteRow?.name}" permanently?`} />
+        <ConfirmDialog open={!!deleteRow} onClose={() => setDeleteRow(null)} onConfirm={handleDelete} loading={deleting} title="Delete Brand" message={`Delete "${deleteRow?.name}" permanently?`} />
       </div>
     </AdminShell>
   );
