@@ -164,7 +164,7 @@ export default function WholesalePage() {
           </Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden animate-pulse">
                 <div className="aspect-square bg-muted" />
@@ -179,7 +179,7 @@ export default function WholesalePage() {
         ) : wholesaleProducts.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No products available yet.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {wholesaleProducts.map((p) => (
               <UnifiedProductCard key={p.id} product={p} className="w-full" />
             ))}
