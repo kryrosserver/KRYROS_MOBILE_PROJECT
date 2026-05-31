@@ -11,10 +11,20 @@ export class UpdateProductDto {
   slug?: string;
 
   @IsOptional()
+  @IsString()
+  sku?: string;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  salePrice?: number;
 
   @IsOptional()
   @IsString()
@@ -23,6 +33,10 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   shortDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  weight?: string;
 
   @IsOptional()
   @IsString()
@@ -190,6 +204,14 @@ export class UpdateProductDto {
   @Min(0)
   @Type(() => Number)
   wholesalePrice?: number;
+
+  @IsOptional()
+  @IsString()
+  metaTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  metaDescription?: string;
 
   @IsOptional()
   @IsString()
