@@ -378,7 +378,7 @@ function CMSContent() {
           const secs: Section[] = [];
           if (isHome) {
             if (banners.length > 0) {
-              secs.push({ name: 'Hero Banner', items: banners.map((b: any) => ({ id: b.id, content: { title: b.title || '', subtitle: b.subtitle || '', description: '', button_text: b.linkText || '', button_link: b.link || '', media: b.image || '' }, status: b.isActive ? 'Active' : 'Inactive', mediaUrl: b.image })) });
+              secs.push({ name: 'Hero Banner', items: banners.map((b: any) => ({ id: b.id, content: { title: b.title || '', subtitle: b.subtitle || '', description: '', button_text: b.linkText || '', button_link: b.link || '', media: b.videoUrl || b.image || '' }, status: b.isActive ? 'Active' : 'Inactive', mediaUrl: b.videoUrl || b.image })) });
             }
             [...hpSecs].sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).forEach((sec: any) => {
               const nm = HP_NAME[sec.type] || sec.type || 'Section';
@@ -884,7 +884,7 @@ function CMSContent() {
                     {hasMedia && (
                       <div style={{ height: '160px', background: surface, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                         {item.mediaUrl ? (
-                          item.content.media?.match(/\.(mp4|mov|avi|webm)$/i) ? (
+                          item.mediaUrl?.match(/\.(mp4|mov|avi|webm|ogg|m4v)(\?.*)?$/i) ? (
                             <video src={item.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
                             <img src={item.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
