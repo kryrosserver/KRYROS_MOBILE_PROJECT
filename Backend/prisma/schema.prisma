@@ -1116,3 +1116,48 @@ enum SymbolPosition {
   BEFORE
   AFTER
 }
+
+
+// ─── Checkout Payment Configuration (admin-configurable) ──────────────────
+model CheckoutMethod {
+  id          String              @id @default(uuid())
+  name        String
+  type        String              // mobile_wallet | card | bank | cash | digital_wallet
+  icon        String?
+  sortOrder   Int                 @default(0)
+  isEnabled   Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  providers   CheckoutProvider[]
+
+  @@map("checkout_methods")
+}
+
+model CheckoutProvider {
+  id              String             @id @default(uuid())
+  checkoutMethodId String
+  name            String             // "543", "503", "Flutterwave", "Stanbic Bank"
+  description     String?
+  sortOrder       Int                @default(0)
+  isEnabled       Boolean            @default(true)
+  config          Json?              // bank:{accountName,accountNumber} | card:{apiKey}
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  checkoutMethod  CheckoutMethod     @relation(fields: [checkoutMethodId], references: [id], onDelete: Cascade)
+  networks        CheckoutNetwork[]
+
+  @@map("checkout_providers")
+}
+
+model CheckoutNetwork {
+  id         String           @id @default(uuid())
+  providerId String
+  name       String           // "MTN","Airtel","Zamtel","Visa","MasterCard","Verve"
+  sortOrder  Int              @default(0)
+  isEnabled  Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  provider   CheckoutProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("checkout_networks")
+}
