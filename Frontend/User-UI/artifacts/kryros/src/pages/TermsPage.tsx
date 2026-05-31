@@ -9,7 +9,7 @@ export default function TermsPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 pb-28">
       <h1 className="text-2xl font-black text-foreground mb-0.5">Terms & Conditions</h1>
-      <p className="text-xs text-muted-foreground mb-3">Last updated: May 20, 2024</p>
+      <p className="text-xs text-muted-foreground mb-3">Last updated: May 20, 2026</p>
       <p className="text-xs text-muted-foreground leading-relaxed mb-5">
         Please read these terms and conditions carefully before using KRYROS.
       </p>
