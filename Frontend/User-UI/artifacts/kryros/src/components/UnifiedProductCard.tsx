@@ -29,10 +29,10 @@ export default function UnifiedProductCard({
 
   return (
     <div
-      className={`${className} bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow`}
+      className={`${className} bg-card border border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow flex flex-col`}
       onClick={() => (window.location.href = `/product/${product.id}`)}
     >
-      {/* ── Image: aspect-[4/3] makes cards shorter & wider ── */}
+      {/* ── Image: aspect-[4/3] keeps cards shorter & wider ── */}
       <div className="relative bg-[#f5f5f5] dark:bg-muted aspect-[4/3] overflow-hidden">
         {!imgErr && product.image ? (
           <img
@@ -81,15 +81,15 @@ export default function UnifiedProductCard({
         </button>
       </div>
 
-      {/* ── Info ── */}
-      <div className="p-2.5">
+      {/* ── Info: flex-col flex-1 so buttons always pin to bottom ── */}
+      <div className="p-2.5 flex flex-col flex-1">
 
-        {/* Name — min-h keeps all cards same height even with 1-line names */}
+        {/* Name — min-h-[2rem] reserves 2-line height for equal spacing */}
         <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 min-h-[2rem] mb-0.5">
           {product.name}
         </h3>
 
-        {/* Specs — always rendered so height stays consistent */}
+        {/* Specs — always rendered to keep consistent height */}
         <p className="text-[10px] text-muted-foreground truncate mb-1 min-h-[0.875rem]">
           {product.specs || ""}
         </p>
@@ -102,13 +102,13 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* ── Rating + Stock on SAME ROW — stars IN FRONT of badge, no wrap ──
-            [⭐⭐⭐⭐⭐ (1)]  [Out of Stock]
-            min-h keeps equal height even when no rating exists
-        ──────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-1 mb-2 min-h-[1.25rem]">
+        {/* ── Rating + Stock on SAME ROW — stars IN FRONT of badge ──
+            [⭐⭐⭐⭐⭐ (1)]  [Out of Stock / In Stock]
+            min-h keeps this row consistent even with no rating
+        ─────────────────────────────────────────────────────── */}
+        <div className="flex items-center gap-1 mb-1.5 min-h-[1.25rem]">
 
-          {/* Stars — only if rating exists, always before the badge */}
+          {/* Stars — only if rating exists, always BEFORE the badge */}
           {product.rating > 0 && !product.isWholesaleOnly && (
             <div className="flex items-center gap-0.5 flex-shrink-0">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -164,8 +164,16 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* ── Buttons ── */}
-        <div className="flex items-center gap-1.5">
+        {/* ── Description — fills the empty space between stock row and buttons.
+            Always rendered with min-h so all cards stay the same height.
+            Shows up to 2 lines of product description text.
+        ─────────────────────────────────────────────────────── */}
+        <p className="text-[10px] text-muted-foreground leading-snug line-clamp-2 min-h-[2rem] mb-1">
+          {product.description || ""}
+        </p>
+
+        {/* ── Buttons — mt-auto pins them to bottom, no dead space below ── */}
+        <div className="flex items-center gap-1.5 mt-auto">
           <button
             onClick={(e) => {
               e.stopPropagation();
