@@ -228,7 +228,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                           <span className="text-sm font-medium">Currency</span>
                         </div>
                         <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                          <span>{selected.flag} {selected.code} ({selected.symbol})</span>
+                          <span>{selected.code} ({selected.symbol})</span>
                           <ChevronDown className={`w-4 h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
                         </div>
                       </button>
@@ -240,7 +240,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                               onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
                               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left ${c.code === selected.code ? "bg-primary/10 text-primary font-semibold" : "text-foreground"}`}
                             >
-                              <span>{c.flag}</span>
                               <span className="font-medium">{c.code}</span>
                               <span className="text-muted-foreground text-xs ml-auto">{c.symbol}</span>
                             </button>
