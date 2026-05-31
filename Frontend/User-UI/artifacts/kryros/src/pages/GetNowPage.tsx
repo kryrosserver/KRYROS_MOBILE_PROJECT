@@ -6,6 +6,7 @@ import { fetchProducts, API_BASE } from "@/lib/api";
 import type { Product } from "@/lib/api";
 import { useCurrencyStore } from "@/store/currencyStore";
 import AccountLayout from "@/components/layout/AccountLayout";
+import UnifiedProductCard from "@/components/UnifiedProductCard";
 
 interface CreditPlan {
   id: string;
@@ -182,54 +183,13 @@ export default function GetNowPage() {
                   </div>
                 </div>
               ))
-            : products.map((p, i) => {
-                const monthly = monthlyDivisor > 0
-                  ? format(p.price * (1 + interestRate / 100) / monthlyDivisor)
-                  : "—";
-                return (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.07 }}
-                    className="flex-shrink-0 w-[148px]"
-                  >
-                    <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                      <div className="relative">
-                        {interestRate === 0 && (
-                          <span className="absolute top-2 left-2 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
-                            0% Interest
-                          </span>
-                        )}
-                        <button
-                          onClick={() => setLiked((l) => ({ ...l, [p.id]: !l[p.id] }))}
-                          className="absolute top-2 right-2 z-10 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm"
-                        >
-                          <Heart className={`w-3 h-3 ${liked[p.id] ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                        </button>
-                        {p.image ? (
-                          <img src={p.image} alt={p.name} className="w-full aspect-square object-cover bg-muted" />
-                        ) : (
-                          <div className="w-full aspect-square bg-muted" />
-                        )}
-                      </div>
-                      <div className="p-2.5">
-                        <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5 line-clamp-2">{p.name}</p>
-                        <p className="text-[9px] text-muted-foreground mb-1.5">{p.specs}</p>
-                        <p className="text-sm font-black text-foreground leading-tight">{format(p.price)}</p>
-                        {activePlan && (
-                          <p className="text-[9px] text-muted-foreground mb-2">or {monthly}/mo for {activePlan.duration} mos</p>
-                        )}
-                        <Link href={`/product/${p.id}`}>
-                          <button className="w-full py-1.5 bg-foreground text-background rounded-lg text-[10px] font-bold hover:opacity-90 transition-all">
-                            Get Now
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+            : products.map((p) => (
+                <UnifiedProductCard
+                  key={p.id}
+                  product={p}
+                  className="flex-shrink-0 w-44"
+                />
+              ))}
         </div>
       </div>
 
