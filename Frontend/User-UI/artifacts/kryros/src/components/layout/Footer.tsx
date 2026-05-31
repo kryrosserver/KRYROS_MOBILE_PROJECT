@@ -6,7 +6,7 @@ export default function Footer() {
           © 2026 KRYROS. All Rights Reserved.
         </p>
         <p className="text-[10px] text-muted-foreground/60">
-          Worldwide Shopping.
+          Worldwide Shopping
         </p>
       </div>
     </footer>
