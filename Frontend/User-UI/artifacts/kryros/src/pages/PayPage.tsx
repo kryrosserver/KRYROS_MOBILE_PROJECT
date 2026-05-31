@@ -23,11 +23,7 @@ const CURRENCIES = [
 ];
 
 
-function ProviderLogo({ provider }: { provider: string }) {
-  if (provider.startsWith("Airtel")) return <img src="/airtel-logo.jpg" alt="Airtel" className="w-7 h-7 rounded-lg object-cover" />;
-  if (provider.startsWith("Zamtel")) return <img src="/zamtel-logo.jpg" alt="Zamtel" className="w-7 h-7 rounded-lg object-cover" />;
-  return <img src="/mtn-logo.jpg" alt="MTN" className="w-7 h-7 rounded-lg object-cover" />;
-}
+
 
 const METHODS = [
   {
@@ -702,28 +698,25 @@ export default function PayPage() {
                       onClick={() => setShowProviderDrop((v) => !v)}
                       className="w-full flex items-center gap-2.5 border border-border rounded-2xl px-3.5 py-3 bg-background hover:border-primary/50 transition-colors"
                     >
-                      <ProviderLogo provider={mmProvider} />
+                      <Smartphone className="w-5 h-5 text-primary flex-shrink-0" />
                       <span className="flex-1 text-sm font-semibold text-foreground text-left">{mmProvider}</span>
                       <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${showProviderDrop ? "rotate-180" : ""}`} />
                     </button>
                     {showProviderDrop && (
                       <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-background border border-border rounded-2xl shadow-xl overflow-hidden">
                         {[
-                          { name: "MTN Mobile Money", logo: "/mtn-logo.jpg", color: "bg-yellow-50 dark:bg-yellow-900/20" },
-                          { name: "Airtel Money", logo: "/airtel-logo.jpg", color: "bg-red-50 dark:bg-red-900/20" },
-                          { name: "Zamtel Money", logo: "/zamtel-logo.jpg", color: "bg-primary/10" },
-                        ].map((p) => (
+                          "MTN Mobile Money",
+                          "Airtel Money",
+                          "Zamtel Money",
+                        ].map((name) => (
                           <button
-                            key={p.name}
+                            key={name}
                             type="button"
-                            onClick={() => { setMmProvider(p.name); setShowProviderDrop(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted transition-colors border-b border-border last:border-0 ${mmProvider === p.name ? "bg-primary/5" : ""}`}
+                            onClick={() => { setMmProvider(name); setShowProviderDrop(false); }}
+                            className={`w-full flex items-center px-4 py-3.5 text-left hover:bg-muted transition-colors border-b border-border last:border-0 ${mmProvider === name ? "bg-primary/5" : ""}`}
                           >
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${p.color}`}>
-                              <img src={p.logo} alt={p.name} className="w-6 h-6 rounded-md object-cover" />
-                            </div>
-                            <span className={`text-sm font-semibold flex-1 ${mmProvider === p.name ? "text-primary" : "text-foreground"}`}>{p.name}</span>
-                            {mmProvider === p.name && (
+                            <span className={`text-sm font-semibold flex-1 ${mmProvider === name ? "text-primary" : "text-foreground"}`}>{name}</span>
+                            {mmProvider === name && (
                               <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                                 <Check className="w-3 h-3 text-white" />
                               </div>
@@ -741,7 +734,7 @@ export default function PayPage() {
                       <input
                         value={mmPhone}
                         onChange={(e) => setMmPhone(e.target.value)}
-                        placeholder="+260 97 123 4567"
+                        placeholder="e.g. +260 97 000 0000"
                         type="tel"
                         className="flex-1 text-sm text-foreground outline-none bg-transparent"
                       />
