@@ -238,7 +238,7 @@ export default function ProductPage() {
         {/* Expandable sections */}
         <div className="border border-border rounded-2xl overflow-hidden divide-y divide-border">
           {[
-            { id: "description", label: "Description", content: product.specs || "No description available." },
+            { id: "description", label: "Description", content: product.description || "No description available." },
             { id: "specs", label: "Specifications", content: product.specs || "No specifications available." },
             { id: "reviews", label: "Reviews", extra: product.rating > 0 ? String(product.rating) : undefined, stars: product.rating > 0, content: product.reviewCount > 0 ? `${product.reviewCount.toLocaleString()} verified reviews` : "No reviews yet." },
           ].map(({ id, label, extra, stars, content }) => (
