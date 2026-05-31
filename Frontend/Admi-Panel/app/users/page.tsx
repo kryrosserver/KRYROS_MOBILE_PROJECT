@@ -183,6 +183,7 @@ function UsersContent() {
     <>
       <FormField label="Full Name" value={form.name} onChange={fp('name')} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="e.g. John Banda" />
       <FormField label="Email Address" value={form.email} onChange={fp('email')} type="email" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="john@example.com" />
+      <FormField label="Password (leave blank to keep)" value={(form as any).password || ''} onChange={fp('password')} type="password" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} placeholder="Min 8 chars, upper+lower+number" />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <FormField label="Role" value={form.role} onChange={fp('role')} options={isSuperAdmin ? ['Customer', 'Wholesale', 'Manager', 'Admin'] : ['Customer', 'Wholesale']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
         <FormField label="Status" value={form.status} onChange={fp('status')} options={['Active', 'Inactive', 'Blocked']} isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
