@@ -37,6 +37,7 @@ const nextConfig: NextConfig = {
       ...proxy("notifications"),
       ...proxy("newsletter"),
       ...proxy("payments"),
+      ...proxy("payment-config"),
     ];
   },
 };
