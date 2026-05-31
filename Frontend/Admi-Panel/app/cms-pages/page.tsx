@@ -231,9 +231,21 @@ function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, tex
     toast.success(file.name + ' selected');
   };
 
+  const getYouTubeId = (url: string): string | null => {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    return m ? m[1] : null;
+  };
   const handleUrlChange = (url: string) => {
     setUrlInput(url);
     if (!url.trim()) { setPreview(null); onChange('', ''); onUrlChange?.(''); return; }
+    const ytId = getYouTubeId(url);
+    if (ytId) {
+      const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      setPreview({ name: 'YouTube Video', type: 'image', url: thumbUrl });
+      onChange(url, url);
+      onUrlChange?.(url);
+      return;
+    }
     const isVideo = /\.(mp4|mov|webm|ogg)(\?.*)?$/i.test(url);
     setPreview({ name: url, type: isVideo ? 'video' : 'image', url });
     onChange(url, url);
@@ -277,7 +289,7 @@ function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, tex
         <span style={{ fontSize:'10px', color:textMuted, fontWeight:500, whiteSpace:'nowrap' }}>OR PASTE URL</span>
         <div style={{ flex:1, height:'1px', background:border }} />
       </div>
-      <input type="text" value={urlInput} onChange={e => handleUrlChange(e.target.value)} placeholder="https://example.com/image.jpg or video.mp4"
+      <input type="text" value={urlInput} onChange={e => handleUrlChange(e.target.value)} placeholder="Paste image URL, video URL, or YouTube link"
         style={{ width:'100%', padding:'8px 10px', borderRadius:'7px', background:surface, border:`1px solid ${border}`, color:textMuted, fontSize:'12px', outline:'none', fontFamily:'inherit', boxSizing:'border-box' as const }} />
       <input ref={inputRef} type="file" accept="image/*,video/*" onChange={handleFile} style={{ display: 'none' }} />
     </div>
@@ -887,11 +899,13 @@ function CMSContent() {
                     {hasMedia && (
                       <div style={{ height: '160px', background: surface, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                         {item.mediaUrl ? (
-                          item.mediaUrl?.match(/\.(mp4|mov|avi|webm|ogg|m4v)(\?.*)?$/i) ? (
-                            <video src={item.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          ) : (
-                            <img src={item.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          )
+                          (() => {
+                            const ytMatch = item.mediaUrl?.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([-\w]{11})/);
+                            const ytId = ytMatch?.[1];
+                            if (ytId) return <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />;
+                            if (item.mediaUrl?.match(/\.(mp4|mov|avi|webm|ogg|m4v)(\?.*)?$/i)) return <video src={item.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+                            return <img src={item.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />;
+                          })()
                         ) : item.content.media ? (
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '16px', textAlign: 'center' }}>
                             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
