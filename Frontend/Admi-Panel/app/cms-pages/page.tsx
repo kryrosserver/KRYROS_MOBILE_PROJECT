@@ -429,6 +429,15 @@ function CMSContent() {
     } else { updateCmsSection(itemId, { isActive: active }).catch(() => {}); }
   };
   const [view, setView] = useState<View>('pages');
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const toggleSection = (secName: string) => {
+    setSelectedSectionName(secName);
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(secName)) next.delete(secName); else next.add(secName);
+      return next;
+    });
+  };
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [selectedSectionName, setSelectedSectionName] = useState<string | null>(null);
 
@@ -503,12 +512,14 @@ function CMSContent() {
     setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.filter(i => i.id !== deletingItem.id) }) }));
     toast.success('Deleted'); setDeletingItem(null);
   };
-  const handleToggleItem = (itemId: string, cur: string) => {
-    if (!selectedPageId || !selectedSectionName) return;
+  const handleToggleItem = (itemId: string, cur: string, secNameOverride?: string, pageIdOverride?: string) => {
+    const sn = secNameOverride ?? selectedSectionName;
+    const pid = pageIdOverride ?? selectedPageId;
+    if (!pid || !sn) return;
     const ns = cur === 'Active' ? 'Inactive' : 'Active';
-    setData(d => d.map(p => p.id !== selectedPageId ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== selectedSectionName ? s : { ...s, items: s.items.map(i => i.id !== itemId ? i : { ...i, status: ns }) }) }));
+    setData(d => d.map(p => p.id !== pid ? p : { ...p, lastEdited: new Date().toISOString().split('T')[0], sections: p.sections.map(s => s.name !== sn ? s : { ...s, items: s.items.map(i => i.id !== itemId ? i : { ...i, status: ns }) }) }));
     toast.success('Set to ' + ns);
-    _apiToggle(itemId, selectedPageId, selectedSectionName, ns === 'Active');
+    _apiToggle(itemId, pid, sn, ns === 'Active');
   };
 
   const Breadcrumb = () => (
