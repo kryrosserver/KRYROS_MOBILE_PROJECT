@@ -46,10 +46,16 @@ function LoginForm() {
       // 2FA required — switch to code entry screen
       setTwoFaToken(result.twoFactorToken);
       setStep("2fa");
-    } else if (!result.success) {
+      setLoading(false);
+    } else if (result.success) {
+      // Login succeeded — navigate directly, don't rely solely on the isAuthenticated useEffect
+      router.replace("/dashboard");
+      // Don't setLoading(false) — component is about to unmount
+      return;
+    } else {
       setLoginError("Invalid credentials. Please try again.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handle2faVerify = async (e: React.FormEvent) => {
