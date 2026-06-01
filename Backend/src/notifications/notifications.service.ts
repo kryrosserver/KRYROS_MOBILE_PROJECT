@@ -502,6 +502,13 @@ export class NotificationsService implements OnModuleInit {
           shippingAddress: shippingAddr,
           trackingUrl: `${this.configService.get('FRONTEND_URL') || 'https://kryros-interface.onrender.com'}/orders/${orderId}`,
         }).catch(e => this.logger.warn(`Order confirmation email failed for ${order.orderNumber}: ${e.message}`));
+
+        // Auto-register customer as an email contact for future blasts
+        this.prisma.emailContact.upsert({
+          where: { email: userEmail },
+          update: { name: firstName, isActive: true },
+          create: { email: userEmail, name: firstName, source: 'Checkout' },
+        }).catch(e => this.logger.warn(`Auto-register email contact failed: ${e.message}`));
       }
 
       // ── 3. SMS ───────────────────────────────────────────────────────────
@@ -624,5 +631,63 @@ export class NotificationsService implements OnModuleInit {
       return { success: false, message: 'Country not found' };
     }
   }
+
+  // ─── Email Contacts ──────────────────────────────────────────────────────────
+  async getEmailContacts() {
+    return this.prisma.emailContact.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async addEmailContact(email: string, name?: string, source: string = 'Manual') {
+    if (!email?.trim()) return { success: false, message: 'Email address is required' };
+    try {
+      const contact = await this.prisma.emailContact.upsert({
+        where: { email: email.toLowerCase().trim() },
+        update: { name: name ?? undefined, source, isActive: true },
+        create: { email: email.toLowerCase().trim(), name, source },
+      });
+      return { success: true, contact };
+    } catch (error) {
+      this.logger.error('addEmailContact failed', error.message);
+      return { success: false, message: 'Failed to add email contact' };
+    }
+  }
+
+  async deleteEmailContact(id: string) {
+    try {
+      await this.prisma.emailContact.delete({ where: { id } });
+      return { success: true };
+    } catch {
+      return { success: false, message: 'Contact not found' };
+    }
+  }
+
+  async sendEmailBlast(subject: string, body: string, emailIds?: string[]) {
+    const contacts = await this.prisma.emailContact.findMany({
+      where: {
+        isActive: true,
+        ...(emailIds && emailIds.length > 0 ? { id: { in: emailIds } } : {}),
+      },
+    });
+
+    if (contacts.length === 0) {
+      return { success: false, message: 'No active email contacts found' };
+    }
+
+    let sent = 0;
+    let failed = 0;
+    for (const contact of contacts) {
+      try {
+        await this.mailerService.sendNewsletterEmail(contact.email, subject, body);
+        sent++;
+      } catch (error) {
+        this.logger.warn(`Email blast failed for ${contact.email}: ${error.message}`);
+        failed++;
+      }
+    }
+    return { success: true, sent, failed, total: contacts.length };
+  }
+
 
 }

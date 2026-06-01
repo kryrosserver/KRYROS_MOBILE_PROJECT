@@ -1223,6 +1223,19 @@ model SmsContact {
   @@index([phone])
   @@map("sms_contacts")
 }
+model EmailContact {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  source    String   @default("Manual")  // "Manual" | "Checkout" | "Import"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("email_contacts")
+}
+
 
 model SmsSupportedCountry {
   id        String   @id @default(uuid())

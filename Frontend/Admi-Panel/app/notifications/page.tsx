@@ -10,6 +10,7 @@ import {
   getSmsContacts, addSmsContact, deleteSmsContact,
   getSmsCountries, addSmsCountry, toggleSmsCountry, deleteSmsCountry,
   getDevices, deleteDevice, sendToDevices,
+  getEmailContacts, addEmailContact, deleteEmailContact, sendEmailBlast,
 } from '@/lib/api';
 import api from '@/lib/api';
 
@@ -17,6 +18,7 @@ type NotifRecord = { id:string; title:string; message:string; target:string; cha
 type SmsContact  = { id:string; phone:string; name?:string; source:string; isActive:boolean; createdAt:string };
 type NLSubscriber   = { id: string; email: string; isActive: boolean; createdAt: string };
 type SmsCountry     = { id: string; name: string; dialCode: string; isoCode: string; isActive: boolean; createdAt: string };
+type EmailContact   = { id: string; email: string; name?: string; source: string; isActive: boolean; createdAt: string };
 
 // ─── Shared theme hook ───────────────────────────────────────────────────────
 function useColors() {
@@ -701,15 +703,214 @@ function NewsletterContent() {
   );
 }
 
+
+// ─── Email Contacts Tab ───────────────────────────────────────────────────────
+function EmailContent() {
+  const { card, border, textMain, textMuted, surface, primary } = useColors();
+  const [contacts, setContacts] = useState<EmailContact[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [search, setSearch] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [adding, setAdding] = useState(false);
+
+  const loadContacts = () => {
+    setLoading(true);
+    getEmailContacts()
+      .then((r: any) => { const raw = Array.isArray(r.data) ? r.data : []; setContacts(raw); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { loadContacts(); }, []);
+
+  const filtered = contacts.filter(c =>
+    !search || c.email.toLowerCase().includes(search.toLowerCase()) || (c.name || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  const toggleSelect = (id: string) =>
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const toggleSelectAll = () => {
+    if (selectAll) { setSelected([]); setSelectAll(false); }
+    else { setSelected(filtered.map(c => c.id)); setSelectAll(true); }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteEmailContact(id);
+      setContacts(prev => prev.filter(c => c.id !== id));
+      setSelected(prev => prev.filter(x => x !== id));
+      toast.success('Contact removed');
+    } catch { toast.error('Failed to remove contact'); }
+  };
+
+  const handleAddContact = async () => {
+    if (!newEmail.trim()) { toast.error('Email address is required'); return; }
+    setAdding(true);
+    try {
+      await addEmailContact({ email: newEmail.trim(), name: newName.trim() || undefined, source: 'Manual' });
+      toast.success('Contact added');
+      setNewName(''); setNewEmail(''); setShowAdd(false);
+      loadContacts();
+    } catch { toast.error('Failed to add contact — email may already exist'); }
+    finally { setAdding(false); }
+  };
+
+  const handleSendBlast = async () => {
+    if (!subject.trim()) { toast.error('Subject is required'); return; }
+    if (!emailBody.trim()) { toast.error('Message body is required'); return; }
+    setSending(true);
+    try {
+      const emailIds = selected.length > 0 ? selected : undefined;
+      const res: any = await sendEmailBlast({ subject: subject.trim(), body: emailBody.trim(), emailIds });
+      if (res.data?.success) {
+        toast.success(`Email sent to ${res.data.sent}/${res.data.total} contacts`);
+        setSubject(''); setEmailBody(''); setSelected([]); setSelectAll(false);
+      } else {
+        toast.error(res.data?.message || 'Failed to send emails');
+      }
+    } catch { toast.error('Failed to send email blast'); }
+    finally { setSending(false); }
+  };
+
+  const sourceColors: Record<string, string> = { Checkout: '#22c55e', Manual: '#3b82f6', Import: '#f59e0b' };
+  const inputStyle = { width:'100%', padding:'9px 12px', borderRadius:8, border:`1px solid ${border}`, background:surface, color:textMain, fontSize:13, outline:'none', boxSizing:'border-box' as const, fontFamily:'inherit' };
+  const recipientLabel = selected.length > 0
+    ? `${selected.length} selected contact${selected.length > 1 ? 's' : ''}`
+    : `All ${contacts.filter(c=>c.isActive).length} active contacts`;
+
+  return (
+    <div style={{ paddingBottom: 40 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12, marginBottom:20 }}>
+        {[
+          { label: 'Total Contacts', value: contacts.length, color: primary },
+          { label: 'From Checkout', value: contacts.filter(c=>c.source==='Checkout').length, color: '#22c55e' },
+          { label: 'Manual', value: contacts.filter(c=>c.source==='Manual').length, color: '#3b82f6' },
+        ].map(s => (
+          <div key={s.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: 10, padding: '14px 18px' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }} className="email-grid">
+        <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow:'hidden' }}>
+          <div style={{ padding:'14px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, flexWrap:'wrap' }}>
+            <span style={{ fontWeight:700, color:textMain, fontSize:14, display:'flex', alignItems:'center', gap:6 }}>
+              <Mail style={{ width:15, height:15, color:primary }} /> Email Contacts
+            </span>
+            <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{ padding:'5px 10px', borderRadius:6, border:`1px solid ${border}`, background:surface, color:textMain, fontSize:11, outline:'none', width:120 }} />
+              <button onClick={()=>setShowAdd(true)} style={{ display:'flex', alignItems:'center', gap:4, padding:'5px 10px', borderRadius:6, background:'linear-gradient(135deg,#1FA89A,#27B9AF)', border:'none', color:'white', fontSize:11, fontWeight:600, cursor:'pointer' }}>
+                <Plus style={{ width:12, height:12 }} /> Add
+              </button>
+            </div>
+          </div>
+          <div style={{ padding:'8px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:10, background:surface }}>
+            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} style={{ accentColor:primary, width:14, height:14 }} />
+            <span style={{ fontSize:11, color:textMuted }}>{selectAll ? 'Deselect all' : `Select all (${filtered.length})`}</span>
+            {selected.length > 0 && <span style={{ marginLeft:'auto', fontSize:11, color:primary, fontWeight:600 }}>{selected.length} selected</span>}
+          </div>
+          <div style={{ maxHeight:360, overflowY:'auto' }}>
+            {loading ? (
+              <div style={{ padding:'32px 0', textAlign:'center', color:textMuted, fontSize:12 }}>Loading...</div>
+            ) : filtered.length === 0 ? (
+              <div style={{ padding:'32px 0', textAlign:'center', color:textMuted, fontSize:12 }}>
+                {search ? 'No matching contacts' : 'No email contacts yet — add one or they auto-register on checkout'}
+              </div>
+            ) : filtered.map(c => (
+              <div key={c.id} style={{ padding:'10px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:10, cursor:'pointer' }} onClick={()=>toggleSelect(c.id)}>
+                <input type="checkbox" checked={selected.includes(c.id)} onChange={()=>toggleSelect(c.id)} onClick={e=>e.stopPropagation()} style={{ accentColor:primary, width:14, height:14, flexShrink:0 }} />
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:12, fontWeight:600, color:textMain, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.name || c.email}</div>
+                  {c.name && <div style={{ fontSize:10, color:textMuted, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.email}</div>}
+                  <div style={{ fontSize:10, color:textMuted }}>{new Date(c.createdAt).toLocaleDateString()}</div>
+                </div>
+                <span style={{ fontSize:9, fontWeight:700, padding:'2px 7px', borderRadius:20, background:`${sourceColors[c.source] || '#888'}20`, color: sourceColors[c.source] || '#888', border:`1px solid ${sourceColors[c.source] || '#888'}44`, flexShrink:0 }}>
+                  {c.source}
+                </span>
+                <button onClick={e=>{ e.stopPropagation(); handleDelete(c.id); }} style={{ background:'none', border:'none', cursor:'pointer', padding:4, color:'#ef4444', flexShrink:0 }}>
+                  <Trash2 style={{ width:13, height:13 }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow:'hidden' }}>
+          <div style={{ padding:'14px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:8 }}>
+            <Send style={{ width:15, height:15, color:primary }} />
+            <span style={{ fontWeight:700, color:textMain, fontSize:14 }}>Compose Email Blast</span>
+          </div>
+          <div style={{ padding:18, display:'flex', flexDirection:'column', gap:14 }}>
+            <div style={{ background:surface, border:`1px solid ${border}`, borderRadius:8, padding:'8px 12px', fontSize:11, color:textMuted, display:'flex', alignItems:'center', gap:6 }}>
+              <CheckCircle2 style={{ width:12, height:12, color:primary }} />
+              Sending to: <strong style={{ color:textMain }}>{recipientLabel}</strong>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:600, color:textMuted, display:'block', marginBottom:5 }}>Subject *</label>
+              <input value={subject} onChange={e=>setSubject(e.target.value)} placeholder="e.g. Exclusive Weekend Sale — Up to 40% Off!" style={inputStyle} />
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:600, color:textMuted, display:'block', marginBottom:5 }}>Message *</label>
+              <textarea value={emailBody} onChange={e=>setEmailBody(e.target.value)} placeholder="Write your email message here..." rows={7} style={{ ...inputStyle, resize:'vertical', lineHeight:1.6, display:'block' }} />
+            </div>
+            <button onClick={handleSendBlast} disabled={sending || !subject.trim() || !emailBody.trim()} style={{ width:'100%', padding:'11px', borderRadius:8, border:'none', background:(!sending && subject.trim() && emailBody.trim())?'linear-gradient(135deg,#1FA89A,#27B9AF)':border, color:'#fff', fontWeight:700, fontSize:13, cursor:sending?'wait':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, opacity:(!subject.trim()||!emailBody.trim())?0.5:1 }}>
+              {sending ? <><Loader2 style={{ width:14, height:14, animation:'spin 1s linear infinite' }} /> Sending...</> : <><Send style={{ width:13, height:13 }} /> Send Email Blast</>}
+            </button>
+            <p style={{ fontSize:10, color:textMuted, textAlign:'center' }}>
+              {selected.length === 0 ? `Will send to all ${contacts.filter(c=>c.isActive).length} active contacts` : `Will send to ${selected.length} selected contact${selected.length>1?'s':''}`}
+            </p>
+          </div>
+        </div>
+      </div>
+      {showAdd && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }} onClick={()=>setShowAdd(false)}>
+          <div style={{ background:card, border:`1px solid ${border}`, borderRadius:14, padding:24, width:'100%', maxWidth:360 }} onClick={e=>e.stopPropagation()}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18 }}>
+              <span style={{ fontWeight:700, color:textMain, fontSize:15 }}>Add Email Contact</span>
+              <button onClick={()=>setShowAdd(false)} style={{ background:'none', border:'none', cursor:'pointer', color:textMuted }}><X size={18} /></button>
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <div>
+                <label style={{ fontSize:11, fontWeight:600, color:textMuted, display:'block', marginBottom:5 }}>Name (optional)</label>
+                <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="e.g. John Banda" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontSize:11, fontWeight:600, color:textMuted, display:'block', marginBottom:5 }}>Email Address *</label>
+                <input value={newEmail} onChange={e=>setNewEmail(e.target.value)} placeholder="john@example.com" type="email" style={inputStyle} />
+              </div>
+              <button onClick={handleAddContact} disabled={adding || !newEmail.trim()} style={{ width:'100%', padding:'11px', borderRadius:8, border:'none', background:'linear-gradient(135deg,#1FA89A,#27B9AF)', color:'#fff', fontWeight:700, fontSize:13, cursor:adding?'wait':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                {adding ? <><Loader2 style={{ width:14, height:14, animation:'spin 1s linear infinite' }} /> Adding...</> : <><Plus style={{ width:13, height:13 }} /> Add Contact</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @media (max-width: 700px) { .email-grid { grid-template-columns: 1fr !important; } }
+      `}</style>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function NotificationsPage() {
-  const [activeSection, setActiveSection] = useState<'push' | 'sms' | 'newsletter'>('push');
+  const [activeSection, setActiveSection] = useState<'push' | 'sms' | 'newsletter' | 'email'>('push');
   const { card, border, textMuted, surface } = useColors();
 
   const tabs = [
     { id: 'push',       label: 'Push & Alerts', Icon: Bell },
     { id: 'sms',        label: 'SMS',           Icon: Smartphone },
     { id: 'newsletter', label: 'Newsletter',     Icon: Mail },
+    { id: 'email',      label: 'Email Contacts', Icon: Send },
   ] as const;
 
   return (
@@ -726,6 +927,7 @@ export default function NotificationsPage() {
       {activeSection === 'push'       && <PushContent />}
       {activeSection === 'sms'        && <SmsContent />}
       {activeSection === 'newsletter' && <NewsletterContent />}
+      {activeSection === 'email'      && <EmailContent />}
     </AdminShell>
   );
 }

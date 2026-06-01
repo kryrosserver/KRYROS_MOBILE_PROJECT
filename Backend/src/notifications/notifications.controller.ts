@@ -273,4 +273,44 @@ export class NotificationsController {
     return this.notificationsService.deleteSmsCountry(id);
   }
 
+
+  // ─── Email Contacts ───────────────────────────────────────────────────────────
+  @Get('email/contacts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List email contacts (Admin only)' })
+  async getEmailContacts() {
+    return this.notificationsService.getEmailContacts();
+  }
+
+  @Post('email/contacts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add an email contact (Admin only)' })
+  async addEmailContact(@Body() body: { email: string; name?: string; source?: string }) {
+    return this.notificationsService.addEmailContact(body.email, body.name, body.source);
+  }
+
+  @Delete('email/contacts/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an email contact (Admin only)' })
+  async deleteEmailContact(@Param('id') id: string) {
+    return this.notificationsService.deleteEmailContact(id);
+  }
+
+  @Post('email/blast')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send email blast to contacts (Admin only) — max 5/min' })
+  async sendEmailBlast(@Body() body: { subject: string; body: string; emailIds?: string[] }) {
+    return this.notificationsService.sendEmailBlast(body.subject, body.body, body.emailIds);
+  }
+
+
 }

@@ -454,14 +454,13 @@ export const addSmsContact = (payload: { phone: string; name?: string; source?: 
   api.post('/api/notifications/sms/contacts', payload);
 
 export const deleteSmsContact = (id: string) =>
+  api.delete(`/api/notifications/sms/contacts/${id}`);
 
 // ─── SMS Supported Countries ──────────────────────────────────────────────────
 export const getSmsCountries   = ()                                                    => api.get('/api/notifications/sms/countries');
 export const addSmsCountry     = (data: { name: string; dialCode: string; isoCode: string }) => api.post('/api/notifications/sms/countries', data);
 export const toggleSmsCountry  = (id: string, isActive: boolean)                      => api.patch(`/api/notifications/sms/countries/${id}`, { isActive });
 export const deleteSmsCountry  = (id: string)                                          => api.delete(`/api/notifications/sms/countries/${id}`);
-
-  api.delete(`/api/notifications/sms/contacts/${id}`);
 
 // ─── Push Devices ─────────────────────────────────────────────────────────────
 export const getDevices = () =>
@@ -472,4 +471,17 @@ export const deleteDevice = (id: string) =>
 
 export const sendToDevices = (payload: { deviceIds: string[]; title: string; body: string; data?: any }) =>
   api.post('/api/notifications/devices/send', payload);
+
+// ─── Email Contacts ────────────────────────────────────────────────────────────
+export const getEmailContacts = () =>
+  api.get('/api/notifications/email/contacts');
+
+export const addEmailContact = (payload: { email: string; name?: string; source?: string }) =>
+  api.post('/api/notifications/email/contacts', payload);
+
+export const deleteEmailContact = (id: string) =>
+  api.delete(`/api/notifications/email/contacts/${id}`);
+
+export const sendEmailBlast = (payload: { subject: string; body: string; emailIds?: string[] }) =>
+  api.post('/api/notifications/email/blast', payload);
 
