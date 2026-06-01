@@ -267,7 +267,21 @@ export class CMSService {
         subtitle: 'Personalised product recommendations',
         animation: 'slideUp',
         config: { limit: 8, scroll: true }
-      }
+      },
+      {
+        type: 'Newsletter',
+        order: 15,
+        isActive: true,
+        title: 'Newsletter Popup',
+        subtitle: 'Homepage newsletter subscription popup — configure content below',
+        animation: 'fadeIn',
+        config: {
+          heading: 'Stay in the Loop with KRYROS',
+          subheading: 'Subscribe to get exclusive deals, new arrivals, and special offers delivered straight to your inbox.',
+          placeholder: 'Enter your email address',
+          button_text: 'Subscribe',
+        }
+      },
     ];
 
     const existingSections = await this.prisma.homePageSection.findMany();
