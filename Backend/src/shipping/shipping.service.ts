@@ -1,11 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateShippingMethodDto, UpdateShippingMethodDto } from './dto/shipping-method.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ShippingService {
-  constructor(private prisma: PrismaService) {}
+  private readonly CACHE_TTL = 300000;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async create(dto: CreateShippingMethodDto) {
     const method = await this.prisma.shippingMethod.create({
