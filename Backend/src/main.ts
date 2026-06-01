@@ -126,6 +126,27 @@ async function bootstrap() {
     });
   }
 
+
+  // Cache-Control: no-store on all sensitive API responses ──────────────────
+  // Prevents browsers and shared proxies from caching auth/user/financial data.
+  const SENSITIVE_PREFIXES = [
+    '/api/auth',
+    '/api/users',
+    '/api/orders',
+    '/api/wallet',
+    '/api/payments',
+    '/api/reports',
+    '/api/credit',
+  ];
+  app.use((req: import('express').Request, res: import('express').Response, next: import('express').NextFunction) => {
+    const isSensitive = SENSITIVE_PREFIXES.some((prefix) => req.path.startsWith(prefix));
+    if (isSensitive) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.setHeader('Pragma', 'no-cache');
+    }
+    next();
+  });
+
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
