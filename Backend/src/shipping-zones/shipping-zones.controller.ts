@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } , UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ShippingZonesService } from './shipping-zones.service';
 import { CreateShippingZoneDto } from './dto/create-shipping-zone.dto';
@@ -12,6 +13,7 @@ import { UserRole } from '@prisma/client';
 
 @ApiTags('Shipping Zones')
 @Controller('shipping-zones')
+@UseInterceptors(CacheInterceptor)
 export class ShippingZonesController {
   constructor(private readonly shippingZonesService: ShippingZonesService) {}
 
