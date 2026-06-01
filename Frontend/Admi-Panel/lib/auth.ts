@@ -1,8 +1,6 @@
 import Cookies from "js-cookie";
 
-const TOKEN_KEY = "kryros_admin_token";
 const USER_KEY = "kryros_admin_user";
-const REFRESH_KEY = "kryros_admin_refresh";
 
 export interface AdminUser {
   id: string;
@@ -12,56 +10,44 @@ export interface AdminUser {
   avatar?: string;
 }
 
-// ── Access Token ──────────────────────────────────────────────────────────────
-export function setToken(token: string): void {
-  Cookies.set(TOKEN_KEY, token, {
-    expires: 1, // 1-day cookie lifespan; actual JWT expires in 15 min (self-enforced)
-    sameSite: "strict",
-    secure: typeof window !== "undefined" && window.location.protocol === "https:",
-  });
-  // Access token stored in cookie only — do NOT write to localStorage
-  // (localStorage is a common XSS target; cookie with sameSite+secure is safer)
+// ── Token functions ───────────────────────────────────────────────────────────
+// Tokens are now httpOnly cookies managed entirely by the BFF routes
+// (/api/bff/login, /api/bff/refresh, /api/bff/logout) and injected into
+// backend requests by proxy.ts — JavaScript can NEVER read them.
+
+/** @deprecated — tokens are httpOnly, managed by BFF. This is a no-op. */
+export function setToken(_token: string): void {
+  // No-op: httpOnly cookies are set server-side by BFF routes only
 }
 
+/** Always returns null — httpOnly cookies are not accessible from JavaScript. */
 export function getToken(): string | null {
-  const cookie = Cookies.get(TOKEN_KEY);
-  if (cookie) return cookie;
-  // No localStorage fallback — cookie is the single source of truth for access token
   return null;
 }
 
+/** Clears the legacy client-accessible cookie (migration cleanup) and user data. */
 export function removeToken(): void {
-  Cookies.remove(TOKEN_KEY);
+  Cookies.remove("kryros_admin_token"); // clear legacy cookie if present
   if (typeof window !== "undefined") {
-    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    removeRefreshToken(); // always clear refresh token together with access token
+    localStorage.removeItem("kryros_admin_refresh"); // clear old refresh token
   }
 }
 
-// ── Refresh Token (long-lived, stored in localStorage) ───────────────────────
-// NOTE: Refresh tokens are only ever sent to /api/auth/refresh — never to other
-// endpoints. Storing in localStorage is acceptable here since we isolate usage.
-export function setRefreshToken(token: string): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(REFRESH_KEY, token);
-  }
-}
+/** @deprecated — refresh token is now httpOnly, managed by BFF. No-op. */
+export function setRefreshToken(_token: string): void {}
 
-export function getRefreshToken(): string | null {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem(REFRESH_KEY);
-  }
-  return null;
-}
+/** Always returns null — httpOnly. */
+export function getRefreshToken(): string | null { return null; }
 
+/** Clears any legacy refresh token storage. */
 export function removeRefreshToken(): void {
   if (typeof window !== "undefined") {
-    localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem("kryros_admin_refresh");
   }
 }
 
-// ── User ──────────────────────────────────────────────────────────────────────
+// ── User functions — user profile still stored in localStorage ────────────────
 export function setUser(user: AdminUser): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -78,12 +64,17 @@ export function getUser(): AdminUser | null {
   return null;
 }
 
+/**
+ * Authentication is now determined by user presence in storage.
+ * The actual token lives in an httpOnly cookie — proxy.ts forwards it to the backend.
+ * If the token is expired the first API call returns 401, auto-refresh fires silently.
+ */
 export function isAuthenticated(): boolean {
-  return !!getToken();
+  return !!getUser();
 }
 
 export function logout(): void {
-  removeToken(); // clears access token, user, AND refresh token
+  removeToken();
   if (typeof window !== "undefined") {
     window.location.href = "/login";
   }
