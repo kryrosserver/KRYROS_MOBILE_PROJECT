@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } , UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ShippingService } from './shipping.service';
 import { CreateShippingMethodDto, UpdateShippingMethodDto } from './dto/shipping-method.dto';
@@ -9,6 +10,7 @@ import { UserRole } from '@prisma/client';
 
 @ApiTags('Shipping Methods')
 @Controller('shipping')
+@UseInterceptors(CacheInterceptor)
 export class ShippingController {
   constructor(private readonly shippingService: ShippingService) {}
 
