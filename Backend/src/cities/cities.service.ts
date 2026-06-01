@@ -46,8 +46,10 @@ export class CitiesService {
   }
 
   async remove(id: string) {
-    return this.prisma.city.delete({
+    // Soft delete — preserves shipping zones referencing this city
+    return this.prisma.city.update({
       where: { id },
+      data: { isActive: false },
     });
   }
 }
