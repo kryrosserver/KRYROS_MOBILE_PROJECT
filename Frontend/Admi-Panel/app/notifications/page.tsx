@@ -2,10 +2,10 @@
 import AdminShell from '@/components/admin/admin-shell';
 import PageHeader from '@/components/admin/page-header';
 import { useTheme } from '@/contexts/theme-context';
-import { Bell, Send, Globe, Smartphone } from 'lucide-react';
+import { Bell, Send, Globe, Smartphone, Mail, Users, CheckCircle2, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { getNotifications } from '@/lib/api';
+import { getNotifications, getNewsletterSubscribers, sendNewsletterEmail } from '@/lib/api';
 import api from '@/lib/api';
 
 type NotifRecord = { id:string; title:string; message:string; target:string; channel:string; sent:number; opened:number; date:string; status:string };
@@ -257,4 +257,300 @@ function NotificationsContent() {
     </div>
   );
 }
-export default function NotificationsPage() { return <AdminShell><NotificationsContent /></AdminShell>; }
+// ─── Newsletter Tab Component ─────────────────────────────────────────────────
+type NLSubscriber = { id: string; email: string; isActive: boolean; createdAt: string };
+
+function NewsletterContent() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const card = isDark ? '#0D1523' : '#FFFFFF';
+  const border = isDark ? '#1E293B' : '#E2E8F0';
+  const textMain = isDark ? '#FFFFFF' : '#0F172A';
+  const textMuted = isDark ? '#8E9AAF' : '#64748B';
+  const surface = isDark ? '#101826' : '#F1F5F9';
+  const primary = '#1FA89A';
+
+  const [subscribers, setSubscribers] = useState<NLSubscriber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    getNewsletterSubscribers()
+      .then((r: any) => {
+        const raw = Array.isArray(r.data) ? r.data : [];
+        setSubscribers(raw);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = subscribers.filter(
+    (s) => !searchQuery || s.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const active = subscribers.filter((s) => s.isActive);
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelected([]);
+      setSelectAll(false);
+    } else {
+      setSelected(filtered.map((s) => s.id));
+      setSelectAll(true);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!subject.trim()) { toast.error('Subject is required'); return; }
+    if (!body.trim()) { toast.error('Message body is required'); return; }
+
+    // Resolve emails to send to
+    let emailsToSend: string[] = [];
+    if (selected.length > 0) {
+      emailsToSend = subscribers
+        .filter((s) => selected.includes(s.id) && s.isActive)
+        .map((s) => s.email);
+    }
+    // empty emailsToSend = send to ALL active (backend handles this)
+
+    setSending(true);
+    try {
+      const res: any = await sendNewsletterEmail({
+        subject: subject.trim(),
+        body: body.trim(),
+        emails: emailsToSend,
+      });
+      const result = res.data;
+      toast.success(
+        `Newsletter sent! ${result?.sent ?? 0} delivered${result?.failed ? `, ${result.failed} failed` : ''}`
+      );
+      setSubject('');
+      setBody('');
+      setSelected([]);
+      setSelectAll(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to send newsletter');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const recipientLabel = selected.length > 0
+    ? `${selected.length} selected subscriber${selected.length > 1 ? 's' : ''}`
+    : `All ${active.length} active subscribers`;
+
+  return (
+    <div style={{ padding: '0 0 40px' }}>
+      {/* Stats row */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:24 }}>
+        {[
+          { label: 'Total Subscribers', value: subscribers.length, color: primary },
+          { label: 'Active', value: active.length, color: '#22c55e' },
+          { label: 'Unsubscribed', value: subscribers.length - active.length, color: '#ef4444' },
+        ].map((stat) => (
+          <div key={stat.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: 10, padding: '14px 18px' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: stat.color }}>{stat.value}</div>
+            <div style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }} className="nl-grid">
+        {/* Subscriber List */}
+        <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow:'hidden' }}>
+          <div style={{ padding:'14px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', justifyContent:'space-between', gap:10 }}>
+            <span style={{ fontWeight:700, color:textMain, fontSize:14, display:'flex', alignItems:'center', gap:6 }}>
+              <Users style={{ width:15, height:15, color:primary }} />
+              Subscribers
+            </span>
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search email..."
+              style={{ padding:'5px 10px', borderRadius:6, border:`1px solid ${border}`, background:surface, color:textMain, fontSize:11, outline:'none', width:150 }}
+            />
+          </div>
+
+          {/* Select all row */}
+          <div style={{ padding:'8px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:10, background: surface }}>
+            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} style={{ accentColor: primary, width:14, height:14 }} />
+            <span style={{ fontSize:11, color:textMuted }}>
+              {selectAll ? 'Deselect all' : `Select all (${filtered.length})`}
+            </span>
+            {selected.length > 0 && (
+              <span style={{ marginLeft:'auto', fontSize:11, color: primary, fontWeight:600 }}>
+                {selected.length} selected
+              </span>
+            )}
+          </div>
+
+          {/* Subscriber rows */}
+          <div style={{ maxHeight:340, overflowY:'auto' }}>
+            {loading ? (
+              <div style={{ padding:'32px 0', textAlign:'center', color:textMuted, fontSize:12 }}>Loading...</div>
+            ) : filtered.length === 0 ? (
+              <div style={{ padding:'32px 0', textAlign:'center', color:textMuted, fontSize:12 }}>No subscribers yet</div>
+            ) : (
+              filtered.map((sub) => (
+                <div
+                  key={sub.id}
+                  style={{ padding:'10px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}
+                  onClick={() => toggleSelect(sub.id)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(sub.id)}
+                    onChange={() => toggleSelect(sub.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ accentColor: primary, width:14, height:14, flexShrink:0 }}
+                  />
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:textMain, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                      {sub.email}
+                    </div>
+                    <div style={{ fontSize:10, color:textMuted }}>
+                      {new Date(sub.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span style={{
+                    fontSize:9, fontWeight:700, padding:'2px 7px', borderRadius:20,
+                    background: sub.isActive ? '#22c55e22' : '#ef444422',
+                    color: sub.isActive ? '#16a34a' : '#dc2626',
+                    border: `1px solid ${sub.isActive ? '#22c55e44' : '#ef444444'}`,
+                    flexShrink:0
+                  }}>
+                    {sub.isActive ? 'Active' : 'Off'}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Compose Newsletter */}
+        <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow:'hidden' }}>
+          <div style={{ padding:'14px 18px', borderBottom:`1px solid ${border}`, display:'flex', alignItems:'center', gap:8 }}>
+            <Mail style={{ width:15, height:15, color:primary }} />
+            <span style={{ fontWeight:700, color:textMain, fontSize:14 }}>Compose Newsletter</span>
+          </div>
+          <div style={{ padding:18, display:'flex', flexDirection:'column', gap:14 }}>
+
+            {/* Recipient indicator */}
+            <div style={{ background:surface, border:`1px solid ${border}`, borderRadius:8, padding:'8px 12px', fontSize:11, color:textMuted, display:'flex', alignItems:'center', gap:6 }}>
+              <CheckCircle2 style={{ width:12, height:12, color:primary }} />
+              Sending to: <strong style={{ color:textMain }}>{recipientLabel}</strong>
+            </div>
+
+            {/* Subject */}
+            <div>
+              <label style={{ fontSize:11, fontWeight:600, color:textMuted, display:'block', marginBottom:5 }}>Subject *</label>
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="e.g. Exclusive Weekend Sale — Up to 40% Off!"
+                style={{ width:'100%', padding:'9px 12px', borderRadius:8, border:`1px solid ${border}`, background:surface, color:textMain, fontSize:13, outline:'none', boxSizing:'border-box' }}
+              />
+            </div>
+
+            {/* Body */}
+            <div>
+              <label style={{ fontSize:11, fontWeight:600, color:textMuted, display:'block', marginBottom:5 }}>Message *</label>
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Write your newsletter message here. Each new line becomes a paragraph in the email..."
+                rows={7}
+                style={{ width:'100%', padding:'9px 12px', borderRadius:8, border:`1px solid ${border}`, background:surface, color:textMain, fontSize:12, outline:'none', resize:'vertical', boxSizing:'border-box', fontFamily:'inherit', lineHeight:1.6 }}
+              />
+            </div>
+
+            {/* Send Button */}
+            <button
+              onClick={handleSend}
+              disabled={sending || !subject.trim() || !body.trim()}
+              style={{
+                width:'100%', padding:'11px', borderRadius:8, border:'none',
+                background: (!sending && subject.trim() && body.trim()) ? `linear-gradient(135deg, #1FA89A, #27B9AF)` : border,
+                color: '#fff', fontWeight:700, fontSize:13, cursor: sending ? 'wait' : 'pointer',
+                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                opacity: (!subject.trim() || !body.trim()) ? 0.5 : 1,
+              }}
+            >
+              {sending ? (
+                <><Loader2 style={{ width:14, height:14, animation:'spin 1s linear infinite' }} /> Sending...</>
+              ) : (
+                <><Send style={{ width:13, height:13 }} /> Send Newsletter</>
+              )}
+            </button>
+
+            <p style={{ fontSize:10, color:textMuted, textAlign:'center' }}>
+              {selected.length === 0
+                ? `Will send to all ${active.length} active subscribers`
+                : `Will send to ${selected.length} selected subscriber${selected.length > 1 ? 's' : ''}`
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @media (max-width: 700px) { .nl-grid { grid-template-columns: 1fr !important; } }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Main Page with Tabs ───────────────────────────────────────────────────────
+export default function NotificationsPage() {
+  const [activeSection, setActiveSection] = useState<'push' | 'newsletter'>('push');
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const card = isDark ? '#0D1523' : '#FFFFFF';
+  const border = isDark ? '#1E293B' : '#E2E8F0';
+  const textMain = isDark ? '#FFFFFF' : '#0F172A';
+  const textMuted = isDark ? '#8E9AAF' : '#64748B';
+  const surface = isDark ? '#101826' : '#F1F5F9';
+
+  return (
+    <AdminShell>
+      <PageHeader title="Notifications" description="Send push notifications and manage newsletter campaigns" />
+
+      {/* Section tab switcher */}
+      <div style={{ display:'flex', gap:4, marginBottom:24, background:surface, padding:4, borderRadius:10, border:`1px solid ${border}`, width:'fit-content' }}>
+        {[
+          { id: 'push', label: 'Push & Alerts', icon: Bell },
+          { id: 'newsletter', label: 'Newsletter', icon: Mail },
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveSection(id as any)}
+            style={{
+              padding:'7px 18px', borderRadius:7, border:'none', fontWeight:600, fontSize:13, cursor:'pointer',
+              display:'flex', alignItems:'center', gap:6,
+              background: activeSection === id ? '#1FA89A' : 'transparent',
+              color: activeSection === id ? '#fff' : textMuted,
+              transition:'all 0.15s',
+            }}
+          >
+            <Icon style={{ width:14, height:14 }} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeSection === 'push' ? <NotificationsContent /> : <NewsletterContent />}
+    </AdminShell>
+  );
+}
