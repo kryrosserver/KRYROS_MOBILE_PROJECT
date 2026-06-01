@@ -1,11 +1,20 @@
-import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 import { compressImage } from '../common/utils/image.util';
 
 @Injectable()
 export class BrandsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
+
+  private async invalidateBrandCache() {
+    await this.cacheManager.del('brands:all');
+  }
 
   private slugify(text: string): string {
     return text
@@ -36,7 +45,7 @@ export class BrandsService {
       if (logoData && logoData.startsWith('data:image')) {
         logoData = await compressImage(logoData, 300, 120, 80);
       }
-      return await this.prisma.brand.create({
+      const brand = await this.prisma.brand.create({
         data: {
           name: dto.name,
           slug,
@@ -48,14 +57,18 @@ export class BrandsService {
           categoryId: dto.categoryId || null,
         },
       });
+      await this.invalidateBrandCache();
+      return brand;
     } catch (e: any) {
       throw new InternalServerErrorException(`Failed to create brand: ${e.message}`);
     }
   }
 
   async findAll() {
+    const cached = await this.cacheManager.get<any[]>('brands:all');
+    if (cached) return cached;
     try {
-      return await this.prisma.brand.findMany({
+      const result = await this.prisma.brand.findMany({
         include: {
           category: {
             select: { id: true, name: true, slug: true },
@@ -63,6 +76,8 @@ export class BrandsService {
         },
         orderBy: { name: 'asc' },
       });
+      await this.cacheManager.set('brands:all', result, 5 * 60 * 1000);
+      return result;
     } catch {
       return [];
     }
