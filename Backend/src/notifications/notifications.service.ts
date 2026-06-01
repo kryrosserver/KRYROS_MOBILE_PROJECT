@@ -277,6 +277,31 @@ export class NotificationsService implements OnModuleInit {
 
   // ==================== SMS (BEEM AFRICA) ====================
 
+  // ─── Country support check ───────────────────────────────────────────────────
+  private async isSmsAllowed(rawPhone: string): Promise<{ allowed: boolean; country?: string }> {
+    const digits = rawPhone.replace(/\D/g, '');
+    try {
+      const activeCountries = await this.prisma.smsSupportedCountry.findMany({
+        where: { isActive: true },
+        select: { dialCode: true, name: true },
+        orderBy: { dialCode: 'desc' }, // longer codes first (e.g. 263 before 26)
+      });
+      // If no countries configured → allow all (fail-open for admin direct sends)
+      if (activeCountries.length === 0) return { allowed: true };
+      for (const c of activeCountries) {
+        if (digits.startsWith(c.dialCode)) {
+          return { allowed: true, country: c.name };
+        }
+        // Also handle local format starting with 0 — normalise first
+        // e.g. 097... for Zambia (+260) after normalising becomes 260...
+      }
+      return { allowed: false };
+    } catch (e) {
+      this.logger.warn('isSmsAllowed check failed — defaulting to allowed: ' + e.message);
+      return { allowed: true }; // fail open so orders don't break
+    }
+  }
+
   async sendSMS(phoneNumber: string, message: string) {
     const apiKey = this.configService.get('BEEM_API_KEY');
     const secretKey = this.configService.get('BEEM_SECRET_KEY');
@@ -303,6 +328,16 @@ export class NotificationsService implements OnModuleInit {
       
       // If the number is already in international format (like 234... or 260...)
       // Beem Africa will accept it as is as long as it's just numbers.
+
+      // ── Country filter: skip if number is not from a supported country ──
+      const countryCheck = await this.isSmsAllowed(formattedPhone);
+      if (!countryCheck.allowed) {
+        this.logger.log(`SMS skipped — country not in supported list for number: ${formattedPhone}`);
+        return { success: false, skipped: true, reason: 'Country not supported for SMS delivery' };
+      }
+      if (countryCheck.country) {
+        this.logger.log(`SMS allowed for country: ${countryCheck.country}`);
+      }
 
       const auth = Buffer.from(`${apiKey}:${secretKey}`).toString('base64');
       this.logger.log(`Final formatted number being sent to Beem: ${formattedPhone}`);
@@ -544,6 +579,50 @@ export class NotificationsService implements OnModuleInit {
     if (tokens.length === 0) return { success: false, message: 'No tokens found for selected devices' };
     await this.sendToTokens(tokens, title, body, data);
     return { success: true, sent: tokens.length };
+  }
+
+
+  // ─── SMS Supported Countries ─────────────────────────────────────────────
+  async getSmsCountries() {
+    return this.prisma.smsSupportedCountry.findMany({
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async addSmsCountry(name: string, dialCode: string, isoCode: string) {
+    const cleanDial = dialCode.replace(/\D/g, '');
+    try {
+      const country = await this.prisma.smsSupportedCountry.upsert({
+        where: { dialCode: cleanDial },
+        update: { name, isoCode, isActive: true },
+        create: { name, dialCode: cleanDial, isoCode, isActive: true },
+      });
+      return { success: true, country };
+    } catch (error) {
+      this.logger.warn(`addSmsCountry failed: ${error.message}`);
+      return { success: false, message: 'Could not add country' };
+    }
+  }
+
+  async toggleSmsCountry(id: string, isActive: boolean) {
+    try {
+      const country = await this.prisma.smsSupportedCountry.update({
+        where: { id },
+        data: { isActive },
+      });
+      return { success: true, country };
+    } catch {
+      return { success: false, message: 'Country not found' };
+    }
+  }
+
+  async deleteSmsCountry(id: string) {
+    try {
+      await this.prisma.smsSupportedCountry.delete({ where: { id } });
+      return { success: true };
+    } catch {
+      return { success: false, message: 'Country not found' };
+    }
   }
 
 }
