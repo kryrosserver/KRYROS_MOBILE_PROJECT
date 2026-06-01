@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/theme-context';
 import {
   Layout, Edit, Eye, Plus, ChevronDown, Trash2, Upload, X,
   Image as ImageIcon, Video, Link2, Type, AlignLeft, MousePointer,
-  ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag, Award
+  ChevronLeft, ChevronRight, FileText, MapPin, Clock, Tag, Award
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -367,12 +367,6 @@ function CMSContent() {
   const [data, setData] = useState<CmsPage[]>(INITIAL_PAGES);
   type View = 'pages' | 'sections' | 'items' | 'trusted-brands';
 
-  // ── Newsletter Popup config ───────────────────────────────────────────
-  const DEFAULT_NL_CONFIG = { popup_image: '', heading: 'Signup Today!', subheading: 'Want exclusive access to discounts & offers on premium brands?', placeholder: 'Your E-mail', button_text: 'Submit', footnote: '*Limited time offer.' };
-  const [nlConfig, setNlConfig] = useState<Record<string,string>>(DEFAULT_NL_CONFIG);
-  const [nlConfigId, setNlConfigId] = useState<string | null>(null);
-  const [nlModalOpen, setNlModalOpen] = useState(false);
-  const [nlSaving, setNlSaving] = useState(false);
 
   // ── Load real data from API on mount ─────────────────────────────────
   useEffect(() => {
@@ -387,9 +381,7 @@ function CMSContent() {
         const banners: any[] = Array.isArray(bannersRes.data) ? bannersRes.data : Array.isArray((bannersRes.data as any)?.data) ? (bannersRes.data as any).data : [];
         const hpSecs: any[] = Array.isArray(hpRes.data) ? hpRes.data : Array.isArray((hpRes.data as any)?.data) ? (hpRes.data as any).data : [];
         if (apiPages.length === 0 && banners.length === 0 && hpSecs.length === 0) return;
-        // Extract Newsletter popup config from homepage sections
         const _nlSec = hpSecs.find((s: any) => s.type === 'Newsletter');
-        if (_nlSec?.config) { setNlConfigId(_nlSec.id); setNlConfig(prev => ({ ...prev, ...Object.fromEntries(Object.entries(_nlSec.config).map(([k,v]) => [k, String(v)])) })); }
         const HP_NAME: Record<string, string> = {
           HeroSlider: 'Hero Slider', Brands: 'Featured Brands', TrustBadges: 'Trust Badges',
           CategorySection: 'Category Section', FeaturedProducts: 'Featured Products',
@@ -412,6 +404,10 @@ function CMSContent() {
               if (existing) { existing.items.push(newItem); }
               else { secs.push({ name: nm, items: [newItem] }); }
             });
+            // Always ensure Newsletter section appears in Home, even if not yet in DB
+            if (!secs.find(s => s.name === 'Newsletter')) {
+              secs.push({ name: 'Newsletter', items: [{ id: _nlSec?.id ? String(_nlSec.id) : 'nl-placeholder', content: { heading: 'Signup Today!', subheading: 'Want exclusive access to discounts & offers on premium brands?', placeholder: 'Your E-mail', button_text: 'Submit', footnote: '*Limited time offer.', popup_image: '' }, status: 'Active' }] });
+            }
           } else {
             try {
               const sr = await getCmsSections(p.slug).catch(() => ({ data: [] }));
@@ -455,6 +451,16 @@ function CMSContent() {
   const _getPageSlug = (pageId: string) => data.find(p => p.id === pageId)?.slug || '/';
   const _isHome = (pageId: string) => { const s = _getPageSlug(pageId); return s === '/' || s === 'home'; };
   const _apiSave = (itemId: string, pageId: string, secName: string, content: SectionData, mediaUrl?: string) => {
+    // Newsletter with placeholder ID (not yet in DB) — create instead of update
+    if (itemId === 'nl-placeholder' && _isHome(pageId)) {
+      createCmsHomepageSection({ type: 'Newsletter', config: { ...content, ...(mediaUrl ? { media: mediaUrl } : {}) }, isActive: true })
+        .then((res: any) => {
+          const newId = res?.data?.id || (res?.data as any)?.data?.id;
+          if (newId) setData(d => d.map(p => p.id !== pageId ? p : { ...p, sections: p.sections.map(s => s.name !== 'Newsletter' ? s : { ...s, items: s.items.map(i => i.id === 'nl-placeholder' ? { ...i, id: String(newId) } : i) }) }));
+        })
+        .catch(() => {});
+      return;
+    }
     if (_isHome(pageId)) {
       if (secName === 'Hero Banner') {
         const _mUrl = mediaUrl || content.media || content.image || '';
@@ -663,20 +669,6 @@ function CMSContent() {
     _apiToggle(itemId, pid, sn, ns === 'Active');
   };
 
-  const handleSaveNlConfig = async () => {
-    setNlSaving(true);
-    try {
-      if (nlConfigId) {
-        await updateCmsHomepageSection(nlConfigId, { config: nlConfig as any, isActive: true });
-      } else {
-        const res: any = await createCmsHomepageSection({ type: 'Newsletter', config: nlConfig as any, isActive: true });
-        const newId = res?.data?.id || (res?.data as any)?.data?.id;
-        if (newId) setNlConfigId(newId);
-      }
-      toast.success('Newsletter popup config saved!');
-      setNlModalOpen(false);
-    } catch { toast.error('Failed to save config'); } finally { setNlSaving(false); }
-  };
 
   const Breadcrumb = () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -715,21 +707,7 @@ function CMSContent() {
       {view === 'pages' && (
         <div>
           <PageHeader title="CMS & Pages" subtitle="Manage your website pages and content" icon={Layout} onAdd={() => { setPageForm({ ...EMPTY_PAGE_FORM }); setAddPageOpen(true); }} addLabel="New Page" />
-          {/* ── Newsletter Popup Quick Configure ── */}
-          <div style={{ background: card, border: `1px solid #1FA89A55`, borderRadius: 14, padding: '16px 20px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', transition: 'border-color 0.15s' }}
-            onClick={() => setNlModalOpen(true)} onMouseEnter={e => (e.currentTarget.style.borderColor = '#1FA89A')} onMouseLeave={e => (e.currentTarget.style.borderColor = '#1FA89A55')}>
-            <div style={{ width: 42, height: 42, borderRadius: 11, background: 'rgba(31,168,154,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Mail size={20} color="#1FA89A" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, color: textMain, fontSize: '14.5px' }}>Newsletter Popup</div>
-              <div style={{ fontSize: '12px', color: textMuted, marginTop: 2 }}>Configure the popup shown to store visitors — image, heading &amp; email form</div>
-              <div style={{ fontSize: '11.5px', color: '#1FA89A', marginTop: 5, fontWeight: 600 }}>{nlConfig.heading || 'Signup Today!'} &bull; {nlConfig.button_text || 'Submit'}</div>
-            </div>
-            <button onClick={e => { e.stopPropagation(); setNlModalOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'linear-gradient(135deg,#1FA89A,#27B9AF)', border: 'none', borderRadius: 9, color: 'white', fontSize: '13px', fontWeight: 600, padding: '9px 16px', cursor: 'pointer', fontFamily: 'var(--font-inter)', flexShrink: 0, boxShadow: '0 4px 12px rgba(31,168,154,0.25)' }}>
-              <Edit size={13} /> Configure
-            </button>
-          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', marginBottom: '24px' }} className="sg">
             {[{ label: 'Total Pages', val: String(data.length), color: accent },
               { label: 'Published', val: String(data.filter(p => p.status === 'Published').length), color: accent },
