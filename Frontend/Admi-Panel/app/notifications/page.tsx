@@ -32,142 +32,189 @@ function useColors() {
 
 // ─── Push Tab ────────────────────────────────────────────────────────────────
 function PushContent() {
-  const { card, border, textMain, textMuted, surface } = useColors();
-  const [notifications, setNotifications] = useState<NotifRecord[]>([]);
-  const [title, setTitle] = useState('');
-  const [message, setMessage] = useState('');
-  const [target, setTarget] = useState('All Users');
-  const [channel, setChannel] = useState('Push');
+  const { card, border, textMain, textMuted, surface, primary } = useColors();
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [pushTitle, setPushTitle] = useState('');
+  const [pushMessage, setPushMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    getNotifications({ limit: 50 }).then((r: any) => {
-      const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
-      if (raw.length > 0) {
-        setNotifications(raw.map((n: any) => ({
-          id: n.id || String(Date.now()),
-          title: n.title || n.type || 'Notification',
-          message: n.message || n.body || '',
-          target: n.target || 'All Users',
-          channel: n.channel || n.type || 'Push',
-          sent: n.sentCount ?? n.sent ?? 0,
-          opened: n.openedCount ?? n.opened ?? 0,
-          date: n.createdAt ? n.createdAt.split('T')[0] : '',
-          status: n.status === 'SENT' || n.status === 'sent' ? 'Sent' : n.status === 'SCHEDULED' ? 'Scheduled' : (n.status || 'Sent'),
-        })));
-      }
-    }).catch(() => {});
-  }, []);
+  const loadDevices = () => {
+    setLoading(true);
+    getDevices()
+      .then((r: any) => {
+        const raw = Array.isArray(r.data) ? r.data : [];
+        setDevices(raw);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { loadDevices(); }, []);
+
+  const filtered = devices.filter(d => {
+    if (!search) return true;
+    const email = d.user?.email || '';
+    const name = `${d.user?.firstName || ''} ${d.user?.lastName || ''}`.trim();
+    return email.toLowerCase().includes(search.toLowerCase()) ||
+           name.toLowerCase().includes(search.toLowerCase()) ||
+           d.platform.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const toggleSelect = (id: string) =>
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const toggleSelectAll = () => {
+    if (selectAll) { setSelected([]); setSelectAll(false); }
+    else { setSelected(filtered.map(d => d.id)); setSelectAll(true); }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDevice(id);
+      setDevices(prev => prev.filter(d => d.id !== id));
+      setSelected(prev => prev.filter(x => x !== id));
+      toast.success('Device removed');
+    } catch { toast.error('Failed to remove device'); }
+  };
 
   const handleSend = async () => {
-    if (!title.trim() || !message.trim()) { toast.error('Title and message are required'); return; }
+    if (!pushTitle.trim() || !pushMessage.trim()) { toast.error('Title and message are required'); return; }
     setSending(true);
     try {
-      const targetTypeMap: Record<string, string> = {
-        'All Users': 'BULK', 'Bulk': 'BULK', 'Specific User': 'SINGLE',
-        'Status Based': 'STATUS_BASED', 'All Customers': 'BULK',
-      };
-      const targetType = targetTypeMap[target] || 'BULK';
-      const payload: any = { title, body: message, targetType };
-      await api.post('/api/notifications/send', payload);
-      toast.success(`Notification sent via ${channel}`);
+      if (selected.length > 0) {
+        // Send to specific selected devices
+        await sendToDevices({ deviceIds: selected, title: pushTitle.trim(), body: pushMessage.trim() });
+        toast.success(`Push sent to ${selected.length} device${selected.length > 1 ? 's' : ''}`);
+      } else {
+        // Broadcast to all
+        await api.post('/api/notifications/broadcast', { title: pushTitle.trim(), body: pushMessage.trim() });
+        toast.success(`Push broadcast to all ${devices.length} devices`);
+      }
+      setPushTitle(''); setPushMessage(''); setSelected([]); setSelectAll(false);
     } catch {
-      toast.success(`Notification queued via ${channel}`);
+      toast.error('Failed to send push notification');
     }
-    setNotifications(d => [{
-      id: `N${String(Date.now()).slice(-6)}`, title, message, target, channel,
-      sent: target === 'Specific User' ? 1 : 0, opened: 0,
-      date: new Date().toISOString().split('T')[0], status: 'Sent',
-    }, ...d]);
-    setTitle(''); setMessage('');
     setSending(false);
   };
 
-  const inputStyle = { width:'100%', background:surface, border:`1px solid ${border}`, borderRadius:'9px', color:textMain, fontSize:'13.5px', fontFamily:'inherit', outline:'none', padding:'10px 14px', boxSizing:'border-box' as const };
-  const selStyle = { ...inputStyle, cursor:'pointer' };
-  const totalSent = notifications.reduce((a, n) => a + n.sent, 0);
-  const totalOpened = notifications.reduce((a, n) => a + n.opened, 0);
+  const platformColors: Record<string, string> = {
+    android: '#22c55e', ios: '#3b82f6', web: '#f59e0b',
+  };
+  const platformLabel = (p: string) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+
+  const recipientLabel = selected.length > 0
+    ? `${selected.length} selected device${selected.length > 1 ? 's' : ''}`
+    : `All ${devices.length} registered devices`;
+
+  const inputStyle = { width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${border}`, background: surface, color: textMain, fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
 
   return (
-    <div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'20px',marginBottom:'24px'}} className="push-grid">
-        {/* Compose */}
-        <div style={{background:card,border:`1px solid ${border}`,borderRadius:'12px',padding:'20px'}}>
-          <div style={{fontSize:'14px',fontWeight:700,color:textMain,marginBottom:'16px',display:'flex',alignItems:'center',gap:'8px'}}>
-            <Send size={16} color="#1FA89A" /> Compose Notification
-          </div>
-          <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-            <div>
-              <label style={{fontSize:'12px',fontWeight:600,color:textMuted,display:'block',marginBottom:'6px'}}>Title</label>
-              <input type="text" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Notification title..." style={inputStyle} />
-            </div>
-            <div>
-              <label style={{fontSize:'12px',fontWeight:600,color:textMuted,display:'block',marginBottom:'6px'}}>Message</label>
-              <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Enter notification message..." rows={3} style={{...inputStyle, resize:'none'}} />
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
-              <div>
-                <label style={{fontSize:'12px',fontWeight:600,color:textMuted,display:'block',marginBottom:'6px'}}>Target</label>
-                <select value={target} onChange={e=>setTarget(e.target.value)} style={selStyle}>
-                  {['All Users','New Users','Loyalty Members','Wholesale','Specific User'].map(t=><option key={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={{fontSize:'12px',fontWeight:600,color:textMuted,display:'block',marginBottom:'6px'}}>Channel</label>
-                <select value={channel} onChange={e=>setChannel(e.target.value)} style={selStyle}>
-                  {['Push'].map(t=><option key={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div style={{display:'flex',gap:'8px'}}>
-              <button onClick={handleSend} disabled={sending} style={{flex:1,padding:'11px',background:sending?'rgba(31,168,154,0.5)':'linear-gradient(135deg,#1FA89A,#27B9AF)',border:'none',borderRadius:'9px',color:'white',fontSize:'13.5px',fontWeight:600,cursor:sending?'not-allowed':'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}}>
-                <Send size={14} /> {sending ? 'Sending...' : 'Send Now'}
-              </button>
-            </div>
-          </div>
-        </div>
-        {/* Stats */}
-        <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-          {([
-            {label:'Total Sent',val:totalSent.toLocaleString(),icon:Send,color:'#1FA89A'},
-            {label:'Total Opened',val:totalOpened.toLocaleString(),icon:Bell,color:'#6366f1'},
-            {label:'Open Rate',val: totalSent > 0 ? `${Math.round(totalOpened/totalSent*100)}%` : '0%',icon:Globe,color:'#FFC107'},
-            {label:'Records',val:notifications.length.toString(),icon:Smartphone,color:'#1FA89A'},
-          ] as any[]).map((s: any) => (
-            <div key={s.label} style={{background:card,border:`1px solid ${border}`,borderRadius:'12px',padding:'16px',display:'flex',alignItems:'center',gap:'14px'}}>
-              <div style={{width:'40px',height:'40px',borderRadius:'10px',background:`${s.color}18`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                <s.icon size={18} color={s.color} />
-              </div>
-              <div>
-                <div style={{fontSize:'12px',color:textMuted}}>{s.label}</div>
-                <div style={{fontSize:'22px',fontWeight:800,color:s.color}}>{s.val}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* History */}
-      <div style={{background:card,border:`1px solid ${border}`,borderRadius:'12px',overflow:'hidden'}}>
-        <div style={{padding:'16px 20px',borderBottom:`1px solid ${border}`,fontSize:'14px',fontWeight:700,color:textMain}}>Notification History</div>
-        {notifications.length === 0 ? (
-          <div style={{padding:'32px',textAlign:'center',color:textMuted,fontSize:'13px'}}>No notifications yet.</div>
-        ) : notifications.map(n=>(
-          <div key={n.id} style={{padding:'14px 20px',borderBottom:`1px solid ${border}`,display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap'}}>
-            <div style={{flex:'1 1 200px',minWidth:0}}>
-              <div style={{fontWeight:600,color:textMain,fontSize:'13.5px'}}>{n.title}</div>
-              <div style={{fontSize:'12px',color:textMuted,marginTop:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{n.message}</div>
-            </div>
-            <div style={{display:'flex',gap:'12px',flexWrap:'wrap',fontSize:'12px',color:textMuted}}>
-              <div><span style={{fontWeight:600,color:textMain}}>{n.sent}</span> sent</div>
-              <div style={{padding:'2px 8px',borderRadius:'8px',background:'rgba(31,168,154,0.1)',color:'#1FA89A',fontSize:'11px',fontWeight:600}}>{n.channel}</div>
-              <div>{n.date}</div>
-            </div>
-            <span style={{padding:'3px 10px',borderRadius:'20px',fontSize:'11.5px',fontWeight:600,background:n.status==='Sent'?'rgba(31,168,154,0.12)':'rgba(255,193,7,0.12)',color:n.status==='Sent'?'#1FA89A':'#FFC107'}}>{n.status}</span>
+    <div style={{ paddingBottom: 40 }}>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+        {[
+          { label: 'Total Devices', value: devices.length, color: primary },
+          { label: 'Android', value: devices.filter(d => d.platform === 'android').length, color: '#22c55e' },
+          { label: 'iOS / Web', value: devices.filter(d => d.platform !== 'android').length, color: '#3b82f6' },
+        ].map(s => (
+          <div key={s.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: 10, padding: '14px 18px' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>{s.label}</div>
           </div>
         ))}
       </div>
-      <style>{`@media(max-width:900px){.push-grid{grid-template-columns:1fr!important;}}`}</style>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }} className="push-device-grid">
+        {/* Device List */}
+        <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 700, color: textMain, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Smartphone style={{ width: 15, height: 15, color: primary }} /> Registered Devices
+            </span>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..." style={{ padding: '5px 10px', borderRadius: 6, border: `1px solid ${border}`, background: surface, color: textMain, fontSize: 11, outline: 'none', width: 130 }} />
+          </div>
+
+          {/* Select all row */}
+          <div style={{ padding: '8px 18px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 10, background: surface }}>
+            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} style={{ accentColor: primary, width: 14, height: 14 }} />
+            <span style={{ fontSize: 11, color: textMuted }}>{selectAll ? 'Deselect all' : `Select all (${filtered.length})`}</span>
+            {selected.length > 0 && <span style={{ marginLeft: 'auto', fontSize: 11, color: primary, fontWeight: 600 }}>{selected.length} selected</span>}
+          </div>
+
+          {/* Device rows */}
+          <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+            {loading ? (
+              <div style={{ padding: '32px 0', textAlign: 'center', color: textMuted, fontSize: 12 }}>Loading...</div>
+            ) : filtered.length === 0 ? (
+              <div style={{ padding: '32px 0', textAlign: 'center', color: textMuted, fontSize: 12 }}>
+                {search ? 'No matching devices' : 'No registered devices yet — installs the app or PWA to register'}
+              </div>
+            ) : filtered.map(d => (
+              <div key={d.id} style={{ padding: '10px 18px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => toggleSelect(d.id)}>
+                <input type="checkbox" checked={selected.includes(d.id)} onChange={() => toggleSelect(d.id)} onClick={e => e.stopPropagation()} style={{ accentColor: primary, width: 14, height: 14, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: textMain, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {d.user?.email || d.user?.firstName ? `${d.user.firstName || ''} ${d.user.lastName || ''}`.trim() || d.user.email : 'Unknown user'}
+                  </div>
+                  {d.user?.email && <div style={{ fontSize: 10, color: textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.user.email}</div>}
+                  <div style={{ fontSize: 10, color: textMuted }}>{new Date(d.createdAt).toLocaleDateString()}</div>
+                </div>
+                <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 20, background: `${platformColors[d.platform] || '#888'}20`, color: platformColors[d.platform] || '#888', border: `1px solid ${platformColors[d.platform] || '#888'}44`, flexShrink: 0 }}>
+                  {platformLabel(d.platform)}
+                </span>
+                <button onClick={e => { e.stopPropagation(); handleDelete(d.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#ef4444', flexShrink: 0 }}>
+                  <Trash2 style={{ width: 13, height: 13 }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Compose Push */}
+        <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Bell style={{ width: 15, height: 15, color: primary }} />
+            <span style={{ fontWeight: 700, color: textMain, fontSize: 14 }}>Compose Push</span>
+          </div>
+          <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* Recipient indicator */}
+            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 8, padding: '8px 12px', fontSize: 11, color: textMuted, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircle2 style={{ width: 12, height: 12, color: primary }} />
+              Sending to: <strong style={{ color: textMain }}>{recipientLabel}</strong>
+            </div>
+
+            {/* Title */}
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: textMuted, display: 'block', marginBottom: 5 }}>Title *</label>
+              <input value={pushTitle} onChange={e => setPushTitle(e.target.value)} placeholder="e.g. New Arrivals — Just for You!" style={inputStyle} />
+            </div>
+
+            {/* Message */}
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: textMuted, display: 'block', marginBottom: 5 }}>Message *</label>
+              <textarea value={pushMessage} onChange={e => setPushMessage(e.target.value)} placeholder="Write your push notification message here..." rows={6} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6, display: 'block' }} />
+            </div>
+
+            {/* Send Button */}
+            <button onClick={handleSend} disabled={sending || !pushTitle.trim() || !pushMessage.trim()} style={{ width: '100%', padding: '11px', borderRadius: 8, border: 'none', background: (!sending && pushTitle.trim() && pushMessage.trim()) ? 'linear-gradient(135deg,#1FA89A,#27B9AF)' : border, color: '#fff', fontWeight: 700, fontSize: 13, cursor: sending ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: (!pushTitle.trim() || !pushMessage.trim()) ? 0.5 : 1 }}>
+              {sending ? <><Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Sending...</> : <><Send style={{ width: 13, height: 13 }} /> Send Push</>}
+            </button>
+
+            <p style={{ fontSize: 10, color: textMuted, textAlign: 'center' }}>
+              {selected.length === 0 ? `Will broadcast to all ${devices.length} registered devices` : `Will send to ${selected.length} selected device${selected.length > 1 ? 's' : ''}`}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @media(max-width:700px){.push-device-grid{grid-template-columns:1fr!important;}}
+      `}</style>
     </div>
   );
 }
