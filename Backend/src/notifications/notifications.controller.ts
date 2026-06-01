@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { NotificationsService } from './notifications.service';
 import { MailerService } from './mailer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -189,7 +190,8 @@ export class NotificationsController {
   }
 
   @Post('sms/contacts/register')
-  @ApiOperation({ summary: 'Auto-register phone from checkout (public)' })
+  @Throttle({ default: { ttl: 60000, limit: 3 } })
+  @ApiOperation({ summary: 'Auto-register phone from checkout (public, max 3/min per IP)' })
   async registerSmsContact(@Body() body: { phone: string; name?: string; source?: string }) {
     return this.notificationsService.addSmsContact(body.phone, body.name, body.source || 'Checkout');
   }
