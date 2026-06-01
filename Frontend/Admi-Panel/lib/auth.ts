@@ -12,7 +12,7 @@ export interface AdminUser {
 }
 
 export function setToken(token: string): void {
-  Cookies.set(TOKEN_KEY, token, { expires: 7, sameSite: "lax" });
+  Cookies.set(TOKEN_KEY, token, { expires: 7, sameSite: "strict", secure: window.location.protocol === "https:" });
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
   }
