@@ -20,9 +20,11 @@ model User {
   isActive             Boolean              @default(true)
   emailVerifiedAt      DateTime?
   lastLoginAt          DateTime?
-  passwordResetToken   String?
-  passwordResetExpires DateTime?
-  twoFactorSecret      String?
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  twoFactorSecret          String?
   twoFactorEnabled     Boolean              @default(false)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
