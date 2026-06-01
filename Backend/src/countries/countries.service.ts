@@ -1,4 +1,6 @@
 import { Injectable, Logger, OnModuleInit, BadRequestException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCountryDto, SymbolPosition } from './dto/create-country.dto';
 import { UpdateCountryDto } from './dto/update-country.dto';
@@ -11,7 +13,12 @@ export class CountriesService implements OnModuleInit {
   private readonly PRIMARY_EXCHANGE_API = 'https://api.exchangerate-api.com/v4/latest/USD';
   private readonly FALLBACK_EXCHANGE_API = 'https://open.er-api.com/v6/latest/USD';
 
-  constructor(private prisma: PrismaService) {}
+  private readonly CACHE_TTL = 600000;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async onModuleInit() {
     try {
