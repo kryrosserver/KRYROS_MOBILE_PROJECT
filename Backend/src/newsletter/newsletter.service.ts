@@ -12,7 +12,7 @@ export class NewsletterService {
 
   constructor(
     private prisma: PrismaService,
-    private mailerService: MailerService,,
+    private mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
