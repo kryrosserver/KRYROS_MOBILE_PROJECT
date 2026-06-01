@@ -230,6 +230,39 @@ export class CloudinaryService {
     return result.secure_url;
   }
 
+
+  /**
+   * Generate a signed upload signature for direct browser-to-Cloudinary uploads.
+   * The browser uses this to upload files directly to Cloudinary (no server proxy).
+   * API secret is NEVER exposed to the client.
+   *
+   * @param folder  Target Cloudinary folder (default: kryros/videos)
+   */
+  getUploadSignature(folder: string = 'kryros/videos'): {
+    signature: string;
+    timestamp: number;
+    cloudName: string;
+    apiKey: string;
+    folder: string;
+  } {
+    if (!this.configured) {
+      throw new Error('Cloudinary not configured — add CLOUDINARY_* env vars to Render');
+    }
+    const timestamp = Math.round(Date.now() / 1000);
+    const paramsToSign = { timestamp, folder };
+    const signature = cloudinary.utils.api_sign_request(
+      paramsToSign,
+      this.configService.get<string>('CLOUDINARY_API_SECRET')!,
+    );
+    return {
+      signature,
+      timestamp,
+      cloudName: this.configService.get<string>('CLOUDINARY_CLOUD_NAME')!,
+      apiKey: this.configService.get<string>('CLOUDINARY_API_KEY')!,
+      folder,
+    };
+  }
+
   /**
    * Delete a Cloudinary asset by its full secure URL.
    */
