@@ -715,6 +715,15 @@ export class ProductsService {
       },
     });
 
+    // Sync inventory.stock whenever stockCurrent is updated (keeps "In Stock" display accurate)
+    if (dto.stockCurrent !== undefined) {
+      await this.prisma.inventory.upsert({
+        where: { productId: id },
+        update: { stock: isNaN(Number(dto.stockCurrent)) ? 0 : Number(dto.stockCurrent) },
+        create: { productId: id, stock: isNaN(Number(dto.stockCurrent)) ? 0 : Number(dto.stockCurrent), reservedStock: 0 },
+      }).catch(() => null);
+    }
+
     if (dto.upsellProductId !== undefined) {
       try {
         // Clear existing upsells
