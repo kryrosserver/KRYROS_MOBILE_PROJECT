@@ -83,7 +83,7 @@ function buildThrottlerConfig() {
               socket: { reconnectStrategy: (retries: number) => Math.min(retries * 100, 3000) },
             });
             logger.log('CacheModule: using Redis store (REDIS_URL detected)');
-            return { store, ttl: 60 * 1000 };
+            return { store, ttl: 5 * 60 * 1000 }; // 5-min TTL — safe for public read-heavy data
           } catch (err) {
             logger.error(`CacheModule: Redis store failed, falling back to memory — ${err}`);
           }
@@ -92,7 +92,7 @@ function buildThrottlerConfig() {
           'CacheModule: REDIS_URL not set — using in-memory store. ' +
           'Auth lockouts will reset on server restart. Set REDIS_URL in production.',
         );
-        return { ttl: 60 * 1000, max: 100 };
+        return { ttl: 5 * 60 * 1000, max: 500 }; // 5-min in-memory cache, 500 entries max
       },
     }),
 
