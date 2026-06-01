@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { MailerService } from './mailer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -168,4 +168,39 @@ export class NotificationsController {
       status: body.status || 'SHIPPED',
     });
   }
+
+  // ─── SMS Contacts ─────────────────────────────────────────────────────────
+  @Get('sms/contacts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all SMS contacts (Admin only)' })
+  async getSmsContacts() {
+    return this.notificationsService.getSmsContacts();
+  }
+
+  @Post('sms/contacts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Manually add an SMS contact (Admin only)' })
+  async addSmsContact(@Body() body: { phone: string; name?: string; source?: string }) {
+    return this.notificationsService.addSmsContact(body.phone, body.name, body.source || 'Manual');
+  }
+
+  @Post('sms/contacts/register')
+  @ApiOperation({ summary: 'Auto-register phone from checkout (public)' })
+  async registerSmsContact(@Body() body: { phone: string; name?: string; source?: string }) {
+    return this.notificationsService.addSmsContact(body.phone, body.name, body.source || 'Checkout');
+  }
+
+  @Delete('sms/contacts/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an SMS contact (Admin only)' })
+  async deleteSmsContact(@Param('id') id: string) {
+    return this.notificationsService.deleteSmsContact(id);
+  }
+
 }
