@@ -46,7 +46,7 @@ function ProductsContent() {
 
   // Load real products from API on mount
   useEffect(() => {
-    getProducts({ limit: 200 }).then(r => {
+    getProducts({ take: 500 }).then(r => {
       const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
       const normalized: Product[] = raw.map((p: any) => ({
         id: p.id || '',
@@ -61,7 +61,7 @@ function ProductsContent() {
         stock: p.stockCurrent ?? p.inventory?.stock ?? p.stock ?? 0,
         weight: String(p.weight || ''),
         sold: p._count?.orderItems ?? 0,
-        status: p.status === 'ACTIVE' ? 'Active' : p.status === 'OUT_OF_STOCK' ? 'Out of Stock' : p.status === 'INACTIVE' ? 'Inactive' : p.status === 'LOW_STOCK' ? 'Low Stock' : (p.status || 'Active'),
+        status: p.isActive !== false ? 'Active' : 'Inactive',
         featured: !!p.isFeatured,
         showGuaranteeBadge: !!p.showGuaranteeBadge,
         showReturnsBadge: !!p.showReturnsBadge,
@@ -145,7 +145,7 @@ function ProductsContent() {
       weight: form.weight || undefined,
       stockTotal: Number(form.stock),
       stockCurrent: Number(form.stock),
-      isActive: form.status === 'Active',
+      isActive: form.status !== 'Inactive',
       isFeatured: strToBool(form.featured),
       hasFiveYearGuarantee: strToBool(form.showGuaranteeBadge),
       hasFreeReturns: strToBool(form.showReturnsBadge),
