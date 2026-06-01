@@ -15,6 +15,7 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { EmailService } from '../common/email/email.service';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 const BCRYPT_ROUNDS = 12;
@@ -37,6 +38,7 @@ export class AuthService {
     private jwtService: JwtService,
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private emailService: EmailService,
   ) {}
 
   // ── Failed-login lockout (in-memory, sliding window) ─────────────────────
@@ -212,7 +214,45 @@ export class AuthService {
       this.createRefreshToken(result.id),
     ]);
 
+    // Send email verification if user has an email
+    if (result.email) {
+      const verifyRaw = generateOpaqueToken();
+      const verifyHash = hashToken(verifyRaw);
+      await this.prisma.user.update({
+        where: { id: result.id },
+        data: {
+          emailVerificationToken: verifyHash,
+          emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+        },
+      });
+      await this.emailService.sendEmailVerification(result.email, verifyRaw);
+    }
+
     return { user: result, accessToken, refreshToken };
+  }
+
+  async verifyEmail(rawToken: string): Promise<void> {
+    const tokenHash = hashToken(rawToken);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        emailVerificationToken: tokenHash,
+        emailVerificationExpires: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isVerified: true,
+        emailVerifiedAt: new Date(),
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+    });
   }
 
   async refreshToken(rawToken: string): Promise<{ accessToken: string; refreshToken: string }> {
@@ -272,10 +312,14 @@ export class AuthService {
       },
     });
 
-    // TODO: Deliver rawToken via email/SMS to user.email or user.phone
-    // Do NOT return or log the raw token in production
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[DEV] Password reset token for ${identifier}: ${rawToken}`);
+    // Send reset email (or log in dev if SMTP not configured)
+    if (user.email) {
+      await this.emailService.sendPasswordReset(user.email, rawToken);
+    } else {
+      // Phone-only users — log in dev; in prod integrate SMS
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[DEV] Password reset token for ${identifier}: ${rawToken}`);
+      }
     }
   }
 
