@@ -1,10 +1,13 @@
 import {
   Injectable,
+  Inject,
   UnauthorizedException,
   ConflictException,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -16,6 +19,8 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 const BCRYPT_ROUNDS = 12;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 function hashToken(raw: string): string {
   return crypto.createHash('sha256').update(raw).digest('hex');
@@ -31,7 +36,32 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  // ── Failed-login lockout (in-memory, sliding window) ─────────────────────
+  private lockKey(id: string): string {
+    return `login_lock:${id.toLowerCase().trim()}`;
+  }
+
+  private async checkLockout(identifier: string): Promise<void> {
+    const attempts = (await this.cacheManager.get<number>(this.lockKey(identifier))) ?? 0;
+    if (attempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+      throw new UnauthorizedException(
+        'Too many failed attempts. Account temporarily locked for 15 minutes.',
+      );
+    }
+  }
+
+  private async recordFailedAttempt(identifier: string): Promise<void> {
+    const key = this.lockKey(identifier);
+    const attempts = (await this.cacheManager.get<number>(key)) ?? 0;
+    await this.cacheManager.set(key, attempts + 1, LOCKOUT_TTL_MS);
+  }
+
+  private async clearFailedAttempts(identifier: string): Promise<void> {
+    await this.cacheManager.del(this.lockKey(identifier));
+  }
 
   private buildPayload(user: {
     id: string;
@@ -70,20 +100,29 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
+    // Check lockout BEFORE any DB work to stop brute-force early
+    await this.checkLockout(loginDto.identifier);
+
     const user = await this.usersService.findByIdentifier(loginDto.identifier);
 
     if (!user) {
+      // Record attempt even for unknown identifiers (prevents enumeration via timing)
+      await this.recordFailedAttempt(loginDto.identifier);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
+      await this.recordFailedAttempt(loginDto.identifier);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     if (!user.isActive) {
       throw new UnauthorizedException('Account is deactivated');
     }
+
+    // Successful credential check — clear failed attempts
+    await this.clearFailedAttempts(loginDto.identifier);
 
     // Auto-verify users on successful login (no email verification flow exists)
     if (!user.isVerified) {
