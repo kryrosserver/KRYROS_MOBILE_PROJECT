@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-rwb2.onrender.com")
-  .replace(/\/api$/, "");
-const isProd = process.env.NODE_ENV === "production";
+import { getBackendUrl, isProd } from "@/lib/bff-utils";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ message: "Bad request" }, { status: 400 }); }
 
   try {
-    const upstream = await fetch(`${BACKEND_URL}/api/auth/login`, {
+    const upstream = await fetch(`${getBackendUrl()}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -40,7 +37,6 @@ export async function POST(req: NextRequest) {
         httpOnly: true, secure: isProd, sameSite: "strict", maxAge: 7 * 24 * 60 * 60, path: "/",
       });
     }
-    // Clear the legacy client-accessible cookie on new login
     res.cookies.set("kryros_admin_token", "", { maxAge: 0, path: "/" });
     return res;
 
