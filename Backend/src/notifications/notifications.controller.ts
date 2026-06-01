@@ -205,4 +205,33 @@ export class NotificationsController {
     return this.notificationsService.deleteSmsContact(id);
   }
 
+
+  // ─── Device Management ────────────────────────────────────────────────────
+  @Get('devices')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all registered devices (Admin only)' })
+  async getDevices() {
+    return this.notificationsService.getDevices();
+  }
+
+  @Delete('devices/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a registered device (Admin only)' })
+  async deleteDevice(@Param('id') id: string) {
+    return this.notificationsService.deleteDevice(id);
+  }
+
+  @Post('devices/send')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send push to specific device IDs (Admin only)' })
+  async sendToDevices(@Body() body: { deviceIds: string[]; title: string; body: string; data?: any }) {
+    return this.notificationsService.sendToDeviceIds(body.deviceIds, body.title, body.body, body.data);
+  }
+
 }
