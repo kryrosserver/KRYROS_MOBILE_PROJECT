@@ -34,9 +34,11 @@ function UsersContent() {
   const isSuperAdmin = currentUser?.role === 'Super Admin';
 
   const [data, setData] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load real users from API on mount
   useEffect(() => {
+    setIsLoading(true);
     getUsers({ limit: 500 }).then(r => {
       const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
       const normalized: User[] = raw.map((u: any) => ({
@@ -49,7 +51,7 @@ function UsersContent() {
         orders: u._count?.orders ?? 0,
       }));
       setData(normalized);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setIsLoading(false));
   }, []);
 
   const [addOpen, setAddOpen] = useState(false);
@@ -224,7 +226,22 @@ function UsersContent() {
         </div>
       </div>
 
+      {isLoading ? (
+        <div style={{ padding: '16px 0' }}>
+          {[...Array(8)].map((_, i) => (
+            <div key={i} style={{
+              height: 52,
+              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              borderRadius: 8, marginBottom: 8,
+              animation: 'skeletonPulse 1.4s ease-in-out infinite',
+              animationDelay: `${i * 0.08}s`,
+            }} />
+          ))}
+          <style>{`@keyframes skeletonPulse { 0%,100%{opacity:1} 50%{opacity:0.35} }`}</style>
+        </div>
+      ) : (
       <DataTable columns={columns} data={data as unknown as Record<string, unknown>[]} searchPlaceholder="Search users..." onEdit={openEdit} onDelete={openDelete} onView={openView} />
+      )}
 
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add New User">
         {modalFields}
