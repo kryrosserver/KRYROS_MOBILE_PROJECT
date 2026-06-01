@@ -3,8 +3,10 @@ import {
   Post,
   Body,
   Get,
+  Query,
   UseGuards,
   Request,
+  Redirect,
   UnauthorizedException,
   ForbiddenException,
   HttpCode,
@@ -111,6 +113,19 @@ export class AuthController {
   async resetPassword(@Body() body: ResetPasswordDto) {
     await this.authService.resetPassword(body.token, body.newPassword);
   }
+  @Get('verify-email')
+  @SkipThrottle()
+  @ApiOperation({ summary: 'Verify email address via token from verification email' })
+  async verifyEmail(@Query('token') token: string) {
+    const appUrl = process.env.APP_URL || 'https://kryros.com';
+    try {
+      await this.authService.verifyEmail(token);
+      return { verified: true, message: 'Email verified successfully. You can now log in.' };
+    } catch {
+      return { verified: false, message: 'Invalid or expired verification link.' };
+    }
+  }
+
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
