@@ -165,6 +165,72 @@ export class CloudinaryService {
   }
 
   /**
+   * Validate and upload a video file (base64 data URI or public URL) to Cloudinary.
+   *
+   * Uses resource_type: 'video' so Cloudinary processes it correctly.
+   * Supports: mp4, mov, avi, mkv, webm, m4v, ogv.
+   * Max size: 100 MB (Cloudinary free plan limit for video).
+   *
+   * @param source   Base64 data URI (data:video/mp4;base64,...) or public HTTPS URL
+   * @param folder   Cloudinary folder path (e.g. "kryros/videos")
+   * @param publicId Optional Cloudinary public ID
+   */
+  async uploadVideo(
+    source: string,
+    folder: string = 'kryros/videos',
+    publicId?: string,
+  ): Promise<string> {
+    const ALLOWED_VIDEO_TYPES = new Set([
+      'video/mp4',
+      'video/quicktime',
+      'video/x-msvideo',
+      'video/x-matroska',
+      'video/webm',
+      'video/x-m4v',
+      'video/ogg',
+    ]);
+
+    const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100 MB
+
+    if (CloudinaryService.isBase64(source)) {
+      const mimeType = extractMimeType(source);
+      if (!mimeType) {
+        throw new BadRequestException('Invalid video format: cannot determine MIME type');
+      }
+      if (!ALLOWED_VIDEO_TYPES.has(mimeType)) {
+        throw new BadRequestException(
+          `Unsupported video type: ${mimeType}. Allowed: mp4, mov, avi, mkv, webm, m4v, ogv`,
+        );
+      }
+
+      const base64Data = source.split(',')[1] || '';
+      const approxBytes = (base64Data.length * 3) / 4;
+      if (approxBytes > MAX_VIDEO_BYTES) {
+        throw new BadRequestException(
+          `Video exceeds the ${MAX_VIDEO_BYTES / (1024 * 1024)} MB upload limit`,
+        );
+      }
+    }
+
+    if (!this.configured) {
+      this.logger.warn('Cloudinary not configured — storing video URL as-is (dev only)');
+      return source;
+    }
+
+    this.logger.debug(`Uploading video to Cloudinary folder="${folder}"`);
+
+    const options: Record<string, unknown> = {
+      folder,
+      resource_type: 'video',
+    };
+    if (publicId) options.public_id = publicId;
+
+    const result: UploadApiResponse = await cloudinary.uploader.upload(source, options);
+    this.logger.log(`Video uploaded → ${result.public_id} (${result.bytes} bytes, ${result.format})`);
+    return result.secure_url;
+  }
+
+  /**
    * Delete a Cloudinary asset by its full secure URL.
    */
   async deleteByUrl(secureUrl: string): Promise<void> {
