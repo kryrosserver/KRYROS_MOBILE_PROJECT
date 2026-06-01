@@ -177,7 +177,14 @@ async function bootstrap() {
       .setVersion('1.0')
       .addBearerAuth()
       .build();
-    const document = SwaggerModule.createDocument(app, config);
+  
+  // ── Health check — fast ping for monitoring and keep-alive ──────────────────
+  // Responds immediately, no DB or auth needed.
+  app.getHttpAdapter().get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
   }
 
