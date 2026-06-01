@@ -10,6 +10,7 @@ import {
   ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag, Award
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CloudinaryUpload from '@/components/ui/file-upload';
 import {
   getCmsPages, getCmsBanners, getCmsHomepageSections, getCmsSections,
   createCmsBanner, updateCmsBanner, deleteCmsBanner,
@@ -205,144 +206,7 @@ const INITIAL_PAGES: CmsPage[] = [
 const EMPTY_PAGE_FORM = { title: '', slug: '', status: 'Published' };
 const ADD_SECTION_NAMES = ['Hero Banner','Promo Banner','Featured Products','Promotions','Newsletter','Company Story','Team','Mission & Vision','Contact Form','Location Map','Business Hours','Terms Text','Policy Text','Products Grid','Sale Banner','Custom Section'];
 
-function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, textMuted }: {
-  value: string; onChange: (v: string, name: string) => void; onUrlChange?: (url: string) => void;
-  isDark: boolean; border: string; surface: string; textMuted: string;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<{ name: string; type: string; url: string } | null>(null);
-  const [urlInput, setUrlInput] = useState('');
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState('');
-
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.type.startsWith('video/')) {
-      // Direct-to-Cloudinary upload — video bypasses your server entirely
-      try {
-        setUploading(true);
-        setUploadProgress('Getting upload token...');
-        e.target.value = '';
-        const sigRes = await fetch('/api/cloudinary/sign?folder=kryros%2Fvideos');
-        if (!sigRes.ok) throw new Error('Could not get upload signature');
-        const { signature, timestamp, cloudName, apiKey, folder } = await sigRes.json();
-        setUploadProgress('Uploading to Cloudinary...');
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('api_key', apiKey);
-        formData.append('timestamp', String(timestamp));
-        formData.append('signature', signature);
-        formData.append('folder', folder);
-        const uploadRes = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`,
-          { method: 'POST', body: formData }
-        );
-        if (!uploadRes.ok) {
-          const errData = await uploadRes.json().catch(() => ({}));
-          throw new Error((errData as any)?.error?.message || 'Upload failed');
-        }
-        const data = await uploadRes.json();
-        setPreview({ name: file.name, type: 'video', url: (data as any).secure_url });
-        onChange((data as any).secure_url, file.name);
-        onUrlChange?.((data as any).secure_url);
-        setUrlInput('');
-        toast.success('Video uploaded successfully!');
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Video upload failed. Please try again.';
-        toast.error(msg);
-      } finally {
-        setUploading(false);
-        setUploadProgress('');
-      }
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setPreview({ name: file.name, type: 'image', url: dataUrl });
-      onChange(dataUrl, file.name);
-      onUrlChange?.(dataUrl);
-      setUrlInput('');
-    };
-    reader.readAsDataURL(file);
-    toast.success(file.name + ' selected');
-  };
-
-  const getYouTubeId = (url: string): string | null => {
-    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-    return m ? m[1] : null;
-  };
-  const handleUrlChange = (url: string) => {
-    setUrlInput(url);
-    if (!url.trim()) { setPreview(null); onChange('', ''); onUrlChange?.(''); return; }
-    const ytId = getYouTubeId(url);
-    if (ytId) {
-      const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-      setPreview({ name: 'YouTube Video', type: 'image', url: thumbUrl });
-      onChange(url, url);
-      onUrlChange?.(url);
-      return;
-    }
-    const isVideo = /\.(mp4|mov|webm|ogg)(\?.*)?$/i.test(url);
-    setPreview({ name: url, type: isVideo ? 'video' : 'image', url });
-    onChange(url, url);
-    onUrlChange?.(url);
-  };
-
-  const clearAll = () => { setPreview(null); setUrlInput(''); onChange('', ''); onUrlChange?.(''); };
-
-  return (
-    <div>
-      {preview ? (
-        <div style={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px', border: `1px solid ${border}` }}>
-          {preview.type === 'image' ? <img src={preview.url} alt="" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} onError={(e:any)=>{e.target.style.opacity='0.3';}} />
-            : <video src={preview.url} controls style={{ width: '100%', maxHeight: '180px', display: 'block' }} />}
-          <div style={{ position: 'absolute', top: 8, right: 8 }}>
-            <button onClick={clearAll} style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <X size={13} color="white" />
-            </button>
-          </div>
-          <div style={{ padding: '6px 10px', background: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.9)', fontSize: '11px', color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {preview.type === 'video' ? <Video size={11} /> : <ImageIcon size={11} />}
-            {preview.name.startsWith('data:') ? 'Uploaded file' : preview.name.length > 50 ? preview.name.slice(0,50)+'...' : preview.name}
-          </div>
-        </div>
-      ) : value ? (
-        <div style={{ padding: '10px 12px', background: surface, border: `1px solid ${border}`, borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: textMuted }}>
-          <ImageIcon size={14} /> {value.startsWith('data:') ? 'Uploaded file' : value.slice(0,60)}
-          <button onClick={clearAll} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex' }}><X size={13} /></button>
-        </div>
-      ) : null}
-      <div onClick={() => { if (!uploading) inputRef.current?.click(); }} style={{ border: `2px dashed ${uploading ? '#1FA89A' : border}`, borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: uploading ? 'default' : 'pointer', background: surface, transition: 'border-color 0.15s', marginBottom:'8px' }} onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#1FA89A'; }} onMouseLeave={e => { if (!uploading) e.currentTarget.style.borderColor = uploading ? '#1FA89A' : border; }}>
-        {uploading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
-            <div style={{ width: '32px', height: '32px', border: '3px solid rgba(31,168,154,0.2)', borderTopColor: '#1FA89A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ fontSize: '12px', color: '#1FA89A', margin: 0, fontWeight: 600 }}>{uploadProgress || 'Uploading...'}</p>
-            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Upload size={16} color="#1FA89A" /></div>
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Video size={16} color="#6366f1" /></div>
-            </div>
-            <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 2px' }}><span style={{ color: '#1FA89A', fontWeight: 600 }}>Click to upload</span> image or video</p>
-            <p style={{ fontSize: '11px', color: textMuted, margin: 0 }}>PNG, JPG, GIF, MP4, MOV — direct upload via Cloudinary</p>
-          </>
-        )}
-      </div>
-      <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
-        <div style={{ flex:1, height:'1px', background:border }} />
-        <span style={{ fontSize:'10px', color:textMuted, fontWeight:500, whiteSpace:'nowrap' }}>OR PASTE URL</span>
-        <div style={{ flex:1, height:'1px', background:border }} />
-      </div>
-      <input type="text" value={urlInput} onChange={e => handleUrlChange(e.target.value)} placeholder="Paste image URL, video URL, or YouTube link"
-        style={{ width:'100%', padding:'8px 10px', borderRadius:'7px', background:surface, border:`1px solid ${border}`, color:textMuted, fontSize:'12px', outline:'none', fontFamily:'inherit', boxSizing:'border-box' as const }} />
-      <input ref={inputRef} type="file" accept="image/*,video/*" onChange={handleFile} style={{ display: 'none' }} />
-    </div>
-  );
-}
+// FileUpload is now the shared CloudinaryUpload component
 
 function ItemFormModal({ sectionName, pageTitle, initialValues, onClose, onSave, isDark, border, textMain, textMuted, surface, isEdit }: {
   sectionName: string; pageTitle: string; initialValues: SectionData;
@@ -373,7 +237,7 @@ function ItemFormModal({ sectionName, pageTitle, initialValues, onClose, onSave,
                 {field.label}
               </label>
               {field.type === 'file' ? (
-                <FileUpload value={values[field.key] || ''} onChange={(v) => set(field.key)(v)} onUrlChange={setMediaUrl} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
+                <CloudinaryUpload value={values[field.key] || ''} onChange={(v) => set(field.key)(v)} onUrlChange={setMediaUrl} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
               ) : field.type === 'textarea' ? (
                 <textarea value={values[field.key] || ''} onChange={e => set(field.key)(e.target.value)} rows={4} placeholder={'Enter ' + field.label.toLowerCase() + '...'} style={{ ...inputStyle, resize: 'vertical' }} />
               ) : field.type === 'select' ? (
@@ -1070,7 +934,7 @@ function CMSContent() {
         <FormField label="Brand Name *" value={tbForm.name} onChange={(v) => setTbForm(f => ({ ...f, name: v, ...(tbEditIdx === null ? { slug: toTbSlug(v) } : {}) }))} placeholder="e.g. Samsung" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
         <div style={{ marginBottom: '14px' }}>
           <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, color: textMuted, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Brand Logo</label>
-          <FileUpload value={tbForm.logo} onChange={(v) => setTbForm(f => ({ ...f, logo: v }))} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
+          <CloudinaryUpload value={tbForm.logo} onChange={(v) => setTbForm(f => ({ ...f, logo: v }))} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
         </div>
         <div style={{ marginBottom: '14px' }}>
           <FormField label="Shop Scroll Anchor" value={tbForm.slug} onChange={(v) => setTbForm(f => ({ ...f, slug: v }))} placeholder="e.g. samsung" isDark={isDark} border={border} textMain={textMain} textMuted={textMuted} surface={surface} />
