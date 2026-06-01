@@ -91,9 +91,26 @@ export function proxy(request: NextRequest) {
   if (!previewAuth) {
     const accessToken = process.env.CODEWORDS_ACCESS_TOKEN;
 
-    // No access token configured → fully public (production deployments)
+    // No access token configured → production deployment (Render/custom host)
     if (!accessToken) {
-      return addSecurityHeaders(NextResponse.next(), request);
+      // ── Phase 3: Inject Authorization header from httpOnly token cookie ─────
+      // The browser sends the httpOnly 'kryros_token' cookie automatically.
+      // proxy.ts reads it server-side and injects Authorization: Bearer for all
+      // backend-proxied requests. JavaScript can NEVER read this cookie.
+      // Falls back to legacy 'kryros_admin_token' for sessions that predate Phase 3.
+      const httpOnlyToken  = request.cookies.get("kryros_token")?.value;
+      const legacyToken    = request.cookies.get("kryros_admin_token")?.value;
+      const bearerToken    = httpOnlyToken || legacyToken;
+
+      const newHeaders = new Headers(request.headers);
+      if (bearerToken && !newHeaders.get("Authorization")) {
+        newHeaders.set("Authorization", `Bearer ${bearerToken}`);
+      }
+
+      return addSecurityHeaders(
+        NextResponse.next({ request: { headers: newHeaders } }),
+        request
+      );
     }
 
     // Access token IS configured (sandbox) → require valid token
