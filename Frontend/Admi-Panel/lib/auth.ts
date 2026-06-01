@@ -19,17 +19,14 @@ export function setToken(token: string): void {
     sameSite: "strict",
     secure: typeof window !== "undefined" && window.location.protocol === "https:",
   });
-  if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_KEY, token);
-  }
+  // Access token stored in cookie only — do NOT write to localStorage
+  // (localStorage is a common XSS target; cookie with sameSite+secure is safer)
 }
 
 export function getToken(): string | null {
   const cookie = Cookies.get(TOKEN_KEY);
   if (cookie) return cookie;
-  if (typeof window !== "undefined") {
-    return localStorage.getItem(TOKEN_KEY);
-  }
+  // No localStorage fallback — cookie is the single source of truth for access token
   return null;
 }
 
