@@ -61,7 +61,9 @@ export function proxy(request: NextRequest) {
   const ADMIN_PUBLIC = ['/login', '/api/', '/_next', '/favicon'];
   const needsAdminAuth = !ADMIN_PUBLIC.some((p) => pathname.startsWith(p));
   if (needsAdminAuth) {
-    const adminToken = request.cookies.get('kryros_admin_token')?.value;
+    const adminToken =
+      request.cookies.get('kryros_token')?.value      // Phase 3 httpOnly cookie (set by BFF)
+      || request.cookies.get('kryros_admin_token')?.value; // legacy fallback
     if (!adminToken) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('from', encodeURIComponent(pathname));
