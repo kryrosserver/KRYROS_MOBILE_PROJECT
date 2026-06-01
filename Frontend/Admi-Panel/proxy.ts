@@ -55,6 +55,21 @@ export function proxy(request: NextRequest) {
     return addSecurityHeaders(NextResponse.next(), request);
   }
 
+  // ── KRYROS Admin Route Protection ────────────────────────────────────────
+  // Pages outside /login and /api/* require a valid admin token.
+  // Runs server-side at the edge — no client-side flash possible.
+  const ADMIN_PUBLIC = ['/login', '/api/', '/_next', '/favicon'];
+  const needsAdminAuth = !ADMIN_PUBLIC.some((p) => pathname.startsWith(p));
+  if (needsAdminAuth) {
+    const adminToken = request.cookies.get('kryros_admin_token')?.value;
+    if (!adminToken) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('from', encodeURIComponent(pathname));
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   // Handle preflight
   const origin = request.headers.get("origin");
   if (request.method === "OPTIONS" && origin && isAllowedOrigin(origin)) {
