@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/theme-context';
 import {
   Layout, Edit, Eye, Plus, ChevronDown, Trash2, Upload, X,
   Image as ImageIcon, Video, Link2, Type, AlignLeft, MousePointer,
-  ChevronLeft, ChevronRight, FileText, MapPin, Clock, Tag, Award
+  ChevronLeft, ChevronRight, FileText, Mail, MapPin, Clock, Tag, Award
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
