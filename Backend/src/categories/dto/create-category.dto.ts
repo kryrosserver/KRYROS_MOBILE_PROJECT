@@ -32,8 +32,13 @@ export class CreateCategoryDto {
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, description: 'Show on homepage (alias: showOnHome)' })
   @IsOptional()
   @IsBoolean()
   showOnHomepage?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  showOnHome?: boolean;
 }
