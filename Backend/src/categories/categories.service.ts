@@ -1,13 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { compressImage } from '../common/utils/image.util';
 
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
+
+  private async invalidateCategoryCache() {
+    await Promise.all([
+      this.cacheManager.del('categories:all'),
+      this.cacheManager.del('categories:active'),
+      this.cacheManager.del('categories:homepage'),
+    ]);
+  }
 
   async findAll() {
-    return this.prisma.category.findMany({
+    const cached = await this.cacheManager.get<any[]>('categories:all');
+    if (cached) return cached;
+
+    const result = await this.prisma.category.findMany({
       where: { isActive: true },
       include: {
         _count: {
@@ -16,10 +34,15 @@ export class CategoriesService {
       },
       orderBy: { sortOrder: 'asc' },
     });
+    await this.cacheManager.set('categories:all', result, CACHE_TTL);
+    return result;
   }
 
   async findAllActive() {
-    return this.prisma.category.findMany({
+    const cached = await this.cacheManager.get<any[]>('categories:active');
+    if (cached) return cached;
+
+    const result = await this.prisma.category.findMany({
       where: { isActive: true },
       select: {
         id: true,
@@ -33,10 +56,15 @@ export class CategoriesService {
       },
       orderBy: { sortOrder: 'asc' },
     });
+    await this.cacheManager.set('categories:active', result, CACHE_TTL);
+    return result;
   }
 
   async getHomepageCategories() {
-    return this.prisma.category.findMany({
+    const cached = await this.cacheManager.get<any[]>('categories:homepage');
+    if (cached) return cached;
+
+    const result = await this.prisma.category.findMany({
       where: { isActive: true, showOnHome: true },
       include: {
         _count: {
@@ -45,6 +73,8 @@ export class CategoriesService {
       },
       orderBy: { sortOrder: 'asc' },
     });
+    await this.cacheManager.set('categories:homepage', result, CACHE_TTL);
+    return result;
   }
 
   async findById(id: string) {
@@ -63,29 +93,35 @@ export class CategoriesService {
 
   async create(data: any) {
     if (data.image) {
-      data.image = await compressImage(data.image, 400, 400, 60); // Smaller for categories
+      data.image = await compressImage(data.image, 400, 400, 60);
     }
-    return this.prisma.category.create({
+    const result = await this.prisma.category.create({
       data: {
         ...data,
         slug: data.slug || data.name.toLowerCase().replace(/\s+/g, '-'),
       },
     });
+    await this.invalidateCategoryCache();
+    return result;
   }
 
   async update(id: string, data: any) {
     if (data.image) {
       data.image = await compressImage(data.image, 400, 400, 60);
     }
-    return this.prisma.category.update({
+    const result = await this.prisma.category.update({
       where: { id },
       data,
     });
+    await this.invalidateCategoryCache();
+    return result;
   }
 
   async delete(id: string) {
-    return this.prisma.category.delete({
+    const result = await this.prisma.category.delete({
       where: { id },
     });
+    await this.invalidateCategoryCache();
+    return result;
   }
 }
