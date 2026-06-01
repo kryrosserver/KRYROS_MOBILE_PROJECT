@@ -263,12 +263,28 @@ async function processTask(
           report.migrated++;
           log(`    ✅  id:${rec.id}  .${field}  →  ${preview(newUrl)}`);
         } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err);
+          // Cloudinary SDK throws plain objects {message, http_code} — not Error instances.
+          // JSON.stringify gives us the real error message.
+          let msg: string;
+          if (err instanceof Error) {
+            msg = err.message;
+          } else if (err && typeof err === 'object' && 'message' in err) {
+            // Cloudinary-style error object: { message: '...', http_code: NNN }
+            const errObj = err as Record<string, unknown>;
+            msg = String(errObj.message);
+            if (errObj.http_code) msg += ` (HTTP ${errObj.http_code})`;
+          } else {
+            msg = JSON.stringify(err);
+          }
           entry.status = 'error';
           entry.error = msg;
           taskErrors++;
           report.errors++;
           log(`    ❌  id:${rec.id}  .${field}  ERROR: ${msg}`);
+          // On the FIRST error per table, dump the full error object so we can diagnose
+          if (taskErrors === 1) {
+            log(`       [DEBUG] Full error: ${JSON.stringify(err)}`);
+          }
         }
 
         report.entries.push(entry);
