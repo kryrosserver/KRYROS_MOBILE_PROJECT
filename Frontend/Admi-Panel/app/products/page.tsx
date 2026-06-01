@@ -351,7 +351,56 @@ function ProductsContent() {
   return (
     <div>
       <PageHeader title="Products" subtitle="Manage your product catalogue" icon={Package} onAdd={openAdd} addLabel="Add Product" />
-      <DataTable columns={columns} data={data as unknown as Record<string, unknown>[]} searchPlaceholder="Search products..." onEdit={openEdit} onDelete={openDelete} onView={openView} />
+      {isLoading ? (
+        <div style={{ padding: '16px 0' }}>
+          {[...Array(8)].map((_, i) => (
+            <div key={i} style={{
+              height: 52,
+              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              borderRadius: 8,
+              marginBottom: 8,
+              animation: 'skeletonPulse 1.4s ease-in-out infinite',
+              animationDelay: `${i * 0.08}s`,
+            }} />
+          ))}
+          <style>{`@keyframes skeletonPulse { 0%,100%{opacity:1} 50%{opacity:0.35} }`}</style>
+        </div>
+      ) : (
+        <>
+          <DataTable columns={columns} data={data as unknown as Record<string, unknown>[]} searchPlaceholder="Search products..." onEdit={openEdit} onDelete={openDelete} onView={openView} />
+          {/* Pagination Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, padding: '12px 0', borderTop: `1px solid ${border}` }}>
+            <span style={{ fontSize: 13, color: textMuted }}>
+              {totalCount > 0 ? `Showing ${currentPage * PAGE_SIZE + 1}–${Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} of ${totalCount} products` : `${data.length} products`}
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                disabled={currentPage === 0}
+                style={{
+                  padding: '6px 16px', borderRadius: 6, border: `1px solid ${border}`,
+                  background: isDark ? '#1E293B' : '#F1F5F9', color: textMain,
+                  cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 0 ? 0.4 : 1, fontSize: 13,
+                }}
+              >← Prev</button>
+              <span style={{ padding: '6px 12px', fontSize: 13, color: textMuted, background: isDark ? '#0D1523' : '#F8FAFC', border: `1px solid ${border}`, borderRadius: 6 }}>
+                Page {currentPage + 1}{totalCount > 0 ? ` of ${Math.ceil(totalCount / PAGE_SIZE)}` : ''}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={data.length < PAGE_SIZE && totalCount > 0 ? (currentPage + 1) * PAGE_SIZE >= totalCount : data.length < PAGE_SIZE}
+                style={{
+                  padding: '6px 16px', borderRadius: 6, border: `1px solid ${border}`,
+                  background: isDark ? '#1E293B' : '#F1F5F9', color: textMain,
+                  cursor: 'pointer', fontSize: 13,
+                  opacity: data.length < PAGE_SIZE ? 0.4 : 1,
+                }}
+              >Next →</button>
+            </div>
+          </div>
+        </>
+      )}
 
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add New Product">
         {formFields}
