@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
@@ -14,15 +16,32 @@ import { UpdateHomePageSectionDto } from './dto/update-homepage-section.dto';
 
 @Injectable()
 export class CMSService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
+
+  // ── Cache invalidation helper — call after any write to banners/sections ──
+  async invalidateCmsCache(type?: string) {
+    const keys = [
+      'cms:banners',
+      'cms:sections',
+      type ? `cms:sections:${type}` : null,
+    ].filter(Boolean) as string[];
+    await Promise.all(keys.map(k => this.cacheManager.del(k)));
+  }
 
   // ==================== HOME PAGE SECTIONS ====================
 
   async getHomePageSections(type?: string) {
+    const cacheKey = type ? `cms:sections:${type}` : 'cms:sections';
+    const cached = await this.cacheManager.get<any[]>(cacheKey);
+    if (cached) return cached;
+
     const where: any = { isActive: true };
     if (type) where.type = type;
 
-    const sections = await this.prisma.homePageSection.findMany({
+    let sections = await this.prisma.homePageSection.findMany({
       where,
       orderBy: { order: 'asc' },
     });
@@ -30,12 +49,13 @@ export class CMSService {
     // Auto-seed if completely empty (no type filter)
     if (!type && sections.length === 0) {
       await this.seedHomePageSections();
-      return this.prisma.homePageSection.findMany({
+      sections = await this.prisma.homePageSection.findMany({
         where: { isActive: true },
         orderBy: { order: 'asc' },
       });
     }
 
+    await this.cacheManager.set(cacheKey, sections, 5 * 60 * 1000);
     return sections;
   }
 
@@ -46,28 +66,32 @@ export class CMSService {
   }
 
   async createHomePageSection(data: CreateHomePageSectionDto) {
-    return this.prisma.homePageSection.create({
+    const result = await this.prisma.homePageSection.create({
       data: {
         ...data,
         config: data.config ? (typeof data.config === 'string' ? JSON.parse(data.config) : data.config) : undefined,
       } as any,
     });
+    await this.invalidateCmsCache();
+    return result;
   }
 
   async updateHomePageSection(id: string, data: UpdateHomePageSectionDto) {
-    return this.prisma.homePageSection.update({
+    const result = await this.prisma.homePageSection.update({
       where: { id },
       data: {
         ...data,
         config: data.config ? (typeof data.config === 'string' ? JSON.parse(data.config) : data.config) : undefined,
       } as any,
     });
+    await this.invalidateCmsCache();
+    return result;
   }
 
   async deleteHomePageSection(id: string) {
-    return this.prisma.homePageSection.delete({
-      where: { id },
-    });
+    const result = await this.prisma.homePageSection.delete({ where: { id } });
+    await this.invalidateCmsCache();
+    return result;
   }
 
   async resetAndSeedHomePageSections() {
