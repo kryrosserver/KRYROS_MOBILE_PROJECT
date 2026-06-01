@@ -2,7 +2,7 @@
 import AdminShell from '@/components/admin/admin-shell';
 import PageHeader from '@/components/admin/page-header';
 import { useTheme } from '@/contexts/theme-context';
-import { Settings, Store, Bell, Shield, Globe, CreditCard, Palette, Save, Mail, MessageSquare, Smartphone, Send, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Settings, Store, Bell, Shield, Globe, CreditCard, Palette, Save, Mail, MessageSquare, Smartphone, Send, CheckCircle, AlertCircle, Clock, KeyRound, Lock, Unlock, RefreshCw, Copy } from 'lucide-react';
 import api from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '@/lib/api';
@@ -36,8 +36,13 @@ function SettingsContent() {
   const [emailNotif, setEmailNotif] = useState(true);
   const [pushNotif, setPushNotif] = useState(true);
   const [orderNotif, setOrderNotif] = useState(true);
-  const [twoFA, setTwoFA] = useState(false);
   const [sessionTimeout, setSessionTimeout] = useState('30');
+  // ── 2FA state ──────────────────────────────────────────────────────────────
+  type TwoFAStep = 'loading' | 'disabled' | 'setup' | 'enabled' | 'disabling';
+  const [twoFAStep, setTwoFAStep] = useState<TwoFAStep>('loading');
+  const [twoFAQr, setTwoFAQr] = useState('');
+  const [twoFACode, setTwoFACode] = useState('');
+  const [twoFABusy, setTwoFABusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [testEmailSending, setTestEmailSending] = useState(false);
@@ -104,7 +109,6 @@ function SettingsContent() {
         email_notifications: String(emailNotif),
         push_notifications: String(pushNotif),
         order_notifications: String(orderNotif),
-        two_factor_enabled: String(twoFA),
       });
       toast.success('Settings saved successfully');
     } catch { toast.error('Failed to save settings — check connection'); }
@@ -279,9 +283,91 @@ function SettingsContent() {
       case 'security': return (
         <div>
           <SectionTitle title="Security Settings" sub="Protect your admin account and data" />
-          <Row label="Two-Factor Authentication" sub="Add an extra layer of security to your account">
-            <ToggleSwitch value={twoFA} onChange={()=>setTwoFA(!twoFA)} />
-          </Row>
+          {/* ─── Two-Factor Authentication ─────────────────────────────── */}
+          <div style={{background:card,border:`1px solid ${border}`,borderRadius:'12px',padding:'20px',marginBottom:'12px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'16px'}}>
+              <div style={{width:'36px',height:'36px',borderRadius:'9px',background:'rgba(31,168,154,0.12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                <KeyRound size={16} color="#1FA89A" />
+              </div>
+              <div>
+                <div style={{fontWeight:700,color:textMain,fontSize:'14px'}}>Two-Factor Authentication</div>
+                <div style={{fontSize:'12px',color:textMuted}}>Add an extra layer of security with Google Authenticator or Authy</div>
+              </div>
+              {twoFAStep==='enabled' && <span style={{marginLeft:'auto',padding:'3px 10px',borderRadius:'20px',background:'rgba(34,197,94,0.12)',color:'#22c55e',fontSize:'11px',fontWeight:700,border:'1px solid rgba(34,197,94,0.3)',flexShrink:0}}>ENABLED</span>}
+              {twoFAStep==='disabled' && <span style={{marginLeft:'auto',padding:'3px 10px',borderRadius:'20px',background:'rgba(107,122,150,0.1)',color:textMuted,fontSize:'11px',fontWeight:700,border:`1px solid ${border}`,flexShrink:0}}>OFF</span>}
+            </div>
+
+            {/* LOADING */}
+            {twoFAStep==='loading' && <div style={{textAlign:'center',padding:'16px',color:textMuted,fontSize:'12px'}}>Checking status...</div>}
+
+            {/* DISABLED — show enable button */}
+            {twoFAStep==='disabled' && (
+              <button onClick={handle2faSetup} disabled={twoFABusy} style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 18px',background:'linear-gradient(135deg,#1FA89A,#27B9AF)',border:'none',borderRadius:'9px',color:'white',fontSize:'13px',fontWeight:600,cursor:twoFABusy?'wait':'pointer',fontFamily:'inherit'}}>
+                {twoFABusy ? <><RefreshCw size={13} style={{animation:'spin2 1s linear infinite'}} /> Generating...</> : <><Lock size={13} /> Enable 2FA</>}
+              </button>
+            )}
+
+            {/* SETUP — show QR code + code input */}
+            {twoFAStep==='setup' && (
+              <div>
+                <div style={{fontSize:'12px',color:textMuted,marginBottom:'12px',lineHeight:1.6}}>
+                  1. Install <strong style={{color:textMain}}>Google Authenticator</strong> or <strong style={{color:textMain}}>Authy</strong> on your phone.<br/>
+                  2. Open the app and scan the QR code below.<br/>
+                  3. Enter the 6-digit code shown in the app to confirm.
+                </div>
+                {twoFAQr && (
+                  <div style={{display:'flex',justifyContent:'center',marginBottom:'16px'}}>
+                    <img src={twoFAQr} alt="2FA QR Code" style={{width:160,height:160,border:`1px solid ${border}`,borderRadius:'10px',background:'white',padding:8}} />
+                  </div>
+                )}
+                <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+                  <input
+                    value={twoFACode}
+                    onChange={e=>setTwoFACode(e.target.value.replace(/\D/g,'').slice(0,6))}
+                    placeholder="Enter 6-digit code"
+                    maxLength={6}
+                    style={{flex:1,padding:'10px 14px',background:surface,border:`1px solid ${border}`,borderRadius:'9px',color:textMain,fontSize:'16px',fontFamily:'monospace',outline:'none',letterSpacing:'0.25em',textAlign:'center'}}
+                  />
+                  <button onClick={handle2faEnable} disabled={twoFABusy||twoFACode.length!==6} style={{padding:'10px 16px',background:twoFACode.length===6?'linear-gradient(135deg,#1FA89A,#27B9AF)':border,border:'none',borderRadius:'9px',color:'white',fontSize:'13px',fontWeight:600,cursor:twoFACode.length===6?'pointer':'not-allowed',fontFamily:'inherit',opacity:twoFACode.length!==6?0.5:1}}>
+                    {twoFABusy ? '...' : 'Verify'}
+                  </button>
+                </div>
+                <button onClick={()=>{setTwoFAStep('disabled');setTwoFACode('');setTwoFAQr('');}} style={{fontSize:'11px',color:textMuted,background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>Cancel</button>
+              </div>
+            )}
+
+            {/* ENABLED — show disable option */}
+            {twoFAStep==='enabled' && (
+              <div>
+                <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 12px',background:'rgba(34,197,94,0.06)',border:'1px solid rgba(34,197,94,0.2)',borderRadius:'9px',marginBottom:'12px'}}>
+                  <CheckCircle size={14} color="#22c55e" />
+                  <span style={{fontSize:'12px',color:'#22c55e',fontWeight:600}}>Your account is protected with two-factor authentication</span>
+                </div>
+                {twoFAStep==='enabled' && twoFACode==='' && (
+                  <button onClick={()=>setTwoFAStep('disabling' as any)} style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 14px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.25)',borderRadius:'9px',color:'#ef4444',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
+                    <Unlock size={13} /> Disable 2FA
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* DISABLING — confirm with code */}
+            {(twoFAStep as string)==='disabling' && (
+              <div>
+                <div style={{fontSize:'12px',color:textMuted,marginBottom:'10px'}}>Enter your current 6-digit authenticator code to disable 2FA:</div>
+                <div style={{display:'flex',gap:'8px'}}>
+                  <input value={twoFACode} onChange={e=>setTwoFACode(e.target.value.replace(/\D/g,'').slice(0,6))} placeholder="6-digit code" maxLength={6}
+                    style={{flex:1,padding:'10px 14px',background:surface,border:`1px solid ${border}`,borderRadius:'9px',color:textMain,fontSize:'16px',fontFamily:'monospace',outline:'none',letterSpacing:'0.25em',textAlign:'center'}} />
+                  <button onClick={handle2faDisable} disabled={twoFABusy||twoFACode.length!==6} style={{padding:'10px 14px',background:'#ef4444',border:'none',borderRadius:'9px',color:'white',fontSize:'12px',fontWeight:600,cursor:twoFACode.length===6?'pointer':'not-allowed',fontFamily:'inherit',opacity:twoFACode.length!==6?0.5:1}}>
+                    {twoFABusy?'...':'Disable'}
+                  </button>
+                </div>
+                <button onClick={()=>{setTwoFAStep('enabled');setTwoFACode('');}} style={{fontSize:'11px',color:textMuted,background:'none',border:'none',cursor:'pointer',padding:'4px 0',marginTop:'6px'}}>Cancel</button>
+              </div>
+            )}
+          </div>
+
+          <style>{`@keyframes spin2{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
           <Row label="Session Timeout" sub="Auto logout after inactivity">
             <select style={{...inputStyle,width:'120px'}} value={sessionTimeout} onChange={e=>setSessionTimeout(e.target.value)}>
               {['15','30','60','120','Never'].map(t=><option key={t}>{t} {t!=='Never'?'min':''}</option>)}
