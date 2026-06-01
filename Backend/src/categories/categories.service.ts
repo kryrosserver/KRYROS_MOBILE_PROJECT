@@ -126,8 +126,10 @@ export class CategoriesService {
   }
 
   async delete(id: string) {
-    const result = await this.prisma.category.delete({
+    // Soft delete — preserves products/children/brands referencing this category
+    const result = await this.prisma.category.update({
       where: { id },
+      data: { isActive: false },
     });
     await this.invalidateCategoryCache();
     return result;
