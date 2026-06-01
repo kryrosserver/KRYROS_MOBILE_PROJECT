@@ -62,7 +62,9 @@ export default function CloudinaryUpload({
   // ── Direct-to-Cloudinary upload ──────────────────────────────────────────
   async function uploadToCloudinary(file: File): Promise<string> {
     const encodedFolder = encodeURIComponent(folder);
-    const sigRes = await fetch(`/api/cloudinary/sign?folder=${encodedFolder}`);
+    // Use the BFF route — it reads the httpOnly kryros_token cookie and
+    // forwards the request to the backend with proper Authorization header.
+    const sigRes = await fetch(`/api/bff/cloudinary-sign?folder=${encodedFolder}`);
     if (!sigRes.ok) throw new Error("Could not get upload signature");
     const { signature, timestamp, cloudName, apiKey, folder: signedFolder } = await sigRes.json();
 
