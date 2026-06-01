@@ -38,10 +38,7 @@ function PushContent() {
   const [message, setMessage] = useState('');
   const [target, setTarget] = useState('All Users');
   const [channel, setChannel] = useState('Push');
-  const [recipientPhone, setRecipientPhone] = useState('');
   const [sending, setSending] = useState(false);
-
-  const needsPhone = channel.includes('SMS') || target === 'Specific User';
 
   useEffect(() => {
     getNotifications({ limit: 50 }).then((r: any) => {
@@ -72,11 +69,7 @@ function PushContent() {
       };
       const targetType = targetTypeMap[target] || 'BULK';
       const payload: any = { title, body: message, targetType };
-      if (channel === 'SMS' && recipientPhone) {
-        await api.post('/api/notifications/sms/send', { phoneNumber: recipientPhone, message });
-      } else {
-        await api.post('/api/notifications/send', payload);
-      }
+      await api.post('/api/notifications/send', payload);
       toast.success(`Notification sent via ${channel}`);
     } catch {
       toast.success(`Notification queued via ${channel}`);
@@ -86,7 +79,7 @@ function PushContent() {
       sent: target === 'Specific User' ? 1 : 0, opened: 0,
       date: new Date().toISOString().split('T')[0], status: 'Sent',
     }, ...d]);
-    setTitle(''); setMessage(''); setRecipientPhone('');
+    setTitle(''); setMessage('');
     setSending(false);
   };
 
@@ -122,16 +115,11 @@ function PushContent() {
               <div>
                 <label style={{fontSize:'12px',fontWeight:600,color:textMuted,display:'block',marginBottom:'6px'}}>Channel</label>
                 <select value={channel} onChange={e=>setChannel(e.target.value)} style={selStyle}>
-                  {['Push','SMS','Push+SMS'].map(t=><option key={t}>{t}</option>)}
+                  {['Push'].map(t=><option key={t}>{t}</option>)}
                 </select>
               </div>
             </div>
-            {needsPhone && (
-              <div>
-                <label style={{fontSize:'12px',fontWeight:600,color:textMuted,display:'block',marginBottom:'6px'}}>Phone Number</label>
-                <input type="text" value={recipientPhone} onChange={e=>setRecipientPhone(e.target.value)} placeholder="+260 97X XXX XXX" style={inputStyle} />
-              </div>
-            )}
+
             <div style={{display:'flex',gap:'8px'}}>
               <button onClick={handleSend} disabled={sending} style={{flex:1,padding:'11px',background:sending?'rgba(31,168,154,0.5)':'linear-gradient(135deg,#1FA89A,#27B9AF)',border:'none',borderRadius:'9px',color:'white',fontSize:'13.5px',fontWeight:600,cursor:sending?'not-allowed':'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}}>
                 <Send size={14} /> {sending ? 'Sending...' : 'Send Now'}
