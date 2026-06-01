@@ -396,3 +396,14 @@ export const updateCountryPaymentMethod = (methodId: string, data: Record<string
   api.patch(`/api/countries/payment-methods/${methodId}`, data);
 export const removeCountryPaymentMethod = (methodId: string) =>
   api.delete(`/api/countries/payment-methods/${methodId}`);
+
+// ─── SMS Contacts ─────────────────────────────────────────────────────────────
+export const getSmsContacts = () =>
+  api.get('/api/notifications/sms/contacts');
+
+export const addSmsContact = (payload: { phone: string; name?: string; source?: string }) =>
+  api.post('/api/notifications/sms/contacts', payload);
+
+export const deleteSmsContact = (id: string) =>
+  api.delete(`/api/notifications/sms/contacts/${id}`);
+
