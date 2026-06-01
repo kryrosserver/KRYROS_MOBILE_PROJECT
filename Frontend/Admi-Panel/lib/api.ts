@@ -1,5 +1,12 @@
 import axios from "axios";
-import { getToken, logout } from "./auth";
+import {
+  getToken,
+  setToken,
+  getRefreshToken,
+  setRefreshToken,
+  removeRefreshToken,
+  logout,
+} from "./auth";
 
 const api = axios.create({
   baseURL: "",
@@ -7,6 +14,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// ── Request: attach the current access token to every request ─────────────────
 api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
@@ -15,17 +23,91 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ── Response: auto-refresh on 401 with concurrent-request queuing ─────────────
+//
+// How it works:
+//   1. Any 401 triggers a single refresh call.
+//   2. While refreshing, subsequent 401 requests are queued.
+//   3. Once refreshed, the queue drains — all pending requests retry with the new token.
+//   4. If the refresh itself fails → clear tokens → redirect to /login.
+//
+// Safe guards:
+//   - Skips the interceptor for /auth/refresh calls (prevents infinite loop).
+//   - Uses a _retry flag so each request only retries once.
+//   - Uses bare axios (not api) for the refresh call (avoids re-entering interceptor).
+
+let _isRefreshing = false;
+type QueuedCallback = (newToken: string) => void;
+let _waitingQueue: QueuedCallback[] = [];
+
+function _drainQueue(newToken: string) {
+  _waitingQueue.forEach((cb) => cb(newToken));
+  _waitingQueue = [];
+}
+
+function _flushQueue() {
+  _waitingQueue = [];
+}
+
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      logout();
+  async (err) => {
+    const originalReq = err.config as typeof err.config & { _retry?: boolean };
+
+    // Only handle 401s that aren't from the refresh endpoint itself
+    const isRefreshEndpoint = originalReq?.url?.includes("/auth/refresh");
+    if (err.response?.status !== 401 || originalReq._retry || isRefreshEndpoint) {
+      return Promise.reject(err);
     }
-    return Promise.reject(err);
+
+    // Concurrent 401 — queue this request until the refresh completes
+    if (_isRefreshing) {
+      return new Promise((resolve) => {
+        _waitingQueue.push((newToken: string) => {
+          originalReq.headers.Authorization = `Bearer ${newToken}`;
+          resolve(api(originalReq));
+        });
+      });
+    }
+
+    originalReq._retry = true;
+    _isRefreshing = true;
+
+    const storedRefreshToken = getRefreshToken();
+    if (!storedRefreshToken) {
+      _isRefreshing = false;
+      logout();
+      return Promise.reject(err);
+    }
+
+    try {
+      // Use bare axios — NOT the api instance — to avoid re-entering this interceptor
+      const refreshRes = await axios.post("/api/auth/refresh", {
+        refreshToken: storedRefreshToken,
+      });
+
+      const { accessToken, refreshToken: newRefreshToken } = refreshRes.data;
+      setToken(accessToken);
+      if (newRefreshToken) setRefreshToken(newRefreshToken);
+
+      _drainQueue(accessToken);
+
+      // Retry the original failed request with the fresh token
+      originalReq.headers.Authorization = `Bearer ${accessToken}`;
+      return api(originalReq);
+    } catch (refreshErr) {
+      _flushQueue();
+      removeRefreshToken();
+      logout();
+      return Promise.reject(refreshErr);
+    } finally {
+      _isRefreshing = false;
+    }
   }
 );
 
 export default api;
+
 
 // ── Auth ──────────────────────────────────────────────────
 export const adminLogin = (identifier: string, password: string) =>
