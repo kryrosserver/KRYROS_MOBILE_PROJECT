@@ -1,105 +1,71 @@
 import axios from "axios";
-import {
-  getToken,
-  setToken,
-  getRefreshToken,
-  setRefreshToken,
-  removeRefreshToken,
-  logout,
-} from "./auth";
+import { logout } from "./auth";
 
+// ── Axios instance ────────────────────────────────────────────────────────────
 const api = axios.create({
   baseURL: "",
   timeout: 30000,
   headers: { "Content-Type": "application/json" },
 });
 
-// ── Request: attach the current access token to every request ─────────────────
-api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ── Request interceptor ───────────────────────────────────────────────────────
+// No Authorization header injection needed here.
+// proxy.ts reads the httpOnly 'kryros_token' cookie server-side and injects
+// the Authorization: Bearer header into every request forwarded to the backend.
+// This keeps the token 100% invisible to JavaScript.
+api.interceptors.request.use((config) => config);
 
-// ── Response: auto-refresh on 401 with concurrent-request queuing ─────────────
+// ── Response interceptor — silent auto-refresh on 401 ────────────────────────
 //
-// How it works:
-//   1. Any 401 triggers a single refresh call.
-//   2. While refreshing, subsequent 401 requests are queued.
-//   3. Once refreshed, the queue drains — all pending requests retry with the new token.
-//   4. If the refresh itself fails → clear tokens → redirect to /login.
+// Flow:
+//   401 received → POST /api/bff/refresh (reads httpOnly refresh cookie server-side)
+//              → BFF issues new httpOnly access + refresh cookies
+//              → original request retried (proxy picks up new kryros_token cookie)
 //
-// Safe guards:
-//   - Skips the interceptor for /auth/refresh calls (prevents infinite loop).
-//   - Uses a _retry flag so each request only retries once.
-//   - Uses bare axios (not api) for the refresh call (avoids re-entering interceptor).
+// The token is NEVER visible in JavaScript at any point in this flow.
+// Concurrent 401s are queued so only ONE refresh call is made.
 
 let _isRefreshing = false;
-type QueuedCallback = (newToken: string) => void;
-let _waitingQueue: QueuedCallback[] = [];
+type QueueCb = () => void;
+let _queue: QueueCb[] = [];
 
-function _drainQueue(newToken: string) {
-  _waitingQueue.forEach((cb) => cb(newToken));
-  _waitingQueue = [];
-}
-
-function _flushQueue() {
-  _waitingQueue = [];
-}
+function _drainQueue() { _queue.forEach((cb) => cb()); _queue = []; }
+function _flushQueue() { _queue = []; }
 
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
-    const originalReq = err.config as typeof err.config & { _retry?: boolean };
+    const orig = err.config as typeof err.config & { _retry?: boolean };
 
-    // Only handle 401s that aren't from the refresh endpoint itself
-    const isRefreshEndpoint = originalReq?.url?.includes("/auth/refresh");
-    if (err.response?.status !== 401 || originalReq._retry || isRefreshEndpoint) {
+    // Skip retry logic for BFF auth endpoints (prevents infinite loops)
+    const isBff = orig?.url?.includes("/bff/");
+    if (err.response?.status !== 401 || orig._retry || isBff) {
       return Promise.reject(err);
     }
 
-    // Concurrent 401 — queue this request until the refresh completes
+    // Queue this request if a refresh is already in progress
     if (_isRefreshing) {
       return new Promise((resolve) => {
-        _waitingQueue.push((newToken: string) => {
-          originalReq.headers.Authorization = `Bearer ${newToken}`;
-          resolve(api(originalReq));
-        });
+        _queue.push(() => resolve(api(orig)));
       });
     }
 
-    originalReq._retry = true;
+    orig._retry = true;
     _isRefreshing = true;
 
-    const storedRefreshToken = getRefreshToken();
-    if (!storedRefreshToken) {
-      _isRefreshing = false;
-      logout();
-      return Promise.reject(err);
-    }
-
     try {
-      // Use bare axios — NOT the api instance — to avoid re-entering this interceptor
-      const refreshRes = await axios.post("/api/auth/refresh", {
-        refreshToken: storedRefreshToken,
-      });
+      // Call BFF refresh — no body or token needed from JS side.
+      // The BFF reads the httpOnly 'kryros_refresh' cookie server-side.
+      await axios.post("/api/bff/refresh");
 
-      const { accessToken, refreshToken: newRefreshToken } = refreshRes.data;
-      setToken(accessToken);
-      if (newRefreshToken) setRefreshToken(newRefreshToken);
+      _drainQueue();
 
-      _drainQueue(accessToken);
-
-      // Retry the original failed request with the fresh token
-      originalReq.headers.Authorization = `Bearer ${accessToken}`;
-      return api(originalReq);
-    } catch (refreshErr) {
+      // Retry the original request — proxy will inject the new kryros_token cookie
+      return api(orig);
+    } catch {
       _flushQueue();
-      removeRefreshToken();
-      logout();
-      return Promise.reject(refreshErr);
+      logout(); // refresh failed — session over, redirect to login
+      return Promise.reject(err);
     } finally {
       _isRefreshing = false;
     }
@@ -107,6 +73,7 @@ api.interceptors.response.use(
 );
 
 export default api;
+
 
 
 // ── Auth ──────────────────────────────────────────────────
