@@ -35,6 +35,7 @@ export default function UnifiedProductCard({
 
   const monthlyText = product.creditMessage || `${format(product.price / 12)}/mo`;
   const specs = validSpecs(product.specs);
+  const inStock = product.stock > 0;
 
   return (
     <div
@@ -104,8 +105,22 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* Stars first (w-3 h-3 — slightly smaller for cleaner layout), then stock badge */}
+        {/* Stock badge FIRST, then stars/reviews */}
         <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5 mb-1.5">
+          {/* 1. Stock badge — always first for non-wholesale */}
+          {!product.isWholesaleOnly && (
+            inStock ? (
+              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                In Stock
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                Out of Stock
+              </span>
+            )
+          )}
+
+          {/* 2. Stars + review count — after stock badge */}
           {product.rating > 0 && !product.isWholesaleOnly && (
             <div className="flex items-center gap-0.5 flex-shrink-0">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -125,22 +140,14 @@ export default function UnifiedProductCard({
             </div>
           )}
 
-          {!product.isWholesaleOnly && (
-            product.stock > 0 ? (
-              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
-                In Stock
-              </span>
-            ) : (
-              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
-                Out of Stock
-              </span>
-            )
-          )}
-          {product.allowCredit && (
+          {/* 3. Credit text */}
+          {product.allowCredit && inStock && (
             <span className="text-[10px] text-primary font-bold whitespace-nowrap truncate">
               {monthlyText}
             </span>
           )}
+
+          {/* 4. Wholesale details */}
           {product.isWholesaleOnly && (
             <>
               {product.wholesalePrice && (
@@ -156,27 +163,45 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* Buttons */}
+        {/* Buttons — disabled when out of stock */}
         <div className="flex items-center gap-1.5 mt-auto pt-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!inStock) return;
               addToCart({ id: product.id, name: product.name, price: product.price, qty: 1, image: product.image });
               toast.success("Added to cart", { description: product.name });
             }}
-            className="w-8 h-7 flex items-center justify-center border border-teal-600 rounded-lg flex-shrink-0 hover:bg-teal-50 transition-colors"
+            disabled={!inStock}
+            className={`w-8 h-7 flex items-center justify-center border rounded-lg flex-shrink-0 transition-colors ${
+              inStock
+                ? "border-teal-600 hover:bg-teal-50 cursor-pointer"
+                : "border-gray-300 opacity-40 cursor-not-allowed"
+            }`}
           >
-            <ShoppingCart className="w-3.5 h-3.5 text-teal-600" />
+            <ShoppingCart className={`w-3.5 h-3.5 ${inStock ? "text-teal-600" : "text-gray-400"}`} />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!inStock) return;
               window.location.href = `/product/${product.id}`;
             }}
-            className="flex-1 h-7 bg-teal-600 text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-teal-700 transition-colors"
+            disabled={!inStock}
+            className={`flex-1 h-7 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-colors ${
+              inStock
+                ? "bg-teal-600 text-white hover:bg-teal-700 cursor-pointer"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
           >
-            <Zap className="w-3 h-3" />
-            {product.allowCredit ? "Get Now" : "Buy Now"}
+            {inStock ? (
+              <>
+                <Zap className="w-3 h-3" />
+                {product.allowCredit ? "Get Now" : "Buy Now"}
+              </>
+            ) : (
+              "Unavailable"
+            )}
           </button>
         </div>
       </div>
