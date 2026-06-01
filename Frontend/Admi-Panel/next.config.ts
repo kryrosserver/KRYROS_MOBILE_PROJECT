@@ -1,5 +1,22 @@
 import type { NextConfig } from "next";
 
+// Require NEXT_PUBLIC_API_URL in production — never fall back to a hardcoded URL
+const backendUrl = (() => {
+  const raw = process.env.NEXT_PUBLIC_API_URL;
+  if (!raw) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'NEXT_PUBLIC_API_URL environment variable is required in production. ' +
+        'Add it to your Render/Vercel environment variables.',
+      );
+    }
+    // Development fallback — localhost only
+    console.warn('[config] NEXT_PUBLIC_API_URL not set — defaulting to http://localhost:8080 (dev only)');
+    return 'http://localhost:8080';
+  }
+  return raw.replace(/\/api$/, '');
+})();
+
 const nextConfig: NextConfig = {
   devIndicators: false,
   productionBrowserSourceMaps: false, // security: don't ship source maps to browsers
@@ -26,7 +43,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              process.env.NODE_ENV === 'production' ? "script-src 'self'" : "script-src 'self' 'unsafe-eval'", // unsafe-eval only in dev (Next.js HMR)
+              process.env.NODE_ENV === 'production' ? "script-src 'self'" : "script-src 'self' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https:",
@@ -37,6 +54,8 @@ const nextConfig: NextConfig = {
               "form-action 'self'",
             ].join('; '),
           },
+          // Prevent sensitive responses being cached
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, private' },
         ],
       },
     ];
@@ -44,11 +63,6 @@ const nextConfig: NextConfig = {
 
   // ── API Proxy — forward /api/* to the NestJS backend ─────────────────────
   async rewrites() {
-    // Strip trailing /api to prevent double /api/api/... paths
-    const backendUrl = (
-      process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-rwb2.onrender.com"
-    ).replace(/\/api$/, "");
-
     const proxy = (seg: string) => [
       { source: `/api/${seg}`, destination: `${backendUrl}/api/${seg}` },
       { source: `/api/${seg}/:rest*`, destination: `${backendUrl}/api/${seg}/:rest*` },
