@@ -123,7 +123,8 @@ export class BrandsService {
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.brand.delete({ where: { id } });
+    // Soft delete — preserves products referencing this brand
+    return this.prisma.brand.update({ where: { id }, data: { isActive: false } });
   }
 
   async cleanupCorruptedData() {
