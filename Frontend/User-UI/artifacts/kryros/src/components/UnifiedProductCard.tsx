@@ -22,14 +22,6 @@ function validSpecs(specs: string | undefined | null): string {
   return t;
 }
 
-/** Only show description if it has real content */
-function validDescription(desc: string | undefined | null): string {
-  if (!desc) return "";
-  const t = desc.trim();
-  if (t === "" || t === "[]" || t === "null") return "";
-  return t;
-}
-
 export default function UnifiedProductCard({
   product,
   className = "w-full",
@@ -43,7 +35,6 @@ export default function UnifiedProductCard({
 
   const monthlyText = product.creditMessage || `${format(product.price / 12)}/mo`;
   const specs = validSpecs(product.specs);
-  const description = validDescription(product.description);
 
   return (
     <div
@@ -164,13 +155,6 @@ export default function UnifiedProductCard({
             </>
           )}
         </div>
-
-        {/* Description — only shown if real content exists, NO reserved space */}
-        {description && (
-          <p className="text-[10px] text-muted-foreground leading-snug line-clamp-2 mb-1">
-            {description}
-          </p>
-        )}
 
         {/* Buttons — mt-auto pins to bottom, handles height differences cleanly */}
         <div className="flex items-center gap-1.5 mt-auto pt-1">
