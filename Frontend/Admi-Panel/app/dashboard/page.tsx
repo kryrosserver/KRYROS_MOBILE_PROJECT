@@ -78,8 +78,10 @@ function DashboardContent() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [report, setReport]       = useState<any>(null);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
 
   useEffect(() => {
+    setIsDashboardLoading(true);
     getRecentOrders(5).then(r => {
       const data = r.data?.data || r.data || [];
       const meta = r.data?.meta || {};
@@ -101,7 +103,7 @@ function DashboardContent() {
       const d = r.data;
       setReport(d);
       if (d?.stats?.totalOrders) setTotalOrders(d.stats.totalOrders);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setIsDashboardLoading(false));
   }, []);
 
   const cardStyle = (extra?: React.CSSProperties): React.CSSProperties => ({
