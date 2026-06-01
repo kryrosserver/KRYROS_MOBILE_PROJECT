@@ -73,13 +73,14 @@ function buildThrottlerConfig() {
     // Redis-backed when REDIS_URL is set → ensures brute-force lockouts persist
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => {
+      useFactory: async (): Promise<any> => {
         if (process.env.REDIS_URL) {
           try {
             // Dynamic import so the package is optional in dev without Redis
             const { redisStore } = await import('cache-manager-redis-yet');
             const store = await redisStore({
-              socket: { url: process.env.REDIS_URL, reconnectStrategy: (retries: number) => Math.min(retries * 100, 3000) },
+              url: process.env.REDIS_URL,
+              socket: { reconnectStrategy: (retries: number) => Math.min(retries * 100, 3000) },
             });
             logger.log('CacheModule: using Redis store (REDIS_URL detected)');
             return { store, ttl: 60 * 1000 };
