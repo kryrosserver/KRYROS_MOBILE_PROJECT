@@ -146,6 +146,12 @@ export class CloudinaryService {
       return source;
     }
 
+    // ── Short-circuit: already a Cloudinary URL — no need to re-upload ──────
+    if (typeof source === 'string' && source.includes('res.cloudinary.com')) {
+      this.logger.debug(`Image already on Cloudinary — returning as-is`);
+      return source;
+    }
+
     // ── Choose the right transformation preset ──────────────────────────────
     const resolvedPreset = preset ?? presetFromFolder(folder);
     const transformation = PRESET_TRANSFORMATIONS[resolvedPreset];
