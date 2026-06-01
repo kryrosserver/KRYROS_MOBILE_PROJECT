@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const rawPort = process.env.PORT ?? "5000";
 const port = Number(rawPort);
@@ -18,18 +17,15 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+    // Only include dev/Replit plugins in development
+    ...(process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
       ? [
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (await import("@replit/vite-plugin-runtime-error-modal")).default() as any,
           await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
+            m.cartographer({ root: path.resolve(import.meta.dirname, "..") }),
           ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
+          await import("@replit/vite-plugin-dev-banner").then((m) => m.devBanner()),
         ]
       : []),
   ],
@@ -45,15 +41,57 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     sourcemap: false,
+    // ── Chunk splitting — browser caches vendor chunks independently ──────
+    // On re-deploy, only changed app chunks need to be re-downloaded.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React runtime — almost never changes
+          "vendor-react": ["react", "react-dom"],
+          // Routing
+          "vendor-router": ["wouter"],
+          // Data fetching — large but stable
+          "vendor-query": ["@tanstack/react-query"],
+          // All Radix UI components bundled together
+          "vendor-radix": [
+            "@radix-ui/react-accordion",
+            "@radix-ui/react-alert-dialog",
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-label",
+            "@radix-ui/react-navigation-menu",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-progress",
+            "@radix-ui/react-select",
+            "@radix-ui/react-separator",
+            "@radix-ui/react-slot",
+            "@radix-ui/react-switch",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-tooltip",
+          ],
+          // Animation — heavy, lazy split
+          "vendor-motion": ["framer-motion"],
+          // Charts — only loaded on chart pages
+          "vendor-charts": ["recharts"],
+          // Icons
+          "vendor-icons": ["lucide-react"],
+          // Forms
+          "vendor-forms": ["react-hook-form", "@hookform/resolvers"],
+        },
+      },
+    },
+    // Warn if any chunk exceeds 500 KB
+    chunkSizeWarningLimit: 500,
   },
   server: {
     port,
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
-    fs: {
-      strict: true,
-    },
+    fs: { strict: true },
     proxy: {
       "/api": {
         target: process.env.BACKEND_URL || "https://kryrosbackend-rwb2.onrender.com",
