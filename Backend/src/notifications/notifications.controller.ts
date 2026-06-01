@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { NotificationsService } from './notifications.service';
 import { MailerService } from './mailer.service';
@@ -59,10 +59,11 @@ export class NotificationsController {
   }
 
   @Post('sms/send')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Send direct SMS (Admin only)' })
+  @ApiOperation({ summary: 'Send direct SMS (Admin only) — max 10/min' })
   async sendSMS(@Body() body: { phoneNumber: string; message: string }) {
     return this.notificationsService.sendSMS(body.phoneNumber, body.message);
   }
@@ -232,6 +233,44 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Send push to specific device IDs (Admin only)' })
   async sendToDevices(@Body() body: { deviceIds: string[]; title: string; body: string; data?: any }) {
     return this.notificationsService.sendToDeviceIds(body.deviceIds, body.title, body.body, body.data);
+  }
+
+
+  // ─── SMS Supported Countries ──────────────────────────────────────────────
+  @Get('sms/countries')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List SMS supported countries (Admin only)' })
+  async getSmsCountries() {
+    return this.notificationsService.getSmsCountries();
+  }
+
+  @Post('sms/countries')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add a supported SMS country (Admin only)' })
+  async addSmsCountry(@Body() body: { name: string; dialCode: string; isoCode: string }) {
+    return this.notificationsService.addSmsCountry(body.name, body.dialCode, body.isoCode);
+  }
+
+  @Patch('sms/countries/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Toggle SMS country active/inactive (Admin only)' })
+  async toggleSmsCountry(@Param('id') id: string, @Body() body: { isActive: boolean }) {
+    return this.notificationsService.toggleSmsCountry(id, body.isActive);
+  }
+
+  @Delete('sms/countries/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a supported SMS country (Admin only)' })
+  async deleteSmsCountry(@Param('id') id: string) {
+    return this.notificationsService.deleteSmsCountry(id);
   }
 
 }
