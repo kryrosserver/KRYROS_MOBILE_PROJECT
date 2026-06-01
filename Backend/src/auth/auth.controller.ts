@@ -120,7 +120,20 @@ export class AuthController {
     return req.user;
   }
 
-  // ── 2FA ENDPOINTS ─────────────────────────────────────────────────────────
+
+  @Get('2fa/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current 2FA status for the logged-in user' })
+  async get2faStatus(@Request() req: AuthenticatedRequest) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { twoFactorEnabled: true },
+    });
+    return { enabled: user?.twoFactorEnabled ?? false };
+  }
+
+    // ── 2FA ENDPOINTS ─────────────────────────────────────────────────────────
 
   @Post('2fa/setup')
   @UseGuards(JwtAuthGuard)
