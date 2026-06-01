@@ -51,6 +51,7 @@ export default function BrandsSection() {
                   src={brand.logo}
                   alt={brand.name}
                   className="max-w-[56px] max-h-[32px] object-contain"
+                  loading="lazy" decoding="async"
                 />
               ) : (
                 <span className="text-xs font-bold text-foreground leading-tight whitespace-nowrap">{brand.name}</span>
@@ -73,6 +74,7 @@ export default function BrandsSection() {
                   src={brand.logo}
                   alt={brand.name}
                   className="max-w-[64px] max-h-[36px] object-contain"
+                  loading="lazy" decoding="async"
                 />
               ) : (
                 <span className="text-sm font-bold text-foreground leading-tight whitespace-nowrap">{brand.name}</span>
