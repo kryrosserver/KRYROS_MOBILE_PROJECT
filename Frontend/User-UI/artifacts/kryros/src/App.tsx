@@ -116,13 +116,13 @@ function PageLoader() {
 }
 
 function AppRoutes() {
-  const { checkAuth } = useAuthStore();
-  const { initializeCurrency } = useCurrencyStore();
+  const { getMe } = useAuthStore();
+  const { fetchCurrencies } = useCurrencyStore();
   const [location] = useLocation();
 
   useEffect(() => {
-    checkAuth();
-    initializeCurrency();
+    getMe();
+    fetchCurrencies();
   }, []);
 
   // Pages that show the main shell (header + footer)
