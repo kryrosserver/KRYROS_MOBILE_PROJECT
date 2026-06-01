@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || "https://kryrosbackend-rwb2.onrender.com")
-  .replace(/\/api$/, "");
-const isProd = process.env.NODE_ENV === "production";
+import { getBackendUrl, isProd } from "@/lib/bff-utils";
 
 export async function POST(req: NextRequest) {
   const refreshToken = req.cookies.get("kryros_refresh")?.value;
@@ -12,14 +9,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const upstream = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
+    const upstream = await fetch(`${getBackendUrl()}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
 
     if (!upstream.ok) {
-      // Refresh token is invalid/expired — clear cookies so user gets clean logout
       const res = NextResponse.json({ message: "Session expired" }, { status: 401 });
       res.cookies.set("kryros_token", "", { maxAge: 0, path: "/" });
       res.cookies.set("kryros_refresh", "", { maxAge: 0, path: "/" });
@@ -28,7 +24,6 @@ export async function POST(req: NextRequest) {
 
     const { accessToken, refreshToken: newRefreshToken } = await upstream.json();
     const res = NextResponse.json({ success: true });
-
     res.cookies.set("kryros_token", accessToken, {
       httpOnly: true, secure: isProd, sameSite: "strict", maxAge: 15 * 60, path: "/",
     });
