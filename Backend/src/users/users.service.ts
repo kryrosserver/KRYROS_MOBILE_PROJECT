@@ -3,17 +3,24 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { compressImage } from '../common/utils/image.util';
 
 const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinary: CloudinaryService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    if (createUserDto.avatar) {
-      createUserDto.avatar = await compressImage(createUserDto.avatar, 200, 200, 50); // Very small for avatars
+    if (createUserDto.avatar && CloudinaryService.isBase64(createUserDto.avatar)) {
+      createUserDto.avatar = await this.cloudinary.uploadImage(
+        createUserDto.avatar,
+        'kryros/avatars',
+      );
     }
     return this.prisma.user.create({
       data: createUserDto,
@@ -119,8 +126,12 @@ export class UsersService {
       data.password = await bcrypt.hash(data.password as string, BCRYPT_ROUNDS);
     }
 
-    if (data.avatar && typeof data.avatar === 'string') {
-      data.avatar = await compressImage(data.avatar as string, 200, 200, 50);
+    if (data.avatar && typeof data.avatar === 'string' &&
+        CloudinaryService.isBase64(data.avatar as string)) {
+      data.avatar = await this.cloudinary.uploadImage(
+        data.avatar as string,
+        'kryros/avatars',
+      );
     }
 
     return this.prisma.user.update({
