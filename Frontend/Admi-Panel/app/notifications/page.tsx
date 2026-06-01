@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import {
   getNotifications, getNewsletterSubscribers, sendNewsletterEmail,
   getSmsContacts, addSmsContact, deleteSmsContact,
+  getDevices, deleteDevice, sendToDevices,
 } from '@/lib/api';
 import api from '@/lib/api';
 
