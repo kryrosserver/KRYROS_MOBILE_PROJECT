@@ -42,11 +42,15 @@ function ProductsContent() {
   const textMain = isDark ? '#FFFFFF' : '#0F172A'; const textMuted = isDark ? '#8E9AAF' : '#64748B';
   const surface = isDark ? '#101826' : '#F1F5F9';
 
+  const PAGE_SIZE = 25;
   const [data, setData] = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load real products from API on mount
-  useEffect(() => {
-    getProducts({ take: 500 }).then(r => {
+  const loadProducts = (page: number) => {
+    setIsLoading(true);
+    getProducts({ take: PAGE_SIZE, skip: page * PAGE_SIZE, showInactive: 'true' }).then(r => {
       const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
       const normalized: Product[] = raw.map((p: any) => ({
         id: p.id || '',
@@ -73,8 +77,15 @@ function ProductsContent() {
         specifications: p.specifications || '',
       }));
       setData(normalized);
-    }).catch(() => {});
-  }, []);
+      // Update total from meta
+      const meta = r.data?.meta;
+      if (meta?.total !== undefined) setTotalCount(meta.total);
+    }).catch(() => {}).finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    loadProducts(currentPage);
+  }, [currentPage]);
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<Product | null>(null);
   const [deleteRow, setDeleteRow] = useState<Product | null>(null);
