@@ -525,7 +525,7 @@ export default function NotificationsPage() {
 
   return (
     <AdminShell>
-      <PageHeader title="Notifications" description="Send push notifications and manage newsletter campaigns" />
+      <PageHeader title="Notifications" subtitle="Send push notifications and manage newsletter campaigns" icon={Bell} />
 
       {/* Section tab switcher */}
       <div style={{ display:'flex', gap:4, marginBottom:24, background:surface, padding:4, borderRadius:10, border:`1px solid ${border}`, width:'fit-content' }}>
