@@ -513,4 +513,37 @@ export class NotificationsService implements OnModuleInit {
     }
   }
 
+
+  // ─── Device Management ────────────────────────────────────────────────────
+  async getDevices() {
+    return this.prisma.userDevice.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
+      },
+    });
+  }
+
+  async deleteDevice(id: string) {
+    try {
+      await this.prisma.userDevice.delete({ where: { id } });
+      return { success: true };
+    } catch {
+      return { success: false, message: 'Device not found' };
+    }
+  }
+
+  async sendToDeviceIds(ids: string[], title: string, body: string, data?: any) {
+    const devices = await this.prisma.userDevice.findMany({
+      where: { id: { in: ids } },
+      select: { fcmToken: true },
+    });
+    const tokens = devices.map(d => d.fcmToken);
+    if (tokens.length === 0) return { success: false, message: 'No tokens found for selected devices' };
+    await this.sendToTokens(tokens, title, body, data);
+    return { success: true, sent: tokens.length };
+  }
+
 }
