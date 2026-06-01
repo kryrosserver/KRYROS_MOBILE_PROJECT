@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -6,10 +6,15 @@ import { UpdateProductFlagsDto } from './dto/update-product-flags.dto';
 import { Prisma } from '@prisma/client';
 import type { Express } from 'express';
 import { compressImage, compressBuffer } from '../common/utils/image.util';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async findAll(params: {
     skip?: number;
@@ -25,7 +30,7 @@ export class ProductsService {
     popularity?: string;
   }) {
     const { skip = 0, take: rawTake = 20, categoryId, categorySlug, search, isFeatured, allowCredit, isWholesaleOnly, isFlashSale, showInactive, popularity } = params;
-    const take = Math.min(Math.max(1, Number(rawTake) || 20), 100);
+    const take = Math.min(Math.max(1, Number(rawTake) || 20), 500);
     
     const where: any = {};
     if (!showInactive) {
@@ -774,6 +779,7 @@ export class ProductsService {
       }
     }
 
+    await this.cacheManager.reset();
     return this.findById(id);
   }
 
@@ -813,10 +819,12 @@ export class ProductsService {
   async remove(id: string) {
     try {
       await this.prisma.product.delete({ where: { id } });
+      await this.cacheManager.reset();
       return { success: true, id };
     } catch (e: any) {
       // Fallback to soft delete if constrained by foreign keys
       await this.prisma.product.update({ where: { id }, data: { isActive: false } });
+      await this.cacheManager.reset();
       return { success: true, id, softDeleted: true };
     }
   }
