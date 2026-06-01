@@ -52,10 +52,12 @@ const SECTION_FIELDS: Record<string, Array<{ key: string; label: string; type: s
     { key: 'media', label: 'Promotion Image', type: 'file' },
   ],
   'Newsletter': [
-    { key: 'heading', label: 'Heading', type: 'text', icon: 'type' },
-    { key: 'subheading', label: 'Subheading', type: 'text', icon: 'type' },
-    { key: 'placeholder', label: 'Email Placeholder', type: 'text', icon: 'type' },
-    { key: 'button_text', label: 'Subscribe Button Text', type: 'text', icon: 'mouse' },
+    { key: 'popup_image', label: 'Popup Image', type: 'file' },
+    { key: 'heading', label: 'Popup Heading (e.g. Signup Today!)', type: 'text', icon: 'type' },
+    { key: 'subheading', label: 'Subtext (appears above heading)', type: 'text', icon: 'type' },
+    { key: 'placeholder', label: 'Email Input Placeholder', type: 'text', icon: 'type' },
+    { key: 'button_text', label: 'Button Text (e.g. Submit)', type: 'text', icon: 'mouse' },
+    { key: 'footnote', label: 'Footnote Text (below the form)', type: 'text', icon: 'type' },
   ],
   'Company Story': [
     { key: 'heading', label: 'Section Heading', type: 'text', icon: 'type' },
