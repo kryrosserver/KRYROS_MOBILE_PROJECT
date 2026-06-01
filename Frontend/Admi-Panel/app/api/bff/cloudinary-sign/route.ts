@@ -1,54 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBackendUrl, isProd } from "@/lib/bff-utils";
+import crypto from "crypto";
 
 /**
- * BFF proxy for Cloudinary upload signatures.
- * Reads the httpOnly kryros_token cookie and forwards the request to
- * the NestJS backend with proper Authorization header.
- * 
- * This avoids the raw fetch() bypassing the Axios 401 interceptor.
- * 
+ * BFF Cloudinary upload signature endpoint.
+ *
+ * Computes the Cloudinary upload signature LOCALLY using Node.js crypto
+ * (no NestJS backend call needed). The API secret never leaves the server.
+ *
+ * Reads Cloudinary credentials from Next.js environment variables:
+ *   CLOUDINARY_CLOUD_NAME
+ *   CLOUDINARY_API_KEY
+ *   CLOUDINARY_API_SECRET
+ *
  * GET /api/bff/cloudinary-sign?folder=kryros/videos
  */
 export async function GET(req: NextRequest) {
-  const folder = req.nextUrl.searchParams.get("folder") || "kryros/videos";
+  const cloudName  = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey     = process.env.CLOUDINARY_API_KEY;
+  const apiSecret  = process.env.CLOUDINARY_API_SECRET;
 
-  // Read the httpOnly token cookie (set by /api/bff/login)
-  const tokenCookie =
-    req.cookies.get("kryros_token")?.value ||
-    req.cookies.get("kryros_admin_token")?.value;
-
-  if (!tokenCookie) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    const backendUrl = getBackendUrl();
-    const upstream = await fetch(
-      `${backendUrl}/api/cloudinary/sign?folder=${encodeURIComponent(folder)}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${tokenCookie}`,
-        },
-      }
-    );
-
-    if (!upstream.ok) {
-      const errBody = await upstream.text();
-      return NextResponse.json(
-        { message: "Backend sign failed", detail: errBody },
-        { status: upstream.status }
-      );
-    }
-
-    const data = await upstream.json();
-    return NextResponse.json(data);
-  } catch (err) {
+  if (!cloudName || !apiKey || !apiSecret) {
     return NextResponse.json(
-      { message: "Backend unavailable" },
+      {
+        message:
+          "Cloudinary credentials not configured. " +
+          "Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET " +
+          "to your Render environment variables for the Admin Panel service.",
+      },
       { status: 503 }
     );
   }
+
+  const folder    = req.nextUrl.searchParams.get("folder") || "kryros/videos";
+  const timestamp = Math.round(Date.now() / 1000);
+
+  // Build the params-to-sign string (Cloudinary requires alphabetical key order)
+  const paramsToSign: Record<string, string | number> = { folder, timestamp };
+  const paramsString = Object.keys(paramsToSign)
+    .sort()
+    .map((k) => `${k}=${paramsToSign[k]}`)
+    .join("&");
+
+  // SHA-1 hash of "param1=val1&param2=val2" + apiSecret
+  const signature = crypto
+    .createHash("sha1")
+    .update(paramsString + apiSecret)
+    .digest("hex");
+
+  return NextResponse.json({
+    signature,
+    timestamp,
+    cloudName,
+    apiKey,
+    folder,
+  });
 }
