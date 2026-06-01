@@ -109,7 +109,8 @@ export default function CategoryPromoBanners() {
                   src={b.image}
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover"
-                />
+                
+                  loading="lazy" decoding="async" />
               )}
 
               {/* Dark overlay — stronger on image, subtle on gradient */}
