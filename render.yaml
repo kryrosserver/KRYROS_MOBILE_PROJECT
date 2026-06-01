@@ -61,3 +61,11 @@ services:
         value: --max-old-space-size=384
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
+      # Cloudinary credentials — needed by the BFF upload-signature route
+      # Set these values in Render dashboard (never commit actual secrets)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
