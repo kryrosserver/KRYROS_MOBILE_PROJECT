@@ -95,12 +95,14 @@ export class CategoriesService {
     if (data.image) {
       data.image = await compressImage(data.image, 400, 400, 60);
     }
-    const result = await this.prisma.category.create({
-      data: {
-        ...data,
-        slug: data.slug || data.name.toLowerCase().replace(/\s+/g, '-'),
-      },
-    });
+    // Map DTO field name (showOnHomepage) → Prisma field name (showOnHome)
+    const { showOnHomepage, ...rest } = data;
+    const prismaData: any = {
+      ...rest,
+      slug: rest.slug || rest.name.toLowerCase().replace(/\s+/g, '-'),
+      ...(showOnHomepage !== undefined && { showOnHome: showOnHomepage }),
+    };
+    const result = await this.prisma.category.create({ data: prismaData });
     await this.invalidateCategoryCache();
     return result;
   }
@@ -109,9 +111,15 @@ export class CategoriesService {
     if (data.image) {
       data.image = await compressImage(data.image, 400, 400, 60);
     }
+    // Map DTO field name (showOnHomepage) → Prisma field name (showOnHome)
+    const { showOnHomepage, ...rest } = data;
+    const prismaData: any = {
+      ...rest,
+      ...(showOnHomepage !== undefined && { showOnHome: showOnHomepage }),
+    };
     const result = await this.prisma.category.update({
       where: { id },
-      data,
+      data: prismaData,
     });
     await this.invalidateCategoryCache();
     return result;
