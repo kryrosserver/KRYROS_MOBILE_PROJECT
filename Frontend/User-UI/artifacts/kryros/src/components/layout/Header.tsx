@@ -83,7 +83,6 @@ export default function Header() {
           <div className="bg-foreground text-background text-[10px] md:text-xs">
             <div className="flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2">
               <span>
-                <span className="text-primary font-semibold">Free Delivery</span>{" "}
                 {headerCfg.announcementText}
               </span>
               <div className="flex items-center gap-2">
