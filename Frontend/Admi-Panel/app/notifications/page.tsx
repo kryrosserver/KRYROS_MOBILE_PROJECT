@@ -8,13 +8,15 @@ import toast from 'react-hot-toast';
 import {
   getNotifications, getNewsletterSubscribers, sendNewsletterEmail,
   getSmsContacts, addSmsContact, deleteSmsContact,
+  getSmsCountries, addSmsCountry, toggleSmsCountry, deleteSmsCountry,
   getDevices, deleteDevice, sendToDevices,
 } from '@/lib/api';
 import api from '@/lib/api';
 
 type NotifRecord = { id:string; title:string; message:string; target:string; channel:string; sent:number; opened:number; date:string; status:string };
 type SmsContact  = { id:string; phone:string; name?:string; source:string; isActive:boolean; createdAt:string };
-type NLSubscriber = { id: string; email: string; isActive: boolean; createdAt: string };
+type NLSubscriber   = { id: string; email: string; isActive: boolean; createdAt: string };
+type SmsCountry     = { id: string; name: string; dialCode: string; isoCode: string; isActive: boolean; createdAt: string };
 
 // ─── Shared theme hook ───────────────────────────────────────────────────────
 function useColors() {
@@ -221,6 +223,140 @@ function PushContent() {
 }
 
 // ─── SMS Tab ─────────────────────────────────────────────────────────────────
+// ─── SMS Countries Section ───────────────────────────────────────────────────
+function SmsCountriesSection() {
+  const { card, border, textMain, textMuted, surface, primary } = useColors();
+  const [countries, setCountries]   = useState<SmsCountry[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [showAdd, setShowAdd]       = useState(false);
+  const [newName, setNewName]       = useState('');
+  const [newDial, setNewDial]       = useState('');
+  const [newIso,  setNewIso]        = useState('');
+  const [saving,  setSaving]        = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    getSmsCountries()
+      .then((r: any) => setCountries(Array.isArray(r.data) ? r.data : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { load(); }, []);
+
+  const handleToggle = async (id: string, current: boolean) => {
+    try {
+      await toggleSmsCountry(id, !current);
+      setCountries(prev => prev.map(c => c.id === id ? { ...c, isActive: !current } : c));
+    } catch { toast.error('Could not update country'); }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteSmsCountry(id);
+      setCountries(prev => prev.filter(c => c.id !== id));
+      toast.success('Country removed');
+    } catch { toast.error('Could not remove country'); }
+  };
+
+  const handleAdd = async () => {
+    if (!newName.trim() || !newDial.trim() || !newIso.trim()) { toast.error('All fields are required'); return; }
+    setSaving(true);
+    try {
+      await addSmsCountry({ name: newName.trim(), dialCode: newDial.trim().replace(/\D/g,''), isoCode: newIso.trim().toUpperCase() });
+      toast.success('Country added');
+      setNewName(''); setNewDial(''); setNewIso(''); setShowAdd(false);
+      load();
+    } catch { toast.error('Could not add country — dial code may already exist'); }
+    finally { setSaving(false); }
+  };
+
+  const flagEmoji = (iso: string) => {
+    try {
+      return iso.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)));
+    } catch { return '🌍'; }
+  };
+
+  return (
+    <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, overflow: 'hidden', marginTop: 20 }}>
+      {/* Header */}
+      <div style={{ padding: '14px 18px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <span style={{ fontWeight: 700, color: textMain, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Globe style={{ width: 15, height: 15, color: primary }} /> SMS Supported Countries
+        </span>
+        <button
+          onClick={() => setShowAdd(v => !v)}
+          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 7, background: showAdd ? surface : primary, color: showAdd ? textMuted : '#fff', border: `1px solid ${showAdd ? border : primary}`, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+        >
+          {showAdd ? <><X style={{ width: 12, height: 12 }} /> Cancel</> : <><Plus style={{ width: 12, height: 12 }} /> Add Country</>}
+        </button>
+      </div>
+
+      {/* Add form */}
+      {showAdd && (
+        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${border}`, background: surface, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 2, minWidth: 120 }}>
+            <div style={{ fontSize: 11, color: textMuted, marginBottom: 4 }}>Country Name</div>
+            <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Nigeria" style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: `1px solid ${border}`, background: card, color: textMain, fontSize: 12, outline: 'none', boxSizing: 'border-box' as const }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 90 }}>
+            <div style={{ fontSize: 11, color: textMuted, marginBottom: 4 }}>Dial Code (no +)</div>
+            <input value={newDial} onChange={e => setNewDial(e.target.value)} placeholder="e.g. 234" style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: `1px solid ${border}`, background: card, color: textMain, fontSize: 12, outline: 'none', boxSizing: 'border-box' as const }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 80 }}>
+            <div style={{ fontSize: 11, color: textMuted, marginBottom: 4 }}>ISO Code</div>
+            <input value={newIso} onChange={e => setNewIso(e.target.value)} placeholder="e.g. NG" maxLength={2} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: `1px solid ${border}`, background: card, color: textMain, fontSize: 12, outline: 'none', boxSizing: 'border-box' as const, textTransform: 'uppercase' }} />
+          </div>
+          <button
+            onClick={handleAdd} disabled={saving}
+            style={{ padding: '8px 16px', borderRadius: 7, background: primary, color: '#fff', border: 'none', fontSize: 12, cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 600, opacity: saving ? 0.7 : 1, whiteSpace: 'nowrap' }}
+          >
+            {saving ? 'Saving...' : 'Save Country'}
+          </button>
+        </div>
+      )}
+
+      {/* Country list */}
+      <div>
+        {loading ? (
+          <div style={{ padding: '24px 0', textAlign: 'center', color: textMuted, fontSize: 12 }}>Loading...</div>
+        ) : countries.length === 0 ? (
+          <div style={{ padding: '24px 18px', textAlign: 'center', color: textMuted, fontSize: 12 }}>
+            No countries configured yet — SMS will be skipped for all orders. Add Zambia (+260) to get started.
+          </div>
+        ) : countries.map(c => (
+          <div key={c.id} style={{ padding: '12px 18px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 22 }}>{flagEmoji(c.isoCode)}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, color: textMain, fontSize: 13 }}>{c.name}</div>
+              <div style={{ fontSize: 11, color: textMuted }}>+{c.dialCode} &middot; {c.isoCode.toUpperCase()}</div>
+            </div>
+            {/* Active toggle */}
+            <div
+              onClick={() => handleToggle(c.id, c.isActive)}
+              style={{ width: 36, height: 20, borderRadius: 10, background: c.isActive ? primary : border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}
+            >
+              <div style={{ position: 'absolute', top: 3, left: c.isActive ? 18 : 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+            </div>
+            <span style={{ fontSize: 11, color: c.isActive ? '#22c55e' : textMuted, fontWeight: 600, minWidth: 46 }}>{c.isActive ? 'Active' : 'Off'}</span>
+            <button
+              onClick={() => handleDelete(c.id)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 4, borderRadius: 5, display: 'flex', alignItems: 'center' }}
+              title="Remove country"
+            >
+              <Trash2 style={{ width: 14, height: 14 }} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div style={{ padding: '10px 18px', borderTop: countries.length > 0 ? `1px solid ${border}` : undefined }}>
+        <p style={{ fontSize: 11, color: textMuted, margin: 0 }}>
+          SMS is only delivered to phone numbers matching an <strong style={{ color: textMain }}>active</strong> country dial code. Non-matching numbers are silently skipped — no errors, no charges.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SmsContent() {
   const { card, border, textMain, textMuted, surface, primary } = useColors();
   const [contacts, setContacts] = useState<SmsContact[]>([]);
@@ -425,6 +561,9 @@ function SmsContent() {
           </div>
         </div>
       )}
+
+      {/* SMS Supported Countries Management */}
+      <SmsCountriesSection />
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
