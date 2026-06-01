@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Mail, CheckCircle, Loader2 } from "lucide-react";
+import { X, CheckCircle, Loader2 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 
 const STORAGE_KEY = "kryros_nl_subscribed";
@@ -10,6 +10,8 @@ interface NLConfig {
   subheading?: string;
   placeholder?: string;
   button_text?: string;
+  popup_image?: string;
+  footnote?: string;
 }
 
 export default function NewsletterPopup() {
@@ -19,10 +21,12 @@ export default function NewsletterPopup() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [config, setConfig] = useState<NLConfig>({
-    heading: "Stay in the Loop with KRYROS",
-    subheading: "Subscribe to get exclusive deals, new arrivals, and special offers delivered straight to your inbox.",
-    placeholder: "Enter your email address",
-    button_text: "Subscribe",
+    heading: "Signup Today!",
+    subheading: "Want exclusive access to discounts & offers on premium brands?",
+    placeholder: "Your E-mail",
+    button_text: "Submit",
+    popup_image: "",
+    footnote: "*Limited time offer. Free USPS shipping only.",
   });
 
   useEffect(() => {
@@ -75,7 +79,7 @@ export default function NewsletterPopup() {
   };
 
   const handleDismiss = () => {
-    // X button → dismiss for this session only (sessionStorage)
+    // X button -> dismiss for this session only
     setVisible(false);
     sessionStorage.setItem("kryros_nl_dismissed", "1");
   };
@@ -84,82 +88,164 @@ export default function NewsletterPopup() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(2px)" }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.62)", backdropFilter: "blur(4px)" }}
+      onClick={handleDismiss}
     >
       <div
-        className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="relative w-full bg-white shadow-2xl overflow-hidden"
+        style={{
+          maxWidth: 360,
+          borderRadius: 20,
+          animation: "nlPopupIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Teal gradient accent bar */}
-        <div style={{ height: 4, background: "linear-gradient(90deg, #1FA89A, #27B9AF, #1FA89A)" }} />
-
-        {/* Close button */}
+        {/* Dark navy close button - top right */}
         <button
           onClick={handleDismiss}
-          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-muted/80 flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors z-10"
+          style={{
+            position: "absolute", top: 12, right: 12,
+            width: 38, height: 38,
+            background: "#0E1A35",
+            borderRadius: 10,
+            border: "none",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 20,
+            transition: "opacity 0.2s",
+          }}
           aria-label="Close newsletter popup"
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.75")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
         >
-          <X className="w-3.5 h-3.5" />
+          <X size={16} color="white" strokeWidth={2.5} />
         </button>
 
-        <div className="p-6 pt-5">
-          {done ? (
-            /* Success state */
-            <div className="flex flex-col items-center text-center py-4">
-              <CheckCircle className="w-12 h-12 text-primary mb-3" />
-              <h3 className="text-lg font-bold text-foreground mb-1">You're subscribed!</h3>
-              <p className="text-sm text-muted-foreground">
-                Welcome to KRYROS updates. Check your inbox for a welcome email!
-              </p>
+        {done ? (
+          /* Success state */
+          <div style={{ padding: "48px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: "50%",
+              background: "linear-gradient(135deg,#1FA89A,#27B9AF)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              marginBottom: 16,
+            }}>
+              <CheckCircle size={32} color="white" />
             </div>
-          ) : (
-            /* Subscribe form */
-            <>
-              {/* Mail icon */}
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: "linear-gradient(135deg, #1FA89A22, #27B9AF11)", border: "1px solid #1FA89A44" }}>
-                <Mail className="w-5 h-5 text-primary" />
+            <h3 style={{ fontSize: 22, fontWeight: 800, color: "#0A0F1E", marginBottom: 8 }}>
+              You're subscribed!
+            </h3>
+            <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.55 }}>
+              Welcome to KRYROS updates. Check your inbox for a welcome email!
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Hero image */}
+            {config.popup_image ? (
+              <div style={{ width: "100%", height: 290, overflow: "hidden", position: "relative", flexShrink: 0 }}>
+                <img
+                  src={config.popup_image}
+                  alt=""
+                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
+                />
               </div>
+            ) : (
+              /* Gradient placeholder when no image configured */
+              <div style={{
+                width: "100%", height: 240,
+                background: "linear-gradient(135deg,#1FA89A 0%,#27B9AF 55%,#0E1A35 100%)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="m2 7 10 7 10-7"/>
+                </svg>
+              </div>
+            )}
 
-              <h2 className="text-lg font-bold text-foreground mb-1.5 leading-tight pr-6">
-                {config.heading || "Stay in the Loop with KRYROS"}
-              </h2>
-              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-                {config.subheading || "Subscribe for exclusive deals and new arrivals."}
+            {/* Form area */}
+            <div style={{ padding: "20px 22px 22px", background: "white" }}>
+              {/* Subheading */}
+              <p style={{ fontSize: 13.5, color: "#5A6578", lineHeight: 1.6, marginBottom: 10, marginRight: 8 }}>
+                {config.subheading || "Want exclusive access to discounts & offers on premium brands?"}
               </p>
 
-              {/* Email input */}
-              <div className="flex gap-2 mb-2">
+              {/* Main heading */}
+              <h2 style={{
+                fontSize: 30, fontWeight: 900, color: "#0A0F1E",
+                lineHeight: 1.08, marginBottom: 18, letterSpacing: "-0.5px",
+              }}>
+                {config.heading || "Signup Today!"}
+              </h2>
+
+              {/* Email row */}
+              <div style={{
+                display: "flex",
+                border: "1.5px solid #D1D5DB",
+                borderRadius: 10,
+                overflow: "hidden",
+                marginBottom: error ? 6 : 10,
+              }}>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError(""); }}
                   onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
-                  placeholder={config.placeholder || "Enter your email address"}
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  placeholder={config.placeholder || "Your E-mail"}
+                  style={{
+                    flex: 1, padding: "13px 14px",
+                    fontSize: 14, color: "#0A0F1E",
+                    border: "none", outline: "none",
+                    background: "transparent",
+                    fontFamily: "inherit",
+                  }}
                 />
                 <button
                   onClick={handleSubscribe}
                   disabled={loading}
-                  className="px-4 py-2.5 rounded-xl text-white text-sm font-bold flex items-center gap-1.5 transition-opacity disabled:opacity-70 flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #1FA89A, #27B9AF)" }}
+                  style={{
+                    padding: "13px 20px",
+                    background: "#0A0F1E",
+                    color: "white",
+                    fontSize: 14, fontWeight: 700,
+                    border: "none", cursor: loading ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", gap: 6,
+                    opacity: loading ? 0.7 : 1,
+                    whiteSpace: "nowrap",
+                    fontFamily: "inherit",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#1a2d5a")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "#0A0F1E")}
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (config.button_text || "Subscribe")}
+                  {loading && <Loader2 size={14} className="animate-spin" />}
+                  {config.button_text || "Submit"}
                 </button>
               </div>
 
               {error && (
-                <p className="text-xs text-destructive mt-1">{error}</p>
+                <p style={{ fontSize: 12, color: "#ef4444", marginBottom: 8 }}>{error}</p>
               )}
 
-              <p className="text-[10px] text-muted-foreground mt-3 text-center">
-                No spam, ever. Unsubscribe at any time.
-              </p>
-            </>
-          )}
-        </div>
+              {/* Footnote */}
+              {config.footnote && (
+                <p style={{ fontSize: 11.5, color: "#9CA3AF", lineHeight: 1.55 }}>
+                  {config.footnote}
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </div>
+
+      <style>{`
+        @keyframes nlPopupIn {
+          from { opacity: 0; transform: scale(0.88) translateY(24px); }
+          to   { opacity: 1; transform: scale(1)   translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
