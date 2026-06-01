@@ -10,7 +10,6 @@ const backendUrl = (() => {
         'Add it to your Render/Vercel environment variables.',
       );
     }
-    // Development fallback — localhost only
     console.warn('[config] NEXT_PUBLIC_API_URL not set — defaulting to http://localhost:8080 (dev only)');
     return 'http://localhost:8080';
   }
@@ -19,26 +18,64 @@ const backendUrl = (() => {
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  productionBrowserSourceMaps: false, // security: don't ship source maps to browsers
+  productionBrowserSourceMaps: false,
+
+  // ── Image Optimisation — Cloudinary ───────────────────────────────────────
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/dkcgbgcuh/**',
+      },
+    ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 2592000, // 30 days — Cloudinary images are immutable by version
+  },
+
+  // ── Router cache — keep pages fresh for 60 s client-side ─────────────────
+  experimental: {
+    staleTimes: {
+      dynamic: 60,   // client-router cache for dynamic pages (seconds)
+      static: 300,   // client-router cache for static pages
+    },
+  },
 
   // ── Security Headers ──────────────────────────────────────────────────────
   async headers() {
     return [
+      // Static assets: long cache, immutable
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      // Public files (favicon, images etc.)
+      {
+        source: '/(.+\.(?:ico|png|jpg|jpeg|svg|webp|avif|woff2|woff))',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      // API routes: never cache
+      {
+        source: '/api/(.*)',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, private' },
+        ],
+      },
+      // All other routes (authenticated admin pages) — security headers
       {
         source: '/(.*)',
         headers: [
-          // Prevent clickjacking
           { key: 'X-Frame-Options', value: 'DENY' },
-          // Prevent MIME sniffing
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          // Referrer privacy
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          // Disable sensitive browser features
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
           },
-          // Strict Content Security Policy for admin panel
           {
             key: 'Content-Security-Policy',
             value: [
@@ -54,8 +91,8 @@ const nextConfig: NextConfig = {
               "form-action 'self'",
             ].join('; '),
           },
-          // Prevent sensitive responses being cached
-          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, private' },
+          // Admin pages: no cache (user-specific authenticated content)
+          { key: 'Cache-Control', value: 'no-store, private' },
         ],
       },
     ];
