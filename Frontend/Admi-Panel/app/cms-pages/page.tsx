@@ -212,13 +212,49 @@ function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, tex
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<{ name: string; type: string; url: string } | null>(null);
   const [urlInput, setUrlInput] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type.startsWith('video/')) {
-      toast.error('Video files are too large to upload directly. Please paste a hosted video URL (e.g. from Cloudinary, S3, or a direct .mp4 link).');
-      e.target.value = '';
+      // Direct-to-Cloudinary upload — video bypasses your server entirely
+      try {
+        setUploading(true);
+        setUploadProgress('Getting upload token...');
+        e.target.value = '';
+        const sigRes = await fetch('/api/cloudinary/sign?folder=kryros%2Fvideos');
+        if (!sigRes.ok) throw new Error('Could not get upload signature');
+        const { signature, timestamp, cloudName, apiKey, folder } = await sigRes.json();
+        setUploadProgress('Uploading to Cloudinary...');
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('api_key', apiKey);
+        formData.append('timestamp', String(timestamp));
+        formData.append('signature', signature);
+        formData.append('folder', folder);
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`,
+          { method: 'POST', body: formData }
+        );
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error((errData as any)?.error?.message || 'Upload failed');
+        }
+        const data = await uploadRes.json();
+        setPreview({ name: file.name, type: 'video', url: (data as any).secure_url });
+        onChange((data as any).secure_url, file.name);
+        onUrlChange?.((data as any).secure_url);
+        setUrlInput('');
+        toast.success('Video uploaded successfully!');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Video upload failed. Please try again.';
+        toast.error(msg);
+      } finally {
+        setUploading(false);
+        setUploadProgress('');
+      }
       return;
     }
     const reader = new FileReader();
@@ -278,13 +314,23 @@ function FileUpload({ value, onChange, onUrlChange, isDark, border, surface, tex
           <button onClick={clearAll} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex' }}><X size={13} /></button>
         </div>
       ) : null}
-      <div onClick={() => inputRef.current?.click()} style={{ border: `2px dashed ${border}`, borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: 'pointer', background: surface, transition: 'border-color 0.15s', marginBottom:'8px' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#1FA89A'} onMouseLeave={e => e.currentTarget.style.borderColor = border}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Upload size={16} color="#1FA89A" /></div>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Video size={16} color="#6366f1" /></div>
-        </div>
-        <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 2px' }}><span style={{ color: '#1FA89A', fontWeight: 600 }}>Click to upload</span> image or video</p>
-        <p style={{ fontSize: '11px', color: textMuted, margin: 0 }}>PNG, JPG, GIF, MP4, MOV — max 50MB</p>
+      <div onClick={() => { if (!uploading) inputRef.current?.click(); }} style={{ border: `2px dashed ${uploading ? '#1FA89A' : border}`, borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: uploading ? 'default' : 'pointer', background: surface, transition: 'border-color 0.15s', marginBottom:'8px' }} onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = '#1FA89A'; }} onMouseLeave={e => { if (!uploading) e.currentTarget.style.borderColor = uploading ? '#1FA89A' : border; }}>
+        {uploading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
+            <div style={{ width: '32px', height: '32px', border: '3px solid rgba(31,168,154,0.2)', borderTopColor: '#1FA89A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <p style={{ fontSize: '12px', color: '#1FA89A', margin: 0, fontWeight: 600 }}>{uploadProgress || 'Uploading...'}</p>
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(31,168,154,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Upload size={16} color="#1FA89A" /></div>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Video size={16} color="#6366f1" /></div>
+            </div>
+            <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 2px' }}><span style={{ color: '#1FA89A', fontWeight: 600 }}>Click to upload</span> image or video</p>
+            <p style={{ fontSize: '11px', color: textMuted, margin: 0 }}>PNG, JPG, GIF, MP4, MOV — direct upload via Cloudinary</p>
+          </>
+        )}
       </div>
       <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
         <div style={{ flex:1, height:'1px', background:border }} />
