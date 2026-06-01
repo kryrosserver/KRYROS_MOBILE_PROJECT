@@ -1033,50 +1033,6 @@ function CMSContent() {
         <ModalFooter onClose={() => { setTbOpen(false); setTbEditIdx(null); }} onSubmit={handleTbSave} loading={tbSaving} submitLabel={tbEditIdx !== null ? 'Save Changes' : 'Add Brand'} isDark={isDark} border={border} textMain={textMain} />
       </Modal>
       <ConfirmDialog open={tbDeleteIdx !== null} onClose={() => setTbDeleteIdx(null)} onConfirm={handleTbDelete} loading={tbSaving} title="Delete Brand" message={tbDeleteIdx !== null ? `Delete "${trustedBrands[tbDeleteIdx]?.name}" from trusted brands?` : 'Delete this brand?'} />
-
-      {/* ── Newsletter Popup Config Modal ── */}
-      {nlModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(3px)' }} onClick={e => { if (e.target === e.currentTarget) setNlModalOpen(false); }}>
-          <div style={{ background: isDark ? '#0D1523' : '#FFFFFF', border: `1px solid ${border}`, borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '92vh', overflow: 'auto', boxShadow: '0 30px 60px rgba(0,0,0,0.45)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px 14px', borderBottom: `1px solid ${border}` }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: textMain, display: 'flex', alignItems: 'center', gap: 8 }}><Mail size={16} color="#1FA89A" /> Newsletter Popup Configuration</div>
-                <div style={{ fontSize: 11.5, color: textMuted, marginTop: 2 }}>Changes go live on your user website immediately after saving</div>
-              </div>
-              <button onClick={() => setNlModalOpen(false)} style={{ width: 28, height: 28, borderRadius: 7, background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} color={textMuted} /></button>
-            </div>
-            <div style={{ padding: '20px 24px' }}>
-              {([
-                { key: 'popup_image', label: 'Popup Image', type: 'file' },
-                { key: 'heading', label: 'Popup Heading (e.g. Signup Today!)', type: 'text' },
-                { key: 'subheading', label: 'Subtext (appears above heading)', type: 'text' },
-                { key: 'placeholder', label: 'Email Input Placeholder', type: 'text' },
-                { key: 'button_text', label: 'Button Text (e.g. Submit)', type: 'text' },
-                { key: 'footnote', label: 'Footnote Text (below the form)', type: 'text' },
-              ] as Array<{key:string;label:string;type:string}>).map(field => (
-                <div key={field.key} style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 600, color: textMuted, marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: '0.4px' }}>
-                    {field.type === 'file' ? <ImageIcon size={10} /> : <Type size={10} />} {field.label}
-                  </label>
-                  {field.type === 'file' ? (
-                    <FileUpload value={nlConfig[field.key] || ''} onChange={(v) => setNlConfig(prev => ({ ...prev, [field.key]: v }))} isDark={isDark} border={border} surface={surface} textMuted={textMuted} />
-                  ) : (
-                    <input type="text" value={nlConfig[field.key] || ''} onChange={e => setNlConfig(prev => ({ ...prev, [field.key]: e.target.value }))}
-                      placeholder={'Enter ' + field.label.toLowerCase() + '...'}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: 8, background: surface, border: `1px solid ${border}`, color: textMain, fontSize: 13.5, outline: 'none', fontFamily: 'var(--font-inter)', boxSizing: 'border-box' as const }} />
-                  )}
-                </div>
-              ))}
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 16, borderTop: `1px solid ${border}` }}>
-                <button onClick={() => setNlModalOpen(false)} style={{ padding: '10px 20px', borderRadius: 9, background: isDark ? '#1E293B' : '#F1F5F9', border: `1px solid ${border}`, color: textMain, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>Cancel</button>
-                <button onClick={handleSaveNlConfig} disabled={nlSaving} style={{ padding: '10px 20px', borderRadius: 9, background: 'linear-gradient(135deg,#1FA89A,#27B9AF)', border: 'none', color: 'white', fontSize: 13.5, fontWeight: 600, cursor: nlSaving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-inter)', display: 'flex', alignItems: 'center', gap: 6, opacity: nlSaving ? 0.7 : 1 }}>
-                  {nlSaving ? <Loader2 size={14} className="animate-spin" /> : <><CheckCircle2 size={14} /> Save Popup Config</>}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       <style>{`.sg{} @media(max-width:768px){.sg{grid-template-columns:1fr!important;}.items-grid{grid-template-columns:1fr!important;}}`}</style>
     </div>
   );
