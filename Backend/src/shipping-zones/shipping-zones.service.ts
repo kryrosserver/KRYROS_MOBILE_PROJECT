@@ -1,4 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateShippingZoneDto } from './dto/create-shipping-zone.dto';
 import { UpdateShippingZoneDto } from './dto/update-shipping-zone.dto';
@@ -6,7 +8,12 @@ import { CreateLocationShippingMethodDto } from './dto/create-location-shipping-
 
 @Injectable()
 export class ShippingZonesService implements OnModuleInit {
-  constructor(private prisma: PrismaService) {}
+  private readonly CACHE_TTL = 600000;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async onModuleInit() {
     try {
