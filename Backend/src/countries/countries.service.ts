@@ -273,8 +273,10 @@ export class CountriesService implements OnModuleInit {
   }
 
   async remove(id: string) {
-    return this.prisma.country.delete({
+    // Soft delete — preserves states, shipping zones, and payment methods
+    return this.prisma.country.update({
       where: { id },
+      data: { status: false },
     });
   }
 
