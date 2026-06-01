@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
+import { EmailModule } from '../common/email/email.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -15,6 +17,8 @@ import { PrismaModule } from '../prisma/prisma.module';
     UsersModule,
     PrismaModule,
     PassportModule,
+    CloudinaryModule,
+    EmailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
