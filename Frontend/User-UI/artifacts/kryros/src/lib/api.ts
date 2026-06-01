@@ -134,7 +134,7 @@ function normalizeProduct(p: any): Product {
     discount,
     rating: Number(p.rating || 0),
     reviewCount: Number(p.reviewCount || p._count?.reviews || 0),
-    stock: p.inventory?.quantity ?? p.stock ?? 0,
+    stock: p.inventory?.stock ?? p.stockCurrent ?? p.stock ?? 0,
     description: p.description || '',
     specs: (() => {
       // Prefer structured specifications array from backend
