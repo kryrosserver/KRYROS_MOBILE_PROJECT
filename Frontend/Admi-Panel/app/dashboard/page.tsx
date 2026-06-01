@@ -1,10 +1,23 @@
 "use client";
 import AdminShell from "@/components/admin/admin-shell";
 import { useTheme } from "@/contexts/theme-context";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
-} from "recharts";
+// Lazy-loaded — recharts is ~180 KB, defer until after shell paint
+import dynamic from "next/dynamic";
+import type * as RechartsTypes from "recharts";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Recharts = dynamic(() => import("recharts") as any, { ssr: false });
+// Individual components extracted below for JSX use
+const _rc = typeof window !== "undefined" ? require("recharts") : {};
+const AreaChart: typeof RechartsTypes.AreaChart = _rc.AreaChart;
+const Area: typeof RechartsTypes.Area = _rc.Area;
+const XAxis: typeof RechartsTypes.XAxis = _rc.XAxis;
+const YAxis: typeof RechartsTypes.YAxis = _rc.YAxis;
+const CartesianGrid: typeof RechartsTypes.CartesianGrid = _rc.CartesianGrid;
+const Tooltip: typeof RechartsTypes.Tooltip = _rc.Tooltip;
+const ResponsiveContainer: typeof RechartsTypes.ResponsiveContainer = _rc.ResponsiveContainer;
+const PieChart: typeof RechartsTypes.PieChart = _rc.PieChart;
+const Pie: typeof RechartsTypes.Pie = _rc.Pie;
+const Cell: typeof RechartsTypes.Cell = _rc.Cell;
 import {
   TrendingUp, TrendingDown, ShoppingCart, DollarSign, Package,
   CreditCard, FileText, UserPlus, BarChart2, Settings, Wallet,
@@ -82,28 +95,33 @@ function DashboardContent() {
 
   useEffect(() => {
     setIsDashboardLoading(true);
-    getRecentOrders(5).then(r => {
-      const data = r.data?.data || r.data || [];
-      const meta = r.data?.meta || {};
-      setOrders(Array.isArray(data) ? data.slice(0, 5) : []);
-      if (meta.total) setTotalOrders(meta.total);
-    }).catch(() => {});
-
-    getTopProducts(5).then(r => {
-      const data = r.data?.data || r.data || [];
-      setProducts(Array.isArray(data) ? data.slice(0, 5) : []);
-    }).catch(() => {});
-
-    getRecentCustomers(5).then(r => {
-      const data = r.data?.data || r.data || [];
-      setCustomers(Array.isArray(data) ? data.slice(0, 5) : []);
-    }).catch(() => {});
-
-    getReportsSummary("year").then(r => {
-      const d = r.data;
-      setReport(d);
-      if (d?.stats?.totalOrders) setTotalOrders(d.stats.totalOrders);
-    }).catch(() => {}).finally(() => setIsDashboardLoading(false));
+    // Fire all 4 requests in parallel — reduces total wait to the slowest one
+    Promise.allSettled([
+      getRecentOrders(5),
+      getTopProducts(5),
+      getRecentCustomers(5),
+      getReportsSummary("year"),
+    ]).then(([ordersRes, productsRes, customersRes, reportRes]) => {
+      if (ordersRes.status === "fulfilled") {
+        const data = ordersRes.value.data?.data || ordersRes.value.data || [];
+        const meta = ordersRes.value.data?.meta || {};
+        setOrders(Array.isArray(data) ? data.slice(0, 5) : []);
+        if (meta.total) setTotalOrders(meta.total);
+      }
+      if (productsRes.status === "fulfilled") {
+        const data = productsRes.value.data?.data || productsRes.value.data || [];
+        setProducts(Array.isArray(data) ? data.slice(0, 5) : []);
+      }
+      if (customersRes.status === "fulfilled") {
+        const data = customersRes.value.data?.data || customersRes.value.data || [];
+        setCustomers(Array.isArray(data) ? data.slice(0, 5) : []);
+      }
+      if (reportRes.status === "fulfilled") {
+        const d = reportRes.value.data;
+        setReport(d);
+        if (d?.stats?.totalOrders) setTotalOrders(d.stats.totalOrders);
+      }
+    }).finally(() => setIsDashboardLoading(false));
   }, []);
 
   const cardStyle = (extra?: React.CSSProperties): React.CSSProperties => ({
