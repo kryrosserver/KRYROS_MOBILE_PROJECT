@@ -1,9 +1,16 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
+
+const SETTINGS_TTL = 5 * 60 * 1000; // 5 minutes — settings rarely change
 
 @Injectable()
 export class SettingsService implements OnModuleInit {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async onModuleInit() {
     // Seed default settings if they don't exist
@@ -27,28 +34,46 @@ export class SettingsService implements OnModuleInit {
     }
   }
 
+  private async invalidateSettingsCache() {
+    await Promise.all([
+      this.cacheManager.del('settings:all'),
+      this.cacheManager.del('settings:shipping'),
+    ]);
+  }
+
   async getAll() {
-    return this.prisma.setting.findMany();
+    const cached = await this.cacheManager.get<any[]>('settings:all');
+    if (cached) return cached;
+    const result = await this.prisma.setting.findMany();
+    await this.cacheManager.set('settings:all', result, SETTINGS_TTL);
+    return result;
   }
 
   async getByKey(key: string) {
+    // Individual key lookups are not cached — used for admin updates
     return this.prisma.setting.findUnique({ where: { key } });
   }
 
   async update(key: string, value: string) {
-    return this.prisma.setting.upsert({
+    const result = await this.prisma.setting.upsert({
       where: { key },
       update: { value },
-      create: { 
-        key, 
-        value, 
-        type: 'string', 
-        category: 'general' 
+      create: {
+        key,
+        value,
+        type: 'string',
+        category: 'general'
       },
     });
+    // Invalidate cache so next read picks up the new value
+    await this.invalidateSettingsCache();
+    return result;
   }
 
   async getShippingConfig() {
+    const cached = await this.cacheManager.get<any>('settings:shipping');
+    if (cached) return cached;
+
     const [fee, threshold, targetQty, minPrice] = await Promise.all([
       this.getByKey('shipping_fee'),
       this.getByKey('free_shipping_threshold'),
@@ -56,11 +81,13 @@ export class SettingsService implements OnModuleInit {
       this.getByKey('free_shipping_min_price'),
     ]);
 
-    return {
+    const result = {
       fee: Number(fee?.value || 50),
       threshold: Number(threshold?.value || 5000),
       targetQty: Number(targetQty?.value || 50),
       minPrice: Number(minPrice?.value || 100),
     };
+    await this.cacheManager.set('settings:shipping', result, SETTINGS_TTL);
+    return result;
   }
 }
