@@ -1223,3 +1223,15 @@ model SmsContact {
   @@index([phone])
   @@map("sms_contacts")
 }
+
+model SmsSupportedCountry {
+  id        String   @id @default(uuid())
+  name      String
+  dialCode  String   @unique  // e.g. "260" for Zambia (no + prefix)
+  isoCode   String   // e.g. "ZM"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sms_supported_countries")
+}
