@@ -202,7 +202,7 @@ export class AuthService {
     const user = await this.usersService.create({
       ...createUserDto,
       password: hashedPassword,
-      isVerified: true,
+      // isVerified defaults to true in the DB schema — not passed from DTO
     });
 
     const { password: _pw, ...result } = user;
