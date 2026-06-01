@@ -480,4 +480,37 @@ export class NotificationsService implements OnModuleInit {
       this.logger.error(`sendOrderPlacedNotification failed for ${orderId}`, error.message);
     }
   }
+
+  // ─── SMS Contacts ─────────────────────────────────────────────────────────
+  async getSmsContacts() {
+    return this.prisma.smsContact.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async addSmsContact(phone: string, name?: string, source: string = 'Manual') {
+    if (!phone?.trim()) return { success: false, message: 'Phone number is required' };
+    const normalised = phone.trim();
+    try {
+      const contact = await this.prisma.smsContact.upsert({
+        where: { phone: normalised },
+        update: { name: name ?? undefined, isActive: true },
+        create: { phone: normalised, name: name ?? null, source },
+      });
+      return { success: true, contact };
+    } catch (error) {
+      this.logger.warn(`SMS contact upsert failed for ${normalised}: ${error.message}`);
+      return { success: false, message: 'Could not register contact' };
+    }
+  }
+
+  async deleteSmsContact(id: string) {
+    try {
+      await this.prisma.smsContact.delete({ where: { id } });
+      return { success: true };
+    } catch {
+      return { success: false, message: 'Contact not found' };
+    }
+  }
+
 }
