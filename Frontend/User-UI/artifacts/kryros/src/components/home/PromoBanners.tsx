@@ -81,7 +81,7 @@ export default function PromoBanners() {
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           {banners.map((b) => (
             <div key={b.id} className="relative rounded-2xl overflow-hidden" style={{ height: 150 }}>
-              <img src={b.image} alt={b.title} className="absolute inset-0 w-full h-full object-cover" />
+              <img src={b.image} alt={b.title} className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" decoding="async" />
               <div
                 className="absolute inset-0"
                 style={{ background: `linear-gradient(to right, ${b.overlayFrom} 0%, ${b.overlayTo} 70%, transparent 100%)` }}
