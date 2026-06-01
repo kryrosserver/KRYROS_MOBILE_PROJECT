@@ -42,7 +42,11 @@ function AdminShellInner({ children, noPadding }: { children: React.ReactNode; n
     );
   }
 
-  if (!isAuthenticated) return null;
+  // Return a blank screen-coloured div instead of null to prevent white flash
+  // during the async router.replace('/login') navigation
+  if (!isAuthenticated) return (
+    <div style={{ minHeight: '100vh', background: isDark ? '#050816' : '#F8FAFC' }} />
+  );
 
   const mainLeft = isMobile ? 0 : sidebarW;
   const mainTop = isMobile ? 56 : 64;
