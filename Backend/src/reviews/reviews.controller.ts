@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } , UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto, UpdateReviewStatusDto } from './dto/review.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -10,6 +11,7 @@ import { UserRole } from '@prisma/client';
 const ADMIN_ROLES = [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER];
 
 @Controller('reviews')
+@UseInterceptors(CacheInterceptor)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
