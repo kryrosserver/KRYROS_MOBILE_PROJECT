@@ -454,6 +454,13 @@ export const addSmsContact = (payload: { phone: string; name?: string; source?: 
   api.post('/api/notifications/sms/contacts', payload);
 
 export const deleteSmsContact = (id: string) =>
+
+// ─── SMS Supported Countries ──────────────────────────────────────────────────
+export const getSmsCountries   = ()                                                    => api.get('/api/notifications/sms/countries');
+export const addSmsCountry     = (data: { name: string; dialCode: string; isoCode: string }) => api.post('/api/notifications/sms/countries', data);
+export const toggleSmsCountry  = (id: string, isActive: boolean)                      => api.patch(`/api/notifications/sms/countries/${id}`, { isActive });
+export const deleteSmsCountry  = (id: string)                                          => api.delete(`/api/notifications/sms/countries/${id}`);
+
   api.delete(`/api/notifications/sms/contacts/${id}`);
 
 // ─── Push Devices ─────────────────────────────────────────────────────────────
