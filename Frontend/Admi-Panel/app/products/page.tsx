@@ -8,6 +8,7 @@ import { useTheme } from '@/contexts/theme-context';
 import { Package } from 'lucide-react';
 import { createProduct, updateProduct, deleteProduct, getProducts } from '@/lib/api';
 import toast from 'react-hot-toast';
+import CloudinaryUpload from '@/components/ui/file-upload';
 
 type Product = {
   id: string; name: string; slug: string; sku: string; description: string;
@@ -311,20 +312,19 @@ function ProductsContent() {
             ))}
           </div>
         )}
-        <label style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 16px',borderRadius:'8px',background:surface,border:`1px dashed ${border}`,color:'#1FA89A',fontSize:'12px',fontWeight:600,cursor:'pointer',marginBottom:'6px',userSelect:'none'}}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Upload Images (select multiple)
-          <input type="file" accept="image/*" multiple style={{display:'none'}} onChange={(e:any)=>{
-            const files=Array.from(e.target.files||[]) as File[];
-            files.forEach(file=>{
-              const reader=new FileReader();
-              reader.onload=()=>setProductImages(imgs=>[...imgs, reader.result as string]);
-              reader.readAsDataURL(file);
-            });
-            e.target.value='';
-          }} />
-        </label>
-        <div style={{fontSize:'11px',color:textMuted}}>First image = main listing image (marked MAIN). Click × to remove. Drag to reorder coming soon.</div>
+        <CloudinaryUpload
+          multiple
+          onChange={(url) => setProductImages(imgs => [...imgs, url])}
+          accept="image/*"
+          folder="kryros/products"
+          showUrlInput={false}
+          isDark={isDark}
+          border={border}
+          surface={surface}
+          textMuted={textMuted}
+          textMain={textMain}
+        />
+        <div style={{fontSize:'11px',color:textMuted,marginTop:'4px'}}>First image = main listing image (marked MAIN). Click × to remove. Drag to reorder coming soon.</div>
       </div>
 
       {sectionLabel('Specifications')}
