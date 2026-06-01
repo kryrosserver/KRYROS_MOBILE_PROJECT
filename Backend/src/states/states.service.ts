@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStateDto } from './dto/create-state.dto';
 import { UpdateStateDto } from './dto/update-state.dto';
 
 @Injectable()
 export class StatesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly CACHE_TTL = 600000;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async create(createStateDto: CreateStateDto) {
     return this.prisma.state.create({
