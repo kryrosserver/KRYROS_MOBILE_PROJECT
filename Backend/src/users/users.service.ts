@@ -165,9 +165,10 @@ export class UsersService {
 
   async remove(id: string) {
     await this.findById(id);
-    
-    return this.prisma.user.delete({
+    // Soft delete — preserves orders, reviews, wallet, and other user data
+    return this.prisma.user.update({
       where: { id },
+      data: { isActive: false },
     });
   }
 
