@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -16,14 +17,22 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    if (createUserDto.avatar && CloudinaryService.isBase64(createUserDto.avatar)) {
-      createUserDto.avatar = await this.cloudinary.uploadImage(
-        createUserDto.avatar,
-        'kryros/avatars',
-      );
+    // SECURITY: explicitly destructure fields to prevent mass-assignment of privileged
+    // columns (role, isVerified, isActive). Role defaults to CUSTOMER — callers that need
+    // a different role (e.g. auth.service after SUPER_ADMIN validation) pass it explicitly.
+    const { avatar, role = UserRole.CUSTOMER, ...coreFields } = createUserDto;
+
+    let avatarUrl: string | undefined = avatar;
+    if (avatar && CloudinaryService.isBase64(avatar)) {
+      avatarUrl = await this.cloudinary.uploadImage(avatar, 'kryros/avatars');
     }
+
     return this.prisma.user.create({
-      data: createUserDto,
+      data: {
+        ...coreFields,
+        role,
+        ...(avatarUrl !== undefined ? { avatar: avatarUrl } : {}),
+      },
     });
   }
 
