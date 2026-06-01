@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } , UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CountriesService } from './countries.service';
 import { CreateCountryDto } from './dto/create-country.dto';
@@ -11,6 +12,7 @@ import { AddPaymentMethodDto, UpdateCountryPaymentMethodDto } from './dto/add-pa
 
 @ApiTags('Countries')
 @Controller('countries')
+@UseInterceptors(CacheInterceptor)
 export class CountriesController {
   constructor(private readonly countriesService: CountriesService) {}
 
