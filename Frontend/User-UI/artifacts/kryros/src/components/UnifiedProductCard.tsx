@@ -104,26 +104,14 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* Stock badge + Stars — flex-wrap so "Out of Stock" never clips the stars */}
+        {/* Stars first (w-3 h-3 — slightly smaller for cleaner layout), then stock badge */}
         <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5 mb-1.5">
-          {!product.isWholesaleOnly && (
-            product.stock > 0 ? (
-              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
-                In Stock
-              </span>
-            ) : (
-              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
-                Out of Stock
-              </span>
-            )
-          )}
-
           {product.rating > 0 && !product.isWholesaleOnly && (
             <div className="flex items-center gap-0.5 flex-shrink-0">
               {[1, 2, 3, 4, 5].map((star) => (
                 <svg
                   key={star}
-                  className={`w-3.5 h-3.5 flex-shrink-0 ${
+                  className={`w-3 h-3 flex-shrink-0 ${
                     star <= Math.round(product.rating)
                       ? "fill-yellow-400 text-yellow-400"
                       : "fill-gray-300 text-gray-300"
@@ -135,6 +123,18 @@ export default function UnifiedProductCard({
               ))}
               <span className="text-[11px] font-medium text-muted-foreground ml-0.5">({product.reviewCount})</span>
             </div>
+          )}
+
+          {!product.isWholesaleOnly && (
+            product.stock > 0 ? (
+              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                In Stock
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                Out of Stock
+              </span>
+            )
           )}
           {product.allowCredit && (
             <span className="text-[10px] text-primary font-bold whitespace-nowrap truncate">
