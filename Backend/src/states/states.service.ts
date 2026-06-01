@@ -50,8 +50,10 @@ export class StatesService {
   }
 
   async remove(id: string) {
-    return this.prisma.state.delete({
+    // Soft delete — preserves cities and shipping zones referencing this state
+    return this.prisma.state.update({
       where: { id },
+      data: { isActive: false },
     });
   }
 }
