@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -97,13 +98,13 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
       // Get token and sync
       String? token = await messaging.getToken();
       if (token != null) {
-        debugPrint("FCM Token: $token");
+        if (kDebugMode) debugPrint("FCM Token: [REDACTED - debug only]");
         _sendTokenToWebView(token);
       }
 
       // Listen for token refresh
       messaging.onTokenRefresh.listen((newToken) {
-        debugPrint("FCM Token Refreshed: $newToken");
+        if (kDebugMode) debugPrint("FCM Token refreshed");
         _sendTokenToWebView(newToken);
       });
     }
