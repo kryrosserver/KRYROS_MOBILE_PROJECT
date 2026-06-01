@@ -48,7 +48,9 @@ function OrdersContent() {
   const surface = isDark ? '#101826' : '#F1F5F9';
 
   const [data, setData] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
+    setIsLoading(true);
     getOrders({ limit: 200, skip: 0 }).then((r: any) => {
       const raw: any[] = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
       const normalized: Order[] = raw.map((o: any) => ({
@@ -80,7 +82,7 @@ function OrdersContent() {
         })),
       }));
       setData(normalized);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setIsLoading(false));
   }, []);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -327,6 +329,20 @@ function OrdersContent() {
           </div>
         ))}
       </div>
+      {isLoading ? (
+        <div style={{ padding: '16px 0' }}>
+          {[...Array(8)].map((_, i) => (
+            <div key={i} style={{
+              height: 52,
+              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              borderRadius: 8, marginBottom: 8,
+              animation: 'skeletonPulse 1.4s ease-in-out infinite',
+              animationDelay: `${i * 0.08}s`,
+            }} />
+          ))}
+          <style>{`@keyframes skeletonPulse { 0%,100%{opacity:1} 50%{opacity:0.35} }`}</style>
+        </div>
+      ) : (
       <DataTable
         columns={columns}
         data={data as unknown as Record<string, unknown>[]}
@@ -334,6 +350,7 @@ function OrdersContent() {
         onView={openDetail}
         onEdit={openEdit}
       />
+      )}
 
       {/* Edit Status Modal (accessible from list view too) */}
       <Modal open={!!editRow} onClose={() => setEditRow(null)} title={`Update Status: ${editRow?.id ?? ''}`}>
