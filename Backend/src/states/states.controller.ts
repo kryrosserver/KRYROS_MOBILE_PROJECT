@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } , UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { StatesService } from './states.service';
 import { CreateStateDto } from './dto/create-state.dto';
@@ -10,6 +11,7 @@ import { UserRole } from '@prisma/client';
 
 @ApiTags('States')
 @Controller('states')
+@UseInterceptors(CacheInterceptor)
 export class StatesController {
   constructor(private readonly statesService: StatesService) {}
 
