@@ -30,3 +30,10 @@ Thumbs.db
 *.local
 *.swp
 *.swo
+
+# ── Firebase / Mobile secrets (NEVER commit these) ─────────────────────────
+# These files contain Firebase API keys and must be provided via CI/CD secrets
+google-services.json
+GoogleService-Info.plist
+firebase-env.js
+.firebase/
