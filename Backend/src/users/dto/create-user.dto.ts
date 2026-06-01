@@ -50,9 +50,4 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(5_000_000, { message: 'Avatar image is too large' })
   avatar?: string;
-
-  @ApiProperty({ example: true })
-  @IsOptional()
-  @IsBoolean()
-  isVerified?: boolean;
 }
