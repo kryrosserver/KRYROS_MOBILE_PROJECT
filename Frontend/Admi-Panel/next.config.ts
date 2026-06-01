@@ -84,7 +84,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https:",
-              "connect-src 'self'",
+              "connect-src 'self' https://api.cloudinary.com",
               "frame-ancestors 'none'",
               "object-src 'none'",
               "base-uri 'self'",
@@ -130,6 +130,7 @@ const nextConfig: NextConfig = {
       ...proxy("newsletter"),
       ...proxy("payments"),
       ...proxy("payment-config"),
+      ...proxy("cloudinary"),
     ];
   },
 };
