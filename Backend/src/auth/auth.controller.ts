@@ -63,7 +63,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @SkipThrottle()
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @ApiOperation({ summary: 'Login with email/phone and password' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
