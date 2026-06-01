@@ -9,10 +9,14 @@ import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
 import ProductSection from "@/components/home/ProductSection";
 import BrandsSection from "@/components/home/BrandsSection";
 import RecentlyViewedSection from "@/components/home/RecentlyViewedSection";
+import NewsletterPopup from "@/components/NewsletterPopup";
 
 export default function HomePage() {
   return (
     <div>
+      {/* Newsletter popup — shows on every homepage visit unless already subscribed */}
+      <NewsletterPopup />
+
       {/* 1. Hero slider */}
       <HeroSection />
 
