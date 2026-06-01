@@ -1,7 +1,6 @@
 import {
   Controller, Get, Post, Patch, Delete,
-  Body, Param, UseGuards,
-} , UseInterceptors } from '@nestjs/common';
+  Body, Param, UseGuards,, UseInterceptors } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { PaymentConfigService } from './payment-config.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
