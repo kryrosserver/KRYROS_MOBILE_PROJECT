@@ -49,6 +49,8 @@ export default function UnifiedProductCard({
             src={product.image}
             alt={product.name}
             className="w-full h-full object-contain"
+            loading="lazy"
+            decoding="async"
             onError={() => setImgErr(true)}
           />
         ) : (
