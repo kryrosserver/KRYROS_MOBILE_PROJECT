@@ -88,6 +88,15 @@ async function bootstrap() {
       },
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
       crossOriginEmbedderPolicy: false,
+      permissionsPolicy: {
+        features: {
+          camera: [],
+          microphone: [],
+          geolocation: [],
+          payment: [],
+          usb: [],
+        },
+      },
     }),
   );
 
