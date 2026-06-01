@@ -92,6 +92,18 @@ export default function CheckoutPage() {
   const authUser = useAuthStore((s) => s.user);
   const authToken = useAuthStore((s) => s.token);
   const format = useCurrencyStore((s) => s.format);
+
+  // Silent fire-and-forget: register customer phone for SMS marketing
+  const registerPhoneForSms = (customerPhone: string, customerName: string) => {
+    if (!customerPhone?.trim()) return;
+    fetch(`${API_BASE}/api/notifications/sms/contacts/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: customerPhone.trim(), name: customerName.trim() || undefined, source: 'Checkout' }),
+    }).catch(() => {}); // silent — never block the checkout flow
+  };
+
+
   const selectedCurrency = useCurrencyStore((s) => s.selected);
   const allCurrencies = useCurrencyStore((s) => s.currencies);
 
@@ -241,6 +253,8 @@ export default function CheckoutPage() {
           setPlacedOrderNumber(orderNum);
           clearCart();
           setOrdered(true);
+      // Register phone number for SMS marketing (silent, non-blocking)
+      registerPhoneForSms(phone, `${firstName} ${lastName}`);
           setMmPhase("idle");
         } else if (status === "FAILED") {
           clearInterval(pollRef.current!);
