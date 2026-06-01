@@ -407,3 +407,13 @@ export const addSmsContact = (payload: { phone: string; name?: string; source?: 
 export const deleteSmsContact = (id: string) =>
   api.delete(`/api/notifications/sms/contacts/${id}`);
 
+// ─── Push Devices ─────────────────────────────────────────────────────────────
+export const getDevices = () =>
+  api.get('/api/notifications/devices');
+
+export const deleteDevice = (id: string) =>
+  api.delete(`/api/notifications/devices/${id}`);
+
+export const sendToDevices = (payload: { deviceIds: string[]; title: string; body: string; data?: any }) =>
+  api.post('/api/notifications/devices/send', payload);
+
