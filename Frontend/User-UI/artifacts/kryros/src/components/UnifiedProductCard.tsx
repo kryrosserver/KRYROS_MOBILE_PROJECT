@@ -86,12 +86,12 @@ export default function UnifiedProductCard({
       {/* ── Info: flex-col flex-1 so buttons always pin to bottom ── */}
       <div className="p-2.5 flex flex-col flex-1">
 
-        {/* Name — NO min-h, just natural height */}
+        {/* Name */}
         <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 mb-0.5">
           {product.name}
         </h3>
 
-        {/* Specs — only rendered if real data exists (filters out "[]" etc.) */}
+        {/* Specs */}
         {specs && (
           <p className="text-[10px] text-muted-foreground truncate mb-1">{specs}</p>
         )}
@@ -104,8 +104,8 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* Stock badge LEFT, Stars RIGHT — stars enlarged for visibility */}
-        <div className="flex items-center gap-1.5 mb-1.5">
+        {/* Stock badge + Stars — flex-wrap so "Out of Stock" never clips the stars */}
+        <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5 mb-1.5">
           {!product.isWholesaleOnly && (
             product.stock > 0 ? (
               <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
@@ -156,7 +156,7 @@ export default function UnifiedProductCard({
           )}
         </div>
 
-        {/* Buttons — mt-auto pins to bottom, handles height differences cleanly */}
+        {/* Buttons */}
         <div className="flex items-center gap-1.5 mt-auto pt-1">
           <button
             onClick={(e) => {
