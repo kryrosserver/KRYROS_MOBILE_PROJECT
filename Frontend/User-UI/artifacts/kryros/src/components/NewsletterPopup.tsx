@@ -180,54 +180,61 @@ export default function NewsletterPopup() {
                 {config.heading || "Signup Today!"}
               </h2>
 
-              {/* Email row */}
-              <div style={{
-                display: "flex",
-                border: "1.5px solid #D1D5DB",
-                borderRadius: 10,
-                overflow: "hidden",
-                marginBottom: error ? 6 : 10,
-              }}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setError(""); }}
-                  onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
-                  placeholder={config.placeholder || "Your E-mail"}
-                  style={{
-                    flex: 1, padding: "13px 14px",
-                    fontSize: 14, color: "#0A0F1E",
-                    border: "none", outline: "none",
-                    background: "transparent",
-                    fontFamily: "inherit",
-                  }}
-                />
-                <button
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                  style={{
-                    padding: "13px 20px",
-                    background: "#0A0F1E",
-                    color: "white",
-                    fontSize: 14, fontWeight: 700,
-                    border: "none", cursor: loading ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", gap: 6,
-                    opacity: loading ? 0.7 : 1,
-                    whiteSpace: "nowrap",
-                    fontFamily: "inherit",
-                    transition: "background 0.2s",
-                  }}
-                  onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#1a2d5a")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#0A0F1E")}
-                >
-                  {loading && <Loader2 size={14} className="animate-spin" />}
-                  {config.button_text || "Submit"}
-                </button>
-              </div>
+              {/* Email input — full width */}
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
+                placeholder={config.placeholder || "Your E-mail"}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "13px 14px",
+                  fontSize: 14, color: "#0A0F1E",
+                  border: "1.5px solid #D1D5DB",
+                  borderRadius: 10,
+                  outline: "none",
+                  background: "white",
+                  fontFamily: "inherit",
+                  boxSizing: "border-box",
+                  marginBottom: error ? 6 : 10,
+                }}
+              />
 
               {error && (
                 <p style={{ fontSize: 12, color: "#ef4444", marginBottom: 8 }}>{error}</p>
               )}
+
+              {/* Submit button — full width below input */}
+              <button
+                onClick={handleSubscribe}
+                disabled={loading}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  width: "100%",
+                  padding: "13px 20px",
+                  background: "#0A0F1E",
+                  color: "white",
+                  fontSize: 14, fontWeight: 700,
+                  border: "none",
+                  borderRadius: 10,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                  fontFamily: "inherit",
+                  transition: "background 0.2s",
+                  marginBottom: 10,
+                  boxSizing: "border-box",
+                }}
+                onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#1a2d5a")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#0A0F1E")}
+              >
+                {loading && <Loader2 size={14} className="animate-spin" />}
+                {config.button_text || "Submit"}
+              </button>
 
               {/* Footnote */}
               {config.footnote && (
