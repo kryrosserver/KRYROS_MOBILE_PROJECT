@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PaymentConfigService {
-  constructor(private prisma: PrismaService) {}
+  private readonly CACHE_TTL = 300000;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   // ── All methods (admin) ─────────────────────────────────────────────────
   async getMethods() {
