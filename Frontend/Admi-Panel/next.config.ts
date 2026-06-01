@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  productionBrowserSourceMaps: false, // security: don't ship source maps to browsers
 
   // ── Security Headers ──────────────────────────────────────────────────────
   async headers() {
@@ -25,7 +26,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval'",   // unsafe-eval needed by Next.js dev HMR
+              process.env.NODE_ENV === 'production' ? "script-src 'self'" : "script-src 'self' 'unsafe-eval'", // unsafe-eval only in dev (Next.js HMR)
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https:",
