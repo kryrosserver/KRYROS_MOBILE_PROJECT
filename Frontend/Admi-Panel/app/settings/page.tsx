@@ -93,8 +93,16 @@ function SettingsContent() {
       if (s.emailNotifications !== undefined) setEmailNotif(Boolean(s.emailNotifications));
       if (s.pushNotifications !== undefined) setPushNotif(Boolean(s.pushNotifications));
       if (s.orderNotifications !== undefined) setOrderNotif(Boolean(s.orderNotifications));
-      if (s.twoFactorEnabled !== undefined) setTwoFA(Boolean(s.twoFactorEnabled));
+      if (s.twoFactorEnabled !== undefined) setTwoFAStep(s.twoFactorEnabled ? 'enabled' : 'disabled');
     }).catch(() => {});
+  }, []);
+
+
+  // ── Fetch real 2FA status from backend ──────────────────────────────────────
+  useEffect(() => {
+    api.get('/api/auth/2fa/status').then((r: any) => {
+      setTwoFAStep(r.data?.enabled ? 'enabled' : 'disabled');
+    }).catch(() => { setTwoFAStep('disabled'); });
   }, []);
 
   const handleSave = async () => {
@@ -113,6 +121,48 @@ function SettingsContent() {
       toast.success('Settings saved successfully');
     } catch { toast.error('Failed to save settings — check connection'); }
     setSaving(false);
+  };
+
+
+  // ── 2FA Handlers ────────────────────────────────────────────────────────────
+  const handle2faSetup = async () => {
+    setTwoFABusy(true);
+    try {
+      const res: any = await api.post('/api/auth/2fa/setup');
+      setTwoFAQr(res.data.qrCodeUrl);
+      setTwoFACode('');
+      setTwoFAStep('setup');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Failed to generate 2FA setup');
+    }
+    setTwoFABusy(false);
+  };
+
+  const handle2faEnable = async () => {
+    setTwoFABusy(true);
+    try {
+      await api.post('/api/auth/2fa/enable', { code: twoFACode });
+      toast.success('Two-factor authentication enabled!');
+      setTwoFAStep('enabled');
+      setTwoFACode('');
+      setTwoFAQr('');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Invalid code — try again');
+    }
+    setTwoFABusy(false);
+  };
+
+  const handle2faDisable = async () => {
+    setTwoFABusy(true);
+    try {
+      await api.post('/api/auth/2fa/disable', { code: twoFACode });
+      toast.success('Two-factor authentication disabled');
+      setTwoFAStep('disabled');
+      setTwoFACode('');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Invalid code — try again');
+    }
+    setTwoFABusy(false);
   };
 
   const inputStyle = { width:'100%', background:surface, border:`1px solid ${border}`, borderRadius:'9px', color:textMain, fontSize:'13.5px', fontFamily:'var(--font-inter)', outline:'none', padding:'10px 14px' };
