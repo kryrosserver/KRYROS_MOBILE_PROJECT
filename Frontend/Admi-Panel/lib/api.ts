@@ -257,7 +257,16 @@ export const markNotificationRead = (id: string) =>
 
 // ── Newsletter ────────────────────────────────────────────
 export const getNewsletterSubscribers = (params?: Record<string, unknown>) =>
-  api.get("/api/newsletter", { params });
+  api.get("/api/newsletter/list", { params });
+
+export const getActiveNewsletterSubscribers = () =>
+  api.get("/api/newsletter/active");
+
+export const sendNewsletterEmail = (payload: {
+  subject: string;
+  body: string;
+  emails?: string[];
+}) => api.post("/api/newsletter/send", payload);
 
 // ── Payments ──────────────────────────────────────────────
 export const getPayments = (params?: Record<string, unknown>) =>
