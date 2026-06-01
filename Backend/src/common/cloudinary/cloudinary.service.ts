@@ -11,6 +11,58 @@ const ALLOWED_IMAGE_TYPES = new Set([
   'image/gif',
 ]);
 
+/** Max upload size: 10 MB (Cloudinary free plan cap is 10 MB per file) */
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Image type presets — controls how Cloudinary crops/resizes on upload.
+ *
+ * | preset      | use for                                    | behaviour                                    |
+ * |-------------|---------------------------------------------|----------------------------------------------|
+ * | avatar      | user profile pictures                       | 400×400 smart face-crop, WebP/AVIF delivery  |
+ * | product     | product images (any aspect ratio)           | limit to 1200px wide, maintain aspect ratio  |
+ * | thumbnail   | category / brand icons, small tiles         | 300×300 fill, smart crop                     |
+ * | banner      | CMS banners, hero images, wide artwork      | limit to 1920px wide, maintain aspect ratio  |
+ * | generic     | anything else (reviews, misc)               | limit to 1200px, auto quality/format only    |
+ */
+export type ImagePreset = 'avatar' | 'product' | 'thumbnail' | 'banner' | 'generic';
+
+/** Cloudinary transformation chains per preset */
+const PRESET_TRANSFORMATIONS: Record<ImagePreset, object[]> = {
+  avatar: [
+    { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+    { quality: 'auto', fetch_format: 'auto' },
+  ],
+  product: [
+    { width: 1200, crop: 'limit' },          // never upscale; shrink if wider than 1200px
+    { quality: 'auto', fetch_format: 'auto' },
+  ],
+  thumbnail: [
+    { width: 300, height: 300, crop: 'fill', gravity: 'auto' },
+    { quality: 'auto', fetch_format: 'auto' },
+  ],
+  banner: [
+    { width: 1920, crop: 'limit' },          // never upscale; shrink if wider than 1920px
+    { quality: 'auto', fetch_format: 'auto' },
+  ],
+  generic: [
+    { width: 1200, crop: 'limit' },
+    { quality: 'auto', fetch_format: 'auto' },
+  ],
+};
+
+/** Derive a sensible default preset from the upload folder path */
+function presetFromFolder(folder: string): ImagePreset {
+  if (folder.includes('avatar') || folder.includes('user'))    return 'avatar';
+  if (folder.includes('product'))                               return 'product';
+  if (folder.includes('banner') || folder.includes('hero') ||
+      folder.includes('cms') || folder.includes('homepage'))   return 'banner';
+  if (folder.includes('category') || folder.includes('brand') ||
+      folder.includes('icon') || folder.includes('logo') ||
+      folder.includes('thumbnail'))                             return 'thumbnail';
+  return 'generic';
+}
+
 /** Extract MIME type from a base64 data URI, e.g. data:image/png;base64,... */
 function extractMimeType(dataUri: string): string | null {
   const match = dataUri.match(/^data:([a-zA-Z0-9][a-zA-Z0-9!#$&\-^_]+\/[a-zA-Z0-9][a-zA-Z0-9!#$&\-^_]+);base64,/);
@@ -35,14 +87,13 @@ export class CloudinaryService {
       this.configured = false;
       const isProd = process.env.NODE_ENV === 'production';
       if (isProd) {
-        // In production, missing Cloudinary config is a hard error — no raw base64 in DB
         throw new Error(
           'CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET must be set in production. ' +
           'Add these to your Render environment variables.',
         );
       }
       this.logger.warn(
-        'Cloudinary credentials not set. Avatar uploads will fall back to storing base64 in DB (dev only). ' +
+        'Cloudinary credentials not set. Image uploads will fall back to storing base64 in DB (dev only). ' +
         'Add CLOUDINARY_* env vars before going to production.',
       );
     }
@@ -50,35 +101,43 @@ export class CloudinaryService {
 
   /**
    * Validate and upload a base64 data URI or public URL to Cloudinary.
-   * - Rejects non-image MIME types (XSS-via-upload prevention)
-   * - Rejects files larger than 5MB
-   * - Falls back to returning source string in development if Cloudinary unconfigured
+   *
+   * Optimisation applied automatically per image type:
+   *   - f_auto  → serves WebP / AVIF to browsers that support them, JPEG/PNG otherwise
+   *   - q_auto  → Cloudinary picks the best quality/size balance (typically 60-80% smaller)
+   *   - smart crop/resize per preset (avatar=face, product=limit-width, banner=wide, etc.)
+   *
+   * @param source   Base64 data URI or public HTTPS URL
+   * @param folder   Cloudinary folder path  (e.g. "kryros/products")
+   * @param publicId Optional Cloudinary public ID (used for deterministic overwrites)
+   * @param preset   Override the auto-detected image preset
    */
   async uploadImage(
     source: string,
-    folder: string = 'kryros/avatars',
+    folder: string = 'kryros/general',
     publicId?: string,
+    preset?: ImagePreset,
   ): Promise<string> {
-    // Validate MIME type for base64 uploads
+    // ── Size + MIME validation for base64 uploads ──────────────────────────
     if (CloudinaryService.isBase64(source)) {
       const mimeType = extractMimeType(source);
 
       if (!mimeType) {
         throw new BadRequestException('Invalid image format: cannot determine MIME type');
       }
-
       if (!ALLOWED_IMAGE_TYPES.has(mimeType)) {
         throw new BadRequestException(
-          `Unsupported image type: ${mimeType}. Allowed types: jpeg, png, webp, gif`,
+          `Unsupported image type: ${mimeType}. Allowed: jpeg, png, webp, gif`,
         );
       }
 
-      // Rough base64 size check (base64 is ~33% larger than binary)
+      // base64 is ~33% larger than binary — this is a fast pre-check before upload
       const base64Data = source.split(',')[1] || '';
       const approxBytes = (base64Data.length * 3) / 4;
-      const maxBytes = 5 * 1024 * 1024; // 5MB
-      if (approxBytes > maxBytes) {
-        throw new BadRequestException('Image file size exceeds the 5MB limit');
+      if (approxBytes > MAX_UPLOAD_BYTES) {
+        throw new BadRequestException(
+          `Image exceeds the ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB upload limit`,
+        );
       }
     }
 
@@ -87,18 +146,21 @@ export class CloudinaryService {
       return source;
     }
 
+    // ── Choose the right transformation preset ──────────────────────────────
+    const resolvedPreset = preset ?? presetFromFolder(folder);
+    const transformation = PRESET_TRANSFORMATIONS[resolvedPreset];
+
+    this.logger.debug(`Uploading to Cloudinary folder="${folder}" preset="${resolvedPreset}"`);
+
     const options: Record<string, unknown> = {
       folder,
       resource_type: 'image',
-      transformation: [
-        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
+      transformation,
     };
     if (publicId) options.public_id = publicId;
 
     const result: UploadApiResponse = await cloudinary.uploader.upload(source, options);
-    this.logger.log(`Uploaded to Cloudinary: ${result.public_id}`);
+    this.logger.log(`Uploaded → ${result.public_id} (${result.bytes} bytes, ${result.format})`);
     return result.secure_url;
   }
 
