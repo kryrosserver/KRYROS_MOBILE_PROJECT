@@ -1,4 +1,6 @@
 import { Injectable, ConflictException, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailerService } from '../notifications/mailer.service';
 
@@ -6,9 +8,12 @@ import { MailerService } from '../notifications/mailer.service';
 export class NewsletterService {
   private readonly logger = new Logger(NewsletterService.name);
 
+  private readonly CACHE_TTL = 600000;
+
   constructor(
     private prisma: PrismaService,
-    private mailerService: MailerService,
+    private mailerService: MailerService,,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async subscribe(email: string) {
