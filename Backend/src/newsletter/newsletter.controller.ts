@@ -43,4 +43,23 @@ export class NewsletterController {
   async active() {
     return this.newsletterService.findActive();
   }
+
+  /** Admin: send newsletter to specific emails or ALL active subscribers */
+  @Post('send')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async send(
+    @Body('subject') subject: string,
+    @Body('body') body: string,
+    @Body('emails') emails?: string[],
+  ) {
+    if (!subject?.trim()) {
+      throw new BadRequestException('Subject is required');
+    }
+    if (!body?.trim()) {
+      throw new BadRequestException('Body is required');
+    }
+    const targets = Array.isArray(emails) ? emails.filter(Boolean) : [];
+    return this.newsletterService.sendBulkNewsletter(targets, subject.trim(), body.trim());
+  }
 }
