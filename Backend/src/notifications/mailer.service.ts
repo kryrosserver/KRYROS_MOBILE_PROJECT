@@ -249,4 +249,71 @@ export class MailerService {
     const html = this.buildAnnouncementHtml(params);
     return this.sendMail(params.to, params.subject, params.headline, html);
   }
+  // ─── Newsletter: Welcome Email ────────────────────────────────────────────
+  async sendNewsletterWelcome(email: string): Promise<void> {
+    const appUrl = this.configService.get('FRONTEND_URL') || 'https://kryros-interface.onrender.com';
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Welcome to KRYROS Newsletter</title><style>${BASE_STYLES}
+  .nl-highlight { background: linear-gradient(135deg, #1FA89A22, #27B9AF11); border: 1px solid #1FA89A44; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+  .nl-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #475569; margin-bottom: 10px; }
+  .nl-item:last-child { margin-bottom: 0; }
+  .nl-dot { width: 8px; height: 8px; border-radius: 50%; background: #1FA89A; flex-shrink: 0; }
+</style></head>
+<body><div class="wrapper"><div class="card">
+  <div class="header">
+    <div class="logo">KR<span>YROS</span></div>
+    <div class="tagline">You're on the list!</div>
+  </div>
+  <div class="body">
+    <div class="greeting">Welcome to KRYROS Updates!</div>
+    <p class="text">You've successfully subscribed to the <strong>KRYROS Newsletter</strong>. You'll be the first to know about exclusive deals, new arrivals, and special offers.</p>
+    <div class="nl-highlight">
+      <div class="nl-item"><div class="nl-dot"></div><span>Early access to flash sales &amp; promotions</span></div>
+      <div class="nl-item"><div class="nl-dot"></div><span>New product announcements</span></div>
+      <div class="nl-item"><div class="nl-dot"></div><span>Exclusive subscriber-only discounts</span></div>
+      <div class="nl-item"><div class="nl-dot"></div><span>Tech tips and buying guides</span></div>
+    </div>
+    <a href="${appUrl}" class="cta-btn">Shop KRYROS Now →</a>
+    <div class="divider"></div>
+    <p class="text" style="font-size:12px;color:#94a3b8">Don't want emails? You can unsubscribe at any time by visiting our website.</p>
+  </div>
+  <div class="footer"><p class="footer-text">© 2025 <span class="footer-brand">KRYROS Mobile Tech Limited</span><br>Secure · Trusted · Fast</p></div>
+</div></div></body></html>`;
+
+    await this.sendMail(
+      email,
+      'Welcome to KRYROS Newsletter!',
+      'You have successfully subscribed to the KRYROS Newsletter. Stay tuned for the latest deals and updates.',
+      html,
+    );
+  }
+
+  // ─── Newsletter: Bulk Send ────────────────────────────────────────────────
+  async sendNewsletterEmail(to: string, subject: string, body: string): Promise<void> {
+    const appUrl = this.configService.get('FRONTEND_URL') || 'https://kryros-interface.onrender.com';
+    // Convert plain text body to basic HTML paragraphs
+    const bodyHtml = body
+      .split('\n')
+      .filter((line) => line.trim())
+      .map((line) => `<p class="text">${line}</p>`)
+      .join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${subject} - KRYROS</title><style>${BASE_STYLES}</style></head>
+<body><div class="wrapper"><div class="card">
+  <div class="header">
+    <div class="logo">KR<span>YROS</span></div>
+    <div class="tagline">KRYROS Newsletter</div>
+  </div>
+  <div class="body">
+    <div class="greeting">${subject}</div>
+    ${bodyHtml}
+    <a href="${appUrl}" class="cta-btn">Shop Now →</a>
+    <div class="divider"></div>
+    <p class="text" style="font-size:12px;color:#94a3b8">You're receiving this because you subscribed to KRYROS updates.</p>
+  </div>
+  <div class="footer"><p class="footer-text">© 2025 <span class="footer-brand">KRYROS Mobile Tech Limited</span><br>Secure · Trusted · Fast</p></div>
+</div></div></body></html>`;
+
+    await this.sendMail(to, subject, body, html);
+  }
 }
+
