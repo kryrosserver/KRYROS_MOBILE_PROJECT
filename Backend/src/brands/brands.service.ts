@@ -130,16 +130,17 @@ export class BrandsService {
   async cleanupCorruptedData() {
     const updatedProducts = await this.prisma.product.updateMany({ data: { brandId: null } });
 
+    // Security: use $executeRaw tagged template literal instead of $executeRawUnsafe.
+    // Both strings are static/hardcoded (no user input), but $executeRaw enforces
+    // the parameterised-query pattern and prevents accidental injection if ever refactored.
     try {
-      await this.prisma.$executeRawUnsafe('TRUNCATE TABLE "brands" RESTART IDENTITY CASCADE;');
+      await this.prisma.$executeRaw`TRUNCATE TABLE "brands" RESTART IDENTITY CASCADE`;
     } catch {
       await this.prisma.brand.deleteMany({});
     }
 
     try {
-      await this.prisma.$executeRawUnsafe(
-        'ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "showOnHome" BOOLEAN DEFAULT false;',
-      );
+      await this.prisma.$executeRaw`ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "showOnHome" BOOLEAN DEFAULT false`;
     } catch {
       // Column may already exist — safe to ignore
     }
