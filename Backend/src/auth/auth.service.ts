@@ -39,9 +39,23 @@ export class AuthService {
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private emailService: EmailService,
-  ) {}
+  ) {
+    // ── Redis health check ────────────────────────────────────────────────────
+    // The failed-login lockout counter is stored via cacheManager. If REDIS_URL
+    // is not configured, NestJS cache-manager falls back to in-memory storage,
+    // which means lockout state resets on every server restart — allowing
+    // brute-force attacks to resume immediately after a restart.
+    // Set REDIS_URL in your production environment to persist lockout state.
+    if (!process.env.REDIS_URL) {
+      console.warn(
+        '[AuthService] WARNING: REDIS_URL is not set. ' +
+        'Login lockout state is stored in memory and will be lost on server restart. ' +
+        'Set REDIS_URL in production to persist brute-force protection across restarts.',
+      );
+    }
+  }
 
-  // ── Failed-login lockout (in-memory, sliding window) ─────────────────────
+  // ── Failed-login lockout (cache-backed, sliding window) ──────────────────
   private lockKey(id: string): string {
     return `login_lock:${id.toLowerCase().trim()}`;
   }
