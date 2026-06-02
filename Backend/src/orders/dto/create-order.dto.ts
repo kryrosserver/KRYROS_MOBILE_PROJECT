@@ -17,26 +17,32 @@ export class OrderItemDto {
 }
 
 export class AddressDetailsDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   email!: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   firstName!: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   lastName!: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   phone!: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   address!: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   zipCode?: string;
@@ -55,14 +61,17 @@ export class AddressDetailsDto {
   @IsOptional()
   cityId?: string | null;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   stateName?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   cityName?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   countryName?: string;
@@ -91,10 +100,12 @@ export class CreateOrderDto {
   @IsOptional()
   shippingMethodId?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   paymentMethod!: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   paymentPhone?: string;
@@ -102,10 +113,12 @@ export class CreateOrderDto {
   @IsOptional()
   totalZMW?: number;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   currencyCode?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   currencySymbol?: string;
@@ -113,6 +126,7 @@ export class CreateOrderDto {
   @IsOptional()
   exchangeRate?: number;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   notes?: string;
