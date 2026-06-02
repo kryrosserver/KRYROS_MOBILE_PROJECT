@@ -1,5 +1,5 @@
 import { IsString, IsBoolean, IsOptional, IsNumber, IsEnum, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export enum SymbolPosition {
   BEFORE = 'BEFORE',

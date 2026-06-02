@@ -1,5 +1,5 @@
 import { IsString, IsBoolean, IsOptional, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class CreatePickupStationDto {
   @Transform(({ value }) => value?.trim())

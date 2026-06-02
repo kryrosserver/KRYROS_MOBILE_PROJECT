@@ -1,5 +1,5 @@
 import { IsString, IsBoolean, IsOptional, IsInt, IsUUID, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateShippingZoneDto {
   @Transform(({ value }) => value?.trim())
