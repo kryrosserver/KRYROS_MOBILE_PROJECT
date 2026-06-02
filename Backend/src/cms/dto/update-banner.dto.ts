@@ -1,15 +1,19 @@
 import { IsBoolean, IsInt, IsOptional, IsString, Min, IsISO8601 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UpdateBannerDto {
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   title?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   subtitle?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   mediaType?: string; // "image" or "video"
 
@@ -22,10 +26,12 @@ export class UpdateBannerDto {
   videoUrl?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   link?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   linkText?: string;
 
@@ -57,18 +63,22 @@ export class UpdateBannerDto {
   endDate?: string | null;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   tag?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   secondaryCta?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   secondaryCtaLink?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   badge?: string;
 }
