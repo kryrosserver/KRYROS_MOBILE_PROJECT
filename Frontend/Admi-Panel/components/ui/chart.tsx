@@ -34,6 +34,39 @@ function useChart() {
   return context
 }
 
+/**
+ * Security: Sanitise CSS color values before they are injected via
+ * dangerouslySetInnerHTML. Although ChartConfig is developer-controlled,
+ * this guard prevents a future code-path from accidentally injecting
+ * user-supplied values into a <style> block.
+ *
+ * Allowed patterns:
+ *   - hex:       #RGB / #RRGGBB / #RRGGBBAA
+ *   - rgb/rgba:  rgb(...) / rgba(...)
+ *   - hsl/hsla:  hsl(...) / hsla(...)
+ *   - CSS vars:  var(--some-token)
+ *   - Named:     red, blue, transparent, etc. (alpha-only)
+ *
+ * Any value that does not match is replaced with an empty string so the
+ * CSS variable is silently omitted rather than causing an injection.
+ */
+function sanitizeCssColor(color: string | undefined | null): string {
+  if (!color) return ""
+  const trimmed = color.trim()
+  const safe =
+    /^(#[0-9a-fA-F]{3,8}|rgba?\([^)]{0,80}\)|hsla?\([^)]{0,80}\)|var\(--[a-zA-Z0-9_-]{1,80}\)|[a-zA-Z]{1,50})$/.test(
+      trimmed
+    )
+  if (!safe) {
+    // Log a warning in development so devs can catch misconfigured config objects
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[ChartStyle] Rejected potentially unsafe color value:", trimmed)
+    }
+    return ""
+  }
+  return trimmed
+}
+
 function ChartContainer({
   id,
   className,
@@ -87,11 +120,14 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color =
+    const rawColor =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
+    // Sanitise before injecting into the style block
+    const color = sanitizeCssColor(rawColor)
     return color ? `  --color-${key}: ${color};` : null
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `
