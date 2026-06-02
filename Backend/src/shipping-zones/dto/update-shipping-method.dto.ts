@@ -5,6 +5,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export class UpdateShippingMethodDto {
   @ApiPropertyOptional()
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   name?: string;
 
@@ -29,6 +30,7 @@ export class UpdateShippingMethodDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   description?: string;
 }
