@@ -4,10 +4,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class InitializePaymentDto {
   @ApiProperty({ description: 'The order ID to process payment for', example: 'uuid-here' })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   orderId: string;
 
   @ApiProperty({ description: 'Customer mobile number in Zambian format (07XXXXXXXX or 09XXXXXXXX)', example: '0971234567' })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   phone: string;
 
