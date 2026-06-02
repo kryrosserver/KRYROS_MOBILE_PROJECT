@@ -1,6 +1,8 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateReviewDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   productId: string;
@@ -11,6 +13,7 @@ export class CreateReviewDto {
   @IsNotEmpty()
   rating: number;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   comment?: string;
@@ -19,6 +22,7 @@ export class CreateReviewDto {
   @IsOptional()
   imageUrl?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   orderNumber?: string;
