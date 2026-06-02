@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsArray, IsBoolean, IsNumber } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UpdateFooterConfigDto {
   @IsOptional()
@@ -6,30 +7,37 @@ export class UpdateFooterConfigDto {
   logo?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   description?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   contactPhone?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   contactEmail?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   contactAddress?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   newsletterTitle?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   newsletterSubtitle?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   copyrightText?: string;
 
@@ -45,10 +53,12 @@ export class UpdateFooterConfigDto {
   newsletterPopupEnabled?: boolean;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   newsletterPopupTitle?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   newsletterPopupSubtitle?: string;
 
@@ -66,18 +76,22 @@ export class UpdateFooterConfigDto {
   announcementBarEnabled?: boolean;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   announcementBarText?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   announcementBarLink?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   announcementBarBgColor?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   announcementBarTextColor?: string;
 }
