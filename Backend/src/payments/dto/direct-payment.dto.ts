@@ -4,6 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class DirectPaymentDto {
   @ApiProperty({ description: 'Customer mobile number (07XXXXXXXX or 09XXXXXXXX)', example: '0971234567' })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   phone: string;
 
@@ -14,11 +15,13 @@ export class DirectPaymentDto {
   amount: number;
 
   @ApiProperty({ description: 'Currency code', example: 'ZMW', required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   currency?: string;
 
   @ApiProperty({ description: 'Optional note or reference', required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   note?: string;
