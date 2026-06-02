@@ -1,14 +1,18 @@
 import { IsString, IsOptional, IsBoolean, IsInt, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateSectionDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   type: string; // e.g., 'testimonials'
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   title?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   subtitle?: string;
 
