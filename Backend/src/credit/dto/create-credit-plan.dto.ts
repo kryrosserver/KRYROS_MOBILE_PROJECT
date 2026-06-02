@@ -4,6 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCreditPlanDto {
   @ApiProperty({ example: 'Standard 6-Month Plan' })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   name: string;
 
@@ -34,6 +35,7 @@ export class CreateCreditPlanDto {
 
   @ApiPropertyOptional({ example: 'Flexible repayment over 6 months.' })
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   description?: string;
 
@@ -50,6 +52,7 @@ export class CreateCreditPlanDto {
 
   @ApiPropertyOptional({ description: 'Restrict plan to a specific category ID' })
   @IsOptional()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   targetCategoryId?: string;
 }
