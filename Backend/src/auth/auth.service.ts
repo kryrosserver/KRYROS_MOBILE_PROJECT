@@ -137,8 +137,12 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
-    // Successful credential check — clear failed attempts
+    // Successful credential check — clear failed attempts + record login time
     await this.clearFailedAttempts(loginDto.identifier);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
 
     // Auto-verify users on successful login (no email verification flow exists)
     if (!user.isVerified) {
