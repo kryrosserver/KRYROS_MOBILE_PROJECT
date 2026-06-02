@@ -2,6 +2,7 @@ import { IsString, IsBoolean, IsOptional, IsInt, IsUUID, IsNumber } from 'class-
 import { Type } from 'class-transformer';
 
 export class CreateShippingZoneDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   name: string;
 
@@ -21,10 +22,12 @@ export class CreateShippingZoneDto {
   @IsOptional()
   priority?: number;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   region?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   shippingMethod?: string;
