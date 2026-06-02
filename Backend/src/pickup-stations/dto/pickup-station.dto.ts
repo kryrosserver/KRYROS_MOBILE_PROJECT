@@ -2,19 +2,24 @@ import { IsString, IsBoolean, IsOptional, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreatePickupStationDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   name: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   address: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   city: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   state?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   country?: string;
@@ -29,18 +34,22 @@ export class CreatePickupStationDto {
   @Type(() => Number)
   longitude?: number;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   phone?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   email?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   openingHours?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   description?: string;
@@ -51,22 +60,27 @@ export class CreatePickupStationDto {
 }
 
 export class UpdatePickupStationDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   name?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   address?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   city?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   state?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   country?: string;
@@ -81,18 +95,22 @@ export class UpdatePickupStationDto {
   @Type(() => Number)
   longitude?: number;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   phone?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   email?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   openingHours?: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   description?: string;
