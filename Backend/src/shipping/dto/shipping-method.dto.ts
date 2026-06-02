@@ -4,11 +4,13 @@ import { Type } from 'class-transformer';
 
 export class CreateShippingMethodDto {
   @ApiProperty()
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   description?: string;
@@ -27,6 +29,7 @@ export class CreateShippingMethodDto {
   minThreshold?: number;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   estimatedDays?: string;
@@ -46,11 +49,13 @@ export class CreateShippingMethodDto {
 
 export class UpdateShippingMethodDto {
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   name?: string;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   description?: string;
@@ -70,6 +75,7 @@ export class UpdateShippingMethodDto {
   minThreshold?: number;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   estimatedDays?: string;
