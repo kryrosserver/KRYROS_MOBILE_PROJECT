@@ -1,4 +1,5 @@
 import { IsEmail, IsString, MinLength, IsOptional, IsEnum, IsNotEmpty, IsBoolean, Matches, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
@@ -7,6 +8,7 @@ export class CreateUserDto {
   @IsOptional()
   @IsEmail()
   @MaxLength(254, { message: 'Email must not exceed 254 characters' })
+  @Transform(({ value }) => value?.trim().toLowerCase())
   email?: string;
 
   @ApiProperty({ example: 'SecurePass@99' })
@@ -17,18 +19,21 @@ export class CreateUserDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/, {
     message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
   })
+  // Note: intentionally NOT trimmed — passwords may contain intentional leading/trailing spaces
   password!: string;
 
   @ApiProperty({ example: 'John' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100, { message: 'First name must not exceed 100 characters' })
+  @Transform(({ value }) => value?.trim())
   firstName!: string;
 
   @ApiProperty({ example: 'Doe' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100, { message: 'Last name must not exceed 100 characters' })
+  @Transform(({ value }) => value?.trim())
   lastName!: string;
 
   @ApiProperty({ example: '+260966423719' })
@@ -38,6 +43,7 @@ export class CreateUserDto {
   @Matches(/^\+?[0-9\s\-().]{7,30}$/, {
     message: 'Phone number must be a valid international format (e.g. +260966423719)',
   })
+  @Transform(({ value }) => value?.trim())
   phone?: string;
 
   @ApiProperty({ example: 'CUSTOMER', enum: UserRole })
