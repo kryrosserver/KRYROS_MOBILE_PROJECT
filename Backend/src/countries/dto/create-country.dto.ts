@@ -7,9 +7,11 @@ export enum SymbolPosition {
 }
 
 export class CreatePaymentMethodDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   name: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   description?: string;
@@ -24,15 +26,19 @@ export class CreatePaymentMethodDto {
 }
 
 export class CreateCountryDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   name: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   code: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   currencyCode: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   currencySymbol: string;
 
@@ -48,6 +54,7 @@ export class CreateCountryDto {
   @IsOptional()
   autoRate?: boolean;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   flag?: string;
