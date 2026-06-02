@@ -1,24 +1,35 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ALLOWED_ORIGINS = [
+// ── Production vs development origin rules ────────────────────────────────────
+// In production, only explicit admin-panel domains are allowed.
+// Dev-tunnel domains (ngrok) are restricted to non-production environments only.
+const IS_PROD = process.env.NODE_ENV === "production";
+
+const PRODUCTION_ALLOWED_ORIGINS = [
   "https://codewords.agemo.ai",
   "https://codewords-staging.agemo.ai",
-  "http://localhost:3001",
 ];
 
-const FRAME_ANCESTORS =
-  "'self' *.agemo.ai *.codewords.run *.codewords.click *.ngrok.app *.ngrok.dev localhost:3001";
+const DEV_ONLY_SUFFIXES = [".ngrok.app", ".ngrok.dev"];
 
 const isAllowedOrigin = (origin: string | null): boolean => {
   if (!origin) return false;
-  if (ALLOWED_ORIGINS.includes(origin)) return true;
-  if (origin.endsWith(".ngrok.app")) return true;
-  if (origin.endsWith(".ngrok.dev")) return true;
+  if (PRODUCTION_ALLOWED_ORIGINS.includes(origin)) return true;
   if (origin.endsWith(".codewords.run")) return true;
   if (origin.endsWith(".codewords.click")) return true;
+  // Dev-tunnel domains — only allowed outside production
+  if (!IS_PROD) {
+    if (DEV_ONLY_SUFFIXES.some((s) => origin.endsWith(s))) return true;
+    if (origin === "http://localhost:3001") return true;
+  }
   return false;
 };
+
+// frame-ancestors: ngrok only allowed in dev
+const FRAME_ANCESTORS = IS_PROD
+  ? "'self' *.agemo.ai *.codewords.run *.codewords.click"
+  : "'self' *.agemo.ai *.codewords.run *.codewords.click *.ngrok.app *.ngrok.dev localhost:3001";
 
 const SKIP_PATHS = ["/_next", "/favicon.ico", "/health", "/api/health", "/api/cw-auth"];
 
@@ -48,6 +59,28 @@ const AUTH_HANDSHAKE_HTML = `<!DOCTYPE html>
 </script>
 </div></body></html>`;
 
+// ── JWT expiry check (edge-compatible, no secret needed) ─────────────────────
+// Decodes the JWT payload to read the `exp` claim without signature verification.
+// The backend performs full cryptographic verification on every API call —
+// this is an additional lightweight guard to redirect expired sessions immediately
+// at the edge, preventing unnecessary API round-trips and page flashes.
+function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return true;
+    // Base64url → Base64 → decode
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded));
+    if (typeof payload.exp !== "number") return false; // no exp = permanent token
+    // Add 10-second clock skew tolerance
+    return Date.now() / 1000 > payload.exp - 10;
+  } catch {
+    return true; // malformed = treat as expired → redirect to login
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
@@ -56,17 +89,17 @@ export function proxy(request: NextRequest) {
   }
 
   // ── KRYROS Admin Route Protection ────────────────────────────────────────
-  // Pages outside /login and /api/* require a valid admin token.
+  // Pages outside /login and /api/* require a valid, non-expired admin token.
   // Runs server-side at the edge — no client-side flash possible.
-  const ADMIN_PUBLIC = ['/login', '/api/', '/_next', '/favicon'];
+  const ADMIN_PUBLIC = ["/login", "/api/", "/_next", "/favicon"];
   const needsAdminAuth = !ADMIN_PUBLIC.some((p) => pathname.startsWith(p));
   if (needsAdminAuth) {
     const adminToken =
-      request.cookies.get('kryros_token')?.value      // Phase 3 httpOnly cookie (set by BFF)
-      || request.cookies.get('kryros_admin_token')?.value; // legacy fallback
-    if (!adminToken) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('from', encodeURIComponent(pathname));
+      request.cookies.get("kryros_token")?.value      // httpOnly cookie (set by BFF)
+      || request.cookies.get("kryros_admin_token")?.value; // legacy fallback
+    if (!adminToken || isTokenExpired(adminToken)) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("from", encodeURIComponent(pathname));
       return NextResponse.redirect(loginUrl);
     }
   }
@@ -95,11 +128,10 @@ export function proxy(request: NextRequest) {
 
     // No access token configured → production deployment (Render/custom host)
     if (!accessToken) {
-      // ── Phase 3: Inject Authorization header from httpOnly token cookie ─────
+      // ── Inject Authorization header from httpOnly token cookie ─────────────
       // The browser sends the httpOnly 'kryros_token' cookie automatically.
       // proxy.ts reads it server-side and injects Authorization: Bearer for all
       // backend-proxied requests. JavaScript can NEVER read this cookie.
-      // Falls back to legacy 'kryros_admin_token' for sessions that predate Phase 3.
       const httpOnlyToken  = request.cookies.get("kryros_token")?.value;
       const legacyToken    = request.cookies.get("kryros_admin_token")?.value;
       const bearerToken    = httpOnlyToken || legacyToken;
@@ -178,7 +210,6 @@ export function proxy(request: NextRequest) {
   // 3. Check cw_otk (one-time key from preview-grant redirect)
   const otk = searchParams.get("cw_otk");
   if (otk) {
-    // Validate OTK via ui-builder through runtime
     const runtimeUri = process.env.CODEWORDS_RUNTIME_URI;
     const projectId = process.env.CODEWORDS_PROJECT_ID || request.nextUrl.hostname.split(".")[0];
 
