@@ -56,8 +56,11 @@ export class WalletController {
     return this.walletService.getWallet(userId);
   }
 
+  // Security: JwtAuthGuard inherited from class level; added explicitly here
+  // to match the pattern of all other admin routes and prevent guard-ordering
+  // confusion in future refactors.
   @Get(':walletId/transactions')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({ summary: 'Get wallet transactions by wallet ID (Admin only)' })
   getTransactions(@Param('walletId') walletId: string) {
