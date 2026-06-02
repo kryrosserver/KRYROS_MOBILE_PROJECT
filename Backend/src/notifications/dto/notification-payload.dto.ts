@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsArray, IsObject, IsDateString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export enum NotificationTargetType {
   SINGLE = 'SINGLE',
@@ -7,10 +8,12 @@ export enum NotificationTargetType {
 }
 
 export class SendNotificationDto {
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   title: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   body: string;
@@ -19,6 +22,7 @@ export class SendNotificationDto {
   @IsNotEmpty()
   targetType: NotificationTargetType;
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   userId?: string;
@@ -28,6 +32,7 @@ export class SendNotificationDto {
   @IsOptional()
   orderIds?: string[];
 
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsOptional()
   orderStatus?: string;
