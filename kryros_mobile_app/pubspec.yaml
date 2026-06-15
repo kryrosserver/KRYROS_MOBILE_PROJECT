@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # WebView for loading your website
-  webview_flutter: ^4.11.0
+  webview_flutter: ^4.14.0
   
   # For SVG support
   flutter_svg: ^2.0.10+1
